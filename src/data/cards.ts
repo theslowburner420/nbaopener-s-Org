@@ -6659,57 +6659,6 @@ const rawCards = [
   },
   {
     id: 'moment-005',
-    name: '60 Point Farewell',
-    team: 'Los Angeles Lakers',
-    teamAbbr: 'LAL',
-    position: 'G',
-    rarity: 'legend' as const,
-    category: 'Moment' as const,
-    isHistorical: true,
-    pts: 60,
-    reb: 4,
-    ast: 4,
-    nbaId: 977,
-    year: 2016,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
-    quote: 'The Mamba’s final masterpiece scoring 60 in his last game.'
-  },
-  {
-    id: 'moment-006',
-    name: 'Linsanity begins',
-    team: 'New York Knicks',
-    teamAbbr: 'NYK',
-    position: 'G',
-    rarity: 'legend' as const,
-    category: 'Moment' as const,
-    isHistorical: true,
-    pts: 27,
-    reb: 2,
-    ast: 11,
-    nbaId: 202391,
-    year: 2012,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202391.png',
-    quote: 'The game-winner in Toronto that cemented a global phenomenon.'
-  },
-  {
-    id: 'moment-007',
-    name: 'The Valley of Death',
-    team: 'Milwaukee Bucks',
-    teamAbbr: 'MIL',
-    position: 'F',
-    rarity: 'legend' as const,
-    category: 'Moment' as const,
-    isHistorical: false,
-    pts: 32,
-    reb: 14,
-    ast: 7,
-    nbaId: 203507,
-    year: 2021,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png',
-    quote: 'The legendary block on Ayton that changed the Finals momentum.'
-  },
-  {
-    id: 'moment-008',
     name: 'T-Mac 13 in 33',
     team: 'Houston Rockets',
     teamAbbr: 'HOU',
@@ -6722,7 +6671,7 @@ const rawCards = [
     ast: 2,
     nbaId: 1503,
     year: 2004,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1503.png',
+    imageUrl: 'https://i.makeagif.com/media/11-22-2018/Oag6Lk.gif',
     quote: '13 points in 33 seconds to complete the greatest comeback.'
   },
   {
@@ -6739,25 +6688,8 @@ const rawCards = [
     ast: 2,
     nbaId: 951,
     year: 2013,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/951.png',
+    imageUrl: 'https://media.tenor.com/RNzYmnPTe1YAAAAM/nba-basketball.gif',
     quote: "The shot that saved the Heat's dynasty in Game 6."
-  },
-  {
-    id: 'moment-010',
-    name: 'Dame Time: 37ft',
-    team: 'Portland Trail Blazers',
-    teamAbbr: 'POR',
-    position: 'G',
-    rarity: 'legend' as const,
-    category: 'Moment' as const,
-    isHistorical: true,
-    pts: 50,
-    reb: 7,
-    ast: 6,
-    nbaId: 203081,
-    year: 2019,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203081.png',
-    quote: 'The wave goodbye to OKC after a massive series-clinching 3.'
   },
   {
     id: 'moment-011',
@@ -6773,25 +6705,25 @@ const rawCards = [
     ast: 5,
     nbaId: 202691,
     year: 2015,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202691.png',
+    imageUrl: 'https://i.makeagif.com/media/10-07-2015/0x_mMY.gif',
     quote: 'Perfection. 37 points in 12 minutes without missing a shot.'
   },
   {
     id: 'moment-012',
-    name: 'The 71-Point Night',
+    name: 'The 73-Point Masterpiece',
     team: 'Dallas Mavericks',
     teamAbbr: 'DAL',
     position: 'G',
     rarity: 'legend' as const,
     category: 'Moment' as const,
     isHistorical: false,
-    pts: 60,
-    reb: 21,
-    ast: 10,
+    pts: 73,
+    reb: 10,
+    ast: 7,
     nbaId: 1629029,
-    year: 2022,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png',
-    quote: 'The historic 60/21/10 triple-double that defied logic.'
+    year: 2024,
+    imageUrl: 'https://platform.mavsmoneyball.com/wp-content/uploads/sites/104/chorus/uploads/chorus_asset/file/22993103/Luka_3_Celtics.gif?quality=90&strip=all&crop=0,0,100,100',
+    quote: '73 points on 75% shooting. The most efficient scoring outburst in NBA history.'
   },
   {
     id: 'moment-013',
@@ -6808,7 +6740,7 @@ const rawCards = [
     nbaId: 201935,
     year: 2018,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201935.png',
-    quote: 'The stare-down after crossing Wesley Johnson into another dimension.'
+    quote: 'https://media.tenor.com/wQPMHo7nc10AAAAM/ankle-breaker-crossover.gif'
   },
   {
     id: 'moment-014',
@@ -6824,7 +6756,7 @@ const rawCards = [
     ast: 12,
     nbaId: 2548,
     year: 2009,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2548.png',
+    imageUrl: 'https://media3.giphy.com/media/d35xNm1idb6Ghcdi/giphy.gif',
     quote: '"This is my house!" after the double-OT winner vs Bulls.'
   },
   {
@@ -6841,7 +6773,7 @@ const rawCards = [
     ast: 1,
     nbaId: 202681,
     year: 2016,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202681.png',
+    imageUrl: 'https://media2.giphy.com/media/v1.Y2lkPTZjMDliOTUycHFoOTc1OWtscG10NHF5c3RrczNndWwyNG5lY21sNnB4Njh0aHVjeiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/xT8qBd0tFdFV7l0gr6/200w.gif',
     quote: 'The cold-blooded shot over Curry to clinch the 3-1 comeback.'
   },
   {
