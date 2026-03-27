@@ -30,6 +30,8 @@ export interface Card {
     ovr: number;
   };
   description: string;
+  momentTitle?: string;
+  momentDate?: string;
   quote: string;
   imageUrl: string;
   isNew?: boolean;

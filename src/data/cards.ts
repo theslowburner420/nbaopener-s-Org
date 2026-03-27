@@ -76,6 +76,34 @@ const teamCoaches: Record<string, string> = {
 };
 
 const rawCards = [
+  {
+    id: 'moment-curry-bang-bang',
+    number: 999,
+    name: 'Stephen Curry',
+    team: 'Golden State Warriors',
+    teamAbbr: 'GSW',
+    teamColor: '#1D428A',
+    position: 'G',
+    rarity: 'legend' as const,
+    category: 'Moment' as const,
+    subtitle: 'THE DOUBLE BANG',
+    momentTitle: 'BANG BANG',
+    momentDate: '27 de febrero de 2016',
+    isHistorical: true,
+    pts: 46,
+    reb: 3,
+    ast: 6,
+    nbaId: 201939,
+    stats: {
+      points: 46,
+      rebounds: 3,
+      assists: 6,
+      ovr: 99,
+    },
+    description: 'Triple ganador desde 10 metros vs OKC',
+    quote: 'They do have a timeout, decide not to use it... Curry, from downtown... BANG! BANG! OH WHAT A SHOT BY CURRY!',
+    imageUrl: 'https://media.tenor.com/xZ4fqO-87IsAAAAM/stephen-curry-shoot.gif',
+  },
   // LOS ANGELES LAKERS
   {
     id: 'lal-001',

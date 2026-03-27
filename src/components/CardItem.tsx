@@ -46,7 +46,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
   const [isHovered, setIsHovered] = useState(false);
   const isMini = mode === 'mini';
   
-  const { rarityClass, categoryClass, isDarkCard, isHolo, isFranchise, isLegend, isDPOY, isROTY, isXFactor, isVintage } = useMemo(() => {
+  const { rarityClass, categoryClass, isDarkCard, isHolo, isFranchise, isLegend, isDPOY, isROTY, isXFactor, isVintage, isMoment } = useMemo(() => {
     const rClass = getRarityClass(card.rarity);
     const cClass = card.category === 'Award' 
       ? (card.rarity === 'dpoy' ? 'card-dpoy' : 
@@ -57,17 +57,19 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
         card.category === 'X-Factor' ? 'card-xfactor' : 
         card.category === 'Rookie' ? 'card-rookie' : 
         card.category === 'All-Star MVP' ? 'card-as-mvp' : 
-        card.category === 'Finals MVP' ? 'card-fmvp' : '';
-    const dark = card.category === 'Award' || card.category === 'Coach' || card.rarity === 'dpoy' || card.rarity === 'roty' || card.rarity === 'record' || card.category === 'Dynasty' || card.category === 'X-Factor' || card.category === 'NBA Record' || card.category === 'Rookie' || card.category === 'All-Star MVP' || card.category === 'Finals MVP';
-    const holo = ['allstar', 'franchise', 'legend', 'dpoy', 'roty', 'record', 'rookie'].includes(card.rarity) || card.category === 'Dynasty' || card.category === 'X-Factor';
+        card.category === 'Finals MVP' ? 'card-fmvp' : 
+        card.category === 'Moment' ? 'card-moment' : '';
+    const dark = card.category === 'Award' || card.category === 'Coach' || card.rarity === 'dpoy' || card.rarity === 'roty' || card.rarity === 'record' || card.category === 'Dynasty' || card.category === 'X-Factor' || card.category === 'NBA Record' || card.category === 'Rookie' || card.category === 'All-Star MVP' || card.category === 'Finals MVP' || card.category === 'Moment';
+    const holo = ['allstar', 'franchise', 'legend', 'dpoy', 'roty', 'record', 'rookie'].includes(card.rarity) || card.category === 'Dynasty' || card.category === 'X-Factor' || card.category === 'Moment';
     const franchise = card.rarity === 'franchise';
-    const legend = card.rarity === 'legend' || card.category === 'Dynasty';
+    const legend = card.rarity === 'legend' || card.category === 'Dynasty' || card.category === 'Moment';
     const dpoy = card.rarity === 'dpoy';
     const roty = card.rarity === 'roty';
     const xfactor = card.category === 'X-Factor';
     const vintage = card.nbaId < 1000;
+    const moment = card.category === 'Moment';
     
-    return { rarityClass: rClass, categoryClass: cClass, isDarkCard: dark, isHolo: holo, isFranchise: franchise, isLegend: legend, isDPOY: dpoy, isROTY: roty, isXFactor: xfactor, isVintage: vintage };
+    return { rarityClass: rClass, categoryClass: cClass, isDarkCard: dark, isHolo: holo, isFranchise: franchise, isLegend: legend, isDPOY: dpoy, isROTY: roty, isXFactor: xfactor, isVintage: vintage, isMoment: moment };
   }, [card.rarity, card.category, card.series, card.nbaId]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -145,6 +147,15 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
         <div className="card-vintage-overlay" />
         <div className="card-inner-border" />
         
+        {isMoment && (
+          <>
+            <div className="card-moment-texture" />
+            <div className="card-moment-marble" />
+            <div className="card-moment-glow" />
+            <div className="absolute inset-0 bg-blue-900/5 mix-blend-overlay pointer-events-none z-[3]" />
+          </>
+        )}
+        
         {/* Holographic Effects */}
         {isHolo && isOwned && (
           <>
@@ -172,11 +183,17 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
         {/* Header (Pokémon Style) */}
         <div className="px-3 py-1 flex justify-between items-center z-20 min-h-[40px]">
           <div className="flex flex-col flex-1 min-w-0 pr-2">
-            <h3 className={`text-base md:text-lg font-black uppercase tracking-tighter leading-[0.9] drop-shadow-sm italic ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'} break-words line-clamp-2`}>
-              {card.name}
-            </h3>
+            {isMoment && card.momentTitle ? (
+              <h3 className="text-xl md:text-2xl moment-title-text leading-[0.8] mb-1">
+                {card.momentTitle}
+              </h3>
+            ) : (
+              <h3 className={`text-base md:text-lg font-black uppercase tracking-tighter leading-[0.9] drop-shadow-sm italic ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'} break-words line-clamp-2`}>
+                {card.name}
+              </h3>
+            )}
             <span className={`text-[7px] md:text-[9px] font-bold uppercase tracking-widest mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis ${isDarkCard ? 'card-text-secondary' : 'text-zinc-700'} ${isXFactor ? 'font-mono tracking-[0.2em] text-blue-300' : ''}`}>
-              {isXFactor ? 'X-FACTOR' : card.subtitle}
+              {isXFactor ? 'X-FACTOR' : isMoment ? card.name : card.subtitle}
             </span>
           </div>
           <div className="flex items-center gap-0.5 shrink-0">
@@ -190,8 +207,22 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
         </div>
 
         {/* Photo Area (Modern Pokémon Style Frame) */}
-        <div className="relative mx-2 mt-0.5 bg-white overflow-hidden rounded-sm border-[1.5px] border-black/10 shadow-md z-30 flex-[2] min-h-0">
+        <div className={`relative mx-2 mt-0.5 bg-white overflow-hidden rounded-sm border-[1.5px] border-black/10 shadow-md z-30 flex-[2] min-h-0 ${isMoment ? 'moment-photo-mask' : ''}`}>
           <div className="w-full h-full relative overflow-hidden bg-zinc-200">
+            {isMoment && (
+              <>
+                <div className="absolute top-2 right-2 z-[50]">
+                  <div className="moment-badge">MOMENTO</div>
+                </div>
+                {card.momentDate && (
+                  <div className="absolute bottom-2 right-2 z-[50] opacity-20 pointer-events-none">
+                    <span className="text-4xl font-black text-white italic tracking-tighter">
+                      {card.momentDate.split(' ').pop()}
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
             {(card.category === 'Duo' || card.category === 'All-Star MVP') && card.player2Id ? (
               <div className="flex w-full h-full">
                 <div className="w-1/2 h-full relative overflow-hidden border-r border-black/10">
@@ -217,7 +248,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
               <img
                 src={card.imageUrl}
                 alt={card.name}
-                className={`w-full h-full object-cover object-top relative z-40 ${isVintage ? 'card-vintage' : ''}`}
+                className={`w-full h-full object-cover object-top relative z-40 ${isVintage ? 'card-vintage' : ''} ${isMoment ? 'brightness-110 contrast-110' : ''}`}
                 referrerPolicy="no-referrer"
                 loading="lazy"
               />
@@ -258,7 +289,18 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
 
           {/* Description (Pokémon Flavor Text) */}
           <div className="mt-1 px-1">
+            {isMoment && card.quote ? (
+              <div className="flex gap-2 items-start mb-1 px-2">
+                <div className="w-0.5 self-stretch bg-amber-500/50 rounded-full shrink-0" />
+                <p className="text-[7px] italic leading-tight text-zinc-400 text-left line-clamp-2">
+                  {card.quote}
+                </p>
+              </div>
+            ) : null}
             <p className={`text-[8px] italic leading-tight text-center line-clamp-2 font-medium ${isDarkCard ? 'card-text-secondary' : 'text-zinc-800'}`}>
+              {isMoment && card.momentDate ? (
+                <span className="block font-black not-italic text-[7px] mb-0.5 text-amber-500">{card.momentDate}</span>
+              ) : null}
               "{card.description}"
             </p>
           </div>
@@ -349,7 +391,23 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
       >
         <div className={`flex flex-col h-full ${!isOwned ? 'grayscale brightness-[0.2] bg-black' : ''}`}>
           {/* Top Half: Photo */}
-          <div className="relative h-[55%] overflow-hidden bg-zinc-800">
+          <div className={`relative h-[55%] overflow-hidden bg-zinc-800 ${isMoment ? 'card-moment' : ''}`}>
+            {isMoment && (
+              <>
+                <div className="card-moment-texture" />
+                <div className="card-moment-marble" />
+                <div className="absolute top-1 right-1 z-[50]">
+                  <div className="text-[5px] font-black bg-amber-500 text-black px-1 rounded-sm">MOMENTO</div>
+                </div>
+                {card.momentDate && (
+                  <div className="absolute bottom-1 right-1 z-[50] opacity-10 pointer-events-none">
+                    <span className="text-xl font-black text-white italic tracking-tighter">
+                      {card.momentDate.split(' ').pop()}
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
             {(card.category === 'Duo' || card.category === 'All-Star MVP') && card.player2Id ? (
               <div className="flex w-full h-full transition-transform duration-500 group-hover/mini:scale-110">
                 <img
@@ -371,7 +429,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
               <img
                 src={card.imageUrl}
                 alt={card.name}
-                className={`w-full h-full object-cover object-top transition-transform duration-500 group-hover/mini:scale-110 ${isVintage ? 'card-vintage' : ''}`}
+                className={`w-full h-full object-cover object-top transition-transform duration-500 group-hover/mini:scale-110 ${isVintage ? 'card-vintage' : ''} ${isMoment ? 'brightness-110 contrast-110' : ''}`}
                 referrerPolicy="no-referrer"
                 loading="lazy"
               />
@@ -380,11 +438,11 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
             
             {/* Name Overlay */}
             <div className="absolute bottom-1 left-1.5 right-1.5">
-              <h3 className="text-[9px] font-black text-white uppercase italic leading-[0.9] drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] line-clamp-2">
-                {card.name}
+              <h3 className={`text-[9px] font-black uppercase italic leading-[0.9] drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] line-clamp-2 ${isMoment ? 'moment-title-text' : 'text-white'}`}>
+                {isMoment && card.momentTitle ? card.momentTitle : card.name}
               </h3>
               <p className="text-[6px] font-bold text-white/70 uppercase tracking-tighter truncate">
-                {card.subtitle}
+                {isMoment ? card.name : card.subtitle}
               </p>
             </div>
 
