@@ -72,14 +72,14 @@ export default function CollectionView() {
     return (
       <div
         key={`${card.id}-${card.number}`}
-        className="relative group"
+        className="relative group content-auto"
       >
         <div className={`${isOwned ? 'hover:scale-105 cursor-pointer' : 'cursor-default'} transition-transform duration-300`}>
           <CardItem 
             card={card} 
             isOwned={isOwned} 
             mode="mini"
-            onClick={() => isOwned && handleCardClick(card)}
+            onClick={handleCardClick}
           />
         </div>
       </div>

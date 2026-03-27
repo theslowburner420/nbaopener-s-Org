@@ -7,7 +7,7 @@ interface CardItemProps {
   card: Card;
   isOwned: boolean;
   mode?: 'mini' | 'large';
-  onClick?: () => void;
+  onClick?: (card: Card) => void;
   showBack?: boolean;
   isFocused?: boolean;
   isNew?: boolean;
@@ -223,36 +223,13 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
                 )}
               </>
             )}
-            {(card.category === 'Duo' || card.category === 'All-Star MVP') && card.player2Id ? (
-              <div className="flex w-full h-full">
-                <div className="w-1/2 h-full relative overflow-hidden border-r border-black/10">
-                  <img
-                    src={card.imageUrl}
-                    alt={card.name}
-                    className="w-full h-full object-cover object-top relative z-40"
-                    referrerPolicy="no-referrer"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="w-1/2 h-full relative overflow-hidden">
-                  <img
-                    src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.player2Id}.png`}
-                    alt={card.name}
-                    className="w-full h-full object-cover object-top relative z-40"
-                    referrerPolicy="no-referrer"
-                    loading="lazy"
-                  />
-                </div>
-              </div>
-            ) : (
-              <img
+            <img
                 src={card.imageUrl}
                 alt={card.name}
                 className={`w-full h-full object-cover object-top relative z-40 ${isVintage ? 'card-vintage' : ''} ${isMoment ? 'brightness-110 contrast-110' : ''}`}
                 referrerPolicy="no-referrer"
                 loading="lazy"
               />
-            )}
             {/* Background Gradient */}
             <div 
               className="absolute inset-0 opacity-30 z-10"
@@ -358,7 +335,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
     return (
       <div 
         className={`nba-card relative flex flex-col items-center justify-center bg-zinc-900 ${isMini ? 'border-4' : 'border-8'} border-zinc-800 ${isMini ? 'aspect-[2.5/3.5]' : 'w-full max-w-[340px] aspect-[2.5/3.5]'}`}
-        onClick={onClick}
+        onClick={() => onClick?.(card)}
       >
         <div className="absolute inset-4 border-2 border-zinc-700 rounded-lg flex flex-col items-center justify-center overflow-hidden bg-zinc-950">
           <div className="w-24 h-24 rounded-full border-4 border-zinc-800 flex items-center justify-center relative overflow-hidden">
@@ -387,7 +364,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
           boxShadow: isOwned ? `0 4px 20px ${RarityColor}33` : 'none',
           background: 'transparent' // Override nba-card default bg
         } as React.CSSProperties}
-        onClick={onClick}
+        onClick={() => isOwned && onClick?.(card)}
       >
         <div className={`flex flex-col h-full ${!isOwned ? 'grayscale brightness-[0.2] bg-black' : ''}`}>
           {/* Top Half: Photo */}
@@ -408,32 +385,13 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
                 )}
               </>
             )}
-            {(card.category === 'Duo' || card.category === 'All-Star MVP') && card.player2Id ? (
-              <div className="flex w-full h-full transition-transform duration-500 group-hover/mini:scale-110">
-                <img
-                  src={card.imageUrl}
-                  alt={card.name}
-                  className="w-1/2 h-full object-cover object-top"
-                  referrerPolicy="no-referrer"
-                  loading="lazy"
-                />
-                <img
-                  src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.player2Id}.png`}
-                  alt={card.name}
-                  className="w-1/2 h-full object-cover object-top border-l border-white/10"
-                  referrerPolicy="no-referrer"
-                  loading="lazy"
-                />
-              </div>
-            ) : (
-              <img
+            <img
                 src={card.imageUrl}
                 alt={card.name}
                 className={`w-full h-full object-cover object-top transition-transform duration-500 group-hover/mini:scale-110 ${isVintage ? 'card-vintage' : ''} ${isMoment ? 'brightness-110 contrast-110' : ''}`}
                 referrerPolicy="no-referrer"
                 loading="lazy"
               />
-            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
             
             {/* Name Overlay */}
@@ -524,7 +482,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
   return (
     <motion.div
       layoutId={card.id}
-      onClick={onClick}
+      onClick={() => isOwned && onClick?.(card)}
       className="w-full max-w-[340px] aspect-[2.5/3.5] cursor-pointer"
       whileHover={isOwned ? { 
         scale: 1.02, 
