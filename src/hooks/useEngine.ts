@@ -67,11 +67,11 @@ const PACK_SIZES: Record<PackType, number> = {
 };
 
 export const PACK_PRICES: Record<Exclude<PackType, 'random'>, number> = {
-  rookie: 500,
-  allstar: 1000,
-  mvp: 2000,
-  hof: 5000,
-  legendary_mvp: 10000,
+  rookie: 1000,
+  allstar: 5000,
+  mvp: 25000,
+  hof: 100000,
+  legendary_mvp: 250000,
 };
 
 // Pre-calculate pools for series-specific packs
@@ -198,7 +198,7 @@ export function useEngine() {
       newCoins -= price;
     } else {
       // Daily Stimulus
-      newCoins += 50;
+      newCoins += 500;
     }
 
     setCoins(newCoins);

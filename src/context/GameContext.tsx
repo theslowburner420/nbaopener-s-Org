@@ -24,14 +24,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const defaultState: GameState = {
       user: null,
       coins: 1000,
-      collection: [
-        'coach-lal', 'coach-gsw', 'coach-bos', 'coach-mia', 'coach-sas', 
-        'coach-nyk', 'coach-den', 'coach-mil', 'coach-phx', 'coach-dal', 
-        'coach-okc', 'coach-min', 'coach-lac', 'coach-phi', 'coach-ind', 
-        'coach-cle', 'coach-orl', 'coach-sac', 'coach-hou', 'coach-mem', 
-        'coach-nop', 'coach-chi', 'coach-atl', 'coach-bkn', 'coach-tor', 
-        'coach-uta', 'coach-por', 'coach-cha', 'coach-det', 'coach-was'
-      ],
+      collection: [],
       customCards: [],
       currentView: 'open',
       unlockedAchievements: [],

@@ -1,11 +1,14 @@
-import { Trophy, Star, Zap, Shield, Crown, Gem, Flame, Target, Users, Coins, Calendar, History, Package } from 'lucide-react';
+import { Trophy, Star, Zap, Shield, Crown, Gem, Flame, Target, Users, Coins, Calendar, History, Package, Award, Globe, TrendingUp, Wallet, Gift, Map, Crosshair, Activity, Layers, Eye } from 'lucide-react';
 
 export interface Achievement {
   id: string;
   title: string;
   description: string;
   icon: any;
+  category: 'packs' | 'collection' | 'specials';
+  level: 'bronze' | 'silver' | 'gold' | 'diamond';
   requirement: (state: any, allCards: any[]) => boolean;
+  getProgress: (state: any, allCards: any[]) => { current: number; total: number };
   reward: number;
   packReward?: {
     id: string;
@@ -14,259 +17,343 @@ export interface Achievement {
   };
 }
 
+const TEAMS = [
+  'Atlanta Hawks', 'Boston Celtics', 'Brooklyn Nets', 'Charlotte Hornets', 'Chicago Bulls',
+  'Cleveland Cavaliers', 'Dallas Mavericks', 'Denver Nuggets', 'Detroit Pistons', 'Golden State Warriors',
+  'Houston Rockets', 'Indiana Pacers', 'LA Clippers', 'Los Angeles Lakers', 'Memphis Grizzlies',
+  'Miami Heat', 'Milwaukee Bucks', 'Minnesota Timberwolves', 'New Orleans Pelicans', 'New York Knicks',
+  'Oklahoma City Thunder', 'Orlando Magic', 'Philadelphia 76ers', 'Phoenix Suns', 'Portland Trail Blazers',
+  'Sacramento Kings', 'San Antonio Spurs', 'Toronto Raptors', 'Utah Jazz', 'Washington Wizards'
+];
+
+const PLAYERS = [
+  'Michael Jordan', 'Kobe Bryant', 'LeBron James', 'Stephen Curry', 'Shaquille O\'Neal',
+  'Magic Johnson', 'Larry Bird', 'Kareem Abdul-Jabbar', 'Wilt Chamberlain', 'Bill Russell',
+  'Tim Duncan', 'Kevin Garnett', 'Dirk Nowitzki', 'Dwyane Wade', 'Allen Iverson',
+  'Kevin Durant', 'Giannis Antetokounmpo', 'Nikola Jokic', 'Luka Doncic', 'Victor Wembanyama'
+];
+
+const getLevel = (reward: number): 'bronze' | 'silver' | 'gold' | 'diamond' => {
+  if (reward >= 100000) return 'diamond';
+  if (reward >= 25000) return 'gold';
+  if (reward >= 5000) return 'silver';
+  return 'bronze';
+};
+
 export const ACHIEVEMENTS: Achievement[] = [
-  {
-    id: 'first-pick',
-    title: 'First Pick',
-    description: 'Abrir tu primer sobre.',
-    icon: Zap,
-    requirement: (state) => state.collection.length > 30, // 30 are coaches given at start
-    reward: 100
+  // --- OPENING MILESTONES (20) ---
+  { 
+    id: 'pack-1', title: 'First Step', description: 'Abrir tu primer sobre.', icon: Package, category: 'packs', level: 'bronze',
+    requirement: (state) => state.collection.length >= 5, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 5), total: 5 }),
+    reward: 1000 
   },
-  {
-    id: 'roster-builder',
-    title: 'Roster Builder',
-    description: 'Conseguir 15 jugadores de un mismo equipo.',
+  { 
+    id: 'pack-5', title: 'Rookie Opener', description: 'Abrir 5 sobres.', icon: Package, category: 'packs', level: 'bronze',
+    requirement: (state) => state.collection.length >= 25, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 25), total: 25 }),
+    reward: 2500 
+  },
+  { 
+    id: 'pack-10', title: 'Regular Opener', description: 'Abrir 10 sobres.', icon: Package, category: 'packs', level: 'silver',
+    requirement: (state) => state.collection.length >= 50, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 50), total: 50 }),
+    reward: 5000, packReward: { id: 'rookie-pack', type: 'rookie', name: 'Rookie Pack' } 
+  },
+  { 
+    id: 'pack-25', title: 'Dedicated Opener', description: 'Abrir 25 sobres.', icon: Package, category: 'packs', level: 'silver',
+    requirement: (state) => state.collection.length >= 125, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 125), total: 125 }),
+    reward: 10000 
+  },
+  { 
+    id: 'pack-50', title: 'Pack Enthusiast', description: 'Abrir 50 sobres.', icon: Package, category: 'packs', level: 'gold',
+    requirement: (state) => state.collection.length >= 250, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 250), total: 250 }),
+    reward: 25000, packReward: { id: 'allstar-pack', type: 'allstar', name: 'All-Star Pack' } 
+  },
+  { 
+    id: 'pack-100', title: 'Pack Addict', description: 'Abrir 100 sobres.', icon: Package, category: 'packs', level: 'gold',
+    requirement: (state) => state.collection.length >= 500, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 500), total: 500 }),
+    reward: 50000, packReward: { id: 'mvp-pack', type: 'mvp', name: 'MVP Pack' } 
+  },
+  { 
+    id: 'pack-200', title: 'Bulk Buyer', description: 'Abrir 200 sobres.', icon: Package, category: 'packs', level: 'gold',
+    requirement: (state) => state.collection.length >= 1000, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 1000), total: 1000 }),
+    reward: 100000 
+  },
+  { 
+    id: 'pack-300', title: 'Crate Collector', description: 'Abrir 300 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    requirement: (state) => state.collection.length >= 1500, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 1500), total: 1500 }),
+    reward: 150000 
+  },
+  { 
+    id: 'pack-400', title: 'Warehouse Manager', description: 'Abrir 400 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    requirement: (state) => state.collection.length >= 2000, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 2000), total: 2000 }),
+    reward: 200000 
+  },
+  { 
+    id: 'pack-500', title: 'Halfway to a Thousand', description: 'Abrir 500 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    requirement: (state) => state.collection.length >= 2500, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 2500), total: 2500 }),
+    reward: 250000, packReward: { id: 'hof-pack', type: 'hof', name: 'HOF Pack' } 
+  },
+  { 
+    id: 'pack-750', title: 'Three Quarters', description: 'Abrir 750 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    requirement: (state) => state.collection.length >= 3750, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 3750), total: 3750 }),
+    reward: 350000 
+  },
+  { 
+    id: 'pack-1000', title: 'Millennial Opener', description: 'Abrir 1000 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    requirement: (state) => state.collection.length >= 5000, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 5000), total: 5000 }),
+    reward: 500000, packReward: { id: 'hof-pack', type: 'hof', name: 'HOF Pack' } 
+  },
+  { 
+    id: 'pack-1500', title: 'Pack Veteran', description: 'Abrir 1500 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    requirement: (state) => state.collection.length >= 7500, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 7500), total: 7500 }),
+    reward: 750000 
+  },
+  { 
+    id: 'pack-2000', title: 'Double Millennial', description: 'Abrir 2000 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    requirement: (state) => state.collection.length >= 10000, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 10000), total: 10000 }),
+    reward: 1000000 
+  },
+  { 
+    id: 'pack-2500', title: 'Pack Legend', description: 'Abrir 2500 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    requirement: (state) => state.collection.length >= 12500, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 12500), total: 12500 }),
+    reward: 1250000 
+  },
+  { 
+    id: 'pack-3000', title: 'Triple Millennial', description: 'Abrir 3000 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    requirement: (state) => state.collection.length >= 15000, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 15000), total: 15000 }),
+    reward: 1500000 
+  },
+  { 
+    id: 'pack-3500', title: 'Pack Master', description: 'Abrir 3500 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    requirement: (state) => state.collection.length >= 17500, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 17500), total: 17500 }),
+    reward: 1750000 
+  },
+  { 
+    id: 'pack-4000', title: 'Quadruple Millennial', description: 'Abrir 4000 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    requirement: (state) => state.collection.length >= 20000, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 20000), total: 20000 }),
+    reward: 2000000 
+  },
+  { 
+    id: 'pack-4500', title: 'Pack God', description: 'Abrir 4500 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    requirement: (state) => state.collection.length >= 22500, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 22500), total: 22500 }),
+    reward: 2250000 
+  },
+  { 
+    id: 'pack-5000', title: 'Ultimate Opener', description: 'Abrir 5000 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    requirement: (state) => state.collection.length >= 25000, 
+    getProgress: (state) => ({ current: Math.min(state.collection.length, 25000), total: 25000 }),
+    reward: 5000000, packReward: { id: 'hof-pack', type: 'hof', name: 'HOF Pack' } 
+  },
+
+  // --- FRANCHISES (30) ---
+  ...TEAMS.map(team => ({
+    id: `team-master-static-${team.toLowerCase().replace(/ /g, '-')}`,
+    title: `${team} Master`,
+    description: `Completar la plantilla de los ${team}.`,
     icon: Users,
-    requirement: (state, allCards) => {
+    category: 'collection' as const,
+    level: 'silver' as const,
+    requirement: (state: any, allCards: any[]) => {
       const ownedIds = new Set(state.collection);
-      const teamCounts: Record<string, number> = {};
-      allCards.forEach(c => {
-        if (ownedIds.has(c.id) && c.category !== 'Coach') {
-          teamCounts[c.team] = (teamCounts[c.team] || 0) + 1;
-        }
-      });
-      return Object.values(teamCounts).some(count => count >= 15);
+      const teamCards = allCards.filter(c => c.team === team);
+      return teamCards.length > 0 && teamCards.every(c => ownedIds.has(c.id));
     },
-    reward: 500,
-    packReward: { id: 'allstar-pack', type: 'allstar', name: 'Silver Team Pack' }
-  },
-  {
-    id: 'full-squad',
-    title: 'The Full Squad',
-    description: 'Completar una franquicia entera (Jugadores + Coach).',
-    icon: Star,
-    requirement: (state, allCards) => {
+    getProgress: (state: any, allCards: any[]) => {
       const ownedIds = new Set(state.collection);
-      const teams = Array.from(new Set(allCards.map(c => c.team)));
-      return teams.some(team => {
-        const teamCards = allCards.filter(c => c.team === team);
-        return teamCards.every(c => ownedIds.has(c.id));
-      });
+      const teamCards = allCards.filter(c => c.team === team);
+      const owned = teamCards.filter(c => ownedIds.has(c.id)).length;
+      return { current: owned, total: teamCards.length || 1 };
     },
-    reward: 1000,
-    packReward: { id: 'mvp-pack', type: 'mvp', name: 'Special Edition Pack' }
-  },
-  {
-    id: 'vintage-collector',
-    title: 'Vintage Collector',
-    description: 'Conseguir 5 cartas de "Historical Duos".',
-    icon: History,
-    requirement: (state, allCards) => {
-      const ownedIds = new Set(state.collection);
-      const historicalDuos = allCards.filter(c => c.category === 'Duo' && c.isHistorical && ownedIds.has(c.id));
-      return historicalDuos.length >= 5;
-    },
-    reward: 1500
-  },
-  {
-    id: 'dynasty-hunter',
-    title: 'Dynasty Hunter',
-    description: 'Desbloquear tu primera carta de Dinastía.',
-    icon: Crown,
-    requirement: (state, allCards) => {
-      const ownedIds = new Set(state.collection);
-      return allCards.some(c => c.category === 'Dynasty' && ownedIds.has(c.id));
-    },
-    reward: 2000
-  },
-  {
-    id: 'pack-master',
-    title: 'Pack Master',
-    description: 'Completar 5 logros anteriores.',
-    icon: Package,
-    requirement: (state) => state.unlockedAchievements.length >= 5,
-    reward: 0,
-    packReward: { id: 'hof-pack', type: 'hof', name: 'Free HOF Pack' }
-  },
-  {
-    id: 'collector-50',
-    title: 'Rising Collector',
-    description: 'Collect 50 unique cards',
-    icon: Users,
-    requirement: (state) => state.collection.length >= 50,
-    reward: 500,
-    packReward: { id: 'rookie-pack', type: 'rookie', name: 'Rookie Pack' }
-  },
-  {
-    id: 'collector-100',
-    title: 'Elite Scout',
-    description: 'Collect 100 unique cards',
-    icon: Target,
-    requirement: (state) => state.collection.length >= 100,
-    reward: 1000,
-    packReward: { id: 'allstar-pack', type: 'allstar', name: 'All-Star Pack' }
-  },
-  {
-    id: 'lucky-legend',
-    title: 'Legendary Find',
-    description: 'Find your first Legend rarity card',
-    icon: Crown,
-    requirement: (state, allCards) => {
-      const ownedIds = new Set(state.collection);
-      return allCards.some(c => c.rarity === 'legend' && ownedIds.has(c.id));
-    },
-    reward: 2000,
-    packReward: { id: 'mvp-pack', type: 'mvp', name: 'MVP Pack' }
-  },
-  {
-    id: 'all-star-squad',
-    title: 'All-Star Squad',
-    description: 'Collect 5 All-Star rarity cards',
-    icon: Star,
-    requirement: (state, allCards) => {
-      const ownedIds = new Set(state.collection);
-      const allStars = allCards.filter(c => c.rarity === 'allstar' && ownedIds.has(c.id));
-      return allStars.length >= 5;
-    },
-    reward: 750
-  },
-  {
-    id: 'dpoy-wall',
-    title: 'The Wall',
-    description: 'Find a Defensive Player of the Year card',
-    icon: Shield,
-    requirement: (state, allCards) => {
-      const ownedIds = new Set(state.collection);
-      return allCards.some(c => c.rarity === 'dpoy' && ownedIds.has(c.id));
-    },
-    reward: 1500
-  },
-  {
-    id: 'coin-hoarder',
-    title: 'Coin Hoarder',
-    description: 'Accumulate 5,000 coins',
-    icon: Coins,
-    requirement: (state) => state.coins >= 5000,
-    reward: 1000
-  },
-  {
-    id: 'loyal-player',
-    title: 'Perfect Week',
-    description: 'Claim all 7 daily rewards',
-    icon: Calendar,
-    requirement: (state) => state.claimedDays.length >= 7,
-    reward: 2500
-  },
-  {
-    id: 'mythic-pull',
-    title: 'Mythic Pull',
-    description: 'Find a Franchise Player card',
-    icon: Flame,
-    requirement: (state, allCards) => {
-      const ownedIds = new Set(state.collection);
-      return allCards.some(c => c.rarity === 'franchise' && ownedIds.has(c.id));
-    },
-    reward: 3000,
-    packReward: { id: 'mvp-pack', type: 'mvp', name: 'MVP Pack' }
-  },
-  {
-    id: 'high-roller',
-    title: 'High Roller',
-    description: 'Accumulate 10,000 coins',
-    icon: Coins,
-    requirement: (state: any) => state.coins >= 10000,
     reward: 5000,
-    packReward: { id: 'hof-pack', type: 'hof', name: 'HOF Pack' }
-  },
-  {
-    id: 'roty-collector',
-    title: 'Rookie Watch',
-    description: 'Collect 5 Rookie of the Year cards',
-    icon: Star,
-    requirement: (state: any, allCards: any[]) => {
-      const ownedIds = new Set(state.collection);
-      const rotys = allCards.filter(c => c.rarity === 'roty' && ownedIds.has(c.id));
-      return rotys.length >= 5;
-    },
-    reward: 2000,
-    packReward: { id: 'rookie-pack', type: 'rookie', name: 'Rookie Pack' }
-  },
-  {
-    id: 'dpoy-collector',
-    title: 'Defensive Anchor',
-    description: 'Collect 5 Defensive Player of the Year cards',
-    icon: Shield,
-    requirement: (state: any, allCards: any[]) => {
-      const ownedIds = new Set(state.collection);
-      const dpoys = allCards.filter(c => c.rarity === 'dpoy' && ownedIds.has(c.id));
-      return dpoys.length >= 5;
-    },
-    reward: 2500,
     packReward: { id: 'mvp-pack', type: 'mvp', name: 'MVP Pack' }
-  },
-  {
-    id: 'coach-collector',
-    title: 'Mastermind Collector',
-    description: 'Collect 15 Coach cards',
-    icon: Users,
+  })),
+
+  // --- RARITIES (50) ---
+  ...[10, 50, 100, 200, 300, 400, 500, 600, 800, 1000].map(count => ({
+    id: `rarity-bench-${count}`, title: `Bench Warmer ${count}`, description: `Coleccionar ${count} cartas de rareza Bench.`, icon: Shield,
+    category: 'collection' as const,
+    level: getLevel(count * 2),
     requirement: (state: any, allCards: any[]) => {
       const ownedIds = new Set(state.collection);
-      const coaches = allCards.filter(c => c.rarity === 'coach' && ownedIds.has(c.id));
-      return coaches.length >= 15;
+      return allCards.filter(c => c.rarity === 'bench' && ownedIds.has(c.id)).length >= count;
     },
-    reward: 1000,
-    packReward: { id: 'allstar-pack', type: 'allstar', name: 'All-Star Pack' }
-  },
-  {
-    id: 'franchise-collector',
-    title: 'Franchise Foundation',
-    description: 'Collect 10 Franchise rarity cards',
-    icon: Flame,
+    getProgress: (state: any, allCards: any[]) => {
+      const ownedIds = new Set(state.collection);
+      const countOwned = allCards.filter(c => c.rarity === 'bench' && ownedIds.has(c.id)).length;
+      return { current: Math.min(countOwned, count), total: count };
+    },
+    reward: count * 10
+  })),
+  ...[10, 50, 100, 150, 200, 250, 300, 350, 400, 500].map(count => ({
+    id: `rarity-starter-${count}`, title: `Starter Squad ${count}`, description: `Coleccionar ${count} cartas de rareza Starter.`, icon: Target,
+    category: 'collection' as const,
+    level: getLevel(count * 5),
     requirement: (state: any, allCards: any[]) => {
       const ownedIds = new Set(state.collection);
-      const franchise = allCards.filter(c => c.rarity === 'franchise' && ownedIds.has(c.id));
-      return franchise.length >= 10;
+      return allCards.filter(c => c.rarity === 'starter' && ownedIds.has(c.id)).length >= count;
     },
-    reward: 3000,
-    packReward: { id: 'hof-pack', type: 'hof', name: 'HOF Pack' }
-  },
-  {
-    id: 'duo-collector',
-    title: 'Dynamic Duo',
-    description: 'Collect your first Duo card',
-    icon: Users,
+    getProgress: (state: any, allCards: any[]) => {
+      const ownedIds = new Set(state.collection);
+      const countOwned = allCards.filter(c => c.rarity === 'starter' && ownedIds.has(c.id)).length;
+      return { current: Math.min(countOwned, count), total: count };
+    },
+    reward: count * 25
+  })),
+  ...[5, 10, 15, 20, 25, 30, 40, 50, 75, 100].map(count => ({
+    id: `rarity-allstar-${count}`, title: `All-Star Elite ${count}`, description: `Coleccionar ${count} cartas de rareza All-Star.`, icon: Star,
+    category: 'collection' as const,
+    level: getLevel(count * 20),
     requirement: (state: any, allCards: any[]) => {
       const ownedIds = new Set(state.collection);
-      return allCards.some(c => c.category === 'Duo' && ownedIds.has(c.id));
+      return allCards.filter(c => c.rarity === 'allstar' && ownedIds.has(c.id)).length >= count;
     },
-    reward: 1000,
-    packReward: { id: 'allstar-pack', type: 'allstar', name: 'All-Star Pack' }
-  },
-  {
-    id: 'duo-dynasty',
-    title: 'Duo Dynasty',
-    description: 'Collect 5 Duo cards',
-    icon: Crown,
+    getProgress: (state: any, allCards: any[]) => {
+      const ownedIds = new Set(state.collection);
+      const countOwned = allCards.filter(c => c.rarity === 'allstar' && ownedIds.has(c.id)).length;
+      return { current: Math.min(countOwned, count), total: count };
+    },
+    reward: count * 100
+  })),
+  ...[1, 2, 3, 4, 5, 10, 15, 20, 25, 50].map(count => ({
+    id: `rarity-franchise-${count}`, title: `Franchise Face ${count}`, description: `Coleccionar ${count} cartas de rareza Franchise.`, icon: Flame,
+    category: 'collection' as const,
+    level: getLevel(count * 100),
     requirement: (state: any, allCards: any[]) => {
       const ownedIds = new Set(state.collection);
-      const duos = allCards.filter(c => c.category === 'Duo' && ownedIds.has(c.id));
-      return duos.length >= 5;
+      return allCards.filter(c => c.rarity === 'franchise' && ownedIds.has(c.id)).length >= count;
     },
-    reward: 2500,
-    packReward: { id: 'mvp-pack', type: 'mvp', name: 'MVP Pack' }
-  },
-  {
-    id: 'record-breaker',
-    title: 'Record Breaker',
-    description: 'Conseguir 5 cartas de "Season Record".',
-    icon: Target,
+    getProgress: (state: any, allCards: any[]) => {
+      const ownedIds = new Set(state.collection);
+      const countOwned = allCards.filter(c => c.rarity === 'franchise' && ownedIds.has(c.id)).length;
+      return { current: Math.min(countOwned, count), total: count };
+    },
+    reward: count * 500
+  })),
+  ...[1, 2, 3, 4, 5, 10, 15, 20, 25, 30].map(count => ({
+    id: `rarity-legend-${count}`, title: `Legendary Status ${count}`, description: `Coleccionar ${count} cartas de rareza Legend.`, icon: Crown,
+    category: 'collection' as const,
+    level: getLevel(count * 500),
     requirement: (state: any, allCards: any[]) => {
       const ownedIds = new Set(state.collection);
-      const records = allCards.filter(c => c.id.startsWith('record-') && ownedIds.has(c.id));
-      return records.length >= 5;
+      return allCards.filter(c => c.rarity === 'legend' && ownedIds.has(c.id)).length >= count;
     },
-    reward: 2500,
-    packReward: { id: 'hof-pack', type: 'hof', name: 'HOF Pack' }
-  }
+    getProgress: (state: any, allCards: any[]) => {
+      const ownedIds = new Set(state.collection);
+      const countOwned = allCards.filter(c => c.rarity === 'legend' && ownedIds.has(c.id)).length;
+      return { current: Math.min(countOwned, count), total: count };
+    },
+    reward: count * 2500
+  })),
+
+  // --- HISTORICAL MOMENTS / PLAYERS (100) ---
+  ...PLAYERS.flatMap(player => [
+    {
+      id: `player-${player.toLowerCase().replace(/ /g, '-')}-1`,
+      title: `${player} Fan`,
+      description: `Conseguir tu primera carta de ${player}.`,
+      icon: Target,
+      category: 'specials' as const,
+      level: 'bronze' as const,
+      requirement: (state: any, allCards: any[]) => {
+        const ownedIds = new Set(state.collection);
+        return allCards.some(c => c.name.includes(player) && ownedIds.has(c.id));
+      },
+      getProgress: (state: any, allCards: any[]) => {
+        const ownedIds = new Set(state.collection);
+        const has = allCards.some(c => c.name.includes(player) && ownedIds.has(c.id));
+        return { current: has ? 1 : 0, total: 1 };
+      },
+      reward: 2500
+    },
+    {
+      id: `player-${player.toLowerCase().replace(/ /g, '-')}-2`,
+      title: `${player} Collector`,
+      description: `Conseguir 3 versiones diferentes de ${player}.`,
+      icon: Trophy,
+      category: 'specials' as const,
+      level: 'silver' as const,
+      requirement: (state: any, allCards: any[]) => {
+        const ownedIds = new Set(state.collection);
+        return allCards.filter(c => c.name.includes(player) && ownedIds.has(c.id)).length >= 3;
+      },
+      getProgress: (state: any, allCards: any[]) => {
+        const ownedIds = new Set(state.collection);
+        const count = allCards.filter(c => c.name.includes(player) && ownedIds.has(c.id)).length;
+        return { current: Math.min(count, 3), total: 3 };
+      },
+      reward: 7500
+    },
+    {
+      id: `player-${player.toLowerCase().replace(/ /g, '-')}-3`,
+      title: `${player} Legend`,
+      description: `Conseguir 5 versiones diferentes de ${player}.`,
+      icon: Crown,
+      category: 'specials' as const,
+      level: 'gold' as const,
+      requirement: (state: any, allCards: any[]) => {
+        const ownedIds = new Set(state.collection);
+        return allCards.filter(c => c.name.includes(player) && ownedIds.has(c.id)).length >= 5;
+      },
+      getProgress: (state: any, allCards: any[]) => {
+        const ownedIds = new Set(state.collection);
+        const count = allCards.filter(c => c.name.includes(player) && ownedIds.has(c.id)).length;
+        return { current: Math.min(count, 5), total: 5 };
+      },
+      reward: 25000
+    },
+    {
+      id: `player-${player.toLowerCase().replace(/ /g, '-')}-4`,
+      title: `${player} Dynasty`,
+      description: `Conseguir una carta de Dinastía de ${player}.`,
+      icon: Flame,
+      category: 'specials' as const,
+      level: 'gold' as const,
+      requirement: (state: any, allCards: any[]) => {
+        const ownedIds = new Set(state.collection);
+        return allCards.some(c => c.name.includes(player) && c.category === 'Dynasty' && ownedIds.has(c.id));
+      },
+      getProgress: (state: any, allCards: any[]) => {
+        const ownedIds = new Set(state.collection);
+        const has = allCards.some(c => c.name.includes(player) && c.category === 'Dynasty' && ownedIds.has(c.id));
+        return { current: has ? 1 : 0, total: 1 };
+      },
+      reward: 15000
+    },
+    {
+      id: `player-${player.toLowerCase().replace(/ /g, '-')}-5`,
+      title: `${player} MVP`,
+      description: `Conseguir una carta de MVP de ${player}.`,
+      icon: Award,
+      category: 'specials' as const,
+      level: 'gold' as const,
+      requirement: (state: any, allCards: any[]) => {
+        const ownedIds = new Set(state.collection);
+        return allCards.some(c => c.name.includes(player) && (c.category === 'Finals MVP' || c.category === 'All-Star MVP') && ownedIds.has(c.id));
+      },
+      getProgress: (state: any, allCards: any[]) => {
+        const ownedIds = new Set(state.collection);
+        const has = allCards.some(c => c.name.includes(player) && (c.category === 'Finals MVP' || c.category === 'All-Star MVP') && ownedIds.has(c.id));
+        return { current: has ? 1 : 0, total: 1 };
+      },
+      reward: 12500
+    }
+  ])
 ];

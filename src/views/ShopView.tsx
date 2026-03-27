@@ -21,7 +21,7 @@ const COIN_PACKS: CoinPack[] = [
   {
     id: 'starter',
     name: 'Starter Pack',
-    coins: 5000,
+    coins: 25000,
     price: 1.99,
     icon: <Zap size={24} className="text-blue-400" />,
     color: 'from-blue-600/20 to-blue-900/40',
@@ -29,9 +29,9 @@ const COIN_PACKS: CoinPack[] = [
   {
     id: 'pro',
     name: 'Pro Pack',
-    coins: 15000,
+    coins: 75000,
     price: 4.99,
-    bonus: '+10% Bonus',
+    bonus: '+15% Bonus',
     icon: <Star size={24} className="text-purple-400" />,
     color: 'from-purple-600/20 to-purple-900/40',
     popular: true,
@@ -39,9 +39,9 @@ const COIN_PACKS: CoinPack[] = [
   {
     id: 'whale',
     name: 'Whale Pack',
-    coins: 50000,
+    coins: 250000,
     price: 14.99,
-    bonus: '+25% Bonus',
+    bonus: '+30% Bonus',
     icon: <Trophy size={24} className="text-amber-400" />,
     color: 'from-amber-600/20 to-amber-900/40',
   }
@@ -84,10 +84,10 @@ export default function ShopView() {
   const handleClaimReward = () => {
     if (adTimer !== 0) return;
     
-    setCoins(coins + 500);
+    setCoins(coins + 2500);
     setIsAdRunning(false);
     setAdTimer(null);
-    notifySuccess("500 Coins added to your account!");
+    notifySuccess("2,500 Coins added to your account!");
   };
 
   const handlePaymentSuccess = (rewardType: 'coins' | 'isPremium', amount: number) => {
@@ -168,7 +168,7 @@ export default function ShopView() {
                     </h2>
                     <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.2em] leading-relaxed">
                       {adTimer === 0 
-                        ? 'You can now claim your 500 coins!' 
+                        ? 'You can now claim your 2,500 coins!' 
                         : `Claiming reward in ${adTimer} seconds...`}
                     </p>
                   </div>
@@ -176,7 +176,7 @@ export default function ShopView() {
                   <div className="pt-4 flex flex-col items-center gap-2">
                     <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20">
                       <Coins size={14} className="text-amber-500 animate-bounce" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">500 Coins Pending</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">2,500 Coins Pending</span>
                     </div>
                   </div>
                 </div>
@@ -238,7 +238,7 @@ export default function ShopView() {
                       {isAdRunning ? 'Processing Reward...' : 'NEED MORE COINS?'}
                     </h2>
                     <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
-                      {isAdRunning ? `Wait ${adTimer}s to receive your prize` : 'Get 500 FREE here'}
+                      {isAdRunning ? `Wait ${adTimer}s to receive your prize` : 'Get 2,500 FREE here'}
                     </p>
                   </div>
                 </div>

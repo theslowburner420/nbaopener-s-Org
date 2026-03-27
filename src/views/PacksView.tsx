@@ -22,7 +22,7 @@ const PACKS: Pack[] = [
     id: 'rookie',
     name: 'Rookie Pack',
     description: 'Perfect for beginners. Contains 3 cards.',
-    price: 500,
+    price: 1000,
     color: 'from-orange-800 to-orange-950',
     icon: <Zap size={48} className="text-orange-400" />
   },
@@ -30,15 +30,15 @@ const PACKS: Pack[] = [
     id: 'allstar',
     name: 'All-Star Pack',
     description: 'High chance of elite players. Contains 4 cards.',
-    price: 1000,
+    price: 5000,
     color: 'from-zinc-400 to-zinc-600',
-    icon: <Star size={48} className="text-zinc-200" />
+    icon: <Star size={24} className="text-zinc-200" />
   },
   {
     id: 'mvp',
     name: 'Finals MVP Pack',
     description: 'Guaranteed high-tier players. Contains 5 cards.',
-    price: 2000,
+    price: 25000,
     color: 'from-amber-500 to-amber-700',
     icon: <Trophy size={48} className="text-amber-200" />
   },
@@ -46,7 +46,7 @@ const PACKS: Pack[] = [
     id: 'hof',
     name: 'HOF Pack',
     description: 'The ultimate collection. Highest Mythic rates.',
-    price: 5000,
+    price: 100000,
     color: 'from-yellow-400 via-orange-500 to-red-600',
     icon: <Crown size={48} />
   },
@@ -54,7 +54,7 @@ const PACKS: Pack[] = [
     id: 'legendary_mvp',
     name: 'Legendary MVP',
     description: 'Exclusive series of historical MVP winners. Contains 1 card.',
-    price: 10000,
+    price: 250000,
     color: 'from-zinc-900 via-amber-900 to-black',
     icon: <Trophy size={48} className="text-amber-500" />
   }
