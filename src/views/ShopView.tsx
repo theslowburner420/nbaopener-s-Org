@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useGame } from '../context/GameContext';
-import { motion, AnimatePresence } from 'motion/react';
-import { Zap, Star, Trophy, Coins, Gift, Timer, ShoppingCart, ArrowRight, Sparkles, Crown, ShieldCheck, X, CheckCircle2 } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Zap, Star, Trophy, ShoppingCart, ShieldCheck, Sparkles } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import InterstitialAd from '../components/InterstitialAd';
 
 interface CoinPack {
   id: string;
@@ -51,44 +50,9 @@ const ADS_FREE_PRICE = 2.00;
 
 export default function ShopView() {
   const { coins, setCoins, isPremium, setPremium } = useGame();
-  const { notifySuccess, notifyInfo, notifyError } = useNotification();
+  const { notifySuccess, notifyError } = useNotification();
   
-  const [adTimer, setAdTimer] = useState<number | null>(null);
-  const [isAdRunning, setIsAdRunning] = useState(false);
-
   const paypalClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
-
-  // Adsterra Timer Logic
-  useEffect(() => {
-    if (adTimer === null || adTimer === 0) return;
-    
-    const timer = setTimeout(() => {
-      setAdTimer(prev => (prev !== null ? prev - 1 : null));
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [adTimer]);
-
-  const handleStartAd = () => {
-    if (isPremium) {
-      notifyInfo("You already have the Ads Free version. Enjoy the game!");
-      return;
-    }
-    if (isAdRunning) return;
-    
-    setIsAdRunning(true);
-    setAdTimer(10); // 10 seconds as requested
-    notifyInfo("Watching Ad... Please wait.");
-  };
-
-  const handleClaimReward = () => {
-    if (adTimer !== 0) return;
-    
-    setCoins(coins + 2500);
-    setIsAdRunning(false);
-    setAdTimer(null);
-    notifySuccess("2,500 Coins added to your account!");
-  };
 
   const handlePaymentSuccess = (rewardType: 'coins' | 'isPremium', amount: number) => {
     if (rewardType === 'coins') {
@@ -114,96 +78,13 @@ export default function ShopView() {
   return (
     <PayPalScriptProvider options={{ "client-id": paypalClientId }}>
       <div className="h-full w-full flex flex-col bg-black overflow-hidden relative">
-        {/* Ad Blocking Overlay */}
-        <AnimatePresence>
-          {isAdRunning && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[5000] flex items-center justify-center bg-black/95 backdrop-blur-2xl p-6 text-center"
-            >
-              <div className="max-w-md w-full space-y-8 flex flex-col items-center">
-                
-                {/* Ad Content */}
-                <div className="w-full space-y-4">
-                  <div className="flex items-center justify-between px-2">
-                    <div className="flex items-center gap-2 text-amber-500">
-                      <Sparkles size={16} className="animate-pulse" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">Watching Ad</span>
-                    </div>
-                    {adTimer === 0 && (
-                      <motion.button
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        onClick={handleClaimReward}
-                        className="flex items-center gap-2 px-4 py-1.5 bg-green-500 text-black rounded-full font-black uppercase tracking-widest text-[10px] shadow-[0_0_20px_rgba(34,197,94,0.4)]"
-                      >
-                        <CheckCircle2 size={14} />
-                        Claim Reward
-                      </motion.button>
-                    )}
-                  </div>
-                  
-                  <InterstitialAd />
-                </div>
-
-                <div className="space-y-4 w-full">
-                  <div className="relative w-24 h-24 mx-auto">
-                    <motion.div 
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                      className="absolute inset-0 rounded-full border-4 border-amber-500/10 border-t-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.2)]"
-                    />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-3xl font-black italic tracking-tighter text-amber-500">
-                        {adTimer === 0 ? '0' : adTimer}s
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white">
-                      {adTimer === 0 ? 'Reward Claimed' : 'Please wait'}
-                    </h2>
-                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.2em] leading-relaxed">
-                      {adTimer === 0 
-                        ? 'You can now claim your 2,500 coins!' 
-                        : `Claiming reward in ${adTimer} seconds...`}
-                    </p>
-                  </div>
-
-                  <div className="pt-4 flex flex-col items-center gap-2">
-                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20">
-                      <Coins size={14} className="text-amber-500 animate-bounce" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">2,500 Coins Pending</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Close Button (only visible when timer is 0) */}
-                {adTimer === 0 && (
-                  <motion.button
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    onClick={handleClaimReward}
-                    className="absolute top-6 right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-                  >
-                    <X size={24} />
-                  </motion.button>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Background Ambience */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(245,158,11,0.05)_0%,transparent_70%)] pointer-events-none" />
 
         {/* Compact Header */}
         <header className="px-6 py-4 flex justify-between items-center shrink-0 z-20 border-b border-white/5 bg-black/40 backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.3)]">
+            <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center shadow-[0_0_15_rgba(245,158,11,0.3)]">
               <ShoppingCart size={16} className="text-black" />
             </div>
             <div>
@@ -216,51 +97,6 @@ export default function ShopView() {
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8 no-scrollbar pb-32 z-10">
           
-          {/* Adsterra Free Coins Banner - COMPLETELY HIDDEN IF isPremium */}
-          {!isPremium && (
-            <motion.div
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              onClick={handleStartAd}
-              className={`relative overflow-hidden rounded-2xl border transition-all duration-500 cursor-pointer ${
-                isAdRunning 
-                  ? 'border-zinc-800 bg-zinc-900/50 grayscale' 
-                  : 'border-amber-500/30 bg-gradient-to-r from-amber-600/20 to-orange-600/20 hover:border-amber-500/50'
-              }`}
-            >
-              <div className="p-5 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isAdRunning ? 'bg-zinc-800' : 'bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.4)]'}`}>
-                    {isAdRunning ? <Timer size={24} className="text-zinc-500 animate-pulse" /> : <Gift size={24} className="text-black animate-bounce" />}
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-black uppercase italic tracking-tighter text-white">
-                      {isAdRunning ? 'Processing Reward...' : 'NEED MORE COINS?'}
-                    </h2>
-                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
-                      {isAdRunning ? `Wait ${adTimer}s to receive your prize` : 'Get 2,500 FREE here'}
-                    </p>
-                  </div>
-                </div>
-                
-                {isAdRunning ? (
-                  <div className="text-2xl font-black italic tracking-tighter text-amber-500 font-mono">
-                    {adTimer}s
-                  </div>
-                ) : (
-                  <div className="bg-amber-500 text-black px-3 py-1.5 rounded-lg font-black uppercase tracking-widest text-[10px] shadow-lg">
-                    Watch Now
-                  </div>
-                )}
-              </div>
-
-              {/* Progress Bar for Ad */}
-              {isAdRunning && (
-                <div className="absolute bottom-0 left-0 h-1 bg-amber-500 transition-all duration-1000 ease-linear" style={{ width: `${(adTimer! / 10) * 100}%` }} />
-              )}
-            </motion.div>
-          )}
-
           {/* Ads Free Option */}
           {!isPremium ? (
             <div className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-zinc-900/40 p-5 group">

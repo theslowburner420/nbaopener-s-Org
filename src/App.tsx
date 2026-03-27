@@ -16,6 +16,7 @@ import { LayoutGrid, ShoppingBag, Zap, Trophy, Coins } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import Header from './components/Header';
+import StaticAd from './components/StaticAd';
 
 function AppContent() {
   const { currentView, setCurrentView, isPremium } = useGame();
@@ -92,6 +93,7 @@ function AppContent() {
 
   return (
     <div className="h-[100dvh] w-full bg-black text-white flex flex-col overflow-hidden font-sans selection:bg-amber-500 selection:text-black">
+      <StaticAd />
       <Header />
       {/* Main Content Area */}
       <main className="flex-1 overflow-hidden relative">

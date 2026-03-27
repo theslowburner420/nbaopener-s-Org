@@ -48,10 +48,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Auth and Profile sync
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabase) {
+      console.warn('Supabase client not initialized');
+      return;
+    }
 
     const syncProfile = async (user: any) => {
+      console.log('Syncing profile for user:', user?.id);
       if (!user) {
+        console.log('No user detected, clearing user state');
         setState(prev => ({ ...prev, user: null }));
         return;
       }
@@ -63,58 +68,80 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         avatar_url: user.user_metadata?.avatar_url,
       };
 
-      // Fetch profile from Supabase
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+      try {
+        console.log('Fetching profile from Supabase...');
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
 
-      if (error && error.code === 'PGRST116') {
-        // Profile doesn't exist, create it with initial balance
-        const newProfile = {
-          id: user.id,
-          coins: 1000, // Saldo inicial
-          cards: [], // Colección vacía
-          unlocked_achievements: [],
-          inventory_packs: [],
-          ads_disabled: false,
-        };
-        await supabase.from('profiles').insert([newProfile]);
-        setState(prev => ({ 
-          ...prev, 
-          user: userData,
-          coins: 1000,
-          collection: [],
-          unlockedAchievements: [],
-          inventoryPacks: [],
-          isPremium: false
-        }));
-      } else if (profile) {
-        // Profile exists, sync state
-        setState(prev => ({
-          ...prev,
-          user: userData,
-          coins: profile.coins,
-          collection: profile.cards || [],
-          unlockedAchievements: profile.unlocked_achievements || [],
-          inventoryPacks: profile.inventory_packs || [],
-          isPremium: profile.ads_disabled || false,
-        }));
+        if (error && error.code === 'PGRST116') {
+          console.log('Profile not found, creating new profile...');
+          const newProfile = {
+            id: user.id,
+            coins: 1000,
+            cards: [],
+            unlocked_achievements: [],
+            inventory_packs: [],
+            ads_disabled: false,
+          };
+          const { error: insertError } = await supabase.from('profiles').insert([newProfile]);
+          if (insertError) {
+            console.error('Error creating profile:', insertError);
+            return;
+          }
+          console.log('New profile created successfully');
+          setState(prev => ({ 
+            ...prev, 
+            user: userData,
+            coins: 1000,
+            collection: [],
+            unlockedAchievements: [],
+            inventoryPacks: [],
+            isPremium: false
+          }));
+        } else if (profile) {
+          console.log('Profile loaded successfully:', profile.id);
+          setState(prev => ({
+            ...prev,
+            user: userData,
+            coins: profile.coins,
+            collection: profile.cards || [],
+            unlockedAchievements: profile.unlocked_achievements || [],
+            inventoryPacks: profile.inventory_packs || [],
+            isPremium: profile.ads_disabled || false,
+          }));
+        } else if (error) {
+          console.error('Error fetching profile:', error);
+        }
+      } catch (err) {
+        console.error('Unexpected error in syncProfile:', err);
       }
     };
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    console.log('Setting up auth state change listener...');
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
       syncProfile(session?.user || null);
     });
 
-    // Initial check
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      syncProfile(session?.user || null);
+    // Initial check for session
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Error getting initial session:', error);
+      }
+      console.log('Initial session check:', session?.user?.id);
+      if (session) {
+        syncProfile(session.user);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('Cleaning up auth listener');
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Persist to Supabase if logged in
@@ -141,10 +168,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Supabase not configured');
       return;
     }
+    const redirectTo = window.location.origin;
+    console.log('Initiating Google Login, redirecting to:', redirectTo);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin
+        redirectTo
       }
     });
     if (error) console.error('Login error', error);

@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, ShoppingBag } from 'lucide-react';
 import { useEngine } from '../hooks/useEngine';
 import PackOpener from '../components/PackOpener';
-import StaticAd from '../components/StaticAd';
 import { Card } from '../types';
 
 export default function OpenView() {
@@ -24,9 +23,6 @@ export default function OpenView() {
 
   return (
     <div className="h-full w-full flex flex-col items-center bg-black relative overflow-hidden">
-      {/* Ad Banner at the very top */}
-      <StaticAd />
-
       {/* Dynamic Background Glow */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(245,158,11,0.1)_0%,_transparent_70%)] pointer-events-none" />
       
@@ -95,10 +91,6 @@ export default function OpenView() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex flex-col items-center pt-[140px]"
           >
-            <div className="absolute top-0 left-0 right-0 z-[100]">
-              <StaticAd />
-            </div>
-            
             <div className="flex-1 flex flex-col items-center justify-center">
               <motion.div
                 animate={{ 

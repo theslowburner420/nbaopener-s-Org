@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Card, Rarity } from '../types';
 import CardItem from './CardItem';
 import { Check, Sparkles } from 'lucide-react';
-import StaticAd from './StaticAd';
 
 interface PackOpenerProps {
   cards: Card[];
@@ -335,13 +334,6 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
     >
       {/* Dark Overlay for focus */}
       <div className="absolute inset-0 bg-black/80 z-0" />
-
-      {/* Ad Banner at the top with elegant margin */}
-      <div className="absolute top-4 left-0 right-0 z-[500] px-4">
-        <div className="max-w-[728px] mx-auto shadow-2xl rounded-lg overflow-hidden border border-white/10">
-          <StaticAd />
-        </div>
-      </div>
 
       {/* Background Glow & Special Effects */}
       <AnimatePresence mode="wait">
