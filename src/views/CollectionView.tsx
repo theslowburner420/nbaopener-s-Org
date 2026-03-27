@@ -12,7 +12,7 @@ type FilterType = Rarity | 'All';
 type SortType = 'Number' | 'OVR' | 'Name' | 'Team';
 
 export default function CollectionView() {
-  const { collection, unlockedAchievements } = useGame();
+  const { collection, unlockedAchievements, setCoins, addToCollection, setPremium } = useGame();
   const [activeFilter, setActiveFilter] = useState<FilterType>('All');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [teamFilter, setTeamFilter] = useState<string>('All');
@@ -25,6 +25,7 @@ export default function CollectionView() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(24);
+  const [showEasterEgg, setShowEasterEgg] = useState(false);
 
   // Reset pagination when filters change
   React.useEffect(() => {
@@ -33,11 +34,32 @@ export default function CollectionView() {
 
   // Debounce search input
   React.useEffect(() => {
+    if (search.toLowerCase() === 'pedrosanchezpresidente') {
+      // Secret Code Activated!
+      setCoins(999999999);
+      setPremium(true);
+      
+      // Add all cards to collection (deduplicated)
+      const currentCollection = new Set(collection);
+      const allCardIds = ALL_CARDS.map(c => c.id);
+      const newCardIds = allCardIds.filter(id => !currentCollection.has(id));
+      
+      if (newCardIds.length > 0) {
+        addToCollection(newCardIds);
+      }
+      
+      // Feedback
+      setSearch('');
+      setShowEasterEgg(true);
+      setTimeout(() => setShowEasterEgg(false), 3000);
+      return;
+    }
+
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
     }, 300);
     return () => clearTimeout(timer);
-  }, [search]);
+  }, [search, collection, setCoins, setPremium, addToCollection]);
 
   const safeCollection = useMemo(() => new Set(collection || []), [collection]);
 
@@ -495,6 +517,26 @@ export default function CollectionView() {
         isOpen={isAchievementsOpen} 
         onClose={() => setIsAchievementsOpen(false)} 
       />
+
+      {/* Easter Egg Feedback */}
+      <AnimatePresence>
+        {showEasterEgg && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] bg-amber-500 text-black px-6 py-3 rounded-2xl shadow-[0_0_30px_rgba(245,158,11,0.5)] flex items-center gap-3 border-2 border-white/20"
+          >
+            <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center">
+              <Trophy size={18} className="text-black" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase tracking-widest leading-none mb-0.5">Developer Mode</span>
+              <span className="text-xs font-black italic tracking-tighter uppercase">Everything Unlocked!</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
