@@ -6789,7 +6789,7 @@ const rawCards = [
     reb: 25.0,
     ast: 20.0,
     nbaId: 1610612747,
-    imageUrl: 'https://cdn.nba.com/logos/nba/1610612747/global/L/logo.svg',
+    imageUrl: 'https://cdn.nba.com/teams/uploads/sites/1610612747/2022/06/OTD-220611-3Peat-1600x900-7thPhoto.jpg',
     quote: 'The Shaq and Kobe era that dominated the early 2000s with three straight titles.'
   },
   {
@@ -6805,7 +6805,7 @@ const rawCards = [
     reb: 28.0,
     ast: 22.0,
     nbaId: 1610612759,
-    imageUrl: 'https://cdn.nba.com/logos/nba/1610612759/global/L/logo.svg',
+    imageUrl: 'https://media.licdn.com/dms/image/v2/C4D12AQG1KPieZD6jPw/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1598536660361?e=2147483647&v=beta&t=EZhmJKIVy7Am4cqYGTC_CF0iXPTcFyPq7O8EKn7a1ps',
     quote: 'Two decades of consistent greatness under Popovich and the Big Three.'
   },
   {
@@ -6821,7 +6821,7 @@ const rawCards = [
     reb: 22.0,
     ast: 24.0,
     nbaId: 1610612748,
-    imageUrl: 'https://cdn.nba.com/logos/nba/1610612748/global/L/logo.svg',
+    imageUrl: 'https://nbcsports.brightspotcdn.com/dims4/default/37ca610/2147483647/strip/true/crop/3000x1688+0+156/resize/1440x810!/quality/90/?url=https%3A%2F%2Fnbc-sports-production-nbc-sports.s3.us-east-1.amazonaws.com%2Fbrightspot%2Feb%2Fec%2F6d45810e0a90b58d7400e3fb22a3%2Fcd0ymzcznguwzdbhnduynddiytjhm2yyzthlmtjjotqwyyznptayzdczmjbknme1zwi0mjhkogy1yjfizmiwnzzmmmfk.jpeg',
     quote: 'LeBron, Wade, and Bosh: Four straight Finals and two historic championships.'
   },
   {
@@ -6837,7 +6837,7 @@ const rawCards = [
     reb: 20.0,
     ast: 30.0,
     nbaId: 1610612744,
-    imageUrl: 'https://cdn.nba.com/logos/nba/1610612744/global/L/logo.svg',
+    imageUrl: 'https://fivethirtyeight.com/wp-content/uploads/2018/06/dynasty1.jpg?w=712',
     quote: 'The small-ball revolution that redefined modern basketball and won four rings.'
   },
   {
@@ -6853,7 +6853,7 @@ const rawCards = [
     reb: 26.0,
     ast: 21.0,
     nbaId: 1610612738,
-    imageUrl: 'https://cdn.nba.com/logos/nba/1610612738/global/L/logo.svg',
+    imageUrl: 'https://www.masslive.com/resizer/v2/AZOMCB73SFCFHH57N3VJZ2RQNI.jpg?auth=1dd264ac8e16b221d9145299a8d02eedfa505ca4fad468a567146aa24b96d479&width=500&smart=true&quality=90',
     quote: 'Pierce, Garnett, and Allen: The 2008 champions who restored Celtic pride.'
   },
   {
@@ -6869,7 +6869,7 @@ const rawCards = [
     reb: 24.0,
     ast: 25.0,
     nbaId: 1610612760,
-    imageUrl: 'https://cdn.nba.com/logos/nba/1610612760/global/L/logo.svg',
+    imageUrl: 'https://okcfriday.com/27-06-2025-02-29-33-pm-6993666.jpg',
     quote: "SGA, Chet, and J-Dub: The league's most exciting young core building a new dynasty."
   },
   {
@@ -6885,7 +6885,7 @@ const rawCards = [
     reb: 27.0,
     ast: 20.0,
     nbaId: 1610612749,
-    imageUrl: 'https://cdn.nba.com/logos/nba/1610612749/global/L/logo.svg',
+    imageUrl: 'https://www.wpr.org/wp-content/uploads/2021/07/ap_paul_sancya_-_giannis_trophy.jpg',
     quote: 'Giannis and the Bucks: Bringing the championship back to Milwaukee after 50 years.'
   },
   {
@@ -6901,7 +6901,7 @@ const rawCards = [
     reb: 26.0,
     ast: 28.0,
     nbaId: 1610612743,
-    imageUrl: 'https://cdn.nba.com/logos/nba/1610612743/global/L/logo.svg',
+    imageUrl: 'https://cdn.nba.com/manage/2025/05/GettyImages-1498038723.jpg',
     quote: 'Jokic and Murray: The unstoppable duo that brought Denver its first NBA title.'
   },
   {
@@ -6917,7 +6917,7 @@ const rawCards = [
     reb: 30.0,
     ast: 18.0,
     nbaId: 1610612765,
-    imageUrl: 'https://cdn.nba.com/logos/nba/1610612765/global/L/logo.svg',
+    imageUrl: 'https://tiempomuerto3.com/wp-content/uploads/2020/07/636318449938785783-pistons-061504-dpg-16-1-.jpg',
     quote: 'The 2004 "No-Star" champions who defeated the Lakers with elite defense.'
   },
   {
@@ -6933,7 +6933,7 @@ const rawCards = [
     reb: 23.0,
     ast: 24.0,
     nbaId: 1610612739,
-    imageUrl: 'https://cdn.nba.com/logos/nba/1610612739/global/L/logo.svg',
+    imageUrl: 'https://cdn.nba.com/manage/2016/12/160620002308-lebron-james-nba-finals-cleveland-cavaliers-at-golden-state-warriors.1280x720.jpeg',
     quote: 'LeBron returns to Cleveland to fulfill his promise and win the 2016 title.'
   },
   {
