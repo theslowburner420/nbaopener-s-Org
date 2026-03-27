@@ -76,34 +76,7 @@ const teamCoaches: Record<string, string> = {
 };
 
 const rawCards = [
-  {
-    id: 'moment-curry-bang-bang',
-    number: 999,
-    name: 'Stephen Curry',
-    team: 'Golden State Warriors',
-    teamAbbr: 'GSW',
-    teamColor: '#1D428A',
-    position: 'G',
-    rarity: 'legend' as const,
-    category: 'Moment' as const,
-    subtitle: 'THE DOUBLE BANG',
-    momentTitle: 'BANG BANG',
-    momentDate: '27 de febrero de 2016',
-    isHistorical: true,
-    pts: 46,
-    reb: 3,
-    ast: 6,
-    nbaId: 201939,
-    stats: {
-      points: 46,
-      rebounds: 3,
-      assists: 6,
-      ovr: 99,
-    },
-    description: 'Triple ganador desde 10 metros vs OKC',
-    quote: 'They do have a timeout, decide not to use it... Curry, from downtown... BANG! BANG! OH WHAT A SHOT BY CURRY!',
-    imageUrl: 'https://media.tenor.com/xZ4fqO-87IsAAAAM/stephen-curry-shoot.gif',
-  },
+  
   // LOS ANGELES LAKERS
   {
     id: 'lal-001',
@@ -4933,7 +4906,7 @@ const rawCards = [
     reb: 13.6,
     ast: 3.8,
     nbaId: 406,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/406.png',
+    imageUrl: 'https://basketballforever.com/wp-content/uploads/2020/04/Shaq-2000-Lakers.jpg',
     quote: '29.7 PTS, 13.6 REB - Dominio absoluto en la pintura.'
   },
   {
@@ -4950,7 +4923,7 @@ const rawCards = [
     reb: 3.8,
     ast: 4.6,
     nbaId: 947,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/947.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Allen_Iverson_Lipofsky.jpg/250px-Allen_Iverson_Lipofsky.jpg',
     quote: '31.1 PTS, 2.5 STL - El MVP más bajo de la historia.'
   },
   {
@@ -4967,7 +4940,7 @@ const rawCards = [
     reb: 12.7,
     ast: 3.7,
     nbaId: 1495,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1495.png',
+    imageUrl: 'https://i.insider.com/5b858aa489c8a119008b5ad4?width=600&format=jpeg&auto=webp',
     quote: '25.5 PTS, 12.7 REB - Fundamentos de oro.'
   },
   {
@@ -4984,7 +4957,7 @@ const rawCards = [
     reb: 12.9,
     ast: 3.9,
     nbaId: 1495,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1495.png',
+    imageUrl: 'https://i0.wp.com/www.pressherald.com/wp-content/uploads/sites/4/2016/07/27p1-22.jpg?fit=1441%2C1888',
     quote: 'Back-to-back MVP para The Big Fundamental.'
   },
   {
@@ -5001,7 +4974,7 @@ const rawCards = [
     reb: 13.9,
     ast: 5.0,
     nbaId: 708,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/708.png',
+    imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/timberwolves/sites/timberwolves/files/50801635.jpg',
     quote: '24.2 PTS, 13.9 REB - Intensidad pura y liderazgo.'
   },
   {
@@ -5018,7 +4991,7 @@ const rawCards = [
     reb: 3.3,
     ast: 11.5,
     nbaId: 959,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/959.png',
+    imageUrl: 'https://i.redd.it/rc4p0w2sv9oa1.jpg',
     quote: "11.5 AST - El arquitecto del '7 Seconds or Less'."
   },
   {
@@ -5035,7 +5008,7 @@ const rawCards = [
     reb: 4.2,
     ast: 10.5,
     nbaId: 959,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/959.png',
+    imageUrl: 'https://www.nydailynews.com/wp-content/uploads/migration/2015/03/21/SZLPDQHNQ42R7RL55JDUBSEWKI.jpg',
     quote: 'Back-to-back MVP liderando la liga en asistencias y eficiencia.'
   },
   {
@@ -5052,7 +5025,7 @@ const rawCards = [
     reb: 8.9,
     ast: 3.4,
     nbaId: 1717,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1717.png',
+    imageUrl: 'https://e0.365dm.com/21/11/2048x1152/skysports-dirk-nowitzki-dallas-mavericks_5587747.jpg?20211119080851',
     quote: 'Club del 50-40-90. El primer MVP europeo.'
   },
   {
@@ -5069,7 +5042,7 @@ const rawCards = [
     reb: 6.3,
     ast: 5.4,
     nbaId: 977,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
+    imageUrl: 'https://i.pinimg.com/736x/72/ee/58/72ee5850608aaace557b32469e1e9dd7.jpg',
     quote: '28.3 PTS - La mentalidad Mamba en su máximo esplendor.'
   },
   {
@@ -5086,7 +5059,7 @@ const rawCards = [
     reb: 7.6,
     ast: 7.2,
     nbaId: 2544,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
+    imageUrl: 'https://legacymedia.sportsplatform.io/images_root/slides/photos/000/444/576/86427925_original.jpg?1287082316',
     quote: '28.4 PTS, 7.6 REB, 7.2 AST - El primer reinado del Rey.'
   },
   {
@@ -5103,7 +5076,7 @@ const rawCards = [
     reb: 7.3,
     ast: 8.6,
     nbaId: 2544,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
+    imageUrl: 'https://legacymedia.sportsplatform.io/images_root/slides/photos/000/399/610/98824747_original.jpg?1284736938',
     quote: 'Segundo MVP consecutivo dominando ambos lados de la cancha.'
   },
   {
@@ -5120,7 +5093,7 @@ const rawCards = [
     reb: 4.1,
     ast: 7.7,
     nbaId: 201565,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201565.png',
+    imageUrl: 'https://cdn.bleacherreport.net/images_root/slides/photos/000/791/675/109813237_original.jpg?1300221121',
     quote: '25.0 PTS, 7.7 AST - El MVP más joven de la historia de la NBA.'
   },
   {
@@ -5137,7 +5110,7 @@ const rawCards = [
     reb: 7.9,
     ast: 6.2,
     nbaId: 2544,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
+    imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_fill,w_720,ar_16:9,f_auto,q_auto,g_auto/shape/cover/sport/dc8fc487007783d714f6a09864cca2156399d89cbd6e58fcd01f3b957d0faed6.jpg',
     quote: '27.1 PTS, 7.9 REB - Eficiencia letal en South Beach.'
   },
   {
@@ -5154,7 +5127,7 @@ const rawCards = [
     reb: 8.0,
     ast: 7.3,
     nbaId: 2544,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
+    imageUrl: 'https://s.yimg.com/ny/api/res/1.2/Xnp2MJ9NiRlqfvc3FsWwXg--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTQyNztjZj13ZWJw/https://s.yimg.com/os/en/blogs/sptusnbaexperts/LeBron-James-won-his-fourth-NBA-MVP-trophy-in-May-2013.-Jesse-D.-Garrabrant-NBAE-Getty-Images.jpg',
     quote: 'A un voto de ser unánime. Temporada legendaria.'
   },
   {
@@ -5171,7 +5144,7 @@ const rawCards = [
     reb: 7.4,
     ast: 5.5,
     nbaId: 201142,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png',
+    imageUrl: 'https://wordpress.wbur.org/wp-content/uploads/2014/05/0508_oag_durant-mvp-1000x691.jpg',
     quote: "32.0 PTS - 'You the real MVP'. Título de anotación."
   },
   {
@@ -5188,7 +5161,7 @@ const rawCards = [
     reb: 4.3,
     ast: 7.7,
     nbaId: 201939,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png',
+    imageUrl: 'https://therookiewire.usatoday.com/gcdn/authoring/images/smg/2025/01/11/SROK/77641293007-12-31804.jpeg',
     quote: '23.8 PTS - Cambiando el juego a base de triples.'
   },
   {
@@ -5205,7 +5178,7 @@ const rawCards = [
     reb: 5.4,
     ast: 6.7,
     nbaId: 201939,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png',
+    imageUrl: 'https://objetos.estaticos-marca.com/assets/multimedia/imagenes/2016/05/11/14629408277905.jpg',
     quote: '30.1 PTS - El primer y único MVP unánime de la historia. 73 victorias.'
   },
   {
@@ -5222,7 +5195,7 @@ const rawCards = [
     reb: 10.7,
     ast: 10.4,
     nbaId: 201566,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201566.png',
+    imageUrl: 'https://abc3340.com/resources/media/2634f5c9-1250-487e-9f7c-d084adb08594-jumbo1x1_Westbrook.jpg',
     quote: '31.6 PTS, 10.7 REB, 10.4 AST - Promediando un triple-doble histórico.'
   },
   {
@@ -5239,7 +5212,7 @@ const rawCards = [
     reb: 5.4,
     ast: 8.8,
     nbaId: 201935,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201935.png',
+    imageUrl: 'https://imagenes.elpais.com/resizer/v2/IUADSXWPOV447J2Y6QSUNALRBU.jpg?auth=961c54f1f8c9920b3548970e78f7f7c538926809fe84077dedcbdef9c0bc9a26&width=414',
     quote: '30.4 PTS, 8.8 AST - Imparable en el uno contra uno.'
   },
   {
@@ -5256,7 +5229,7 @@ const rawCards = [
     reb: 12.5,
     ast: 5.9,
     nbaId: 203507,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png',
+    imageUrl: 'https://cdn2.mediotiempo.com/uploads/media/2019/06/25/antetokounmpo-jugador-europeo-recibir-trofeo.jpg',
     quote: '27.7 PTS, 12.5 REB - El Greek Freak conquista la liga.'
   },
   {
@@ -5273,7 +5246,7 @@ const rawCards = [
     reb: 13.6,
     ast: 5.6,
     nbaId: 203507,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png',
+    imageUrl: 'https://images.foxtv.com/static.fox6now.com/www.fox6now.com/content/uploads/2020/07/932/524/gettyimages-1158115391.jpg?ve=1&tl=1',
     quote: 'MVP y DPOY en la misma temporada.'
   },
   {
@@ -5290,7 +5263,7 @@ const rawCards = [
     reb: 10.8,
     ast: 8.3,
     nbaId: 203999,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203999.png',
+    imageUrl: 'https://kdvr.com/wp-content/uploads/sites/11/2021/06/AP21163088209102.jpg',
     quote: '26.4 PTS, 10.8 REB, 8.3 AST - El MVP elegido más bajo en el draft (#41).'
   },
   {
@@ -5307,7 +5280,7 @@ const rawCards = [
     reb: 13.8,
     ast: 7.9,
     nbaId: 203999,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203999.png',
+    imageUrl: 'https://cdn.deultimominuto.net/wp-content/uploads/2022/05/Nikola-Jokic.jpg',
     quote: '27.1 PTS, 13.8 REB - Temporada estadística sin precedentes.'
   },
   {
@@ -5324,7 +5297,7 @@ const rawCards = [
     reb: 10.2,
     ast: 4.2,
     nbaId: 203954,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203954.png',
+    imageUrl: 'https://www.aljazeera.com/wp-content/uploads/2023/05/2023-05-06T001555Z_1675084552_MT1USATODAY20602769_RTRMADP_3_NBA-PLAYOFFS-BOSTON-CELTICS-AT-PHILADELPHIA-76ERS-1684174955.jpg?w=770&resize=770%2C513&quality=80',
     quote: '33.1 PTS, 10.2 REB - El proceso completado.'
   },
   {
@@ -5341,7 +5314,7 @@ const rawCards = [
     reb: 12.4,
     ast: 9.0,
     nbaId: 203999,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203999.png',
+    imageUrl: 'https://static01.nyt.com/athletic/uploads/wp/2024/11/27070929/jokermvp-scaled.jpg',
     quote: 'Tercer MVP. Dominio absoluto de la pintura y la distribución.'
   },
   {
@@ -5358,10 +5331,11 @@ const rawCards = [
     reb: 5.5,
     ast: 6.2,
     nbaId: 1628983,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628983.png',
+    imageUrl: 'https://www.cbc.ca/kidsnews/images/shai-mvp-trophy-may2025-860x484.png',
     quote: '30.1 PTS - Liderando a la nueva generación del Thunder.'
   },
-  {
+    // DPOY SERIES
+    {
     id: 'dpoy-1995',
     name: 'Dikembe Mutombo',
     year: "1995",
@@ -5375,7 +5349,24 @@ const rawCards = [
     reb: 12.5,
     ast: 1.4,
     nbaId: 87,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/87.png',
+    imageUrl: 'https://assets-cms.thescore.com/uploads/image/file/404723/w640xh480_GettyImages-635148094.jpg?ts=1590337836',
+    quote: '4x DPOY. A defensive mountain. His iconic finger wag became the universal symbol of a rejected shot.'
+  },
+  {
+    id: 'dpoy-1996',
+    name: 'Gary Payton',
+    year: "1996",
+    team: 'Seattle SuperSonics',
+    teamAbbr: 'SEA',
+    position: 'PG',
+    rarity: 'dpoy' as const,
+    category: 'Award' as const,
+    isHistorical: true,
+    pts: 11.5,
+    reb: 12.5,
+    ast: 1.4,
+    nbaId: 87,
+    imageUrl: 'https://aroundthegame.com/wp-content/uploads/2022/07/payton-1280x640.jpg',
     quote: '4x DPOY. A defensive mountain. His iconic finger wag became the universal symbol of a rejected shot.'
   },
   {
@@ -5392,7 +5383,7 @@ const rawCards = [
     reb: 11.4,
     ast: 1.4,
     nbaId: 87,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/87.png',
+    imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/hawks/sites/hawks/files/gettyimages-461239147.jpg',
     quote: '4x DPOY. A defensive mountain. His iconic finger wag became the universal symbol of a rejected shot.'
   },
   {
@@ -5409,7 +5400,7 @@ const rawCards = [
     reb: 11.4,
     ast: 1.0,
     nbaId: 87,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/87.png',
+    imageUrl: 'https://static.wixstatic.com/media/d318a6_f07f871012b74912885047813200f2f5~mv2.jpg/v1/fill/w_568,h_852,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/d318a6_f07f871012b74912885047813200f2f5~mv2.jpg',
     quote: '4x DPOY. A defensive mountain. His iconic finger wag became the universal symbol of a rejected shot.'
   },
   {
@@ -5426,7 +5417,7 @@ const rawCards = [
     reb: 11.0,
     ast: 1.6,
     nbaId: 278,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/278.png',
+    imageUrl: 'https://i.namu.wiki/i/r1xHXBhJsZQNN3w5Vp0rzaRT3SdM_BRJOFhn4ypzi5XkP0-hV2VI51IlOTgxsMYeJbS0x_i3TRMK8fuBDjAQMg.webp',
     quote: '2x DPOY. The ultimate rim protector for Miami, known for his unmatched intensity and shot-blocking dominance.'
   },
   {
@@ -5443,7 +5434,7 @@ const rawCards = [
     reb: 9.5,
     ast: 1.6,
     nbaId: 278,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/278.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b7/Alonzo_Mourning.jpg',
     quote: '2x DPOY. The ultimate rim protector for Miami, known for his unmatched intensity and shot-blocking dominance.'
   },
   {
@@ -5460,10 +5451,9 @@ const rawCards = [
     reb: 13.5,
     ast: 1.0,
     nbaId: 87,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/87.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Lipofsky-Dikembe_Mutombo.jpg',
     quote: '4x DPOY. A defensive mountain. His iconic finger wag became the universal symbol of a rejected shot.'
   },
-  // DPOY SERIES
   {
     id: 'dpoy-2002',
     name: 'Ben Wallace',
@@ -5482,6 +5472,23 @@ const rawCards = [
     quote: '4x DPOY. The undrafted anchor of the \'Goin\' to Work\' Pistons. Feared for his raw strength and rebounding.'
   },
   {
+    id: 'dpoy-2003',
+    name: 'Ben Wallace',
+    year: "2003",
+    team: 'Detroit Pistons',
+    teamAbbr: 'DET',
+    position: 'C',
+    rarity: 'dpoy' as const,
+    category: 'Award' as const,
+    isHistorical: true,
+    pts: 6.9,
+    reb: 15.4,
+    ast: 1.4,
+    nbaId: 1112,
+    imageUrl: 'https://library.sportingnews.com/styles/crop_style_16_9_desktop_webp/s3/2021-11/ben-wallace-detroit_1lci0x2hm6gao18a1qqtlj02bk.jpg.webp?itok=IesjzmCB',
+    quote: '4x DPOY. The undrafted anchor of the \'Goin\' to Work\' Pistons. Feared for his raw strength and rebounding.'
+  },
+  {
     id: 'dpoy-2004',
     name: 'Metta Sandiford-Artest',
     year: "2004",
@@ -5495,8 +5502,42 @@ const rawCards = [
     reb: 5.3,
     ast: 3.7,
     nbaId: 1894,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1894.png',
+    imageUrl: 'https://pbs.twimg.com/media/GIlHnpLbgAATRFv.png',
     quote: '1x DPOY. A relentless and physical perimeter defender capable of shutting down any opposing star.'
+  },
+  {
+    id: 'dpoy-2005',
+    name: 'Ben Wallace',
+    year: "2005",
+    team: 'Detroit Pistons',
+    teamAbbr: 'DET',
+    position: 'C',
+    rarity: 'dpoy' as const,
+    category: 'Award' as const,
+    isHistorical: true,
+    pts: 9.7,
+    reb: 112.2,
+    ast: 1.7,
+    nbaId: 1112,
+    imageUrl: 'https://slamonline.com/wp-content/uploads/2018/06/wallace.jpg',
+    quote: '4x DPOY. The undrafted anchor of the \'Goin\' to Work\' Pistons. Feared for his raw strength and rebounding.'
+  },
+  {
+    id: 'dpoy-2006',
+    name: 'Ben Wallace',
+    year: "2006",
+    team: 'Detroit Pistons',
+    teamAbbr: 'DET',
+    position: 'C',
+    rarity: 'dpoy' as const,
+    category: 'Award' as const,
+    isHistorical: true,
+    pts: 7.3,
+    reb: 11.3,
+    ast: 1.9,
+    nbaId: 1112,
+    imageUrl: 'https://library.sportingnews.com/styles/twitter_card_120x120/s3/2022-01/ben-wallace-four-time-defensive-player-of-the-yearjpeg_n7z4vvzplpmu1253sjklg5z7s.jpeg?itok=md92clsO',
+    quote: '4x DPOY. The undrafted anchor of the \'Goin\' to Work\' Pistons. Feared for his raw strength and rebounding.'
   },
   {
     id: 'dpoy-2007',
@@ -5512,7 +5553,7 @@ const rawCards = [
     reb: 11.7,
     ast: 3.2,
     nbaId: 948,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/948.png',
+    imageUrl: 'https://pbs.twimg.com/media/GAmpIXTXwAAzL7z.jpg',
     quote: '1x DPOY. Led the league in blocks, patrolling the paint with elite timing and defensive awareness.'
   },
   {
@@ -5529,8 +5570,42 @@ const rawCards = [
     reb: 9.2,
     ast: 3.4,
     nbaId: 708,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/708.png',
+    imageUrl: 'https://a.espncdn.com/photo/2016/0923/r130129_2288x2487cc.jpg',
     quote: '1x DPOY. His legendary intensity, versatility, and vocal leadership transformed the Celtics\' defense into a historic unit.'
+  },
+  {
+    id: 'dpoy-2009',
+    name: 'Dwight Howard',
+    year: "2009",
+    team: 'Orlando Magic',
+    teamAbbr: 'ORL',
+    position: 'C',
+    rarity: 'dpoy' as const,
+    category: 'Award' as const,
+    isHistorical: true,
+    pts: 20.6,
+    reb: 13.8,
+    ast: 1.4,
+    nbaId: 2730,
+    imageUrl: 'https://www.sandiegouniontribune.com/wp-content/uploads/migration/2009/04/21/00000169-0ce2-dbbe-a16f-4ee271760000.jpg?w=535',
+    quote: '3x DPOY. Superman dominated the paint completely, winning three consecutive awards through unparalleled athleticism.'
+  },
+  {
+    id: 'dpoy-2010',
+    name: 'Dwight Howard',
+    year: "2010",
+    team: 'Orlando Magic',
+    teamAbbr: 'ORL',
+    position: 'C',
+    rarity: 'dpoy' as const,
+    category: 'Award' as const,
+    isHistorical: true,
+    pts: 18.3,
+    reb: 13.2,
+    ast: 1.8,
+    nbaId: 2730,
+    imageUrl: 'https://daveontalkssports.wordpress.com/wp-content/uploads/2011/04/112.jpg',
+    quote: '3x DPOY. Superman dominated the paint completely, winning three consecutive awards through unparalleled athleticism.'
   },
   {
     id: 'dpoy-2011',
@@ -5546,7 +5621,7 @@ const rawCards = [
     reb: 14.1,
     ast: 1.4,
     nbaId: 2730,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2730.png',
+    imageUrl: 'https://s.hdnux.com/photos/22/47/56/4881292/64/1920x0.jpg',
     quote: '3x DPOY. Superman dominated the paint completely, winning three consecutive awards through unparalleled athleticism.'
   },
   {
@@ -5563,7 +5638,7 @@ const rawCards = [
     reb: 9.9,
     ast: 0.9,
     nbaId: 2199,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2199.png',
+    imageUrl: 'https://www.longislandpress.com/wp-content/uploads/2022/07/chandler-1.jpg?w=333',
     quote: '1x DPOY. The vocal leader and defensive heart who completely changed the culture for the Knicks.'
   },
   {
@@ -5580,7 +5655,7 @@ const rawCards = [
     reb: 7.8,
     ast: 4.0,
     nbaId: 201188,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201188.png',
+    imageUrl: 'https://pbs.twimg.com/media/E_Vg7H-WYAc_e7l.jpg',
     quote: '1x DPOY. The defensive mastermind of the \'Grit and Grind\' era, relying on elite IQ and perfect positioning.'
   },
   {
@@ -5597,8 +5672,25 @@ const rawCards = [
     reb: 11.3,
     ast: 5.4,
     nbaId: 201149,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201149.png',
+    imageUrl: 'https://www.chicagotribune.com/wp-content/uploads/migration/2014/06/04/FEADTRNL6ZGMXBTICG7B26T2XI.jpg?w=535',
     quote: '1x DPOY. Pure passion and endless energy. A versatile big who could switch onto guards and command the paint.'
+  },
+  {
+    id: 'dpoy-2015',
+    name: 'Kawhi Leonard',
+    year: "2015",
+    team: 'San Antonio Spurs',
+    teamAbbr: 'SAS',
+    position: 'F',
+    rarity: 'dpoy' as const,
+    category: 'Award' as const,
+    isHistorical: true,
+    pts: 16.5,
+    reb: 7.2,
+    ast: 2.5,
+    nbaId: 202695,
+    imageUrl: 'https://ca-times.brightspotcdn.com/dims4/default/64daba3/2147483647/strip/false/crop/2048x1507+0+0/resize/1486x1093!/quality/75/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2F88%2Fbf%2Faf4d4a7b401691ec2fa9e1b895da%2Fla-sp-kawhi-leonard-spurs-wre0037910863-20160418',
+    quote: '2x DPOY. \'The Klaw\' suffocated the league\'s best scorers with massive hands, lateral quickness, and lethal instincts.'
   },
   {
     id: 'dpoy-2016',
@@ -5614,7 +5706,7 @@ const rawCards = [
     reb: 6.8,
     ast: 2.6,
     nbaId: 202695,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202695.png',
+    imageUrl: 'https://s.hdnux.com/photos/36/02/66/7875975/32/rawImage.jpg',
     quote: '2x DPOY. \'The Klaw\' suffocated the league\'s best scorers with massive hands, lateral quickness, and lethal instincts.'
   },
   {
@@ -5631,8 +5723,42 @@ const rawCards = [
     reb: 7.9,
     ast: 7.0,
     nbaId: 203110,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203110.png',
+    imageUrl: 'https://www.eastbaytimes.com/wp-content/uploads/2017/09/bng-l-warriors-1001-157.jpg?w=1800&resize=1800,1800',
     quote: '1x DPOY. The defensive engine of the Warriors\' dynasty. A basketball genius capable of guarding all five positions.'
+  },
+  {
+    id: 'dpoy-2018',
+    name: 'Rudy Gobert',
+    year: "2018",
+    team: 'Utah Jazz',
+    teamAbbr: 'UTA',
+    position: 'C',
+    rarity: 'dpoy' as const,
+    category: 'Award' as const,
+    isHistorical: true,
+    pts: 13.5,
+    reb: 10.7,
+    ast: 1.3,
+    nbaId: 203497,
+    imageUrl: 'https://cdn.kslsports.com/kslsports/wp-content/uploads/2022/05/GettyImages-1239654887.jpg',
+    quote: '4x DPOY. \'The Stifle Tower\' redefined modern rim protection, single-handedly deterring entire offenses from the paint.'
+  },
+  {
+    id: 'dpoy-2019',
+    name: 'Rudy Gobert',
+    year: "2019",
+    team: 'Utah Jazz',
+    teamAbbr: 'UTA',
+    position: 'C',
+    rarity: 'dpoy' as const,
+    category: 'Award' as const,
+    isHistorical: true,
+    pts: 15.9,
+    reb: 12.9,
+    ast: 2.0,
+    nbaId: 203497,
+    imageUrl: 'https://sportshub.cbsistatic.com/i/2019/06/25/2fd539d3-4205-40e0-bdb9-30406afcb3fb/rudy-gobert.jpg',
+    quote: '4x DPOY. \'The Stifle Tower\' redefined modern rim protection, single-handedly deterring entire offenses from the paint.'
   },
   {
     id: 'dpoy-2020',
@@ -5648,7 +5774,7 @@ const rawCards = [
     reb: 13.6,
     ast: 5.6,
     nbaId: 203507,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png',
+    imageUrl: 'https://e0.365dm.com/20/08/800x600/skysports-giannis-antetokounmpo_5077571.jpg?20200826053720',
     quote: '1x DPOY. A physical marvel who used his incredible length and speed to cover the entire floor as a help defender.'
   },
   {
@@ -5665,7 +5791,7 @@ const rawCards = [
     reb: 13.5,
     ast: 1.3,
     nbaId: 203497,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203497.png',
+    imageUrl: 'https://www.sltrib.com/resizer/AbKEcRE8JWAoAspJV84zKVVmp6Y=/arc-anglerfish-arc2-prod-sltrib/public/34OGAS5IBNBXHG42CO44XM3DXQ.jpg',
     quote: '4x DPOY. \'The Stifle Tower\' redefined modern rim protection, single-handedly deterring entire offenses from the paint.'
   },
   {
@@ -5682,7 +5808,7 @@ const rawCards = [
     reb: 3.8,
     ast: 5.9,
     nbaId: 203935,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203935.png',
+    imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/celtics/sites/celtics/files/microsoftteams-image_0.png',
     quote: '1x DPOY. The first guard to win the award since Gary Payton. The absolute embodiment of hustle, heart, and grit.'
   },
   {
@@ -5699,8 +5825,25 @@ const rawCards = [
     reb: 6.8,
     ast: 1.0,
     nbaId: 1628984,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628984.png',
+    imageUrl: 'https://fivethirtyeight.com/wp-content/uploads/2022/06/AP22005095137556-4x3-1.jpg',
     quote: '1x DPOY. A terrifying weak-side shot blocker whose timing and verticality made the rim a no-fly zone.'
+  },
+  {
+    id: 'dpoy-2024',
+    name: 'Rudy Gobert',
+    year: "2024",
+    team: 'Minnesota Timberwolves',
+    teamAbbr: 'MIN',
+    position: 'C',
+    rarity: 'dpoy' as const,
+    category: 'Award' as const,
+    isHistorical: true,
+    pts: 14.0,
+    reb: 12.9,
+    ast: 1.3,
+    nbaId: 203497,
+    imageUrl: 'https://ca-times.brightspotcdn.com/dims4/default/2973549/2147483647/strip/true/crop/2667x3477+0+0/resize/1200x1564!/quality/75/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2F5e%2Ff7%2Fcecd30ed4650bd24cd1e63c0b2ab%2F1406749-sp-clippers-timberwolves-5-gmf.jpg',
+    quote: '4x DPOY. \'The Stifle Tower\' redefined modern rim protection, single-handedly deterring entire offenses from the paint.'
   },
   {
     id: 'dpoy-2025',
@@ -5716,7 +5859,7 @@ const rawCards = [
     reb: 9.4,
     ast: 3.2,
     nbaId: 1630596,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630596.png',
+    imageUrl: 'https://platform.fearthesword.com/wp-content/uploads/sites/78/chorus/uploads/chorus_asset/file/25927821/2206945377.jpg?quality=90&strip=all&crop=16.666666666667,0,66.666666666667,100',
     quote: '1x DPOY. Stepped up as the ultimate defensive anchor for Cleveland, dominating the paint and the perimeter with elite versatility.'
   },
   // ROTY SERIES
@@ -5734,7 +5877,24 @@ const rawCards = [
     reb: 8.9,
     ast: 2.7,
     nbaId: 2200,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2200.png',
+    imageUrl: 'https://i0.wp.com/elgurudelbasket.com/wp-content/uploads/2019/11/pau-gasol-1.jpg?resize=290%2C317&ssl=1',
+    quote: 'First European player to win the award. Instant impact in Memphis with elite post moves.'
+  },
+  {
+    id: 'roty-2003',
+    name: 'Amare Stoudemire',
+    year: "2003",
+    team: 'Phoenix Suns',
+    teamAbbr: 'PHX',
+    position: 'F/C',
+    rarity: 'roty' as const,
+    category: 'Award' as const,
+    isHistorical: true,
+    pts: 17.6,
+    reb: 8.9,
+    ast: 2.7,
+    nbaId: 2200,
+    imageUrl: 'https://legacymedia.sportsplatform.io/img/images/photos/003/614/213/hi-res-203da9d00c953c6e523c59e0d1812770_crop_north.jpg?1469626405&w=630&h=420',
     quote: 'First European player to win the award. Instant impact in Memphis with elite post moves.'
   },
   {
@@ -6214,22 +6374,33 @@ const rawCards = [
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628983.png',
     quote: 'SGA & Chet: The dynamic future of the Thunder. Elite two-way potential.'
   },
-  {
-    id: 'moment-001',
-    name: 'Double Bang!',
+ {
+    id: 'moment-curry-bang-bang',
+    number: 999,
+    name: 'Stephen Curry',
     team: 'Golden State Warriors',
     teamAbbr: 'GSW',
+    teamColor: '#1D428A',
     position: 'G',
     rarity: 'legend' as const,
     category: 'Moment' as const,
+    subtitle: 'THE DOUBLE BANG',
+    momentTitle: 'BANG BANG',
+    momentDate: '27 de febrero de 2016',
     isHistorical: true,
     pts: 46,
     reb: 3,
     ast: 6,
     nbaId: 201939,
-    year: 2016,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png',
-    quote: 'The deep triple vs OKC that broke the internet and the record.'
+    stats: {
+      points: 46,
+      rebounds: 3,
+      assists: 6,
+      ovr: 99,
+    },
+    description: 'Triple ganador desde 10 metros vs OKC',
+    quote: 'They do have a timeout, decide not to use it... Curry, from downtown... BANG! BANG! OH WHAT A SHOT BY CURRY!',
+    imageUrl: 'https://media.tenor.com/xZ4fqO-87IsAAAAM/stephen-curry-shoot.gif',
   },
   {
     id: 'moment-002',
