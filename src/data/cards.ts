@@ -178,8 +178,8 @@ const rawCards = [
     pts: 8.7,
     reb: 4.1,
     ast: 2.0,
-    nbaId: 1631217,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631217.png',
+    nbaId: 1631222,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631222.png',
     quote: 'Versatile forward ready to step up.'
   },
   {
@@ -230,8 +230,8 @@ const rawCards = [
   {
     id: 'lal-011',
     name: 'Gabe Vincent',
-    team: 'Los Angeles Lakers',
-    teamAbbr: 'LAL',
+    team: 'Atlanta Hawks',
+    teamAbbr: 'ATL',
     position: 'G',
     rarity: 'bench' as const,
     isHistorical: false,
@@ -253,8 +253,8 @@ const rawCards = [
     pts: 1.7,
     reb: 0.6,
     ast: 1.3,
-    nbaId: 1642359,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642359.png',
+    nbaId: 1642355,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642355.png',
     quote: 'The next chapter of a legendary bloodline.'
   },
   {
@@ -283,8 +283,8 @@ const rawCards = [
     pts: 1.4,
     reb: 1.1,
     ast: 0.3,
-    nbaId: 1642259,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642259.png',
+    nbaId: 1642876,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642876.png',
     quote: 'Young athletic wing with elite potential.'
   },
   // GOLDEN STATE WARRIORS
@@ -359,8 +359,8 @@ const rawCards = [
     pts: 12.9,
     reb: 5.2,
     ast: 3.8,
-    nbaId: 1641720,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641720.png',
+    nbaId: 1641764,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641764.png',
     quote: 'The rising star bringing new energy to the Bay.'
   },
   {
@@ -434,8 +434,8 @@ const rawCards = [
     pts: 7.0,
     reb: 3.5,
     ast: 1.7,
-    nbaId: 1642275,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642275.png',
+    nbaId: 1642366,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642366.png',
     quote: 'Skilled rookie center with a unique toolkit.'
   },
   {
@@ -449,8 +449,8 @@ const rawCards = [
     pts: 7.8,
     reb: 2.2,
     ast: 3.4,
-    nbaId: 1629674,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629674.png',
+    nbaId: 203552,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203552.png',
     quote: 'A sharpshooter with the family touch.'
   },
   {
@@ -464,8 +464,8 @@ const rawCards = [
     pts: 4.2,
     reb: 2.8,
     ast: 0.9,
-    nbaId: 1631220,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631220.png',
+    nbaId: 4997536,
+    imageUrl: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/4997536.png',
     quote: 'Brazilian energy off the bench every night.'
   },
   {
@@ -479,8 +479,8 @@ const rawCards = [
     pts: 3.1,
     reb: 2.1,
     ast: 0.8,
-    nbaId: 1642301,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642301.png',
+    nbaId: 1642954,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642954.png',
     quote: 'Athletic rookie wing earning his NBA minutes.'
   },
   // BOSTON CELTICS
@@ -565,13 +565,13 @@ const rawCards = [
     team: 'Boston Celtics',
     teamAbbr: 'BOS',
     position: 'SF',
-    rarity: 'starter' as const,
+    rarity: 'bench' as const,
     isHistorical: false,
-    pts: 11.2,
+    pts: 9.0,
     reb: 3.8,
     ast: 1.4,
-    nbaId: 1630570,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630570.png',
+    nbaId: 1630573,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630573.png',
     quote: 'Elite corner shooter with champion DNA.'
   },
   {
@@ -582,11 +582,11 @@ const rawCards = [
     position: 'C',
     rarity: 'starter' as const,
     isHistorical: false,
-    pts: 5.1,
-    reb: 5.2,
-    ast: 0.7,
-    nbaId: 1630602,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630602.png',
+    pts: 9.9,
+    reb: 8.3,
+    ast: 1.5,
+    nbaId: 1629674,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629674.png',
     quote: 'Shot-blocking specialist protecting the rim.'
   },
   {
@@ -600,8 +600,8 @@ const rawCards = [
     pts: 4.0,
     reb: 3.5,
     ast: 0.6,
-    nbaId: 1642260,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642260.png',
+    nbaId: 1642864,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642864.png',
     quote: 'Spanish rookie with explosive athletic potential.'
   },
   {
@@ -615,8 +615,8 @@ const rawCards = [
     pts: 4.8,
     reb: 2.9,
     ast: 1.3,
-    nbaId: 1641731,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641731.png',
+    nbaId: 1631248,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631248.png',
     quote: 'Versatile wing with a sharp basketball IQ.'
   },
   {
@@ -630,8 +630,8 @@ const rawCards = [
     pts: 3.2,
     reb: 2.1,
     ast: 0.5,
-    nbaId: 1641748,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641748.png',
+    nbaId: 1641775,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641775.png',
     quote: 'Athletic defender still developing his game.'
   },
   {
@@ -645,8 +645,8 @@ const rawCards = [
     pts: 3.4,
     reb: 1.5,
     ast: 0.6,
-    nbaId: 1630579,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630579.png',
+    nbaId: 1631199,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631199.png',
     quote: 'Physical wing fighting for every minute.'
   },
   // CHICAGO BULLS
@@ -676,8 +676,8 @@ const rawCards = [
     pts: 16.2,
     reb: 5.6,
     ast: 2.1,
-    nbaId: 1642258,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642258.png',
+    nbaId: 1641824,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641824.png',
     quote: 'The rising star. Long, skilled and dangerous.'
   },
   {
@@ -721,8 +721,8 @@ const rawCards = [
     pts: 12.8,
     reb: 2.9,
     ast: 5.4,
-    nbaId: 1630217,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630217.png',
+    nbaId: 1630200,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630200.png',
     quote: 'Defensive pest and steady floor general.'
   },
   {
@@ -746,13 +746,13 @@ const rawCards = [
     team: 'Chicago Bulls',
     teamAbbr: 'CHI',
     position: 'PF',
-    rarity: 'starter' as const,
+    rarity: 'bench' as const,
     isHistorical: false,
-    pts: 10.1,
-    reb: 5.5,
+    pts: 5.1,
+    reb: 3.2,
     ast: 2.0,
-    nbaId: 203477,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203477.png',
+    nbaId: 1627824,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627824.png',
     quote: 'Physical forward with a reliable mid-range touch.'
   },
   {
@@ -766,8 +766,8 @@ const rawCards = [
     pts: 11.5,
     reb: 4.8,
     ast: 4.0,
-    nbaId: 1631095,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631095.png',
+    nbaId: 1631093,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631093.png',
     quote: 'Athletic guard with elite first-step explosion.'
   },
   {
@@ -781,23 +781,23 @@ const rawCards = [
     pts: 8.6,
     reb: 2.8,
     ast: 3.3,
-    nbaId: 1642256,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642256.png',
+    nbaId: 1642265,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642265.png',
     quote: 'Lightning-quick rookie point guard.'
   },
   {
     id: 'chi-010',
     name: 'Nick Richards',
-    team: 'Chicago Bulls',
-    teamAbbr: 'CHI',
+    team: 'Phoenix Suns',
+    teamAbbr: 'PHX',
     position: 'C',
     rarity: 'bench' as const,
     isHistorical: false,
-    pts: 9.7,
-    reb: 5.8,
+    pts: 5.8,
+    reb: 5.1,
     ast: 0.8,
-    nbaId: 1629671,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629671.png',
+    nbaId: 1630208,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630208.png',
     quote: 'Physical interior presence. Reliable off the bench.'
   },
   {
@@ -811,8 +811,8 @@ const rawCards = [
     pts: 4.8,
     reb: 3.8,
     ast: 0.6,
-    nbaId: 1641735,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641735.png',
+    nbaId: 1631159,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631159.png',
     quote: 'Young forward developing his two-way potential.'
   },
   {
@@ -841,8 +841,8 @@ const rawCards = [
     pts: 9.0,
     reb: 2.5,
     ast: 1.8,
-    nbaId: 1630168,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630168.png',
+    nbaId: 1630171,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630171.png',
     quote: 'Lockdown defender capable of guarding 1-4.'
   },
   {
@@ -856,8 +856,8 @@ const rawCards = [
     pts: 3.2,
     reb: 2.1,
     ast: 0.5,
-    nbaId: 1642600,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642600.png',
+    nbaId: 1642855,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642855.png',
     quote: 'French rookie with enormous long-term upside.'
   },
   // MIAMI HEAT
@@ -977,8 +977,8 @@ const rawCards = [
     pts: 7.5,
     reb: 3.0,
     ast: 1.2,
-    nbaId: 1629748,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629748.png',
+    nbaId: 1631323,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631323.png',
     quote: "European sniper."
   },
   {
@@ -992,8 +992,8 @@ const rawCards = [
     pts: 8.0,
     reb: 3.8,
     ast: 2.1,
-    nbaId: 1631730,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631730.png',
+    nbaId: 1631170,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631170.png',
     quote: "Hard-nosed UCLA product."
   },
   {
@@ -1007,8 +1007,8 @@ const rawCards = [
     pts: 6.5,
     reb: 4.2,
     ast: 1.8,
-    nbaId: 1631119,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631119.png',
+    nbaId: 1631107,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631107.png',
     quote: "Serbian stretch four."
   },
   // CLEVELAND CAVALIERS
@@ -1058,21 +1058,6 @@ const rawCards = [
     quote: "Two-way monster from USC."
   },
   {
-    id: 'cle-004',
-    name: 'Darius Garland',
-    team: 'Cleveland Cavaliers',
-    teamAbbr: 'CLE',
-    position: 'G',
-    rarity: 'allstar' as const,
-    isHistorical: false,
-    pts: 18.0,
-    reb: 3.2,
-    ast: 6.9,
-    nbaId: 1629636,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629636.png',
-    quote: "Cleveland's dazzling playmaker."
-  },
-  {
     id: 'cle-005',
     name: 'Jarrett Allen',
     team: 'Cleveland Cavaliers',
@@ -1110,11 +1095,11 @@ const rawCards = [
     position: 'F',
     rarity: 'bench' as const,
     isHistorical: false,
-    pts: 9.0,
+    pts: 13.1,
     reb: 5.1,
     ast: 1.5,
-    nbaId: 1641734,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641734.png',
+    nbaId: 1642281,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642281.png',
     quote: "Emerging young forward."
   },
   {
@@ -1138,13 +1123,13 @@ const rawCards = [
     team: 'Cleveland Cavaliers',
     teamAbbr: 'CLE',
     position: 'G',
-    rarity: 'bench' as const,
+    rarity: 'starter' as const,
     isHistorical: false,
-    pts: 7.0,
+    pts: 13.1,
     reb: 2.5,
     ast: 1.2,
-    nbaId: 1630245,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630245.png',
+    nbaId: 1630241,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630241.png',
     quote: "Sharpshooter off the bench."
   },
   {
@@ -1158,8 +1143,8 @@ const rawCards = [
     pts: 5.5,
     reb: 3.8,
     ast: 1.0,
-    nbaId: 1629684,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629684.png',
+    nbaId: 1629731,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629731.png',
     quote: "Versatile veteran wing."
   },
   // OKLAHOMA CITY THUNDER
@@ -1189,8 +1174,8 @@ const rawCards = [
     pts: 17.5,
     reb: 4.7,
     ast: 5.4,
-    nbaId: 1631108,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631108.png',
+    nbaId: 1631114,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631114.png',
     quote: "J-Dub runs this offence."
   },
   {
@@ -1216,11 +1201,11 @@ const rawCards = [
     position: 'C',
     rarity: 'allstar' as const,
     isHistorical: false,
-    pts: 9.5,
-    reb: 10.4,
+    pts: 9.6,
+    reb: 9.5,
     ast: 2.5,
-    nbaId: 1628990,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628990.png',
+    nbaId: 1628392,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628392.png',
     quote: "Dirty work every single night."
   },
   {
@@ -1249,8 +1234,8 @@ const rawCards = [
     pts: 7.5,
     reb: 3.2,
     ast: 3.0,
-    nbaId: 1629166,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629166.png',
+    nbaId: 1627936,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627936.png',
     quote: "The Bald Mamba never quits."
   },
   {
@@ -1264,8 +1249,8 @@ const rawCards = [
     pts: 8.5,
     reb: 3.0,
     ast: 2.0,
-    nbaId: 1641730,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641730.png',
+    nbaId: 1641717,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641717.png',
     quote: "Next gen Oklahoma City product."
   },
   {
@@ -1279,8 +1264,8 @@ const rawCards = [
     pts: 8.0,
     reb: 2.5,
     ast: 1.5,
-    nbaId: 1641740,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641740.png',
+    nbaId: 1642272,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642272.png',
     quote: "Rookie sharpshooter from Duke."
   },
   {
@@ -1291,11 +1276,11 @@ const rawCards = [
     position: 'G',
     rarity: 'bench' as const,
     isHistorical: false,
-    pts: 6.0,
+    pts: 9.8,
     reb: 3.0,
     ast: 1.2,
-    nbaId: 1630538,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630538.png',
+    nbaId: 1630598,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630598.png',
     quote: "Reliable vet off the bench."
   },
   {
@@ -1306,11 +1291,11 @@ const rawCards = [
     position: 'F',
     rarity: 'bench' as const,
     isHistorical: false,
-    pts: 5.5,
+    pts: 7.5,
     reb: 4.5,
     ast: 1.5,
-    nbaId: 1631113,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631113.png',
+    nbaId: 1631119,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631119.png',
     quote: "Energy big from Arkansas."
   },
   // NEW YORK KNICKS
@@ -1430,26 +1415,11 @@ const rawCards = [
     pts: 8.5,
     reb: 4.0,
     ast: 2.0,
-    nbaId: 1631107,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631107.png',
+    nbaId: 1631110,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631110.png',
     quote: "Versatile young defender."
   },
-  {
-    id: 'nyk-009',
-    name: 'Dillon Jones',
-    team: 'New York Knicks',
-    teamAbbr: 'NYK',
-    position: 'F',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 5.0,
-    reb: 4.5,
-    ast: 2.5,
-    nbaId: 1641753,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641753.png',
-    quote: "Physical energy wing."
-  },
-  {
+{
     id: 'nyk-010',
     name: 'Jordan Clarkson',
     team: 'New York Knicks',
@@ -1506,8 +1476,8 @@ const rawCards = [
     pts: 16.5,
     reb: 5.1,
     ast: 7.1,
-    nbaId: 1642235,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642235.png',
+    nbaId: 1642264,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642264.png',
     quote: "Back-to-back Rookie of the Year."
   },
   {
@@ -1521,8 +1491,8 @@ const rawCards = [
     pts: 14.5,
     reb: 3.8,
     ast: 2.2,
-    nbaId: 1630175,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630175.png',
+    nbaId: 1630170,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630170.png',
     quote: "San Antonio's perimeter weapon."
   },
   {
@@ -1563,11 +1533,11 @@ const rawCards = [
     position: 'G',
     rarity: 'starter' as const,
     isHistorical: false,
-    pts: 9.0,
+    pts: 11.5,
     reb: 3.5,
     ast: 3.5,
-    nbaId: 1642272,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642272.png',
+    nbaId: 1642844,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642844.png',
     quote: "2025 Draft #2 pick, the future."
   },
   {
@@ -1581,8 +1551,8 @@ const rawCards = [
     pts: 7.5,
     reb: 3.5,
     ast: 1.5,
-    nbaId: 1630579,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630579.png',
+    nbaId: 1630577,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630577.png',
     quote: "St. John's product finding his role."
   },
   {
@@ -1596,8 +1566,8 @@ const rawCards = [
     pts: 6.6,
     reb: 5.0,
     ast: 1.2,
-    nbaId: 1628410,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628410.png',
+    nbaId: 1628436,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628436.png',
     quote: "Stretch center protecting the rim."
   },
   {
@@ -1611,8 +1581,8 @@ const rawCards = [
     pts: 5.0,
     reb: 3.0,
     ast: 1.0,
-    nbaId: 1642261,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642261.png',
+    nbaId: 1642868,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642868.png',
     quote: "Young forward with high ceiling."
   },
   // DETROIT PISTONS
@@ -1672,8 +1642,8 @@ const rawCards = [
     pts: 13.1,
     reb: 5.2,
     ast: 2.4,
-    nbaId: 6440,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/6440.png',
+    nbaId: 202699,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202699.png',
     quote: "Veteran presence when it matters most."
   },
   {
@@ -1687,8 +1657,8 @@ const rawCards = [
     pts: 11.9,
     reb: 2.7,
     ast: 2.0,
-    nbaId: 3157465,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/3157465.png',
+    nbaId: 1629130,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629130.png',
     quote: "Three-point specialist, always ready."
   },
   {
@@ -1702,8 +1672,8 @@ const rawCards = [
     pts: 8.4,
     reb: 5.8,
     ast: 1.3,
-    nbaId: 4683771,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4683771.png',
+    nbaId: 1641842,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641842.png',
     quote: "The next generation is here."
   },
   {
@@ -1717,8 +1687,8 @@ const rawCards = [
     pts: 10.0,
     reb: 5.1,
     ast: 1.2,
-    nbaId: 4432810,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4432810.png',
+    nbaId: 1630191,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630191.png',
     quote: "Dirty work wins championships."
   },
   {
@@ -1732,8 +1702,8 @@ const rawCards = [
     pts: 8.3,
     reb: 1.9,
     ast: 2.3,
-    nbaId: 5107199,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/5107199.png',
+    nbaId: 1642450,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642450.png',
     quote: "Every opportunity, maximized."
   },
   {
@@ -1747,8 +1717,8 @@ const rawCards = [
     pts: 7.4,
     reb: 1.9,
     ast: 2.7,
-    nbaId: 2991043,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2991043.png',
+    nbaId: 1627747,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627747.png',
     quote: "Veteran energy off the bench."
   },
   {
@@ -1759,11 +1729,11 @@ const rawCards = [
     position: 'PF',
     rarity: 'bench' as const,
     isHistorical: false,
-    pts: 3.8,
+    pts: 7.1,
     reb: 4.4,
     ast: 0.8,
-    nbaId: 4278562,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4278562.png',
+    nbaId: 1630194,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630194.png',
     quote: "Ready whenever my number's called."
   },
   // HOUSTON ROCKETS
@@ -1778,8 +1748,8 @@ const rawCards = [
     pts: 25.9,
     reb: 5.5,
     ast: 4.4,
-    nbaId: 3202,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/3202.png',
+    nbaId: 201142,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png',
     quote: "Scorer by nature, winner by choice."
   },
   {
@@ -1793,8 +1763,8 @@ const rawCards = [
     pts: 20.4,
     reb: 9.0,
     ast: 6.2,
-    nbaId: 4871144,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4871144.png',
+    nbaId: 1630578,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630578.png',
     quote: "The Turkish sensation redefining the center role."
   },
   {
@@ -1808,8 +1778,8 @@ const rawCards = [
     pts: 18.0,
     reb: 7.8,
     ast: 5.2,
-    nbaId: 4684740,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4684740.png',
+    nbaId: 1641708,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641708.png',
     quote: "Elite athlete, elite energy."
   },
   {
@@ -1823,8 +1793,8 @@ const rawCards = [
     pts: 15.4,
     reb: 6.8,
     ast: 1.9,
-    nbaId: 4432639,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4432639.png',
+    nbaId: 1631095,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631095.png',
     quote: "The cornerstone of Houston's future."
   },
   {
@@ -1838,8 +1808,8 @@ const rawCards = [
     pts: 13.5,
     reb: 2.8,
     ast: 3.4,
-    nbaId: 4711272,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4711272.png',
+    nbaId: 1642263,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642263.png',
     quote: "Kentucky shooter lighting up the NBA."
   },
   {
@@ -1853,8 +1823,8 @@ const rawCards = [
     pts: 10.3,
     reb: 6.3,
     ast: 1.6,
-    nbaId: 4433192,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4433192.png',
+    nbaId: 1631106,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631106.png',
     quote: "Hustle and heart in every possession."
   },
   {
@@ -1868,8 +1838,8 @@ const rawCards = [
     pts: 5.8,
     reb: 8.6,
     ast: 1.5,
-    nbaId: 2991235,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2991235.png',
+    nbaId: 203500,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203500.png',
     quote: "The enforcer. No soft plays."
   },
   {
@@ -1883,8 +1853,8 @@ const rawCards = [
     pts: 4.8,
     reb: 2.6,
     ast: 0.8,
-    nbaId: 4065663,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4065663.png',
+    nbaId: 1629006,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629006.png',
     quote: "Lockdown defender off the bench."
   },
   {
@@ -1898,8 +1868,8 @@ const rawCards = [
     pts: 3.8,
     reb: 4.5,
     ast: 0.7,
-    nbaId: 3102529,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/3102529.png',
+    nbaId: 203991,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203991.png',
     quote: "Still protecting the rim every night."
   },
   {
@@ -1913,8 +1883,8 @@ const rawCards = [
     pts: 3.1,
     reb: 2.6,
     ast: 1.0,
-    nbaId: 2578185,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2578185.png',
+    nbaId: 1627827,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627827.png',
     quote: "Defensive stopper, team-first mentality."
   },
   // DENVER NUGGETS
@@ -1944,8 +1914,8 @@ const rawCards = [
     pts: 25.1,
     reb: 4.4,
     ast: 7.1,
-    nbaId: 1627737,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627737.png',
+    nbaId: 1627750,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627750.png',
     quote: "Big moments find me prepared."
   },
   {
@@ -2049,8 +2019,8 @@ const rawCards = [
     pts: 4.2,
     reb: 1.5,
     ast: 0.8,
-    nbaId: 1642268,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642268.png',
+    nbaId: 1641747,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641747.png',
     quote: "The future starts now."
   },
   {
@@ -2111,7 +2081,7 @@ const rawCards = [
     reb: 5.3,
     ast: 3.4,
     nbaId: 1642271,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642271.png',
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642851.png',
     quote: "I let the game come to me and stay ready."
   },
   {
@@ -2128,21 +2098,6 @@ const rawCards = [
     nbaId: 1628970,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628970.png',
     quote: "I use everything I've been through as fuel."
-  },
-  {
-    id: 'cha-005',
-    name: 'Collin Sexton',
-    team: 'Charlotte Hornets',
-    teamAbbr: 'CHA',
-    position: 'G',
-    rarity: 'starter' as const,
-    isHistorical: false,
-    pts: 14.2,
-    reb: 1.9,
-    ast: 3.7,
-    nbaId: 1629012,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629012.png',
-    quote: "I'm a scorer. That's just what I do."
   },
   {
     id: 'cha-006',
@@ -2170,8 +2125,8 @@ const rawCards = [
     pts: 7.9,
     reb: 5.7,
     ast: 0.8,
-    nbaId: 1642273,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642273.png',
+    nbaId: 1641750,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641750.png',
     quote: "My job is to protect the rim and set screens."
   },
   {
@@ -2200,8 +2155,8 @@ const rawCards = [
     pts: 6.2,
     reb: 4.1,
     ast: 0.8,
-    nbaId: 1642265,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642265.png',
+    nbaId: 1642275,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642275.png',
     quote: "I came to the NBA to prove I belong at this level."
   },
   {
@@ -2215,8 +2170,8 @@ const rawCards = [
     pts: 5.4,
     reb: 3.5,
     ast: 2.0,
-    nbaId: 1642352,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642352.png',
+    nbaId: 1642883,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642883.png',
     quote: "Every opportunity I get, I try to make the most of it."
   },
   // NEW ORLEANS PELICANS
@@ -2306,8 +2261,8 @@ const rawCards = [
     pts: 13.1,
     reb: 3.6,
     ast: 3.2,
-    nbaId: 1642353,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642353.png',
+    nbaId: 1642847,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642847.png',
     quote: "I play with a chip on my shoulder every night."
   },
   {
@@ -2321,8 +2276,8 @@ const rawCards = [
     pts: 11.3,
     reb: 6.8,
     ast: 3.8,
-    nbaId: 1642354,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642354.png',
+    nbaId: 1642852,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642852.png',
     quote: "I just want to be the best version of myself every day."
   },
   {
@@ -2366,8 +2321,8 @@ const rawCards = [
     pts: 5.5,
     reb: 5.8,
     ast: 1.3,
-    nbaId: 1642264,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642264.png',
+    nbaId: 1642274,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642274.png',
     quote: "I protect the paint and do the dirty work."
   },
   // MEMPHIS GRIZZLIES
@@ -2427,8 +2382,8 @@ const rawCards = [
     pts: 13.8,
     reb: 9.2,
     ast: 1.5,
-    nbaId: 1641713,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641713.png',
+    nbaId: 1641744,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641744.png',
     quote: "Size is an advantage I'm going to keep using."
   },
   {
@@ -2442,8 +2397,8 @@ const rawCards = [
     pts: 11.5,
     reb: 5.2,
     ast: 2.1,
-    nbaId: 1642350,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642350.png',
+    nbaId: 1642907,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642907.png',
     quote: "I just stay ready and compete every time I step out there."
   },
   {
@@ -2457,8 +2412,8 @@ const rawCards = [
     pts: 10.8,
     reb: 3.4,
     ast: 2.2,
-    nbaId: 1642278,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642278.png',
+    nbaId: 1642377,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642377.png',
     quote: "Consistency is what separates good players from great ones."
   },
   {
@@ -2487,8 +2442,8 @@ const rawCards = [
     pts: 8.4,
     reb: 2.1,
     ast: 2.5,
-    nbaId: 1642345,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642345.png',
+    nbaId: 1642285,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642285.png',
     quote: "I make plays and keep guys around me sharp."
   },
   {
@@ -2518,8 +2473,8 @@ const rawCards = [
     pts: 19.2,
     reb: 2.8,
     ast: 2.3,
-    nbaId: 3064440,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/3064440.png',
+    nbaId: 203897,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203897.png',
     quote: "I just go out and play my game. No shortcuts."
   },
   {
@@ -2533,8 +2488,8 @@ const rawCards = [
     pts: 18.2,
     reb: 3.0,
     ast: 4.1,
-    nbaId: 3978,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/3978.png',
+    nbaId: 201942,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201942.png',
     quote: "The mid-range is never dead. Not while I'm playing."
   },
   {
@@ -2548,8 +2503,8 @@ const rawCards = [
     pts: 15.8,
     reb: 11.4,
     ast: 4.1,
-    nbaId: 3155942,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/3155942.png',
+    nbaId: 1627734,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627734.png',
     quote: "I find a way to be impactful every single night."
   },
   {
@@ -2563,8 +2518,8 @@ const rawCards = [
     pts: 15.2,
     reb: 5.4,
     ast: 6.7,
-    nbaId: 3468,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/3468.png',
+    nbaId: 201566,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201566.png',
     quote: "I play every game like it could be my last."
   },
   {
@@ -2578,24 +2533,9 @@ const rawCards = [
     pts: 14.0,
     reb: 5.7,
     ast: 1.7,
-    nbaId: 4594327,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4594327.png',
+    nbaId: 1631099,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631099.png',
     quote: "I'm hungry and I show it every night on the floor."
-  },
-  {
-    id: 'sac-006',
-    name: 'Dennis Schroder',
-    team: 'Sacramento Kings',
-    teamAbbr: 'SAC',
-    position: 'G',
-    rarity: 'starter' as const,
-    isHistorical: false,
-    pts: 12.8,
-    reb: 3.1,
-    ast: 5.3,
-    nbaId: 3032979,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/3032979.png',
-    quote: "I bring energy and toughness no matter what."
   },
   {
     id: 'sac-007',
@@ -2608,8 +2548,8 @@ const rawCards = [
     pts: 12.7,
     reb: 1.9,
     ast: 3.0,
-    nbaId: 4066262,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4066262.png',
+    nbaId: 1628370,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628370.png',
     quote: "When I'm in rhythm, I can score from anywhere."
   },
   {
@@ -2623,8 +2563,8 @@ const rawCards = [
     pts: 11.9,
     reb: 7.3,
     ast: 1.3,
-    nbaId: 4898371,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4898371.png',
+    nbaId: 1642875,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642875.png',
     quote: "I'm proving every day that I belong in this league."
   },
   {
@@ -2638,8 +2578,8 @@ const rawCards = [
     pts: 9.3,
     reb: 6.5,
     ast: 1.3,
-    nbaId: 4431679,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4431679.png',
+    nbaId: 1630173,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630173.png',
     quote: "I bring the energy and rebounding this team needs."
   },
   {
@@ -2653,8 +2593,8 @@ const rawCards = [
     pts: 7.7,
     reb: 3.6,
     ast: 2.2,
-    nbaId: 4702384,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4702384.png',
+    nbaId: 1642363,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642363.png',
     quote: "I fight for my spot every single day."
   },
   // DALLAS MAVERICKS
@@ -2669,8 +2609,8 @@ const rawCards = [
     pts: 20.3,
     reb: 6.6,
     ast: 4.6,
-    nbaId: 5041939,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/5041939.png',
+    nbaId: 1642843,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642843.png',
     quote: "I've been working for this my whole life. I'm ready."
   },
   {
@@ -2684,8 +2624,8 @@ const rawCards = [
     pts: 15.3,
     reb: 4.8,
     ast: 3.3,
-    nbaId: 4278594,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4278594.png',
+    nbaId: 1630230,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630230.png',
     quote: "I just stay ready and make plays when called upon."
   },
   {
@@ -2699,8 +2639,8 @@ const rawCards = [
     pts: 14.2,
     reb: 6.9,
     ast: 1.8,
-    nbaId: 4278078,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4278078.png',
+    nbaId: 1629023,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629023.png',
     quote: "Versatility is my calling card on both ends."
   },
   {
@@ -2714,8 +2654,8 @@ const rawCards = [
     pts: 12.8,
     reb: 2.9,
     ast: 3.8,
-    nbaId: 4397040,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4397040.png',
+    nbaId: 1630314,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630314.png',
     quote: "I give everything I have every time I step on the court."
   },
   {
@@ -2729,8 +2669,8 @@ const rawCards = [
     pts: 12.6,
     reb: 3.3,
     ast: 2.0,
-    nbaId: 4432582,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4432582.png',
+    nbaId: 1631108,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631108.png',
     quote: "I stay locked in and shoot with confidence."
   },
   {
@@ -2744,8 +2684,8 @@ const rawCards = [
     pts: 11.9,
     reb: 2.2,
     ast: 1.4,
-    nbaId: 6475,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/6475.png',
+    nbaId: 202691,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202691.png',
     quote: "I've been here before. The fire never goes out."
   },
   {
@@ -2759,8 +2699,8 @@ const rawCards = [
     pts: 9.5,
     reb: 7.0,
     ast: 1.1,
-    nbaId: 4278049,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4278049.png',
+    nbaId: 1629655,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629655.png',
     quote: "I protect the rim and finish above the rest."
   },
   {
@@ -2774,8 +2714,8 @@ const rawCards = [
     pts: 6.4,
     reb: 1.9,
     ast: 4.9,
-    nbaId: 4433629,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4433629.png',
+    nbaId: 1642948,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642948.png',
     quote: "I run the offense and make my teammates better."
   },
   {
@@ -2789,8 +2729,8 @@ const rawCards = [
     pts: 3.9,
     reb: 2.5,
     ast: 1.4,
-    nbaId: 3138160,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/3138160.png',
+    nbaId: 1628997,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628997.png',
     quote: "I bring toughness and do the dirty work."
   },
   // UTAH JAZZ
@@ -2800,13 +2740,13 @@ const rawCards = [
     team: 'Utah Jazz',
     teamAbbr: 'UTA',
     position: 'F',
-    rarity: 'allstar' as const,
+    rarity: 'franchise' as const,
     isHistorical: false,
     pts: 26.7,
     reb: 6.9,
     ast: 2.1,
-    nbaId: 4066336,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4066336.png',
+    nbaId: 1628374,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628374.png',
     quote: "I've evolved into a scorer nobody can stop."
   },
   {
@@ -2820,8 +2760,8 @@ const rawCards = [
     pts: 23.6,
     reb: 3.7,
     ast: 6.1,
-    nbaId: 4433627,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4433627.png',
+    nbaId: 1641718,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641718.png',
     quote: "I play with confidence and let my game speak."
   },
   {
@@ -2835,8 +2775,8 @@ const rawCards = [
     pts: 14.1,
     reb: 3.0,
     ast: 1.7,
-    nbaId: 5105839,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/5105839.png',
+    nbaId: 1641729,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641729.png',
     quote: "I've put in the work and now it's time to show it."
   },
   {
@@ -2850,8 +2790,8 @@ const rawCards = [
     pts: 13.4,
     reb: 4.1,
     ast: 1.8,
-    nbaId: 4873138,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4873138.png',
+    nbaId: 1642846,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642846.png',
     quote: "I'm just getting started — the ceiling is sky high."
   },
   {
@@ -2865,8 +2805,8 @@ const rawCards = [
     pts: 11.7,
     reb: 2.5,
     ast: 7.2,
-    nbaId: 4683766,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4683766.png',
+    nbaId: 1641729,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/260x190/1641729.png',
     quote: "I see the game differently. I make everyone better."
   },
   {
@@ -2880,8 +2820,8 @@ const rawCards = [
     pts: 10.9,
     reb: 10.4,
     ast: 4.8,
-    nbaId: 3102530,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/3102530.png',
+    nbaId: 203994,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203994.png',
     quote: "I bring the physicality and toughness inside."
   },
   {
@@ -2895,8 +2835,8 @@ const rawCards = [
     pts: 10.5,
     reb: 6.9,
     ast: 2.4,
-    nbaId: 4684793,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4684793.png',
+    nbaId: 1642271,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642271.png',
     quote: "I play smart and bring versatility every game."
   },
   {
@@ -2910,8 +2850,8 @@ const rawCards = [
     pts: 9.1,
     reb: 2.5,
     ast: 1.9,
-    nbaId: 3133602,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/3133602.png',
+    nbaId: 1629004,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629004.png',
     quote: "I stay ready and shoot when I get the chance."
   },
   {
@@ -2925,8 +2865,8 @@ const rawCards = [
     pts: 7.4,
     reb: 2.8,
     ast: 1.5,
-    nbaId: 4895758,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/4895758.png',
+    nbaId: 1642262,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642262.png',
     quote: "I'm developing fast and hungry for more minutes."
   },
   {
@@ -2940,8 +2880,8 @@ const rawCards = [
     pts: 6.7,
     reb: 5.8,
     ast: 1.8,
-    nbaId: 3449,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/3449.png',
+    nbaId: 201567,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201567.png',
     quote: "I've been through everything. Experience is undefeated."
   },
   // ORLANDO MAGIC
@@ -3182,8 +3122,8 @@ const rawCards = [
     pts: 13.2,
     reb: 2.8,
     ast: 3.2,
-    nbaId: 4397020,
-    imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4397020.png',
+    nbaId: 1630245,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630245.png',
     quote: 'Versatile guard who brings toughness and playmaking.'
   },
   {
@@ -3424,8 +3364,8 @@ const rawCards = [
     pts: 16.5,
     reb: 7.4,
     ast: 2.7,
-    nbaId: 1642261,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642261.png',
+    nbaId: 1642259,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642259.png',
     quote: 'Versatile big man with elite defensive potential.'
   },
   {
@@ -3439,15 +3379,15 @@ const rawCards = [
     pts: 14.8,
     reb: 5.1,
     ast: 4.5,
-    nbaId: 1642271,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642271.png',
+    nbaId: 1642273,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642273.png',
     quote: 'Dynamic wing with playmaking and scoring ability.'
   },
   {
     id: 'was-005',
     name: 'D\'Angelo Russell',
-    team: 'Washington Wizards',
-    teamAbbr: 'WAS',
+    team: 'Dallas Mavericks',
+    teamAbbr: 'DAL',
     position: 'G',
     rarity: 'starter' as const,
     isHistorical: false,
@@ -3484,8 +3424,8 @@ const rawCards = [
     pts: 12.4,
     reb: 2.8,
     ast: 2.0,
-    nbaId: 1642289,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642289.png',
+    nbaId: 1642848,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642848.png',
     quote: 'Highly touted prospect with elite scoring tools.'
   },
   {
@@ -3514,23 +3454,23 @@ const rawCards = [
     pts: 10.2,
     reb: 3.6,
     ast: 4.5,
-    nbaId: 1642273,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642273.png',
+    nbaId: 1642267,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642267.png',
     quote: 'Versatile guard with great court vision.'
   },
   {
     id: 'was-010',
     name: 'Dante Exum',
-    team: 'Washington Wizards',
-    teamAbbr: 'WAS',
+    team: 'Dallas Mavericks',
+    teamAbbr: 'DAL',
     position: 'G',
     rarity: 'bench' as const,
     isHistorical: false,
     pts: 8.5,
     reb: 2.5,
     ast: 3.5,
-    nbaId: 203901,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203901.png',
+    nbaId: 203957,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203957.png',
     quote: 'Experienced guard providing steady playmaking.'
   },
   // BROOKLYN NETS
@@ -3590,8 +3530,8 @@ const rawCards = [
     pts: 14.5,
     reb: 4.2,
     ast: 5.1,
-    nbaId: 1642360,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642360.png',
+    nbaId: 1642856,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642856.png',
     quote: 'Talented playmaker with great size for a guard.'
   },
   {
@@ -3617,7 +3557,7 @@ const rawCards = [
     position: 'F',
     rarity: 'starter' as const,
     isHistorical: false,
-    pts: 10.5,
+    pts: 6.8,
     reb: 5.2,
     ast: 1.2,
     nbaId: 1631169,
@@ -3635,8 +3575,8 @@ const rawCards = [
     pts: 9.8,
     reb: 6.5,
     ast: 2.1,
-    nbaId: 1642370,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642370.png',
+    nbaId: 1642874,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642874.png',
     quote: 'Skilled big man with a soft touch around the rim.'
   },
   {
@@ -3711,8 +3651,8 @@ const rawCards = [
     pts: 17.2,
     reb: 2.8,
     ast: 7.2,
-    nbaId: 1631211,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631211.png',
+    nbaId: 1629614,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629614.png',
     quote: 'Clutch performer and steady floor general.'
   },
   {
@@ -3786,8 +3726,8 @@ const rawCards = [
     pts: 9.2,
     reb: 2.3,
     ast: 5.1,
-    nbaId: 1626196,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1626196.png',
+    nbaId: 204456,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/204456.png',
     quote: 'High-energy guard and elite pest on defense.'
   },
   {
@@ -3922,8 +3862,8 @@ const rawCards = [
     pts: 6.5,
     reb: 4.0,
     ast: 0.9,
-    nbaId: 1642239,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642239.png',
+    nbaId: 1642346,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642346.png',
     quote: 'Elite defensive prospect with great versatility.'
   },
   {
@@ -3937,8 +3877,8 @@ const rawCards = [
     pts: 5.2,
     reb: 3.8,
     ast: 1.5,
-    nbaId: 1642273,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642273.png',
+    nbaId: 1642345,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642345.png',
     quote: 'Skilled big man with excellent passing ability.'
   },
   {
@@ -3952,8 +3892,8 @@ const rawCards = [
     pts: 4.8,
     reb: 5.1,
     ast: 0.5,
-    nbaId: 1642288,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642288.png',
+    nbaId: 1642863,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642863.png',
     quote: 'Intriguing young big man with massive wingspan.'
   },
   {
@@ -4013,8 +3953,8 @@ const rawCards = [
     pts: 13.0,
     reb: 5.2,
     ast: 2.5,
-    nbaId: 1641724,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641724.png',
+    nbaId: 1641739,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641739.png',
     quote: 'Tenacious defender and high-IQ role player.'
   },
   {
@@ -4058,8 +3998,8 @@ const rawCards = [
     pts: 10.5,
     reb: 11.5,
     ast: 1.4,
-    nbaId: 1642283,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642283.png',
+    nbaId: 1642270,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642270.png',
     quote: 'Dominant interior presence and elite rim protector.'
   },
   {
@@ -4118,8 +4058,8 @@ const rawCards = [
     pts: 6.1,
     reb: 5.5,
     ast: 1.2,
-    nbaId: 1642299,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642299.png',
+    nbaId: 1642905,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642905.png',
     quote: 'Intriguing young big man with great size and potential.'
   },
   {
@@ -4179,8 +4119,8 @@ const rawCards = [
     pts: 16.8,
     reb: 4.6,
     ast: 5.6,
-    nbaId: 1631113,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631113.png',
+    nbaId: 1631157,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631157.png',
     quote: 'Emerging scoring guard with great potential.'
   },
   {
@@ -4390,8 +4330,8 @@ const rawCards = [
     pts: 7.8,
     reb: 4.9,
     ast: 2.0,
-    nbaId: 1642284,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642284.png',
+    nbaId: 1642867,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642867.png',
     quote: 'Promising young forward with high motor.'
   },
   {
@@ -4405,8 +4345,8 @@ const rawCards = [
     pts: 7.1,
     reb: 2.4,
     ast: 1.1,
-    nbaId: 1642263,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642263.png',
+    nbaId: 1642266,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642266.png',
     quote: 'Explosive rookie guard with scoring touch.'
   },
   {
@@ -4466,12 +4406,12 @@ const rawCards = [
     rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 500, // Wins
-    reb: 4, // Titles
-    ast: 10, // Exp
+    pts: 700, // Actualizado a sus victorias reales aproximadas
+    reb: 9, // Sumando sus anillos como jugador y entrenador
+    ast: 11, // Años de experiencia
     ovr: 96,
     nbaId: 1052,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1052.png',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPvWWHi2JAAueNMgz05v0PbC72IKwedFnYhM-ELVkhLTTMG4gLNTYNnXbvMWjYa14oFtpP6oaPddHRGBkbD3Ks5KRx16wHiJvc8ktkb6k&s=10',
     quote: "Managing the legendary Warriors core with championship DNA."
   },
   {
@@ -4483,13 +4423,13 @@ const rawCards = [
     rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 120,
-    reb: 1,
-    ast: 3,
-    ovr: 92,
-    nbaId: 204451,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/204451.png',
-    quote: "Tactical mastermind behind the Celtics' high-volume 3PT era."
+    pts: 121, // Wins
+    reb: 1, // Titles
+    ast: 3, // Experience
+    ovr: 94,
+    nbaId: 1630602,
+    imageUrl: 'https://i.guim.co.uk/img/media/a56620c4785bac664e936d835a3be628bfd33e98/0_58_4200_2732/master/4200.jpg?width=965&dpr=1&s=none&crop=none',
+    quote: "Focusing on the margins and the mindset of a champion."
   },
   {
     id: 'coach-mia',
@@ -4500,30 +4440,30 @@ const rawCards = [
     rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 750,
-    reb: 2,
-    ast: 16,
-    ovr: 95,
-    nbaId: 2101,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2101.png',
-    quote: "The longest-tenured coach in Heat Culture history."
+    pts: 750, // Wins
+    reb: 2, // Titles
+    ast: 16, // Experience
+    ovr: 97,
+    nbaId: 2160,
+    imageUrl: 'https://images.wsj.net/im-784088?width=1280&size=1',
+    quote: "The Heat Culture is not for everyone, it is for the resilient."
   },
   {
     id: 'coach-sas',
-    name: 'Gregg Popovich',
+    name: 'Mitch Johnson',
     team: 'San Antonio Spurs',
     teamAbbr: 'SAS',
     position: 'Coach',
     rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 1300,
-    reb: 5,
-    ast: 28,
-    ovr: 99,
-    nbaId: 2025,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2025.png',
-    quote: 'The greatest of all time. A true legend of the game.'
+    pts: 12, // Victorias como entrenador principal interino/actual
+    reb: 0, // Títulos como HC (está empezando su legado)
+    ast: 9, // Años de experiencia en el staff técnico de los Spurs
+    ovr: 88, // Una gran promesa en los banquillos
+    nbaId: 201142, // ID de referencia
+    imageUrl: 'https://s.yimg.com/ny/api/res/1.2/3sD9XRUYR.BTwkQ6yzSbtg--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTQyNjtjZj13ZWJw/https://media.zenfs.com/en/ny_post_sports_articles_389/14eb36ac74c3cb873d1487bb0b8ca7d8',
+    quote: "Leading the next generation of the Spurs with discipline and vision."
   },
   {
     id: 'coach-nyk',
@@ -4531,33 +4471,33 @@ const rawCards = [
     team: 'New York Knicks',
     teamAbbr: 'NYK',
     position: 'Coach',
-    rarity: 'franchise' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 500,
-    reb: 0,
-    ast: 12,
-    ovr: 89,
-    nbaId: 2021,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2021.png',
-    quote: 'Defensive mastermind bringing grit back to New York.'
+    pts: 527, // Wins
+    reb: 0, // Titles
+    ast: 13, // Experience
+    ovr: 92,
+    nbaId: 203102,
+    imageUrl: 'https://media.cnn.com/api/v1/images/stellar/prod/gettyimages-2217054597.jpg?c=16x9&q=h_833,w_1480,c_fill',
+    quote: "Focus on the process, and the results will take care of themselves."
   },
   {
     id: 'coach-den',
-    name: 'Michael Malone',
+    name: 'David Adelman',
     team: 'Denver Nuggets',
     teamAbbr: 'DEN',
     position: 'Coach',
-    rarity: 'franchise' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 400,
-    reb: 1,
-    ast: 11,
-    ovr: 91,
-    nbaId: 2026,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2026.png',
-    quote: 'Led the Nuggets to their first ever NBA Championship.'
+    pts: 312, // Accumulated wins as part of Denver's staff
+    reb: 1, // NBA Championship (2023)
+    ast: 7, // Years on the Nuggets' coaching staff
+    ovr: 89, // Considered the best assistant coach in the league
+    nbaId: 203105,
+    imageUrl: 'https://www.sandiegouniontribune.com/wp-content/uploads/migration/2024/06/04/0000018f-e54a-d531-a1cf-ed5f25480001.jpg?w=1800&resize=1800,1800',
+    quote: "The tactical mind behind the Nuggets' championship offensive system."
   },
   {
     id: 'coach-mil',
@@ -4565,16 +4505,16 @@ const rawCards = [
     team: 'Milwaukee Bucks',
     teamAbbr: 'MIL',
     position: 'Coach',
-    rarity: 'allstar' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 1100,
-    reb: 1,
-    ast: 24,
-    ovr: 88,
-    nbaId: 2008,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2008.png',
-    quote: 'Veteran leader with a championship pedigree.'
+    pts: 1114, // Career total wins (All-time Top 10)
+    reb: 1, // NBA Championship (2008)
+    ast: 25, // Years of experience as Head Coach
+    ovr: 91,
+    nbaId: 940,
+    imageUrl: 'https://s.yimg.com/ny/api/res/1.2/R4Fr4Lf3eGXhFda.Bjr0hA--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTQyNjtjZj13ZWJw/https://media-mbst-pub-ue1.s3.amazonaws.com/creatr-uploaded-images/2020-10/ff007980-042e-11eb-bfeb-c4965805869b',
+    quote: "Expert at managing star talent and championship expectations."
   },
   {
     id: 'coach-phx',
@@ -4582,16 +4522,16 @@ const rawCards = [
     team: 'Phoenix Suns',
     teamAbbr: 'PHX',
     position: 'Coach',
-    rarity: 'franchise' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 500,
-    reb: 1,
-    ast: 10,
-    ovr: 90,
+    pts: 484, // Total regular season wins
+    reb: 1, // NBA Championship (2021 with Bucks)
+    ast: 10, // Years as Head Coach
+    ovr: 93,
     nbaId: 203102,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203102.png',
-    quote: "Defensive specialist maximizing the Suns' championship window."
+    imageUrl: 'https://gsp-image-cdn.wmsports.io/cms/prod/bleacher-report/getty_images/2197168635_large_image.jpg',
+    quote: "Building a championship culture with defensive grit and spacing."
   },
   {
     id: 'coach-dal',
@@ -4599,16 +4539,16 @@ const rawCards = [
     team: 'Dallas Mavericks',
     teamAbbr: 'DAL',
     position: 'Coach',
-    rarity: 'franchise' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 350,
-    reb: 0,
-    ast: 8,
-    ovr: 89,
+    pts: 323, // Total wins as Head Coach
+    reb: 1, // Championships (1 as player, seeking 1st as HC)
+    ast: 8, // Years of experience as Head Coach
+    ovr: 94, // Increased due to tactical performance in recent Playoffs
     nbaId: 467,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/467.png',
-    quote: 'Former champion player now leading the Mavs from the bench.'
+    imageUrl: 'https://s.yimg.com/ny/api/res/1.2/IRWTss8qX0YQ0HX8KrBlUg--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD04MDA7Y2Y9d2VicA--/https://s.yimg.com/os/creatr-uploaded-images/2024-05/99ff27c0-0ba5-11ef-afbd-9618dd776a71',
+    quote: "A legendary floor general now orchestrating from the sidelines."
   },
   {
     id: 'coach-okc',
@@ -4616,16 +4556,16 @@ const rawCards = [
     team: 'Oklahoma City Thunder',
     teamAbbr: 'OKC',
     position: 'Coach',
-    rarity: 'franchise' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 150,
-    reb: 0,
-    ast: 4,
-    ovr: 92,
-    nbaId: 204439,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/204439.png',
-    quote: "Architect of the league's youngest elite contender."
+    pts: 143, // Total wins (Rapidly rising)
+    reb: 0, // Championships as HC (Already has Coach of the Year award)
+    ast: 4, // Years as Head Coach
+    ovr: 95, // One of the best tactical minds today
+    nbaId: 1630611,
+    imageUrl: 'https://www.youth.inc/_next/image?url=%2Fapi%2Fmedia%2Ffile%2FUSATSI_26190223.jpg&w=3840&q=75',
+    quote: "Building a versatile and relentless culture in the modern NBA."
   },
   {
     id: 'coach-min',
@@ -4633,16 +4573,16 @@ const rawCards = [
     team: 'Minnesota Timberwolves',
     teamAbbr: 'MIN',
     position: 'Coach',
-    rarity: 'allstar' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 160,
-    reb: 0,
-    ast: 4,
-    ovr: 88,
-    nbaId: 1630608,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630608.png',
-    quote: 'Offensive specialist who transformed the Timberwolves.'
+    pts: 160, // Total wins with rising Wolves
+    reb: 0, // Titles as HC (Led team to Conference Finals)
+    ast: 4, // Years as Head Coach in Minnesota
+    ovr: 92, // Recognized for elite offensive schemes
+    nbaId: 1630613,
+    imageUrl: 'https://cdn.nba.com/teams/uploads/sites/1610612750/2023/12/18992275_Minnesota_Timberwolves_v_Charlotte_Hornets_Lucy_T_Raskin_Greenfly_20231203_005407.jpg',
+    quote: "Building a defensive powerhouse with offensive versatility."
   },
   {
     id: 'coach-lac',
@@ -4650,16 +4590,16 @@ const rawCards = [
     team: 'LA Clippers',
     teamAbbr: 'LAC',
     position: 'Coach',
-    rarity: 'franchise' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 300,
-    reb: 1,
-    ast: 9,
-    ovr: 91,
-    nbaId: 1731,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1731.png',
-    quote: 'Master of in-game adjustments and playoff strategy.'
+    pts: 312, // Wins
+    reb: 1, // Titles
+    ast: 9, // Experience
+    ovr: 95,
+    nbaId: 1610,
+    imageUrl: 'https://static01.nyt.com/images/2019/08/14/sports/14lue/merlin_139297686_dc3cc9b3-5bd8-4a8e-bb21-2b519740017f-superJumbo.jpg',
+    quote: "The master of mid-game adjustments and playoff strategy."
   },
   {
     id: 'coach-phi',
@@ -4667,16 +4607,16 @@ const rawCards = [
     team: 'Philadelphia 76ers',
     teamAbbr: 'PHI',
     position: 'Coach',
-    rarity: 'franchise' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 250,
-    reb: 1,
-    ast: 6,
-    ovr: 90,
-    nbaId: 204423,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/204423.png',
-    quote: "Master of creative defensive schemes and aggressive adjustments."
+    pts: 338, // Total NBA career wins
+    reb: 1, // NBA Championship (2019)
+    ast: 7, // Years of experience as an NBA Head Coach
+    ovr: 93, // Former Coach of the Year and elite defensive tactician
+    nbaId: 1610612755,
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTySKnRtmK_huPrlrH8CCNAM3jfEDM8Z3vxPA&s',
+    quote: "A creative mastermind known for defensive innovation and a championship ring."
   },
   {
     id: 'coach-ind',
@@ -4684,16 +4624,16 @@ const rawCards = [
     team: 'Indiana Pacers',
     teamAbbr: 'IND',
     position: 'Coach',
-    rarity: 'franchise' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 900,
-    reb: 1,
-    ast: 22,
-    ovr: 91,
-    nbaId: 76335,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/76335.png',
-    quote: 'One of the most respected tactical minds in the NBA.'
+    pts: 940, // Career total wins
+    reb: 1, // NBA Championship (2011)
+    ast: 22, // Years of experience as Head Coach
+    ovr: 92, // Renowned for offensive efficiency and game management
+    nbaId: 1610612754,
+    imageUrl: 'https://cdn.nba.com/manage/2025/08/rick-carlisle.jpg',
+    quote: "One of the most respected tactical minds in the game, bringing championship pedigree to Indiana."
   },
   {
     id: 'coach-cle',
@@ -4701,16 +4641,16 @@ const rawCards = [
     team: 'Cleveland Cavaliers',
     teamAbbr: 'CLE',
     position: 'Coach',
-    rarity: 'allstar' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 150,
-    reb: 0,
-    ast: 5,
-    ovr: 87,
-    nbaId: 1630612,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630612.png',
-    quote: 'Player development expert leading the Cavs to new heights.'
+    pts: 165, // Career total wins (rapidly increasing with CLE)
+    reb: 1, // NBA Championship (2022 as Assistant with GSW)
+    ast: 5, // Years of experience as Head Coach
+    ovr: 91, // High rating for his player development and offensive system
+    nbaId: 1610612739,
+    imageUrl: 'https://static01.nyt.com/images/2020/03/07/sports/07nba-nets-lede/merlin_170026674_03944f26-61b8-4f91-9428-060a448686a0-mediumSquareAt3X.jpg',
+    quote: "A master of player development now leading the Cavaliers' high-powered offense."
   },
   {
     id: 'coach-orl',
@@ -4718,16 +4658,16 @@ const rawCards = [
     team: 'Orlando Magic',
     teamAbbr: 'ORL',
     position: 'Coach',
-    rarity: 'allstar' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 100,
-    reb: 0,
-    ast: 3,
-    ovr: 86,
-    nbaId: 1630613,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630613.png',
-    quote: 'Building a defensive powerhouse in Orlando.'
+    pts: 103, // Total career wins as Magic Head Coach
+    reb: 0, // Titles (focused on building a young contender)
+    ast: 3, // Years of experience as Head Coach
+    ovr: 90, // High rating for his elite defensive culture
+    nbaId: 1610612753,
+    imageUrl: 'https://legacymedia.sportsplatform.io/image/upload/x_35,y_35,w_1736,h_1156,c_crop/v1710248736/rqrxradod9xvy25tycwr.jpg',
+    quote: "Building a foundation of defensive grit and selfless basketball in Orlando."
   },
   {
     id: 'coach-sac',
@@ -4735,16 +4675,16 @@ const rawCards = [
     team: 'Sacramento Kings',
     teamAbbr: 'SAC',
     position: 'Coach',
-    rarity: 'allstar' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 450,
-    reb: 0,
-    ast: 10,
-    ovr: 88,
-    nbaId: 2018,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2018.png',
-    quote: 'Brought the beam to Sacramento with elite coaching.'
+    pts: 442, // Total career wins
+    reb: 0, // Titles as Head Coach (has 4 as an Assistant)
+    ast: 10, // Years of experience as Head Coach
+    ovr: 92, // High rating for his record-breaking offensive schemes
+    nbaId: 1610612758,
+    imageUrl: 'https://media-cldnry.s-nbcnews.com/image/upload/t_fit-560w,f_auto,q_auto:best/rockcms/2025-07/250702-mike-brown-ch-1333-7d60c5.jpg',
+    quote: "Igniting the beam with a high-speed offense and championship defensive principles."
   },
   {
     id: 'coach-hou',
@@ -4752,16 +4692,16 @@ const rawCards = [
     team: 'Houston Rockets',
     teamAbbr: 'HOU',
     position: 'Coach',
-    rarity: 'allstar' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 100,
-    reb: 0,
-    ast: 2,
-    ovr: 87,
-    nbaId: 200441,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/200441.png',
-    quote: "Transformed Houston into a physical defensive powerhouse."
+    pts: 131, // Career total wins
+    reb: 0, // Titles as Head Coach (reached Finals in 2022)
+    ast: 3, // Years of experience as Head Coach
+    ovr: 91, // Known for elite defensive schemes and discipline
+    nbaId: 203103,
+    imageUrl: 'https://bostonglobe-prod.cdn.arcpublishing.com/resizer/v2/P4Y55QXL2JEVRZSZKGNRZMGBUQ.jpg?auth=a54e650c95c5737e81c50f9d8e5938b886d728b3fa34ec20e3f49637dcf828cb&width=1440',
+    quote: "Demanding excellence through hard-nosed defense and accountability."
   },
   {
     id: 'coach-mem',
@@ -4769,33 +4709,33 @@ const rawCards = [
     team: 'Memphis Grizzlies',
     teamAbbr: 'MEM',
     position: 'Coach',
-    rarity: 'allstar' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 200,
-    reb: 0,
-    ast: 5,
-    ovr: 86,
-    nbaId: 1630615,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630615.png',
-    quote: 'Leading the Grit and Grind era in Memphis.'
+    pts: 206, // Total career wins
+    reb: 0, // Titles (focused on deep playoff runs)
+    ast: 6, // Years of experience as Head Coach
+    ovr: 90, // Known for high-intensity culture and player development
+    nbaId: 1610612763,
+    imageUrl: 'https://media-cldnry.s-nbcnews.com/image/upload/t_fit-560w,f_auto,q_auto:best/rockcms/2025-03/250328-Taylor-Jenkins-ch-1311-9a2c5b.jpg',
+    quote: "Building a 'Grit and Grind' culture for the modern era."
   },
   {
     id: 'coach-nop',
-    name: 'Willie Green',
+    name: 'James Borrego',
     team: 'New Orleans Pelicans',
     teamAbbr: 'NOP',
     position: 'Coach',
-    rarity: 'starter' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 120,
-    reb: 0,
-    ast: 3,
-    ovr: 84,
-    nbaId: 2584,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2584.png',
-    quote: 'Respected leader building a contender in New Orleans.'
+    pts: 158, // Total career wins as Head Coach
+    reb: 2, // NBA Championships (as Assistant with SAS)
+    ast: 6, // Years of experience as Head Coach
+    ovr: 89, // Highly rated for modern spacing and pace-and-space offense
+    nbaId: 203107,
+    imageUrl: 'https://cdn.nba.com/teams/uploads/sites/1610612740/2025/11/Borrego-new-coach.jpg?im=Resize=(640)',
+    quote: "Implementing a high-octane offensive system fueled by spacing and ball movement."
   },
   {
     id: 'coach-chi',
@@ -4803,16 +4743,16 @@ const rawCards = [
     team: 'Chicago Bulls',
     teamAbbr: 'CHI',
     position: 'Coach',
-    rarity: 'starter' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 400,
-    reb: 0,
-    ast: 9,
-    ovr: 83,
-    nbaId: 2022,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2022.png',
-    quote: 'Experienced coach leading the Bulls through transition.'
+    pts: 395, // Total NBA career wins
+    reb: 2, // NCAA Championships (as HC for Florida)
+    ast: 10, // Years of experience as an NBA Head Coach
+    ovr: 91, // Respected for his defensive systems and management
+    nbaId: 1610612741,
+    imageUrl: 'https://legacymedia.sportsplatform.io/image/upload/v1712920339/n7eyp8jwelzithlhthde.jpg',
+    quote: "A championship-winning strategist bringing veteran experience and grit to the Windy City."
   },
   {
     id: 'coach-atl',
@@ -4820,16 +4760,16 @@ const rawCards = [
     team: 'Atlanta Hawks',
     teamAbbr: 'ATL',
     position: 'Coach',
-    rarity: 'allstar' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 400,
-    reb: 0,
-    ast: 9,
-    ovr: 88,
-    nbaId: 203101,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203101.png',
-    quote: "Developing a high-IQ, fast-paced offensive system in Atlanta."
+    pts: 418, // Total career wins
+    reb: 0, // Titles as Head Coach
+    ast: 11, // Years of experience as Head Coach
+    ovr: 92, // Renowned for modern spacing and complex offensive systems
+    nbaId: 203104,
+    imageUrl: 'https://cloudfront-us-east-1.images.arcpublishing.com/sltrib/4GY4DHC5MVC2BBVQV4FCO53GPE.jpg',
+    quote: "A tactical genius crafting high-powered offenses with relentless attention to detail."
   },
   {
     id: 'coach-bkn',
@@ -4837,16 +4777,16 @@ const rawCards = [
     team: 'Brooklyn Nets',
     teamAbbr: 'BKN',
     position: 'Coach',
-    rarity: 'starter' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 10,
-    reb: 0,
-    ast: 1,
-    ovr: 80,
-    nbaId: 1630617,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630617.png',
-    quote: 'First Spanish head coach in NBA history.'
+    pts: 43, // Total career wins as an NBA Head Coach
+    reb: 1, // Bronze Medal at 2023 FIBA World Cup (as Head Coach of Canada)
+    ast: 2, // Years of experience as an NBA Head Coach
+    ovr: 88, // Rising star known for modern tactics and player connection
+    nbaId: 1610612751,
+    imageUrl: 'https://images.eurohoops.net/2023/09/616a2045-jordi-fernandez-torres-fiba-950x498.jpg',
+    quote: "The first Catalan head coach in NBA history, blending tactical precision with elite player development."
   },
   {
     id: 'coach-tor',
@@ -4854,16 +4794,16 @@ const rawCards = [
     team: 'Toronto Raptors',
     teamAbbr: 'TOR',
     position: 'Coach',
-    rarity: 'starter' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 30,
-    reb: 0,
-    ast: 1,
-    ovr: 81,
-    nbaId: 1630618,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630618.png',
-    quote: 'Player development focused coach leading the Raptors rebuild.'
+    pts: 55, // Total wins as Head Coach
+    reb: 0, // Titles as HC (focused on the rebuild)
+    ast: 2, // Years of experience as Head Coach
+    ovr: 87, // Respected for his offensive system and development skills
+    nbaId: 1610612761,
+    imageUrl: 'https://www.vmcdn.ca/f/files/shared/feeds/cp/2024/03/20240319140344-65f9dd978a481d8d1111b04ejpeg.jpg',
+    quote: "Implementing a selfless, fast-paced culture in the North."
   },
   {
     id: 'coach-uta',
@@ -4871,16 +4811,16 @@ const rawCards = [
     team: 'Utah Jazz',
     teamAbbr: 'UTA',
     position: 'Coach',
-    rarity: 'starter' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 70,
-    reb: 0,
-    ast: 2,
-    ovr: 84,
-    nbaId: 1630619,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630619.png',
-    quote: 'Young tactical mind leading the Jazz rebuild.'
+    pts: 68, // Total wins as Head Coach
+    reb: 0, // Titles as HC (building the Jazz future)
+    ast: 4, // Years of experience as Head Coach
+    ovr: 89, // One of the most respected young tacticians in the league
+    nbaId: 1610612762,
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/1a/WillHardy_2023_%28cropped%29.jpg',
+    quote: "A brilliant young mind focused on playing the right way with high-octane energy."
   },
   {
     id: 'coach-por',
@@ -4888,16 +4828,16 @@ const rawCards = [
     team: 'Portland Trail Blazers',
     teamAbbr: 'POR',
     position: 'Coach',
-    rarity: 'starter' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 80,
-    reb: 0,
-    ast: 3,
-    ovr: 82,
-    nbaId: 1503,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1503.png',
-    quote: 'Mr. Big Shot bringing his leadership to the Blazers bench.'
+    pts: 95, // Total wins as Head Coach
+    reb: 1, // NBA Championship (as player, 2004)
+    ast: 5, // Years of experience as Head Coach
+    ovr: 88, // Respected for his leadership and point guard mentality
+    nbaId: 1610612757,
+    imageUrl: 'https://dims.apnews.com/dims4/default/db20a45/2147483647/strip/true/crop/4012x2675+0+0/resize/599x399!/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2F1e%2F3f%2F49a8dde6c2b2c5b1b4428c4857e4%2Fd9d119974b9b4014aaf6c839313ac4c8',
+    quote: "A championship leader instilling toughness and 'Big Shot' poise in the next generation."
   },
   {
     id: 'coach-cha',
@@ -4905,16 +4845,16 @@ const rawCards = [
     team: 'Charlotte Hornets',
     teamAbbr: 'CHA',
     position: 'Coach',
-    rarity: 'starter' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 5,
-    reb: 0,
-    ast: 1,
-    ovr: 79,
+    pts: 15, // Current wins as a first-year Head Coach
+    reb: 2, // NBA Championships (as Assistant with MIL and BOS)
+    ast: 1, // First year as an NBA Head Coach
+    ovr: 88, // Highly regarded for his leadership and defensive focus
     nbaId: 1610612766,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1610612766.png',
-    quote: "Leading the Hornets' young core into a brand new era."
+    imageUrl: 'https://bostonglobe-prod.cdn.arcpublishing.com/resizer/v2/MBO5AQD3VF6GL7B26ITBD7MAZQ.jpg?auth=e1bd2870cd4ba956093d1eb3869399cbd53b4e8b70e9705e74b99fe7ae7af974&width=1440',
+    quote: "Bringing a championship-winning culture and elite tactical discipline to the Hornets."
   },
   {
     id: 'coach-det',
@@ -4922,16 +4862,16 @@ const rawCards = [
     team: 'Detroit Pistons',
     teamAbbr: 'DET',
     position: 'Coach',
-    rarity: 'starter' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 250,
-    reb: 0,
-    ast: 7,
-    ovr: 81,
-    nbaId: 2019,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2019.png',
-    quote: 'Experienced leader tasked with turning around the Pistons.'
+    pts: 255, // Career total wins
+    reb: 0, // Titles as Head Coach
+    ast: 9, // Years of experience as Head Coach
+    ovr: 89, // Respected for defensive identity and rebuilding programs
+    nbaId: 203106,
+    imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_156,w_4800,h_2700/c_fill,w_720,ar_16:9,f_auto,q_auto,g_auto/images/GettyImages/mmsport/67/01k71m35verj13d9by15.jpg',
+    quote: "Establishing a hard-nosed defensive culture and championship habits in the Motor City."
   },
   {
     id: 'coach-was',
@@ -4939,16 +4879,16 @@ const rawCards = [
     team: 'Washington Wizards',
     teamAbbr: 'WAS',
     position: 'Coach',
-    rarity: 'bench' as const,
+    rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 15,
-    reb: 0,
-    ast: 1,
-    ovr: 78,
-    nbaId: 1630622,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630622.png',
-    quote: 'Leading the Wizards through a new developmental phase.'
+    pts: 42, // Total NBA wins as Head Coach (through 2026)
+    reb: 1, // NBA Championship (as Video Coordinator with SAS, 2007)
+    ast: 3, // Years of experience as an NBA Head Coach
+    ovr: 87, // Expert in player development and modern defensive schemes
+    nbaId: 1610612764,
+    imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_fill,w_1200,ar_4:3,f_auto,q_auto,g_auto/images/ImagnImages/mmsport/150/01kkf48pgxy3mzq71zs4.jpg',
+    quote: "A dedicated teacher focused on building winning habits and elite player development."
   },
   // LEGENDARY MVP SERIES
   {
