@@ -93,7 +93,7 @@ function AppContent() {
 
   return (
     <div className="h-[100dvh] w-full bg-black text-white flex flex-col overflow-hidden font-sans selection:bg-amber-500 selection:text-black">
-      <StaticAd />
+      <StaticAd position="header" />
       <Header />
       {/* Main Content Area */}
       <main className="flex-1 overflow-hidden relative">
@@ -111,6 +111,7 @@ function AppContent() {
         </AnimatePresence>
       </main>
 
+      <StaticAd position="footer" />
       {/* NBA Premium Navigation Bar */}
       <nav className="h-16 bg-zinc-950 border-t border-zinc-900 flex items-center justify-around px-4 pb-2 shrink-0 z-50">
         {/* Collection */}
