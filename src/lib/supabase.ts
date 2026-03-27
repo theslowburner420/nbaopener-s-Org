@@ -11,6 +11,8 @@ export interface Profile {
   id: string;
   coins: number;
   cards: string[];
+  unlocked_achievements: string[];
+  inventory_packs: any[];
   username?: string;
   avatar_url?: string;
   updated_at?: string;

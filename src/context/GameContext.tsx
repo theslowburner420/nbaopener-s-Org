@@ -71,15 +71,25 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (error && error.code === 'PGRST116') {
-        // Profile doesn't exist, create it
+        // Profile doesn't exist, create it with initial balance
         const newProfile = {
           id: user.id,
-          coins: state.coins,
-          cards: state.collection,
-          ads_disabled: state.isPremium,
+          coins: 1000, // Saldo inicial
+          cards: [], // Colección vacía
+          unlocked_achievements: [],
+          inventory_packs: [],
+          ads_disabled: false,
         };
         await supabase.from('profiles').insert([newProfile]);
-        setState(prev => ({ ...prev, user: userData }));
+        setState(prev => ({ 
+          ...prev, 
+          user: userData,
+          coins: 1000,
+          collection: [],
+          unlockedAchievements: [],
+          inventoryPacks: [],
+          isPremium: false
+        }));
       } else if (profile) {
         // Profile exists, sync state
         setState(prev => ({
@@ -87,6 +97,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           user: userData,
           coins: profile.coins,
           collection: profile.cards || [],
+          unlockedAchievements: profile.unlocked_achievements || [],
+          inventoryPacks: profile.inventory_packs || [],
           isPremium: profile.ads_disabled || false,
         }));
       }
@@ -111,12 +123,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       supabase.from('profiles').update({
         coins: state.coins,
         cards: state.collection,
+        unlocked_achievements: state.unlockedAchievements,
+        inventory_packs: state.inventoryPacks,
         ads_disabled: state.isPremium,
       }).eq('id', state.user.id).then(({ error }) => {
         if (error) console.error('Failed to sync to Supabase', error);
       });
     }
-  }, [state.coins, state.collection, state.user, state.isPremium]);
+  }, [state.coins, state.collection, state.user, state.isPremium, state.unlockedAchievements, state.inventoryPacks]);
 
   useEffect(() => {
     localStorage.setItem('nba-opener-state', JSON.stringify(state));
