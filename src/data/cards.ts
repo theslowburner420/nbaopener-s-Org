@@ -6269,7 +6269,7 @@ const rawCards = [
     ast: 8.5,
     nbaId: 977,
     player2Id: 406,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
+    imageUrl: 'https://imagenes.elpais.com/resizer/v2/4YWLFOH6RAWZ7K6DALUY6ZAC5U.jpg?auth=c6aa064336e16462d7df23ef5d20fa1b15f9164824321a323d0a4f5259c8d06c&width=414',
     quote: 'The most dominant inside-outside duo in NBA history. 3-Peat Kings.'
   },
   {
@@ -6286,7 +6286,7 @@ const rawCards = [
     ast: 12.4,
     nbaId: 201939,
     player2Id: 202691,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png',
+    imageUrl: 'https://mir-s3-cdn-cf.behance.net/projects/404/3d1f09188483667.Y3JvcCwyMTYwLDE2ODksMCww.jpg',
     quote: 'Steph & Klay: Changed the game forever with the greatest shooting backcourt.'
   },
   {
@@ -6303,7 +6303,7 @@ const rawCards = [
     ast: 15.5,
     nbaId: 2544,
     player2Id: 2548,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
+    imageUrl: 'https://www.mundodeportivo.com/files/og_thumbnail/uploads/2021/12/07/61aef564ec572.jpeg',
     quote: 'LeBron & Wade: Fast-break perfection and two championships in South Beach.'
   },
   {
@@ -6320,7 +6320,7 @@ const rawCards = [
     ast: 6.4,
     nbaId: 1495,
     player2Id: 1122,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1495.png',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoOY4PBRVq9kdf66pXBapjdZLrDVCTBiOfdQ&s',
     quote: 'Duncan & Robinson: A defensive fortress that secured the Spurs\' dynasty.'
   },
   {
@@ -6337,7 +6337,7 @@ const rawCards = [
     ast: 8.2,
     nbaId: 1718,
     player2Id: 708,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1718.png',
+    imageUrl: 'https://a.espncdn.com/photo/2018/0210/r326449_1296x729_16-9.jpg',
     quote: 'Pierce & Garnett: The heart and soul of the 2008 Championship run.'
   },
   {
@@ -6354,7 +6354,7 @@ const rawCards = [
     ast: 18.2,
     nbaId: 203999,
     player2Id: 1627750,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203999.png',
+    imageUrl: 'https://imageio.forbes.com/specials-images/dam/imageserve/1147220931/960x0.jpg?height=458&width=711&fit=bounds',
     quote: 'Jokic & Murray: The most unstoppable two-man game in the modern era.'
   },
   {
@@ -6371,7 +6371,7 @@ const rawCards = [
     ast: 14.8,
     nbaId: 201142,
     player2Id: 201566,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png',
+    imageUrl: 'https://www.denverpost.com/wp-content/uploads/2018/02/gettyimages-114168932.jpg?w=1024&h=673',
     quote: 'Durant & Westbrook: Pure scoring power and explosive athleticism.'
   },
   {
@@ -6388,7 +6388,7 @@ const rawCards = [
     ast: 18.5,
     nbaId: 201933,
     player2Id: 101108,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201933.png',
+    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fphoto%2F2015%2F0514%2Fla_u_paulgriff_1296x729.jpg',
     quote: 'Griffin & Paul: Turned the Clippers into the most exciting show in sports.'
   },
   {
@@ -6405,7 +6405,7 @@ const rawCards = [
     ast: 10.2,
     nbaId: 203507,
     player2Id: 203114,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png',
+    imageUrl: 'https://a.espncdn.com/photo/2021/0715/r880599_1296x729_16-9.jpg',
     quote: 'Giannis & Middleton: The duo that brought the title back to Milwaukee.'
   },
   {
@@ -6422,7 +6422,7 @@ const rawCards = [
     ast: 16.5,
     nbaId: 1629029,
     player2Id: 202681,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png',
+    imageUrl: 'https://assets-cms.thescore.com/uploads/image/file/630218/w640xh480_GettyImages-2153900965.jpg?ts=1716643291',
     quote: 'Two of the most skilled ball-handlers to ever share a backcourt.'
   },
   {
@@ -6439,7 +6439,7 @@ const rawCards = [
     ast: 8.2,
     nbaId: 201188,
     player2Id: 201938,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201188.png',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTieaCDxulGkha9jWhLfcVw1S2Asau3gxtFEQ&s',
     quote: 'Gasol & Randolph: Bully ball at its finest. The heart of Memphis grit.'
   },
   {
@@ -6456,7 +6456,7 @@ const rawCards = [
     ast: 10.8,
     nbaId: 203954,
     player2Id: 1630178,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203954.png',
+    imageUrl: 'https://cdn.abcotvs.com/dip/images/14775146_050624-wpvi-maxey-embiid-img.jpg',
     quote: 'Embiid & Maxey: The dominant MVP center and the fastest guard in the East.'
   },
   {
@@ -6473,25 +6473,25 @@ const rawCards = [
     ast: 9.2,
     nbaId: 1627759,
     player2Id: 1628369,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627759.png',
+    imageUrl: 'https://cdn.nba.com/manage/2024/06/tatum-brown-060424.jpg',
     quote: 'Brown & Tatum: The two-way wings that restored the Celtics\' glory.'
   },
-  {
+ {
     id: 'duo-014',
-    name: 'The Lob City 2.0',
-    team: 'Sacramento Kings',
-    teamAbbr: 'SAC',
-    position: 'G-C',
+    name: 'The Dynamic Duo',
+    team: 'Chicago Bulls',
+    teamAbbr: 'CHI',
+    position: 'G-F',
     rarity: 'legend' as const,
     category: 'Duo' as const,
-    isHistorical: false,
-    pts: 46.5,
-    reb: 18.2,
-    ast: 16.4,
-    nbaId: 1628368,
-    player2Id: 1628374,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628368.png',
-    quote: 'Fox & Sabonis: The fastest duo in transition. Light the Beam!'
+    isHistorical: true,
+    pts: 52.4,
+    reb: 13.1,
+    ast: 11.4,
+    nbaId: 893, // Michael Jordan
+    player2Id: 711, // Scottie Pippen
+    imageUrl: 'https://media.newyorker.com/photos/5e9df8b7ac4b8100087487d5/master/pass/Thomas-TheLastDanceMJ.jpg',
+    quote: 'Jordan & Pippen: 6 Rings. Unstoppable offense, suffocating defense. The GOAT duo.'
   },
   {
     id: 'duo-015',
@@ -6507,25 +6507,25 @@ const rawCards = [
     ast: 12.5,
     nbaId: 200746,
     player2Id: 200745,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/200746.png',
+    imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/pistons/sites/pistons/files/wallace_billups_800.jpg',
     quote: 'Billups & Wallace: The backcourt and paint leaders of the 2004 upset.'
   },
   {
     id: 'duo-016',
-    name: 'The Knickstape',
-    team: 'New York Knicks',
-    teamAbbr: 'NYK',
-    position: 'G-F',
+    name: 'The Original Bad Boys',
+    team: 'Detroit Pistons',
+    teamAbbr: 'DET',
+    position: 'G-G',
     rarity: 'legend' as const,
     category: 'Duo' as const,
-    isHistorical: false,
-    pts: 42.5,
-    reb: 12.8,
-    ast: 14.2,
-    nbaId: 1629029,
-    player2Id: 1628973,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png',
-    quote: 'Brunson & Hart: Pure hustle and Nova-DNA leading the New York resurgence.'
+    isHistorical: true,
+    pts: 40.2,
+    reb: 7.1,
+    ast: 14.5,
+    nbaId: 78318, // Isiah Thomas
+    player2Id: 76606, // Joe Dumars
+    imageUrl: 'https://a.espncdn.com/photo/2020/0501/r694475_667x376_16-9.jpg',
+    quote: 'Thomas & Dumars: Back-to-back Champions. The toughest backcourt in NBA history.'
   },
   {
     id: 'duo-017',
@@ -6541,7 +6541,7 @@ const rawCards = [
     ast: 12.2,
     nbaId: 202710,
     player2Id: 1628389,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202710.png',
+    imageUrl: 'https://www.sun-sentinel.com/wp-content/uploads/2023/05/TFL-FL0130292884.jpg?w=525',
     quote: 'Butler & Adebayo: Defensive intensity and clutch play in the 305.'
   },
   {
@@ -6558,7 +6558,7 @@ const rawCards = [
     ast: 14.5,
     nbaId: 201565,
     player2Id: 201149,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201565.png',
+    imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_fill,w_720,ar_16:9,f_auto,q_auto,g_auto/shape/cover/sport/2f7af99b9fcd2c5eb3ab6bc339663c0b1d6d3de8c04555b4d9ed5dfb42df8cd7.jpg',
     quote: 'Derrick Rose & Noah: The youngest MVP and the DPOY heart of Chicago.'
   },
   {
@@ -6575,8 +6575,8 @@ const rawCards = [
     ast: 12.5,
     nbaId: 1628983,
     player2Id: 1641706,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628983.png',
-    quote: 'SGA & Chet: The dynamic future of the Thunder. Elite two-way potential.'
+    imageUrl: 'https://braze-images.com/appboy/communication/assets/image_assets/images/68591d92d972fd0074f3c832/original.png?1750670738',
+    quote: 'SGA & J-Dub: The dynamic future of the Thunder. Elite two-way potential.'
   },
  {
     id: 'moment-curry-bang-bang',
@@ -6620,7 +6620,7 @@ const rawCards = [
     ast: 11,
     nbaId: 2544,
     year: 2016,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
+    imageUrl: 'https://media.tenor.com/5Z0KOZ1aZZYAAAAM/blocked-bye-felicia.gif',
     quote: "The defensive play that secured Cleveland's first title."
   },
   {
@@ -6637,25 +6637,25 @@ const rawCards = [
     ast: 3,
     nbaId: 202695,
     year: 2019,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202695.png',
+    imageUrl: 'https://media.tenor.com/xJIif7fVqfUAAAAM/kawhi-the-shot.gif',
     quote: 'Four bounces on the rim before sinking the Sixers in Toronto.'
   },
   {
     id: 'moment-004',
-    name: 'The Valley-Oop',
-    team: 'Phoenix Suns',
-    teamAbbr: 'PHX',
-    position: 'C',
+    name: 'The Bad Shot',
+    team: 'Portland Trail Blazers',
+    teamAbbr: 'POR',
+    position: 'G',
     rarity: 'legend' as const,
     category: 'Moment' as const,
-    isHistorical: false,
-    pts: 24,
-    reb: 14,
-    ast: 1,
-    nbaId: 1629028,
-    year: 2021,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629028.png',
-    quote: 'The last-second dunk that sent the Suns to the NBA Finals.'
+    isHistorical: true,
+    pts: 50,
+    reb: 7,
+    ast: 6,
+    nbaId: 203081,
+    year: 2019,
+    imageUrl: 'https://64.media.tumblr.com/5e30c60bbc746d5366cb6a5a043765c9/tumblr_pqhezcs1p81u2klrwo1_400.gif',
+    quote: '50 points and a series-clinching deep triple. "That’s a bad shot."'
   },
   {
     id: 'moment-005',
