@@ -170,27 +170,27 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
         )}
 
         {/* Header (Pokémon Style) */}
-        <div className="px-3 py-1.5 flex justify-between items-center z-20 min-h-[50px]">
+        <div className="px-3 py-1 flex justify-between items-center z-20 min-h-[40px]">
           <div className="flex flex-col flex-1 min-w-0 pr-2">
-            <h3 className={`text-lg md:text-xl font-black uppercase tracking-tighter leading-[0.9] drop-shadow-sm italic ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'} break-words line-clamp-2`}>
+            <h3 className={`text-base md:text-lg font-black uppercase tracking-tighter leading-[0.9] drop-shadow-sm italic ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'} break-words line-clamp-2`}>
               {card.name}
             </h3>
-            <span className={`text-[8px] md:text-[10px] font-bold uppercase tracking-widest mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis ${isDarkCard ? 'card-text-secondary' : 'text-zinc-700'} ${isXFactor ? 'font-mono tracking-[0.2em] text-blue-300' : ''}`}>
+            <span className={`text-[7px] md:text-[9px] font-bold uppercase tracking-widest mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis ${isDarkCard ? 'card-text-secondary' : 'text-zinc-700'} ${isXFactor ? 'font-mono tracking-[0.2em] text-blue-300' : ''}`}>
               {isXFactor ? 'X-FACTOR' : card.subtitle}
             </span>
           </div>
           <div className="flex items-center gap-0.5 shrink-0">
-            <span className={`text-[9px] font-bold uppercase drop-shadow-sm ${isDarkCard ? 'text-red-400' : 'text-red-700'}`}>
+            <span className={`text-[8px] font-bold uppercase drop-shadow-sm ${isDarkCard ? 'text-red-400' : 'text-red-700'}`}>
               OVR
             </span>
-            <span className={`text-2xl font-black leading-none drop-shadow-sm italic ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'}`}>
+            <span className={`text-xl md:text-2xl font-black leading-none drop-shadow-sm italic ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'}`}>
               {card.stats.ovr}
             </span>
           </div>
         </div>
 
         {/* Photo Area (Modern Pokémon Style Frame) */}
-        <div className="relative mx-2 mt-1 bg-white overflow-hidden rounded-sm border-[1.5px] border-black/10 shadow-md z-30 flex-1">
+        <div className="relative mx-2 mt-0.5 bg-white overflow-hidden rounded-sm border-[1.5px] border-black/10 shadow-md z-30 flex-[2] min-h-0">
           <div className="w-full h-full relative overflow-hidden bg-zinc-200">
             {(card.category === 'Duo' || card.category === 'All-Star MVP') && card.player2Id ? (
               <div className="flex w-full h-full">
@@ -231,71 +231,71 @@ const CardItem: React.FC<CardItemProps> = ({ card, isOwned, mode = 'mini', onCli
         </div>
 
         {/* Skills / Stats Section (Pokémon Attack Style - Horizontal) */}
-        <div className="px-4 py-2 flex flex-col justify-center z-10">
-          <div className={`flex items-center justify-around py-2 border-b ${isDarkCard ? 'card-border-subtle' : 'border-black/5'}`}>
+        <div className="px-3 py-1 flex flex-col justify-center z-10 shrink-0">
+          <div className={`flex items-center justify-around py-1 border-b ${isDarkCard ? 'card-border-subtle' : 'border-black/5'}`}>
             {/* PTS / WINS */}
             <div className="flex flex-col items-center">
-              <div className="w-4 h-4 rounded-full bg-amber-400 border border-amber-600 shadow-sm mb-0.5" />
-              <span className={`text-[10px] font-black ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'}`}>
+              <div className="w-3.5 h-3.5 rounded-full bg-amber-400 border border-amber-600 shadow-sm mb-0.5" />
+              <span className={`text-[9px] font-black ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'}`}>
                 {card.stats.points} <span className={`text-[6px] opacity-60 ${isDarkCard ? 'card-text-muted' : ''}`}>{card.category === 'Coach' ? 'WINS' : 'PTS'}</span>
               </span>
             </div>
             {/* REB / TITLES */}
             <div className="flex flex-col items-center">
-              <div className="w-4 h-4 rounded-full bg-zinc-400 border border-zinc-600 shadow-sm mb-0.5" />
-              <span className={`text-[10px] font-black ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'}`}>
+              <div className="w-3.5 h-3.5 rounded-full bg-zinc-400 border border-zinc-600 shadow-sm mb-0.5" />
+              <span className={`text-[9px] font-black ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'}`}>
                 {card.stats.rebounds} <span className={`text-[6px] opacity-60 ${isDarkCard ? 'card-text-muted' : ''}`}>{card.category === 'Coach' ? 'TITLES' : 'REB'}</span>
               </span>
             </div>
             {/* AST / EXP */}
             <div className="flex flex-col items-center">
-              <div className="w-4 h-4 rounded-full bg-blue-400 border border-blue-600 shadow-sm mb-0.5" />
-              <span className={`text-[10px] font-black ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'}`}>
+              <div className="w-3.5 h-3.5 rounded-full bg-blue-400 border border-blue-600 shadow-sm mb-0.5" />
+              <span className={`text-[9px] font-black ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'}`}>
                 {card.stats.assists} <span className={`text-[6px] opacity-60 ${isDarkCard ? 'card-text-muted' : ''}`}>{card.category === 'Coach' ? 'EXP' : 'AST'}</span>
               </span>
             </div>
           </div>
 
           {/* Description (Pokémon Flavor Text) */}
-          <div className="mt-2 px-1">
-            <p className={`text-[9px] italic leading-tight text-center line-clamp-2 font-medium ${isDarkCard ? 'card-text-secondary' : 'text-zinc-800'}`}>
+          <div className="mt-1 px-1">
+            <p className={`text-[8px] italic leading-tight text-center line-clamp-2 font-medium ${isDarkCard ? 'card-text-secondary' : 'text-zinc-800'}`}>
               "{card.description}"
             </p>
           </div>
         </div>
 
         {/* Bottom Info (Pokémon Style) */}
-        <div className={`px-4 py-2 border-t z-10 ${isDarkCard ? 'card-border-subtle' : 'border-black/10'}`}>
+        <div className={`px-3 py-1.5 border-t z-10 shrink-0 ${isDarkCard ? 'card-border-subtle' : 'border-black/10'}`}>
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {card.teamLogoUrl && (
                 <img 
                   src={card.teamLogoUrl} 
                   alt={`${card.team} logo`} 
-                  className="w-8 h-8 object-contain drop-shadow-sm"
+                  className="w-6 h-6 object-contain drop-shadow-sm"
                   referrerPolicy="no-referrer"
                   loading="lazy"
                 />
               )}
               <div className="flex flex-col min-w-0 flex-1">
-                <span className={`text-[7px] font-black uppercase ${isDarkCard ? 'card-text-muted' : 'text-zinc-600'}`}>Team</span>
-                <span className={`text-[9px] font-black uppercase tracking-tighter leading-tight break-words line-clamp-2 ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'}`}>
+                <span className={`text-[6px] font-black uppercase ${isDarkCard ? 'card-text-muted' : 'text-zinc-600'}`}>Team</span>
+                <span className={`text-[8px] font-black uppercase tracking-tighter leading-tight break-words line-clamp-1 ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'}`}>
                   {card.team}
                 </span>
                 {card.coach && (
-                  <span className={`text-[6px] font-bold italic truncate ${isDarkCard ? 'card-text-muted' : 'text-zinc-500'}`}>
+                  <span className={`text-[5px] font-bold italic truncate ${isDarkCard ? 'card-text-muted' : 'text-zinc-500'}`}>
                     Coach: {card.coach}
                   </span>
                 )}
               </div>
             </div>
             <div className="flex flex-col items-center">
-              <span className={`text-[7px] font-black uppercase ${isDarkCard ? 'card-text-muted' : 'text-zinc-600'}`}>Rarity</span>
-              <div className="w-3 h-3 rounded-full border border-black/20" style={{ backgroundColor: RarityColor }} />
+              <span className={`text-[6px] font-black uppercase ${isDarkCard ? 'card-text-muted' : 'text-zinc-600'}`}>Rarity</span>
+              <div className="w-2.5 h-2.5 rounded-full border border-black/20" style={{ backgroundColor: RarityColor }} />
             </div>
             <div className="flex flex-col items-end">
-              <span className={`text-[7px] font-black uppercase ${isDarkCard ? 'card-text-muted' : 'text-zinc-600'}`}>Card No.</span>
-              <span className={`text-[9px] font-bold ${isDarkCard ? 'card-text-primary' : 'text-zinc-800'}`}>
+              <span className={`text-[6px] font-black uppercase ${isDarkCard ? 'card-text-muted' : 'text-zinc-600'}`}>Card No.</span>
+              <span className={`text-[8px] font-bold ${isDarkCard ? 'card-text-primary' : 'text-zinc-800'}`}>
                 #{card.number}
               </span>
             </div>

@@ -97,13 +97,19 @@ const RarityBanner = React.memo(({ rarity, color }: { rarity: Rarity, color: str
   return (
     <motion.div
       initial={{ width: 0, opacity: 0 }}
-      animate={{ width: '100vw', opacity: 0.1 }}
+      animate={{ width: '100vw', opacity: 0.15 }}
       exit={{ width: 0, opacity: 0 }}
-      className="absolute top-1/2 -translate-y-1/2 h-24 pointer-events-none z-0"
-      style={{ backgroundColor: color, filter: 'blur(20px)' }}
+      className="absolute top-1/2 -translate-y-1/2 h-32 pointer-events-none z-0"
+      style={{ backgroundColor: color, filter: 'blur(30px)' }}
     />
   );
 });
+
+const ShimmerOverlay = React.memo(() => (
+  <div className="absolute inset-0 pointer-events-none z-[60] overflow-hidden rounded-xl">
+    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full animate-shimmer-sweep" />
+  </div>
+));
 
 const Shockwave = React.memo(({ color }: { color: string }) => {
   return (
@@ -209,23 +215,19 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
   const totalCards = cards.length;
 
   React.useEffect(() => {
-    // Only trigger the "Epic Reveal" for the very first card when the pack is first opened
+    // Trigger a quick reveal effect for every card change
+    setIsRevealing(true);
+    
+    const card = cards[activeCardIndex];
+    const rarity = card.rarity;
+    const isHighRarity = rarity === 'legend' || rarity === 'dpoy' || rarity === 'roty' || rarity === 'record' || rarity === 'rookie' || card.category === 'Dynasty';
+    
+    // Initial pack opening logic
     if (activeCardIndex === 0 && !hasOpenedPack) {
-      setIsRevealing(true);
       setShowPack(true);
-      
-      const card = cards[activeCardIndex];
-      const rarity = card.rarity;
-      const isDynasty = card.category === 'Dynasty';
-      const isXFactor = card.category === 'X-Factor';
-      
-      // Optimized reveal durations
-      const duration = (rarity === 'legend' || rarity === 'dpoy' || rarity === 'roty' || rarity === 'record' || rarity === 'rookie' || isDynasty) ? 2200 : 
-                      (isXFactor || card.category === 'All-Star MVP') ? 1500 :
-                      rarity === 'franchise' ? 1800 : 
-                      rarity === 'allstar' ? 1200 : 800;
-      
       const packTimer = setTimeout(() => setShowPack(false), 800);
+      
+      const duration = isHighRarity ? 2200 : 1200;
       const revealTimer = setTimeout(() => {
         setIsRevealing(false);
         setHasOpenedPack(true);
@@ -236,9 +238,14 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
         clearTimeout(revealTimer);
       };
     } else {
-      // For subsequent cards or when swiping back, show immediately without blocking animations
-      setIsRevealing(false);
+      // Quick flash/reveal for subsequent cards
       setShowPack(false);
+      const duration = isHighRarity ? 1200 : 600;
+      const revealTimer = setTimeout(() => {
+        setIsRevealing(false);
+      }, duration);
+      
+      return () => clearTimeout(revealTimer);
     }
   }, [activeCardIndex, cards, hasOpenedPack]);
 
@@ -269,46 +276,51 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
     const isUnseen = index > activeCardIndex;
 
     if (isActive) {
-      // Center active card - slightly reduced scale for better visibility on all screens
-      // Move up slightly on mobile to avoid overlapping with bottom buttons
+      // Center active card - optimized for full visibility
       return { 
         x: 0, 
-        y: isMobile ? -30 : 0, 
-        scale: isMobile ? 0.9 : 1.05, 
+        y: 0, 
+        scale: isMobile ? 0.85 : 1, 
         rotate: 0, 
         zIndex: 100 
       };
     }
 
     if (isSeen) {
-      // Fan stack on the left (using vw for mobile responsiveness)
+      // Compact fan stack on the left - much closer to the center
       const distanceFromActive = activeCardIndex - index;
-      const angle = -15 - (distanceFromActive * 4);
-      // Mobile: 32vw, Desktop: 400px (approx 25vw on large screens)
-      const xPos = `calc(-35vw - ${distanceFromActive * 10}px)`;
-      const yPos = 20 + (distanceFromActive * 10);
+      // Only show the top 3-4 cards in the stack for performance and clarity
+      if (distanceFromActive > 5) return { x: -100, y: 100, scale: 0, rotate: -45, zIndex: 0, opacity: 0 };
+      
+      const angle = -8 - (distanceFromActive * 2);
+      const xOffset = -15 - (distanceFromActive * 12);
+      const yOffset = 5 + (distanceFromActive * 4);
       
       return { 
-        x: xPos, 
-        y: yPos, 
-        scale: 0.35, 
+        x: xOffset, 
+        y: yOffset, 
+        scale: 0.8, 
         rotate: angle, 
-        zIndex: 50 - distanceFromActive
+        zIndex: 50 - distanceFromActive,
+        opacity: 1
       };
     }
 
-    // Fan stack on the right (using vw for mobile responsiveness)
+    // Compact fan stack on the right (unseen cards)
     const distanceFromActive = index - activeCardIndex;
-    const angle = 15 + (distanceFromActive * 4);
-    const xPos = `calc(35vw + ${distanceFromActive * 10}px)`;
-    const yPos = 20 + (distanceFromActive * 10);
+    if (distanceFromActive > 5) return { x: 100, y: 100, scale: 0, rotate: 45, zIndex: 0, opacity: 0 };
+
+    const angle = 8 + (distanceFromActive * 2);
+    const xOffset = 15 + (distanceFromActive * 12);
+    const yOffset = 5 + (distanceFromActive * 4);
 
     return { 
-      x: xPos, 
-      y: yPos, 
-      scale: 0.35, 
+      x: xOffset, 
+      y: yOffset, 
+      scale: 0.8, 
       rotate: angle, 
-      zIndex: 50 - distanceFromActive 
+      zIndex: 50 - distanceFromActive,
+      opacity: 1
     };
   }, [activeCardIndex, isMobile]);
 
@@ -317,12 +329,12 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`fixed inset-0 z-[2000] bg-black/98 flex flex-col items-center overflow-hidden h-[100dvh] select-none pt-[140px] ${
+      className={`fixed inset-0 z-[2000] bg-black/98 flex flex-col items-center justify-center overflow-hidden h-[100dvh] select-none ${
         isRevealing ? 'animate-screen-shake-intense' : ''
       }`}
     >
-      {/* Dark Overlay for focus - moved to z-0 to not block interactions */}
-      <div className="absolute inset-0 bg-black/60 z-0" />
+      {/* Dark Overlay for focus */}
+      <div className="absolute inset-0 bg-black/80 z-0" />
 
       {/* Ad Banner at the top with elegant margin */}
       <div className="absolute top-4 left-0 right-0 z-[500] px-4">
@@ -366,13 +378,8 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
               color={getRarityColor(cards[activeCardIndex].rarity)} 
             />
 
-            {/* Initial White Flash */}
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 1, 0] }}
-              transition={{ duration: 0.4, times: [0, 0.1, 1] }}
-              className="absolute inset-0 bg-white z-[3000]"
-            />
+            {/* Intense White Flash */}
+            <div className="absolute inset-0 bg-white z-[3000] animate-white-flash-intense pointer-events-none" />
 
             {/* Shockwave for all reveals */}
             <div 
@@ -685,7 +692,8 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
         )}
       </AnimatePresence>
 
-      <div className="relative w-full h-full flex items-center justify-center overflow-visible z-10">
+      {/* Main Card Area - Centered and responsive */}
+      <div className="flex-1 w-full flex items-center justify-center relative z-10">
         {cards.map((card, index) => {
           const isActive = index === activeCardIndex;
           const isAllStar = card.rarity === 'allstar';
@@ -699,7 +707,7 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
 
           return (
             <motion.div
-              key={`${card.id}-${index}`}
+              key={`${card.id}-${index}-${activeCardIndex === index}`}
               drag={isActive ? "x" : false}
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.8}
@@ -724,14 +732,12 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
                 y: pos.y,
                 scale: pos.scale,
                 rotate: pos.rotate,
-                opacity: 1,
+                opacity: pos.opacity ?? 1,
                 zIndex: pos.zIndex,
+                filter: isActive ? 'brightness(1) contrast(1)' : 'brightness(0.2) contrast(0.7)',
               }}
-              whileHover={!isActive ? { 
-                scale: pos.scale * 1.15, 
-                rotate: pos.rotate * 0.8,
-                zIndex: 150,
-                filter: 'brightness(1.1) contrast(1.1)',
+              whileHover={isActive ? { 
+                scale: 1.02,
                 transition: { duration: 0.2 }
               } : {}}
               transition={{ 
@@ -740,8 +746,12 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
                 damping: 30,
                 mass: 0.8
               }}
-              className={`absolute w-[240px] md:w-[280px] aspect-[2.5/3.5] cursor-pointer touch-none ${
+              className={`absolute w-[260px] md:w-[320px] max-h-[75vh] aspect-[2.5/3.5] touch-none ${
+                !isActive ? 'pointer-events-none' : 'cursor-pointer'
+              } ${
                 isActive && isRevealing ? 'animate-impact-scale' : ''
+              } ${
+                isActive && (isLegend || isRecord || isFranchise || isDPOY || isROTY || isRookie) ? 'animate-aura-pulse' : ''
               } ${
                 isActive && isFranchise && isRevealing ? 'animate-franchise-reveal animate-intense-glow-franchise' : ''
               } ${
@@ -760,14 +770,18 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
                 isActive && (isLegend || isRecord) && !isRevealing ? (isLegend || isRecord ? 'animate-intense-glow-legend' : 'animate-intense-glow-record') : ''
               } ${
                 isActive && isAllStar && !isRevealing ? 'animate-intense-glow-allstar' : ''
-              } ${!isActive ? 'hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] rounded-xl' : ''}`}
+              } ${!isActive ? 'rounded-xl overflow-hidden' : ''}`}
               style={{
                 animationDuration: (isLegend || isDPOY || isROTY || isRookie) && isRevealing ? '2.5s' : '1.5s',
-                willChange: 'transform, opacity'
-              }}
+                willChange: 'transform, opacity',
+                '--aura-color': getRarityColor(card.rarity)
+              } as any}
               onClick={() => handleCardClick(index)}
             >
               <div className={`w-full h-full ${isActive && (isLegend || isDPOY || isROTY || isFranchise || isRecord || isRookie) ? 'relative' : ''}`}>
+                {/* Shimmer effect for high rarity */}
+                {isActive && (isLegend || isRecord || isFranchise || isDPOY || isROTY || isRookie) && <ShimmerOverlay />}
+
                 {/* God Rays for High Rarity */}
                 <RarityBackgroundEffect rarity={card.rarity} isActive={isActive} isRevealing={isRevealing} />
 
@@ -807,16 +821,6 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
                   </div>
                 )}
               </div>
-              
-              {/* Interaction indicator */}
-              {!isActive && (
-                <div className="absolute inset-0 bg-white/5 rounded-xl flex items-center justify-center opacity-0 hover:opacity-100 transition-all duration-300 backdrop-blur-[1px]">
-                  <div className="flex flex-col items-center gap-2">
-                    <Sparkles className="text-white/70 animate-pulse" size={32} />
-                    <span className="text-[10px] font-black text-white/70 uppercase tracking-[0.2em]">View</span>
-                  </div>
-                </div>
-              )}
             </motion.div>
           );
         })}
