@@ -8475,7 +8475,7 @@ const rawCards = [
     reb: 6.4,
     ast: 5.8,
     nbaId: 1628983,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628983.png',
+    imageUrl: 'https://platform.aseaofblue.com/wp-content/uploads/sites/13/chorus/uploads/chorus_asset/file/26050692/2220902781.jpg?quality=90&strip=all&crop=0%2C7.0565403027559%2C100%2C44.43869409583&w=2400',
     quote: 'The New Era: Led OKC to their first title in the modern era with clinical scoring.'
   },
   {
@@ -8492,7 +8492,7 @@ const rawCards = [
     reb: 5.4,
     ast: 5.0,
     nbaId: 1627759,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627759.png',
+    imageUrl: 'https://basketnews.com/image-416945-crop516x516.jpg',
     quote: 'Banner 18: The two-way force that secured Boston\'s record-breaking championship.'
   },
   {
@@ -8509,7 +8509,7 @@ const rawCards = [
     reb: 14.0,
     ast: 7.2,
     nbaId: 203999,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203999.png',
+    imageUrl: 'https://www.denverpost.com/wp-content/uploads/2023/06/TDP-L-NUGGETS-HEAT_AAO0928x.jpg?w=1024&h=683',
     quote: 'Mile High Magic: First center to lead the league in total points, rebounds, and assists in playoffs.'
   },
   {
@@ -8526,7 +8526,7 @@ const rawCards = [
     reb: 6.0,
     ast: 5.0,
     nbaId: 201939,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png',
+    imageUrl: 'https://people.com/thmb/MukObFBFmhP-kVZtL-cNB4rjiiw=/4000x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(674x319:676x321)/nba-finals-2022-steph-curry-3-2000-18e06f29b0fc4abab69b346223c62f9d.jpg',
     quote: 'The Missing Piece: Cemented his legacy with a legendary 31.2 PPG performance.'
   },
   {
@@ -8543,7 +8543,7 @@ const rawCards = [
     reb: 13.2,
     ast: 5.0,
     nbaId: 203507,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png',
+    imageUrl: 'https://www.conchovalleyhomepage.com/wp-content/uploads/sites/83/2021/07/e967b71e6cd943eaa7567028ebb97c43.jpg',
     quote: '50-Piece Closure: Ended the 50-year drought with 50 points in the clinching Game 6.'
   },
   {
@@ -8560,7 +8560,7 @@ const rawCards = [
     reb: 11.8,
     ast: 8.5,
     nbaId: 2544,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
+    imageUrl: 'https://cdn.nba.com/manage/2020/10/lebron-finals-mvp-trophy-2020-scaled-e1603202751519.jpg',
     quote: 'Bubble King: First player to win Finals MVP with three different franchises.'
   },
   {
@@ -8577,7 +8577,7 @@ const rawCards = [
     reb: 9.8,
     ast: 4.2,
     nbaId: 202695,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202695.png',
+    imageUrl: 'https://images.eurohoops.net/2019/06/4a9c2624-kawhi-625x375.jpg',
     quote: 'The North King: Led Canada to its first NBA title in a historic playoff run.'
   },
   {
@@ -8594,7 +8594,7 @@ const rawCards = [
     reb: 10.8,
     ast: 7.5,
     nbaId: 201142,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png',
+    imageUrl: 'https://images.seattletimes.com/wp-content/uploads/2018/06/2329fb6034014c78998db1f1a46e83a0.jpg?d=780x1069',
     quote: 'Back-to-Back: Averaged 28.8 points to secure the Warriors\' second straight title.'
   },
   {
@@ -8611,7 +8611,7 @@ const rawCards = [
     reb: 8.2,
     ast: 5.4,
     nbaId: 201142,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png',
+    imageUrl: 'https://ww2.hdnux.com/photos/61/64/55/13075534/5/2000x0.jpg',
     quote: 'The Ultimate Weapon: 35.2 PPG on 55/47/92 shooting splits in his first title run.'
   },
   {
@@ -8628,7 +8628,7 @@ const rawCards = [
     reb: 11.3,
     ast: 8.9,
     nbaId: 2544,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
+    imageUrl: 'https://a.espncdn.com/photo/2016/0619/r94462_1296x729_16-9.jpg',
     quote: 'The Promise Kept: Led the only 3-1 comeback in Finals history for Cleveland.'
   },
   {
@@ -8645,7 +8645,7 @@ const rawCards = [
     reb: 5.8,
     ast: 4.0,
     nbaId: 2738,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2738.png',
+    imageUrl: 'https://www.mercurynews.com/wp-content/uploads/2016/08/20150616__WARRIORS-06174.jpg?w=1024',
     quote: 'The Specialist: The first winner to not start a single game during the regular season.'
   },
   {
@@ -8662,7 +8662,7 @@ const rawCards = [
     reb: 6.4,
     ast: 2.0,
     nbaId: 202695,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202695.png',
+    imageUrl: 'https://pbs.twimg.com/media/GWEiHlYXcAAk0a1.jpg',
     quote: 'The Rising Klaw: Shut down the Heat dynasty at just 22 years old.'
   },
   {
@@ -8679,7 +8679,7 @@ const rawCards = [
     reb: 10.9,
     ast: 7.0,
     nbaId: 2544,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
+    imageUrl: 'https://s.yimg.com/ny/api/res/1.2/GjaOL2jX12bQZV55WHrNeg--/YXBwaWQ9aGlnaGxhbmRlcjt3PTYzMDtoPTQ3NDtjZj13ZWJw/https://media.zenfs.com/en/blogs/sptusnbaexperts/LeBron-James-celebrates-the-Heats-second-straight-NBA-title-and-his-NBA-Finals-MVP.-Steve-Mitchell-USA-TODAY-Sports.jpg',
     quote: 'Back-to-Back: 37 points and 12 rebounds in an epic Game 7 against the Spurs.'
   },
   {
@@ -8696,7 +8696,7 @@ const rawCards = [
     reb: 10.2,
     ast: 7.4,
     nbaId: 2544,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
+    imageUrl: 'https://pbs.twimg.com/media/CHgoTyLUEAAHH-_.jpg',
     quote: 'First Ring: Finally reached the mountain top with a triple-double in the clincher.'
   },
   {
@@ -8713,7 +8713,7 @@ const rawCards = [
     reb: 9.7,
     ast: 2.0,
     nbaId: 1717,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1717.png',
+    imageUrl: 'https://legacymedia.sportsplatform.io/images_root/slides/photos/001/011/814/115950832_original.jpg?1307960071',
     quote: 'German Precision: Defeated the "Big Three" with one of the greatest solo carry jobs ever.'
   },
   {
@@ -8730,7 +8730,7 @@ const rawCards = [
     reb: 8.0,
     ast: 3.9,
     nbaId: 977,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
+    imageUrl: 'https://covingtonnews.cdn-anvilcms.net/media/images/2022/06/15/images/Screen_Shot_2022-06-13_at_4.05.55_PM.max-752x423.png',
     quote: 'Revenge: Secured his 5th ring by defeating the Celtics in a gritty 7-game battle.'
   },
   {
@@ -8747,7 +8747,7 @@ const rawCards = [
     reb: 5.6,
     ast: 7.4,
     nbaId: 977,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
+    imageUrl: 'https://i.pinimg.com/736x/18/e3/9a/18e39a8703e3bebb230363b36d1d8c40.jpg',
     quote: 'Mamba Out: Proved he could win as the main leader, averaging 32.4 PPG.'
   },
   {
@@ -8764,7 +8764,7 @@ const rawCards = [
     reb: 4.5,
     ast: 6.3,
     nbaId: 1718,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1718.png',
+    imageUrl: 'https://thumb.spokesman.com/xnmtO3mVGSHg5RyM4zvIm_2y_yA=/400x0/media.spokesman.com/photos/2008/06/18/piercetrophy18_06-18-2008_3ODL3MO.jpg',
     quote: 'The Truth: Returned from injury to lead the Big Three to Boston\'s 17th title.'
   },
   {
@@ -8781,7 +8781,7 @@ const rawCards = [
     reb: 5.0,
     ast: 3.3,
     nbaId: 2225,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2225.png',
+    imageUrl: 'https://www.chinadaily.com.cn/sports/2007-06/15/xin_3506041513168702520568.jpg',
     quote: 'Euro Step: The first European player to ever win the NBA Finals MVP award.'
   },
   {
@@ -8798,7 +8798,7 @@ const rawCards = [
     reb: 7.8,
     ast: 3.8,
     nbaId: 2548,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2548.png',
+    imageUrl: 'https://content.api.news/v3/images/bin/b6154b40b9e6cd7ac80dee51c7710b48',
     quote: 'Flash: One of the most dominant individual Finals series in history (34.7 PPG).'
   },
   {
@@ -8815,7 +8815,7 @@ const rawCards = [
     reb: 14.1,
     ast: 2.1,
     nbaId: 1495,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1495.png',
+    imageUrl: 'https://www.chinadaily.com.cn/english/doc/2005-06/24/xin_080602241337223164268.jpg',
     quote: 'The Fundamental: Controlled the paint to win his 3rd Finals MVP trophy.'
   },
   {
@@ -8832,7 +8832,7 @@ const rawCards = [
     reb: 3.2,
     ast: 5.2,
     nbaId: 1503,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1503.png',
+    imageUrl: 'https://andscape.com/wp-content/uploads/2024/10/GettyImages-81373392.jpg?w=683',
     quote: 'Mr. Big Shot: The floor general of the "Bad Boys 2.0" that upset the Lakers.'
   },
   {
@@ -8849,7 +8849,7 @@ const rawCards = [
     reb: 17.0,
     ast: 5.3,
     nbaId: 1495,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1495.png',
+    imageUrl: 'https://cdn.nba.com/teams/uploads/sites/1610612759/2023/09/GettyImages-74831519.jpg',
     quote: 'Near Quad-Double: 21 pts, 20 reb, 10 ast, and 8 blk in the clinching game.'
   },
   {
@@ -8866,7 +8866,7 @@ const rawCards = [
     reb: 12.3,
     ast: 3.8,
     nbaId: 757,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/757.png',
+    imageUrl: 'https://i.insider.com/5acbaaf587826b28008b49b3?width=600&format=jpeg&auto=webp',
     quote: 'Three-Peat: The most dominant physical force the Finals has ever seen.'
   },
   {
@@ -8883,7 +8883,7 @@ const rawCards = [
     reb: 15.8,
     ast: 4.8,
     nbaId: 757,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/757.png',
+    imageUrl: 'https://cdn.nba.com/manage/2021/08/shaq-kobe-2002-finals.jpg',
     quote: 'Unstoppable: Averaged 33 points and 15 rebounds to crush the Sixers.'
   },
   {
@@ -8900,7 +8900,7 @@ const rawCards = [
     reb: 16.7,
     ast: 2.3,
     nbaId: 757,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/757.png',
+    imageUrl: 'https://lakersnation.com/wp-content/uploads/2018/06/Shaquille-ONeal-3.jpg',
     quote: 'The Diesel: Scored 38 points per game to start the Lakers dynasty.'
   },
   {
@@ -8917,7 +8917,7 @@ const rawCards = [
     reb: 14.0,
     ast: 2.4,
     nbaId: 1495,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1495.png',
+    imageUrl: 'https://pbs.twimg.com/media/FzdBQRJakAAwy6v.jpg',
     quote: 'Twin Towers: Won his first title in just his second year in the league.'
   },
   {
@@ -8934,7 +8934,7 @@ const rawCards = [
     reb: 4.0,
     ast: 2.3,
     nbaId: 893,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/893.png',
+    imageUrl: 'https://www.sltrib.com/resizer/v2/K5GJSRWT3BA2TOAAAFEBABIIRQ.jpg?auth=a7a4751c63b4c77364df47a4bc2f1d24d8b739617ef93c33b05d5b8822680e48&width=1024&quality=88',
     quote: 'The Last Dance: Hit "The Shot" in Utah to secure his 6th ring and 6th MVP.'
   },
   {
@@ -8951,7 +8951,7 @@ const rawCards = [
     reb: 7.0,
     ast: 6.0,
     nbaId: 893,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/893.png',
+    imageUrl: 'https://external-preview.redd.it/video-surfaces-of-michael-jordan-winning-1997-finals-mvp-v0-xdWcoHd4k2_DfXEaaq00ahW7AkeTjMC8u0P8ROAgO_0.jpg?width=640&crop=smart&auto=webp&s=b73082cf928990df08ef1baad6f0430371a51b3f',
     quote: 'Unrivaled: Led the Bulls to 69 wins and another championship trophy.'
   },
   {
@@ -8968,7 +8968,7 @@ const rawCards = [
     reb: 5.3,
     ast: 4.2,
     nbaId: 893,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/893.png',
+    imageUrl: 'https://pbs.twimg.com/media/EQ_mbz8W4AAuEov.jpg:large',
     quote: 'Redemption: Won the title on Father\'s Day after returning from retirement.'
   },
   {
@@ -8985,7 +8985,7 @@ const rawCards = [
     reb: 11.5,
     ast: 5.5,
     nbaId: 165,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/165.png',
+    imageUrl: 'https://rocketswire.usatoday.com/gcdn/authoring/images/smg/2025/01/08/SROC/77554093007-29-28518.jpeg',
     quote: 'The Dream: Outplayed Shaq in the Finals to secure back-to-back titles.'
   },
   {
@@ -9002,7 +9002,7 @@ const rawCards = [
     reb: 9.1,
     ast: 3.6,
     nbaId: 165,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/165.png',
+    imageUrl: 'https://cdn.nba.com/manage/2022/04/OlajuwonHakeem95NSBB13490-scaled.jpg',
     quote: 'Historic Year: Only player to win MVP, DPOY, and Finals MVP in the same season.'
   },
   {
@@ -9019,7 +9019,7 @@ const rawCards = [
     reb: 8.5,
     ast: 6.3,
     nbaId: 893,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/893.png',
+    imageUrl: 'https://fanidotcom.wordpress.com/wp-content/uploads/2012/06/3-peat.jpg',
     quote: 'Three-Peat: Averaged an all-time record 41.0 PPG during the series.'
   },
   {
@@ -9036,7 +9036,7 @@ const rawCards = [
     reb: 4.8,
     ast: 6.5,
     nbaId: 893,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/893.png',
+    imageUrl: 'https://www.rollingstone.com/wp-content/uploads/2020/08/MJ9202c.jpg?w=800',
     quote: 'The Shrug: Dominance from the perimeter to beat the Blazers in 6 games.'
   },
   {
@@ -9053,7 +9053,7 @@ const rawCards = [
     reb: 6.6,
     ast: 11.4,
     nbaId: 893,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/893.png',
+    imageUrl: 'https://www.chicagotribune.com/wp-content/uploads/migration/2020/04/27/KGTMDIIEYZGNNEE6N5EDRDKQXE.jpg?w=1200&resize=1200,900',
     quote: 'Passing the Torch: Defeated Magic Johnson to win his very first NBA ring.'
   },
   {
@@ -9070,7 +9070,7 @@ const rawCards = [
     reb: 5.2,
     ast: 7.0,
     nbaId: 78318,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/78318.png',
+    imageUrl: 'https://cdn.nba.com/manage/2022/02/ThomasI89NSB5832-scaled.jpg',
     quote: 'Bad Boy: The heart and soul of the back-to-back Detroit championships.'
   },
   {
@@ -9087,7 +9087,7 @@ const rawCards = [
     reb: 1.8,
     ast: 6.0,
     nbaId: 76607,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/76607.png',
+    imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_fill,w_1200,ar_1:1,f_auto,q_auto,g_auto/shape/cover/sport/b069e3acfc6301318bbd3f57509a3cdaf0d06cb22e1a01975de84015aa90a2ce.jpg',
     quote: 'Lockdown: Elite defense and scoring to sweep the Showtime Lakers.'
   },
   {
@@ -9104,7 +9104,7 @@ const rawCards = [
     reb: 7.4,
     ast: 4.4,
     nbaId: 78586,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/78586.png',
+    imageUrl: 'https://i.pinimg.com/736x/7e/72/ce/7e72ce7219e0c029bca37160f961beae.jpg',
     quote: 'Big Game James: Recorded a triple-double in Game 7 to save the title.'
   },
   {
@@ -9121,7 +9121,7 @@ const rawCards = [
     reb: 8.0,
     ast: 13.0,
     nbaId: 77142,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/77142.png',
+    imageUrl: 'https://library.sportingnews.com/styles/twitter_card_120x120/s3/2021-08/magicmvp_16z7egirhfq381kedkjsmhiq97.jpeg?itok=mdrZcu5S',
     quote: 'Junior Sky Hook: Hit the iconic game-winner to defeat the Celtics.'
   },
   {
@@ -9138,7 +9138,7 @@ const rawCards = [
     reb: 9.7,
     ast: 9.5,
     nbaId: 76164,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/76164.png',
+    imageUrl: 'https://library.sportingnews.com/styles/crop_style_16_9_desktop_webp/s3/2022-01/larry-bird_19nfnvwyxxojk136sbdlp9o1ia.jpg.webp?itok=ZqOO30Es',
     quote: 'Legend: Led what many consider the greatest team in NBA history.'
   },
   {
@@ -9155,7 +9155,7 @@ const rawCards = [
     reb: 9.0,
     ast: 5.2,
     nbaId: 76003,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/76003.png',
+    imageUrl: 'https://i0.wp.com/legendsofsport.blog/wp-content/uploads/2020/06/gettyimages-455538828.jpg?fit=2400%2C3000&ssl=1',
     quote: 'The Captain: The oldest Finals MVP in history at 38 years old.'
   },
   {
@@ -9172,7 +9172,7 @@ const rawCards = [
     reb: 14.0,
     ast: 3.6,
     nbaId: 76164,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/76164.png',
+    imageUrl: 'https://talksport.com/wp-content/uploads/2024/06/null-JS910256860.jpg?strip=all&w=756',
     quote: 'The Duel: Beat Magic in a classic 7-game series between rivals.'
   },
   {
@@ -9189,7 +9189,7 @@ const rawCards = [
     reb: 18.0,
     ast: 2.0,
     nbaId: 77449,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/77449.png',
+    imageUrl: 'https://sportsteamhistory.com/wp-content/uploads/2016/12/Philadelphia-76ers-NBA-Champs-1983.jpeg',
     quote: 'Fo\', Fo\', Fo\': Predicted the sweep and delivered the title to Philly.'
   },
   {
@@ -9206,7 +9206,7 @@ const rawCards = [
     reb: 10.8,
     ast: 8.0,
     nbaId: 77142,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/77142.png',
+    imageUrl: 'https://pbs.twimg.com/media/FMKuBOEagAILi7H.png',
     quote: 'The Maestro: Controlled every aspect of the game to win his 2nd Finals MVP.'
   },
   {
@@ -9223,7 +9223,7 @@ const rawCards = [
     reb: 9.5,
     ast: 2.8,
     nbaId: 77488,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/77488.png',
+    imageUrl: 'https://charlotte49ers.com/images/2022/9/8/SBC_Champs_-_Maxwell_1977.jpg',
     quote: 'Cornbread: Outshined the stars to lead Boston to their 14th banner.'
   },
   {
@@ -9240,7 +9240,7 @@ const rawCards = [
     reb: 11.2,
     ast: 8.7,
     nbaId: 77142,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/77142.png',
+    imageUrl: 'https://ca-times.brightspotcdn.com/dims4/default/34ff1b2/2147483647/strip/true/crop/1424x2128+0+0/resize/1200x1793!/quality/75/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2F36%2F0c%2F2681e9924d6da63901b78c6aa4af%2Flakers11.png',
     quote: 'Rookie Magic: Played center in Game 6 to win the title as a 20-year-old rookie.'
   },
 ];
