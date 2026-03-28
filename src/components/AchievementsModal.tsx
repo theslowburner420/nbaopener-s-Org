@@ -34,7 +34,10 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Performance Optimization: Only calculate achievements when the modal is open
   const filteredAchievements = useMemo(() => {
+    if (!isOpen) return [];
+    
     return ACHIEVEMENTS.filter(ach => {
       const isUnlocked = unlockedAchievements.includes(ach.id) || ach.requirement(state, ALL_CARDS);
       const matchesCategory = activeCategory === 'all' || ach.category === activeCategory;
@@ -46,20 +49,22 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
       
       return matchesCategory && matchesStatus && matchesSearch;
     });
-  }, [activeCategory, statusFilter, searchQuery, unlockedAchievements, state]);
+  }, [isOpen, activeCategory, statusFilter, searchQuery, unlockedAchievements, state]);
 
   const stats = useMemo(() => {
+    if (!isOpen) return { total: ACHIEVEMENTS.length, unlocked: 0, percent: 0 };
+    
     const total = ACHIEVEMENTS.length;
     const unlocked = ACHIEVEMENTS.filter(ach => 
       unlockedAchievements.includes(ach.id) || ach.requirement(state, ALL_CARDS)
     ).length;
     return { total, unlocked, percent: Math.round((unlocked / total) * 100) };
-  }, [unlockedAchievements, state]);
+  }, [isOpen, unlockedAchievements, state]);
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 pt-[160px]">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -72,7 +77,7 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            className="relative w-full max-w-4xl bg-zinc-950 border border-zinc-800/50 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl flex flex-col h-[90vh] sm:h-[85vh] max-h-[900px]"
+            className="relative w-full max-w-4xl bg-zinc-950 border border-zinc-800/50 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl flex flex-col h-[calc(100vh-140px)] max-h-[900px]"
           >
             {/* Header Section */}
             <div className="p-4 sm:p-8 border-b border-zinc-900 bg-zinc-900/20 shrink-0">

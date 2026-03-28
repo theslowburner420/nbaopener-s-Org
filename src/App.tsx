@@ -14,6 +14,7 @@ import OpenView from './views/OpenView';
 import RewardsView from './views/RewardsView';
 import { LayoutGrid, ShoppingBag, Zap, Trophy, Coins } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { MemoryManager } from './lib/memory';
 
 import Header from './components/Header';
 import StaticAd from './components/StaticAd';
@@ -72,6 +73,16 @@ function AppContent() {
     } else {
       setTimeout(prefetch, 2000);
     }
+  }, []);
+
+  // Performance Optimization: Periodic Memory Cleanup
+  useEffect(() => {
+    const interval = setInterval(() => {
+      MemoryManager.optimizeMemory();
+      MemoryManager.cleanupAssets();
+    }, 60000); // Every minute
+    
+    return () => clearInterval(interval);
   }, []);
 
   const handleViewChange = (view: typeof currentView) => {

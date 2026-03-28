@@ -5,6 +5,7 @@ import CardItem from './CardItem';
 import { Check, Sparkles } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
 import { useGame } from '../context/GameContext';
+import { MemoryManager } from '../lib/memory';
 
 interface PackOpenerProps {
   cards: Card[];
@@ -247,6 +248,8 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
 
     return () => {
       document.body.style.overflow = 'unset';
+      // Cleanup assets when the pack opener is closed to free up memory
+      MemoryManager.cleanupAssets();
     };
   }, [cards]);
 

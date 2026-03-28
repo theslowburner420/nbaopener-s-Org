@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useGame } from '../context/GameContext';
 import { LogIn, LogOut, User as UserIcon, Coins, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -6,15 +6,21 @@ import { supabase } from '../lib/supabase';
 const Header: React.FC = React.memo(() => {
   const { user, coins, login, logout } = useGame();
 
-  const formatCoins = (num: number) => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  const formatCoins = (num: any) => {
+    const n = Number(num) || 0;
+    if (n >= 1000000) {
+      return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
     }
-    if (num >= 10000) {
-      return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    if (n >= 10000) {
+      return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
     }
-    return num.toLocaleString();
+    return n.toLocaleString();
   };
+
+  const displayCoins = useMemo(() => {
+    const n = Number(coins) || 0;
+    return n.toLocaleString();
+  }, [coins]);
 
   return (
     <header className="h-12 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-900 flex items-center justify-between px-3 md:px-4 shrink-0 z-[5000] overflow-hidden">
@@ -52,7 +58,7 @@ const Header: React.FC = React.memo(() => {
         <div className="flex items-center gap-1 bg-zinc-900/80 px-2 md:px-3 py-1.5 rounded-xl border border-zinc-800/50 shadow-inner shrink-0">
           <Coins size={10} className="text-amber-500 md:w-3 md:h-3" />
           <span className="text-[10px] md:text-xs font-bold tabular-nums text-amber-500">
-            <span className="hidden md:inline">{coins.toLocaleString()}</span>
+            <span className="hidden md:inline">{displayCoins}</span>
             <span className="md:hidden">{formatCoins(coins)}</span>
           </span>
         </div>

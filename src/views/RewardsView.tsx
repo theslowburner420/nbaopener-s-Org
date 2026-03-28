@@ -18,11 +18,12 @@ export default function RewardsView() {
   const nextDayToClaim = claimedDays.length + 1;
 
   const achievementsPercent = useMemo(() => {
+    // Only calculate if we have the necessary data
     const unlockedCount = ACHIEVEMENTS.filter(ach => 
       unlockedAchievements.includes(ach.id) || ach.requirement(state, ALL_CARDS)
     ).length;
     return Math.round((unlockedCount / ACHIEVEMENTS.length) * 100);
-  }, [unlockedAchievements, state]);
+  }, [unlockedAchievements, state.collection, state.inventoryPacks]); // More specific dependencies to avoid re-calculating on coin changes
 
   const rewards = useMemo(() => [
     { day: 1, amount: 100, label: 'Starter Bonus' },
