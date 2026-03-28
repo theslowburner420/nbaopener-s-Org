@@ -6739,8 +6739,8 @@ const rawCards = [
     ast: 10,
     nbaId: 201935,
     year: 2018,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201935.png',
-    quote: 'https://media.tenor.com/wQPMHo7nc10AAAAM/ankle-breaker-crossover.gif'
+    imageUrl: 'https://media.tenor.com/wQPMHo7nc10AAAAM/ankle-breaker-crossover.gif',
+    quote: 'The step-back that froze the world.'
   },
   {
     id: 'moment-014',
@@ -7143,7 +7143,7 @@ const rawCards = [
     reb: 2.9,
     ast: 5.1,
     nbaId: 1628374,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628374.png',
+    imageUrl: 'https://cdn.nba.com/manage/2024/06/malik-monk-iso.jpg',
     quote: 'The spark plug for the Kings. Instant offense off the bench.'
   },
   {
@@ -7160,7 +7160,7 @@ const rawCards = [
     reb: 5.2,
     ast: 1.3,
     nbaId: 1629675,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629675.png',
+    imageUrl: 'https://cdn.nba.com/teams/uploads/sites/1610612750/2024/04/GettyImages-1868659894.jpg',
     quote: 'Naz Reid. The Timberwolves fan favorite and elite bench big.'
   },
   {
@@ -7177,7 +7177,7 @@ const rawCards = [
     reb: 4.2,
     ast: 3.7,
     nbaId: 1627763,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627763.png',
+    imageUrl: 'https://ca-times.brightspotcdn.com/dims4/default/ac7fb68/2147483647/strip/true/crop/4716x2653+0+0/resize/1200x675!/quality/75/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2F32%2F45%2F870f875a492db9ef9f0397739a47%2Fceltics-heat-basketball-61553.jpg',
     quote: 'The President. Brought veteran leadership and elite shooting to the Celtics bench.'
   },
   {
@@ -7194,7 +7194,7 @@ const rawCards = [
     reb: 5.0,
     ast: 4.0,
     nbaId: 1629639,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629639.png',
+    imageUrl: 'https://basketballforever.com/wp-content/uploads/2019/11/Herro-article_FB.jpg',
     quote: 'Boy Wonder. The first Heat player to win Sixth Man of the Year.'
   },
   {
@@ -7211,7 +7211,7 @@ const rawCards = [
     reb: 4.0,
     ast: 2.5,
     nbaId: 203903,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203903.png',
+    imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_558,w_3566,h_2005/c_fill,w_720,ar_16:9,f_auto,q_auto,g_auto/images/ImagnImages/mmsport/123/01jaecrxnqtmg69j606s.jpg',
     quote: 'Flamethrower. Could get hot in an instant and take over games.'
   },
   {
@@ -7228,7 +7228,7 @@ const rawCards = [
     reb: 7.1,
     ast: 1.7,
     nbaId: 1626149,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1626149.png',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxwJh4EhxOf_riGF8lCFaYPmhTNk6zCU2VtHNGW4aF0w&s',
     quote: 'Energy and hustle. A dominant force in the paint for the Clippers.'
   },
   {
@@ -7245,7 +7245,7 @@ const rawCards = [
     reb: 2.5,
     ast: 5.3,
     nbaId: 201155,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201155.png',
+    imageUrl: 'https://www.ocregister.com/wp-content/uploads/2019/06/imageedit_4_70751589-16x9-1.jpg?w=1800&resize=1800,1800',
     quote: '3-time winner (2015, 2018, 2019). The ultimate bucket getter.'
   },
   {
@@ -7262,7 +7262,7 @@ const rawCards = [
     reb: 2.7,
     ast: 2.5,
     nbaId: 201566,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201566.png',
+    imageUrl: 'https://www.backsportspage.com/wp-content/uploads/2023/02/eric-gordon-tradesss.jpg',
     quote: 'Splash Brother from another mother. Elite range and scoring.'
   },
   {
@@ -7279,7 +7279,7 @@ const rawCards = [
     reb: 2.3,
     ast: 3.2,
     nbaId: 2037,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2037.png',
+    imageUrl: 'https://a2.espncdn.com/combiner/i?img=%2Fphoto%2F2014%2F0412%2Fla_g_jamal%2Dcrawford_mb_1296x729.jpg',
     quote: '3-time winner (2010, 2014, 2016). The crossover king of the bench.'
   },
   {
@@ -7296,7 +7296,7 @@ const rawCards = [
     reb: 5.3,
     ast: 2.7,
     nbaId: 2747,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2747.png',
+    imageUrl: 'https://people.com/thmb/gAncpQ_PJHB2HSGSo7lNlQTuNYc=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(749x279:751x281)/jr-smith-1-9969690fcb614245b5238af71a596225.jpg',
     quote: 'Swish. When he was on, he was one of the most dangerous scorers in the league.'
   },
   {
@@ -7313,7 +7313,7 @@ const rawCards = [
     reb: 4.1,
     ast: 3.7,
     nbaId: 201935,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201935.png',
+    imageUrl: 'https://s.yimg.com/ny/api/res/1.2/92xR131yD3Dzc9cyCMS4xg--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTQ3NDtjZj13ZWJw/https://media.zenfs.com/en/thunder_wire_usa_today_sports_articles_686/8e7cf25315ee28b89b53d95aba9584e6',
     quote: 'The Beard begins. A superstar in the making coming off the bench for OKC.'
   },
   {
@@ -7330,7 +7330,7 @@ const rawCards = [
     reb: 8.7,
     ast: 3.0,
     nbaId: 1885,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1885.png',
+    imageUrl: 'https://assets3.cbsnewsstatic.com/hub/i/r/2015/10/14/67ca6f8d-1f10-49ed-86c2-2ff08a32a76b/thumbnail/1200x630/f5c2f12c76890f6839301275be05e434/ap081111027322.jpg',
     quote: 'The ultimate Swiss Army knife. Could do everything on the court.'
   },
   {
@@ -7347,7 +7347,7 @@ const rawCards = [
     reb: 2.4,
     ast: 4.7,
     nbaId: 1891,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1891.png',
+    imageUrl: 'https://hoopdirt.com/wp-content/uploads/2020/05/jason_terry_spurs-640x340.jpg',
     quote: 'The Jet. A clutch performer and elite shooter for the Mavs.'
   },
   {
@@ -7364,7 +7364,7 @@ const rawCards = [
     reb: 4.8,
     ast: 4.5,
     nbaId: 1938,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1938.png',
+    imageUrl: 'https://cdn.vox-cdn.com/thumbor/HldsAyzP5wtxSM9LNN1EuCedc78=/0x0:3000x2131/1400x1400/filters:focal(1268x667:1748x1147):format(jpeg)/cdn.vox-cdn.com/uploads/chorus_image/image/55784425/53142074.0.jpg',
     quote: 'El Contorsionista. A creative genius who sacrificed stardom for the team.'
   },
   {
@@ -7381,7 +7381,7 @@ const rawCards = [
     reb: 2.7,
     ast: 4.0,
     nbaId: 2571,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2571.png',
+    imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/suns/sites/suns/files/lb11.jpg',
     quote: 'The Brazilian Blur. Lightning quick in the Suns Seven Seconds or Less system.'
   },
   {
@@ -7398,7 +7398,7 @@ const rawCards = [
     reb: 5.4,
     ast: 2.7,
     nbaId: 2034,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2034.png',
+    imageUrl: 'https://a57.foxnews.com/static.foxnews.com/foxnews.com/content/uploads/2018/09/918/516/Grizzlies-Miller-Time-Basketball-1-1.jpg?ve=1&tl=1',
     quote: 'Elite sharpshooter and versatile wing for the Grizzlies.'
   },
   {
@@ -7415,7 +7415,7 @@ const rawCards = [
     reb: 2.6,
     ast: 2.0,
     nbaId: 2732,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2732.png',
+    imageUrl: 'https://imengine.public.prod.pdh.navigacloud.com/?uuid=EFC80648-6529-439C-A97A-8DA4DD9F0EF3&type=preview&function=cover&height=609&width=800',
     quote: 'The only rookie to ever win Sixth Man of the Year. Pure scorer.'
   },
   {
@@ -7432,7 +7432,7 @@ const rawCards = [
     reb: 7.3,
     ast: 1.2,
     nbaId: 1712,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1712.png',
+    imageUrl: 'https://fadeawayworld.net/wp-content/uploads/2022/02/hi-res-65a972f553885f4eedcfacb862d344d0_crop_exact.jpg',
     quote: 'Versatile forward with a unique scoring touch.'
   },
   {
@@ -7449,7 +7449,7 @@ const rawCards = [
     reb: 3.7,
     ast: 3.1,
     nbaId: 1517,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1517.png',
+    imageUrl: 'https://www.espn.com/media/nba/2002/0511/photo/nbagallery8.jpg',
     quote: 'The energy behind the Greatest Show on Court Kings.'
   },
   {
@@ -7466,7 +7466,7 @@ const rawCards = [
     reb: 4.1,
     ast: 1.2,
     nbaId: 739,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/739.png',
+    imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/pistons/sites/pistons/files/legacy/photos/williamson_254_020102.jpg',
     quote: 'Big Nasty. A physical presence in the paint for the Pistons.'
   },
   {
@@ -7483,7 +7483,7 @@ const rawCards = [
     reb: 4.1,
     ast: 5.0,
     nbaId: 258,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/258.png',
+    imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_fill,w_1200,ar_4:3,f_auto,q_auto,g_auto/shape/cover/sport/f70d050e8c6d4e34436642cecac2938a3a75688497f18d3abd145c477e25603c.jpg',
     quote: 'The steady hand for the Iverson-led Sixers Finals run.'
   },
   {
@@ -7500,7 +7500,7 @@ const rawCards = [
     reb: 5.5,
     ast: 2.1,
     nbaId: 164,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/164.png',
+    imageUrl: 'https://assets-cms.thescore.com/uploads/image/file/811030/w640xh480_GettyImages-725185.jpg?ts=1763847138',
     quote: 'A versatile forward with a sweet shooting stroke.'
   },
   {
@@ -7517,7 +7517,7 @@ const rawCards = [
     reb: 5.4,
     ast: 6.7,
     nbaId: 201939,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png',
+    imageUrl: 'https://www.baltana.com/files/wallpapers-36/Stephen-Curry-Wallpaper-126257.jpg',
     quote: '402 Triples: Most three-pointers made in a single season (2015-16).'
   },
   {
@@ -7534,7 +7534,7 @@ const rawCards = [
     reb: 25.7,
     ast: 2.4,
     nbaId: 76375,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/76375.png',
+    imageUrl: 'https://library.sportingnews.com/2022-01/wilt-chamberlain_kwn6o3hy8tdi1jckujwvhw5s0.jpeg',
     quote: '50.4 PPG: Highest scoring average in a single season (1961-62).'
   },
   {
@@ -7551,8 +7551,8 @@ const rawCards = [
     reb: 10.7,
     ast: 10.4,
     nbaId: 201566,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201566.png',
-    quote: '42 Triple-Doubles: Most triple-doubles in a single campaign (2016-17).'
+    imageUrl: 'https://w0.peakpx.com/wallpaper/665/406/HD-wallpaper-russell-westbrook-back-view-basketball-stars-nba-oklahoma-city-thunder-okc-abstract-art-russell-westbrook-iii-neon-lights-basketball-creative.jpg',
+    quote: '42 Triple-Doubles: Most triple-doubles in a single campaign until Jokic.'
   },
   {
     id: 'record-harden',
@@ -7568,7 +7568,7 @@ const rawCards = [
     reb: 6.6,
     ast: 7.5,
     nbaId: 201935,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201935.png',
+    imageUrl: 'https://w0.peakpx.com/wallpaper/936/787/HD-wallpaper-james-harden-2019-basketball-stars-nba-houston-rockets-joy-james-edward-harden-abstract-art-basketball-neon-lights-creative-usa-james-harden.jpg',
     quote: '36.1 PPG: Highest scoring average of the modern era (2018-19).'
   },
   {
@@ -7585,7 +7585,7 @@ const rawCards = [
     reb: 2.9,
     ast: 14.2,
     nbaId: 304,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/304.png',
+    imageUrl: 'https://www.bballytics.co/assets/stockton/stockton.jpg',
     quote: '1,164 Assists: Most total assists in a single season (1990-91).'
   },
   {
@@ -7602,7 +7602,7 @@ const rawCards = [
     reb: 18.7,
     ast: 2.3,
     nbaId: 23,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/23.png',
+    imageUrl: 'https://i.insider.com/5ea6439869852564ea052423?width=700',
     quote: '18.7 RPG: Most brutal rebounding average of the modern era (1991-92).'
   },
   {
@@ -7619,59 +7619,8 @@ const rawCards = [
     reb: 11.3,
     ast: 1.5,
     nbaId: 76631,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/76631.png',
+    imageUrl: 'https://static01.nyt.com/images/2021/06/01/obituaries/30EATON-03/30EATON-03-superJumbo.jpg',
     quote: '5.6 BPG: The Wall. Highest blocks average in history (1984-85).'
-  },
-  {
-    id: 'record-sunderlage',
-    name: 'Don Sunderlage',
-    team: 'Atlanta Hawks',
-    teamAbbr: 'ATL',
-    position: 'G',
-    rarity: 'legend' as const,
-    category: 'Award' as const,
-    year: '1953-54',
-    isHistorical: true,
-    pts: 11.2,
-    reb: 3.3,
-    ast: 3.5,
-    nbaId: 78272,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/78272.png',
-    quote: '703 FT Attempts: All-time franchise record in free throw attempts.'
-  },
-  {
-    id: 'record-sabonis',
-    name: 'Domantas Sabonis',
-    team: 'Sacramento Kings',
-    teamAbbr: 'SAC',
-    position: 'C',
-    rarity: 'legend' as const,
-    category: 'Award' as const,
-    year: '2023-24',
-    isHistorical: true,
-    pts: 19.4,
-    reb: 13.7,
-    ast: 8.2,
-    nbaId: 1627734,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627734.png',
-    quote: '77 Double-Doubles: The king of modern consistency (23-24 Season).'
-  },
-  {
-    id: 'record-drummond',
-    name: 'Andre Drummond',
-    team: 'Detroit Pistons',
-    teamAbbr: 'DET',
-    position: 'C',
-    rarity: 'legend' as const,
-    category: 'Award' as const,
-    year: '2017-18',
-    isHistorical: true,
-    pts: 15.0,
-    reb: 16.0,
-    ast: 3.0,
-    nbaId: 203083,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203083.png',
-    quote: '444 Offensive Rebs: Most offensive rebounds in a modern season.'
   },
   {
     id: 'record-buse',
@@ -7687,59 +7636,8 @@ const rawCards = [
     reb: 3.3,
     ast: 8.5,
     nbaId: 76313,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/76313.png',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcxRTO-mmxsMhQZNuI8e64fszKoFxBsmo7rg&s',
     quote: '3.5 SPG: Highest steals average in history (1976-77).'
-  },
-  {
-    id: 'record-lebron',
-    name: 'LeBron James',
-    team: 'Miami Heat',
-    teamAbbr: 'MIA',
-    position: 'F',
-    rarity: 'legend' as const,
-    category: 'Award' as const,
-    year: '2013-14',
-    isHistorical: true,
-    pts: 27.1,
-    reb: 6.9,
-    ast: 6.3,
-    nbaId: 2544,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
-    quote: '64.0% FG: Most efficient scoring season of his career (2013-14).'
-  },
-  {
-    id: 'record-durant',
-    name: 'Kevin Durant',
-    team: 'Oklahoma City Thunder',
-    teamAbbr: 'OKC',
-    position: 'F',
-    rarity: 'legend' as const,
-    category: 'Award' as const,
-    year: '2012-13',
-    isHistorical: true,
-    pts: 28.1,
-    reb: 7.9,
-    ast: 4.6,
-    nbaId: 201142,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png',
-    quote: '90/50/40 Club: Historic shooting efficiency season (2012-13).'
-  },
-  {
-    id: 'record-wells',
-    name: 'Bubba Wells',
-    team: 'Dallas Mavericks',
-    teamAbbr: 'DAL',
-    position: 'F',
-    rarity: 'legend' as const,
-    category: 'Award' as const,
-    year: '1997-98',
-    isHistorical: true,
-    pts: 3.3,
-    reb: 1.7,
-    ast: 0.9,
-    nbaId: 1532,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1532.png',
-    quote: '6 Fouls in 3 min: Fastest personal fouls disqualification record.'
   },
   {
     id: 'record-wemby',
@@ -7755,25 +7653,8 @@ const rawCards = [
     reb: 10.6,
     ast: 3.9,
     nbaId: 1641705,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641705.png',
+    imageUrl: 'https://media-cldnry.s-nbcnews.com/image/upload/t_fit-1500w,f_auto,q_auto:best/rockcms/2024-05/240506-Victor-Wembanyama-spurs-court-ac-558p-b56fa5.jpg',
     quote: '250+ Blocks Rookie: Rookie record for defensive intimidation (2024).'
-  },
-  {
-    id: 'record-curry-ft',
-    name: 'Stephen Curry',
-    team: 'Golden State Warriors',
-    teamAbbr: 'GSW',
-    position: 'G',
-    rarity: 'record' as const,
-    category: 'NBA Record' as const,
-    year: '2018-19',
-    isHistorical: true,
-    pts: 27.3,
-    reb: 5.3,
-    ast: 5.2,
-    nbaId: 201939,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png',
-    quote: '90.8% FT: The highest career free throw percentage in NBA history.'
   },
   {
     id: 'record-wilt-reb',
@@ -7789,25 +7670,8 @@ const rawCards = [
     reb: 27.2,
     ast: 2.4,
     nbaId: 76375,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/76375.png',
+    imageUrl: 'https://lakersnation.com/wp-content/uploads/2016/04/Wilt_Chamberlain.png',
     quote: '27.2 RPG: The all-time record for the highest rebounding average in a season (1960-61).'
-  },
-  {
-    id: 'record-harden-pts',
-    name: 'James Harden',
-    team: 'Houston Rockets',
-    teamAbbr: 'HOU',
-    position: 'G',
-    rarity: 'record' as const,
-    category: 'NBA Record' as const,
-    year: '2018-19',
-    isHistorical: true,
-    pts: 36.1,
-    reb: 6.6,
-    ast: 7.5,
-    nbaId: 201935,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201935.png',
-    quote: '2,818 Total Points: The highest total points scored in a single season in the 21st century.'
   },
   {
     id: 'record-bol-blk',
@@ -7823,59 +7687,8 @@ const rawCards = [
     reb: 6.0,
     ast: 0.0,
     nbaId: 76195,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/76195.png',
+    imageUrl: 'https://pbs.twimg.com/media/CWCbH0MUsAAo9yx.jpg',
     quote: '397 Total Blocks: The most blocks ever recorded by a rookie in a single season (1985-86).'
-  },
-  {
-    id: 'record-wallace-tech',
-    name: 'Rasheed Wallace',
-    team: 'Portland Trail Blazers',
-    teamAbbr: 'POR',
-    position: 'F-C',
-    rarity: 'record' as const,
-    category: 'NBA Record' as const,
-    year: '2000-01',
-    isHistorical: true,
-    pts: 19.2,
-    reb: 7.8,
-    ast: 2.8,
-    nbaId: 734,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/734.png',
-    quote: '41 Technical Fouls: The most technical fouls ever called on a player in one season (2000-01).'
-  },
-  {
-    id: 'record-mccloud-3pa',
-    name: 'George McCloud',
-    team: 'Dallas Mavericks',
-    teamAbbr: 'DAL',
-    position: 'F-G',
-    rarity: 'record' as const,
-    category: 'NBA Record' as const,
-    year: '1995-96',
-    isHistorical: true,
-    pts: 18.9,
-    reb: 4.8,
-    ast: 2.7,
-    nbaId: 177,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/177.png',
-    quote: '678 Three-Point Attempts: A pioneer of the modern era, setting the 90s record for 3PT volume.'
-  },
-  {
-    id: 'record-smith-bpg',
-    name: 'Elmore Smith',
-    team: 'Los Angeles Lakers',
-    teamAbbr: 'LAL',
-    position: 'C',
-    rarity: 'record' as const,
-    category: 'NBA Record' as const,
-    year: '1973-74',
-    isHistorical: true,
-    pts: 12.5,
-    reb: 11.2,
-    ast: 1.9,
-    nbaId: 78196,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/78196.png',
-    quote: '4.8 BPG: The defensive anchor of the 70s with the highest total block count of that decade.'
   },
   {
     id: 'record-archibald-pts-ast',
@@ -7891,59 +7704,8 @@ const rawCards = [
     reb: 2.8,
     ast: 11.4,
     nbaId: 76054,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/76054.png',
+    imageUrl: 'https://www.basketballnetwork.net/.image/w_2560,q_auto:good,c_limit/MjAxNjA4MjU3ODM0MzI5NDcz/nate-archibald.jpg?arena_f_auto',
     quote: '34.0 PPG & 11.4 APG: The only player to lead the league in Points and Assists in the same year.'
-  },
-  {
-    id: 'record-ellis-min',
-    name: 'Dale Ellis',
-    team: 'Seattle SuperSonics',
-    teamAbbr: 'SEA',
-    position: 'G-F',
-    rarity: 'record' as const,
-    category: 'NBA Record' as const,
-    year: '1988-89',
-    isHistorical: true,
-    pts: 27.5,
-    reb: 4.2,
-    ast: 2.0,
-    nbaId: 76650,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/76650.png',
-    quote: '3,270 Minutes: The "Iron Man" of the 80s, leading the league in total minutes played.'
-  },
-  {
-    id: 'record-bogues-ast-to',
-    name: 'Muggsy Bogues',
-    team: 'Charlotte Hornets',
-    teamAbbr: 'CHA',
-    position: 'G',
-    rarity: 'record' as const,
-    category: 'NBA Record' as const,
-    year: '1989-90',
-    isHistorical: true,
-    pts: 9.4,
-    reb: 2.6,
-    ast: 10.7,
-    nbaId: 127,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/127.png',
-    quote: '10.1 AST/TO Ratio: The most efficient playmaking season in history (1989-90).'
-  },
-  {
-    id: 'record-robinson-fg',
-    name: 'Mitchell Robinson',
-    team: 'New York Knicks',
-    teamAbbr: 'NYK',
-    position: 'C',
-    rarity: 'record' as const,
-    category: 'NBA Record' as const,
-    year: '2019-20',
-    isHistorical: true,
-    pts: 9.7,
-    reb: 7.0,
-    ast: 0.6,
-    nbaId: 1629011,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629011.png',
-    quote: '74.2% FG: Highest single-season field goal percentage in NBA history (2019-20).'
   },
   {
     id: 'record-calderon-ft',
@@ -7959,7 +7721,7 @@ const rawCards = [
     reb: 2.9,
     ast: 8.9,
     nbaId: 101181,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/101181.png',
+    imageUrl: 'https://www.sportsnet.ca/wp-content/uploads/2013/01/calderon_jose640.jpg',
     quote: '98.1% FT: The near-perfect season. Only missed 3 free throws in the entire year (2008-09).'
   },
   {
@@ -7976,7 +7738,7 @@ const rawCards = [
     reb: 3.0,
     ast: 13.6,
     nbaId: 30,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/30.png',
+    imageUrl: 'https://cdn.nba.com/manage/2021/08/stockton-pass-081821-1568x882.jpg',
     quote: '3.2 SPG: The ultimate thief. Led the league in steals for 9 consecutive seasons.'
   },
   {
@@ -7993,25 +7755,8 @@ const rawCards = [
     reb: 3.6,
     ast: 6.7,
     nbaId: 35,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/35.png',
+    imageUrl: 'https://assets-cms.thescore.com/uploads/image/file/385896/w640xh480_GettyImages-1932457.jpg?ts=1576014577',
     quote: '6th Man & MIP: The only player to win 6th Man and Most Improved Player in the same year.'
-  },
-  {
-    id: 'record-doncic-offensive',
-    name: 'Luka Doncic',
-    team: 'Dallas Mavericks',
-    teamAbbr: 'DAL',
-    position: 'G-F',
-    rarity: 'record' as const,
-    category: 'NBA Record' as const,
-    year: '2023-24',
-    isHistorical: true,
-    pts: 33.9,
-    reb: 9.2,
-    ast: 9.8,
-    nbaId: 1629029,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png',
-    quote: '33.9 PPG / 9.2 RPG / 9.8 APG: The most complete offensive season of the 2020s (23-24).'
   },
   {
     id: 'rookie-flagg',
@@ -8255,6 +8000,23 @@ const rawCards = [
   },
   // ALL-STAR MVP SERIES
   {
+    id: 'as-mvp-2026',
+    name: 'Anthony Edwards',
+    team: 'Minnesota Timberwolves',
+    teamAbbr: 'MIN',
+    position: 'G',
+    rarity: 'allstar' as const,
+    category: 'All-Star MVP' as const,
+    year: 2025,
+    isHistorical: true,
+    pts: 29.5,
+    reb: 4.7,
+    ast: 4.8,
+    nbaId: 201939,
+    imageUrl: 'https://manofmany.com/_next/image?url=https%3A%2F%2Fapi.manofmany.com%2Fwp-content%2Fuploads%2F2026%2F02%2FAll-Star-Game-MVP.jpg&w=768&q=75',
+    quote: 'Young talent.'
+  },
+  {
     id: 'as-mvp-2025',
     name: 'Stephen Curry',
     team: 'Golden State Warriors',
@@ -8268,7 +8030,7 @@ const rawCards = [
     reb: 4.2,
     ast: 6.8,
     nbaId: 201939,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png',
+    imageUrl: 'https://cdn.nba.com/manage/2025/02/curry-all-star-mvp.jpg',
     quote: 'Golden Homecoming: Won his second Kobe Trophy in front of his home fans.'
   },
   {
@@ -8285,7 +8047,7 @@ const rawCards = [
     reb: 3.0,
     ast: 6.0,
     nbaId: 203081,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203081.png',
+    imageUrl: 'https://a1.espncdn.com/combiner/i?img=%2Fphoto%2F2024%2F0219%2Fr1293164_1296x729_16%2D9.jpg',
     quote: 'Dame Time: 39 points and 11 triples in a record-breaking East performance.'
   },
   {
@@ -8302,7 +8064,7 @@ const rawCards = [
     reb: 10.0,
     ast: 6.0,
     nbaId: 1628369,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628369.png',
+    imageUrl: 'https://thumb.spokesman.com/nEBS8BO2FiBlOWWvzofUfSJaPjs=/2500x1875/smart/media.spokesman.com/photos/2023/02/19/63f2f66db0166.hires.jpg',
     quote: 'Record Breaker: Set the all-time All-Star scoring record with 55 points.'
   },
   {
@@ -8319,7 +8081,7 @@ const rawCards = [
     reb: 5.0,
     ast: 2.0,
     nbaId: 201939,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png',
+    imageUrl: 'https://www.si.com/.image/t_share/MTg3NTY1MDQ1Njc5NDAwMTkx/stephen-curry-all-star-game-mvp.jpg',
     quote: 'Rainmaker: An incredible 16 three-pointers in a single legendary night.'
   },
   {
@@ -8336,7 +8098,7 @@ const rawCards = [
     reb: 7.0,
     ast: 3.0,
     nbaId: 203507,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png',
+    imageUrl: 'https://res.cloudinary.com/ybmedia/image/upload/c_crop,h_909,w_1618,x_0,y_40/c_fill,f_auto,h_900,q_auto,w_1600/v1/m/5/d/5da24e1d670e31b12b36e52793693a46ac25e8eb/giannis-antetokounmpo-on-star-game-mvp-amazing.jpg',
     quote: 'Perfect Game: Went 16-of-16 from the field. 100% shooting dominance.'
   },
   {
@@ -8353,7 +8115,7 @@ const rawCards = [
     reb: 7.0,
     ast: 4.0,
     nbaId: 202695,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202695.png',
+    imageUrl: 'https://pbs.twimg.com/media/EQ9TxL5XYAEkOKh.jpg',
     quote: 'The First Kobe Trophy: Honored the Mamba with 8 triples and elite defense.'
   },
   {
@@ -8370,7 +8132,7 @@ const rawCards = [
     reb: 7.0,
     ast: 2.0,
     nbaId: 201142,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png',
+    imageUrl: 'https://www.kron4.com/wp-content/uploads/sites/11/2019/02/durant_1550521615526_73689442_ver1.0.jpeg',
     quote: 'The Sniper: 31 points to lead a massive second-half comeback.'
   },
   {
@@ -8387,7 +8149,7 @@ const rawCards = [
     reb: 10.0,
     ast: 8.0,
     nbaId: 2544,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
+    imageUrl: 'https://library.sportingnews.com/styles/twitter_card_120x120/s3/2021-08/lebron-james-2018-all-star-mvp-021119-ftr-nba-gettyjpg_1w6lk38rcv5mz10t1637kzqa7m.jpg?itok=Ca5PtnQp',
     quote: 'Captain LeBron: 29 points in the very first All-Star Draft format.'
   },
   {
@@ -8404,7 +8166,7 @@ const rawCards = [
     reb: 10.0,
     ast: 0.0,
     nbaId: 203076,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203076.png',
+    imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/pelicans/sites/pelicans/files/gettyimages-643008528_master-w750.jpg',
     quote: 'Home Cooking: 52 points in New Orleans. The most points at the time.'
   },
   {
@@ -8421,7 +8183,7 @@ const rawCards = [
     reb: 8.0,
     ast: 5.0,
     nbaId: 201566,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201566.png',
+    imageUrl: 'https://www.sacbee.com/public/sports/nba/qb6fzt/picture60418451/alternates/FREE_1140/All%20Star%20Game%20Basketball',
     quote: 'Back-to-Back: The only player to win two consecutive outright MVPs.'
   },
   {
@@ -8438,7 +8200,7 @@ const rawCards = [
     reb: 5.0,
     ast: 1.0,
     nbaId: 201566,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201566.png',
+    imageUrl: 'https://a.espncdn.com/photo/2015/0215/nba_g_russwts_1296x729.jpg',
     quote: 'Electric Burst: 41 points off the bench in a historic Madison Square Garden game.'
   },
   {
@@ -8455,7 +8217,7 @@ const rawCards = [
     reb: 5.0,
     ast: 14.0,
     nbaId: 202681,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202681.png',
+    imageUrl: 'https://i.ytimg.com/vi/NqCcF1uNOHU/sddefault.jpg',
     quote: 'Uncle Drew: 31 points and 14 assists to spark an Eastern comeback.'
   },
   {
@@ -8472,7 +8234,7 @@ const rawCards = [
     reb: 0.0,
     ast: 15.0,
     nbaId: 101108,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/101108.png',
+    imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/clippers/sites/clippers/files/legacy/main_photo/paul-300-130218.jpg',
     quote: 'Point God: Orchestrated the West with 20 points and 15 assists.'
   },
   {
@@ -8489,7 +8251,7 @@ const rawCards = [
     reb: 7.0,
     ast: 3.0,
     nbaId: 201142,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png',
+    imageUrl: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhvb2f7GGkoW3_lNrMHpyGz-KYFOmQERofVyM2-a_HycOW-Cr9zHUmXroeMMywg_mh-PyThpYYs5HLhnmQEN_32i8yTJRV-SoNLUmfNG1lUXhVhXk1I1dxAHXPt6DXfeHhCogVdRfdVLto/s1600/kevin-durant-2012-nba-all-star-mvp.jpg',
     quote: 'Unstoppable: 36 points in a high-scoring Orlando showdown.'
   },
   {
@@ -8506,7 +8268,7 @@ const rawCards = [
     reb: 14.0,
     ast: 3.0,
     nbaId: 977,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
+    imageUrl: 'https://im.haberturk.com/2023/01/25/3559469_aadb129345ec9114d2c1a9ebd6e621b4.jpg',
     quote: 'LA Legend: 37 points and 14 rebounds in his home arena.'
   },
   {
@@ -8523,7 +8285,7 @@ const rawCards = [
     reb: 6.0,
     ast: 11.0,
     nbaId: 2548,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2548.png',
+    imageUrl: 'https://www.ocregister.com/wp-content/uploads/migration/kxv/kxvejr-b78605990z.120100214223913000guamipmj.3.jpg?w=620',
     quote: 'Flash: 28 points, 11 assists, and 5 steals in a thrilling 1-point win.'
   },
   {
@@ -8541,7 +8303,7 @@ const rawCards = [
     ast: 4.0,
     nbaId: 977,
     player2Id: 757,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
+    imageUrl: 'https://www.sandiegouniontribune.com/wp-content/uploads/migration/2009/02/16/00000169-0ce2-dbbe-a16f-4ee229060000.jpg?w=535',
     quote: 'Shared Legacy: The former duo reunited to share the MVP trophy in Phoenix.'
   },
   {
@@ -8558,7 +8320,7 @@ const rawCards = [
     reb: 8.0,
     ast: 9.0,
     nbaId: 2544,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
+    imageUrl: 'https://lh4.google.com/kaczalas/R7nHtotYuoI/AAAAAAAAhss/9rmodxa-tvM/s600/nba_080217_all-star_b-13.jpg',
     quote: 'All-Around Greatness: 27 points, 8 rebounds, and 9 assists for the King.'
   },
   {
@@ -8575,7 +8337,7 @@ const rawCards = [
     reb: 5.0,
     ast: 6.0,
     nbaId: 977,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
+    imageUrl: 'https://www.chinadaily.com.cn/sports/2007-02/19/xin_4402041913518031206714.jpg',
     quote: 'Las Vegas Lights: 31 points and 6 steals in the historic Vegas game.'
   },
   {
@@ -8592,7 +8354,7 @@ const rawCards = [
     reb: 6.0,
     ast: 2.0,
     nbaId: 2544,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
+    imageUrl: 'https://cdn.nba.com/manage/2021/08/GettyImages-56889648.jpg',
     quote: 'Rising King: Became the youngest All-Star MVP in history at age 21.'
   },
   {
@@ -8609,7 +8371,7 @@ const rawCards = [
     reb: 4.0,
     ast: 10.0,
     nbaId: 1505,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1505.png',
+    imageUrl: 'https://i.pinimg.com/736x/c5/db/59/c5db593394dbf9b16e844314ba8aed9f.jpg',
     quote: 'The Answer: 15 points and 10 assists to secure the East victory.'
   },
   {
@@ -8626,7 +8388,7 @@ const rawCards = [
     reb: 11.0,
     ast: 1.0,
     nbaId: 757,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/757.png',
+    imageUrl: 'https://i0.wp.com/b-rise.com/wp-content/uploads/2018/01/Shaquille-ONeal-troph%C3%A9e-MVP-All-Star-Game-2004-c-Getty.jpg?resize=295%2C360&ssl=1',
     quote: 'The Diesel: 24 points and 11 rebounds in just 23 minutes of play.'
   },
   {
@@ -8643,7 +8405,7 @@ const rawCards = [
     reb: 9.0,
     ast: 3.0,
     nbaId: 708,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/708.png',
+    imageUrl: 'https://pbs.twimg.com/media/BfQRKseCAAA-oe7.jpg',
     quote: 'The Big Ticket: 37 points in the legendary double-overtime battle.'
   },
   {
@@ -8660,7 +8422,7 @@ const rawCards = [
     reb: 5.0,
     ast: 5.0,
     nbaId: 977,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
+    imageUrl: 'https://www.inquirer.com/resizer/v2/VD2442YYRNDDZH4MJSJEZSJRM4.jpg?auth=5aba6f0931d9d2a936428287e87a8250a46e3aed22dbc8c148c39cb83338197e&width=760&height=507&smart=true',
     quote: 'Philly\'s Own: 31 points in his hometown despite the heavy boos.'
   },
   {
@@ -8677,7 +8439,7 @@ const rawCards = [
     reb: 2.0,
     ast: 5.0,
     nbaId: 1505,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1505.png',
+    imageUrl: 'https://www.sltrib.com/resizer/v2/JPWS3UUED5D4HFEMWE5U4KL3WQ.jpg?auth=f65109a17b41413502b064667380cc35ec32728ac94517b557d676ce741b41cc&width=750&quality=88',
     quote: 'The Heart: Led a 21-point comeback in the final nine minutes.'
   },
   {
@@ -8695,7 +8457,7 @@ const rawCards = [
     ast: 2.0,
     nbaId: 757,
     player2Id: 1495,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/757.png',
+    imageUrl: 'https://cdn.nba.com/manage/2021/08/duncan-shaq-082421.jpg',
     quote: 'Twin Towers: The two most dominant bigs shared the award in Oakland.'
   },
   // FINALS MVP SERIES
