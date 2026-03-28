@@ -122,72 +122,96 @@ export function useEngine() {
     return pool[Math.floor(Math.random() * pool.length)];
   };
 
-  const checkAchievements = (newCollection: string[], currentCoins: number, currentUnlocked: string[] = [], newlyAddedCardIds: string[] = []) => {
+  const checkAchievements = (newCollection: string[], currentCoins: number, currentUnlocked: string[] = [], newlyAddedCardIds: string[] = [], silent: boolean = false) => {
     let bonusCoins = 0;
-    const newlyUnlocked: string[] = [];
+    const newlyUnlocked: any[] = [];
     const unlockedSet = new Set(currentUnlocked || []);
-    const collectionSet = new Set(newCollection);
+    
+    // We'll track the collection as we "add" cards one by one to see which one triggers what
+    const tempCollection = [...newCollection.filter(id => !newlyAddedCardIds.includes(id))];
+    const tempCollectionSet = new Set(tempCollection);
 
-    // Check all achievements from the constants list
-    for (const ach of ACHIEVEMENTS) {
-      if (!unlockedSet.has(ach.id) && !newlyUnlocked.includes(ach.id)) {
-        // Create a temporary state to check the requirement
-        const tempState = {
-          collection: newCollection,
-          coins: currentCoins,
-          claimedDays: [],
-          unlockedAchievements: currentUnlocked
-        };
+    const checkAll = (cardId: string | null) => {
+      for (const ach of ACHIEVEMENTS) {
+        if (!unlockedSet.has(ach.id) && !newlyUnlocked.some(a => a.id === ach.id)) {
+          const tempState = {
+            collection: [...tempCollection],
+            coins: currentCoins,
+            claimedDays: [],
+            unlockedAchievements: currentUnlocked
+          };
 
-        if (ach.requirement(tempState, ALL_CARDS)) {
-          newlyUnlocked.push(ach.id);
-          unlockAchievement(ach.id);
-          
-          notify({
-            id: ach.id,
-            title: ach.title,
-            description: ach.description,
-            reward: ach.packReward ? `+${ach.reward} Coins & ${ach.packReward.name}` : `+${ach.reward} Coins`,
-            icon: ach.icon
-          });
-
-          bonusCoins += ach.reward;
-          if (ach.packReward) {
-            addPackToInventory(ach.packReward);
+          if (ach.requirement(tempState, ALL_CARDS)) {
+            const achievementData = {
+              id: ach.id,
+              title: ach.title,
+              description: ach.description,
+              reward: ach.packReward ? `+${ach.reward} Coins & ${ach.packReward.name}` : `+${ach.reward} Coins`,
+              icon: ach.icon,
+              rewardCoins: ach.reward,
+              packReward: ach.packReward,
+              triggeredByCardId: cardId
+            };
+            
+            newlyUnlocked.push(achievementData);
+            
+            if (!silent) {
+              unlockAchievement(ach.id);
+              notify(achievementData);
+              bonusCoins += ach.reward;
+              if (ach.packReward) {
+                addPackToInventory(ach.packReward);
+              }
+            }
           }
         }
       }
-    }
 
-    // Special Achievement: Team Master (Dynamic for each team)
-    // Only check teams that are relevant to the newly added cards to save cycles
-    const relevantTeams = newlyAddedCardIds.length > 0 
-      ? Array.from(new Set(newlyAddedCardIds.map(id => ALL_CARDS.find(c => c.id === id)?.team).filter(Boolean))) as string[]
-      : ALL_TEAMS;
+      // Team Master checks
+      const relevantTeams = cardId 
+        ? [ALL_CARDS.find(c => c.id === cardId)?.team].filter(Boolean) as string[]
+        : ALL_TEAMS;
 
-    for (const team of relevantTeams) {
-      const achievementId = `team-master-${team}`;
-      if (!unlockedSet.has(achievementId) && !newlyUnlocked.includes(achievementId)) {
-        const teamCardIds = TEAM_CARDS_MAP[team];
-        const hasAll = teamCardIds.every(id => collectionSet.has(id));
-        if (hasAll) {
-          newlyUnlocked.push(achievementId);
-          unlockAchievement(achievementId);
-          
-          notify({
-            id: achievementId,
-            title: `Team Master: ${team}`,
-            description: `Collected every card from the ${team}`,
-            reward: "+1 MVP Pack"
-          });
+      for (const team of relevantTeams) {
+        const achievementId = `team-master-${team}`;
+        if (!unlockedSet.has(achievementId) && !newlyUnlocked.some(a => a.id === achievementId)) {
+          const teamCardIds = TEAM_CARDS_MAP[team];
+          const hasAll = teamCardIds.every(id => tempCollectionSet.has(id));
+          if (hasAll) {
+            const achievementData = {
+              id: achievementId,
+              title: `Team Master: ${team}`,
+              description: `Collected every card from the ${team}`,
+              reward: "+1 MVP Pack",
+              packReward: { id: 'mvp-pack', type: 'mvp' as PackType, name: 'MVP Pack' },
+              triggeredByCardId: cardId
+            };
 
-          // Reward: 1 MVP Pack to inventory
-          addPackToInventory({ id: 'mvp-pack', type: 'mvp', name: 'MVP Pack' });
+            newlyUnlocked.push(achievementData);
+            
+            if (!silent) {
+              unlockAchievement(achievementId);
+              notify(achievementData);
+              addPackToInventory(achievementData.packReward);
+            }
+          }
         }
       }
+    };
+
+    // First check if any were already satisfied (unlikely but safe)
+    checkAll(null);
+
+    // Then check card by card
+    for (const cardId of newlyAddedCardIds) {
+      tempCollection.push(cardId);
+      tempCollectionSet.add(cardId);
+      checkAll(cardId);
     }
 
-    if (bonusCoins > 0) setCoins(currentCoins + bonusCoins);
+    if (!silent && bonusCoins > 0) setCoins(currentCoins + bonusCoins);
+    
+    return newlyUnlocked;
   };
 
   const openPack = (packType: PackType) => {
@@ -215,9 +239,9 @@ export function useEngine() {
     addToCollection(newIds);
     
     // Check achievements with the state that will exist after this update
-    checkAchievements([...collection, ...newIds], newCoins, unlockedAchievements, newIds);
+    const newlyUnlocked = checkAchievements([...collection, ...newIds], newCoins, unlockedAchievements, newIds, true);
 
-    return cardsWithNewFlag;
+    return { cards: cardsWithNewFlag, newlyUnlocked };
   };
 
   const openInventoryPack = (packId: string, packType: PackType) => {
@@ -234,9 +258,9 @@ export function useEngine() {
     addToCollection(newIds);
     
     // Check achievements with the state that will exist after this update
-    checkAchievements([...collection, ...newIds], coins, unlockedAchievements, newIds);
+    const newlyUnlocked = checkAchievements([...collection, ...newIds], coins, unlockedAchievements, newIds, true);
 
-    return cardsWithNewFlag;
+    return { cards: cardsWithNewFlag, newlyUnlocked };
   };
 
   return { openPack, openInventoryPack, PACK_SIZES };

@@ -8,15 +8,17 @@ import { Card } from '../types';
 export default function OpenView() {
   const [isOpening, setIsOpening] = useState(false);
   const [openedCards, setOpenedCards] = useState<Card[] | null>(null);
+  const [newlyUnlocked, setNewlyUnlocked] = useState<any[]>([]);
   const { openPack } = useEngine();
 
   const handleOpenFreePack = () => {
-    const cards = openPack('random');
-    if (cards) {
+    const result = openPack('random');
+    if (result) {
       setIsOpening(true);
       setTimeout(() => {
         setIsOpening(false);
-        setOpenedCards(cards);
+        setOpenedCards(result.cards);
+        setNewlyUnlocked(result.newlyUnlocked);
       }, 1500);
     }
   };
@@ -89,7 +91,7 @@ export default function OpenView() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex flex-col items-center pt-[140px]"
+            className="fixed inset-0 z-[7000] bg-black/95 backdrop-blur-2xl flex flex-col items-center pt-[140px]"
           >
             <div className="flex-1 flex flex-col items-center justify-center">
               <motion.div
@@ -117,7 +119,11 @@ export default function OpenView() {
         {openedCards && (
           <PackOpener 
             cards={openedCards} 
-            onClose={() => setOpenedCards(null)} 
+            newlyUnlockedAchievements={newlyUnlocked}
+            onClose={() => {
+              setOpenedCards(null);
+              setNewlyUnlocked([]);
+            }} 
           />
         )}
       </AnimatePresence>

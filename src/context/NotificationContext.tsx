@@ -57,17 +57,21 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   return (
     <NotificationContext.Provider value={{ notify, notifyError, notifySuccess, notifyInfo }}>
       {children}
-      <div className="fixed top-6 left-0 right-0 z-[1000] flex flex-col items-center pointer-events-none px-4 space-y-3">
-        <AnimatePresence>
-          {queue.map((notif) => (
-            <React.Fragment key={notif.id}>
+      <div className="fixed top-6 left-0 right-0 z-[9999] flex flex-col items-center pointer-events-none px-4 space-y-3">
+        <AnimatePresence mode="popLayout">
+          {queue.slice(0, 3).map((notif) => (
+            <motion.div
+              layout
+              key={notif.id}
+              initial={{ opacity: 0, y: -20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9, y: -10 }}
+              className="pointer-events-auto"
+            >
               {notif.type === 'achievement' && notif.achievement ? (
                 <AchievementToast achievement={notif.achievement} />
               ) : (
-                <motion.div
-                  initial={{ opacity: 0, y: -20, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                <div
                   className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border backdrop-blur-xl ${
                     notif.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
                     notif.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-400' :
@@ -78,9 +82,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                   {notif.type === 'success' && <CheckCircle2 size={18} />}
                   {notif.type === 'info' && <Info size={18} />}
                   <span className="text-sm font-bold tracking-tight">{notif.message}</span>
-                </motion.div>
+                </div>
               )}
-            </React.Fragment>
+            </motion.div>
           ))}
         </AnimatePresence>
       </div>

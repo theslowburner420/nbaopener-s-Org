@@ -12,7 +12,7 @@ type FilterType = Rarity | 'All';
 type SortType = 'Number' | 'OVR' | 'Name' | 'Team';
 
 export default function CollectionView() {
-  const { collection, unlockedAchievements, setCoins, addToCollection, setPremium } = useGame();
+  const { collection, unlockedAchievements, setCoins, addToCollection, setPremium, resetGame } = useGame();
   const [activeFilter, setActiveFilter] = useState<FilterType>('All');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [teamFilter, setTeamFilter] = useState<string>('All');
@@ -26,6 +26,7 @@ export default function CollectionView() {
   const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(24);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
+  const [easterEggType, setEasterEggType] = useState<'unlock' | 'reset'>('unlock');
 
   // Reset pagination when filters change
   React.useEffect(() => {
@@ -50,6 +51,19 @@ export default function CollectionView() {
       
       // Feedback
       setSearch('');
+      setEasterEggType('unlock');
+      setShowEasterEgg(true);
+      setTimeout(() => setShowEasterEgg(false), 3000);
+      return;
+    }
+
+    if (search.toLowerCase() === 'holaquetal') {
+      // Base Version Secret Code!
+      resetGame();
+      
+      // Feedback
+      setSearch('');
+      setEasterEggType('reset');
       setShowEasterEgg(true);
       setTimeout(() => setShowEasterEgg(false), 3000);
       return;
@@ -70,19 +84,13 @@ export default function CollectionView() {
   const renderGridItem = useCallback((card: Card) => {
     const isOwned = safeCollection.has(card.id);
     return (
-      <div
+      <CardItem 
         key={`${card.id}-${card.number}`}
-        className="relative group content-auto"
-      >
-        <div className={`${isOwned ? 'hover:scale-105 cursor-pointer' : 'cursor-default'} transition-transform duration-300`}>
-          <CardItem 
-            card={card} 
-            isOwned={isOwned} 
-            mode="mini"
-            onClick={handleCardClick}
-          />
-        </div>
-      </div>
+        card={card} 
+        isOwned={isOwned} 
+        mode="mini"
+        onClick={handleCardClick}
+      />
     );
   }, [safeCollection, handleCardClick]);
 
@@ -531,8 +539,12 @@ export default function CollectionView() {
               <Trophy size={18} className="text-black" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] font-black uppercase tracking-widest leading-none mb-0.5">Developer Mode</span>
-              <span className="text-xs font-black italic tracking-tighter uppercase">Everything Unlocked!</span>
+              <span className="text-[10px] font-black uppercase tracking-widest leading-none mb-0.5">
+                {easterEggType === 'unlock' ? 'Developer Mode' : 'System Reset'}
+              </span>
+              <span className="text-xs font-black italic tracking-tighter uppercase">
+                {easterEggType === 'unlock' ? 'Everything Unlocked!' : 'Game Restored to Base!'}
+              </span>
             </div>
           </motion.div>
         )}

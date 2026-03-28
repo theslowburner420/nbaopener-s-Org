@@ -65,6 +65,7 @@ export default function PacksView() {
   const { openPack, openInventoryPack } = useEngine();
   const { notifyError } = useNotification();
   const [openedCards, setOpenedCards] = useState<Card[] | null>(null);
+  const [newlyUnlocked, setNewlyUnlocked] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'shop' | 'inventory'>('shop');
 
   const uniqueOwned = useMemo(() => Array.from(new Set(collection)).length, [collection]);
@@ -102,16 +103,18 @@ export default function PacksView() {
       notifyError(`Need ${pack.price - coins} more coins!`);
       return;
     }
-    const cards = openPack(pack.id);
-    if (cards) {
-      setOpenedCards(cards);
+    const result = openPack(pack.id);
+    if (result) {
+      setOpenedCards(result.cards);
+      setNewlyUnlocked(result.newlyUnlocked);
     }
   };
 
   const handleOpenInventory = (packId: string, packType: string) => {
-    const cards = openInventoryPack(packId, packType as PackType);
-    if (cards) {
-      setOpenedCards(cards);
+    const result = openInventoryPack(packId, packType as PackType);
+    if (result) {
+      setOpenedCards(result.cards);
+      setNewlyUnlocked(result.newlyUnlocked);
     }
   };
 
@@ -298,7 +301,11 @@ export default function PacksView() {
         {openedCards && (
           <PackOpener 
             cards={openedCards} 
-            onClose={() => setOpenedCards(null)} 
+            newlyUnlockedAchievements={newlyUnlocked}
+            onClose={() => {
+              setOpenedCards(null);
+              setNewlyUnlocked([]);
+            }} 
           />
         )}
       </AnimatePresence>

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGame } from '../context/GameContext';
-import { motion } from 'motion/react';
-import { Zap, Star, Trophy, ShoppingCart, ShieldCheck, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Zap, Star, Trophy, ShoppingCart, ShieldCheck, Sparkles, X, Play } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
@@ -51,8 +51,64 @@ const ADS_FREE_PRICE = 2.00;
 export default function ShopView() {
   const { coins, setCoins, isPremium, setPremium } = useGame();
   const { notifySuccess, notifyError } = useNotification();
+  const [isAdPlaying, setIsAdPlaying] = useState(false);
+  const [adCountdown, setAdCountdown] = useState(30);
+  const adContainerRef = useRef<HTMLDivElement>(null);
   
   const paypalClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isAdPlaying && adCountdown > 0) {
+      timer = setInterval(() => {
+        setAdCountdown(prev => prev - 1);
+      }, 1000);
+    } else if (isAdPlaying && adCountdown === 0) {
+      setIsAdPlaying(false);
+      setCoins(coins + 50000);
+      notifySuccess("Reward Claimed! +50,000 Coins");
+      setAdCountdown(30);
+    }
+    return () => clearInterval(timer);
+  }, [isAdPlaying, adCountdown, coins, setCoins, notifySuccess]);
+
+  // Adsterra Integration
+  useEffect(() => {
+    if (isAdPlaying && adContainerRef.current) {
+      const container = adContainerRef.current;
+      container.innerHTML = '';
+
+      const adId = 'adsterra-reward-ad-7b956296dd611d148eef5572569c1535';
+      const adWrapper = document.createElement('div');
+      adWrapper.id = adId;
+      container.appendChild(adWrapper);
+
+      const optionsScript = document.createElement('script');
+      optionsScript.type = 'text/javascript';
+      optionsScript.text = `
+        atOptions = {
+          'key' : '7b956296dd611d148eef5572569c1535',
+          'format' : 'iframe',
+          'height' : 250,
+          'width' : 300,
+          'params' : {}
+        };
+      `;
+      
+      const invokeScript = document.createElement('script');
+      invokeScript.type = 'text/javascript';
+      invokeScript.src = 'https://www.highperformanceformat.com/7b956296dd611d148eef5572569c1535/invoke.js';
+      invokeScript.async = true;
+
+      container.appendChild(optionsScript);
+      container.appendChild(invokeScript);
+    }
+  }, [isAdPlaying]);
+
+  const startAd = () => {
+    setIsAdPlaying(true);
+    setAdCountdown(30);
+  };
 
   const handlePaymentSuccess = (rewardType: 'coins' | 'isPremium', amount: number) => {
     if (rewardType === 'coins') {
@@ -157,6 +213,30 @@ export default function ShopView() {
             </div>
           )}
 
+          {/* Ad Reward Banner */}
+          <div className="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-transparent p-5 group cursor-pointer active:scale-[0.98] transition-all"
+               onClick={startAd}>
+            <div className="absolute inset-0 bg-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center justify-between relative z-10">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center text-black shadow-[0_0_20px_rgba(245,158,11,0.4)]">
+                  <Sparkles size={24} fill="currentColor" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black uppercase italic tracking-tighter text-white">Daily Reward</h3>
+                  <p className="text-[9px] text-amber-500/80 uppercase font-bold tracking-widest">Watch an ad to claim coins</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="flex items-center gap-1 justify-end">
+                  <span className="text-2xl font-black italic tracking-tighter text-amber-400">+50,000</span>
+                  <span className="text-sm">🪙</span>
+                </div>
+                <span className="text-[8px] text-zinc-500 uppercase font-black tracking-widest">Available Now</span>
+              </div>
+            </div>
+          </div>
+
           {/* Coin Packs Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
@@ -244,6 +324,62 @@ export default function ShopView() {
           </div>
         </div>
       </div>
+
+      {/* Ad Modal */}
+      <AnimatePresence>
+        {isAdPlaying && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-6"
+          >
+            {/* Ad Content Simulation */}
+            <div className="w-full max-w-md aspect-video bg-zinc-900 rounded-2xl border border-white/10 flex flex-col items-center justify-center relative overflow-hidden shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent animate-pulse" />
+              
+              {/* Adsterra Container */}
+              <div 
+                ref={adContainerRef}
+                className="relative z-10 min-h-[250px] min-w-[300px] flex items-center justify-center"
+              >
+                <div className="flex flex-col items-center">
+                  <Play size={48} className="text-amber-500 mb-4 animate-bounce" />
+                  <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">NBA Opener Ad</h2>
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mt-2">Premium Experience Loading...</p>
+                </div>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-800">
+                <motion.div 
+                  initial={{ width: '0%' }}
+                  animate={{ width: `${((30 - adCountdown) / 30) * 100}%` }}
+                  className="h-full bg-amber-500"
+                />
+              </div>
+            </div>
+
+            <div className="mt-8 flex flex-col items-center gap-4">
+              <div className="w-16 h-16 rounded-full border-4 border-amber-500/20 border-t-amber-500 flex items-center justify-center relative">
+                <span className="text-xl font-black italic text-white">{adCountdown}</span>
+              </div>
+              <p className="text-[10px] text-zinc-500 uppercase tracking-[0.3em] font-black">Reward in progress...</p>
+            </div>
+
+            {/* Close Button (Disabled until finished) */}
+            <button 
+              disabled={adCountdown > 0}
+              onClick={() => setIsAdPlaying(false)}
+              className={`absolute top-6 right-6 p-2 rounded-full transition-all ${
+                adCountdown > 0 ? 'opacity-20 cursor-not-allowed' : 'bg-white text-black hover:scale-110'
+              }`}
+            >
+              <X size={24} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </PayPalScriptProvider>
   );
 }

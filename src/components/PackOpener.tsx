@@ -3,9 +3,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Card, Rarity } from '../types';
 import CardItem from './CardItem';
 import { Check, Sparkles } from 'lucide-react';
+import { useNotification } from '../context/NotificationContext';
+import { useGame } from '../context/GameContext';
 
 interface PackOpenerProps {
   cards: Card[];
+  newlyUnlockedAchievements?: any[];
   onClose: () => void;
 }
 
@@ -198,18 +201,54 @@ const RarityBackgroundEffect = React.memo(({ rarity, isActive, isRevealing }: { 
   }
 });
 
-export default function PackOpener({ cards, onClose }: PackOpenerProps) {
+export default function PackOpener({ cards, newlyUnlockedAchievements = [], onClose }: PackOpenerProps) {
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [isRevealing, setIsRevealing] = useState(true);
   const [showPack, setShowPack] = useState(true);
   const [hasOpenedPack, setHasOpenedPack] = useState(false);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  const [isPreloaded, setIsPreloaded] = useState(false);
+  const [shownAchievementIds, setShownAchievementIds] = useState<Set<string>>(new Set());
+
+  const { notify } = useNotification();
+  const { unlockAchievement, setCoins, coins, addPackToInventory } = useGame();
 
   React.useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  React.useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    
+    // Preload images for all cards in the pack
+    const preloadImages = async () => {
+      const promises = cards.flatMap(card => {
+        const cardImg = new Image();
+        cardImg.src = card.imageUrl;
+        
+        const logoImg = new Image();
+        if (card.teamLogoUrl) {
+          logoImg.src = card.teamLogoUrl;
+        }
+        
+        return [
+          new Promise(resolve => { cardImg.onload = resolve; cardImg.onerror = resolve; }),
+          card.teamLogoUrl ? new Promise(resolve => { logoImg.onload = resolve; logoImg.onerror = resolve; }) : Promise.resolve()
+        ];
+      });
+      
+      await Promise.all(promises);
+      setIsPreloaded(true);
+    };
+
+    preloadImages();
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [cards]);
 
   const totalCards = cards.length;
 
@@ -247,6 +286,43 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
       return () => clearTimeout(revealTimer);
     }
   }, [activeCardIndex, cards, hasOpenedPack]);
+
+  // Handle achievement notifications during reveal
+  React.useEffect(() => {
+    if (isRevealing && isPreloaded) {
+      const currentCard = cards[activeCardIndex];
+      const achievementsToTrigger = newlyUnlockedAchievements.filter(ach => 
+        !shownAchievementIds.has(ach.id) && 
+        (ach.triggeredByCardId === currentCard.id || ach.triggeredByCardId === null)
+      );
+
+      if (achievementsToTrigger.length > 0) {
+        achievementsToTrigger.forEach(ach => {
+          // Mark as shown immediately to prevent duplicate triggers
+          setShownAchievementIds(prev => new Set(prev).add(ach.id));
+          
+          // Delay slightly to align with card impact
+          setTimeout(() => {
+            unlockAchievement(ach.id);
+            notify({
+              id: ach.id,
+              title: ach.title,
+              description: ach.description,
+              reward: ach.reward,
+              icon: ach.icon
+            });
+            
+            if (ach.rewardCoins) {
+              setCoins(prev => prev + ach.rewardCoins);
+            }
+            if (ach.packReward) {
+              addPackToInventory(ach.packReward);
+            }
+          }, 400);
+        });
+      }
+    }
+  }, [activeCardIndex, isRevealing, isPreloaded, newlyUnlockedAchievements, shownAchievementIds, notify, unlockAchievement, setCoins, addPackToInventory, cards]);
 
   const nextCard = React.useCallback(() => {
     if (activeCardIndex < totalCards - 1) {
@@ -323,17 +399,32 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
     };
   }, [activeCardIndex, isMobile]);
 
+  if (!isPreloaded) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="fixed inset-0 z-[8000] bg-black flex items-center justify-center"
+      >
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-amber-500 font-black uppercase tracking-widest text-xs">Preparing Pack...</p>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`fixed inset-0 z-[2000] bg-black/98 flex flex-col items-center justify-center overflow-hidden h-[100dvh] select-none ${
+      className={`fixed inset-0 z-[8000] bg-black flex flex-col items-center justify-center overflow-hidden h-[100dvh] select-none pointer-events-auto isolation-isolate gpu-accelerated ${
         isRevealing ? 'animate-screen-shake-intense' : ''
       }`}
     >
       {/* Dark Overlay for focus */}
-      <div className="absolute inset-0 bg-black/80 z-0" />
+      <div className="absolute inset-0 bg-black/80 z-0 pointer-events-none" />
 
       {/* Background Glow & Special Effects */}
       <AnimatePresence mode="wait">
@@ -342,7 +433,7 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.5 }}
             exit={{ opacity: 0 }}
-            className={`absolute inset-0 blur-[150px] pointer-events-none transition-all duration-700 ${
+            className={`absolute inset-0 blur-[150px] pointer-events-none transition-all duration-700 will-change-opacity ${
               isRevealing && (cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].category === 'Dynasty' || cards[activeCardIndex].category === 'X-Factor') ? 'animate-screen-darken' : ''
             }`}
             style={{ 
@@ -353,7 +444,7 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
           />
         {/* Screen-wide Vignette */}
         <div 
-          className={`absolute inset-0 pointer-events-none z-[10] ${isRevealing ? 'animate-shimmer-bg' : ''}`}
+          className={`absolute inset-0 pointer-events-none z-[10] will-change-transform ${isRevealing ? 'animate-shimmer-bg' : ''}`}
           style={{ 
             background: `radial-gradient(circle, transparent 20%, ${getRarityColor(cards[activeCardIndex].rarity)}22 100%)`
           }}
@@ -738,7 +829,7 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
                 damping: 30,
                 mass: 0.8
               }}
-              className={`absolute w-[260px] md:w-[320px] max-h-[75vh] aspect-[2.5/3.5] touch-none ${
+              className={`absolute w-[260px] md:w-[320px] max-h-[75vh] aspect-[2.5/3.5] touch-none gpu-accelerated ${
                 !isActive ? 'pointer-events-none' : 'cursor-pointer'
               } ${
                 isActive && isRevealing ? 'animate-impact-scale' : ''
@@ -765,7 +856,7 @@ export default function PackOpener({ cards, onClose }: PackOpenerProps) {
               } ${!isActive ? 'rounded-xl overflow-hidden' : ''}`}
               style={{
                 animationDuration: (isLegend || isDPOY || isROTY || isRookie) && isRevealing ? '2.5s' : '1.5s',
-                willChange: 'transform, opacity',
+                willChange: 'transform, opacity, filter',
                 '--aura-color': getRarityColor(card.rarity)
               } as any}
               onClick={() => handleCardClick(index)}

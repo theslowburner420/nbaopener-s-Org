@@ -12,6 +12,7 @@ interface GameContextType extends GameState {
   addPackToInventory: (pack: { id: string; type: string; name: string }) => void;
   removePackFromInventory: (packId: string) => void;
   setPremium: (status: boolean) => void;
+  resetGame: () => void;
   login: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -237,8 +238,22 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const setPremium = (isPremium: boolean) => setState(prev => ({ ...prev, isPremium }));
 
+  const resetGame = () => {
+    setState(prev => ({
+      ...prev,
+      coins: 1000,
+      collection: [],
+      customCards: [],
+      unlockedAchievements: [],
+      lastClaimedDate: null,
+      claimedDays: [],
+      inventoryPacks: [],
+      isPremium: false,
+    }));
+  };
+
   return (
-    <GameContext.Provider value={{ ...state, setCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, login, logout }}>
+    <GameContext.Provider value={{ ...state, setCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, login, logout }}>
       {children}
     </GameContext.Provider>
   );

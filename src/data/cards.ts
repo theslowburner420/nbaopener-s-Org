@@ -6949,7 +6949,7 @@ const rawCards = [
     reb: 6.0,
     ast: 4.0,
     nbaId: 711,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/711.png',
+    imageUrl: 'https://i1.sndcdn.com/artworks-aPrXGTNKVFNYzEIe-hYL6Kw-t500x500.jpg',
     quote: '"Big Shot Rob". 7 anillos. El mejor tirador bajo presión de la historia.'
   },
   {
@@ -6965,7 +6965,7 @@ const rawCards = [
     reb: 5.0,
     ast: 5.0,
     nbaId: 2738,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2738.png',
+    imageUrl: 'https://www.arabnews.com/sites/default/files/styles/n_670_395/public/2015/06/17/file-17-iggy%20mvp.jpg?itok=UIt-lo0w',
     quote: 'El ancla defensiva de la dinastía. MVP de las Finales 2015 saliendo del banquillo.'
   },
   {
@@ -6981,7 +6981,7 @@ const rawCards = [
     reb: 4.0,
     ast: 5.0,
     nbaId: 1938,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1938.png',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTuy4BB46wSY9HO3p_SbIjGMQyNXOYsVbWvaA&s',
     quote: 'El 6º hombre definitivo. Sacrificó ser titular por el bien de la dinastía.'
   },
   {
@@ -6997,7 +6997,7 @@ const rawCards = [
     reb: 2.0,
     ast: 4.0,
     nbaId: 1891,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1891.png',
+    imageUrl: 'https://a.espncdn.com/photo/2011/0526/dal_g_terryj_300.jpg',
     quote: '"The Jet". Sus triples fueron clave para tumbar al Heat de LeBron en 2011.'
   },
   {
@@ -7013,7 +7013,7 @@ const rawCards = [
     reb: 6.0,
     ast: 3.0,
     nbaId: 2419,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2419.png',
+    imageUrl: 'https://thumb.spokesman.com/g_spB6WdLAjJ-WgopCOpqHsADd4=/400x0/media.spokesman.com/photos/2004/05/25/spt_princepic25_05-25-2004_G51L7SP.jpg',
     quote: 'El tapón a Miller y su defensa exterior definieron a los Pistons de 2004.'
   },
   {
@@ -7029,7 +7029,7 @@ const rawCards = [
     reb: 5.0,
     ast: 6.0,
     nbaId: 2563,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2563.png',
+    imageUrl: 'https://a.espncdn.com/photo/2012/0530/nba_g_boris-diaw_mb_576.jpg',
     quote: 'El "maestro" de los pases. La pieza que hacía que el sistema de Popovich fluyera.'
   },
   {
@@ -7045,7 +7045,7 @@ const rawCards = [
     reb: 3.0,
     ast: 4.0,
     nbaId: 965,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/965.png',
+    imageUrl: 'https://www.dailynews.com/wp-content/uploads/migration/2013/201312/SPORTS_131219792_AR_0_GZJMKGZCUUOT.jpg?w=1800&resize=1800,1800',
     quote: 'El líder vocal y autor del mítico tiro con 0.4 segundos contra los Spurs.'
   },
   {
@@ -7061,7 +7061,7 @@ const rawCards = [
     reb: 4.0,
     ast: 2.0,
     nbaId: 2747,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2747.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/c4/J.R._Smith_%2840627108671%29_%28cropped%29.jpg',
     quote: 'Cuando estaba enchufado, era el soporte anotador que LeBron necesitaba.'
   },
   {
@@ -7077,7 +7077,7 @@ const rawCards = [
     reb: 4.0,
     ast: 2.0,
     nbaId: 2203,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2203.png',
+    imageUrl: 'https://media.newyorker.com/photos/59095788c14b3c606c104a1d/master/pass/ShaneBattier_AP120617051483_Original_opt.jpg',
     quote: 'El rey de las "estadísticas invisibles" y el marcaje defensivo de élite.'
   },
   {
@@ -7093,7 +7093,7 @@ const rawCards = [
     reb: 6.0,
     ast: 1.0,
     nbaId: 200782,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/200782.png',
+    imageUrl: 'https://imageio.forbes.com/specials-images/dam/imageserve/8d5793cf5e4947d39ed55feb7e6bc92e/960x0.jpg?height=1013&width=711&fit=bounds',
     quote: 'El "corner 3" y la defensa física extrema que todo campeón necesita.'
   },
   {
@@ -7109,7 +7109,7 @@ const rawCards = [
     reb: 9.0,
     ast: 4.0,
     nbaId: 1885,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1885.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/LamarOdomLakers.jpg/250px-LamarOdomLakers.jpg',
     quote: 'Versatilidad total. Podía jugar de base o de pívot para los Lakers de Kobe.'
   },
   {
@@ -7125,7 +7125,7 @@ const rawCards = [
     reb: 3.0,
     ast: 5.0,
     nbaId: 1627832,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627832.png',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLP79Q8-metZDFTjxxrybI1UDm7bzqReTo2w&s',
     quote: 'De no ser drafteado a anotar triples clave en las Finales de 2019.'
   },
   // SIXTH MAN OF THE YEAR (6MOY)
