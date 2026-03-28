@@ -151,30 +151,30 @@ export default function ShopView() {
         </header>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8 no-scrollbar pb-32 z-10">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 space-y-6 sm:space-y-8 no-scrollbar pb-32 z-10">
           
           {/* Ads Free Option */}
           {!isPremium ? (
-            <div className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-zinc-900/40 p-5 group">
-              <div className="flex flex-col gap-5 relative z-10">
+            <div className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-zinc-900/40 p-4 sm:p-5 group">
+              <div className="flex flex-col gap-4 sm:gap-5 relative z-10">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-purple-500 flex items-center justify-center text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]">
-                      <Zap size={20} fill="currentColor" />
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-purple-500 flex items-center justify-center text-white shadow-[0_0_15px_rgba(168,85,247,0.3)] shrink-0">
+                      <Zap size={16} sm:size={20} fill="currentColor" />
                     </div>
                     <div>
-                      <h3 className="text-base font-black uppercase italic tracking-tighter text-white">Ad-Free Experience</h3>
-                      <p className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest">One-time payment • Lifetime access</p>
+                      <h3 className="text-sm sm:text-base font-black uppercase italic tracking-tighter text-white">Ad-Free Experience</h3>
+                      <p className="text-[8px] sm:text-[9px] text-zinc-500 uppercase font-bold tracking-widest">One-time payment • Lifetime access</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className="block text-lg font-black italic tracking-tighter text-purple-400">${ADS_FREE_PRICE.toFixed(2)}</span>
+                  <div className="text-right shrink-0">
+                    <span className="block text-base sm:text-lg font-black italic tracking-tighter text-purple-400">${ADS_FREE_PRICE.toFixed(2)}</span>
                   </div>
                 </div>
                 
                 <div className="mt-1">
                   <PayPalButtons
-                    style={{ layout: "horizontal", height: 38, color: 'blue', shape: 'rect', label: 'pay' }}
+                    style={{ layout: "horizontal", height: 32, color: 'blue', shape: 'rect', label: 'pay' }}
                     createOrder={(data, actions) => {
                       return actions.order.create({
                         intent: "CAPTURE",
@@ -202,86 +202,86 @@ export default function ShopView() {
               </div>
             </div>
           ) : (
-            <div className="bg-zinc-900/30 border border-green-500/20 rounded-2xl p-4 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
-                <ShieldCheck size={20} />
+            <div className="bg-zinc-900/30 border border-green-500/20 rounded-2xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 shrink-0">
+                <ShieldCheck size={16} sm:size={20} />
               </div>
               <div>
-                <h3 className="text-xs font-black uppercase tracking-widest text-green-500">Ads Free Active</h3>
-                <p className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest">Thank you for supporting the game</p>
+                <h3 className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-green-500">Ads Free Active</h3>
+                <p className="text-[8px] sm:text-[9px] text-zinc-500 uppercase font-bold tracking-widest">Thank you for supporting the game</p>
               </div>
             </div>
           )}
 
           {/* Ad Reward Banner */}
-          <div className="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-transparent p-5 group cursor-pointer active:scale-[0.98] transition-all"
+          <div className="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-transparent p-4 sm:p-5 group cursor-pointer active:scale-[0.98] transition-all"
                onClick={startAd}>
             <div className="absolute inset-0 bg-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center justify-between relative z-10">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center text-black shadow-[0_0_20px_rgba(245,158,11,0.4)]">
-                  <Sparkles size={24} fill="currentColor" />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-500 flex items-center justify-center text-black shadow-[0_0_20px_rgba(245,158,11,0.4)] shrink-0">
+                  <Sparkles size={20} sm:size={24} fill="currentColor" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black uppercase italic tracking-tighter text-white">Daily Reward</h3>
-                  <p className="text-[9px] text-amber-500/80 uppercase font-bold tracking-widest">Watch an ad to claim coins</p>
+                  <h3 className="text-base sm:text-lg font-black uppercase italic tracking-tighter text-white">Daily Reward</h3>
+                  <p className="text-[8px] sm:text-[9px] text-amber-500/80 uppercase font-bold tracking-widest">Watch an ad to claim coins</p>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-right shrink-0">
                 <div className="flex items-center gap-1 justify-end">
-                  <span className="text-2xl font-black italic tracking-tighter text-amber-400">+50,000</span>
-                  <span className="text-sm">🪙</span>
+                  <span className="text-xl sm:text-2xl font-black italic tracking-tighter text-amber-400">+50,000</span>
+                  <span className="text-xs sm:text-sm">🪙</span>
                 </div>
-                <span className="text-[8px] text-zinc-500 uppercase font-black tracking-widest">Available Now</span>
+                <span className="text-[7px] sm:text-[8px] text-zinc-500 uppercase font-black tracking-widest">Available Now</span>
               </div>
             </div>
           </div>
 
           {/* Coin Packs Section */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-1 h-3 bg-amber-500 rounded-full" />
-              <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500">Coin Packs</h3>
+              <h3 className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500">Coin Packs</h3>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-3 sm:gap-4">
               {COIN_PACKS.map((pack, index) => (
                 <motion.div
                   key={pack.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5"
+                  className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4 sm:p-5"
                 >
                   {/* Background Glow */}
                   <div className={`absolute inset-0 bg-gradient-to-br ${pack.color} opacity-5 group-hover:opacity-10 transition-opacity`} />
                   
-                  <div className="flex flex-col gap-5 relative z-10">
+                  <div className="flex flex-col gap-4 sm:gap-5 relative z-10">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/5">
-                          {pack.icon}
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/5 shrink-0">
+                          {React.cloneElement(pack.icon as React.ReactElement, { size: 20 })}
                         </div>
                         <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xl font-black italic tracking-tighter text-white">{pack.coins.toLocaleString()}</span>
-                            <span className="text-xs font-bold text-yellow-500">🪙</span>
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <span className="text-lg sm:text-xl font-black italic tracking-tighter text-white">{pack.coins.toLocaleString()}</span>
+                            <span className="text-[10px] sm:text-xs font-bold text-yellow-500">🪙</span>
                           </div>
-                          <h4 className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">{pack.name}</h4>
+                          <h4 className="text-[8px] sm:text-[9px] font-black text-zinc-500 uppercase tracking-widest">{pack.name}</h4>
                           {pack.bonus && (
-                            <span className="text-[9px] font-black text-green-400 uppercase tracking-widest">{pack.bonus}</span>
+                            <span className="text-[8px] sm:text-[9px] font-black text-green-400 uppercase tracking-widest">{pack.bonus}</span>
                           )}
                         </div>
                       </div>
 
-                      <div className="text-right">
-                        <span className="block text-base font-black italic tracking-tighter text-white">${pack.price.toFixed(2)}</span>
+                      <div className="text-right shrink-0">
+                        <span className="block text-sm sm:text-base font-black italic tracking-tighter text-white">${pack.price.toFixed(2)}</span>
                       </div>
                     </div>
 
                     <div className="mt-1">
                       <PayPalButtons
-                        style={{ layout: "horizontal", height: 38, color: 'gold', shape: 'rect', label: 'pay' }}
+                        style={{ layout: "horizontal", height: 32, color: 'gold', shape: 'rect', label: 'pay' }}
                         createOrder={(data, actions) => {
                           return actions.order.create({
                             intent: "CAPTURE",
@@ -319,7 +319,7 @@ export default function ShopView() {
               <span className="text-[8px] font-black uppercase tracking-[0.3em]">Premium NBA Economy</span>
             </div>
             <p className="text-center text-[7px] text-zinc-800 uppercase tracking-[0.2em] font-bold max-w-[180px]">
-              All transactions are final. Coins are non-transferable and have no real-world value.
+              All transactions are final. We are not affiliated with the NBA; this is a fan game. Coins are non-transferable and have no real-world value.
             </p>
           </div>
         </div>

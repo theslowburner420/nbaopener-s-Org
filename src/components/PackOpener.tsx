@@ -354,8 +354,8 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
       // Center active card - optimized for full visibility
       return { 
         x: 0, 
-        y: 0, 
-        scale: isMobile ? 0.85 : 1, 
+        y: isMobile ? -20 : 0, 
+        scale: isMobile ? 0.75 : 1, 
         rotate: 0, 
         zIndex: 100 
       };
@@ -368,13 +368,13 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
       if (distanceFromActive > 5) return { x: -100, y: 100, scale: 0, rotate: -45, zIndex: 0, opacity: 0 };
       
       const angle = -8 - (distanceFromActive * 2);
-      const xOffset = -15 - (distanceFromActive * 12);
+      const xOffset = isMobile ? -10 - (distanceFromActive * 8) : -15 - (distanceFromActive * 12);
       const yOffset = 5 + (distanceFromActive * 4);
       
       return { 
         x: xOffset, 
         y: yOffset, 
-        scale: 0.8, 
+        scale: isMobile ? 0.6 : 0.8, 
         rotate: angle, 
         zIndex: 50 - distanceFromActive,
         opacity: 1
@@ -386,13 +386,13 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
     if (distanceFromActive > 5) return { x: 100, y: 100, scale: 0, rotate: 45, zIndex: 0, opacity: 0 };
 
     const angle = 8 + (distanceFromActive * 2);
-    const xOffset = 15 + (distanceFromActive * 12);
+    const xOffset = isMobile ? 10 + (distanceFromActive * 8) : 15 + (distanceFromActive * 12);
     const yOffset = 5 + (distanceFromActive * 4);
 
     return { 
       x: xOffset, 
       y: yOffset, 
-      scale: 0.8, 
+      scale: isMobile ? 0.6 : 0.8, 
       rotate: angle, 
       zIndex: 50 - distanceFromActive,
       opacity: 1
@@ -829,7 +829,7 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
                 damping: 30,
                 mass: 0.8
               }}
-              className={`absolute w-[260px] md:w-[320px] max-h-[75vh] aspect-[2.5/3.5] touch-none gpu-accelerated ${
+              className={`absolute w-[220px] xs:w-[260px] md:w-[320px] max-h-[65vh] md:max-h-[75vh] aspect-[2.5/3.5] touch-none gpu-accelerated ${
                 !isActive ? 'pointer-events-none' : 'cursor-pointer'
               } ${
                 isActive && isRevealing ? 'animate-impact-scale' : ''
@@ -880,10 +880,10 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
                     transition={{ duration: 0.8, ease: "easeInOut" }}
                     className="w-full h-full flex items-center justify-center"
                   >
-                    <div className="w-48 h-64 bg-gradient-to-br from-amber-500 to-amber-900 rounded-2xl shadow-[0_0_50px_rgba(245,158,11,0.5)] border-2 border-white/20 flex items-center justify-center relative overflow-hidden">
+                    <div className="w-40 h-56 sm:w-48 sm:h-64 bg-gradient-to-br from-amber-500 to-amber-900 rounded-2xl shadow-[0_0_50px_rgba(245,158,11,0.5)] border-2 border-white/20 flex items-center justify-center relative overflow-hidden">
                       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
-                      <Sparkles size={64} className="text-white/80 animate-pulse" />
-                      <div className="absolute bottom-4 text-white font-black italic uppercase tracking-widest text-xs">Opening...</div>
+                      <Sparkles size={isMobile ? 48 : 64} className="text-white/80 animate-pulse" />
+                      <div className="absolute bottom-4 text-white font-black italic uppercase tracking-widest text-[10px] sm:text-xs">Opening...</div>
                     </div>
                   </motion.div>
                 ) : (
@@ -914,22 +914,22 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute bottom-12 flex flex-col items-center gap-4 z-[4000] pointer-events-auto"
+          className="absolute bottom-6 sm:bottom-12 flex flex-col items-center gap-3 sm:gap-4 z-[4000] pointer-events-auto pb-safe"
         >
-          <div className="flex items-center gap-8 mb-4">
+          <div className="flex items-center gap-4 sm:gap-8 mb-2 sm:mb-4">
             <button 
               onClick={(e) => { e.stopPropagation(); prevCard(); }}
               disabled={activeCardIndex === 0}
-              className={`text-[10px] font-black uppercase tracking-widest px-6 py-3 rounded-full border border-white/10 transition-all shadow-xl ${activeCardIndex === 0 ? 'opacity-20 cursor-not-allowed' : 'bg-zinc-800 text-white hover:bg-zinc-700 active:scale-95'}`}
+              className={`text-[8px] sm:text-[10px] font-black uppercase tracking-widest px-4 sm:px-6 py-2 sm:py-3 rounded-full border border-white/10 transition-all shadow-xl ${activeCardIndex === 0 ? 'opacity-20 cursor-not-allowed' : 'bg-zinc-800 text-white hover:bg-zinc-700 active:scale-95'}`}
             >
               Prev
             </button>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5 sm:gap-2">
               {cards.map((_, i) => (
                 <div 
                   key={i}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    i === activeCardIndex ? 'w-6 bg-white' : (i < activeCardIndex ? 'w-2 bg-white/60' : 'w-2 bg-white/20')
+                  className={`h-1 sm:h-1.5 rounded-full transition-all duration-300 ${
+                    i === activeCardIndex ? 'w-4 sm:w-6 bg-white' : (i < activeCardIndex ? 'w-1.5 sm:w-2 bg-white/60' : 'w-1.5 sm:w-2 bg-white/20')
                   }`}
                 />
               ))}
@@ -937,7 +937,7 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
             <button 
               onClick={(e) => { e.stopPropagation(); nextCard(); }}
               disabled={activeCardIndex === totalCards - 1}
-              className={`text-[10px] font-black uppercase tracking-widest px-6 py-3 rounded-full border border-white/10 transition-all shadow-xl ${activeCardIndex === totalCards - 1 ? 'opacity-20 cursor-not-allowed' : 'bg-zinc-800 text-white hover:bg-zinc-700 active:scale-95'}`}
+              className={`text-[8px] sm:text-[10px] font-black uppercase tracking-widest px-4 sm:px-6 py-2 sm:py-3 rounded-full border border-white/10 transition-all shadow-xl ${activeCardIndex === totalCards - 1 ? 'opacity-20 cursor-not-allowed' : 'bg-zinc-800 text-white hover:bg-zinc-700 active:scale-95'}`}
             >
               Next
             </button>
@@ -946,9 +946,9 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
           {allRevealed && (
             <button
               onClick={(e) => { e.stopPropagation(); onClose(); }}
-              className="bg-white text-black font-black px-12 py-4 rounded-full shadow-[0_0_50px_rgba(255,255,255,0.3)] flex items-center gap-3 uppercase tracking-widest text-xs hover:bg-amber-400 transition-all active:scale-95 border-2 border-white/50"
+              className="bg-white text-black font-black px-8 sm:px-12 py-3 sm:py-4 rounded-full shadow-[0_0_50px_rgba(255,255,255,0.3)] flex items-center gap-2 sm:gap-3 uppercase tracking-widest text-[10px] sm:text-xs hover:bg-amber-400 transition-all active:scale-95 border-2 border-white/50"
             >
-              <Check size={18} strokeWidth={3} />
+              <Check size={isMobile ? 14 : 18} strokeWidth={3} />
               Collect Cards
             </button>
           )}

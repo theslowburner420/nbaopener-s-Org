@@ -113,60 +113,60 @@ function AppContent() {
 
       <StaticAd position="footer" />
       {/* NBA Premium Navigation Bar */}
-      <nav className="h-16 bg-zinc-950 border-t border-zinc-900 flex items-center justify-around px-4 pb-2 shrink-0 z-50">
+      <nav className="h-16 bg-zinc-950 border-t border-zinc-900 flex items-center justify-around px-2 pb-safe shrink-0 z-50">
         {/* Collection */}
         <button 
           onClick={() => handleViewChange('collection')}
-          className={`flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'collection' ? 'text-white' : 'text-zinc-600'}`}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'collection' ? 'text-white' : 'text-zinc-600'}`}
         >
           <div className={`p-1.5 rounded-lg transition-all ${currentView === 'collection' ? 'bg-zinc-900' : ''}`}>
-            <LayoutGrid size={18} strokeWidth={currentView === 'collection' ? 2.5 : 2} />
+            <LayoutGrid size={20} strokeWidth={currentView === 'collection' ? 2.5 : 2} />
           </div>
-          <span className="text-[7px] font-black uppercase tracking-[0.1em]">Roster</span>
+          <span className="text-[8px] font-black uppercase tracking-wider">Roster</span>
         </button>
 
         {/* Rewards */}
         <button 
           onClick={() => handleViewChange('rewards')}
-          className={`flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'rewards' ? 'text-white' : 'text-zinc-600'}`}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'rewards' ? 'text-white' : 'text-zinc-600'}`}
         >
           <div className={`p-1.5 rounded-lg transition-all ${currentView === 'rewards' ? 'bg-zinc-900' : ''}`}>
-            <Trophy size={18} strokeWidth={currentView === 'rewards' ? 2.5 : 2} />
+            <Trophy size={20} strokeWidth={currentView === 'rewards' ? 2.5 : 2} />
           </div>
-          <span className="text-[7px] font-black uppercase tracking-[0.1em]">Rewards</span>
+          <span className="text-[8px] font-black uppercase tracking-wider">Rewards</span>
         </button>
 
         {/* OPEN (Center) */}
         <button 
           onClick={() => handleViewChange('open')}
-          className={`relative flex flex-col items-center justify-center transition-all duration-500 ${currentView === 'open' ? 'scale-105' : ''}`}
+          className={`flex-1 relative flex flex-col items-center justify-center transition-all duration-500 ${currentView === 'open' ? 'scale-110 -translate-y-1' : ''}`}
         >
           <div className={`p-2.5 rounded-xl transition-all ${currentView === 'open' ? 'bg-amber-500 text-black shadow-[0_0_20px_rgba(245,158,11,0.4)]' : 'bg-zinc-900 text-zinc-500'}`}>
-            <Zap size={22} strokeWidth={3} fill={currentView === 'open' ? "currentColor" : "none"} />
+            <Zap size={24} strokeWidth={3} fill={currentView === 'open' ? "currentColor" : "none"} />
           </div>
-          <span className={`text-[8px] font-black uppercase tracking-[0.2em] mt-1 transition-colors ${currentView === 'open' ? 'text-amber-500' : 'text-zinc-600'}`}>Open</span>
+          <span className={`text-[9px] font-black uppercase tracking-[0.1em] mt-1 transition-colors ${currentView === 'open' ? 'text-amber-500' : 'text-zinc-600'}`}>Open</span>
         </button>
 
         {/* Packs */}
         <button 
           onClick={() => handleViewChange('packs')}
-          className={`flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'packs' ? 'text-white' : 'text-zinc-600'}`}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'packs' ? 'text-white' : 'text-zinc-600'}`}
         >
           <div className={`p-1.5 rounded-lg transition-all ${currentView === 'packs' ? 'bg-zinc-900' : ''}`}>
-            <ShoppingBag size={18} strokeWidth={currentView === 'packs' ? 2.5 : 2} />
+            <ShoppingBag size={20} strokeWidth={currentView === 'packs' ? 2.5 : 2} />
           </div>
-          <span className="text-[7px] font-black uppercase tracking-[0.1em]">Packs</span>
+          <span className="text-[8px] font-black uppercase tracking-wider">Packs</span>
         </button>
 
         {/* Shop */}
         <button 
           onClick={() => handleViewChange('shop')}
-          className={`flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'shop' ? 'text-white' : 'text-zinc-600'}`}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'shop' ? 'text-white' : 'text-zinc-600'}`}
         >
           <div className={`p-1.5 rounded-lg transition-all ${currentView === 'shop' ? 'bg-zinc-900' : ''}`}>
-            <Coins size={18} strokeWidth={currentView === 'shop' ? 2.5 : 2} />
+            <Coins size={20} strokeWidth={currentView === 'shop' ? 2.5 : 2} />
           </div>
-          <span className="text-[7px] font-black uppercase tracking-[0.1em]">Shop</span>
+          <span className="text-[8px] font-black uppercase tracking-wider">Shop</span>
         </button>
       </nav>
     </div>

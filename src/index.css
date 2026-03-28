@@ -747,12 +747,26 @@ body {
   100% { background-position: -200% 0%; }
 }
 
-/* Collection Grid Styles - Improved */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Collection Grid Styles - Responsive */
 .collection-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  padding: 10px;
+  gap: 4px;
+  padding: 8px;
+  width: 100%;
+}
+
+@media (min-width: 480px) {
+  .collection-grid {
+    gap: 8px;
+    padding: 12px;
+  }
 }
 
 @media (min-width: 768px) {
@@ -765,7 +779,21 @@ body {
 
 @media (min-width: 1280px) {
   .collection-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* Ensure modals don't overflow on narrow screens */
+.modal-container {
+  width: 95%;
+  max-width: 500px;
+  margin: auto;
+}
+
+@media (max-width: 380px) {
+  .collection-grid {
+    gap: 3px;
+    padding: 6px;
   }
 }
 

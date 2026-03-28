@@ -43,121 +43,121 @@ const getLevel = (reward: number): 'bronze' | 'silver' | 'gold' | 'diamond' => {
 export const ACHIEVEMENTS: Achievement[] = [
   // --- OPENING MILESTONES (20) ---
   { 
-    id: 'pack-1', title: 'First Step', description: 'Abrir tu primer sobre.', icon: Package, category: 'packs', level: 'bronze',
+    id: 'pack-1', title: 'First Step', description: 'Open your first pack.', icon: Package, category: 'packs', level: 'bronze',
     requirement: (state) => state.collection.length >= 5, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 5), total: 5 }),
     reward: 1000 
   },
   { 
-    id: 'pack-5', title: 'Rookie Opener', description: 'Abrir 5 sobres.', icon: Package, category: 'packs', level: 'bronze',
+    id: 'pack-5', title: 'Rookie Opener', description: 'Open 5 packs.', icon: Package, category: 'packs', level: 'bronze',
     requirement: (state) => state.collection.length >= 25, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 25), total: 25 }),
     reward: 2500 
   },
   { 
-    id: 'pack-10', title: 'Regular Opener', description: 'Abrir 10 sobres.', icon: Package, category: 'packs', level: 'silver',
+    id: 'pack-10', title: 'Regular Opener', description: 'Open 10 packs.', icon: Package, category: 'packs', level: 'silver',
     requirement: (state) => state.collection.length >= 50, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 50), total: 50 }),
     reward: 5000, packReward: { id: 'rookie-pack', type: 'rookie', name: 'Rookie Pack' } 
   },
   { 
-    id: 'pack-25', title: 'Dedicated Opener', description: 'Abrir 25 sobres.', icon: Package, category: 'packs', level: 'silver',
+    id: 'pack-25', title: 'Dedicated Opener', description: 'Open 25 packs.', icon: Package, category: 'packs', level: 'silver',
     requirement: (state) => state.collection.length >= 125, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 125), total: 125 }),
     reward: 10000 
   },
   { 
-    id: 'pack-50', title: 'Pack Enthusiast', description: 'Abrir 50 sobres.', icon: Package, category: 'packs', level: 'gold',
+    id: 'pack-50', title: 'Pack Enthusiast', description: 'Open 50 packs.', icon: Package, category: 'packs', level: 'gold',
     requirement: (state) => state.collection.length >= 250, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 250), total: 250 }),
     reward: 25000, packReward: { id: 'allstar-pack', type: 'allstar', name: 'All-Star Pack' } 
   },
   { 
-    id: 'pack-100', title: 'Pack Addict', description: 'Abrir 100 sobres.', icon: Package, category: 'packs', level: 'gold',
+    id: 'pack-100', title: 'Pack Addict', description: 'Open 100 packs.', icon: Package, category: 'packs', level: 'gold',
     requirement: (state) => state.collection.length >= 500, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 500), total: 500 }),
     reward: 50000, packReward: { id: 'mvp-pack', type: 'mvp', name: 'MVP Pack' } 
   },
   { 
-    id: 'pack-200', title: 'Bulk Buyer', description: 'Abrir 200 sobres.', icon: Package, category: 'packs', level: 'gold',
+    id: 'pack-200', title: 'Bulk Buyer', description: 'Open 200 packs.', icon: Package, category: 'packs', level: 'gold',
     requirement: (state) => state.collection.length >= 1000, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 1000), total: 1000 }),
     reward: 100000 
   },
   { 
-    id: 'pack-300', title: 'Crate Collector', description: 'Abrir 300 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    id: 'pack-300', title: 'Crate Collector', description: 'Open 300 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 1500, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 1500), total: 1500 }),
     reward: 150000 
   },
   { 
-    id: 'pack-400', title: 'Warehouse Manager', description: 'Abrir 400 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    id: 'pack-400', title: 'Warehouse Manager', description: 'Open 400 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 2000, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 2000), total: 2000 }),
     reward: 200000 
   },
   { 
-    id: 'pack-500', title: 'Halfway to a Thousand', description: 'Abrir 500 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    id: 'pack-500', title: 'Halfway to a Thousand', description: 'Open 500 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 2500, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 2500), total: 2500 }),
     reward: 250000, packReward: { id: 'hof-pack', type: 'hof', name: 'HOF Pack' } 
   },
   { 
-    id: 'pack-750', title: 'Three Quarters', description: 'Abrir 750 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    id: 'pack-750', title: 'Three Quarters', description: 'Open 750 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 3750, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 3750), total: 3750 }),
     reward: 350000 
   },
   { 
-    id: 'pack-1000', title: 'Millennial Opener', description: 'Abrir 1000 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    id: 'pack-1000', title: 'Millennial Opener', description: 'Open 1000 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 5000, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 5000), total: 5000 }),
     reward: 500000, packReward: { id: 'hof-pack', type: 'hof', name: 'HOF Pack' } 
   },
   { 
-    id: 'pack-1500', title: 'Pack Veteran', description: 'Abrir 1500 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    id: 'pack-1500', title: 'Pack Veteran', description: 'Open 1500 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 7500, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 7500), total: 7500 }),
     reward: 750000 
   },
   { 
-    id: 'pack-2000', title: 'Double Millennial', description: 'Abrir 2000 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    id: 'pack-2000', title: 'Double Millennial', description: 'Open 2000 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 10000, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 10000), total: 10000 }),
     reward: 1000000 
   },
   { 
-    id: 'pack-2500', title: 'Pack Legend', description: 'Abrir 2500 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    id: 'pack-2500', title: 'Pack Legend', description: 'Open 2500 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 12500, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 12500), total: 12500 }),
     reward: 1250000 
   },
   { 
-    id: 'pack-3000', title: 'Triple Millennial', description: 'Abrir 3000 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    id: 'pack-3000', title: 'Triple Millennial', description: 'Open 3000 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 15000, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 15000), total: 15000 }),
     reward: 1500000 
   },
   { 
-    id: 'pack-3500', title: 'Pack Master', description: 'Abrir 3500 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    id: 'pack-3500', title: 'Pack Master', description: 'Open 3500 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 17500, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 17500), total: 17500 }),
     reward: 1750000 
   },
   { 
-    id: 'pack-4000', title: 'Quadruple Millennial', description: 'Abrir 4000 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    id: 'pack-4000', title: 'Quadruple Millennial', description: 'Open 4000 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 20000, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 20000), total: 20000 }),
     reward: 2000000 
   },
   { 
-    id: 'pack-4500', title: 'Pack God', description: 'Abrir 4500 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    id: 'pack-4500', title: 'Pack God', description: 'Open 4500 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 22500, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 22500), total: 22500 }),
     reward: 2250000 
   },
   { 
-    id: 'pack-5000', title: 'Ultimate Opener', description: 'Abrir 5000 sobres.', icon: Package, category: 'packs', level: 'diamond',
+    id: 'pack-5000', title: 'Ultimate Opener', description: 'Open 5000 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 25000, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 25000), total: 25000 }),
     reward: 5000000, packReward: { id: 'hof-pack', type: 'hof', name: 'HOF Pack' } 
@@ -167,7 +167,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   ...TEAMS.map(team => ({
     id: `team-master-static-${team.toLowerCase().replace(/ /g, '-')}`,
     title: `${team} Master`,
-    description: `Completar la plantilla de los ${team}.`,
+    description: `Complete the ${team} roster.`,
     icon: Users,
     category: 'collection' as const,
     level: 'silver' as const,
@@ -188,7 +188,7 @@ export const ACHIEVEMENTS: Achievement[] = [
 
   // --- RARITIES (50) ---
   ...[10, 50, 100, 200, 300, 400, 500, 600, 800, 1000].map(count => ({
-    id: `rarity-bench-${count}`, title: `Bench Warmer ${count}`, description: `Coleccionar ${count} cartas de rareza Bench.`, icon: Shield,
+    id: `rarity-bench-${count}`, title: `Bench Warmer ${count}`, description: `Collect ${count} Bench rarity cards.`, icon: Shield,
     category: 'collection' as const,
     level: getLevel(count * 2),
     requirement: (state: any, allCards: any[]) => {
@@ -203,7 +203,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     reward: count * 10
   })),
   ...[10, 50, 100, 150, 200, 250, 300, 350, 400, 500].map(count => ({
-    id: `rarity-starter-${count}`, title: `Starter Squad ${count}`, description: `Coleccionar ${count} cartas de rareza Starter.`, icon: Target,
+    id: `rarity-starter-${count}`, title: `Starter Squad ${count}`, description: `Collect ${count} Starter rarity cards.`, icon: Target,
     category: 'collection' as const,
     level: getLevel(count * 5),
     requirement: (state: any, allCards: any[]) => {
@@ -218,7 +218,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     reward: count * 25
   })),
   ...[5, 10, 15, 20, 25, 30, 40, 50, 75, 100].map(count => ({
-    id: `rarity-allstar-${count}`, title: `All-Star Elite ${count}`, description: `Coleccionar ${count} cartas de rareza All-Star.`, icon: Star,
+    id: `rarity-allstar-${count}`, title: `All-Star Elite ${count}`, description: `Collect ${count} All-Star rarity cards.`, icon: Star,
     category: 'collection' as const,
     level: getLevel(count * 20),
     requirement: (state: any, allCards: any[]) => {
@@ -233,7 +233,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     reward: count * 100
   })),
   ...[1, 2, 3, 4, 5, 10, 15, 20, 25, 50].map(count => ({
-    id: `rarity-franchise-${count}`, title: `Franchise Face ${count}`, description: `Coleccionar ${count} cartas de rareza Franchise.`, icon: Flame,
+    id: `rarity-franchise-${count}`, title: `Franchise Face ${count}`, description: `Collect ${count} Franchise rarity cards.`, icon: Flame,
     category: 'collection' as const,
     level: getLevel(count * 100),
     requirement: (state: any, allCards: any[]) => {
@@ -248,7 +248,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     reward: count * 500
   })),
   ...[1, 2, 3, 4, 5, 10, 15, 20, 25, 30].map(count => ({
-    id: `rarity-legend-${count}`, title: `Legendary Status ${count}`, description: `Coleccionar ${count} cartas de rareza Legend.`, icon: Crown,
+    id: `rarity-legend-${count}`, title: `Legendary Status ${count}`, description: `Collect ${count} Legend rarity cards.`, icon: Crown,
     category: 'collection' as const,
     level: getLevel(count * 500),
     requirement: (state: any, allCards: any[]) => {
@@ -268,7 +268,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     {
       id: `player-${player.toLowerCase().replace(/ /g, '-')}-1`,
       title: `${player} Fan`,
-      description: `Conseguir tu primera carta de ${player}.`,
+      description: `Get your first ${player} card.`,
       icon: Target,
       category: 'specials' as const,
       level: 'bronze' as const,
@@ -286,7 +286,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     {
       id: `player-${player.toLowerCase().replace(/ /g, '-')}-2`,
       title: `${player} Collector`,
-      description: `Conseguir 3 versiones diferentes de ${player}.`,
+      description: `Get 3 different versions of ${player}.`,
       icon: Trophy,
       category: 'specials' as const,
       level: 'silver' as const,
@@ -304,7 +304,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     {
       id: `player-${player.toLowerCase().replace(/ /g, '-')}-3`,
       title: `${player} Legend`,
-      description: `Conseguir 5 versiones diferentes de ${player}.`,
+      description: `Get 5 different versions of ${player}.`,
       icon: Crown,
       category: 'specials' as const,
       level: 'gold' as const,
@@ -322,7 +322,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     {
       id: `player-${player.toLowerCase().replace(/ /g, '-')}-4`,
       title: `${player} Dynasty`,
-      description: `Conseguir una carta de Dinastía de ${player}.`,
+      description: `Get a Dynasty card of ${player}.`,
       icon: Flame,
       category: 'specials' as const,
       level: 'gold' as const,
@@ -340,7 +340,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     {
       id: `player-${player.toLowerCase().replace(/ /g, '-')}-5`,
       title: `${player} MVP`,
-      description: `Conseguir una carta de MVP de ${player}.`,
+      description: `Get an MVP card of ${player}.`,
       icon: Award,
       category: 'specials' as const,
       level: 'gold' as const,

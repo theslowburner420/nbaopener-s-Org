@@ -10,43 +10,43 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'first-pick',
     title: 'First Pick',
-    description: 'Abrir tu primer sobre.',
+    description: 'Open your first pack.',
     reward: '100 Coins',
     icon: Zap
   },
   {
     id: 'roster-builder',
     title: 'Roster Builder',
-    description: 'Conseguir 15 jugadores de un mismo equipo.',
-    reward: 'Icono de Equipo Plata',
+    description: 'Get 15 players from the same team.',
+    reward: 'Silver Team Icon',
     icon: Users
   },
   {
     id: 'full-squad',
     title: 'The Full Squad',
-    description: 'Completar una franquicia entera (Jugadores + Coach).',
-    reward: 'Carta "Special Edition"',
+    description: 'Complete an entire franchise (Players + Coach).',
+    reward: 'Special Edition Card',
     icon: Star
   },
   {
     id: 'vintage-collector',
     title: 'Vintage Collector',
-    description: 'Conseguir 5 cartas de "Historical Duos".',
-    reward: 'Badge: "History Buff"',
+    description: 'Get 5 "Historical Duos" cards.',
+    reward: 'History Buff Badge',
     icon: History
   },
   {
     id: 'dynasty-hunter',
     title: 'Dynasty Hunter',
-    description: 'Desbloquear tu primera carta de Dinastía.',
-    reward: 'Aura dorada en el perfil',
+    description: 'Unlock your first Dynasty card.',
+    reward: 'Golden Profile Aura',
     icon: Trophy
   },
   {
     id: 'pack-master',
     title: 'Pack Master',
-    description: 'Completar 3 logros anteriores.',
-    reward: 'Pack Gratis',
+    description: 'Complete 3 previous achievements.',
+    reward: 'Free Pack',
     icon: Package
   },
   {

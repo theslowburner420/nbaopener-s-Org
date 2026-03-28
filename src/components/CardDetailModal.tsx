@@ -23,20 +23,22 @@ export default function CardDetailModal({ card, onClose }: CardDetailModalProps)
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="w-full max-w-lg flex flex-col items-center relative"
+            className="w-full max-w-lg flex flex-col items-center relative px-4"
             onClick={e => e.stopPropagation()}
           >
             {/* Close Button */}
             <button 
               onClick={onClose}
-              className="absolute -top-16 right-0 p-3 bg-zinc-900 rounded-full text-zinc-500 hover:text-white transition-colors border border-zinc-800"
+              className="absolute -top-12 sm:-top-16 right-4 sm:right-0 p-2.5 sm:p-3 bg-zinc-900 rounded-full text-zinc-500 hover:text-white transition-colors border border-zinc-800 z-50 shadow-2xl"
             >
-              <X size={24} />
+              <X size={20} sm:size={24} />
             </button>
 
             {/* Large Card Display */}
-            <div className="w-full">
-              <CardItem card={card} isOwned={true} mode="large" isFocused={true} />
+            <div className="w-full max-h-[75vh] flex items-center justify-center">
+              <div className="w-full max-w-[320px] sm:max-w-none">
+                <CardItem card={card} isOwned={true} mode="large" isFocused={true} />
+              </div>
             </div>
           </motion.div>
         </motion.div>
