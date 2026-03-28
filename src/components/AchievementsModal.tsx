@@ -84,7 +84,7 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
                     </div>
                     <div>
                       <h2 className="text-xl sm:text-3xl font-black uppercase italic tracking-tighter">Achievements</h2>
-                      <p className="hidden sm:block text-[8px] sm:text-xs text-zinc-500 font-bold uppercase tracking-widest">Track your NBA Opener legacy</p>
+                      <p className="hidden sm:block text-[8px] sm:text-xs text-zinc-500 font-bold uppercase tracking-widest">Track your Hoops Collector legacy</p>
                     </div>
                   </div>
                   <button 
@@ -294,7 +294,7 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
               <div className="flex items-center gap-2">
                 <Medal size={12} sm:size={14} className="text-zinc-600" />
                 <span className="text-[8px] sm:text-[9px] text-zinc-600 uppercase tracking-[0.2em] font-black">
-                  NBA Opener Hall of Fame
+                  Hoops Collector Hall of Fame
                 </span>
               </div>
               <div className="w-1 h-1 bg-zinc-800 rounded-full" />

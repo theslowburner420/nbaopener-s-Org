@@ -87,7 +87,7 @@ const TEAM_CARDS_MAP = ALL_CARDS.reduce((acc, card) => {
 const ALL_TEAMS = Object.keys(TEAM_CARDS_MAP);
 
 export function useEngine() {
-  const { collection, coins, setCoins, addToCollection, unlockedAchievements, unlockAchievement, addPackToInventory, removePackFromInventory } = useGame();
+  const { collection, coins, addCoins, spendCoins, addToCollection, unlockAchievement, addPackToInventory, removePackFromInventory, unlockedAchievements } = useGame();
   const { notify } = useNotification();
 
   const generateCard = (packType: PackType): Card => {
@@ -209,23 +209,19 @@ export function useEngine() {
       checkAll(cardId);
     }
 
-    if (!silent && bonusCoins > 0) setCoins(currentCoins + bonusCoins);
+    if (!silent && bonusCoins > 0) addCoins(bonusCoins);
     
     return newlyUnlocked;
   };
 
   const openPack = (packType: PackType) => {
-    let newCoins = coins;
     if (packType !== 'random') {
       const price = PACK_PRICES[packType];
-      if (coins < price) return null;
-      newCoins -= price;
+      if (!spendCoins(price)) return null;
     } else {
       // Daily Stimulus
-      newCoins += 500;
+      addCoins(500);
     }
-
-    setCoins(newCoins);
 
     const newCards = Array.from({ length: PACK_SIZES[packType] }).map(() => generateCard(packType));
     const newIds = newCards.map(c => c.id);
@@ -239,7 +235,7 @@ export function useEngine() {
     addToCollection(newIds);
     
     // Check achievements with the state that will exist after this update
-    const newlyUnlocked = checkAchievements([...collection, ...newIds], newCoins, unlockedAchievements, newIds, true);
+    const newlyUnlocked = checkAchievements([...collection, ...newIds], coins, unlockedAchievements, newIds, true);
 
     return { cards: cardsWithNewFlag, newlyUnlocked };
   };

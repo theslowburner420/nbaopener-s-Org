@@ -112,7 +112,7 @@ function AppContent() {
       </main>
 
       <StaticAd position="footer" />
-      {/* NBA Premium Navigation Bar */}
+      {/* Hoops Collector Navigation Bar */}
       <nav className="h-16 bg-zinc-950 border-t border-zinc-900 flex items-center justify-around px-2 pb-safe shrink-0 z-50">
         {/* Collection */}
         <button 

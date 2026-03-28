@@ -437,8 +437,8 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
         <Zap size={48} className="text-zinc-800 relative z-10" fill="currentColor" />
       </div>
       <div className="mt-4 flex flex-col items-center">
-        <span className="text-[10px] font-black text-zinc-800 uppercase tracking-[0.5em]">NBA</span>
-        <span className="text-[8px] font-bold text-zinc-800 uppercase tracking-[0.3em]">OPENER</span>
+        <span className="text-[10px] font-black text-zinc-800 uppercase tracking-[0.5em]">HOOPS</span>
+        <span className="text-[8px] font-bold text-zinc-800 uppercase tracking-[0.3em]">COLLECTOR</span>
       </div>
     </div>
   ) : (

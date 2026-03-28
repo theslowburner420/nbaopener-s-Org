@@ -1,9 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { GameState, ViewType, Card, User } from '../types';
 import { supabase } from '../lib/supabase';
 
 interface GameContextType extends GameState {
-  setCoins: (coins: number) => void;
+  setCoins: (coins: number | ((prev: number) => number)) => void;
+  addCoins: (amount: number) => void;
+  spendCoins: (amount: number) => boolean;
   addToCollection: (cardIds: string[]) => void;
   addCustomCard: (card: Card) => void;
   setCurrentView: (view: ViewType) => void;
@@ -186,28 +188,49 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const setCoins = (coins: number) => setState(prev => ({ ...prev, coins }));
-  const addToCollection = (cardIds: string[]) => setState(prev => ({ 
+  const setCoins = useCallback((coins: number | ((prev: number) => number)) => setState(prev => ({ 
+    ...prev, 
+    coins: typeof coins === 'function' ? coins(prev.coins) : coins 
+  })), []);
+
+  const addCoins = useCallback((amount: number) => setState(prev => ({
+    ...prev,
+    coins: prev.coins + amount
+  })), []);
+
+  const spendCoins = useCallback((amount: number) => {
+    if (state.coins >= amount) {
+      setState(prev => ({ ...prev, coins: prev.coins - amount }));
+      return true;
+    }
+    return false;
+  }, [state.coins]);
+
+  const addToCollection = useCallback((cardIds: string[]) => setState(prev => ({ 
     ...prev, 
     collection: [...prev.collection, ...cardIds] 
-  }));
-  const addCustomCard = (card: Card) => setState(prev => ({
+  })), []);
+
+  const addCustomCard = useCallback((card: Card) => setState(prev => ({
     ...prev,
     customCards: [...prev.customCards, card]
-  }));
-  const setCurrentView = (currentView: ViewType) => setState(prev => ({ ...prev, currentView }));
-  const unlockAchievement = (id: string) => setState(prev => ({
+  })), []);
+
+  const setCurrentView = useCallback((currentView: ViewType) => setState(prev => ({ ...prev, currentView })), []);
+
+  const unlockAchievement = useCallback((id: string) => setState(prev => ({
     ...prev,
     unlockedAchievements: [...prev.unlockedAchievements, id]
-  }));
-  const claimReward = (day: number, amount: number) => setState(prev => ({
+  })), []);
+
+  const claimReward = useCallback((day: number, amount: number) => setState(prev => ({
     ...prev,
     coins: prev.coins + amount,
     claimedDays: [...prev.claimedDays, day],
     lastClaimedDate: new Date().toISOString().split('T')[0]
-  }));
+  })), []);
 
-  const addPackToInventory = (pack: { id: string; type: string; name: string }) => setState(prev => {
+  const addPackToInventory = useCallback((pack: { id: string; type: string; name: string }) => setState(prev => {
     const existing = prev.inventoryPacks.find(p => p.id === pack.id);
     if (existing) {
       return {
@@ -219,9 +242,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ...prev,
       inventoryPacks: [...prev.inventoryPacks, { ...pack, count: 1 }]
     };
-  });
+  }), []);
 
-  const removePackFromInventory = (packId: string) => setState(prev => {
+  const removePackFromInventory = useCallback((packId: string) => setState(prev => {
     const existing = prev.inventoryPacks.find(p => p.id === packId);
     if (!existing) return prev;
     if (existing.count > 1) {
@@ -234,11 +257,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ...prev,
       inventoryPacks: prev.inventoryPacks.filter(p => p.id !== packId)
     };
-  });
+  }), []);
 
-  const setPremium = (isPremium: boolean) => setState(prev => ({ ...prev, isPremium }));
+  const setPremium = useCallback((isPremium: boolean) => setState(prev => ({ ...prev, isPremium })), []);
 
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     setState(prev => ({
       ...prev,
       coins: 1000,
@@ -250,10 +273,28 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       inventoryPacks: [],
       isPremium: false,
     }));
-  };
+  }, []);
+
+  const contextValue = useMemo(() => ({
+    ...state,
+    setCoins,
+    addCoins,
+    spendCoins,
+    addToCollection,
+    addCustomCard,
+    setCurrentView,
+    unlockAchievement,
+    claimReward,
+    addPackToInventory,
+    removePackFromInventory,
+    setPremium,
+    resetGame,
+    login,
+    logout
+  }), [state, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, login, logout]);
 
   return (
-    <GameContext.Provider value={{ ...state, setCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, login, logout }}>
+    <GameContext.Provider value={contextValue}>
       {children}
     </GameContext.Provider>
   );

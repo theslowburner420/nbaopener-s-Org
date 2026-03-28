@@ -4407,8 +4407,8 @@ const rawCards = [
     rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 700, // Actualizado a sus victorias reales aproximadas
-    reb: 9, // Sumando sus anillos como jugador y entrenador
+    pts: 700, // Updated to their approximate actual wins
+    reb: 9, // Summing their rings as player and coach
     ast: 11, // Años de experiencia
     ovr: 96,
     nbaId: 1052,
@@ -4458,10 +4458,10 @@ const rawCards = [
     rarity: 'coach' as const,
     category: 'Coach' as const,
     isHistorical: false,
-    pts: 12, // Victorias como entrenador principal interino/actual
-    reb: 0, // Títulos como HC (está empezando su legado)
+    pts: 12, // Wins as interim/current head coach
+    reb: 0, // Titles as HC (legacy just beginning)
     ast: 9, // Años de experiencia en el staff técnico de los Spurs
-    ovr: 88, // Una gran promesa en los banquillos
+    ovr: 88, // A great coaching prospect
     nbaId: 201142, // ID de referencia
     imageUrl: 'https://s.yimg.com/ny/api/res/1.2/3sD9XRUYR.BTwkQ6yzSbtg--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTQyNjtjZj13ZWJw/https://media.zenfs.com/en/ny_post_sports_articles_389/14eb36ac74c3cb873d1487bb0b8ca7d8',
     quote: "Leading the next generation of the Spurs with discipline and vision."
@@ -4924,7 +4924,7 @@ const rawCards = [
     ast: 4.6,
     nbaId: 947,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Allen_Iverson_Lipofsky.jpg/250px-Allen_Iverson_Lipofsky.jpg',
-    quote: '31.1 PTS, 2.5 STL - El MVP más bajo de la historia.'
+    quote: '31.1 PTS, 2.5 STL - The shortest MVP in history.'
   },
   {
     id: 'mvp-2002',
@@ -4941,7 +4941,7 @@ const rawCards = [
     ast: 3.7,
     nbaId: 1495,
     imageUrl: 'https://i.insider.com/5b858aa489c8a119008b5ad4?width=600&format=jpeg&auto=webp',
-    quote: '25.5 PTS, 12.7 REB - Fundamentos de oro.'
+    quote: '25.5 PTS, 12.7 REB - Golden fundamentals.'
   },
   {
     id: 'mvp-2003',
@@ -4958,7 +4958,7 @@ const rawCards = [
     ast: 3.9,
     nbaId: 1495,
     imageUrl: 'https://i0.wp.com/www.pressherald.com/wp-content/uploads/sites/4/2016/07/27p1-22.jpg?fit=1441%2C1888',
-    quote: 'Back-to-back MVP para The Big Fundamental.'
+    quote: 'Back-to-back MVP for The Big Fundamental.'
   },
   {
     id: 'mvp-2004',
@@ -5009,7 +5009,7 @@ const rawCards = [
     ast: 10.5,
     nbaId: 959,
     imageUrl: 'https://www.nydailynews.com/wp-content/uploads/migration/2015/03/21/SZLPDQHNQ42R7RL55JDUBSEWKI.jpg',
-    quote: 'Back-to-back MVP liderando la liga en asistencias y eficiencia.'
+    quote: 'Back-to-back MVP leading the league in assists and efficiency.'
   },
   {
     id: 'mvp-2007',
@@ -5026,7 +5026,7 @@ const rawCards = [
     ast: 3.4,
     nbaId: 1717,
     imageUrl: 'https://e0.365dm.com/21/11/2048x1152/skysports-dirk-nowitzki-dallas-mavericks_5587747.jpg?20211119080851',
-    quote: 'Club del 50-40-90. El primer MVP europeo.'
+    quote: '50-40-90 Club. The first European MVP.'
   },
   {
     id: 'mvp-2008',
@@ -5060,7 +5060,7 @@ const rawCards = [
     ast: 7.2,
     nbaId: 2544,
     imageUrl: 'https://legacymedia.sportsplatform.io/images_root/slides/photos/000/444/576/86427925_original.jpg?1287082316',
-    quote: '28.4 PTS, 7.6 REB, 7.2 AST - El primer reinado del Rey.'
+    quote: '28.4 PTS, 7.6 REB, 7.2 AST - The King\'s first reign.'
   },
   {
     id: 'mvp-2010',
@@ -5077,7 +5077,7 @@ const rawCards = [
     ast: 8.6,
     nbaId: 2544,
     imageUrl: 'https://legacymedia.sportsplatform.io/images_root/slides/photos/000/399/610/98824747_original.jpg?1284736938',
-    quote: 'Segundo MVP consecutivo dominando ambos lados de la cancha.'
+    quote: 'Second consecutive MVP dominating both sides of the court.'
   },
   {
     id: 'mvp-2011',
@@ -5094,7 +5094,7 @@ const rawCards = [
     ast: 7.7,
     nbaId: 201565,
     imageUrl: 'https://cdn.bleacherreport.net/images_root/slides/photos/000/791/675/109813237_original.jpg?1300221121',
-    quote: '25.0 PTS, 7.7 AST - El MVP más joven de la historia de la NBA.'
+    quote: '25.0 PTS, 7.7 AST - The youngest MVP in NBA history.'
   },
   {
     id: 'mvp-2012',
@@ -5128,7 +5128,7 @@ const rawCards = [
     ast: 7.3,
     nbaId: 2544,
     imageUrl: 'https://s.yimg.com/ny/api/res/1.2/Xnp2MJ9NiRlqfvc3FsWwXg--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTQyNztjZj13ZWJw/https://s.yimg.com/os/en/blogs/sptusnbaexperts/LeBron-James-won-his-fourth-NBA-MVP-trophy-in-May-2013.-Jesse-D.-Garrabrant-NBAE-Getty-Images.jpg',
-    quote: 'A un voto de ser unánime. Temporada legendaria.'
+    quote: 'One vote away from being unanimous. Legendary season.'
   },
   {
     id: 'mvp-2014',
@@ -5145,7 +5145,7 @@ const rawCards = [
     ast: 5.5,
     nbaId: 201142,
     imageUrl: 'https://wordpress.wbur.org/wp-content/uploads/2014/05/0508_oag_durant-mvp-1000x691.jpg',
-    quote: "32.0 PTS - 'You the real MVP'. Título de anotación."
+    quote: "32.0 PTS - 'You the real MVP'. Scoring title."
   },
   {
     id: 'mvp-2015',
@@ -5162,7 +5162,7 @@ const rawCards = [
     ast: 7.7,
     nbaId: 201939,
     imageUrl: 'https://therookiewire.usatoday.com/gcdn/authoring/images/smg/2025/01/11/SROK/77641293007-12-31804.jpeg',
-    quote: '23.8 PTS - Cambiando el juego a base de triples.'
+    quote: '23.8 PTS - Changing the game with three-pointers.'
   },
   {
     id: 'mvp-2016',
@@ -5179,7 +5179,7 @@ const rawCards = [
     ast: 6.7,
     nbaId: 201939,
     imageUrl: 'https://objetos.estaticos-marca.com/assets/multimedia/imagenes/2016/05/11/14629408277905.jpg',
-    quote: '30.1 PTS - El primer y único MVP unánime de la historia. 73 victorias.'
+    quote: '30.1 PTS - The first and only unanimous MVP in history. 73 wins.'
   },
   {
     id: 'mvp-2017',
@@ -5196,7 +5196,7 @@ const rawCards = [
     ast: 10.4,
     nbaId: 201566,
     imageUrl: 'https://abc3340.com/resources/media/2634f5c9-1250-487e-9f7c-d084adb08594-jumbo1x1_Westbrook.jpg',
-    quote: '31.6 PTS, 10.7 REB, 10.4 AST - Promediando un triple-doble histórico.'
+    quote: '31.6 PTS, 10.7 REB, 10.4 AST - Averaging a historic triple-double.'
   },
   {
     id: 'mvp-2018',
@@ -5230,7 +5230,7 @@ const rawCards = [
     ast: 5.9,
     nbaId: 203507,
     imageUrl: 'https://cdn2.mediotiempo.com/uploads/media/2019/06/25/antetokounmpo-jugador-europeo-recibir-trofeo.jpg',
-    quote: '27.7 PTS, 12.5 REB - El Greek Freak conquista la liga.'
+    quote: '27.7 PTS, 12.5 REB - The Greek Freak conquers the league.'
   },
   {
     id: 'mvp-2020',
@@ -5247,7 +5247,7 @@ const rawCards = [
     ast: 5.6,
     nbaId: 203507,
     imageUrl: 'https://images.foxtv.com/static.fox6now.com/www.fox6now.com/content/uploads/2020/07/932/524/gettyimages-1158115391.jpg?ve=1&tl=1',
-    quote: 'MVP y DPOY en la misma temporada.'
+    quote: 'MVP and DPOY in the same season.'
   },
   {
     id: 'mvp-2021',
@@ -5264,7 +5264,7 @@ const rawCards = [
     ast: 8.3,
     nbaId: 203999,
     imageUrl: 'https://kdvr.com/wp-content/uploads/sites/11/2021/06/AP21163088209102.jpg',
-    quote: '26.4 PTS, 10.8 REB, 8.3 AST - El MVP elegido más bajo en el draft (#41).'
+    quote: '26.4 PTS, 10.8 REB, 8.3 AST - The lowest-drafted MVP in history (#41).'
   },
   {
     id: 'mvp-2022',
@@ -5281,7 +5281,7 @@ const rawCards = [
     ast: 7.9,
     nbaId: 203999,
     imageUrl: 'https://cdn.deultimominuto.net/wp-content/uploads/2022/05/Nikola-Jokic.jpg',
-    quote: '27.1 PTS, 13.8 REB - Temporada estadística sin precedentes.'
+    quote: '27.1 PTS, 13.8 REB - Unprecedented statistical season.'
   },
   {
     id: 'mvp-2023',
@@ -5315,7 +5315,7 @@ const rawCards = [
     ast: 9.0,
     nbaId: 203999,
     imageUrl: 'https://static01.nyt.com/athletic/uploads/wp/2024/11/27070929/jokermvp-scaled.jpg',
-    quote: 'Tercer MVP. Dominio absoluto de la pintura y la distribución.'
+    quote: 'Third MVP. Absolute dominance of the paint and distribution.'
   },
   {
     id: 'mvp-2025',
@@ -6602,7 +6602,7 @@ const rawCards = [
       assists: 6,
       ovr: 99,
     },
-    description: 'Triple ganador desde 10 metros vs OKC',
+    description: 'Game-winning triple from 30+ feet vs OKC',
     quote: 'They do have a timeout, decide not to use it... Curry, from downtown... BANG! BANG! OH WHAT A SHOT BY CURRY!',
     imageUrl: 'https://media.tenor.com/xZ4fqO-87IsAAAAM/stephen-curry-shoot.gif',
   },
@@ -6950,7 +6950,7 @@ const rawCards = [
     ast: 4.0,
     nbaId: 711,
     imageUrl: 'https://i1.sndcdn.com/artworks-aPrXGTNKVFNYzEIe-hYL6Kw-t500x500.jpg',
-    quote: '"Big Shot Rob". 7 anillos. El mejor tirador bajo presión de la historia.'
+    quote: '"Big Shot Rob". 7 rings. The best clutch shooter in history.'
   },
   {
     id: 'xfactor-002',
@@ -6966,7 +6966,7 @@ const rawCards = [
     ast: 5.0,
     nbaId: 2738,
     imageUrl: 'https://www.arabnews.com/sites/default/files/styles/n_670_395/public/2015/06/17/file-17-iggy%20mvp.jpg?itok=UIt-lo0w',
-    quote: 'El ancla defensiva de la dinastía. MVP de las Finales 2015 saliendo del banquillo.'
+    quote: 'The defensive anchor of the dynasty. 2015 Finals MVP coming off the bench.'
   },
   {
     id: 'xfactor-003',
@@ -6998,7 +6998,7 @@ const rawCards = [
     ast: 4.0,
     nbaId: 1891,
     imageUrl: 'https://a.espncdn.com/photo/2011/0526/dal_g_terryj_300.jpg',
-    quote: '"The Jet". Sus triples fueron clave para tumbar al Heat de LeBron en 2011.'
+    quote: '"The Jet". His triples were key to taking down LeBron\'s Heat in 2011.'
   },
   {
     id: 'xfactor-005',
@@ -7014,7 +7014,7 @@ const rawCards = [
     ast: 3.0,
     nbaId: 2419,
     imageUrl: 'https://thumb.spokesman.com/g_spB6WdLAjJ-WgopCOpqHsADd4=/400x0/media.spokesman.com/photos/2004/05/25/spt_princepic25_05-25-2004_G51L7SP.jpg',
-    quote: 'El tapón a Miller y su defensa exterior definieron a los Pistons de 2004.'
+    quote: 'The block on Miller and his perimeter defense defined the 2004 Pistons.'
   },
   {
     id: 'xfactor-006',
@@ -7030,7 +7030,7 @@ const rawCards = [
     ast: 6.0,
     nbaId: 2563,
     imageUrl: 'https://a.espncdn.com/photo/2012/0530/nba_g_boris-diaw_mb_576.jpg',
-    quote: 'El "maestro" de los pases. La pieza que hacía que el sistema de Popovich fluyera.'
+    quote: 'The "master" of passing. The piece that made Popovich\'s system flow.'
   },
   {
     id: 'xfactor-007',
@@ -7046,7 +7046,7 @@ const rawCards = [
     ast: 4.0,
     nbaId: 965,
     imageUrl: 'https://www.dailynews.com/wp-content/uploads/migration/2013/201312/SPORTS_131219792_AR_0_GZJMKGZCUUOT.jpg?w=1800&resize=1800,1800',
-    quote: 'El líder vocal y autor del mítico tiro con 0.4 segundos contra los Spurs.'
+    quote: 'The vocal leader and author of the legendary 0.4 second shot against the Spurs.'
   },
   {
     id: 'xfactor-008',
@@ -7062,7 +7062,7 @@ const rawCards = [
     ast: 2.0,
     nbaId: 2747,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/c4/J.R._Smith_%2840627108671%29_%28cropped%29.jpg',
-    quote: 'Cuando estaba enchufado, era el soporte anotador que LeBron necesitaba.'
+    quote: 'When he was on fire, he was the scoring support LeBron needed.'
   },
   {
     id: 'xfactor-009',
@@ -7094,7 +7094,7 @@ const rawCards = [
     ast: 1.0,
     nbaId: 200782,
     imageUrl: 'https://imageio.forbes.com/specials-images/dam/imageserve/8d5793cf5e4947d39ed55feb7e6bc92e/960x0.jpg?height=1013&width=711&fit=bounds',
-    quote: 'El "corner 3" y la defensa física extrema que todo campeón necesita.'
+    quote: 'The "corner 3" and extreme physical defense every champion needs.'
   },
   {
     id: 'xfactor-011',
@@ -7126,7 +7126,7 @@ const rawCards = [
     ast: 5.0,
     nbaId: 1627832,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLP79Q8-metZDFTjxxrybI1UDm7bzqReTo2w&s',
-    quote: 'De no ser drafteado a anotar triples clave en las Finales de 2019.'
+    quote: 'From undrafted to hitting key triples in the 2019 Finals.'
   },
   // SIXTH MAN OF THE YEAR (6MOY)
   {

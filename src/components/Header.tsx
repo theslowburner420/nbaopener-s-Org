@@ -3,7 +3,7 @@ import { useGame } from '../context/GameContext';
 import { LogIn, LogOut, User as UserIcon, Coins, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-const Header: React.FC = () => {
+const Header: React.FC = React.memo(() => {
   const { user, coins, login, logout } = useGame();
 
   const formatCoins = (num: number) => {
@@ -40,9 +40,9 @@ const Header: React.FC = () => {
         ) : (
           <div className="flex items-center gap-1.5 md:gap-2">
             <div className="w-6 h-6 md:w-7 md:h-7 bg-white rounded-lg flex items-center justify-center shadow-[0_4px_12px_rgba(255,255,255,0.15)] border border-zinc-200 shrink-0">
-              <span className="text-black font-black text-[8px] md:text-[10px] italic tracking-tighter">NBA</span>
+              <span className="text-black font-black text-[8px] md:text-[10px] italic tracking-tighter">HC</span>
             </div>
-            <h1 className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] text-zinc-100 drop-shadow-md truncate">Card Opener</h1>
+            <h1 className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] text-zinc-100 drop-shadow-md truncate">Hoops Collector</h1>
           </div>
         )}
       </div>
@@ -84,6 +84,6 @@ const Header: React.FC = () => {
       </div>
     </header>
   );
-};
+});
 
 export default Header;

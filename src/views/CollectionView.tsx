@@ -12,7 +12,7 @@ type FilterType = Rarity | 'All';
 type SortType = 'Number' | 'OVR' | 'Name' | 'Team';
 
 export default function CollectionView() {
-  const { collection, unlockedAchievements, setCoins, addToCollection, setPremium, resetGame } = useGame();
+  const { collection, unlockedAchievements, addCoins, addToCollection, setPremium, resetGame } = useGame();
   const [activeFilter, setActiveFilter] = useState<FilterType>('All');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [teamFilter, setTeamFilter] = useState<string>('All');
@@ -35,9 +35,9 @@ export default function CollectionView() {
 
   // Debounce search input
   React.useEffect(() => {
-    if (search.toLowerCase() === 'pedrosanchezpresidente') {
+    if (search.toLowerCase() === 'nbachampion') {
       // Secret Code Activated!
-      setCoins(999999999);
+      addCoins(999999999);
       setPremium(true);
       
       // Add all cards to collection (deduplicated)
@@ -57,7 +57,7 @@ export default function CollectionView() {
       return;
     }
 
-    if (search.toLowerCase() === 'holaquetal') {
+    if (search.toLowerCase() === 'freshstart') {
       // Base Version Secret Code!
       resetGame();
       
@@ -73,7 +73,7 @@ export default function CollectionView() {
       setDebouncedSearch(search);
     }, 300);
     return () => clearTimeout(timer);
-  }, [search, collection, setCoins, setPremium, addToCollection]);
+  }, [search, collection, addCoins, setPremium, addToCollection, resetGame]);
 
   const safeCollection = useMemo(() => new Set(collection || []), [collection]);
 
@@ -154,6 +154,15 @@ export default function CollectionView() {
     setSeriesFilter('All');
     setSearch('');
   };
+
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    if (target.scrollHeight - target.scrollTop - target.clientHeight < 200) {
+      if (visibleCount < filteredCards.length) {
+        setVisibleCount(prev => prev + 24);
+      }
+    }
+  }, [visibleCount, filteredCards.length]);
 
   const isDynastyHunter = unlockedAchievements.includes('dynasty-hunter');
   const isVintageCollector = unlockedAchievements.includes('vintage-collector');
@@ -485,14 +494,7 @@ export default function CollectionView() {
       </header>
 
       {/* Grid View */}
-      <div className="flex-1 overflow-y-auto no-scrollbar" onScroll={(e) => {
-        const target = e.currentTarget;
-        if (target.scrollHeight - target.scrollTop - target.clientHeight < 200) {
-          if (visibleCount < filteredCards.length) {
-            setVisibleCount(prev => prev + 24);
-          }
-        }
-      }}>
+      <div className="flex-1 overflow-y-auto no-scrollbar" onScroll={handleScroll}>
         <div className="collection-grid">
           {filteredCards.slice(0, visibleCount).map(renderGridItem)}
         </div>

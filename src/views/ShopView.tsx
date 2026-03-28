@@ -49,7 +49,7 @@ const COIN_PACKS: CoinPack[] = [
 const ADS_FREE_PRICE = 2.00;
 
 export default function ShopView() {
-  const { coins, setCoins, isPremium, setPremium } = useGame();
+  const { coins, addCoins, isPremium, setPremium } = useGame();
   const { notifySuccess, notifyError } = useNotification();
   const [isAdPlaying, setIsAdPlaying] = useState(false);
   const [adCountdown, setAdCountdown] = useState(30);
@@ -65,12 +65,12 @@ export default function ShopView() {
       }, 1000);
     } else if (isAdPlaying && adCountdown === 0) {
       setIsAdPlaying(false);
-      setCoins(coins + 50000);
+      addCoins(50000);
       notifySuccess("Reward Claimed! +50,000 Coins");
       setAdCountdown(30);
     }
     return () => clearInterval(timer);
-  }, [isAdPlaying, adCountdown, coins, setCoins, notifySuccess]);
+  }, [isAdPlaying, adCountdown, coins, addCoins, notifySuccess]);
 
   // Adsterra Integration
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function ShopView() {
 
   const handlePaymentSuccess = (rewardType: 'coins' | 'isPremium', amount: number) => {
     if (rewardType === 'coins') {
-      setCoins(coins + amount);
+      addCoins(amount);
     } else {
       setPremium(true);
     }
@@ -145,7 +145,7 @@ export default function ShopView() {
             </div>
             <div>
               <h1 className="text-xl font-black tracking-tighter uppercase italic leading-none">Shop</h1>
-              <p className="text-[8px] text-zinc-500 uppercase tracking-[0.2em] font-bold">NBA Economy</p>
+              <p className="text-[8px] text-zinc-500 uppercase tracking-[0.2em] font-bold">Hoops Economy</p>
             </div>
           </div>
         </header>
@@ -316,7 +316,7 @@ export default function ShopView() {
           <div className="pt-4 flex flex-col items-center gap-3">
             <div className="flex items-center gap-2 text-zinc-800">
               <Sparkles size={12} />
-              <span className="text-[8px] font-black uppercase tracking-[0.3em]">Premium NBA Economy</span>
+              <span className="text-[8px] font-black uppercase tracking-[0.3em]">Premium Hoops Economy</span>
             </div>
             <p className="text-center text-[7px] text-zinc-800 uppercase tracking-[0.2em] font-bold max-w-[180px]">
               All transactions are final. We are not affiliated with the NBA; this is a fan game. Coins are non-transferable and have no real-world value.
@@ -345,7 +345,7 @@ export default function ShopView() {
               >
                 <div className="flex flex-col items-center">
                   <Play size={48} className="text-amber-500 mb-4 animate-bounce" />
-                  <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">NBA Opener Ad</h2>
+                  <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">Hoops Collector Ad</h2>
                   <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mt-2">Premium Experience Loading...</p>
                 </div>
               </div>
