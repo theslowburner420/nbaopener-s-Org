@@ -21,7 +21,7 @@ import Header from './components/Header';
 import StaticAd from './components/StaticAd';
 
 function AppContent() {
-  const { currentView, setCurrentView, isPremium } = useGame();
+  const { currentView, setCurrentView, isPremium, isAuthLoading } = useGame();
 
   // Adsterra Script Logic - ONLY load if NOT premium
   useEffect(() => {
@@ -31,16 +31,6 @@ function AppContent() {
       scripts.forEach(s => s.remove());
       return;
     }
-    
-    // Example of how to load Adsterra script dynamically
-    // const script = document.createElement('script');
-    // script.src = 'https://pl123456.highperformanceformat.com/abcdef/invoke.js';
-    // script.async = true;
-    // document.head.appendChild(script);
-    
-    // return () => {
-    //   script.remove();
-    // };
   }, [isPremium]);
 
   // Pre-fetch common images and assets
@@ -103,6 +93,30 @@ function AppContent() {
       default: return <OpenView />;
     }
   };
+
+  if (isAuthLoading) {
+    return (
+      <div className="h-[100dvh] w-full bg-black flex flex-col items-center justify-center gap-6">
+        <div className="relative">
+          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)] border border-zinc-200 animate-bounce">
+            <span className="text-black font-black text-xl italic tracking-tighter">HC</span>
+          </div>
+          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-zinc-900 rounded-full blur-sm animate-pulse" />
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-xs font-black uppercase tracking-[0.3em] text-white animate-pulse">Loading Hoops Collector</p>
+          <div className="w-32 h-1 bg-zinc-900 rounded-full overflow-hidden">
+            <motion.div 
+              className="h-full bg-amber-500"
+              initial={{ width: "0%" }}
+              animate={{ width: "100%" }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-[100dvh] w-full bg-black text-white flex flex-col overflow-hidden font-sans selection:bg-amber-500 selection:text-black">

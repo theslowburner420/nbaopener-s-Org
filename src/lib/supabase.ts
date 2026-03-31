@@ -18,7 +18,10 @@ export interface Profile {
   id: string;
   coins: number;
   cards: string[];
+  custom_cards?: any[];
   unlocked_achievements: string[];
+  last_claimed_date?: string | null;
+  claimed_days?: number[];
   inventory_packs: any[];
   username?: string;
   avatar_url?: string;

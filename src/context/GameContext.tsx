@@ -69,7 +69,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...prev, 
         user: null,
       }));
-      setIsInitialSyncDone(false);
+      setIsInitialSyncDone(true); // Mark as done for guest users
       setIsAuthLoading(false);
       if (profileSubscriptionRef.current) {
         supabase?.removeChannel(profileSubscriptionRef.current);
@@ -165,6 +165,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsInitialSyncDone(true);
       } else if (profile) {
         console.log('Profile loaded successfully for user:', profile.id);
+        
+        // Merge logic: if guest has more progress than cloud, or we want to combine them
+        // The user said "guest data should not be deleted, it should be sent to their profile"
+        const currentState = stateRef.current;
+        const mergedCoins = Math.max(profile.coins || 0, currentState.coins || 0);
+        const mergedCollection = [...new Set([...(profile.cards || []), ...(currentState.collection || [])])];
+        const mergedAchievements = [...new Set([...(profile.unlocked_achievements || []), ...(currentState.unlockedAchievements || [])])];
+        const mergedCustomCards = [...(profile.custom_cards || []), ...(currentState.customCards || [])];
+        const mergedInventoryPacks = [...(profile.inventory_packs || []), ...(currentState.inventoryPacks || [])];
+
         setState(prev => ({
           ...prev,
           user: {
@@ -172,14 +182,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             username: profile.username || userData.username,
             avatar_url: profile.avatar_url || userData.avatar_url,
           },
-          coins: profile.coins ?? 1000,
-          collection: profile.cards || [],
-          customCards: profile.custom_cards || [],
-          unlockedAchievements: profile.unlocked_achievements || [],
-          lastClaimedDate: profile.last_claimed_date || null,
-          claimedDays: profile.claimed_days || [],
-          inventoryPacks: profile.inventory_packs || [],
-          isPremium: profile.ads_disabled || false,
+          coins: mergedCoins,
+          collection: mergedCollection,
+          customCards: mergedCustomCards,
+          unlockedAchievements: mergedAchievements,
+          lastClaimedDate: profile.last_claimed_date || currentState.lastClaimedDate || null,
+          claimedDays: profile.claimed_days || currentState.claimedDays || [],
+          inventoryPacks: mergedInventoryPacks,
+          isPremium: profile.ads_disabled || currentState.isPremium || false,
         }));
         setIsInitialSyncDone(true);
       } else if (error) {
@@ -249,33 +259,38 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Persist to Supabase if logged in and initial sync is complete
+  // Persist to Supabase if logged in and initial sync is complete with debounce
   useEffect(() => {
     if (state.user && supabase && isInitialSyncDone) {
-      const saveData = async () => {
-        const { error } = await supabase.from('profiles').update({
-          coins: state.coins,
-          cards: state.collection,
-          custom_cards: state.customCards,
-          unlocked_achievements: state.unlockedAchievements,
-          last_claimed_date: state.lastClaimedDate,
-          claimed_days: state.claimedDays,
-          inventory_packs: state.inventoryPacks,
-          ads_disabled: state.isPremium,
-        }).eq('id', state.user?.id);
-        
-        if (error) {
-          console.error('Failed to sync to Supabase:', error.message);
+      const timeoutId = setTimeout(async () => {
+        try {
+          const { error } = await supabase.from('profiles').update({
+            coins: state.coins,
+            cards: state.collection,
+            custom_cards: state.customCards,
+            unlocked_achievements: state.unlockedAchievements,
+            last_claimed_date: state.lastClaimedDate,
+            claimed_days: state.claimedDays,
+            inventory_packs: state.inventoryPacks,
+            ads_disabled: state.isPremium,
+            updated_at: new Date().toISOString(),
+          }).eq('id', state.user?.id);
+          
+          if (error) {
+            console.error('Failed to sync to Supabase:', error.message);
+          }
+        } catch (err) {
+          console.error('Unexpected error in persistence effect:', err);
         }
-      };
+      }, 1000); // 1 second debounce
       
-      saveData();
+      return () => clearTimeout(timeoutId);
     }
   }, [
     state.coins, 
     state.collection, 
     state.customCards,
-    state.user, 
+    state.user?.id, 
     state.isPremium, 
     state.unlockedAchievements, 
     state.inventoryPacks,
