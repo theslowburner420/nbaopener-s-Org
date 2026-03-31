@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'motion/react';
 
 const Header: React.FC = React.memo(() => {
-  const { user, coins, login, logout, setCurrentView } = useGame();
+  const { user, coins, login, logout, setCurrentView, isAuthLoading } = useGame();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -57,7 +57,9 @@ const Header: React.FC = React.memo(() => {
         </div>
 
         {/* User Profile / Login */}
-        {user ? (
+        {isAuthLoading ? (
+          <div className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 animate-pulse shrink-0" />
+        ) : user ? (
           <div className="relative" ref={menuRef}>
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)}

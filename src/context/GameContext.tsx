@@ -3,6 +3,7 @@ import { GameState, ViewType, Card, User } from '../types';
 import { supabase } from '../lib/supabase';
 
 interface GameContextType extends GameState {
+  isAuthLoading: boolean;
   setCoins: (coins: number | ((prev: number) => number)) => void;
   addCoins: (amount: number) => void;
   spendCoins: (amount: number) => boolean;
@@ -50,214 +51,202 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const authProcessed = React.useRef(false);
-
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isInitialSyncDone, setIsInitialSyncDone] = useState(false);
   const stateRef = useRef(state);
+  const profileSubscriptionRef = useRef<any>(null);
 
   useEffect(() => {
     stateRef.current = state;
   }, [state]);
 
-  // Auth and Profile sync
-  useEffect(() => {
-    if (!supabase) {
-      console.warn('Supabase client not initialized');
+  const syncProfile = useCallback(async (user: any) => {
+    console.log('Syncing profile for user:', user?.id);
+    
+    if (!user) {
+      console.log('No user detected, clearing user state');
+      setState(prev => ({ 
+        ...prev, 
+        user: null,
+      }));
+      setIsInitialSyncDone(false);
+      setIsAuthLoading(false);
+      if (profileSubscriptionRef.current) {
+        supabase?.removeChannel(profileSubscriptionRef.current);
+        profileSubscriptionRef.current = null;
+      }
       return;
     }
 
-    let profileSubscription: any = null;
+    // If already synced for this user, don't do it again
+    if (stateRef.current.user?.id === user.id && isInitialSyncDone) {
+      setIsAuthLoading(false);
+      return;
+    }
 
-    const syncProfile = async (user: any) => {
-      console.log('Syncing profile for user:', user?.id);
-      
-      if (!user) {
-        console.log('No user detected, clearing user state');
-        setState(prev => ({ ...prev, user: null }));
-        setIsInitialSyncDone(false);
-        if (profileSubscription) {
-          supabase.removeChannel(profileSubscription);
-          profileSubscription = null;
-        }
-        return;
-      }
-
-      // Set basic user info immediately to update UI quickly
-      const userData: User = {
-        id: user.id,
-        email: user.email,
-        username: user.user_metadata?.full_name || user.email?.split('@')[0],
-        avatar_url: user.user_metadata?.avatar_url,
-      };
-
-      setState(prev => ({ ...prev, user: userData }));
-
-      // Set up real-time subscription
-      if (!profileSubscription) {
-        console.log('Setting up real-time subscription for user:', user.id);
-        profileSubscription = supabase
-          .channel(`public:profiles:id=eq.${user.id}`)
-          .on(
-            'postgres_changes',
-            {
-              event: 'UPDATE',
-              schema: 'public',
-              table: 'profiles',
-              filter: `id=eq.${user.id}`,
-            },
-            (payload) => {
-              console.log('Real-time profile update received:', payload.new);
-              const newProfile = payload.new;
-              setState(prev => ({
-                ...prev,
-                user: prev.user ? {
-                  ...prev.user,
-                  username: newProfile.username || prev.user.username,
-                  avatar_url: newProfile.avatar_url || prev.user.avatar_url,
-                } : null,
-                coins: newProfile.coins ?? prev.coins,
-                collection: newProfile.cards || prev.collection,
-                customCards: newProfile.custom_cards || prev.customCards,
-                unlockedAchievements: newProfile.unlocked_achievements || prev.unlockedAchievements,
-                lastClaimedDate: newProfile.last_claimed_date || prev.lastClaimedDate,
-                claimedDays: newProfile.claimed_days || prev.claimedDays,
-                inventoryPacks: newProfile.inventory_packs || prev.inventoryPacks,
-                isPremium: newProfile.ads_disabled || prev.isPremium,
-              }));
-            }
-          )
-          .subscribe();
-      }
-
-      try {
-        console.log('Fetching profile from Supabase...');
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-
-        if (error && error.code === 'PGRST116') {
-          console.log('Profile not found, creating new profile with current guest progress...');
-          // Promote guest progress to the new account
-          const currentState = stateRef.current;
-          const newProfile = {
-            id: user.id,
-            username: userData.username,
-            avatar_url: userData.avatar_url,
-            coins: currentState.coins,
-            cards: currentState.collection,
-            custom_cards: currentState.customCards,
-            unlocked_achievements: currentState.unlockedAchievements,
-            last_claimed_date: currentState.lastClaimedDate,
-            claimed_days: currentState.claimedDays,
-            inventory_packs: currentState.inventoryPacks,
-            ads_disabled: currentState.isPremium,
-          };
-          
-          const { error: insertError } = await supabase.from('profiles').insert([newProfile]);
-          if (insertError) {
-            console.error('Error creating profile:', insertError);
-            return;
-          }
-          console.log('New profile created successfully');
-          setIsInitialSyncDone(true);
-        } else if (profile) {
-          console.log('Profile loaded successfully:', profile.id);
-          setState(prev => ({
-            ...prev,
-            user: prev.user ? {
-              ...prev.user,
-              username: profile.username || prev.user.username,
-              avatar_url: profile.avatar_url || prev.user.avatar_url,
-            } : null,
-            coins: profile.coins ?? 1000,
-            collection: profile.cards || [],
-            customCards: profile.custom_cards || [],
-            unlockedAchievements: profile.unlocked_achievements || [],
-            lastClaimedDate: profile.last_claimed_date || null,
-            claimedDays: profile.claimed_days || [],
-            inventoryPacks: profile.inventory_packs || [],
-            isPremium: profile.ads_disabled || false,
-          }));
-          setIsInitialSyncDone(true);
-        } else if (error) {
-          console.error('Error fetching profile:', error);
-        }
-      } catch (err) {
-        console.error('Unexpected error in syncProfile:', err);
-      }
+    // Set basic user info immediately to update UI quickly (Header will show this)
+    const userData: User = {
+      id: user.id,
+      email: user.email,
+      username: user.user_metadata?.full_name || user.email?.split('@')[0],
+      avatar_url: user.user_metadata?.avatar_url,
     };
 
+    setState(prev => ({ ...prev, user: userData }));
+
+    // Set up real-time subscription
+    if (!profileSubscriptionRef.current && supabase) {
+      console.log('Setting up real-time subscription for user:', user.id);
+      profileSubscriptionRef.current = supabase
+        .channel(`public:profiles:id=eq.${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'profiles',
+            filter: `id=eq.${user.id}`,
+          },
+          (payload) => {
+            console.log('Real-time profile update received:', payload.new);
+            const newProfile = payload.new;
+            setState(prev => ({
+              ...prev,
+              user: prev.user ? {
+                ...prev.user,
+                username: newProfile.username || prev.user.username,
+                avatar_url: newProfile.avatar_url || prev.user.avatar_url,
+              } : null,
+              coins: newProfile.coins ?? prev.coins,
+              collection: newProfile.cards || prev.collection,
+              customCards: newProfile.custom_cards || prev.customCards,
+              unlockedAchievements: newProfile.unlocked_achievements || prev.unlockedAchievements,
+              lastClaimedDate: newProfile.last_claimed_date || prev.lastClaimedDate,
+              claimedDays: newProfile.claimed_days || prev.claimedDays,
+              inventoryPacks: newProfile.inventory_packs || prev.inventoryPacks,
+              isPremium: newProfile.ads_disabled || prev.isPremium,
+            }));
+          }
+        )
+        .subscribe();
+    }
+
+    try {
+      console.log('Fetching profile from Supabase for user:', user.id);
+      const { data: profile, error } = await supabase!
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error && error.code === 'PGRST116') {
+        console.log('Profile not found, creating new profile with current guest progress...');
+        const currentState = stateRef.current;
+        const newProfile = {
+          id: user.id,
+          username: userData.username,
+          avatar_url: userData.avatar_url,
+          coins: currentState.coins,
+          cards: currentState.collection,
+          custom_cards: currentState.customCards,
+          unlocked_achievements: currentState.unlockedAchievements,
+          last_claimed_date: currentState.lastClaimedDate,
+          claimed_days: currentState.claimedDays,
+          inventory_packs: currentState.inventoryPacks,
+          ads_disabled: currentState.isPremium,
+        };
+        
+        const { error: insertError } = await supabase!.from('profiles').insert([newProfile]);
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+        } else {
+          console.log('New profile created successfully');
+        }
+        setIsInitialSyncDone(true);
+      } else if (profile) {
+        console.log('Profile loaded successfully for user:', profile.id);
+        setState(prev => ({
+          ...prev,
+          user: {
+            ...userData,
+            username: profile.username || userData.username,
+            avatar_url: profile.avatar_url || userData.avatar_url,
+          },
+          coins: profile.coins ?? 1000,
+          collection: profile.cards || [],
+          customCards: profile.custom_cards || [],
+          unlockedAchievements: profile.unlocked_achievements || [],
+          lastClaimedDate: profile.last_claimed_date || null,
+          claimedDays: profile.claimed_days || [],
+          inventoryPacks: profile.inventory_packs || [],
+          isPremium: profile.ads_disabled || false,
+        }));
+        setIsInitialSyncDone(true);
+      } else if (error) {
+        console.error('Error fetching profile:', error);
+        setIsInitialSyncDone(true);
+      }
+    } catch (err) {
+      console.error('Unexpected error in syncProfile:', err);
+      setIsInitialSyncDone(true);
+    } finally {
+      setIsAuthLoading(false);
+    }
+  }, [isInitialSyncDone]);
+
+  // Auth and Profile sync setup
+  useEffect(() => {
+    if (!supabase) return;
+
     // Listen for auth changes
-    console.log('Setting up auth state change listener...');
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event, session?.user?.id);
+      console.log('Auth event:', event, 'User:', session?.user?.id);
+      // Always sync profile when auth state changes
       syncProfile(session?.user || null);
+      
+      // Clean URL if we have auth params (PKCE or Implicit)
+      if (window.location.search.includes('code=') || window.location.hash.includes('access_token=')) {
+        const url = new URL(window.location.href);
+        url.search = '';
+        url.hash = '';
+        window.history.replaceState({}, document.title, url.toString());
+      }
     });
 
     // Initial check for session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        console.error('Error getting initial session:', error);
-      }
-      console.log('Initial session check:', session?.user?.id);
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
+        console.log('Session found on mount:', session.user.id);
         syncProfile(session.user);
+      } else {
+        console.log('No session found on mount');
+        setIsAuthLoading(false);
       }
     });
 
     return () => {
-      console.log('Cleaning up auth listener');
       subscription.unsubscribe();
+      if (profileSubscriptionRef.current) {
+        supabase.removeChannel(profileSubscriptionRef.current);
+      }
     };
-  }, []);
+  }, [syncProfile]);
 
-  // Handle Auth Callback (PKCE)
+  // Handle Auth Callback (PKCE) - Simplified to just error handling since detectSessionInUrl is true
   useEffect(() => {
-    if (!supabase || authProcessed.current) return;
+    if (!supabase) return;
 
-    const handleAuthCallback = async () => {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get('code');
-      const error = params.get('error');
-      const errorDescription = params.get('error_description');
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    const errorDescription = params.get('error_description');
 
-      if (error || errorDescription) {
-        authProcessed.current = true;
-        console.error('Auth error detected in URL:', error, errorDescription);
-        // Clean URL to prevent repeated error processing
-        const url = new URL(window.location.href);
-        url.searchParams.delete('error');
-        url.searchParams.delete('error_description');
-        window.history.replaceState({}, document.title, url.toString());
-        return;
-      }
-      
-      if (code) {
-        authProcessed.current = true;
-        console.log('Auth code detected in URL, exchanging for session...');
-        try {
-          // Use exchangeCodeForSession to manually handle the PKCE flow
-          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-          
-          if (exchangeError) {
-            console.error('Error exchanging code for session:', exchangeError.message);
-          } else if (data.session) {
-            console.log('Code exchanged successfully for session:', data.session.user.id);
-          }
-        } catch (err) {
-          console.error('Unexpected error during code exchange:', err);
-        } finally {
-          // Clean URL regardless of outcome to avoid re-processing the same code
-          const url = new URL(window.location.href);
-          url.searchParams.delete('code');
-          url.searchParams.delete('state');
-          window.history.replaceState({}, document.title, url.toString());
-        }
-      }
-    };
-
-    handleAuthCallback();
+    if (error || errorDescription) {
+      console.error('Auth error detected in URL:', error, errorDescription);
+      const url = new URL(window.location.href);
+      url.searchParams.delete('error');
+      url.searchParams.delete('error_description');
+      window.history.replaceState({}, document.title, url.toString());
+    }
   }, []);
 
   // Persist to Supabase if logged in and initial sync is complete
@@ -416,6 +405,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const contextValue = useMemo(() => ({
     ...state,
+    isAuthLoading,
     setCoins,
     addCoins,
     spendCoins,
@@ -430,7 +420,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     resetGame,
     login,
     logout
-  }), [state, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, login, logout]);
+  }), [state, isAuthLoading, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, login, logout]);
 
   return (
     <GameContext.Provider value={contextValue}>
