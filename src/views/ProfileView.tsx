@@ -36,13 +36,25 @@ const ProfileView: React.FC = () => {
   const handleDeleteAccount = async () => {
     if (!supabase || !user) return;
     
+    setIsUpdating(true);
     try {
-      // In a real production app with administrative access, you'd call a function to delete the user.
-      // For this implementation, we'll sign out the user and clear local data.
+      // Delete the profile record from the database
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      // Sign out the user
       await logout();
       window.location.reload();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error during account deletion:', err);
+      setMessage({ type: 'error', text: err.message || 'Failed to delete account' });
+    } finally {
+      setIsUpdating(false);
+      setShowDeleteModal(false);
     }
   };
 

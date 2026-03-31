@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { GameState, ViewType, Card, User } from '../types';
 import { supabase } from '../lib/supabase';
 
@@ -51,6 +51,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const authProcessed = React.useRef(false);
 
+  const [isInitialSyncDone, setIsInitialSyncDone] = useState(false);
+  const stateRef = useRef(state);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
   // Auth and Profile sync
   useEffect(() => {
     if (!supabase) {
@@ -64,6 +71,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!user) {
         console.log('No user detected, clearing user state');
         setState(prev => ({ ...prev, user: null }));
+        setIsInitialSyncDone(false);
         return;
       }
 
@@ -86,39 +94,42 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .single();
 
         if (error && error.code === 'PGRST116') {
-          console.log('Profile not found, creating new profile...');
+          console.log('Profile not found, creating new profile with current guest progress...');
+          // Promote guest progress to the new account
+          const currentState = stateRef.current;
           const newProfile = {
             id: user.id,
-            coins: 1000,
-            cards: [],
-            unlocked_achievements: [],
-            inventory_packs: [],
-            ads_disabled: false,
+            coins: currentState.coins,
+            cards: currentState.collection,
+            custom_cards: currentState.customCards,
+            unlocked_achievements: currentState.unlockedAchievements,
+            last_claimed_date: currentState.lastClaimedDate,
+            claimed_days: currentState.claimedDays,
+            inventory_packs: currentState.inventoryPacks,
+            ads_disabled: currentState.isPremium,
           };
+          
           const { error: insertError } = await supabase.from('profiles').insert([newProfile]);
           if (insertError) {
             console.error('Error creating profile:', insertError);
             return;
           }
           console.log('New profile created successfully');
-          setState(prev => ({ 
-            ...prev, 
-            coins: 1000,
-            collection: [],
-            unlockedAchievements: [],
-            inventoryPacks: [],
-            isPremium: false
-          }));
+          setIsInitialSyncDone(true);
         } else if (profile) {
           console.log('Profile loaded successfully:', profile.id);
           setState(prev => ({
             ...prev,
-            coins: profile.coins,
+            coins: profile.coins ?? 1000,
             collection: profile.cards || [],
+            customCards: profile.custom_cards || [],
             unlockedAchievements: profile.unlocked_achievements || [],
+            lastClaimedDate: profile.last_claimed_date || null,
+            claimedDays: profile.claimed_days || [],
             inventoryPacks: profile.inventory_packs || [],
             isPremium: profile.ads_disabled || false,
           }));
+          setIsInitialSyncDone(true);
         } else if (error) {
           console.error('Error fetching profile:', error);
         }
@@ -199,20 +210,40 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     handleAuthCallback();
   }, []);
 
-  // Persist to Supabase if logged in
+  // Persist to Supabase if logged in and initial sync is complete
   useEffect(() => {
-    if (state.user && supabase) {
-      supabase.from('profiles').update({
-        coins: state.coins,
-        cards: state.collection,
-        unlocked_achievements: state.unlockedAchievements,
-        inventory_packs: state.inventoryPacks,
-        ads_disabled: state.isPremium,
-      }).eq('id', state.user.id).then(({ error }) => {
-        if (error) console.error('Failed to sync to Supabase', error);
-      });
+    if (state.user && supabase && isInitialSyncDone) {
+      const saveData = async () => {
+        const { error } = await supabase.from('profiles').update({
+          coins: state.coins,
+          cards: state.collection,
+          custom_cards: state.customCards,
+          unlocked_achievements: state.unlockedAchievements,
+          last_claimed_date: state.lastClaimedDate,
+          claimed_days: state.claimedDays,
+          inventory_packs: state.inventoryPacks,
+          ads_disabled: state.isPremium,
+        }).eq('id', state.user?.id);
+        
+        if (error) {
+          console.error('Failed to sync to Supabase:', error.message);
+        }
+      };
+      
+      saveData();
     }
-  }, [state.coins, state.collection, state.user, state.isPremium, state.unlockedAchievements, state.inventoryPacks]);
+  }, [
+    state.coins, 
+    state.collection, 
+    state.customCards,
+    state.user, 
+    state.isPremium, 
+    state.unlockedAchievements, 
+    state.inventoryPacks,
+    state.lastClaimedDate,
+    state.claimedDays,
+    isInitialSyncDone
+  ]);
 
   useEffect(() => {
     localStorage.setItem('nba-opener-state', JSON.stringify(state));
@@ -313,7 +344,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const setPremium = useCallback((isPremium: boolean) => setState(prev => ({ ...prev, isPremium })), []);
 
-  const resetGame = useCallback(() => {
+  const resetGame = useCallback(async () => {
+    const confirmReset = window.confirm("Are you sure you want to reset all progress? This cannot be undone.");
+    if (!confirmReset) return;
+
     setState(prev => ({
       ...prev,
       coins: 1000,
@@ -325,6 +359,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       inventoryPacks: [],
       isPremium: false,
     }));
+
+    // If logged in, the persistence useEffect will handle the sync to Supabase
+    // but we can also force a save here if needed.
   }, []);
 
   const contextValue = useMemo(() => ({
