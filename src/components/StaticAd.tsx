@@ -61,17 +61,29 @@ export default function StaticAd({ position }: StaticAdProps) {
   if (isPremium) return null;
 
   const containerClasses = position === 'header'
-    ? "w-full bg-zinc-950 border-b border-zinc-900 flex justify-center items-center h-[60px] shrink-0 z-[1000] overflow-hidden"
-    : "w-full bg-zinc-950 border-t border-zinc-900 flex justify-center items-center h-[60px] shrink-0 z-[1000] overflow-hidden";
+    ? "w-full bg-zinc-950 border-b border-zinc-900 flex justify-center items-center h-[60px] shrink-0 z-10 overflow-hidden relative"
+    : "w-full bg-zinc-950 border-t border-zinc-900 flex justify-center items-center h-[60px] shrink-0 z-10 overflow-hidden relative";
 
   return (
     <div className={containerClasses}>
       <div 
-        ref={containerRef} 
-        className="h-[50px] w-[320px] flex items-center justify-center bg-zinc-900/50 rounded overflow-hidden"
-        style={{ minHeight: '50px', minWidth: '320px' }}
+        className="h-[50px] w-[320px] flex items-center justify-center bg-zinc-900/50 rounded overflow-hidden relative adsterra-container"
+        style={{ 
+          minHeight: '50px', 
+          maxHeight: '50px', 
+          minWidth: '320px', 
+          maxWidth: '320px',
+          width: '320px',
+          height: '50px',
+          overflow: 'hidden'
+        }}
       >
-        <span className="text-[8px] text-zinc-700 font-bold uppercase tracking-widest">Advertisement</span>
+        <div 
+          ref={containerRef} 
+          className="w-full h-full flex items-center justify-center"
+        >
+          <span className="text-[8px] text-zinc-700 font-bold uppercase tracking-widest">Advertisement</span>
+        </div>
       </div>
     </div>
   );

@@ -64,20 +64,20 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 pt-[160px]">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/95 backdrop-blur-2xl"
+            className="absolute inset-0 bg-black/90 backdrop-blur-xl"
           />
           
           <motion.div
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            className="relative w-full max-w-4xl bg-zinc-950 border border-zinc-800/50 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl flex flex-col h-[calc(100vh-140px)] max-h-[900px]"
+            className="relative w-full max-w-4xl bg-zinc-950 border border-zinc-800/50 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl flex flex-col h-[85vh] max-h-[900px]"
           >
             {/* Header Section */}
             <div className="p-4 sm:p-8 border-b border-zinc-900 bg-zinc-900/20 shrink-0">

@@ -78,7 +78,7 @@ export default function RewardsView() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3 no-scrollbar pb-32">
+      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3 no-scrollbar pb-24">
         {rewards.map((reward) => {
           const isClaimed = claimedDays.includes(reward.day);
           const isNext = reward.day === nextDayToClaim;

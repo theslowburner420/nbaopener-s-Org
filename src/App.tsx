@@ -104,10 +104,14 @@ function AppContent() {
 
   return (
     <div className="h-[100dvh] w-full bg-black text-white flex flex-col overflow-hidden font-sans selection:bg-amber-500 selection:text-black">
+      {/* Top Ad Area */}
       <StaticAd position="header" />
+      
+      {/* Global Header */}
       <Header />
-      {/* Main Content Area */}
-      <main className="flex-1 overflow-hidden relative">
+      
+      {/* Main Content Area - This grows to fill space and its children handle scrolling */}
+      <main className="flex-1 overflow-hidden relative bg-black">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentView}
@@ -115,16 +119,18 @@ function AppContent() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="h-full w-full"
+            className="h-full w-full overflow-hidden"
           >
             {renderView()}
           </motion.div>
         </AnimatePresence>
       </main>
 
+      {/* Bottom Ad Area */}
       <StaticAd position="footer" />
-      {/* Hoops Collector Navigation Bar */}
-      <nav className="h-16 bg-zinc-950 border-t border-zinc-900 flex items-center justify-around px-2 pb-safe shrink-0 z-50">
+      
+      {/* Global Navigation Bar */}
+      <nav className="h-16 bg-zinc-950 border-t border-zinc-900 flex items-center justify-around px-2 pb-safe shrink-0 z-40">
         {/* Collection */}
         <button 
           onClick={() => handleViewChange('collection')}

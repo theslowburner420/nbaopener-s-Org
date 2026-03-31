@@ -159,7 +159,7 @@ export default function PacksView() {
       </header>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 overflow-y-auto custom-scrollbar pb-safe">
         <AnimatePresence mode="wait">
           {activeTab === 'shop' ? (
             <motion.div
@@ -167,7 +167,7 @@ export default function PacksView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 p-4 sm:p-6 pb-24"
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 p-4 sm:p-6 pb-20"
             >
               {PACKS.map((pack) => (
                 <motion.div 

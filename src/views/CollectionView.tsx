@@ -515,7 +515,7 @@ export default function CollectionView() {
         )}
 
         {/* Padding for the bottom nav */}
-        <div className="h-32" />
+        <div className="h-24" />
       </div>
 
       <CardDetailModal 
