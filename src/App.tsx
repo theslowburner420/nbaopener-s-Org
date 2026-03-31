@@ -12,7 +12,8 @@ import ShopView from './views/ShopView';
 import CollectionView from './views/CollectionView';
 import OpenView from './views/OpenView';
 import RewardsView from './views/RewardsView';
-import { LayoutGrid, ShoppingBag, Zap, Trophy, Coins } from 'lucide-react';
+import ProfileView from './views/ProfileView';
+import { LayoutGrid, ShoppingBag, Zap, Trophy, Coins, User as UserIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MemoryManager } from './lib/memory';
 
@@ -98,6 +99,7 @@ function AppContent() {
       case 'packs': return <PacksView />;
       case 'rewards': return <RewardsView />;
       case 'shop': return <ShopView />;
+      case 'profile': return <ProfileView />;
       default: return <OpenView />;
     }
   };
