@@ -340,20 +340,36 @@ export default function ShopView() {
               
               {/* Adsterra Container */}
               <div 
-                ref={adContainerRef}
-                className="relative z-10 min-h-[250px] min-w-[300px] w-[300px] h-[250px] flex items-center justify-center overflow-hidden adsterra-container"
+                className="relative z-10 flex items-center justify-center bg-zinc-950/50 rounded-xl overflow-hidden adsterra-container"
                 style={{ 
-                  maxWidth: '300px', 
-                  maxHeight: '250px',
                   width: '300px',
                   height: '250px',
-                  overflow: 'hidden'
+                  minWidth: '300px',
+                  maxWidth: '300px',
+                  minHeight: '250px',
+                  maxHeight: '250px',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  position: 'relative'
                 }}
               >
-                <div className="flex flex-col items-center">
-                  <Play size={48} className="text-amber-500 mb-4 animate-bounce" />
-                  <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">Hoops Collector Ad</h2>
-                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mt-2">Premium Experience Loading...</p>
+                <div 
+                  ref={adContainerRef}
+                  className="w-full h-full flex items-center justify-center pointer-events-auto"
+                  style={{
+                    width: '300px',
+                    height: '250px',
+                    overflow: 'hidden',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0
+                  }}
+                >
+                  <div className="flex flex-col items-center">
+                    <Play size={48} className="text-amber-500 mb-4 animate-bounce" />
+                    <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">Hoops Collector Ad</h2>
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mt-2">Premium Experience Loading...</p>
+                  </div>
                 </div>
               </div>
               

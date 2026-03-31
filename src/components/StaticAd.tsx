@@ -66,21 +66,33 @@ export default function StaticAd({ position }: StaticAdProps) {
 
   return (
     <div className={containerClasses}>
+      {/* Outer wrapper for ad with strict fixed dimensions */}
       <div 
-        className="h-[50px] w-[320px] flex items-center justify-center bg-zinc-900/50 rounded overflow-hidden relative adsterra-container"
+        className="flex items-center justify-center bg-zinc-900/50 rounded overflow-hidden relative adsterra-container"
         style={{ 
-          minHeight: '50px', 
-          maxHeight: '50px', 
-          minWidth: '320px', 
-          maxWidth: '320px',
           width: '320px',
           height: '50px',
-          overflow: 'hidden'
+          minWidth: '320px',
+          maxWidth: '320px',
+          minHeight: '50px',
+          maxHeight: '50px',
+          overflow: 'hidden',
+          display: 'flex',
+          position: 'relative'
         }}
       >
+        {/* Inner container where the script is injected */}
         <div 
           ref={containerRef} 
-          className="w-full h-full flex items-center justify-center"
+          className="w-full h-full flex items-center justify-center pointer-events-auto"
+          style={{
+            width: '320px',
+            height: '50px',
+            overflow: 'hidden',
+            position: 'absolute',
+            top: 0,
+            left: 0
+          }}
         >
           <span className="text-[8px] text-zinc-700 font-bold uppercase tracking-widest">Advertisement</span>
         </div>

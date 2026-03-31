@@ -8,7 +8,7 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true,
+        detectSessionInUrl: false, // Disabled to handle PKCE manually in GameContext
         storageKey: 'nba-opener-auth'
       }
     }) 

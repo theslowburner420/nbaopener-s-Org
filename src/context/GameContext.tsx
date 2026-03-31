@@ -49,6 +49,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return defaultState;
   });
 
+  const authProcessed = React.useRef(false);
+
   // Auth and Profile sync
   useEffect(() => {
     if (!supabase) {
@@ -145,6 +147,54 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Cleaning up auth listener');
       subscription.unsubscribe();
     };
+  }, []);
+
+  // Handle Auth Callback (PKCE)
+  useEffect(() => {
+    if (!supabase || authProcessed.current) return;
+
+    const handleAuthCallback = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const error = params.get('error');
+      const errorDescription = params.get('error_description');
+
+      if (error || errorDescription) {
+        authProcessed.current = true;
+        console.error('Auth error detected in URL:', error, errorDescription);
+        // Clean URL to prevent repeated error processing
+        const url = new URL(window.location.href);
+        url.searchParams.delete('error');
+        url.searchParams.delete('error_description');
+        window.history.replaceState({}, document.title, url.toString());
+        return;
+      }
+      
+      if (code) {
+        authProcessed.current = true;
+        console.log('Auth code detected in URL, exchanging for session...');
+        try {
+          // Use exchangeCodeForSession to manually handle the PKCE flow
+          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          
+          if (exchangeError) {
+            console.error('Error exchanging code for session:', exchangeError.message);
+          } else if (data.session) {
+            console.log('Code exchanged successfully for session:', data.session.user.id);
+          }
+        } catch (err) {
+          console.error('Unexpected error during code exchange:', err);
+        } finally {
+          // Clean URL regardless of outcome to avoid re-processing the same code
+          const url = new URL(window.location.href);
+          url.searchParams.delete('code');
+          url.searchParams.delete('state');
+          window.history.replaceState({}, document.title, url.toString());
+        }
+      }
+    };
+
+    handleAuthCallback();
   }, []);
 
   // Persist to Supabase if logged in

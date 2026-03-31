@@ -798,22 +798,50 @@ html, body {
 }
 
 /* Adsterra iOS Fix - Force ads to stay within their containers */
+.adsterra-container {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  pointer-events: auto !important;
+  z-index: 1 !important;
+  background: transparent !important;
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+}
+
 .adsterra-container iframe,
 .adsterra-container div,
-.adsterra-container ins {
+.adsterra-container ins,
+.adsterra-container a,
+.adsterra-container img {
   max-width: 100% !important;
   max-height: 100% !important;
   width: 100% !important;
   height: 100% !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
-  position: relative !important;
+  position: absolute !important;
   top: 0 !important;
   left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Specific fix for iOS where scripts might try to go full screen or inject outside */
+body > div[id^="at-"],
+body > iframe[id^="at-"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
 }
 
 /* Ensure Adsterra's dynamically created wrappers don't break layout */

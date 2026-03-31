@@ -104,14 +104,17 @@ function AppContent() {
 
   return (
     <div className="h-[100dvh] w-full bg-black text-white flex flex-col overflow-hidden font-sans selection:bg-amber-500 selection:text-black">
-      {/* Top Ad Area */}
-      <StaticAd position="header" />
-      
-      {/* Global Header */}
-      <Header />
+      {/* Header Area - Fixed at top to prevent layout shifts */}
+      <div className="fixed top-0 left-0 right-0 z-[5000] flex flex-col bg-black">
+        {/* Top Ad Area */}
+        <StaticAd position="header" />
+        
+        {/* Global Header */}
+        <Header />
+      </div>
       
       {/* Main Content Area - This grows to fill space and its children handle scrolling */}
-      <main className="flex-1 overflow-hidden relative bg-black">
+      <main className={`flex-1 overflow-hidden relative bg-black ${isPremium ? 'pt-12 pb-16' : 'pt-[108px] pb-[124px]'}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={currentView}
@@ -126,11 +129,13 @@ function AppContent() {
         </AnimatePresence>
       </main>
 
-      {/* Bottom Ad Area */}
-      <StaticAd position="footer" />
-      
-      {/* Global Navigation Bar */}
-      <nav className="h-16 bg-zinc-950 border-t border-zinc-900 flex items-center justify-around px-2 pb-safe shrink-0 z-40">
+      {/* Footer Area - Fixed at bottom */}
+      <div className="fixed bottom-0 left-0 right-0 z-[4000] flex flex-col bg-black">
+        {/* Bottom Ad Area */}
+        <StaticAd position="footer" />
+        
+        {/* Global Navigation Bar */}
+        <nav className="h-16 bg-zinc-950 border-t border-zinc-900 flex items-center justify-around px-2 pb-safe shrink-0">
         {/* Collection */}
         <button 
           onClick={() => handleViewChange('collection')}
@@ -186,6 +191,7 @@ function AppContent() {
           <span className="text-[8px] font-black uppercase tracking-wider">Shop</span>
         </button>
       </nav>
+      </div>
     </div>
   );
 }
