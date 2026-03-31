@@ -60,18 +60,22 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const syncProfile = async (user: any) => {
       console.log('Syncing profile for user:', user?.id);
+      
       if (!user) {
         console.log('No user detected, clearing user state');
         setState(prev => ({ ...prev, user: null }));
         return;
       }
 
+      // Set basic user info immediately to update UI quickly
       const userData: User = {
         id: user.id,
         email: user.email,
         username: user.user_metadata?.full_name || user.email?.split('@')[0],
         avatar_url: user.user_metadata?.avatar_url,
       };
+
+      setState(prev => ({ ...prev, user: userData }));
 
       try {
         console.log('Fetching profile from Supabase...');
@@ -99,7 +103,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log('New profile created successfully');
           setState(prev => ({ 
             ...prev, 
-            user: userData,
             coins: 1000,
             collection: [],
             unlockedAchievements: [],
@@ -110,7 +113,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log('Profile loaded successfully:', profile.id);
           setState(prev => ({
             ...prev,
-            user: userData,
             coins: profile.coins,
             collection: profile.cards || [],
             unlockedAchievements: profile.unlocked_achievements || [],
