@@ -65,6 +65,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
+    let profileSubscription: any = null;
+
     const syncProfile = async (user: any) => {
       console.log('Syncing profile for user:', user?.id);
       
@@ -72,6 +74,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('No user detected, clearing user state');
         setState(prev => ({ ...prev, user: null }));
         setIsInitialSyncDone(false);
+        if (profileSubscription) {
+          supabase.removeChannel(profileSubscription);
+          profileSubscription = null;
+        }
         return;
       }
 
@@ -84,6 +90,43 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
 
       setState(prev => ({ ...prev, user: userData }));
+
+      // Set up real-time subscription
+      if (!profileSubscription) {
+        console.log('Setting up real-time subscription for user:', user.id);
+        profileSubscription = supabase
+          .channel(`public:profiles:id=eq.${user.id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'profiles',
+              filter: `id=eq.${user.id}`,
+            },
+            (payload) => {
+              console.log('Real-time profile update received:', payload.new);
+              const newProfile = payload.new;
+              setState(prev => ({
+                ...prev,
+                user: prev.user ? {
+                  ...prev.user,
+                  username: newProfile.username || prev.user.username,
+                  avatar_url: newProfile.avatar_url || prev.user.avatar_url,
+                } : null,
+                coins: newProfile.coins ?? prev.coins,
+                collection: newProfile.cards || prev.collection,
+                customCards: newProfile.custom_cards || prev.customCards,
+                unlockedAchievements: newProfile.unlocked_achievements || prev.unlockedAchievements,
+                lastClaimedDate: newProfile.last_claimed_date || prev.lastClaimedDate,
+                claimedDays: newProfile.claimed_days || prev.claimedDays,
+                inventoryPacks: newProfile.inventory_packs || prev.inventoryPacks,
+                isPremium: newProfile.ads_disabled || prev.isPremium,
+              }));
+            }
+          )
+          .subscribe();
+      }
 
       try {
         console.log('Fetching profile from Supabase...');
@@ -99,6 +142,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const currentState = stateRef.current;
           const newProfile = {
             id: user.id,
+            username: userData.username,
+            avatar_url: userData.avatar_url,
             coins: currentState.coins,
             cards: currentState.collection,
             custom_cards: currentState.customCards,
@@ -120,6 +165,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log('Profile loaded successfully:', profile.id);
           setState(prev => ({
             ...prev,
+            user: prev.user ? {
+              ...prev.user,
+              username: profile.username || prev.user.username,
+              avatar_url: profile.avatar_url || prev.user.avatar_url,
+            } : null,
             coins: profile.coins ?? 1000,
             collection: profile.cards || [],
             customCards: profile.custom_cards || [],
