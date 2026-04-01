@@ -172,8 +172,27 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const mergedCoins = Math.max(profile.coins || 0, currentState.coins || 0);
         const mergedCollection = [...new Set([...(profile.cards || []), ...(currentState.collection || [])])];
         const mergedAchievements = [...new Set([...(profile.unlocked_achievements || []), ...(currentState.unlockedAchievements || [])])];
-        const mergedCustomCards = [...(profile.custom_cards || []), ...(currentState.customCards || [])];
-        const mergedInventoryPacks = [...(profile.inventory_packs || []), ...(currentState.inventoryPacks || [])];
+        
+        // Deduplicate custom cards by ID
+        const customCardsMap = new Map();
+        [...(profile.custom_cards || []), ...(currentState.customCards || [])].forEach(card => {
+          if (card && card.id) customCardsMap.set(card.id, card);
+        });
+        const mergedCustomCards = Array.from(customCardsMap.values());
+
+        // Deduplicate inventory packs by ID and sum counts
+        const packsMap = new Map();
+        [...(profile.inventory_packs || []), ...(currentState.inventoryPacks || [])].forEach(pack => {
+          if (pack && pack.id) {
+            const existing = packsMap.get(pack.id);
+            if (existing) {
+              existing.count += (pack.count || 0);
+            } else {
+              packsMap.set(pack.id, { ...pack });
+            }
+          }
+        });
+        const mergedInventoryPacks = Array.from(packsMap.values());
 
         setState(prev => ({
           ...prev,
@@ -192,7 +211,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           isPremium: profile.ads_disabled || currentState.isPremium || false,
         }));
         setIsInitialSyncDone(true);
-      } else if (error) {
+      }
+ else if (error) {
         console.error('Error fetching profile:', error);
         setIsInitialSyncDone(true);
       }
