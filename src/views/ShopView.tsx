@@ -133,10 +133,7 @@ export default function ShopView() {
 
   return (
     <PayPalScriptProvider options={{ 
-      "client-id": paypalClientId,
-      "components": "buttons",
-      "currency": "USD",
-      "locale": "en-US"
+      "client-id": paypalClientId
     }}>
       <div className="h-full w-full flex flex-col bg-black overflow-hidden relative">
         {/* Background Ambience */}
