@@ -1,11 +1,11 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
-import { LogIn, LogOut, User as UserIcon, Coins, AlertCircle, ChevronDown, Settings } from 'lucide-react';
+import { LogIn, LogOut, User as UserIcon, Coins, AlertCircle, ChevronDown, Settings, Cloud, Check, RefreshCw } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'motion/react';
 
 const Header: React.FC = React.memo(() => {
-  const { user, coins, login, logout, setCurrentView, isAuthLoading } = useGame();
+  const { user, coins, login, logout, setCurrentView, isAuthLoading, isSaving } = useGame();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -47,6 +47,29 @@ const Header: React.FC = React.memo(() => {
 
       {/* Right side: Coins & Profile */}
       <div className="flex items-center gap-3">
+        {/* Cloud Sync Indicator */}
+        <AnimatePresence mode="wait">
+          {user && (
+            <motion.div
+              key={isSaving ? 'saving' : 'saved'}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-zinc-900/50 border border-zinc-800/30"
+              title={isSaving ? "Syncing to Cloud..." : "Progress Saved"}
+            >
+              {isSaving ? (
+                <RefreshCw size={10} className="text-amber-500 animate-spin" />
+              ) : (
+                <Cloud size={10} className="text-green-500" />
+              )}
+              <span className={`text-[8px] font-black uppercase tracking-widest ${isSaving ? 'text-amber-500/70' : 'text-green-500/70'}`}>
+                {isSaving ? 'Syncing' : 'Cloud'}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Coins Display */}
         <div className="flex items-center gap-1.5 bg-zinc-900/80 px-3 py-1.5 rounded-xl border border-zinc-800/50 shadow-inner">
           <Coins size={12} className="text-amber-500" />

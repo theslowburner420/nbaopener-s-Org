@@ -20,6 +20,7 @@ interface GameContextType extends GameState {
   logout: () => Promise<void>;
   updateGameState: (updates: Partial<GameState>) => void;
   forceSync: () => Promise<void>;
+  isSaving: boolean;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -48,6 +49,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isSyncingRef = useRef(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isInitialSyncDone, setIsInitialSyncDone] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const stateRef = useRef(state);
   const profileSubscriptionRef = useRef<any>(null);
 
@@ -121,35 +123,57 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('🚀 PROFILE GUARANTEE: Creating new profile for user:', user.id);
         finalState = localData;
       } else {
-        console.log('📥 CLOUD SYNC: Merging local data with cloud data');
+        console.log('📥 CLOUD SYNC: Prioritizing cloud data');
         
-        const mergeArrays = (arr1: any[], arr2: any[]) => {
-          const set = new Set([...(arr1 || []), ...(arr2 || [])]);
-          return Array.from(set);
-        };
+        // If cloud profile exists, we use it as the definitive state.
+        // We only merge local guest progress if it's the VERY FIRST time the user logs in
+        // and they have significant progress locally (e.g. more coins or cards).
+        // If they are a returning user, cloud is the source of truth.
+        
+        const isFreshGuest = localData.coins === 500 && localData.collection.length === 0;
+        
+        if (isFreshGuest) {
+          // Returning user with no new guest progress, just use cloud.
+          finalState = {
+            coins: cloudProfile.coins ?? 0,
+            collection: cloudProfile.cards || [],
+            customCards: cloudProfile.custom_cards || [],
+            unlockedAchievements: cloudProfile.unlocked_achievements || [],
+            lastClaimedDate: cloudProfile.last_claimed_date,
+            claimedDays: cloudProfile.claimed_days || [],
+            inventoryPacks: cloudProfile.inventory_packs || [],
+            isPremium: cloudProfile.ads_disabled || false,
+          };
+        } else {
+          // User played as guest before logging in, merge local progress into cloud.
+          const mergeArrays = (arr1: any[], arr2: any[]) => {
+            const set = new Set([...(arr1 || []), ...(arr2 || [])]);
+            return Array.from(set);
+          };
 
-        const mergePacks = (packs1: any[], packs2: any[]) => {
-          const map = new Map();
-          [...(packs1 || []), ...(packs2 || [])].forEach(p => {
-            if (map.has(p.id)) {
-              map.get(p.id).count = Math.max(map.get(p.id).count, p.count || 1);
-            } else {
-              map.set(p.id, { ...p, count: p.count || 1 });
-            }
-          });
-          return Array.from(map.values());
-        };
+          const mergePacks = (packs1: any[], packs2: any[]) => {
+            const map = new Map();
+            [...(packs1 || []), ...(packs2 || [])].forEach(p => {
+              if (map.has(p.id)) {
+                map.get(p.id).count = Math.max(map.get(p.id).count, p.count || 1);
+              } else {
+                map.set(p.id, { ...p, count: p.count || 1 });
+              }
+            });
+            return Array.from(map.values());
+          };
 
-        finalState = {
-          coins: Math.max(cloudProfile.coins ?? 0, localData.coins),
-          collection: mergeArrays(cloudProfile.cards, localData.collection),
-          customCards: mergeArrays(cloudProfile.custom_cards, localData.customCards),
-          unlockedAchievements: mergeArrays(cloudProfile.unlocked_achievements, localData.unlockedAchievements),
-          lastClaimedDate: cloudProfile.last_claimed_date || localData.lastClaimedDate,
-          claimedDays: mergeArrays(cloudProfile.claimed_days, localData.claimedDays),
-          inventoryPacks: mergePacks(cloudProfile.inventory_packs, localData.inventoryPacks),
-          isPremium: cloudProfile.ads_disabled || localData.isPremium || false,
-        };
+          finalState = {
+            coins: Math.max(cloudProfile.coins ?? 0, localData.coins),
+            collection: mergeArrays(cloudProfile.cards, localData.collection),
+            customCards: mergeArrays(cloudProfile.custom_cards, localData.customCards),
+            unlockedAchievements: mergeArrays(cloudProfile.unlocked_achievements, localData.unlockedAchievements),
+            lastClaimedDate: cloudProfile.last_claimed_date || localData.lastClaimedDate,
+            claimedDays: mergeArrays(cloudProfile.claimed_days, localData.claimedDays),
+            inventoryPacks: mergePacks(cloudProfile.inventory_packs, localData.inventoryPacks),
+            isPremium: cloudProfile.ads_disabled || localData.isPremium || false,
+          };
+        }
       }
 
       // 3. Push the definitive state to Supabase (UPSERT)
@@ -298,9 +322,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Function to force immediate sync to Supabase with retries (IRON RULE: Write Confirmation)
   const forceSyncToSupabase = useCallback(async (newState: GameState, retries = 5) => {
-    // Only sync if we have a user and supabase is available
-    // We remove the isInitialSyncDone check to allow immediate syncing as soon as user is set
     if (newState.user && supabase) {
+      setIsSaving(true);
       console.log('💾 CLOUD SAVE: Initiating immediate sync for user:', newState.user.id);
       
       const performSave = async (attempt: number): Promise<boolean> => {
@@ -323,9 +346,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return false;
           }
           
-          if (data) {
-            console.log('✅ CLOUD SAVE CONFIRMED: Data is identical in cloud and local.');
-          }
           return true;
         } catch (err) {
           console.error(`❌ UNEXPECTED SYNC ERROR (Attempt ${attempt}):`, err);
@@ -347,6 +367,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!success) {
         console.error('🚨 CRITICAL SYNC FAILURE: Could not persist progress to cloud after multiple attempts.');
       }
+      
+      // Artificial delay to ensure the user sees the "Saving" indicator if it's too fast
+      setTimeout(() => setIsSaving(false), 800);
     }
   }, []);
 
@@ -529,9 +552,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     resetGame,
     updateGameState,
     forceSync,
+    isSaving,
     login,
     logout
-  }), [state, isAuthLoading, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, forceSync, login, logout]);
+  }), [state, isAuthLoading, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, forceSync, isSaving, login, logout]);
 
   return (
     <GameContext.Provider value={contextValue}>

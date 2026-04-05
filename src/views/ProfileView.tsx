@@ -43,7 +43,7 @@ const ProfileView: React.FC = () => {
     
     try {
       await forceSync();
-      setSyncMessage({ type: 'success', text: 'Sync Successful!' });
+      setSyncMessage({ type: 'success', text: 'Progress Synced!' });
       setTimeout(() => setSyncMessage(null), 3000);
     } catch (err: any) {
       setSyncMessage({ type: 'error', text: 'Sync Failed. Try again.' });
@@ -135,9 +135,9 @@ const ProfileView: React.FC = () => {
                 {isSyncing ? (
                   <RefreshCw size={16} className="animate-spin" />
                 ) : (
-                  <CloudUpload size={16} />
+                  <Check size={16} />
                 )}
-                {isSyncing ? 'Syncing...' : 'Sync Data to Cloud'}
+                {isSyncing ? 'Syncing...' : 'Sync Progress Now'}
               </button>
               
               <AnimatePresence>
