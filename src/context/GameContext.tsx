@@ -158,12 +158,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const parsedCloud = {
           coins: Number(cloudProfile.coins) || 0,
           cards: Array.isArray(cloudProfile.cards) ? cloudProfile.cards : [],
-          custom_cards: Array.isArray(cloudProfile.custom_cards) ? cloudProfile.custom_cards : [],
           unlocked_achievements: Array.isArray(cloudProfile.unlocked_achievements) ? cloudProfile.unlocked_achievements : [],
           inventory_packs: Array.isArray(cloudProfile.inventory_packs) ? cloudProfile.inventory_packs : [],
           ads_disabled: !!cloudProfile.ads_disabled,
-          last_claimed_date: cloudProfile.last_claimed_date || null,
-          claimed_days: Array.isArray(cloudProfile.claimed_days) ? cloudProfile.claimed_days : [],
         };
 
         // Update the last received cloud state to prevent loops
@@ -181,10 +178,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           finalState = {
             coins: parsedCloud.coins,
             collection: parsedCloud.cards,
-            customCards: parsedCloud.custom_cards,
             unlockedAchievements: parsedCloud.unlocked_achievements,
-            lastClaimedDate: parsedCloud.last_claimed_date,
-            claimedDays: parsedCloud.claimed_days,
             inventoryPacks: parsedCloud.inventory_packs,
             isPremium: parsedCloud.ads_disabled,
           };
@@ -211,10 +205,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           finalState = {
             coins: Math.max(parsedCloud.coins, localData.coins),
             collection: mergeArrays(parsedCloud.cards, localData.collection),
-            customCards: mergeArrays(parsedCloud.custom_cards, localData.customCards),
             unlockedAchievements: mergeArrays(parsedCloud.unlocked_achievements, localData.unlockedAchievements),
-            lastClaimedDate: parsedCloud.last_claimed_date || localData.lastClaimedDate,
-            claimedDays: mergeArrays(parsedCloud.claimed_days, localData.claimedDays),
             inventoryPacks: mergePacks(parsedCloud.inventory_packs, localData.inventoryPacks),
             isPremium: parsedCloud.ads_disabled || localData.isPremium || false,
           };
@@ -362,91 +353,103 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Function to force immediate sync to Supabase with retries (IRON RULE: Write Confirmation)
   const forceSyncToSupabase = useCallback(async (newState: GameState, retries = 5) => {
-    if (!newState.user || !supabase) return;
+    try {
+      if (!newState.user || !supabase) return;
 
-    // Data Mapping Validation: Ensure arrays are sent as arrays
-    const payload = {
-      coins: Number(newState.coins) || 0,
-      cards: Array.isArray(newState.collection) ? newState.collection : [],
-      custom_cards: Array.isArray(newState.customCards) ? newState.customCards : [],
-      unlocked_achievements: Array.isArray(newState.unlockedAchievements) ? newState.unlockedAchievements : [],
-      last_claimed_date: newState.lastClaimedDate,
-      claimed_days: Array.isArray(newState.claimedDays) ? newState.claimedDays : [],
-      inventory_packs: Array.isArray(newState.inventoryPacks) ? newState.inventoryPacks : [],
-      ads_disabled: !!newState.isPremium,
-      updated_at: new Date().toISOString(),
-    };
+      // Validation of UUID
+      console.log('🔍 VALIDATING UUID:', newState.user?.id);
+      if (!newState.user?.id) {
+        console.error('❌ UUID VALIDATION FAILED: user.id is null or undefined');
+        return;
+      }
 
-    const stateString = JSON.stringify({
-      coins: payload.coins,
-      collection: payload.cards,
-      customCards: payload.custom_cards,
-      unlockedAchievements: payload.unlocked_achievements,
-      lastClaimedDate: payload.last_claimed_date,
-      claimedDays: payload.claimed_days,
-      inventoryPacks: payload.inventory_packs,
-      isPremium: payload.ads_disabled,
-    });
+      // Payload Cleanup & Data Mapping Validation
+      // We only include columns that exist in the CSV/Table to avoid 400 errors
+      const payload = {
+        username: newState.user.username,
+        avatar_url: newState.user.avatar_url,
+        coins: Number(newState.coins) || 0,
+        // Serialización Estricta: Ensure arrays are sent as arrays (JSONB)
+        cards: Array.isArray(newState.collection) ? newState.collection : [],
+        unlocked_achievements: Array.isArray(newState.unlockedAchievements) ? newState.unlockedAchievements : [],
+        inventory_packs: Array.isArray(newState.inventoryPacks) ? newState.inventoryPacks : [],
+        ads_disabled: !!newState.isPremium,
+        updated_at: new Date().toISOString(),
+      };
 
-    if (stateString === lastSyncedStateRef.current) {
-      return;
-    }
+      const stateString = JSON.stringify({
+        coins: payload.coins,
+        collection: payload.cards,
+        unlockedAchievements: payload.unlocked_achievements,
+        inventoryPacks: payload.inventory_packs,
+        isPremium: payload.ads_disabled,
+      });
 
-    setIsSaving(true);
-    console.log('📤 CLOUD SYNC: Attempting to save state...', payload);
-    
-    const performSave = async (attempt: number): Promise<boolean> => {
-      try {
-        // Use .update().eq() for existing profiles as requested, fallback to upsert if needed
-        // Actually, upsert is safer for initial creation, but the user specifically asked for .update().eq() for the save pipeline
-        const { error } = await supabase!
-          .from('profiles')
-          .update(payload)
-          .eq('id', newState.user!.id);
-        
-        if (error) {
-          console.error(`❌ CLOUD SAVE ERROR (Attempt ${attempt}):`, error.message, error.details, error.hint);
-          // If update fails because record doesn't exist, try upsert
-          if (error.code === 'PGRST116' || error.message.includes('0 rows')) {
-            const { error: upsertError } = await supabase!.from('profiles').upsert({
-              id: newState.user!.id,
-              ...payload
-            });
-            if (upsertError) return false;
-            return true;
+      if (stateString === lastSyncedStateRef.current) {
+        return;
+      }
+
+      setIsSaving(true);
+      console.log('📤 CLOUD SYNC: Attempting to save state...', payload);
+      
+      const performSave = async (attempt: number): Promise<boolean> => {
+        try {
+          // Use .update().eq() for existing profiles
+          const { error } = await supabase!
+            .from('profiles')
+            .update(payload)
+            .eq('id', newState.user!.id);
+          
+          if (error) {
+            console.error(`❌ CLOUD SAVE ERROR (Attempt ${attempt}):`, error.message, error.details, error.hint);
+            // If update fails because record doesn't exist, try upsert
+            if (error.code === 'PGRST116' || error.message.includes('0 rows')) {
+              console.log('ℹ️ Profile not found, attempting upsert...');
+              const { error: upsertError } = await supabase!.from('profiles').upsert({
+                id: newState.user!.id,
+                ...payload
+              });
+              if (upsertError) {
+                console.error('❌ UPSERT FAILED:', upsertError.message);
+                return false;
+              }
+              return true;
+            }
+            return false;
           }
+          
+          lastSyncedStateRef.current = stateString;
+          localStorage.removeItem('GUEST_PROGRESS');
+          return true;
+        } catch (err) {
+          console.error(`❌ UNEXPECTED SYNC ERROR (Attempt ${attempt}):`, err);
           return false;
         }
-        
-        lastSyncedStateRef.current = stateString;
-        // Clear guest cache on successful sync
-        localStorage.removeItem('GUEST_PROGRESS');
-        return true;
-      } catch (err) {
-        console.error(`❌ UNEXPECTED SYNC ERROR (Attempt ${attempt}):`, err);
-        return false;
+      };
+
+      let success = await performSave(1);
+      let currentAttempt = 1;
+
+      while (!success && currentAttempt < retries) {
+        currentAttempt++;
+        const delay = 1000 * Math.pow(2, currentAttempt - 1);
+        console.log(`🔄 SYNC RETRY: Attempt ${currentAttempt}/${retries} in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        success = await performSave(currentAttempt);
       }
-    };
 
-    let success = await performSave(1);
-    let currentAttempt = 1;
-
-    while (!success && currentAttempt < retries) {
-      currentAttempt++;
-      const delay = 1000 * Math.pow(2, currentAttempt - 1);
-      console.log(`🔄 SYNC RETRY: Attempt ${currentAttempt}/${retries} in ${delay}ms...`);
-      await new Promise(resolve => setTimeout(resolve, delay));
-      success = await performSave(currentAttempt);
+      if (!success) {
+        console.error('🚨 CRITICAL SYNC FAILURE: Could not persist progress to cloud.');
+        setIsOffline(true);
+      } else {
+        setIsOffline(false);
+      }
+      
+      setTimeout(() => setIsSaving(false), 800);
+    } catch (criticalErr) {
+      console.error('🚨 CRITICAL SYNC ENGINE ERROR (Anti-Crash Protection):', criticalErr);
+      setIsSaving(false);
     }
-
-    if (!success) {
-      console.error('🚨 CRITICAL SYNC FAILURE: Could not persist progress to cloud.');
-      setIsOffline(true);
-    } else {
-      setIsOffline(false);
-    }
-    
-    setTimeout(() => setIsSaving(false), 800);
   }, []);
 
   // Debounced sync effect to handle rapid state changes (proactive saving)
