@@ -135,7 +135,8 @@ export default function ShopView() {
     <PayPalScriptProvider options={{ 
       "client-id": paypalClientId,
       "components": "buttons",
-      "currency": "USD"
+      "currency": "USD",
+      "locale": "en-US"
     }}>
       <div className="h-full w-full flex flex-col bg-black overflow-hidden relative">
         {/* Background Ambience */}
@@ -186,6 +187,7 @@ export default function ShopView() {
                       label: 'pay',
                       tagline: false
                     }}
+                    commit={true}
                     createOrder={(data, actions) => {
                       return actions.order.create({
                         intent: "CAPTURE",
@@ -300,6 +302,7 @@ export default function ShopView() {
                         label: 'pay',
                         tagline: false
                       }}
+                      commit={true}
                         createOrder={(data, actions) => {
                           return actions.order.create({
                             intent: "CAPTURE",

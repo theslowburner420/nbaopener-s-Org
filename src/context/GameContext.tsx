@@ -24,9 +24,9 @@ const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<GameState>(() => {
-    const defaultState: GameState = {
+    return {
       user: null,
-      coins: 1000,
+      coins: 500,
       collection: [],
       customCards: [],
       currentView: 'open',
@@ -36,21 +36,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       inventoryPacks: [],
       isPremium: false,
     };
-    
-    // Only use localStorage for GUEST users. 
-    // If we have a session, syncProfile will overwrite this anyway.
-    const saved = localStorage.getItem('nba-opener-state');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        // We only return saved state if it's not conflicting with a potential login
-        return { ...defaultState, ...parsed };
-      } catch (e) {
-        console.error('Failed to parse saved state', e);
-        return defaultState;
-      }
-    }
-    return defaultState;
   });
 
   const authProcessed = React.useRef(false);
@@ -98,89 +83,64 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', user.id)
         .single();
 
-      // 1.5 Recover user-specific local state if it exists (Safety net for refresh)
-      const localSaved = localStorage.getItem(`nba-opener-state-${user.id}`);
-      let localState = stateRef.current;
-      if (localSaved) {
-        try {
-          const parsed = JSON.parse(localSaved);
-          // If local state is for the same user and has data, use it for comparison
-          localState = { ...localState, ...parsed };
-        } catch (e) {
-          console.error('Failed to parse user-specific local state', e);
-        }
-      }
-      
-      // 2. Determine Priority (Inverse Priority Rule)
-      // Cloud is empty if it doesn't exist or has 0 coins and no cards
-      const isCloudEmpty = !cloudProfile || (
-        (cloudProfile.coins === 0 || cloudProfile.coins === 1000) && 
-        (!cloudProfile.cards || cloudProfile.cards.length === 0) &&
-        (!cloudProfile.inventory_packs || cloudProfile.inventory_packs.length === 0)
-      );
-
-      // Local is "better" if it has more coins or more cards or more packs or more achievements
-      const isLocalBetter = localState.coins > (cloudProfile?.coins || 0) || 
-                           localState.collection.length > (cloudProfile?.cards?.length || 0) ||
-                           localState.inventoryPacks.length > (cloudProfile?.inventory_packs?.length || 0) ||
-                           localState.unlockedAchievements.length > (cloudProfile?.unlocked_achievements?.length || 0);
-
-      // 3. Mandatory Initial Sync / Upload if Local > Cloud
-      if (isCloudEmpty || isLocalBetter) {
-        console.log('🚀 IRON RULE: Uploading local progress to cloud (Local > Cloud or Cloud Empty)');
-        
-        const profileToUpload = {
+      // 2. Second Net Logic: Create profile if it doesn't exist
+      if (!cloudProfile) {
+        console.log('🚀 SECOND NET: Creating new profile for user:', user.id);
+        const newProfile = {
           id: user.id,
           username: userData.username,
           avatar_url: userData.avatar_url,
-          coins: localState.coins,
-          cards: localState.collection,
-          custom_cards: localState.customCards,
-          unlocked_achievements: localState.unlockedAchievements,
-          last_claimed_date: localState.lastClaimedDate,
-          claimed_days: localState.claimedDays,
-          inventory_packs: localState.inventoryPacks,
-          ads_disabled: localState.isPremium,
+          coins: 500,
+          cards: [],
+          custom_cards: [],
+          unlocked_achievements: [],
+          last_claimed_date: null,
+          claimed_days: [],
+          inventory_packs: [],
+          ads_disabled: false,
           updated_at: new Date().toISOString(),
         };
-        
-        const { error: upsertError } = await supabase!.from('profiles').upsert(profileToUpload);
+
+        const { error: upsertError } = await supabase!.from('profiles').upsert(newProfile);
         
         if (upsertError) {
-          console.error('❌ CRITICAL: Initial cloud upload failed:', upsertError.message);
-          // If upload fails, we still set the user but keep local state
-          setState({ ...localState, user: userData });
-        } else {
-          console.log('✅ Initial cloud upload SUCCESSFUL');
-          setState({ ...localState, user: userData });
+          console.error('❌ SECOND NET: Failed to create profile:', upsertError.message);
         }
+
+        setState({
+          ...newProfile,
+          user: userData,
+          collection: [],
+          customCards: [],
+          unlockedAchievements: [],
+          lastClaimedDate: null,
+          claimedDays: [],
+          inventoryPacks: [],
+          isPremium: false,
+          currentView: stateRef.current.currentView
+        });
       } 
-      // 4. Download if Cloud > Local
-      else if (cloudProfile) {
-        console.log('📥 IRON RULE: Downloading cloud progress (Cloud > Local)');
-        
+      // 3. Cloud is Source of Truth: Load from Cloud
+      else {
+        console.log('📥 CLOUD SYNC: Loading profile from Supabase');
         setState({
           user: {
             ...userData,
             username: cloudProfile.username || userData.username,
             avatar_url: cloudProfile.avatar_url || userData.avatar_url,
           },
-          coins: cloudProfile.coins ?? 0,
+          coins: cloudProfile.coins ?? 500,
           collection: cloudProfile.cards || [],
           customCards: cloudProfile.custom_cards || [],
           unlockedAchievements: cloudProfile.unlocked_achievements || [],
           lastClaimedDate: cloudProfile.last_claimed_date || null,
-          claimed_days: cloudProfile.claimed_days || [],
+          claimedDays: cloudProfile.claimed_days || [],
           inventoryPacks: cloudProfile.inventory_packs || [],
           isPremium: cloudProfile.ads_disabled || false,
-          currentView: localState.currentView // Keep current view
+          currentView: stateRef.current.currentView
         });
       }
 
-      // 5. Eliminate Ghost Guest Mode - But keep a user-specific backup
-      console.log('👻 IRON RULE: Eliminating Ghost Guest Mode. Moving to user-specific storage.');
-      localStorage.removeItem('nba-opener-state');
-      localStorage.setItem(`nba-opener-state-${user.id}`, JSON.stringify(localState));
       setIsInitialSyncDone(true);
 
       // 6. Real-time Subscription (Only for updates)
@@ -270,59 +230,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Persist to Supabase if logged in and initial sync is complete with debounce
-  useEffect(() => {
-    if (state.user && supabase && isInitialSyncDone) {
-      const timeoutId = setTimeout(async () => {
-        try {
-          const { error } = await supabase.from('profiles').update({
-            coins: state.coins,
-            cards: state.collection,
-            custom_cards: state.customCards,
-            unlocked_achievements: state.unlockedAchievements,
-            last_claimed_date: state.lastClaimedDate,
-            claimed_days: state.claimedDays,
-            inventory_packs: state.inventoryPacks,
-            ads_disabled: state.isPremium,
-            updated_at: new Date().toISOString(),
-          }).eq('id', state.user?.id);
-          
-          if (error) {
-            console.error('❌ Background cloud sync failed:', error.message);
-          } else {
-            console.log('✅ Background cloud sync CONFIRMED (OK)');
-          }
-        } catch (err) {
-          console.error('Unexpected error in persistence effect:', err);
-        }
-      }, 1000); // 1 second debounce
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [
-    state.coins, 
-    state.collection, 
-    state.customCards,
-    state.user?.id, 
-    state.isPremium, 
-    state.unlockedAchievements, 
-    state.inventoryPacks,
-    state.lastClaimedDate,
-    state.claimedDays,
-    isInitialSyncDone
-  ]);
-
-  useEffect(() => {
-    // Persist to localStorage
-    if (!state.user) {
-      // Guest mode
-      localStorage.setItem('nba-opener-state', JSON.stringify(state));
-    } else {
-      // Logged in mode - use user-specific key for safety on refresh
-      localStorage.setItem(`nba-opener-state-${state.user.id}`, JSON.stringify(state));
-    }
-  }, [state]);
-
+  // Remove background sync and localStorage persistence to ensure Supabase is the only source of truth
+  // and all updates are immediate via forceSyncToSupabase.
+  
   const login = async () => {
     if (!supabase) {
       console.error('Supabase not configured');
@@ -399,11 +309,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setState(prev => {
       const newCoins = typeof coins === 'function' ? coins(prev.coins) : coins;
       const newState = { ...prev, coins: newCoins };
-      // If it's a significant change (like spending for a pack), we could force sync, 
-      // but we'll rely on the specific action handlers for "immediate" sync as requested.
+      forceSyncToSupabase(newState);
       return newState;
     });
-  }, []);
+  }, [forceSyncToSupabase]);
 
   const addCoins = useCallback((amount: number) => {
     const newState = { ...stateRef.current, coins: stateRef.current.coins + amount };
@@ -506,7 +415,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const newState = {
       ...stateRef.current,
-      coins: 1000,
+      coins: 500,
       collection: [],
       customCards: [],
       unlockedAchievements: [],
@@ -521,10 +430,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // If logged in, force immediate sync
     if (newState.user) {
       forceSyncToSupabase(newState);
-      // Also update user-specific local storage
-      localStorage.setItem(`nba-opener-state-${newState.user.id}`, JSON.stringify(newState));
-    } else {
-      localStorage.setItem('nba-opener-state', JSON.stringify(newState));
     }
   }, [forceSyncToSupabase]);
 
