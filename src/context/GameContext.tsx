@@ -24,17 +24,21 @@ const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<GameState>(() => {
+    // Try to load guest progress if it exists
+    const saved = localStorage.getItem('GUEST_PROGRESS');
+    const initialGuestState = saved ? JSON.parse(saved) : null;
+
     return {
       user: null,
-      coins: 500,
-      collection: [],
-      customCards: [],
+      coins: initialGuestState?.coins ?? 500,
+      collection: initialGuestState?.collection ?? [],
+      customCards: initialGuestState?.customCards ?? [],
       currentView: 'open',
-      unlockedAchievements: [],
-      lastClaimedDate: null,
-      claimedDays: [],
-      inventoryPacks: [],
-      isPremium: false,
+      unlockedAchievements: initialGuestState?.unlockedAchievements ?? [],
+      lastClaimedDate: initialGuestState?.lastClaimedDate ?? null,
+      claimedDays: initialGuestState?.claimedDays ?? [],
+      inventoryPacks: initialGuestState?.inventoryPacks ?? [],
+      isPremium: initialGuestState?.isPremium ?? false,
     };
   });
 
@@ -47,27 +51,36 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     stateRef.current = state;
+    // Save guest progress to localStorage ONLY if not logged in
+    if (!state.user) {
+      const guestData = {
+        coins: state.coins,
+        collection: state.collection,
+        customCards: state.customCards,
+        unlockedAchievements: state.unlockedAchievements,
+        lastClaimedDate: state.lastClaimedDate,
+        claimedDays: state.claimedDays,
+        inventoryPacks: state.inventoryPacks,
+        isPremium: state.isPremium,
+      };
+      localStorage.setItem('GUEST_PROGRESS', JSON.stringify(guestData));
+    }
   }, [state]);
 
   const syncProfile = useCallback(async (user: any) => {
     if (isSyncingRef.current) return;
     
     if (!user) {
-      console.log('👤 No user detected, clearing user state');
+      console.log('👤 No user detected, keeping guest state');
       setState(prev => ({ ...prev, user: null }));
       setIsInitialSyncDone(true);
       setIsAuthLoading(false);
-      if (profileSubscriptionRef.current) {
-        supabase?.removeChannel(profileSubscriptionRef.current);
-        profileSubscriptionRef.current = null;
-      }
       return;
     }
 
     isSyncingRef.current = true;
-    console.log('🔄 STARTING IRON SYNC for user:', user.id);
+    console.log('🔄 STARTING DEFINITIVE SYNC for user:', user.id);
     
-    // Basic user info for UI
     const userData: User = {
       id: user.id,
       email: user.email,
@@ -83,67 +96,94 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', user.id)
         .single();
 
-      // 2. Second Net Logic: Create profile if it doesn't exist
+      // 2. Load Local Guest Data for merging
+      const savedGuest = localStorage.getItem('GUEST_PROGRESS');
+      const guestData = savedGuest ? JSON.parse(savedGuest) : null;
+
+      let finalState: Partial<GameState>;
+
       if (!cloudProfile) {
-        console.log('🚀 SECOND NET: Creating new profile for user:', user.id);
-        const newProfile = {
-          id: user.id,
-          username: userData.username,
-          avatar_url: userData.avatar_url,
-          coins: 500,
-          cards: [],
-          custom_cards: [],
-          unlocked_achievements: [],
-          last_claimed_date: null,
-          claimed_days: [],
-          inventory_packs: [],
-          ads_disabled: false,
-          updated_at: new Date().toISOString(),
+        console.log('🚀 PROFILE GUARANTEE: Creating new profile for user:', user.id);
+        // Use guest data or defaults
+        finalState = {
+          coins: guestData?.coins ?? 500,
+          collection: guestData?.collection ?? [],
+          customCards: guestData?.customCards ?? [],
+          unlockedAchievements: guestData?.unlockedAchievements ?? [],
+          lastClaimedDate: guestData?.lastClaimedDate ?? null,
+          claimedDays: guestData?.claimedDays ?? [],
+          inventoryPacks: guestData?.inventoryPacks ?? [],
+          isPremium: guestData?.isPremium ?? false,
+        };
+      } else {
+        console.log('📥 CLOUD SYNC: Merging local guest data with cloud data');
+        // MERGE LOGIC: Take the best of both worlds
+        // For coins, take the max (don't lose progress)
+        // For arrays, take the union (don't lose cards/achievements)
+        
+        const mergeArrays = (arr1: any[], arr2: any[]) => {
+          const set = new Set([...(arr1 || []), ...(arr2 || [])]);
+          return Array.from(set);
         };
 
-        const { error: upsertError } = await supabase!.from('profiles').upsert(newProfile);
-        
-        if (upsertError) {
-          console.error('❌ SECOND NET: Failed to create profile:', upsertError.message);
-        }
+        // Special merge for inventory packs (combine counts)
+        const mergePacks = (packs1: any[], packs2: any[]) => {
+          const map = new Map();
+          [...(packs1 || []), ...(packs2 || [])].forEach(p => {
+            if (map.has(p.id)) {
+              map.get(p.id).count += (p.count || 1);
+            } else {
+              map.set(p.id, { ...p, count: p.count || 1 });
+            }
+          });
+          return Array.from(map.values());
+        };
 
-        setState({
-          ...newProfile,
-          user: userData,
-          collection: [],
-          customCards: [],
-          unlockedAchievements: [],
-          lastClaimedDate: null,
-          claimedDays: [],
-          inventoryPacks: [],
-          isPremium: false,
-          currentView: stateRef.current.currentView
-        });
-      } 
-      // 3. Cloud is Source of Truth: Load from Cloud
-      else {
-        console.log('📥 CLOUD SYNC: Loading profile from Supabase');
-        setState({
-          user: {
-            ...userData,
-            username: cloudProfile.username || userData.username,
-            avatar_url: cloudProfile.avatar_url || userData.avatar_url,
-          },
-          coins: cloudProfile.coins ?? 500,
-          collection: cloudProfile.cards || [],
-          customCards: cloudProfile.custom_cards || [],
-          unlockedAchievements: cloudProfile.unlocked_achievements || [],
-          lastClaimedDate: cloudProfile.last_claimed_date || null,
-          claimedDays: cloudProfile.claimed_days || [],
-          inventoryPacks: cloudProfile.inventory_packs || [],
-          isPremium: cloudProfile.ads_disabled || false,
-          currentView: stateRef.current.currentView
-        });
+        finalState = {
+          coins: Math.max(cloudProfile.coins ?? 0, guestData?.coins ?? 0),
+          collection: mergeArrays(cloudProfile.cards, guestData?.collection),
+          customCards: mergeArrays(cloudProfile.custom_cards, guestData?.customCards),
+          unlockedAchievements: mergeArrays(cloudProfile.unlocked_achievements, guestData?.unlockedAchievements),
+          lastClaimedDate: cloudProfile.last_claimed_date || guestData?.lastClaimedDate,
+          claimedDays: mergeArrays(cloudProfile.claimed_days, guestData?.claimedDays),
+          inventoryPacks: mergePacks(cloudProfile.inventory_packs, guestData?.inventoryPacks),
+          isPremium: cloudProfile.ads_disabled || guestData?.isPremium || false,
+        };
       }
+
+      // 3. Push the definitive state to Supabase (UPSERT)
+      const { error: upsertError } = await supabase!.from('profiles').upsert({
+        id: user.id,
+        username: userData.username,
+        avatar_url: userData.avatar_url,
+        coins: finalState.coins,
+        cards: finalState.collection,
+        custom_cards: finalState.customCards,
+        unlocked_achievements: finalState.unlockedAchievements,
+        last_claimed_date: finalState.lastClaimedDate,
+        claimed_days: finalState.claimedDays,
+        inventory_packs: finalState.inventoryPacks,
+        ads_disabled: finalState.isPremium,
+        updated_at: new Date().toISOString(),
+      });
+
+      if (upsertError) {
+        console.error('❌ SYNC ERROR: Failed to push definitive state:', upsertError.message);
+      } else {
+        console.log('✅ SYNC SUCCESS: Cloud is now source of truth. Clearing guest data.');
+        localStorage.removeItem('GUEST_PROGRESS');
+      }
+
+      // 4. Update Local State
+      setState({
+        ...stateRef.current,
+        ...finalState,
+        user: userData,
+      } as GameState);
 
       setIsInitialSyncDone(true);
 
-      // 6. Real-time Subscription (Only for updates)
+      // 5. Real-time Subscription
       if (!profileSubscriptionRef.current && supabase) {
         profileSubscriptionRef.current = supabase
           .channel(`profile_realtime_${user.id}`)
@@ -315,98 +355,117 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [forceSyncToSupabase]);
 
   const addCoins = useCallback((amount: number) => {
-    const newState = { ...stateRef.current, coins: stateRef.current.coins + amount };
-    setState(newState);
-    forceSyncToSupabase(newState);
+    setState(prev => {
+      const newState = { ...prev, coins: prev.coins + amount };
+      forceSyncToSupabase(newState);
+      return newState;
+    });
   }, [forceSyncToSupabase]);
 
   const spendCoins = useCallback((amount: number) => {
-    if (stateRef.current.coins >= amount) {
-      const newState = { ...stateRef.current, coins: stateRef.current.coins - amount };
-      setState(newState);
-      forceSyncToSupabase(newState);
-      return true;
-    }
-    return false;
+    let success = false;
+    setState(prev => {
+      if (prev.coins >= amount) {
+        success = true;
+        const newState = { ...prev, coins: prev.coins - amount };
+        forceSyncToSupabase(newState);
+        return newState;
+      }
+      return prev;
+    });
+    return success;
   }, [forceSyncToSupabase]);
 
   const addToCollection = useCallback((cardIds: string[]) => {
-    const newState = { ...stateRef.current, collection: [...stateRef.current.collection, ...cardIds] };
-    setState(newState);
-    forceSyncToSupabase(newState);
+    setState(prev => {
+      const newState = { ...prev, collection: [...prev.collection, ...cardIds] };
+      forceSyncToSupabase(newState);
+      return newState;
+    });
   }, [forceSyncToSupabase]);
 
   const addCustomCard = useCallback((card: Card) => {
-    const newState = { ...stateRef.current, customCards: [...stateRef.current.customCards, card] };
-    setState(newState);
-    forceSyncToSupabase(newState);
+    setState(prev => {
+      const newState = { ...prev, customCards: [...prev.customCards, card] };
+      forceSyncToSupabase(newState);
+      return newState;
+    });
   }, [forceSyncToSupabase]);
 
   const setCurrentView = useCallback((currentView: ViewType) => {
-    const newState = { ...stateRef.current, currentView };
-    setState(newState);
+    setState(prev => ({ ...prev, currentView }));
   }, []);
 
   const unlockAchievement = useCallback((id: string) => {
-    if (stateRef.current.unlockedAchievements.includes(id)) return;
-    const newState = { ...stateRef.current, unlockedAchievements: [...stateRef.current.unlockedAchievements, id] };
-    setState(newState);
-    forceSyncToSupabase(newState);
+    setState(prev => {
+      if (prev.unlockedAchievements.includes(id)) return prev;
+      const newState = { ...prev, unlockedAchievements: [...prev.unlockedAchievements, id] };
+      forceSyncToSupabase(newState);
+      return newState;
+    });
   }, [forceSyncToSupabase]);
 
   const claimReward = useCallback((day: number, amount: number) => {
-    const newState = {
-      ...stateRef.current,
-      coins: stateRef.current.coins + amount,
-      claimedDays: [...stateRef.current.claimedDays, day],
-      lastClaimedDate: new Date().toISOString().split('T')[0]
-    };
-    setState(newState);
-    forceSyncToSupabase(newState);
+    setState(prev => {
+      const newState = {
+        ...prev,
+        coins: prev.coins + amount,
+        claimedDays: [...prev.claimedDays, day],
+        lastClaimedDate: new Date().toISOString().split('T')[0]
+      };
+      forceSyncToSupabase(newState);
+      return newState;
+    });
   }, [forceSyncToSupabase]);
 
   const addPackToInventory = useCallback((pack: { id: string; type: string; name: string }) => {
-    const existing = stateRef.current.inventoryPacks.find(p => p.id === pack.id);
-    let newState;
-    if (existing) {
-      newState = {
-        ...stateRef.current,
-        inventoryPacks: stateRef.current.inventoryPacks.map(p => p.id === pack.id ? { ...p, count: p.count + 1 } : p)
-      };
-    } else {
-      newState = {
-        ...stateRef.current,
-        inventoryPacks: [...stateRef.current.inventoryPacks, { ...pack, count: 1 }]
-      };
-    }
-    setState(newState);
-    forceSyncToSupabase(newState);
+    setState(prev => {
+      const existing = prev.inventoryPacks.find(p => p.id === pack.id);
+      let newState;
+      if (existing) {
+        newState = {
+          ...prev,
+          inventoryPacks: prev.inventoryPacks.map(p => p.id === pack.id ? { ...p, count: p.count + 1 } : p)
+        };
+      } else {
+        newState = {
+          ...prev,
+          inventoryPacks: [...prev.inventoryPacks, { ...pack, count: 1 }]
+        };
+      }
+      forceSyncToSupabase(newState);
+      return newState;
+    });
   }, [forceSyncToSupabase]);
 
   const removePackFromInventory = useCallback((packId: string) => {
-    const existing = stateRef.current.inventoryPacks.find(p => p.id === packId);
-    if (!existing) return;
-    
-    let newState;
-    if (existing.count > 1) {
-      newState = {
-        ...stateRef.current,
-        inventoryPacks: stateRef.current.inventoryPacks.map(p => p.id === packId ? { ...p, count: p.count - 1 } : p)
-      };
-    } else {
-      newState = {
-        ...stateRef.current,
-        inventoryPacks: stateRef.current.inventoryPacks.filter(p => p.id !== packId)
-      };
-    }
-    setState(newState);
-    forceSyncToSupabase(newState);
+    setState(prev => {
+      const existing = prev.inventoryPacks.find(p => p.id === packId);
+      if (!existing) return prev;
+      
+      let newState;
+      if (existing.count > 1) {
+        newState = {
+          ...prev,
+          inventoryPacks: prev.inventoryPacks.map(p => p.id === packId ? { ...p, count: p.count - 1 } : p)
+        };
+      } else {
+        newState = {
+          ...prev,
+          inventoryPacks: prev.inventoryPacks.filter(p => p.id !== packId)
+        };
+      }
+      forceSyncToSupabase(newState);
+      return newState;
+    });
   }, [forceSyncToSupabase]);
 
   const setPremium = useCallback((isPremium: boolean) => {
-    const newState = { ...stateRef.current, isPremium };
-    setState(newState);
-    forceSyncToSupabase(newState);
+    setState(prev => {
+      const newState = { ...prev, isPremium };
+      forceSyncToSupabase(newState);
+      return newState;
+    });
   }, [forceSyncToSupabase]);
 
   const resetGame = useCallback(async () => {
