@@ -212,7 +212,6 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
   const [shownAchievementIds, setShownAchievementIds] = useState<Set<string>>(new Set());
 
   const { notify } = useNotification();
-  const { unlockAchievement, addCoins, coins, addPackToInventory } = useGame();
 
   React.useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -306,7 +305,6 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
           
           // Delay slightly to align with card impact
           setTimeout(() => {
-            unlockAchievement(ach.id);
             notify({
               id: ach.id,
               title: ach.title,
@@ -314,18 +312,11 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
               reward: ach.reward,
               icon: ach.icon
             });
-            
-            if (ach.rewardCoins) {
-              addCoins(ach.rewardCoins);
-            }
-            if (ach.packReward) {
-              addPackToInventory(ach.packReward);
-            }
           }, 400);
         });
       }
     }
-  }, [activeCardIndex, isRevealing, isPreloaded, newlyUnlockedAchievements, shownAchievementIds, notify, unlockAchievement, addCoins, addPackToInventory, cards]);
+  }, [activeCardIndex, isRevealing, isPreloaded, newlyUnlockedAchievements, shownAchievementIds, notify, cards]);
 
   const nextCard = React.useCallback(() => {
     if (activeCardIndex < totalCards - 1) {

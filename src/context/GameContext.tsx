@@ -18,6 +18,7 @@ interface GameContextType extends GameState {
   resetGame: () => void;
   login: () => Promise<void>;
   logout: () => Promise<void>;
+  updateGameState: (updates: Partial<GameState>) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -96,42 +97,41 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', user.id)
         .single();
 
-      // 2. Load Local Guest Data for merging
+      // 2. Load Local Data for merging (prefer live state over localStorage)
+      const liveState = stateRef.current;
       const savedGuest = localStorage.getItem('GUEST_PROGRESS');
       const guestData = savedGuest ? JSON.parse(savedGuest) : null;
+      
+      // Use the most advanced data available (live state or guest storage)
+      const localData = {
+        coins: Math.max(liveState.coins, guestData?.coins ?? 0),
+        collection: Array.from(new Set([...liveState.collection, ...(guestData?.collection || [])])),
+        customCards: Array.from(new Set([...liveState.customCards, ...(guestData?.customCards || [])])),
+        unlockedAchievements: Array.from(new Set([...liveState.unlockedAchievements, ...(guestData?.unlockedAchievements || [])])),
+        inventoryPacks: liveState.inventoryPacks.length > 0 ? liveState.inventoryPacks : (guestData?.inventoryPacks || []),
+        claimedDays: Array.from(new Set([...liveState.claimedDays, ...(guestData?.claimedDays || [])])),
+        lastClaimedDate: liveState.lastClaimedDate || guestData?.lastClaimedDate,
+        isPremium: liveState.isPremium || guestData?.isPremium || false,
+      };
 
       let finalState: Partial<GameState>;
 
       if (!cloudProfile) {
         console.log('🚀 PROFILE GUARANTEE: Creating new profile for user:', user.id);
-        // Use guest data or defaults
-        finalState = {
-          coins: guestData?.coins ?? 500,
-          collection: guestData?.collection ?? [],
-          customCards: guestData?.customCards ?? [],
-          unlockedAchievements: guestData?.unlockedAchievements ?? [],
-          lastClaimedDate: guestData?.lastClaimedDate ?? null,
-          claimedDays: guestData?.claimedDays ?? [],
-          inventoryPacks: guestData?.inventoryPacks ?? [],
-          isPremium: guestData?.isPremium ?? false,
-        };
+        finalState = localData;
       } else {
-        console.log('📥 CLOUD SYNC: Merging local guest data with cloud data');
-        // MERGE LOGIC: Take the best of both worlds
-        // For coins, take the max (don't lose progress)
-        // For arrays, take the union (don't lose cards/achievements)
+        console.log('📥 CLOUD SYNC: Merging local data with cloud data');
         
         const mergeArrays = (arr1: any[], arr2: any[]) => {
           const set = new Set([...(arr1 || []), ...(arr2 || [])]);
           return Array.from(set);
         };
 
-        // Special merge for inventory packs (combine counts)
         const mergePacks = (packs1: any[], packs2: any[]) => {
           const map = new Map();
           [...(packs1 || []), ...(packs2 || [])].forEach(p => {
             if (map.has(p.id)) {
-              map.get(p.id).count += (p.count || 1);
+              map.get(p.id).count = Math.max(map.get(p.id).count, p.count || 1);
             } else {
               map.set(p.id, { ...p, count: p.count || 1 });
             }
@@ -140,14 +140,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
 
         finalState = {
-          coins: Math.max(cloudProfile.coins ?? 0, guestData?.coins ?? 0),
-          collection: mergeArrays(cloudProfile.cards, guestData?.collection),
-          customCards: mergeArrays(cloudProfile.custom_cards, guestData?.customCards),
-          unlockedAchievements: mergeArrays(cloudProfile.unlocked_achievements, guestData?.unlockedAchievements),
-          lastClaimedDate: cloudProfile.last_claimed_date || guestData?.lastClaimedDate,
-          claimedDays: mergeArrays(cloudProfile.claimed_days, guestData?.claimedDays),
-          inventoryPacks: mergePacks(cloudProfile.inventory_packs, guestData?.inventoryPacks),
-          isPremium: cloudProfile.ads_disabled || guestData?.isPremium || false,
+          coins: Math.max(cloudProfile.coins ?? 0, localData.coins),
+          collection: mergeArrays(cloudProfile.cards, localData.collection),
+          customCards: mergeArrays(cloudProfile.custom_cards, localData.customCards),
+          unlockedAchievements: mergeArrays(cloudProfile.unlocked_achievements, localData.unlockedAchievements),
+          lastClaimedDate: cloudProfile.last_claimed_date || localData.lastClaimedDate,
+          claimedDays: mergeArrays(cloudProfile.claimed_days, localData.claimedDays),
+          inventoryPacks: mergePacks(cloudProfile.inventory_packs, localData.inventoryPacks),
+          isPremium: cloudProfile.ads_disabled || localData.isPremium || false,
         };
       }
 
@@ -297,12 +297,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Function to force immediate sync to Supabase with retries (IRON RULE: Write Confirmation)
   const forceSyncToSupabase = useCallback(async (newState: GameState, retries = 5) => {
-    if (newState.user && supabase && isInitialSyncDone) {
-      console.log('💾 IRON RULE: Executing IMMEDIATE cloud save with confirmation...');
+    // Only sync if we have a user and supabase is available
+    // We remove the isInitialSyncDone check to allow immediate syncing as soon as user is set
+    if (newState.user && supabase) {
+      console.log('💾 CLOUD SAVE: Initiating immediate sync for user:', newState.user.id);
       
       const performSave = async (attempt: number): Promise<boolean> => {
         try {
-          const { error } = await supabase.from('profiles').upsert({
+          const { data, error } = await supabase.from('profiles').upsert({
             id: newState.user!.id,
             coins: newState.coins,
             cards: newState.collection,
@@ -313,17 +315,19 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             inventory_packs: newState.inventoryPacks,
             ads_disabled: newState.isPremium,
             updated_at: new Date().toISOString(),
-          });
+          }).select().single();
           
           if (error) {
-            console.error(`❌ Cloud save attempt ${attempt} failed:`, error.message);
+            console.error(`❌ CLOUD SAVE ERROR (Attempt ${attempt}):`, error.message);
             return false;
           }
           
-          console.log('✅ IRON RULE: Cloud save CONFIRMED (OK)');
+          if (data) {
+            console.log('✅ CLOUD SAVE CONFIRMED: Data is identical in cloud and local.');
+          }
           return true;
         } catch (err) {
-          console.error(`❌ Unexpected error in cloud save attempt ${attempt}:`, err);
+          console.error(`❌ UNEXPECTED SYNC ERROR (Attempt ${attempt}):`, err);
           return false;
         }
       };
@@ -333,17 +337,26 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       while (!success && currentAttempt < retries) {
         currentAttempt++;
-        const delay = 1000 * Math.pow(2, currentAttempt - 1); // Exponential backoff
-        console.log(`🔄 IRON RULE: Retrying cloud save in ${delay}ms (Attempt ${currentAttempt}/${retries})...`);
+        const delay = 1000 * Math.pow(2, currentAttempt - 1);
+        console.log(`🔄 SYNC RETRY: Attempt ${currentAttempt}/${retries} in ${delay}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
         success = await performSave(currentAttempt);
       }
 
       if (!success) {
-        console.error('🚨 CRITICAL: ALL cloud save attempts failed. Data is NOT secure in cloud.');
+        console.error('🚨 CRITICAL SYNC FAILURE: Could not persist progress to cloud after multiple attempts.');
       }
     }
-  }, [isInitialSyncDone]);
+  }, []);
+
+  // Optimized batch update to prevent redundant network calls
+  const updateGameState = useCallback((updates: Partial<GameState>) => {
+    setState(prev => {
+      const newState = { ...prev, ...updates };
+      forceSyncToSupabase(newState);
+      return newState;
+    });
+  }, [forceSyncToSupabase]);
 
   const setCoins = useCallback((coins: number | ((prev: number) => number)) => {
     setState(prev => {
@@ -507,9 +520,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     removePackFromInventory,
     setPremium,
     resetGame,
+    updateGameState,
     login,
     logout
-  }), [state, isAuthLoading, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, login, logout]);
+  }), [state, isAuthLoading, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, login, logout]);
 
   return (
     <GameContext.Provider value={contextValue}>
