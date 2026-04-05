@@ -21,7 +21,7 @@ import Header from './components/Header';
 import StaticAd from './components/StaticAd';
 
 function AppContent() {
-  const { currentView, setCurrentView, isPremium, isAuthLoading, isInitialSyncDone } = useGame();
+  const { currentView, setCurrentView, isPremium, isAuthLoading, isInitialSyncDone, isOffline } = useGame();
 
   // Adsterra Script Logic - ONLY load if NOT premium
   useEffect(() => {
@@ -94,7 +94,7 @@ function AppContent() {
     }
   };
 
-  if (isAuthLoading || !isInitialSyncDone) {
+  if (isAuthLoading) {
     return (
       <div className="h-[100dvh] w-full bg-black flex flex-col items-center justify-center gap-6">
         <div className="relative">
@@ -105,7 +105,7 @@ function AppContent() {
         </div>
         <div className="flex flex-col items-center gap-2">
           <p className="text-xs font-black uppercase tracking-[0.3em] text-white animate-pulse">
-            {isAuthLoading ? 'Checking Session...' : 'Syncing Progress...'}
+            Checking Session...
           </p>
           <div className="w-32 h-1 bg-zinc-900 rounded-full overflow-hidden">
             <motion.div 
@@ -122,6 +122,21 @@ function AppContent() {
 
   return (
     <div className="h-[100dvh] w-full bg-black text-white flex flex-col overflow-hidden font-sans selection:bg-amber-500 selection:text-black">
+      {/* Offline Warning */}
+      <AnimatePresence>
+        {isOffline && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="bg-amber-500 text-black text-[10px] font-black uppercase tracking-widest py-1.5 text-center z-[6000] flex items-center justify-center gap-2"
+          >
+            <Zap size={12} className="animate-pulse" />
+            Offline Mode: Progress will sync when connection returns
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header Area - Fixed at top to prevent layout shifts */}
       <div className="fixed top-0 left-0 right-0 z-[5000] flex flex-col bg-black">
         {/* Top Ad Area */}
