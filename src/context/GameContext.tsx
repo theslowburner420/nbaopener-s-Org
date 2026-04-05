@@ -406,117 +406,98 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const addCoins = useCallback((amount: number) => {
-    setState(prev => {
-      const newState = { ...prev, coins: prev.coins + amount };
-      forceSyncToSupabase(newState);
-      return newState;
-    });
+    const newState = { ...stateRef.current, coins: stateRef.current.coins + amount };
+    setState(newState);
+    forceSyncToSupabase(newState);
   }, [forceSyncToSupabase]);
 
   const spendCoins = useCallback((amount: number) => {
-    let success = false;
-    setState(prev => {
-      if (prev.coins >= amount) {
-        success = true;
-        const newState = { ...prev, coins: prev.coins - amount };
-        // Force immediate sync when spending coins (usually for packs)
-        forceSyncToSupabase(newState);
-        return newState;
-      }
-      return prev;
-    });
-    return success;
+    if (stateRef.current.coins >= amount) {
+      const newState = { ...stateRef.current, coins: stateRef.current.coins - amount };
+      setState(newState);
+      forceSyncToSupabase(newState);
+      return true;
+    }
+    return false;
   }, [forceSyncToSupabase]);
 
   const addToCollection = useCallback((cardIds: string[]) => {
-    setState(prev => {
-      const newState = { ...prev, collection: [...prev.collection, ...cardIds] };
-      // Force immediate sync when adding to collection (pack opening)
-      forceSyncToSupabase(newState);
-      return newState;
-    });
+    const newState = { ...stateRef.current, collection: [...stateRef.current.collection, ...cardIds] };
+    setState(newState);
+    forceSyncToSupabase(newState);
   }, [forceSyncToSupabase]);
 
   const addCustomCard = useCallback((card: Card) => {
-    setState(prev => {
-      const newState = { ...prev, customCards: [...prev.customCards, card] };
-      forceSyncToSupabase(newState);
-      return newState;
-    });
+    const newState = { ...stateRef.current, customCards: [...stateRef.current.customCards, card] };
+    setState(newState);
+    forceSyncToSupabase(newState);
   }, [forceSyncToSupabase]);
 
-  const setCurrentView = useCallback((currentView: ViewType) => setState(prev => ({ ...prev, currentView })), []);
+  const setCurrentView = useCallback((currentView: ViewType) => {
+    const newState = { ...stateRef.current, currentView };
+    setState(newState);
+  }, []);
 
   const unlockAchievement = useCallback((id: string) => {
-    setState(prev => {
-      const newState = { ...prev, unlockedAchievements: [...prev.unlockedAchievements, id] };
-      forceSyncToSupabase(newState);
-      return newState;
-    });
+    if (stateRef.current.unlockedAchievements.includes(id)) return;
+    const newState = { ...stateRef.current, unlockedAchievements: [...stateRef.current.unlockedAchievements, id] };
+    setState(newState);
+    forceSyncToSupabase(newState);
   }, [forceSyncToSupabase]);
 
   const claimReward = useCallback((day: number, amount: number) => {
-    setState(prev => {
-      const newState = {
-        ...prev,
-        coins: prev.coins + amount,
-        claimedDays: [...prev.claimedDays, day],
-        lastClaimedDate: new Date().toISOString().split('T')[0]
-      };
-      forceSyncToSupabase(newState);
-      return newState;
-    });
+    const newState = {
+      ...stateRef.current,
+      coins: stateRef.current.coins + amount,
+      claimedDays: [...stateRef.current.claimedDays, day],
+      lastClaimedDate: new Date().toISOString().split('T')[0]
+    };
+    setState(newState);
+    forceSyncToSupabase(newState);
   }, [forceSyncToSupabase]);
 
   const addPackToInventory = useCallback((pack: { id: string; type: string; name: string }) => {
-    setState(prev => {
-      const existing = prev.inventoryPacks.find(p => p.id === pack.id);
-      let newState;
-      if (existing) {
-        newState = {
-          ...prev,
-          inventoryPacks: prev.inventoryPacks.map(p => p.id === pack.id ? { ...p, count: p.count + 1 } : p)
-        };
-      } else {
-        newState = {
-          ...prev,
-          inventoryPacks: [...prev.inventoryPacks, { ...pack, count: 1 }]
-        };
-      }
-      forceSyncToSupabase(newState);
-      return newState;
-    });
+    const existing = stateRef.current.inventoryPacks.find(p => p.id === pack.id);
+    let newState;
+    if (existing) {
+      newState = {
+        ...stateRef.current,
+        inventoryPacks: stateRef.current.inventoryPacks.map(p => p.id === pack.id ? { ...p, count: p.count + 1 } : p)
+      };
+    } else {
+      newState = {
+        ...stateRef.current,
+        inventoryPacks: [...stateRef.current.inventoryPacks, { ...pack, count: 1 }]
+      };
+    }
+    setState(newState);
+    forceSyncToSupabase(newState);
   }, [forceSyncToSupabase]);
 
   const removePackFromInventory = useCallback((packId: string) => {
-    setState(prev => {
-      const existing = prev.inventoryPacks.find(p => p.id === packId);
-      if (!existing) return prev;
-      
-      let newState;
-      if (existing.count > 1) {
-        newState = {
-          ...prev,
-          inventoryPacks: prev.inventoryPacks.map(p => p.id === packId ? { ...p, count: p.count - 1 } : p)
-        };
-      } else {
-        newState = {
-          ...prev,
-          inventoryPacks: prev.inventoryPacks.filter(p => p.id !== packId)
-        };
-      }
-      // Force immediate sync when removing pack (opening it)
-      forceSyncToSupabase(newState);
-      return newState;
-    });
+    const existing = stateRef.current.inventoryPacks.find(p => p.id === packId);
+    if (!existing) return;
+    
+    let newState;
+    if (existing.count > 1) {
+      newState = {
+        ...stateRef.current,
+        inventoryPacks: stateRef.current.inventoryPacks.map(p => p.id === packId ? { ...p, count: p.count - 1 } : p)
+      };
+    } else {
+      newState = {
+        ...stateRef.current,
+        inventoryPacks: stateRef.current.inventoryPacks.filter(p => p.id !== packId)
+      };
+    }
+    setState(newState);
+    forceSyncToSupabase(newState);
   }, [forceSyncToSupabase]);
 
   const setPremium = useCallback((isPremium: boolean) => {
-    setState(prev => {
-      const newState = { ...prev, isPremium };
-      forceSyncToSupabase(newState);
-      return newState;
-    });
+    const newState = { ...stateRef.current, isPremium };
+    setState(newState);
+    forceSyncToSupabase(newState);
   }, [forceSyncToSupabase]);
 
   const resetGame = useCallback(async () => {
