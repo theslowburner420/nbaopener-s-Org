@@ -98,7 +98,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', user.id)
         .single();
 
-      const localState = stateRef.current;
+      // 1.5 Recover user-specific local state if it exists (Safety net for refresh)
+      const localSaved = localStorage.getItem(`nba-opener-state-${user.id}`);
+      let localState = stateRef.current;
+      if (localSaved) {
+        try {
+          const parsed = JSON.parse(localSaved);
+          // If local state is for the same user and has data, use it for comparison
+          localState = { ...localState, ...parsed };
+        } catch (e) {
+          console.error('Failed to parse user-specific local state', e);
+        }
+      }
       
       // 2. Determine Priority (Inverse Priority Rule)
       // Cloud is empty if it doesn't exist or has 0 coins and no cards
@@ -108,10 +119,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         (!cloudProfile.inventory_packs || cloudProfile.inventory_packs.length === 0)
       );
 
-      // Local is "better" if it has more coins or more cards or more packs
+      // Local is "better" if it has more coins or more cards or more packs or more achievements
       const isLocalBetter = localState.coins > (cloudProfile?.coins || 0) || 
                            localState.collection.length > (cloudProfile?.cards?.length || 0) ||
-                           localState.inventoryPacks.length > (cloudProfile?.inventory_packs?.length || 0);
+                           localState.inventoryPacks.length > (cloudProfile?.inventory_packs?.length || 0) ||
+                           localState.unlockedAchievements.length > (cloudProfile?.unlocked_achievements?.length || 0);
 
       // 3. Mandatory Initial Sync / Upload if Local > Cloud
       if (isCloudEmpty || isLocalBetter) {
@@ -137,10 +149,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (upsertError) {
           console.error('❌ CRITICAL: Initial cloud upload failed:', upsertError.message);
           // If upload fails, we still set the user but keep local state
-          setState(prev => ({ ...prev, user: userData }));
+          setState({ ...localState, user: userData });
         } else {
           console.log('✅ Initial cloud upload SUCCESSFUL');
-          setState(prev => ({ ...prev, user: userData }));
+          setState({ ...localState, user: userData });
         }
       } 
       // 4. Download if Cloud > Local
@@ -158,16 +170,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           customCards: cloudProfile.custom_cards || [],
           unlockedAchievements: cloudProfile.unlocked_achievements || [],
           lastClaimedDate: cloudProfile.last_claimed_date || null,
-          claimedDays: cloudProfile.claimed_days || [],
+          claimed_days: cloudProfile.claimed_days || [],
           inventoryPacks: cloudProfile.inventory_packs || [],
           isPremium: cloudProfile.ads_disabled || false,
           currentView: localState.currentView // Keep current view
         });
       }
 
-      // 5. Eliminate Ghost Guest Mode
-      console.log('👻 IRON RULE: Eliminating Ghost Guest Mode. Clearing localStorage.');
+      // 5. Eliminate Ghost Guest Mode - But keep a user-specific backup
+      console.log('👻 IRON RULE: Eliminating Ghost Guest Mode. Moving to user-specific storage.');
       localStorage.removeItem('nba-opener-state');
+      localStorage.setItem(`nba-opener-state-${user.id}`, JSON.stringify(localState));
       setIsInitialSyncDone(true);
 
       // 6. Real-time Subscription (Only for updates)
@@ -300,12 +313,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   ]);
 
   useEffect(() => {
-    // Only persist to localStorage if NOT logged in (Guest mode)
+    // Persist to localStorage
     if (!state.user) {
+      // Guest mode
       localStorage.setItem('nba-opener-state', JSON.stringify(state));
     } else {
-      // If logged in, we can clear the local guest state to prevent conflicts
-      // or just stop updating it.
+      // Logged in mode - use user-specific key for safety on refresh
+      localStorage.setItem(`nba-opener-state-${state.user.id}`, JSON.stringify(state));
     }
   }, [state]);
 
@@ -509,8 +523,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const confirmReset = window.confirm("Are you sure you want to reset all progress? This cannot be undone.");
     if (!confirmReset) return;
 
-    setState(prev => ({
-      ...prev,
+    const newState = {
+      ...stateRef.current,
       coins: 1000,
       collection: [],
       customCards: [],
@@ -519,11 +533,19 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       claimedDays: [],
       inventoryPacks: [],
       isPremium: false,
-    }));
+    };
 
-    // If logged in, the persistence useEffect will handle the sync to Supabase
-    // but we can also force a save here if needed.
-  }, []);
+    setState(newState);
+
+    // If logged in, force immediate sync
+    if (newState.user) {
+      forceSyncToSupabase(newState);
+      // Also update user-specific local storage
+      localStorage.setItem(`nba-opener-state-${newState.user.id}`, JSON.stringify(newState));
+    } else {
+      localStorage.setItem('nba-opener-state', JSON.stringify(newState));
+    }
+  }, [forceSyncToSupabase]);
 
   const contextValue = useMemo(() => ({
     ...state,

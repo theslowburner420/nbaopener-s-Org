@@ -133,7 +133,9 @@ export default function ShopView() {
 
   return (
     <PayPalScriptProvider options={{ 
-      "client-id": paypalClientId
+      "client-id": paypalClientId,
+      "components": "buttons",
+      "currency": "USD"
     }}>
       <div className="h-full w-full flex flex-col bg-black overflow-hidden relative">
         {/* Background Ambience */}
@@ -179,7 +181,7 @@ export default function ShopView() {
                     style={{ 
                       layout: "vertical", 
                       height: 45, 
-                      color: 'blue', 
+                      color: 'black', 
                       shape: 'rect', 
                       label: 'pay',
                       tagline: false
@@ -289,15 +291,15 @@ export default function ShopView() {
                     </div>
 
                     <div className="mt-1">
-                      <PayPalButtons
-                        style={{ 
-                          layout: "vertical", 
-                          height: 45, 
-                          color: 'gold', 
-                          shape: 'rect', 
-                          label: 'pay',
-                          tagline: false
-                        }}
+                    <PayPalButtons
+                      style={{ 
+                        layout: "vertical", 
+                        height: 45, 
+                        color: 'gold', 
+                        shape: 'rect', 
+                        label: 'pay',
+                        tagline: false
+                      }}
                         createOrder={(data, actions) => {
                           return actions.order.create({
                             intent: "CAPTURE",
