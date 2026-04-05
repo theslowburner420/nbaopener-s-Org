@@ -87,7 +87,7 @@ const TEAM_CARDS_MAP = ALL_CARDS.reduce((acc, card) => {
 const ALL_TEAMS = Object.keys(TEAM_CARDS_MAP);
 
 export function useEngine() {
-  const { collection, coins, updateGameState, unlockedAchievements } = useGame();
+  const { collection, coins, updateGameState, unlockedAchievements, inventoryPacks } = useGame();
   const { notify } = useNotification();
 
   const generateCard = (packType: PackType): Card => {
@@ -240,7 +240,7 @@ export function useEngine() {
     const { newlyUnlocked, bonusCoins, newInventoryPacks, newlyUnlockedIds } = checkAchievements(finalCollection, currentCoins, unlockedAchievements, newIds, false);
 
     // Corrected inventory merge
-    const updatedInventory = [...useGame().inventoryPacks]; // Get current inventory
+    const updatedInventory = [...inventoryPacks]; // Get current inventory
     newInventoryPacks.forEach(pack => {
       const existing = updatedInventory.find(p => p.id === pack.id);
       if (existing) {
@@ -277,7 +277,7 @@ export function useEngine() {
     const { newlyUnlocked, bonusCoins, newInventoryPacks, newlyUnlockedIds } = checkAchievements(finalCollection, coins, unlockedAchievements, newIds, false);
 
     // Handle inventory removal and additions
-    const currentInventory = [...useGame().inventoryPacks];
+    const currentInventory = [...inventoryPacks];
     const packIndex = currentInventory.findIndex(p => p.id === packId);
     if (packIndex !== -1) {
       if (currentInventory[packIndex].count > 1) {
