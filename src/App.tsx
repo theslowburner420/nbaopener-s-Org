@@ -21,7 +21,7 @@ import Header from './components/Header';
 import StaticAd from './components/StaticAd';
 
 function AppContent() {
-  const { currentView, setCurrentView, isPremium, isAuthLoading } = useGame();
+  const { currentView, setCurrentView, isPremium, isAuthLoading, isInitialSyncDone } = useGame();
 
   // Adsterra Script Logic - ONLY load if NOT premium
   useEffect(() => {
@@ -94,7 +94,7 @@ function AppContent() {
     }
   };
 
-  if (isAuthLoading) {
+  if (isAuthLoading || !isInitialSyncDone) {
     return (
       <div className="h-[100dvh] w-full bg-black flex flex-col items-center justify-center gap-6">
         <div className="relative">
@@ -104,7 +104,9 @@ function AppContent() {
           <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-zinc-900 rounded-full blur-sm animate-pulse" />
         </div>
         <div className="flex flex-col items-center gap-2">
-          <p className="text-xs font-black uppercase tracking-[0.3em] text-white animate-pulse">Loading Hoops Collector</p>
+          <p className="text-xs font-black uppercase tracking-[0.3em] text-white animate-pulse">
+            {isAuthLoading ? 'Checking Session...' : 'Syncing Progress...'}
+          </p>
           <div className="w-32 h-1 bg-zinc-900 rounded-full overflow-hidden">
             <motion.div 
               className="h-full bg-amber-500"

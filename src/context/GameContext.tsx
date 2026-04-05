@@ -51,7 +51,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isInitialSyncDone, setIsInitialSyncDone] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const stateRef = useRef(state);
+  const lastSyncedStateRef = useRef<string>('');
+  const lastReceivedCloudStateRef = useRef<string>('');
   const profileSubscriptionRef = useRef<any>(null);
+  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     stateRef.current = state;
@@ -94,11 +97,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       // 1. Fetch Cloud Data
-      const { data: cloudProfile, error } = await supabase!
+      const { data: cloudProfile, error: fetchError } = await supabase!
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
+
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        throw fetchError;
+      }
 
       // 2. Load Local Data for merging (prefer live state over localStorage)
       const liveState = stateRef.current;
@@ -120,11 +127,20 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let finalState: Partial<GameState>;
 
       if (!cloudProfile) {
-        console.log('🚀 PROFILE GUARANTEE: Creating new profile for user:', user.id);
+        console.log('🚀 ATOMIC REGISTRATION: Creating new profile for user:', user.id);
         finalState = localData;
       } else {
         console.log('📥 CLOUD SYNC: Prioritizing cloud data');
         
+        // Update the last received cloud state to prevent loops
+        lastReceivedCloudStateRef.current = JSON.stringify({
+          coins: cloudProfile.coins,
+          collection: cloudProfile.cards,
+          inventoryPacks: cloudProfile.inventory_packs,
+          unlockedAchievements: cloudProfile.unlocked_achievements,
+          isPremium: cloudProfile.ads_disabled,
+        });
+
         // If cloud profile exists, we use it as the definitive state.
         // We only merge local guest progress if it's the VERY FIRST time the user logs in
         // and they have significant progress locally (e.g. more coins or cards).
@@ -176,7 +192,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
-      // 3. Push the definitive state to Supabase (UPSERT)
+      // 3. Push the definitive state to Supabase (UPSERT) - Ensure this is atomic
       const { error: upsertError } = await supabase!.from('profiles').upsert({
         id: user.id,
         username: userData.username,
@@ -193,11 +209,23 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (upsertError) {
-        console.error('❌ SYNC ERROR: Failed to push definitive state:', upsertError.message);
-      } else {
-        console.log('✅ SYNC SUCCESS: Cloud is now source of truth. Clearing guest data.');
-        localStorage.removeItem('GUEST_PROGRESS');
+        throw new Error(`Failed to push definitive state: ${upsertError.message}`);
       }
+
+      console.log('✅ SYNC SUCCESS: Cloud is now source of truth. Clearing guest data.');
+      localStorage.removeItem('GUEST_PROGRESS');
+      
+      // Update last synced state ref to avoid immediate re-sync
+      lastSyncedStateRef.current = JSON.stringify({
+        coins: finalState.coins,
+        collection: finalState.collection,
+        customCards: finalState.customCards,
+        unlockedAchievements: finalState.unlockedAchievements,
+        lastClaimedDate: finalState.lastClaimedDate,
+        claimedDays: finalState.claimedDays,
+        inventoryPacks: finalState.inventoryPacks,
+        isPremium: finalState.isPremium,
+      });
 
       // 4. Update Local State
       setState({
@@ -208,7 +236,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setIsInitialSyncDone(true);
 
-      // 5. Real-time Subscription
+      // 5. Real-time Subscription with Loop Prevention
       if (!profileSubscriptionRef.current && supabase) {
         profileSubscriptionRef.current = supabase
           .channel(`profile_realtime_${user.id}`)
@@ -218,8 +246,24 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             table: 'profiles', 
             filter: `id=eq.${user.id}` 
           }, (payload) => {
-            console.log('🔔 Cloud update received via Real-time');
             const updated = payload.new as any;
+            
+            // Loop Prevention: Check if the received update is identical to what we just synced
+            const receivedString = JSON.stringify({
+              coins: updated.coins,
+              collection: updated.cards,
+              inventoryPacks: updated.inventory_packs,
+              unlockedAchievements: updated.unlocked_achievements,
+              isPremium: updated.ads_disabled,
+            });
+
+            if (receivedString === lastSyncedStateRef.current || receivedString === lastReceivedCloudStateRef.current) {
+              return;
+            }
+
+            console.log('🔔 Cloud update received via Real-time');
+            lastReceivedCloudStateRef.current = receivedString;
+            
             setState(prev => ({
               ...prev,
               coins: updated.coins ?? prev.coins,
@@ -322,112 +366,129 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Function to force immediate sync to Supabase with retries (IRON RULE: Write Confirmation)
   const forceSyncToSupabase = useCallback(async (newState: GameState, retries = 5) => {
-    if (newState.user && supabase) {
-      setIsSaving(true);
-      console.log('💾 CLOUD SAVE: Initiating immediate sync for user:', newState.user.id);
-      
-      const performSave = async (attempt: number): Promise<boolean> => {
-        try {
-          const { data, error } = await supabase.from('profiles').upsert({
-            id: newState.user!.id,
-            coins: newState.coins,
-            cards: newState.collection,
-            custom_cards: newState.customCards,
-            unlocked_achievements: newState.unlockedAchievements,
-            last_claimed_date: newState.lastClaimedDate,
-            claimed_days: newState.claimedDays,
-            inventory_packs: newState.inventoryPacks,
-            ads_disabled: newState.isPremium,
-            updated_at: new Date().toISOString(),
-          }).select().single();
-          
-          if (error) {
-            console.error(`❌ CLOUD SAVE ERROR (Attempt ${attempt}):`, error.message);
-            return false;
-          }
-          
-          return true;
-        } catch (err) {
-          console.error(`❌ UNEXPECTED SYNC ERROR (Attempt ${attempt}):`, err);
+    if (!newState.user || !supabase) return;
+
+    // Don't sync if the state is identical to the last synced state
+    const stateString = JSON.stringify({
+      coins: newState.coins,
+      collection: newState.collection,
+      customCards: newState.customCards,
+      unlockedAchievements: newState.unlockedAchievements,
+      lastClaimedDate: newState.lastClaimedDate,
+      claimedDays: newState.claimedDays,
+      inventoryPacks: newState.inventoryPacks,
+      isPremium: newState.isPremium,
+    });
+
+    if (stateString === lastSyncedStateRef.current) {
+      console.log('⏭️ SYNC SKIPPED: State is already up to date in cloud.');
+      return;
+    }
+
+    setIsSaving(true);
+    console.log('💾 CLOUD SAVE: Initiating immediate sync for user:', newState.user.id);
+    
+    const performSave = async (attempt: number): Promise<boolean> => {
+      try {
+        const { error } = await supabase!.from('profiles').upsert({
+          id: newState.user!.id,
+          coins: newState.coins,
+          cards: newState.collection,
+          custom_cards: newState.customCards,
+          unlocked_achievements: newState.unlockedAchievements,
+          last_claimed_date: newState.lastClaimedDate,
+          claimed_days: newState.claimedDays,
+          inventory_packs: newState.inventoryPacks,
+          ads_disabled: newState.isPremium,
+          updated_at: new Date().toISOString(),
+        });
+        
+        if (error) {
+          console.error(`❌ CLOUD SAVE ERROR (Attempt ${attempt}):`, error.message);
           return false;
         }
-      };
-
-      let success = await performSave(1);
-      let currentAttempt = 1;
-
-      while (!success && currentAttempt < retries) {
-        currentAttempt++;
-        const delay = 1000 * Math.pow(2, currentAttempt - 1);
-        console.log(`🔄 SYNC RETRY: Attempt ${currentAttempt}/${retries} in ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        success = await performSave(currentAttempt);
+        
+        lastSyncedStateRef.current = stateString;
+        return true;
+      } catch (err) {
+        console.error(`❌ UNEXPECTED SYNC ERROR (Attempt ${attempt}):`, err);
+        return false;
       }
+    };
 
-      if (!success) {
-        console.error('🚨 CRITICAL SYNC FAILURE: Could not persist progress to cloud after multiple attempts.');
-      }
-      
-      // Artificial delay to ensure the user sees the "Saving" indicator if it's too fast
-      setTimeout(() => setIsSaving(false), 800);
+    let success = await performSave(1);
+    let currentAttempt = 1;
+
+    while (!success && currentAttempt < retries) {
+      currentAttempt++;
+      const delay = 1000 * Math.pow(2, currentAttempt - 1);
+      console.log(`🔄 SYNC RETRY: Attempt ${currentAttempt}/${retries} in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      success = await performSave(currentAttempt);
     }
+
+    if (!success) {
+      console.error('🚨 CRITICAL SYNC FAILURE: Could not persist progress to cloud after multiple attempts.');
+    }
+    
+    // Artificial delay to ensure the user sees the "Saving" indicator if it's too fast
+    setTimeout(() => setIsSaving(false), 800);
   }, []);
+
+  // Debounced sync effect to handle rapid state changes (proactive saving)
+  useEffect(() => {
+    if (!state.user || !isInitialSyncDone) return;
+
+    if (syncTimeoutRef.current) {
+      clearTimeout(syncTimeoutRef.current);
+    }
+
+    syncTimeoutRef.current = setTimeout(() => {
+      forceSyncToSupabase(state);
+    }, 2000); // 2 second debounce for automatic sync
+
+    return () => {
+      if (syncTimeoutRef.current) {
+        clearTimeout(syncTimeoutRef.current);
+      }
+    };
+  }, [state, isInitialSyncDone, forceSyncToSupabase]);
 
   // Optimized batch update to prevent redundant network calls
   const updateGameState = useCallback((updates: Partial<GameState>) => {
-    setState(prev => {
-      const newState = { ...prev, ...updates };
-      forceSyncToSupabase(newState);
-      return newState;
-    });
-  }, [forceSyncToSupabase]);
+    setState(prev => ({ ...prev, ...updates }));
+  }, []);
 
   const setCoins = useCallback((coins: number | ((prev: number) => number)) => {
     setState(prev => {
       const newCoins = typeof coins === 'function' ? coins(prev.coins) : coins;
-      const newState = { ...prev, coins: newCoins };
-      forceSyncToSupabase(newState);
-      return newState;
+      return { ...prev, coins: newCoins };
     });
-  }, [forceSyncToSupabase]);
+  }, []);
 
   const addCoins = useCallback((amount: number) => {
-    setState(prev => {
-      const newState = { ...prev, coins: prev.coins + amount };
-      forceSyncToSupabase(newState);
-      return newState;
-    });
-  }, [forceSyncToSupabase]);
+    setState(prev => ({ ...prev, coins: prev.coins + amount }));
+  }, []);
 
   const spendCoins = useCallback((amount: number) => {
     let success = false;
     setState(prev => {
       if (prev.coins >= amount) {
         success = true;
-        const newState = { ...prev, coins: prev.coins - amount };
-        forceSyncToSupabase(newState);
-        return newState;
+        return { ...prev, coins: prev.coins - amount };
       }
       return prev;
     });
     return success;
-  }, [forceSyncToSupabase]);
+  }, []);
 
   const addToCollection = useCallback((cardIds: string[]) => {
-    setState(prev => {
-      const newState = { ...prev, collection: [...prev.collection, ...cardIds] };
-      forceSyncToSupabase(newState);
-      return newState;
-    });
-  }, [forceSyncToSupabase]);
+    setState(prev => ({ ...prev, collection: [...prev.collection, ...cardIds] }));
+  }, []);
 
   const addCustomCard = useCallback((card: Card) => {
-    setState(prev => {
-      const newState = { ...prev, customCards: [...prev.customCards, card] };
-      forceSyncToSupabase(newState);
-      return newState;
-    });
-  }, [forceSyncToSupabase]);
+    setState(prev => ({ ...prev, customCards: [...prev.customCards, card] }));
+  }, []);
 
   const setCurrentView = useCallback((currentView: ViewType) => {
     setState(prev => ({ ...prev, currentView }));
@@ -436,74 +497,58 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const unlockAchievement = useCallback((id: string) => {
     setState(prev => {
       if (prev.unlockedAchievements.includes(id)) return prev;
-      const newState = { ...prev, unlockedAchievements: [...prev.unlockedAchievements, id] };
-      forceSyncToSupabase(newState);
-      return newState;
+      return { ...prev, unlockedAchievements: [...prev.unlockedAchievements, id] };
     });
-  }, [forceSyncToSupabase]);
+  }, []);
 
   const claimReward = useCallback((day: number, amount: number) => {
-    setState(prev => {
-      const newState = {
-        ...prev,
-        coins: prev.coins + amount,
-        claimedDays: [...prev.claimedDays, day],
-        lastClaimedDate: new Date().toISOString().split('T')[0]
-      };
-      forceSyncToSupabase(newState);
-      return newState;
-    });
-  }, [forceSyncToSupabase]);
+    setState(prev => ({
+      ...prev,
+      coins: prev.coins + amount,
+      claimedDays: [...prev.claimedDays, day],
+      lastClaimedDate: new Date().toISOString().split('T')[0]
+    }));
+  }, []);
 
   const addPackToInventory = useCallback((pack: { id: string; type: string; name: string }) => {
     setState(prev => {
       const existing = prev.inventoryPacks.find(p => p.id === pack.id);
-      let newState;
       if (existing) {
-        newState = {
+        return {
           ...prev,
           inventoryPacks: prev.inventoryPacks.map(p => p.id === pack.id ? { ...p, count: p.count + 1 } : p)
         };
       } else {
-        newState = {
+        return {
           ...prev,
           inventoryPacks: [...prev.inventoryPacks, { ...pack, count: 1 }]
         };
       }
-      forceSyncToSupabase(newState);
-      return newState;
     });
-  }, [forceSyncToSupabase]);
+  }, []);
 
   const removePackFromInventory = useCallback((packId: string) => {
     setState(prev => {
       const existing = prev.inventoryPacks.find(p => p.id === packId);
       if (!existing) return prev;
       
-      let newState;
       if (existing.count > 1) {
-        newState = {
+        return {
           ...prev,
           inventoryPacks: prev.inventoryPacks.map(p => p.id === packId ? { ...p, count: p.count - 1 } : p)
         };
       } else {
-        newState = {
+        return {
           ...prev,
           inventoryPacks: prev.inventoryPacks.filter(p => p.id !== packId)
         };
       }
-      forceSyncToSupabase(newState);
-      return newState;
     });
-  }, [forceSyncToSupabase]);
+  }, []);
 
   const setPremium = useCallback((isPremium: boolean) => {
-    setState(prev => {
-      const newState = { ...prev, isPremium };
-      forceSyncToSupabase(newState);
-      return newState;
-    });
-  }, [forceSyncToSupabase]);
+    setState(prev => ({ ...prev, isPremium }));
+  }, []);
 
   const resetGame = useCallback(async () => {
     const confirmReset = window.confirm("Are you sure you want to reset all progress? This cannot be undone.");
@@ -525,12 +570,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // If logged in, force immediate sync
     if (newState.user) {
-      forceSyncToSupabase(newState);
+      await forceSyncToSupabase(newState);
     }
   }, [forceSyncToSupabase]);
 
   const forceSync = useCallback(async () => {
     if (stateRef.current.user) {
+      console.log('🔄 EMERGENCY SYNC: Performing full validation and force save');
+      // Reset last synced state to force the upsert
+      lastSyncedStateRef.current = '';
       await forceSyncToSupabase(stateRef.current);
     }
   }, [forceSyncToSupabase]);
