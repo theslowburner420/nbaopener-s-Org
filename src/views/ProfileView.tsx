@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { supabase } from '../lib/supabase';
-import { LogOut, Trash2, User as UserIcon, Check, AlertTriangle, X } from 'lucide-react';
+import { LogOut, Trash2, User as UserIcon, Check, AlertTriangle, X, CloudUpload, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 const ProfileView: React.FC = () => {
-  const { user, logout } = useGame();
+  const { user, logout, forceSync } = useGame();
   const [username, setUsername] = useState(user?.username || '');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmStep, setDeleteConfirmStep] = useState(1);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const handleUpdateUsername = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +32,23 @@ const ProfileView: React.FC = () => {
       setMessage({ type: 'error', text: err.message || 'Failed to update username' });
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleManualSync = async () => {
+    if (!user) return;
+    
+    setIsSyncing(true);
+    setSyncMessage(null);
+    
+    try {
+      await forceSync();
+      setSyncMessage({ type: 'success', text: 'Sync Successful!' });
+      setTimeout(() => setSyncMessage(null), 3000);
+    } catch (err: any) {
+      setSyncMessage({ type: 'error', text: 'Sync Failed. Try again.' });
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -106,6 +125,39 @@ const ProfileView: React.FC = () => {
 
         {/* Actions */}
         <div className="space-y-3">
+          {user && (
+            <div className="space-y-2">
+              <button
+                onClick={handleManualSync}
+                disabled={isSyncing}
+                className="w-full bg-amber-500 text-black font-black uppercase py-4 rounded-2xl text-xs tracking-widest hover:bg-amber-400 transition-all flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(245,158,11,0.2)] disabled:opacity-50"
+              >
+                {isSyncing ? (
+                  <RefreshCw size={16} className="animate-spin" />
+                ) : (
+                  <CloudUpload size={16} />
+                )}
+                {isSyncing ? 'Syncing...' : 'Sync Data to Cloud'}
+              </button>
+              
+              <AnimatePresence>
+                {syncMessage && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className={`text-[10px] font-black uppercase tracking-widest text-center py-2 rounded-xl ${
+                      syncMessage.type === 'success' ? 'text-green-500 bg-green-500/5' : 'text-red-500 bg-red-500/5'
+                    }`}
+                  >
+                    {syncMessage.type === 'success' ? <Check size={12} className="inline mr-1" /> : null}
+                    {syncMessage.text}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
           <button
             onClick={() => logout()}
             className="w-full bg-zinc-900 text-white font-black uppercase py-4 rounded-2xl text-xs tracking-widest border border-zinc-800 hover:bg-zinc-800 transition-all flex items-center justify-center gap-3"

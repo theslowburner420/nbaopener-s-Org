@@ -19,6 +19,7 @@ interface GameContextType extends GameState {
   login: () => Promise<void>;
   logout: () => Promise<void>;
   updateGameState: (updates: Partial<GameState>) => void;
+  forceSync: () => Promise<void>;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -505,6 +506,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [forceSyncToSupabase]);
 
+  const forceSync = useCallback(async () => {
+    if (stateRef.current.user) {
+      await forceSyncToSupabase(stateRef.current);
+    }
+  }, [forceSyncToSupabase]);
+
   const contextValue = useMemo(() => ({
     ...state,
     isAuthLoading,
@@ -521,9 +528,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPremium,
     resetGame,
     updateGameState,
+    forceSync,
     login,
     logout
-  }), [state, isAuthLoading, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, login, logout]);
+  }), [state, isAuthLoading, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, forceSync, login, logout]);
 
   return (
     <GameContext.Provider value={contextValue}>
