@@ -90,17 +90,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     isSyncingRef.current = true;
-    console.log('🔄 STARTING DEFINITIVE SYNC for user:', user.id);
+    console.log('🔄 STARTING SYNC PIPELINE for user:', user.id);
     
-    // Set an emergency timeout to unblock the UI if Supabase hangs
-    const emergencyTimeout = setTimeout(() => {
-      if (!isInitialSyncDone) {
-        console.warn('⚠️ SYNC TIMEOUT: Supabase taking too long. Unblocking UI with local data.');
-        setIsInitialSyncDone(true);
-        setIsAuthLoading(false);
-      }
-    }, 5000);
-
     const userData: User = {
       id: user.id,
       email: user.email,
@@ -108,54 +99,62 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       avatar_url: user.user_metadata?.avatar_url,
     };
 
+    // --- OPTIMISTIC HYDRATION ---
+    // Load local data immediately to unblock the UI
+    const liveState = stateRef.current;
+    const savedGuest = localStorage.getItem('GUEST_PROGRESS');
+    let guestData = null;
     try {
-      // 1. Fetch Cloud Data with a shorter timeout for the request itself
-      const fetchPromise = supabase!
+      guestData = savedGuest ? JSON.parse(savedGuest) : null;
+    } catch (e) {
+      console.error('Failed to parse guest progress', e);
+    }
+    
+    const localData = {
+      coins: Math.max(liveState.coins, guestData?.coins ?? 0),
+      collection: Array.from(new Set([...liveState.collection, ...(guestData?.collection || [])])),
+      customCards: Array.from(new Set([...liveState.customCards, ...(guestData?.customCards || [])])),
+      unlockedAchievements: Array.from(new Set([...liveState.unlockedAchievements, ...(guestData?.unlockedAchievements || [])])),
+      inventoryPacks: liveState.inventoryPacks.length > 0 ? liveState.inventoryPacks : (guestData?.inventoryPacks || []),
+      claimedDays: Array.from(new Set([...liveState.claimedDays, ...(guestData?.claimedDays || [])])),
+      lastClaimedDate: liveState.lastClaimedDate || guestData?.lastClaimedDate,
+      isPremium: liveState.isPremium || guestData?.isPremium || false,
+    };
+
+    // Set initial state from local data immediately
+    setState(prev => ({
+      ...prev,
+      ...localData,
+      user: userData,
+    }));
+
+    // Unblock UI immediately (Optimistic UI)
+    setIsInitialSyncDone(true);
+    setIsAuthLoading(false);
+
+    // --- BACKGROUND CLOUD SYNC ---
+    try {
+      const { data: cloudProfile, error: fetchError } = await supabase!
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
 
-      const { data: cloudProfile, error: fetchError } = await fetchPromise;
-
       if (fetchError && fetchError.code !== 'PGRST116') {
-        console.error('❌ Fetch error:', fetchError);
+        console.error('❌ CLOUD FETCH ERROR:', fetchError);
         setIsOffline(true);
       } else {
         setIsOffline(false);
       }
 
-      // 2. Load Local Data for merging (prefer live state over localStorage)
-      const liveState = stateRef.current;
-      const savedGuest = localStorage.getItem('GUEST_PROGRESS');
-      let guestData = null;
-      try {
-        guestData = savedGuest ? JSON.parse(savedGuest) : null;
-      } catch (e) {
-        console.error('Failed to parse guest progress', e);
-      }
-      
-      // Use the most advanced data available (live state or guest storage)
-      const localData = {
-        coins: Math.max(liveState.coins, guestData?.coins ?? 0),
-        collection: Array.from(new Set([...liveState.collection, ...(guestData?.collection || [])])),
-        customCards: Array.from(new Set([...liveState.customCards, ...(guestData?.customCards || [])])),
-        unlockedAchievements: Array.from(new Set([...liveState.unlockedAchievements, ...(guestData?.unlockedAchievements || [])])),
-        inventoryPacks: liveState.inventoryPacks.length > 0 ? liveState.inventoryPacks : (guestData?.inventoryPacks || []),
-        claimedDays: Array.from(new Set([...liveState.claimedDays, ...(guestData?.claimedDays || [])])),
-        lastClaimedDate: liveState.lastClaimedDate || guestData?.lastClaimedDate,
-        isPremium: liveState.isPremium || guestData?.isPremium || false,
-      };
-
       let finalState: Partial<GameState>;
 
       if (!cloudProfile) {
-        console.log('🚀 ATOMIC REGISTRATION: Creating new profile for user:', user.id);
+        console.log('🚀 NEW USER REGISTRATION: Syncing local data to cloud');
         finalState = localData;
       } else {
-        console.log('📥 CLOUD SYNC: Prioritizing cloud data');
+        console.log('📥 CLOUD DATA FOUND: Merging with local progress');
         
-        // Robust data parsing for Supabase profiles (handling potential nulls/wrong formats)
         const parsedCloud = {
           coins: Number(cloudProfile.coins) || 0,
           cards: Array.isArray(cloudProfile.cards) ? cloudProfile.cards : [],
@@ -222,51 +221,21 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
-      // 3. Push the definitive state to Supabase (UPSERT) - Ensure this is atomic
-      const { error: upsertError } = await supabase!.from('profiles').upsert({
-        id: user.id,
-        username: userData.username,
-        avatar_url: userData.avatar_url,
-        coins: finalState.coins,
-        cards: finalState.collection,
-        custom_cards: finalState.customCards,
-        unlocked_achievements: finalState.unlockedAchievements,
-        last_claimed_date: finalState.lastClaimedDate,
-        claimed_days: finalState.claimedDays,
-        inventory_packs: finalState.inventoryPacks,
-        ads_disabled: finalState.isPremium,
-        updated_at: new Date().toISOString(),
-      });
+      // Sync definitive state back to cloud
+      await forceSyncToSupabase({
+        ...stateRef.current,
+        ...finalState,
+        user: userData,
+      } as GameState);
 
-      if (upsertError) {
-        console.error('❌ Sync push error:', upsertError);
-      }
-
-      console.log('✅ SYNC SUCCESS: Cloud is now source of truth.');
-      localStorage.removeItem('GUEST_PROGRESS');
-      
-      // Update last synced state ref to avoid immediate re-sync
-      lastSyncedStateRef.current = JSON.stringify({
-        coins: finalState.coins,
-        collection: finalState.collection,
-        customCards: finalState.customCards,
-        unlockedAchievements: finalState.unlockedAchievements,
-        lastClaimedDate: finalState.lastClaimedDate,
-        claimedDays: finalState.claimedDays,
-        inventoryPacks: finalState.inventoryPacks,
-        isPremium: finalState.isPremium,
-      });
-
-      // 4. Update Local State
+      // Update local state with merged data
       setState(prev => ({
         ...prev,
         ...finalState,
         user: userData,
       }));
 
-      setIsInitialSyncDone(true);
-
-      // 5. Real-time Subscription with Loop Prevention
+      // Setup Real-time Subscription
       if (!profileSubscriptionRef.current && supabase) {
         profileSubscriptionRef.current = supabase
           .channel(`profile_realtime_${user.id}`)
@@ -277,8 +246,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             filter: `id=eq.${user.id}` 
           }, (payload) => {
             const updated = payload.new as any;
-            
-            // Loop Prevention: Check if the received update is identical to what we just synced
             const receivedString = JSON.stringify({
               coins: updated.coins,
               collection: updated.cards,
@@ -291,7 +258,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
               return;
             }
 
-            console.log('🔔 Cloud update received via Real-time');
+            console.log('🔔 CLOUD UPDATE: Received via Real-time');
             lastReceivedCloudStateRef.current = receivedString;
             
             setState(prev => ({
@@ -306,15 +273,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
     } catch (err) {
-      console.error('❌ Unexpected error in syncProfile:', err);
-      setIsInitialSyncDone(true);
+      console.error('❌ BACKGROUND SYNC ERROR:', err);
       setIsOffline(true);
     } finally {
       isSyncingRef.current = false;
-      setIsAuthLoading(false);
-      clearTimeout(emergencyTimeout);
     }
-  }, [isInitialSyncDone]);
+  }, []);
 
   // Auth and Profile sync setup
   useEffect(() => {
@@ -400,47 +364,63 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const forceSyncToSupabase = useCallback(async (newState: GameState, retries = 5) => {
     if (!newState.user || !supabase) return;
 
-    // Don't sync if the state is identical to the last synced state
+    // Data Mapping Validation: Ensure arrays are sent as arrays
+    const payload = {
+      coins: Number(newState.coins) || 0,
+      cards: Array.isArray(newState.collection) ? newState.collection : [],
+      custom_cards: Array.isArray(newState.customCards) ? newState.customCards : [],
+      unlocked_achievements: Array.isArray(newState.unlockedAchievements) ? newState.unlockedAchievements : [],
+      last_claimed_date: newState.lastClaimedDate,
+      claimed_days: Array.isArray(newState.claimedDays) ? newState.claimedDays : [],
+      inventory_packs: Array.isArray(newState.inventoryPacks) ? newState.inventoryPacks : [],
+      ads_disabled: !!newState.isPremium,
+      updated_at: new Date().toISOString(),
+    };
+
     const stateString = JSON.stringify({
-      coins: newState.coins,
-      collection: newState.collection,
-      customCards: newState.customCards,
-      unlockedAchievements: newState.unlockedAchievements,
-      lastClaimedDate: newState.lastClaimedDate,
-      claimedDays: newState.claimedDays,
-      inventoryPacks: newState.inventoryPacks,
-      isPremium: newState.isPremium,
+      coins: payload.coins,
+      collection: payload.cards,
+      customCards: payload.custom_cards,
+      unlockedAchievements: payload.unlocked_achievements,
+      lastClaimedDate: payload.last_claimed_date,
+      claimedDays: payload.claimed_days,
+      inventoryPacks: payload.inventory_packs,
+      isPremium: payload.ads_disabled,
     });
 
     if (stateString === lastSyncedStateRef.current) {
-      console.log('⏭️ SYNC SKIPPED: State is already up to date in cloud.');
       return;
     }
 
     setIsSaving(true);
-    console.log('💾 CLOUD SAVE: Initiating immediate sync for user:', newState.user.id);
+    console.log('📤 CLOUD SYNC: Attempting to save state...', payload);
     
     const performSave = async (attempt: number): Promise<boolean> => {
       try {
-        const { error } = await supabase!.from('profiles').upsert({
-          id: newState.user!.id,
-          coins: newState.coins,
-          cards: newState.collection,
-          custom_cards: newState.customCards,
-          unlocked_achievements: newState.unlockedAchievements,
-          last_claimed_date: newState.lastClaimedDate,
-          claimed_days: newState.claimedDays,
-          inventory_packs: newState.inventoryPacks,
-          ads_disabled: newState.isPremium,
-          updated_at: new Date().toISOString(),
-        });
+        // Use .update().eq() for existing profiles as requested, fallback to upsert if needed
+        // Actually, upsert is safer for initial creation, but the user specifically asked for .update().eq() for the save pipeline
+        const { error } = await supabase!
+          .from('profiles')
+          .update(payload)
+          .eq('id', newState.user!.id);
         
         if (error) {
-          console.error(`❌ CLOUD SAVE ERROR (Attempt ${attempt}):`, error.message);
+          console.error(`❌ CLOUD SAVE ERROR (Attempt ${attempt}):`, error.message, error.details, error.hint);
+          // If update fails because record doesn't exist, try upsert
+          if (error.code === 'PGRST116' || error.message.includes('0 rows')) {
+            const { error: upsertError } = await supabase!.from('profiles').upsert({
+              id: newState.user!.id,
+              ...payload
+            });
+            if (upsertError) return false;
+            return true;
+          }
           return false;
         }
         
         lastSyncedStateRef.current = stateString;
+        // Clear guest cache on successful sync
+        localStorage.removeItem('GUEST_PROGRESS');
         return true;
       } catch (err) {
         console.error(`❌ UNEXPECTED SYNC ERROR (Attempt ${attempt}):`, err);
@@ -460,10 +440,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     if (!success) {
-      console.error('🚨 CRITICAL SYNC FAILURE: Could not persist progress to cloud after multiple attempts.');
+      console.error('🚨 CRITICAL SYNC FAILURE: Could not persist progress to cloud.');
+      setIsOffline(true);
+    } else {
+      setIsOffline(false);
     }
     
-    // Artificial delay to ensure the user sees the "Saving" indicator if it's too fast
     setTimeout(() => setIsSaving(false), 800);
   }, []);
 
