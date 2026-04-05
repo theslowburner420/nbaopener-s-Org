@@ -49,7 +49,7 @@ const COIN_PACKS: CoinPack[] = [
 const ADS_FREE_PRICE = 2.00;
 
 export default function ShopView() {
-  const { coins, addCoins, isPremium, setPremium } = useGame();
+  const { coins, addCoins, isPremium, setPremium, forceSync } = useGame();
   const { notifySuccess, notifyError } = useNotification();
   const [isAdPlaying, setIsAdPlaying] = useState(false);
   const [adCountdown, setAdCountdown] = useState(30);
@@ -110,13 +110,19 @@ export default function ShopView() {
     setAdCountdown(30);
   };
 
-  const handlePaymentSuccess = (rewardType: 'coins' | 'isPremium', amount: number) => {
+  const handlePaymentSuccess = async (rewardType: 'coins' | 'isPremium', amount: number, transactionId?: string) => {
     if (rewardType === 'coins') {
       addCoins(amount);
     } else {
       setPremium(true);
     }
-    notifySuccess("Purchase Successful! Enjoy your rewards.");
+    
+    // Force immediate sync to database using the secure function
+    // This ensures the purchase is persisted even if the user closes the tab immediately
+    await forceSync();
+    
+    console.log(`💰 PURCHASE VERIFIED: ${rewardType} - Amount: ${amount} - TX: ${transactionId}`);
+    notifySuccess("Purchase Successful! Your progress has been synced to the cloud.");
   };
 
   if (!paypalClientId) {
@@ -133,7 +139,13 @@ export default function ShopView() {
 
   return (
     <PayPalScriptProvider options={{ 
-      "client-id": paypalClientId
+      "client-id": paypalClientId,
+      currency: "USD",
+      locale: "en_US",
+      "enable-funding": "venmo",
+      "disable-funding": "paylater",
+      "components": "buttons",
+      "intent": "capture"
     }}>
       <div className="h-full w-full flex flex-col bg-black overflow-hidden relative">
         {/* Background Ambience */}
@@ -178,13 +190,13 @@ export default function ShopView() {
                   <PayPalButtons
                     style={{ 
                       layout: "vertical", 
-                      height: 45, 
-                      color: 'black', 
+                      height: 50, 
+                      color: 'blue', 
                       shape: 'rect', 
                       label: 'pay',
                       tagline: false
                     }}
-                    commit={true}
+                    fundingSource={undefined} // Allow all eligible funding sources (Card, Apple Pay, Google Pay)
                     createOrder={(data, actions) => {
                       return actions.order.create({
                         intent: "CAPTURE",
@@ -194,13 +206,17 @@ export default function ShopView() {
                             currency_code: "USD",
                             value: ADS_FREE_PRICE.toFixed(2)
                           }
-                        }]
+                        }],
+                        application_context: {
+                          shipping_preference: 'NO_SHIPPING',
+                          user_action: 'PAY_NOW'
+                        }
                       });
                     }}
                     onApprove={async (data, actions) => {
                       const details = await actions.order?.capture();
                       if (details?.status === 'COMPLETED') {
-                        handlePaymentSuccess('isPremium', 0);
+                        handlePaymentSuccess('isPremium', 0, details.id);
                       }
                     }}
                     onError={(err) => {
@@ -293,36 +309,40 @@ export default function ShopView() {
                     <PayPalButtons
                       style={{ 
                         layout: "vertical", 
-                        height: 45, 
+                        height: 50, 
                         color: 'gold', 
                         shape: 'rect', 
                         label: 'pay',
                         tagline: false
                       }}
-                      commit={true}
-                        createOrder={(data, actions) => {
-                          return actions.order.create({
-                            intent: "CAPTURE",
-                            purchase_units: [{
-                              description: pack.name,
-                              amount: {
-                                currency_code: "USD",
-                                value: pack.price.toFixed(2)
-                              }
-                            }]
-                          });
-                        }}
-                        onApprove={async (data, actions) => {
-                          const details = await actions.order?.capture();
-                          if (details?.status === 'COMPLETED') {
-                            handlePaymentSuccess('coins', pack.coins);
+                      fundingSource={undefined} // Allow all eligible funding sources
+                      createOrder={(data, actions) => {
+                        return actions.order.create({
+                          intent: "CAPTURE",
+                          purchase_units: [{
+                            description: pack.name,
+                            amount: {
+                              currency_code: "USD",
+                              value: pack.price.toFixed(2)
+                            }
+                          }],
+                          application_context: {
+                            shipping_preference: 'NO_SHIPPING',
+                            user_action: 'PAY_NOW'
                           }
-                        }}
-                        onError={(err) => {
-                          console.error("PayPal Error:", err);
-                          notifyError("Payment failed. Please try again.");
-                        }}
-                      />
+                        });
+                      }}
+                      onApprove={async (data, actions) => {
+                        const details = await actions.order?.capture();
+                        if (details?.status === 'COMPLETED') {
+                          handlePaymentSuccess('coins', pack.coins, details.id);
+                        }
+                      }}
+                      onError={(err) => {
+                        console.error("PayPal Error:", err);
+                        notifyError("Payment failed. Please try again.");
+                      }}
+                    />
                     </div>
                   </div>
                 </motion.div>
