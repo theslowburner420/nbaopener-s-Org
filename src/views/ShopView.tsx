@@ -132,7 +132,9 @@ export default function ShopView() {
   }
 
   return (
-    <PayPalScriptProvider options={{ "client-id": paypalClientId }}>
+    <PayPalScriptProvider options={{ 
+      "client-id": paypalClientId
+    }}>
       <div className="h-full w-full flex flex-col bg-black overflow-hidden relative">
         {/* Background Ambience */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(245,158,11,0.05)_0%,transparent_70%)] pointer-events-none" />
@@ -174,7 +176,14 @@ export default function ShopView() {
                 
                 <div className="mt-1">
                   <PayPalButtons
-                    style={{ layout: "horizontal", height: 32, color: 'blue', shape: 'rect', label: 'pay' }}
+                    style={{ 
+                      layout: "vertical", 
+                      height: 45, 
+                      color: 'blue', 
+                      shape: 'rect', 
+                      label: 'pay',
+                      tagline: false
+                    }}
                     createOrder={(data, actions) => {
                       return actions.order.create({
                         intent: "CAPTURE",
@@ -281,7 +290,14 @@ export default function ShopView() {
 
                     <div className="mt-1">
                       <PayPalButtons
-                        style={{ layout: "horizontal", height: 32, color: 'gold', shape: 'rect', label: 'pay' }}
+                        style={{ 
+                          layout: "vertical", 
+                          height: 45, 
+                          color: 'gold', 
+                          shape: 'rect', 
+                          label: 'pay',
+                          tagline: false
+                        }}
                         createOrder={(data, actions) => {
                           return actions.order.create({
                             intent: "CAPTURE",

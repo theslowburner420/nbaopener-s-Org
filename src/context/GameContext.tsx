@@ -24,7 +24,6 @@ const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<GameState>(() => {
-    const saved = localStorage.getItem('nba-opener-state');
     const defaultState: GameState = {
       user: null,
       coins: 1000,
@@ -38,9 +37,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isPremium: false,
     };
     
+    // Only use localStorage for GUEST users. 
+    // If we have a session, syncProfile will overwrite this anyway.
+    const saved = localStorage.getItem('nba-opener-state');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
+        // We only return saved state if it's not conflicting with a potential login
         return { ...defaultState, ...parsed };
       } catch (e) {
         console.error('Failed to parse saved state', e);
@@ -51,6 +54,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const authProcessed = React.useRef(false);
+  const isSyncingRef = useRef(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isInitialSyncDone, setIsInitialSyncDone] = useState(false);
   const stateRef = useRef(state);
@@ -61,15 +65,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [state]);
 
   const syncProfile = useCallback(async (user: any) => {
-    console.log('Syncing profile for user:', user?.id);
+    if (isSyncingRef.current) return;
     
     if (!user) {
-      console.log('No user detected, clearing user state');
-      setState(prev => ({ 
-        ...prev, 
-        user: null,
-      }));
-      setIsInitialSyncDone(true); // Mark as done for guest users
+      console.log('👤 No user detected, clearing user state');
+      setState(prev => ({ ...prev, user: null }));
+      setIsInitialSyncDone(true);
       setIsAuthLoading(false);
       if (profileSubscriptionRef.current) {
         supabase?.removeChannel(profileSubscriptionRef.current);
@@ -78,13 +79,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    // If already synced for this user, don't do it again
-    if (stateRef.current.user?.id === user.id && isInitialSyncDone) {
-      setIsAuthLoading(false);
-      return;
-    }
-
-    // Set basic user info immediately to update UI quickly (Header will show this)
+    isSyncingRef.current = true;
+    console.log('🔄 STARTING IRON SYNC for user:', user.id);
+    
+    // Basic user info for UI
     const userData: User = {
       id: user.id,
       email: user.email,
@@ -92,137 +90,117 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       avatar_url: user.user_metadata?.avatar_url,
     };
 
-    setState(prev => ({ ...prev, user: userData }));
-
-    // Set up real-time subscription
-    if (!profileSubscriptionRef.current && supabase) {
-      console.log('Setting up real-time subscription for user:', user.id);
-      profileSubscriptionRef.current = supabase
-        .channel(`public:profiles:id=eq.${user.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'profiles',
-            filter: `id=eq.${user.id}`,
-          },
-          (payload) => {
-            console.log('Real-time profile update received:', payload.new);
-            const newProfile = payload.new;
-            setState(prev => ({
-              ...prev,
-              user: prev.user ? {
-                ...prev.user,
-                username: newProfile.username || prev.user.username,
-                avatar_url: newProfile.avatar_url || prev.user.avatar_url,
-              } : null,
-              coins: newProfile.coins ?? prev.coins,
-              collection: newProfile.cards || prev.collection,
-              customCards: newProfile.custom_cards || prev.customCards,
-              unlockedAchievements: newProfile.unlocked_achievements || prev.unlockedAchievements,
-              lastClaimedDate: newProfile.last_claimed_date || prev.lastClaimedDate,
-              claimedDays: newProfile.claimed_days || prev.claimedDays,
-              inventoryPacks: newProfile.inventory_packs || prev.inventoryPacks,
-              isPremium: newProfile.ads_disabled || prev.isPremium,
-            }));
-          }
-        )
-        .subscribe();
-    }
-
     try {
-      console.log('Fetching profile from Supabase for user:', user.id);
-      const { data: profile, error } = await supabase!
+      // 1. Fetch Cloud Data
+      const { data: cloudProfile, error } = await supabase!
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
 
-      if (error && error.code === 'PGRST116') {
-        console.log('Profile not found, creating new profile with current guest progress...');
-        const currentState = stateRef.current;
-        const newProfile = {
+      const localState = stateRef.current;
+      
+      // 2. Determine Priority (Inverse Priority Rule)
+      // Cloud is empty if it doesn't exist or has 0 coins and no cards
+      const isCloudEmpty = !cloudProfile || (
+        (cloudProfile.coins === 0 || cloudProfile.coins === 1000) && 
+        (!cloudProfile.cards || cloudProfile.cards.length === 0) &&
+        (!cloudProfile.inventory_packs || cloudProfile.inventory_packs.length === 0)
+      );
+
+      // Local is "better" if it has more coins or more cards or more packs
+      const isLocalBetter = localState.coins > (cloudProfile?.coins || 0) || 
+                           localState.collection.length > (cloudProfile?.cards?.length || 0) ||
+                           localState.inventoryPacks.length > (cloudProfile?.inventory_packs?.length || 0);
+
+      // 3. Mandatory Initial Sync / Upload if Local > Cloud
+      if (isCloudEmpty || isLocalBetter) {
+        console.log('🚀 IRON RULE: Uploading local progress to cloud (Local > Cloud or Cloud Empty)');
+        
+        const profileToUpload = {
           id: user.id,
           username: userData.username,
           avatar_url: userData.avatar_url,
-          coins: currentState.coins,
-          cards: currentState.collection,
-          custom_cards: currentState.customCards,
-          unlocked_achievements: currentState.unlockedAchievements,
-          last_claimed_date: currentState.lastClaimedDate,
-          claimed_days: currentState.claimedDays,
-          inventory_packs: currentState.inventoryPacks,
-          ads_disabled: currentState.isPremium,
+          coins: localState.coins,
+          cards: localState.collection,
+          custom_cards: localState.customCards,
+          unlocked_achievements: localState.unlockedAchievements,
+          last_claimed_date: localState.lastClaimedDate,
+          claimed_days: localState.claimedDays,
+          inventory_packs: localState.inventoryPacks,
+          ads_disabled: localState.isPremium,
+          updated_at: new Date().toISOString(),
         };
         
-        const { error: insertError } = await supabase!.from('profiles').insert([newProfile]);
-        if (insertError) {
-          console.error('Error creating profile:', insertError);
+        const { error: upsertError } = await supabase!.from('profiles').upsert(profileToUpload);
+        
+        if (upsertError) {
+          console.error('❌ CRITICAL: Initial cloud upload failed:', upsertError.message);
+          // If upload fails, we still set the user but keep local state
+          setState(prev => ({ ...prev, user: userData }));
         } else {
-          console.log('New profile created successfully');
+          console.log('✅ Initial cloud upload SUCCESSFUL');
+          setState(prev => ({ ...prev, user: userData }));
         }
-        setIsInitialSyncDone(true);
-      } else if (profile) {
-        console.log('Profile loaded successfully for user:', profile.id);
+      } 
+      // 4. Download if Cloud > Local
+      else if (cloudProfile) {
+        console.log('📥 IRON RULE: Downloading cloud progress (Cloud > Local)');
         
-        // Merge logic: if guest has more progress than cloud, or we want to combine them
-        // The user said "guest data should not be deleted, it should be sent to their profile"
-        const currentState = stateRef.current;
-        const mergedCoins = Math.max(profile.coins || 0, currentState.coins || 0);
-        const mergedCollection = [...new Set([...(profile.cards || []), ...(currentState.collection || [])])];
-        const mergedAchievements = [...new Set([...(profile.unlocked_achievements || []), ...(currentState.unlockedAchievements || [])])];
-        
-        // Deduplicate custom cards by ID
-        const customCardsMap = new Map();
-        [...(profile.custom_cards || []), ...(currentState.customCards || [])].forEach(card => {
-          if (card && card.id) customCardsMap.set(card.id, card);
-        });
-        const mergedCustomCards = Array.from(customCardsMap.values());
-
-        // Deduplicate inventory packs by ID and sum counts
-        const packsMap = new Map();
-        [...(profile.inventory_packs || []), ...(currentState.inventoryPacks || [])].forEach(pack => {
-          if (pack && pack.id) {
-            const existing = packsMap.get(pack.id);
-            if (existing) {
-              existing.count += (pack.count || 0);
-            } else {
-              packsMap.set(pack.id, { ...pack });
-            }
-          }
-        });
-        const mergedInventoryPacks = Array.from(packsMap.values());
-
-        setState(prev => ({
-          ...prev,
+        setState({
           user: {
             ...userData,
-            username: profile.username || userData.username,
-            avatar_url: profile.avatar_url || userData.avatar_url,
+            username: cloudProfile.username || userData.username,
+            avatar_url: cloudProfile.avatar_url || userData.avatar_url,
           },
-          coins: mergedCoins,
-          collection: mergedCollection,
-          customCards: mergedCustomCards,
-          unlockedAchievements: mergedAchievements,
-          lastClaimedDate: profile.last_claimed_date || currentState.lastClaimedDate || null,
-          claimedDays: profile.claimed_days || currentState.claimedDays || [],
-          inventoryPacks: mergedInventoryPacks,
-          isPremium: profile.ads_disabled || currentState.isPremium || false,
-        }));
-        setIsInitialSyncDone(true);
+          coins: cloudProfile.coins ?? 0,
+          collection: cloudProfile.cards || [],
+          customCards: cloudProfile.custom_cards || [],
+          unlockedAchievements: cloudProfile.unlocked_achievements || [],
+          lastClaimedDate: cloudProfile.last_claimed_date || null,
+          claimedDays: cloudProfile.claimed_days || [],
+          inventoryPacks: cloudProfile.inventory_packs || [],
+          isPremium: cloudProfile.ads_disabled || false,
+          currentView: localState.currentView // Keep current view
+        });
       }
- else if (error) {
-        console.error('Error fetching profile:', error);
-        setIsInitialSyncDone(true);
+
+      // 5. Eliminate Ghost Guest Mode
+      console.log('👻 IRON RULE: Eliminating Ghost Guest Mode. Clearing localStorage.');
+      localStorage.removeItem('nba-opener-state');
+      setIsInitialSyncDone(true);
+
+      // 6. Real-time Subscription (Only for updates)
+      if (!profileSubscriptionRef.current && supabase) {
+        profileSubscriptionRef.current = supabase
+          .channel(`profile_realtime_${user.id}`)
+          .on('postgres_changes', { 
+            event: 'UPDATE', 
+            schema: 'public', 
+            table: 'profiles', 
+            filter: `id=eq.${user.id}` 
+          }, (payload) => {
+            console.log('🔔 Cloud update received via Real-time');
+            const updated = payload.new as any;
+            setState(prev => ({
+              ...prev,
+              coins: updated.coins ?? prev.coins,
+              collection: updated.cards || prev.collection,
+              inventoryPacks: updated.inventory_packs || prev.inventoryPacks,
+              unlockedAchievements: updated.unlocked_achievements || prev.unlockedAchievements,
+              isPremium: updated.ads_disabled || prev.isPremium,
+            }));
+          }).subscribe();
       }
+
     } catch (err) {
-      console.error('Unexpected error in syncProfile:', err);
+      console.error('❌ Unexpected error in syncProfile:', err);
       setIsInitialSyncDone(true);
     } finally {
+      isSyncingRef.current = false;
       setIsAuthLoading(false);
     }
-  }, [isInitialSyncDone]);
+  }, []);
 
   // Auth and Profile sync setup
   useEffect(() => {
@@ -297,7 +275,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }).eq('id', state.user?.id);
           
           if (error) {
-            console.error('Failed to sync to Supabase:', error.message);
+            console.error('❌ Background cloud sync failed:', error.message);
+          } else {
+            console.log('✅ Background cloud sync CONFIRMED (OK)');
           }
         } catch (err) {
           console.error('Unexpected error in persistence effect:', err);
@@ -320,7 +300,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   ]);
 
   useEffect(() => {
-    localStorage.setItem('nba-opener-state', JSON.stringify(state));
+    // Only persist to localStorage if NOT logged in (Guest mode)
+    if (!state.user) {
+      localStorage.setItem('nba-opener-state', JSON.stringify(state));
+    } else {
+      // If logged in, we can clear the local guest state to prevent conflicts
+      // or just stop updating it.
+    }
   }, [state]);
 
   const login = async () => {
@@ -345,78 +331,179 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const setCoins = useCallback((coins: number | ((prev: number) => number)) => setState(prev => ({ 
-    ...prev, 
-    coins: typeof coins === 'function' ? coins(prev.coins) : coins 
-  })), []);
+  // Function to force immediate sync to Supabase with retries (IRON RULE: Write Confirmation)
+  const forceSyncToSupabase = useCallback(async (newState: GameState, retries = 5) => {
+    if (newState.user && supabase && isInitialSyncDone) {
+      console.log('💾 IRON RULE: Executing IMMEDIATE cloud save with confirmation...');
+      
+      const performSave = async (attempt: number): Promise<boolean> => {
+        try {
+          const { error } = await supabase.from('profiles').upsert({
+            id: newState.user!.id,
+            coins: newState.coins,
+            cards: newState.collection,
+            custom_cards: newState.customCards,
+            unlocked_achievements: newState.unlockedAchievements,
+            last_claimed_date: newState.lastClaimedDate,
+            claimed_days: newState.claimedDays,
+            inventory_packs: newState.inventoryPacks,
+            ads_disabled: newState.isPremium,
+            updated_at: new Date().toISOString(),
+          });
+          
+          if (error) {
+            console.error(`❌ Cloud save attempt ${attempt} failed:`, error.message);
+            return false;
+          }
+          
+          console.log('✅ IRON RULE: Cloud save CONFIRMED (OK)');
+          return true;
+        } catch (err) {
+          console.error(`❌ Unexpected error in cloud save attempt ${attempt}:`, err);
+          return false;
+        }
+      };
 
-  const addCoins = useCallback((amount: number) => setState(prev => ({
-    ...prev,
-    coins: prev.coins + amount
-  })), []);
+      let success = await performSave(1);
+      let currentAttempt = 1;
+
+      while (!success && currentAttempt < retries) {
+        currentAttempt++;
+        const delay = 1000 * Math.pow(2, currentAttempt - 1); // Exponential backoff
+        console.log(`🔄 IRON RULE: Retrying cloud save in ${delay}ms (Attempt ${currentAttempt}/${retries})...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        success = await performSave(currentAttempt);
+      }
+
+      if (!success) {
+        console.error('🚨 CRITICAL: ALL cloud save attempts failed. Data is NOT secure in cloud.');
+      }
+    }
+  }, [isInitialSyncDone]);
+
+  const setCoins = useCallback((coins: number | ((prev: number) => number)) => {
+    setState(prev => {
+      const newCoins = typeof coins === 'function' ? coins(prev.coins) : coins;
+      const newState = { ...prev, coins: newCoins };
+      // If it's a significant change (like spending for a pack), we could force sync, 
+      // but we'll rely on the specific action handlers for "immediate" sync as requested.
+      return newState;
+    });
+  }, []);
+
+  const addCoins = useCallback((amount: number) => {
+    setState(prev => {
+      const newState = { ...prev, coins: prev.coins + amount };
+      forceSyncToSupabase(newState);
+      return newState;
+    });
+  }, [forceSyncToSupabase]);
 
   const spendCoins = useCallback((amount: number) => {
-    if (state.coins >= amount) {
-      setState(prev => ({ ...prev, coins: prev.coins - amount }));
-      return true;
-    }
-    return false;
-  }, [state.coins]);
+    let success = false;
+    setState(prev => {
+      if (prev.coins >= amount) {
+        success = true;
+        const newState = { ...prev, coins: prev.coins - amount };
+        // Force immediate sync when spending coins (usually for packs)
+        forceSyncToSupabase(newState);
+        return newState;
+      }
+      return prev;
+    });
+    return success;
+  }, [forceSyncToSupabase]);
 
-  const addToCollection = useCallback((cardIds: string[]) => setState(prev => ({ 
-    ...prev, 
-    collection: [...prev.collection, ...cardIds] 
-  })), []);
+  const addToCollection = useCallback((cardIds: string[]) => {
+    setState(prev => {
+      const newState = { ...prev, collection: [...prev.collection, ...cardIds] };
+      // Force immediate sync when adding to collection (pack opening)
+      forceSyncToSupabase(newState);
+      return newState;
+    });
+  }, [forceSyncToSupabase]);
 
-  const addCustomCard = useCallback((card: Card) => setState(prev => ({
-    ...prev,
-    customCards: [...prev.customCards, card]
-  })), []);
+  const addCustomCard = useCallback((card: Card) => {
+    setState(prev => {
+      const newState = { ...prev, customCards: [...prev.customCards, card] };
+      forceSyncToSupabase(newState);
+      return newState;
+    });
+  }, [forceSyncToSupabase]);
 
   const setCurrentView = useCallback((currentView: ViewType) => setState(prev => ({ ...prev, currentView })), []);
 
-  const unlockAchievement = useCallback((id: string) => setState(prev => ({
-    ...prev,
-    unlockedAchievements: [...prev.unlockedAchievements, id]
-  })), []);
+  const unlockAchievement = useCallback((id: string) => {
+    setState(prev => {
+      const newState = { ...prev, unlockedAchievements: [...prev.unlockedAchievements, id] };
+      forceSyncToSupabase(newState);
+      return newState;
+    });
+  }, [forceSyncToSupabase]);
 
-  const claimReward = useCallback((day: number, amount: number) => setState(prev => ({
-    ...prev,
-    coins: prev.coins + amount,
-    claimedDays: [...prev.claimedDays, day],
-    lastClaimedDate: new Date().toISOString().split('T')[0]
-  })), []);
-
-  const addPackToInventory = useCallback((pack: { id: string; type: string; name: string }) => setState(prev => {
-    const existing = prev.inventoryPacks.find(p => p.id === pack.id);
-    if (existing) {
-      return {
+  const claimReward = useCallback((day: number, amount: number) => {
+    setState(prev => {
+      const newState = {
         ...prev,
-        inventoryPacks: prev.inventoryPacks.map(p => p.id === pack.id ? { ...p, count: p.count + 1 } : p)
+        coins: prev.coins + amount,
+        claimedDays: [...prev.claimedDays, day],
+        lastClaimedDate: new Date().toISOString().split('T')[0]
       };
-    }
-    return {
-      ...prev,
-      inventoryPacks: [...prev.inventoryPacks, { ...pack, count: 1 }]
-    };
-  }), []);
+      forceSyncToSupabase(newState);
+      return newState;
+    });
+  }, [forceSyncToSupabase]);
 
-  const removePackFromInventory = useCallback((packId: string) => setState(prev => {
-    const existing = prev.inventoryPacks.find(p => p.id === packId);
-    if (!existing) return prev;
-    if (existing.count > 1) {
-      return {
-        ...prev,
-        inventoryPacks: prev.inventoryPacks.map(p => p.id === packId ? { ...p, count: p.count - 1 } : p)
-      };
-    }
-    return {
-      ...prev,
-      inventoryPacks: prev.inventoryPacks.filter(p => p.id !== packId)
-    };
-  }), []);
+  const addPackToInventory = useCallback((pack: { id: string; type: string; name: string }) => {
+    setState(prev => {
+      const existing = prev.inventoryPacks.find(p => p.id === pack.id);
+      let newState;
+      if (existing) {
+        newState = {
+          ...prev,
+          inventoryPacks: prev.inventoryPacks.map(p => p.id === pack.id ? { ...p, count: p.count + 1 } : p)
+        };
+      } else {
+        newState = {
+          ...prev,
+          inventoryPacks: [...prev.inventoryPacks, { ...pack, count: 1 }]
+        };
+      }
+      forceSyncToSupabase(newState);
+      return newState;
+    });
+  }, [forceSyncToSupabase]);
 
-  const setPremium = useCallback((isPremium: boolean) => setState(prev => ({ ...prev, isPremium })), []);
+  const removePackFromInventory = useCallback((packId: string) => {
+    setState(prev => {
+      const existing = prev.inventoryPacks.find(p => p.id === packId);
+      if (!existing) return prev;
+      
+      let newState;
+      if (existing.count > 1) {
+        newState = {
+          ...prev,
+          inventoryPacks: prev.inventoryPacks.map(p => p.id === packId ? { ...p, count: p.count - 1 } : p)
+        };
+      } else {
+        newState = {
+          ...prev,
+          inventoryPacks: prev.inventoryPacks.filter(p => p.id !== packId)
+        };
+      }
+      // Force immediate sync when removing pack (opening it)
+      forceSyncToSupabase(newState);
+      return newState;
+    });
+  }, [forceSyncToSupabase]);
+
+  const setPremium = useCallback((isPremium: boolean) => {
+    setState(prev => {
+      const newState = { ...prev, isPremium };
+      forceSyncToSupabase(newState);
+      return newState;
+    });
+  }, [forceSyncToSupabase]);
 
   const resetGame = useCallback(async () => {
     const confirmReset = window.confirm("Are you sure you want to reset all progress? This cannot be undone.");
