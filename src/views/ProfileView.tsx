@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { supabase } from '../lib/supabase';
-import { LogOut, Trash2, User as UserIcon, Check, AlertTriangle, X, CloudUpload, RefreshCw } from 'lucide-react';
+import { LogOut, Trash2, User as UserIcon, Check, AlertTriangle, X, CloudUpload, RefreshCw, Twitter } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 const ProfileView: React.FC = () => {
-  const { user, logout, forceSync } = useGame();
+  const { 
+    user, 
+    logout, 
+    forceSync, 
+    unlockedAchievements, 
+    coins, 
+    inventoryPacks, 
+    updateGameState 
+  } = useGame();
   const [username, setUsername] = useState(user?.username || '');
   const [isUpdating, setIsUpdating] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -13,6 +21,48 @@ const ProfileView: React.FC = () => {
   const [deleteConfirmStep, setDeleteConfirmStep] = useState(1);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const isTwitterClaimed = unlockedAchievements.includes('reward_twitter_claimed');
+
+  const handleTwitterReward = async () => {
+    if (isTwitterClaimed) return;
+
+    // Open link
+    window.open('https://x.com/HoopsCollector', '_blank');
+
+    // Update inventory
+    const updatedInventory = [...inventoryPacks];
+    const mvpPackIndex = updatedInventory.findIndex(p => p.id === 'mvp-pack');
+    
+    if (mvpPackIndex !== -1) {
+      updatedInventory[mvpPackIndex] = {
+        ...updatedInventory[mvpPackIndex],
+        count: updatedInventory[mvpPackIndex].count + 1
+      };
+    } else {
+      updatedInventory.push({
+        id: 'mvp-pack',
+        type: 'mvp',
+        name: 'MVP Pack',
+        count: 1
+      });
+    }
+
+    // Update state
+    updateGameState({
+      coins: coins + 100000,
+      inventoryPacks: updatedInventory,
+      unlockedAchievements: [...unlockedAchievements, 'reward_twitter_claimed']
+    });
+
+    // Show success message
+    setMessage({ type: 'success', text: 'Reward Claimed! 100,000 Coins & 1 MVP Pack added.' });
+    
+    // Force sync
+    setTimeout(() => {
+      forceSync();
+    }, 500);
+  };
 
   const handleUpdateUsername = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +138,59 @@ const ProfileView: React.FC = () => {
           <div>
             <h2 className="text-2xl font-black uppercase tracking-tighter italic">My Account</h2>
             <p className="text-zinc-500 text-sm font-medium">{user?.email}</p>
+          </div>
+        </div>
+
+        {/* Social Missions */}
+        <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Social Missions</h3>
+            <div className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded-full">
+              <span className="text-[8px] font-black uppercase text-amber-500 tracking-tighter">New Rewards</span>
+            </div>
+          </div>
+
+          <div className="relative group">
+            {!isTwitterClaimed && (
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+            )}
+            <button
+              onClick={handleTwitterReward}
+              disabled={isTwitterClaimed}
+              className={`relative w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
+                isTwitterClaimed 
+                ? 'bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed' 
+                : 'bg-black border-zinc-800 hover:border-blue-500/50 group'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isTwitterClaimed ? 'bg-zinc-800 text-zinc-500' : 'bg-blue-500/10 text-blue-400'}`}>
+                  <Twitter size={20} />
+                </div>
+                <div className="text-left">
+                  <p className={`text-xs font-black uppercase tracking-tight ${isTwitterClaimed ? 'text-zinc-500' : 'text-white'}`}>
+                    Follow us on X
+                  </p>
+                  <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                    @HoopsCollector
+                  </p>
+                </div>
+              </div>
+              
+              <div className="text-right">
+                {isTwitterClaimed ? (
+                  <div className="flex items-center gap-1 text-zinc-500">
+                    <span className="text-[10px] font-black uppercase italic">Claimed</span>
+                    <Check size={12} />
+                  </div>
+                ) : (
+                  <div className="space-y-0.5">
+                    <p className="text-[10px] font-black text-amber-500 italic">+100K COINS</p>
+                    <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-tighter">+1 MVP PACK</p>
+                  </div>
+                )}
+              </div>
+            </button>
           </div>
         </div>
 

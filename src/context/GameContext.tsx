@@ -53,6 +53,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isInitialSyncDone, setIsInitialSyncDone] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
+  const [showWelcomeGift, setShowWelcomeGift] = useState(false);
   const stateRef = useRef(state);
   const lastSyncedStateRef = useRef<string>('');
   const lastReceivedCloudStateRef = useRef<string>('');
@@ -150,8 +151,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let finalState: Partial<GameState>;
 
       if (!cloudProfile) {
-        console.log('🚀 NEW USER REGISTRATION: Syncing local data to cloud');
-        finalState = localData;
+        console.log('🚀 NEW USER REGISTRATION: Granting welcome gift');
+        // Grant 50,000 coins and 3 MVP Packs
+        finalState = {
+          ...localData,
+          coins: 50000,
+          inventoryPacks: [
+            ...localData.inventoryPacks,
+            { id: `gift-${Date.now()}`, type: 'mvp', name: 'Finals MVP Pack', count: 3 }
+          ]
+        };
+        setShowWelcomeGift(true);
       } else {
         console.log('📥 CLOUD DATA FOUND: Merging with local progress');
         
@@ -568,9 +578,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const resetGame = useCallback(async () => {
-    const confirmReset = window.confirm("Are you sure you want to reset all progress? This cannot be undone.");
-    if (!confirmReset) return;
-
     const newState = {
       ...stateRef.current,
       coins: 500,
@@ -585,7 +592,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setState(newState);
 
-    // If logged in, force immediate sync
     if (newState.user) {
       await forceSyncToSupabase(newState);
     }
@@ -593,8 +599,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const forceSync = useCallback(async () => {
     if (stateRef.current.user) {
-      console.log('🔄 EMERGENCY SYNC: Performing full validation and force save');
-      // Reset last synced state to force the upsert
       lastSyncedStateRef.current = '';
       await forceSyncToSupabase(stateRef.current);
     }
@@ -620,9 +624,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isSaving,
     isInitialSyncDone,
     isOffline,
+    showWelcomeGift,
+    setShowWelcomeGift,
     login,
     logout
-  }), [state, isAuthLoading, isInitialSyncDone, isOffline, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, forceSync, isSaving, login, logout]);
+  }), [state, isAuthLoading, isInitialSyncDone, isOffline, showWelcomeGift, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, forceSync, isSaving, login, logout]);
 
   return (
     <GameContext.Provider value={contextValue}>
