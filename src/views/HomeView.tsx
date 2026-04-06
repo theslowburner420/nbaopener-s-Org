@@ -93,6 +93,17 @@ const HomeView: React.FC = () => {
         </motion.div>
 
       </div>
+
+      {/* Achievements Quick Link */}
+      <div className="px-4 pb-4">
+        <button 
+          onClick={() => setCurrentView('achievements')}
+          className="w-full bg-zinc-950 border border-zinc-900 rounded-2xl py-3 flex items-center justify-center gap-3 group hover:bg-zinc-900 transition-all"
+        >
+          <Trophy size={16} className="text-amber-500 group-hover:scale-110 transition-transform" />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 group-hover:text-white transition-colors">Draft Achievements</span>
+        </button>
+      </div>
     </div>
   );
 };

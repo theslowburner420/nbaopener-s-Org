@@ -44,10 +44,17 @@ export type ViewType = 'collection' | 'open' | 'packs' | 'rewards' | 'shop' | 'p
 
 export interface Achievement {
   id: string;
+  category: 'drafting' | 'tournaments' | 'matches';
   title: string;
   description: string;
-  reward: string;
-  icon?: any;
+  rewardText: string;
+  rewards: Array<{
+    type: 'coins' | 'pack';
+    amount?: number;
+    packType?: string;
+    packName?: string;
+  }>;
+  icon: any;
 }
 
 export interface InventoryPack {

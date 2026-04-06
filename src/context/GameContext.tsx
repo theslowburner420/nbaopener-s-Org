@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { GameState, ViewType, Card, User } from '../types';
+import { ACHIEVEMENTS } from '../data/achievements';
 import { supabase } from '../lib/supabase';
 
 interface GameContextType extends GameState {
@@ -23,6 +24,7 @@ interface GameContextType extends GameState {
   updateGameState: (updates: Partial<GameState>) => void;
   forceSync: () => Promise<void>;
   isSaving: boolean;
+  removeNotification: (id: string) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -522,10 +524,46 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const unlockAchievement = useCallback((id: string) => {
+    const achievement = ACHIEVEMENTS.find((a: any) => a.id === id);
+    if (!achievement) return null;
+
+    let newlyUnlocked = null;
+
     setState(prev => {
       if (prev.unlockedAchievements.includes(id)) return prev;
-      return { ...prev, unlockedAchievements: [...prev.unlockedAchievements, id] };
+      
+      newlyUnlocked = achievement;
+
+      // Grant rewards
+      let newCoins = prev.coins;
+      let newPacks = [...prev.inventoryPacks];
+
+      achievement.rewards.forEach((r: any) => {
+        if (r.type === 'coins') {
+          newCoins += r.amount || 0;
+        } else if (r.type === 'pack') {
+          const existing = newPacks.find(p => p.id === r.packType);
+          if (existing) {
+            newPacks = newPacks.map(p => p.id === r.packType ? { ...p, count: p.count + (r.amount || 1) } : p);
+          } else {
+            newPacks.push({ id: r.packType, type: r.packType, name: r.packName, count: r.amount || 1 });
+          }
+        }
+      });
+
+      return { 
+        ...prev, 
+        unlockedAchievements: [...prev.unlockedAchievements, id],
+        coins: newCoins,
+        inventoryPacks: newPacks
+      };
     });
+
+    return newlyUnlocked;
+  }, []);
+
+  const removeNotification = useCallback((id: string) => {
+    // No-op since we're using NotificationContext
   }, []);
 
   const claimReward = useCallback((day: number, amount: number) => {
@@ -622,6 +660,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateGameState,
     forceSync,
     isSaving,
+    removeNotification,
     isInitialSyncDone,
     isOffline,
     showWelcomeGift,

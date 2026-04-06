@@ -17,12 +17,13 @@ import {
   Package
 } from 'lucide-react';
 import { useGame } from '../context/GameContext';
+import { useNotification } from '../context/NotificationContext';
 import { useEngine } from '../hooks/useEngine';
 import { Card } from '../types';
 import { ALL_CARDS } from '../data/cards';
 import CardDetailModal from '../components/CardDetailModal';
 
-type DraftPhase = 'entry' | 'captain' | 'starters' | 'bench' | 'summary' | 'tournament_selection' | 'bracket';
+type DraftPhase = 'entry' | 'captain' | 'starters' | 'bench' | 'review' | 'summary' | 'tournament_selection' | 'bracket';
 
 interface DraftSlot {
   id: string;
@@ -44,6 +45,27 @@ interface BracketMatch {
   score1?: number;
   score2?: number;
   status: 'pending' | 'simulating' | 'finished';
+}
+
+interface MatchEvent {
+  id: string;
+  text: string;
+  score1: number;
+  score2: number;
+  quarter: number;
+  team: 'USER' | 'OPP';
+  points: number;
+}
+
+interface PlayerStats {
+  cardId: string;
+  name: string;
+  imageUrl: string;
+  pts: number;
+  reb: number;
+  ast: number;
+  ovr: number;
+  position: string;
 }
 
 interface Tournament {
@@ -227,18 +249,28 @@ const Slot: React.FC<{
   mini?: boolean; 
   onClick: () => void; 
   disabled?: boolean; 
-}> = ({ slot, mini, onClick, disabled }) => {
+  isSelected?: boolean;
+}> = ({ slot, mini, onClick, disabled, isSelected }) => {
   return (
     <button 
       onClick={onClick}
       disabled={disabled}
-      className={`relative group transition-all duration-500 ${mini ? 'w-[11vw] max-w-[65px] aspect-[2.5/3.5]' : 'w-[18vw] max-w-[115px] aspect-[2.5/3.5]'} ${disabled ? 'opacity-40 cursor-not-allowed grayscale-[0.5]' : ''}`}
+      className={`relative group transition-all duration-500 ${mini ? 'w-[11vw] max-w-[65px] aspect-[2.5/3.5]' : 'w-[18vw] max-w-[115px] aspect-[2.5/3.5]'} ${disabled ? 'opacity-40 cursor-not-allowed grayscale-[0.5]' : ''} ${isSelected ? 'scale-110 z-50' : ''}`}
     >
       {slot.card ? (
         <motion.div 
           initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="h-full w-full bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden shadow-[0_10px_25px_rgba(0,0,0,0.5)] group-hover:border-amber-500 transition-all group-hover:shadow-[0_0_20px_rgba(245,158,11,0.3)]"
+          animate={{ 
+            scale: isSelected ? 1.05 : 1, 
+            opacity: 1,
+            boxShadow: isSelected ? [
+              "0 0 20px rgba(245,158,11,0.4)",
+              "0 0 40px rgba(245,158,11,0.8)",
+              "0 0 20px rgba(245,158,11,0.4)"
+            ] : "0 10px 25px rgba(0,0,0,0.5)"
+          }}
+          transition={isSelected ? { repeat: Infinity, duration: 1.5 } : { duration: 0.3 }}
+          className={`h-full w-full bg-zinc-900 rounded-xl border-2 overflow-hidden transition-all ${isSelected ? 'border-amber-500 ring-4 ring-amber-500/20' : 'border-zinc-800 group-hover:border-amber-500'}`}
         >
           <img src={slot.card.imageUrl} alt={slot.card.name} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
@@ -246,6 +278,9 @@ const Slot: React.FC<{
             <p className={`font-black uppercase italic text-white truncate ${mini ? 'text-[6px]' : 'text-[8px]'}`}>{slot.card.name}</p>
             <p className={`font-bold text-amber-500 ${mini ? 'text-[5px]' : 'text-[7px]'}`}>{slot.card.stats?.ovr} OVR</p>
           </div>
+          {isSelected && (
+            <div className="absolute inset-0 bg-amber-500/10 animate-pulse pointer-events-none" />
+          )}
         </motion.div>
       ) : (
         <div className="h-full w-full bg-zinc-900/30 border-2 border-dashed border-zinc-800/50 rounded-xl flex flex-col items-center justify-center gap-1 group-hover:border-amber-500/50 group-hover:bg-zinc-900/60 transition-all relative overflow-hidden">
@@ -281,7 +316,16 @@ const Slot: React.FC<{
 };
 
 const DraftView: React.FC = () => {
-  const { coins, spendCoins, setCurrentView, addCoins, addPackToInventory } = useGame();
+  const { 
+    coins, 
+    spendCoins, 
+    setCurrentView, 
+    addCoins, 
+    addPackToInventory, 
+    unlockAchievement,
+    updateGameState 
+  } = useGame();
+  const { notify } = useNotification();
   const { generateDraftOptions } = useEngine();
 
   const [phase, setPhase] = useState<DraftPhase>('entry');
@@ -291,6 +335,7 @@ const DraftView: React.FC = () => {
   const [activeSlotId, setActiveSlotId] = useState<string | null>(null);
   const [isFlipping, setIsFlipping] = useState(false);
   const [selectedCardForDetail, setSelectedCardForDetail] = useState<Card | null>(null);
+  const [swapSource, setSwapSource] = useState<string | null>(null);
 
   // Tournament State
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
@@ -298,6 +343,15 @@ const DraftView: React.FC = () => {
   const [currentRound, setCurrentRound] = useState<'QF' | 'SF' | 'F'>('QF');
   const [isSimulating, setIsSimulating] = useState(false);
   const [matchResult, setMatchResult] = useState<{ score1: number, score2: number, winner: string } | null>(null);
+
+  // Live Match State
+  const [isLiveMatchActive, setIsLiveMatchActive] = useState(false);
+  const [liveScore, setLiveScore] = useState({ s1: 0, s2: 0 });
+  const [liveQuarter, setLiveQuarter] = useState(1);
+  const [liveEvents, setLiveEvents] = useState<MatchEvent[]>([]);
+  const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
+  const [boxScore, setBoxScore] = useState<PlayerStats[]>([]);
+  const [showBoxScore, setShowBoxScore] = useState(false);
 
   // Rewards State
   const [showTournamentSummary, setShowTournamentSummary] = useState(false);
@@ -370,6 +424,12 @@ const DraftView: React.FC = () => {
       setStarters(prev => prev.map(s => s.position === card.position ? { ...s, card } : s));
       setPhase('starters');
       setCurrentOptions([]);
+
+      // Achievement: Generational Talent
+      if ((card.stats?.ovr || 0) >= 97) {
+        const unlocked = unlockAchievement('generational_talent');
+        if (unlocked) notify(unlocked);
+      }
     } else if (activeSlotId) {
       // Regular selection
       if (activeSlotId.startsWith('bench')) {
@@ -387,12 +447,79 @@ const DraftView: React.FC = () => {
       if (allStartersFilled && !allBenchFilled) {
         setPhase('bench');
       } else if (allStartersFilled && allBenchFilled) {
-        setPhase('summary');
+        setPhase('review');
+        
+        // Achievement: Trust the Process
+        const unlocked1 = unlockAchievement('trust_the_process');
+        if (unlocked1) notify(unlocked1);
+
+        // Achievement: Superteam
+        if (teamOVR >= 92) {
+          const unlocked2 = unlockAchievement('superteam');
+          if (unlocked2) notify(unlocked2);
+        }
+
+        // Achievement: Bench Mob
+        const benchPlayers = bench.map(s => s.card).filter(Boolean) as Card[];
+        const benchAvg = benchPlayers.length > 0 
+          ? benchPlayers.reduce((acc, p) => acc + (p.stats?.ovr || 0), 0) / benchPlayers.length 
+          : 0;
+        if (benchAvg >= 85) {
+          const unlocked3 = unlockAchievement('bench_mob');
+          if (unlocked3) notify(unlocked3);
+        }
       }
     }
   };
 
   const handleSlotClick = (slot: DraftSlot) => {
+    // If we're in a phase where drafting is done, allow swapping
+    const isDraftFinished = phase === 'review' || phase === 'summary' || phase === 'tournament_selection' || phase === 'bracket';
+    
+    if (isDraftFinished && slot.card) {
+      if (!swapSource) {
+        setSwapSource(slot.id);
+      } else if (swapSource === slot.id) {
+        // Deselect if clicking the same card
+        setSwapSource(null);
+        setSelectedCardForDetail(slot.card); // Show detail on second click of same card? Or just deselect?
+        // Let's just deselect and show detail
+      } else {
+        // Perform Swap
+        const sourceId = swapSource;
+        const targetId = slot.id;
+        
+        let newStarters = [...starters];
+        let newBench = [...bench];
+        
+        const sourceInStarters = starters.find(s => s.id === sourceId);
+        const targetInStarters = starters.find(s => s.id === targetId);
+        
+        const sourceInBench = bench.find(b => b.id === sourceId);
+        const targetInBench = bench.find(b => b.id === targetId);
+        
+        const sourceCard = sourceInStarters?.card || sourceInBench?.card;
+        const targetCard = targetInStarters?.card || targetInBench?.card;
+        
+        if (sourceInStarters) {
+          newStarters = newStarters.map(s => s.id === sourceId ? { ...s, card: targetCard || null } : s);
+        } else if (sourceInBench) {
+          newBench = newBench.map(b => b.id === sourceId ? { ...b, card: targetCard || null } : b);
+        }
+        
+        if (targetInStarters) {
+          newStarters = newStarters.map(s => s.id === targetId ? { ...s, card: sourceCard || null } : s);
+        } else if (targetInBench) {
+          newBench = newBench.map(b => b.id === targetId ? { ...b, card: sourceCard || null } : b);
+        }
+        
+        setStarters(newStarters);
+        setBench(newBench);
+        setSwapSource(null);
+      }
+      return;
+    }
+
     if (slot.card) {
       setSelectedCardForDetail(slot.card);
       return;
@@ -431,53 +558,265 @@ const DraftView: React.FC = () => {
     const match = bracket.find(m => m.id === matchId);
     if (!match || match.status !== 'pending') return;
 
-    setBracket(prev => prev.map(m => m.id === matchId ? { ...m, status: 'simulating' } : m));
-    setIsSimulating(true);
+    setActiveMatchId(matchId);
+    setIsLiveMatchActive(true);
+    setLiveScore({ s1: 0, s2: 0 });
+    setLiveQuarter(1);
+    setLiveEvents([]);
+    setShowBoxScore(false);
     
-    // Artificial delay for tension
-    await new Promise(resolve => setTimeout(resolve, 2500));
-
     const t1Ovr = match.team1 === 'USER' ? teamOVR : (match.team1 as GhostTeam).ovr;
     const t2Ovr = match.team2 === 'USER' ? teamOVR : (match.team2 as GhostTeam).ovr;
-
-    // Simulation logic: OVR based with randomness (Home court advantage + random factor)
-    const t1Strength = t1Ovr + (Math.random() * 15);
-    const t2Strength = t2Ovr + (Math.random() * 15);
-
-    const winner = t1Strength > t2Strength ? match.team1 : match.team2;
     
-    // Realistic basketball scores
-    const baseScore = 95;
-    const score1 = Math.floor(baseScore + (t1Ovr - 80) + (Math.random() * 25));
-    const score2 = Math.floor(baseScore + (t2Ovr - 80) + (Math.random() * 25));
+    const userStarters = starters.map(s => s.card).filter(Boolean) as Card[];
+    const userBench = bench.map(s => s.card).filter(Boolean) as Card[];
+    const allUserPlayers = [...userStarters, ...userBench];
+    
+    const starterNames = userStarters.map(s => s.name);
+    const oppName = match.team1 === 'USER' ? (match.team2 as GhostTeam).name : (match.team1 as GhostTeam).name;
 
-    setMatchResult({ 
-      score1, 
-      score2, 
-      winner: winner === 'USER' ? 'Your Team' : (winner as GhostTeam).name 
+    // 1. OVR Boost Logic
+    const ovrDiff = (match.team1 === 'USER' ? t1Ovr - t2Ovr : t2Ovr - t1Ovr);
+    let userBoost = 1.0;
+    let oppBoost = 1.0;
+
+    if (ovrDiff >= 10) {
+      userBoost = 1.15;
+      oppBoost = 0.85;
+    } else if (ovrDiff <= -10) {
+      userBoost = 0.85;
+      oppBoost = 1.15;
+    } else {
+      const factor = (ovrDiff / 10) * 0.15;
+      userBoost = 1 + factor;
+      oppBoost = 1 - factor;
+    }
+
+    // 2. Individual Stats Engine (Realistic based on card attributes)
+    const stats: PlayerStats[] = allUserPlayers.map(player => {
+      const isStarter = userStarters.some(s => s.id === player.id);
+      const roleWeight = isStarter ? 1.0 : 0.4;
+      
+      // Points: card.pts +/- 20% * boost * role
+      const basePts = (player.pts || 15) * userBoost * roleWeight;
+      const pts = Math.round(basePts * (0.8 + Math.random() * 0.4));
+      
+      // Rebounds: card.reb +/- 20% * boost * role
+      const baseReb = (player.reb || 5) * userBoost * roleWeight;
+      const reb = Math.round(baseReb * (0.8 + Math.random() * 0.4));
+
+      // Assists: card.ast +/- 20% * boost * role
+      const baseAst = (player.ast || 5) * userBoost * roleWeight;
+      const ast = Math.round(baseAst * (0.8 + Math.random() * 0.4));
+
+      return {
+        cardId: player.id,
+        name: player.name,
+        imageUrl: player.imageUrl,
+        pts: Math.max(0, pts),
+        reb: Math.max(0, reb),
+        ast: Math.max(0, ast),
+        ovr: player.stats?.ovr || 0,
+        position: player.position
+      };
     });
 
-    setBracket(prev => prev.map(m => m.id === matchId ? { 
-      ...m, 
-      winner, 
-      score1, 
-      score2, 
-      status: 'finished' 
-    } : m));
+    const userScore = stats.reduce((acc, s) => acc + s.pts, 0);
+    setBoxScore(stats);
 
-    setIsSimulating(false);
-
-    // Handle Tournament Progression or End
-    if (match.team1 === 'USER' || match.team2 === 'USER') {
-      if (winner !== 'USER') {
-        // User lost
-        const position = currentRound === 'QF' ? 'quarters' : currentRound === 'SF' ? 'semis' : 'finalist';
-        handleTournamentEnd(position);
-      } else if (currentRound === 'F') {
-        // User won the final
-        handleTournamentEnd('champion');
-      }
+    // Achievements: In-Match Feats (Stats)
+    if (stats.some(s => s.pts >= 40)) {
+      const unlocked = unlockAchievement('the_carry');
+      if (unlocked) notify(unlocked);
     }
+    if (stats.some(s => s.ast >= 15)) {
+      const unlocked = unlockAchievement('floor_general');
+      if (unlocked) notify(unlocked);
+    }
+
+    // 3. Opponent Score Logic (Simulated based on their OVR)
+    const oppBasePts = 105 * oppBoost;
+    const oppScore = Math.round(oppBasePts * (0.9 + Math.random() * 0.2));
+
+    const s1Final = match.team1 === 'USER' ? userScore : oppScore;
+    const s2Final = match.team1 === 'USER' ? oppScore : userScore;
+
+    const eventTemplates = [
+      "{player} anota una bandeja en reverso (+2)",
+      "{player} clava un triple desde la esquina (+3)",
+      "¡Robo y mate en contraataque de {player}! (+2)",
+      "{player} encesta tras un rebote ofensivo (+2)",
+      "¡Triple frontal de {player}! (+3)",
+      "{player} anota un tiro de media distancia (+2)",
+      "¡{player} machaca el aro con potencia! (+2)"
+    ];
+
+    const oppTemplates = [
+      "{opp} anota tras una buena jugada colectiva (+2)",
+      "¡Triple lejano de {opp}! (+3)",
+      "{opp} encesta una bandeja fácil (+2)",
+      "{opp} castiga desde la línea de tres (+3)",
+      "{opp} anota en suspensión (+2)"
+    ];
+
+    // 3. Event Generation to reach final scores
+    let currentS1 = 0;
+    let currentS2 = 0;
+    const newEvents: MatchEvent[] = [];
+    
+    // We need enough events to reach s1Final and s2Final
+    // Average points per event is ~2.4
+    const totalEventsNeeded = Math.ceil((s1Final + s2Final) / 2.4);
+    const eventsPerQuarter = Math.ceil(totalEventsNeeded / 4);
+
+    for (let i = 0; i < totalEventsNeeded; i++) {
+      const quarter = Math.min(4, Math.floor(i / eventsPerQuarter) + 1);
+      
+      // Determine who scores this event based on remaining points needed
+      const s1Remaining = s1Final - currentS1;
+      const s2Remaining = s2Final - currentS2;
+      
+      let scoringTeam: 'USER' | 'OPP' = 'USER';
+      let points = Math.random() > 0.7 ? 3 : 2;
+
+      if (s1Remaining > 0 && s2Remaining > 0) {
+        const prob1 = s1Remaining / (s1Remaining + s2Remaining);
+        scoringTeam = Math.random() < prob1 ? 'USER' : 'OPP';
+      } else if (s1Remaining > 0) {
+        scoringTeam = 'USER';
+      } else if (s2Remaining > 0) {
+        scoringTeam = 'OPP';
+      } else {
+        break; // Reached final scores
+      }
+
+      // Ensure we don't overshoot
+      if (scoringTeam === 'USER') {
+        if (currentS1 + points > s1Final) points = s1Final - currentS1;
+        if (points <= 0) continue;
+        currentS1 += points;
+      } else {
+        if (currentS2 + points > s2Final) points = s2Final - currentS2;
+        if (points <= 0) continue;
+        currentS2 += points;
+      }
+
+      let text = "";
+      if (match.team1 === 'USER') {
+        if (scoringTeam === 'USER') {
+          // Weighted RNG based on card PTS stat
+          const totalPtsWeight = userStarters.reduce((acc, p) => acc + (p.pts || 10), 0);
+          let r = Math.random() * totalPtsWeight;
+          let selectedPlayer = userStarters[0].name;
+          for (const p of userStarters) {
+            if (r < (p.pts || 10)) {
+              selectedPlayer = p.name;
+              break;
+            }
+            r -= (p.pts || 10);
+          }
+          text = eventTemplates[Math.floor(Math.random() * eventTemplates.length)].replace("{player}", selectedPlayer);
+        } else {
+          text = oppTemplates[Math.floor(Math.random() * oppTemplates.length)].replace("{opp}", oppName);
+        }
+      } else {
+        if (scoringTeam === 'OPP') {
+          text = oppTemplates[Math.floor(Math.random() * oppTemplates.length)].replace("{opp}", oppName);
+        } else {
+          // Weighted RNG based on card PTS stat
+          const totalPtsWeight = userStarters.reduce((acc, p) => acc + (p.pts || 10), 0);
+          let r = Math.random() * totalPtsWeight;
+          let selectedPlayer = userStarters[0].name;
+          for (const p of userStarters) {
+            if (r < (p.pts || 10)) {
+              selectedPlayer = p.name;
+              break;
+            }
+            r -= (p.pts || 10);
+          }
+          text = eventTemplates[Math.floor(Math.random() * eventTemplates.length)].replace("{player}", selectedPlayer);
+        }
+      }
+
+      newEvents.push({
+        id: `event-${i}`,
+        text,
+        score1: currentS1,
+        score2: currentS2,
+        quarter,
+        team: scoringTeam,
+        points
+      });
+    }
+
+    // Final result logic
+    const winner = s1Final > s2Final ? match.team1 : (s1Final < s2Final ? match.team2 : (Math.random() > 0.5 ? match.team1 : match.team2));
+    
+    // Start the simulation loop
+    let eventIdx = 0;
+    const interval = setInterval(() => {
+      if (eventIdx < newEvents.length) {
+        const event = newEvents[eventIdx];
+        setLiveEvents(prev => [event, ...prev]);
+        setLiveScore({ s1: event.score1, s2: event.score2 });
+        setLiveQuarter(event.quarter);
+        eventIdx++;
+      } else {
+        clearInterval(interval);
+        finishMatch(matchId, s1Final, s2Final, winner);
+      }
+    }, 800); // Faster rhythm to reach higher scores in reasonable time
+
+    (window as any).matchInterval = interval;
+    (window as any).skipMatch = () => {
+      clearInterval((window as any).matchInterval);
+      setLiveEvents(newEvents.reverse());
+      setLiveScore({ s1: s1Final, s2: s2Final });
+      setLiveQuarter(4);
+      finishMatch(matchId, s1Final, s2Final, winner);
+    };
+  };
+
+  const finishMatch = (matchId: string, s1: number, s2: number, winner: 'USER' | GhostTeam) => {
+    const match = bracket.find(m => m.id === matchId);
+    if (!match) return;
+
+    setTimeout(() => {
+      setMatchResult({ 
+        score1: s1, 
+        score2: s2, 
+        winner: winner === 'USER' ? 'Your Team' : (winner as GhostTeam).name 
+      });
+
+      // Achievements: In-Match Feats (Score)
+      if (winner === 'USER') {
+        const diff = Math.abs(s1 - s2);
+        if (diff >= 20) {
+          const unlocked = unlockAchievement('blowout');
+          if (unlocked) notify(unlocked);
+        }
+        if (diff >= 1 && diff <= 2) {
+          const unlocked = unlockAchievement('clutch_time');
+          if (unlocked) notify(unlocked);
+        }
+
+        // Achievement: David vs Goliath
+        if (selectedTournament?.name === 'NBA Playoffs' && teamOVR < 88) {
+          const unlocked = unlockAchievement('david_vs_goliath');
+          if (unlocked) notify(unlocked);
+        }
+      }
+
+      setBracket(prev => prev.map(m => m.id === matchId ? { 
+        ...m, 
+        winner, 
+        score1: s1, 
+        score2: s2, 
+        status: 'finished' 
+      } : m));
+
+      setIsLiveMatchActive(false);
+    }, 2000);
   };
 
   const handleTournamentEnd = (position: 'quarters' | 'semis' | 'finalist' | 'champion') => {
@@ -485,10 +824,21 @@ const DraftView: React.FC = () => {
     const rewards = REWARDS[selectedTournament.name as keyof typeof REWARDS][position];
     setFinalPosition(position);
     setEarnedRewards(rewards);
-    // Delay showing the summary so the user can see the match result first
-    setTimeout(() => {
-      setShowTournamentSummary(true);
-    }, 3000);
+    setShowTournamentSummary(true);
+
+    // Achievements: Tournament Success
+    if (position === 'champion') {
+      if (selectedTournament.name === 'Summer League') {
+        const unlocked = unlockAchievement('summer_mvp');
+        if (unlocked) notify(unlocked);
+      } else if (selectedTournament.name === 'NBA Cup') {
+        const unlocked = unlockAchievement('cup_champion');
+        if (unlocked) notify(unlocked);
+      } else if (selectedTournament.name === 'NBA Playoffs') {
+        const unlocked = unlockAchievement('ring_chaser');
+        if (unlocked) notify(unlocked);
+      }
+    }
   };
 
   const claimRewards = () => {
@@ -515,17 +865,25 @@ const DraftView: React.FC = () => {
   };
 
   const advanceRound = () => {
-    const userLost = matchResult && matchResult.winner !== 'Your Team';
-    const isFinal = currentRound === 'F';
-    
-    if (userLost || isFinal) {
-      setMatchResult(null);
-      setShowTournamentSummary(true);
+    if (!showBoxScore) {
+      setShowBoxScore(true);
       return;
     }
 
+    const userLost = matchResult && matchResult.winner !== 'Your Team';
+    const isFinal = currentRound === 'F';
+    
+    setShowBoxScore(false);
     setMatchResult(null);
     
+    if (userLost || isFinal) {
+      const position = userLost 
+        ? (currentRound === 'QF' ? 'quarters' : currentRound === 'SF' ? 'semis' : 'finalist')
+        : 'champion';
+      handleTournamentEnd(position);
+      return;
+    }
+
     // Helper to simulate a match between two ghost teams
     const simulateGhostMatch = (m: BracketMatch): GhostTeam | 'USER' => {
       if (m.winner) return m.winner;
@@ -666,30 +1024,70 @@ const DraftView: React.FC = () => {
             {/* Row 1: PG (Top Center) */}
             <div className="flex justify-center">
               <div className="transform -translate-y-2">
-                <Slot slot={starters[0]} onClick={() => handleSlotClick(starters[0])} disabled={phase === 'captain'} />
+                <Slot 
+                  slot={starters[0]} 
+                  onClick={() => handleSlotClick(starters[0])} 
+                  disabled={phase === 'captain'} 
+                  isSelected={swapSource === starters[0].id}
+                />
               </div>
             </div>
             
             {/* Row 2: SG & SF (Middle Wings) */}
             <div className="flex justify-between px-[10%] md:px-[20%]">
               <div className="transform -translate-x-4">
-                <Slot slot={starters[1]} onClick={() => handleSlotClick(starters[1])} disabled={phase === 'captain'} />
+                <Slot 
+                  slot={starters[1]} 
+                  onClick={() => handleSlotClick(starters[1])} 
+                  disabled={phase === 'captain'} 
+                  isSelected={swapSource === starters[1].id}
+                />
               </div>
               <div className="transform translate-x-4">
-                <Slot slot={starters[2]} onClick={() => handleSlotClick(starters[2])} disabled={phase === 'captain'} />
+                <Slot 
+                  slot={starters[2]} 
+                  onClick={() => handleSlotClick(starters[2])} 
+                  disabled={phase === 'captain'} 
+                  isSelected={swapSource === starters[2].id}
+                />
               </div>
             </div>
             
             {/* Row 3: PF & C (Bottom Paint) */}
             <div className="flex justify-center gap-8 md:gap-16">
               <div className="transform translate-y-2">
-                <Slot slot={starters[3]} onClick={() => handleSlotClick(starters[3])} disabled={phase === 'captain'} />
+                <Slot 
+                  slot={starters[3]} 
+                  onClick={() => handleSlotClick(starters[3])} 
+                  disabled={phase === 'captain'} 
+                  isSelected={swapSource === starters[3].id}
+                />
               </div>
               <div className="transform translate-y-2">
-                <Slot slot={starters[4]} onClick={() => handleSlotClick(starters[4])} disabled={phase === 'captain'} />
+                <Slot 
+                  slot={starters[4]} 
+                  onClick={() => handleSlotClick(starters[4])} 
+                  disabled={phase === 'captain'} 
+                  isSelected={swapSource === starters[4].id}
+                />
               </div>
             </div>
           </div>
+
+          {/* Squad Review Button Overlay */}
+          {phase === 'review' && (
+            <div className="absolute inset-x-0 bottom-8 flex justify-center z-50 px-8">
+              <motion.button
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                onClick={() => setPhase('summary')}
+                className="w-full max-w-xs bg-amber-500 text-black py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all active:scale-95"
+              >
+                <span>Finalizar Draft y Jugar</span>
+                <ArrowRight size={20} />
+              </motion.button>
+            </div>
+          )}
         </div>
 
         {/* Bottom Half: Bench Strip */}
@@ -703,7 +1101,14 @@ const DraftView: React.FC = () => {
           <div className="flex justify-center items-center gap-2 md:gap-3 w-full overflow-x-auto scrollbar-hide py-1">
             {bench.map(slot => (
               <div key={slot.id} className="shrink-0">
-                <Slot slot={slot} mini onClick={() => handleSlotClick(slot)} disabled={phase === 'captain'} />
+                <Slot 
+                  key={slot.id} 
+                  slot={slot} 
+                  mini 
+                  onClick={() => handleSlotClick(slot)} 
+                  disabled={phase === 'captain'} 
+                  isSelected={swapSource === slot.id}
+                />
               </div>
             ))}
           </div>
@@ -783,6 +1188,183 @@ const DraftView: React.FC = () => {
       </motion.div>
     </div>
   );
+
+  const renderLiveMatch = () => {
+    const match = bracket.find(m => m.id === activeMatchId);
+    if (!match) return null;
+
+    const t1 = match.team1;
+    const t2 = match.team2;
+    const t1Name = t1 === 'USER' ? 'Your Team' : (t1 as GhostTeam).name;
+    const t2Name = t2 === 'USER' ? 'Your Team' : (t2 as GhostTeam).name;
+    const t1Ovr = t1 === 'USER' ? teamOVR : (t1 as GhostTeam).ovr;
+    const t2Ovr = t2 === 'USER' ? teamOVR : (t2 as GhostTeam).ovr;
+
+    return (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[8000] bg-zinc-950 flex flex-col overflow-hidden"
+      >
+        {/* Background Court Pattern */}
+        <div className="absolute inset-0 opacity-5 pointer-events-none">
+          <div className="absolute inset-0 border-[10px] border-white m-10 rounded-[50px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] border-[10px] border-white rounded-full" />
+          <div className="absolute top-1/2 left-0 w-full h-[2px] bg-white" />
+        </div>
+
+        {/* Header / Scoreboard */}
+        <div className="relative z-10 bg-zinc-900/50 border-b border-zinc-800 p-6 md:p-10">
+          <div className="max-w-4xl mx-auto flex flex-col items-center gap-8">
+            <div className="flex items-center justify-between w-full">
+              {/* Team 1 */}
+              <div className="flex flex-col items-center gap-3 w-1/3">
+                <div className={`w-16 h-16 md:w-24 md:h-24 rounded-3xl flex items-center justify-center text-3xl font-black ${t1 === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-400'}`}>
+                  {t1Name[0]}
+                </div>
+                <p className="text-sm md:text-lg font-black uppercase italic text-white truncate w-full text-center">{t1Name}</p>
+                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">OVR: {t1Ovr}</p>
+              </div>
+
+              {/* Score Display */}
+              <div className="flex flex-col items-center gap-2">
+                <div className="bg-black px-8 py-4 rounded-3xl border-2 border-zinc-800 shadow-2xl flex items-center gap-6">
+                  <span className="text-5xl md:text-7xl font-black italic text-white tabular-nums">{liveScore.s1}</span>
+                  <span className="text-2xl font-black text-zinc-800">-</span>
+                  <span className="text-5xl md:text-7xl font-black italic text-white tabular-nums">{liveScore.s2}</span>
+                </div>
+                <div className="px-4 py-1 bg-amber-500 text-black rounded-full text-[10px] font-black uppercase tracking-widest">
+                  Q{liveQuarter}
+                </div>
+              </div>
+
+              {/* Team 2 */}
+              <div className="flex flex-col items-center gap-3 w-1/3">
+                <div className={`w-16 h-16 md:w-24 md:h-24 rounded-3xl flex items-center justify-center text-3xl font-black ${t2 === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-400'}`}>
+                  {t2Name[0]}
+                </div>
+                <p className="text-sm md:text-lg font-black uppercase italic text-white truncate w-full text-center">{t2Name}</p>
+                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">OVR: {t2Ovr}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Feed */}
+        <div className="flex-1 overflow-hidden flex flex-col p-6 md:p-10 relative z-10">
+          <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col gap-4 overflow-y-auto pr-4 scrollbar-hide">
+            <AnimatePresence initial={false}>
+              {liveEvents.map((event) => (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, x: -20, scale: 0.95 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  className={`p-4 rounded-2xl border ${
+                    event.team === 'USER' 
+                      ? 'bg-amber-500/10 border-amber-500/20' 
+                      : 'bg-zinc-900/50 border-zinc-800'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className={`text-[8px] font-black uppercase tracking-widest ${event.team === 'USER' ? 'text-amber-500' : 'text-zinc-500'}`}>
+                      {event.team === 'USER' ? 'Tu Equipo' : 'Oponente'}
+                    </span>
+                    <span className="text-[8px] font-bold text-zinc-600">Q{event.quarter}</span>
+                  </div>
+                  <p className="text-sm font-bold text-white">{event.text}</p>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            {liveEvents.length === 0 && (
+              <div className="flex-1 flex flex-col items-center justify-center text-zinc-700 space-y-4">
+                <div className="w-12 h-12 border-4 border-zinc-800 border-t-amber-500 rounded-full animate-spin" />
+                <p className="text-xs font-black uppercase tracking-widest">Esperando el salto inicial...</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer / Controls */}
+        <div className="p-6 md:p-10 bg-zinc-900/30 border-t border-zinc-800 flex justify-center relative z-10">
+          <button
+            onClick={() => (window as any).skipMatch?.()}
+            className="px-8 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center gap-3"
+          >
+            <Zap size={16} className="fill-amber-500 text-amber-500" />
+            Saltar Simulación
+          </button>
+        </div>
+      </motion.div>
+    );
+  };
+
+  const renderBoxScore = () => {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[9500] bg-zinc-950 flex flex-col p-6 md:p-10 overflow-hidden"
+      >
+        <div className="max-w-4xl mx-auto w-full flex flex-col h-full space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-4xl font-black italic uppercase tracking-tighter text-white">Resumen del Partido</h2>
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Box Score Individual</p>
+          </div>
+
+          <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide">
+            <div className="bg-zinc-900/30 border border-zinc-800 rounded-[2.5rem] overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[400px]">
+                <thead>
+                  <tr className="bg-zinc-900/50 border-b border-zinc-800">
+                    <th className="p-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Jugador</th>
+                    <th className="p-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest text-center">PTS</th>
+                    <th className="p-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest text-center">REB</th>
+                    <th className="p-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest text-center">AST</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/50">
+                  {boxScore.map((player) => (
+                    <tr key={player.cardId} className="hover:bg-white/5 transition-colors group">
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-14 rounded-lg overflow-hidden border border-zinc-800 shrink-0">
+                            <img src={player.imageUrl} alt={player.name} className="w-full h-full object-cover" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-black uppercase italic text-white group-hover:text-amber-500 transition-colors">{player.name}</p>
+                            <p className="text-[8px] font-bold text-zinc-500 uppercase">{player.position} • {player.ovr} OVR</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4 text-center">
+                        <span className="text-lg font-black italic text-white">{player.pts}</span>
+                      </td>
+                      <td className="p-4 text-center">
+                        <span className="text-lg font-black italic text-zinc-400">{player.reb}</span>
+                      </td>
+                      <td className="p-4 text-center">
+                        <span className="text-lg font-black italic text-zinc-400">{player.ast}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <button
+            onClick={advanceRound}
+            className="w-full bg-amber-500 text-black py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 hover:bg-amber-400 transition-all shadow-[0_20px_40px_rgba(245,158,11,0.2)] active:scale-95"
+          >
+            <span>Continuar Torneo</span>
+            <ArrowRight size={20} />
+          </button>
+        </div>
+      </motion.div>
+    );
+  };
 
   const renderSummary = () => (
     <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-8">
@@ -1067,7 +1649,7 @@ const DraftView: React.FC = () => {
     <div className="h-full w-full bg-black overflow-hidden flex flex-col">
       <AnimatePresence mode="wait">
         {phase === 'entry' && <motion.div key="entry" exit={{ opacity: 0 }} className="flex-1 flex flex-col">{renderEntry()}</motion.div>}
-        {(phase === 'captain' || phase === 'starters' || phase === 'bench') && <motion.div key="board" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col">{renderDraftBoard()}</motion.div>}
+        {(phase === 'captain' || phase === 'starters' || phase === 'bench' || phase === 'review') && <motion.div key="board" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col">{renderDraftBoard()}</motion.div>}
         {phase === 'summary' && <motion.div key="summary" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col">{renderSummary()}</motion.div>}
         {phase === 'tournament_selection' && <motion.div key="tournament" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col">{renderTournamentSelection()}</motion.div>}
         {phase === 'bracket' && <motion.div key="bracket" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col">{renderBracket()}</motion.div>}
@@ -1088,6 +1670,11 @@ const DraftView: React.FC = () => {
         rewards={earnedRewards}
         onClaim={claimRewards}
       />
+
+      <AnimatePresence>
+        {isLiveMatchActive && renderLiveMatch()}
+        {showBoxScore && renderBoxScore()}
+      </AnimatePresence>
     </div>
   );
 };
@@ -1116,11 +1703,12 @@ const BracketMatchCard: React.FC<{
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ type: "spring", damping: 20, stiffness: 100 }}
       className={`w-full max-w-[200px] md:max-w-[240px] bg-zinc-950 border-2 rounded-[1.5rem] p-3 md:p-4 relative overflow-hidden transition-all duration-500 ${
         isUserMatch ? 'border-amber-500/40 shadow-[0_0_40px_rgba(245,158,11,0.1)]' : 'border-zinc-900'
-      } ${isFinal ? 'scale-110 md:scale-125 shadow-[0_0_60px_rgba(245,158,11,0.2)] border-amber-500/60' : ''}`}
+      } ${isFinal ? 'scale-110 md:scale-125 shadow-[0_0_60px_rgba(245,158,11,0.2)] border-amber-500/60' : ''} ${isFinished ? 'opacity-90' : ''}`}
     >
       <div className="flex flex-col gap-3">
         {/* Team 1 */}
