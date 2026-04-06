@@ -13,7 +13,8 @@ import {
   Sparkles, 
   RotateCcw,
   LayoutGrid,
-  X
+  X,
+  Package
 } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useEngine } from '../hooks/useEngine';
@@ -106,6 +107,121 @@ const BENCH_SLOTS: DraftSlot[] = Array.from({ length: 7 }).map((_, i) => ({
   card: null 
 }));
 
+const REWARDS = {
+  'Summer League': {
+    champion: { coins: 15000, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Rookie Pack' }, { id: 'rookie-2', type: 'rookie', name: 'Rookie Pack' }] },
+    finalist: { coins: 8000, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Rookie Pack' }] },
+    semis: { coins: 4000, packs: [] },
+    quarters: { coins: 1000, packs: [] },
+  },
+  'NBA Cup': {
+    champion: { coins: 50000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }, { id: 'allstar-2', type: 'allstar', name: 'All-Star Pack' }] },
+    finalist: { coins: 25000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
+    semis: { coins: 12000, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Rookie Pack' }] },
+    quarters: { coins: 5000, packs: [] },
+  },
+  'NBA Playoffs': {
+    champion: { coins: 150000, packs: [{ id: 'mvp-1', type: 'mvp', name: 'Finals MVP Pack' }, { id: 'hof-1', type: 'hof', name: 'HOF Pack' }] },
+    finalist: { coins: 75000, packs: [{ id: 'mvp-1', type: 'mvp', name: 'Finals MVP Pack' }] },
+    semis: { coins: 35000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
+    quarters: { coins: 15000, packs: [] },
+  }
+};
+
+const TournamentSummaryModal: React.FC<{
+  show: boolean;
+  position: string;
+  rewards: { coins: number; packs: any[] } | null;
+  onClaim: () => void;
+}> = ({ show, position, rewards, onClaim }) => {
+  if (!show || !rewards) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="fixed inset-0 z-[10000] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-6"
+    >
+      <motion.div
+        initial={{ scale: 0.9, y: 30 }}
+        animate={{ scale: 1, y: 0 }}
+        className="w-full max-w-lg bg-zinc-950 border border-zinc-900 rounded-[3.5rem] p-10 text-center space-y-10 shadow-[0_0_150px_rgba(245,158,11,0.2)] relative overflow-hidden"
+      >
+        {/* Decorative Background Elements */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent" />
+        <div className="absolute -top-24 -left-24 w-64 h-64 bg-amber-500/10 rounded-full blur-[100px]" />
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-amber-500/10 rounded-full blur-[100px]" />
+
+        <div className="space-y-4 relative z-10">
+          <div className="flex justify-center">
+            <div className="w-20 h-20 bg-amber-500 rounded-3xl flex items-center justify-center shadow-[0_0_40px_rgba(245,158,11,0.3)] rotate-12">
+              <Trophy size={40} className="text-black" />
+            </div>
+          </div>
+          <h2 className="text-5xl font-black italic uppercase tracking-tighter text-white leading-tight">
+            Tournament<br />Finished!
+          </h2>
+          <div className="inline-block px-6 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full">
+            <p className="text-sm font-black uppercase tracking-[0.3em] text-amber-500">
+              {position === 'champion' ? '🏆 CHAMPION' : position.toUpperCase()}
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-6 relative z-10">
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">Your Rewards</p>
+          
+          <div className="grid grid-cols-2 gap-4">
+            {/* Coins Reward */}
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-3xl p-6 flex flex-col items-center justify-center gap-3 group hover:border-amber-500/30 transition-all">
+              <div className="w-12 h-12 bg-amber-500/20 rounded-2xl flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+                <Coins size={24} />
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-black italic text-white">{rewards.coins.toLocaleString()}</p>
+                <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Coins</p>
+              </div>
+            </div>
+
+            {/* Packs Reward */}
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-3xl p-6 flex flex-col items-center justify-center gap-3 group hover:border-amber-500/30 transition-all">
+              <div className="w-12 h-12 bg-amber-500/20 rounded-2xl flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+                <Package size={24} />
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-black italic text-white">{rewards.packs.length}</p>
+                <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Packs Earned</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Pack Icons List */}
+          {rewards.packs.length > 0 && (
+            <div className="flex justify-center gap-3 pt-2">
+              {rewards.packs.map((pack, idx) => (
+                <div key={idx} className="w-10 h-14 bg-zinc-900 border border-zinc-800 rounded-lg flex items-center justify-center relative group">
+                  <Package size={16} className="text-zinc-600 group-hover:text-amber-500 transition-colors" />
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center">
+                    <span className="text-[8px] font-black text-black">1</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={onClaim}
+          className="w-full bg-amber-500 text-black py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 hover:bg-amber-400 transition-all shadow-[0_20px_40px_rgba(245,158,11,0.2)] active:scale-95 relative z-10"
+        >
+          <span>Claim Rewards</span>
+          <ArrowRight size={20} />
+        </button>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 const Slot: React.FC<{ 
   slot: DraftSlot; 
   mini?: boolean; 
@@ -165,7 +281,7 @@ const Slot: React.FC<{
 };
 
 const DraftView: React.FC = () => {
-  const { coins, spendCoins, setCurrentView } = useGame();
+  const { coins, spendCoins, setCurrentView, addCoins, addPackToInventory } = useGame();
   const { generateDraftOptions } = useEngine();
 
   const [phase, setPhase] = useState<DraftPhase>('entry');
@@ -182,6 +298,11 @@ const DraftView: React.FC = () => {
   const [currentRound, setCurrentRound] = useState<'QF' | 'SF' | 'F'>('QF');
   const [isSimulating, setIsSimulating] = useState(false);
   const [matchResult, setMatchResult] = useState<{ score1: number, score2: number, winner: string } | null>(null);
+
+  // Rewards State
+  const [showTournamentSummary, setShowTournamentSummary] = useState(false);
+  const [finalPosition, setFinalPosition] = useState<'quarters' | 'semis' | 'finalist' | 'champion' | null>(null);
+  const [earnedRewards, setEarnedRewards] = useState<{ coins: number, packs: any[] } | null>(null);
 
   // State Persistence
   useEffect(() => {
@@ -345,17 +466,66 @@ const DraftView: React.FC = () => {
     } : m));
 
     setIsSimulating(false);
+
+    // Handle Tournament Progression or End
+    if (match.team1 === 'USER' || match.team2 === 'USER') {
+      if (winner !== 'USER') {
+        // User lost
+        const position = currentRound === 'QF' ? 'quarters' : currentRound === 'SF' ? 'semis' : 'finalist';
+        handleTournamentEnd(position);
+      } else if (currentRound === 'F') {
+        // User won the final
+        handleTournamentEnd('champion');
+      }
+    }
+  };
+
+  const handleTournamentEnd = (position: 'quarters' | 'semis' | 'finalist' | 'champion') => {
+    if (!selectedTournament) return;
+    const rewards = REWARDS[selectedTournament.name as keyof typeof REWARDS][position];
+    setFinalPosition(position);
+    setEarnedRewards(rewards);
+    // Delay showing the summary so the user can see the match result first
+    setTimeout(() => {
+      setShowTournamentSummary(true);
+    }, 3000);
+  };
+
+  const claimRewards = () => {
+    if (earnedRewards) {
+      addCoins(earnedRewards.coins);
+      earnedRewards.packs.forEach(pack => {
+        addPackToInventory({ 
+          id: `${pack.type}-${Date.now()}-${Math.random()}`, 
+          type: pack.type, 
+          name: pack.name 
+        });
+      });
+    }
+    // Reset Draft State
+    setPhase('entry');
+    setStarters(STARTER_SLOTS);
+    setBench(BENCH_SLOTS);
+    setBracket([]);
+    setSelectedTournament(null);
+    setShowTournamentSummary(false);
+    setFinalPosition(null);
+    setEarnedRewards(null);
+    localStorage.removeItem('DRAFT_STATE'); // Clear saved draft
   };
 
   const advanceRound = () => {
     const userLost = matchResult && matchResult.winner !== 'Your Team';
-    setMatchResult(null);
+    const isFinal = currentRound === 'F';
     
-    if (userLost) {
-      setPhase('summary');
+    if (userLost || isFinal) {
+      setMatchResult(null);
+      setShowTournamentSummary(true);
       return;
     }
 
+    setMatchResult(null);
+    
     // Helper to simulate a match between two ghost teams
     const simulateGhostMatch = (m: BracketMatch): GhostTeam | 'USER' => {
       if (m.winner) return m.winner;
@@ -910,6 +1080,13 @@ const DraftView: React.FC = () => {
       <CardDetailModal 
         card={selectedCardForDetail} 
         onClose={() => setSelectedCardForDetail(null)} 
+      />
+
+      <TournamentSummaryModal 
+        show={showTournamentSummary}
+        position={finalPosition || ''}
+        rewards={earnedRewards}
+        onClaim={claimRewards}
       />
     </div>
   );
