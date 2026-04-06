@@ -11,9 +11,11 @@ import PacksView from './views/PacksView';
 import ShopView from './views/ShopView';
 import CollectionView from './views/CollectionView';
 import OpenView from './views/OpenView';
+import HomeView from './views/HomeView';
+import DraftView from './views/DraftView';
 import RewardsView from './views/RewardsView';
 import ProfileView from './views/ProfileView';
-import { LayoutGrid, ShoppingBag, Zap, Trophy, Coins, User as UserIcon, Gift, X, Star } from 'lucide-react';
+import { LayoutGrid, ShoppingBag, Zap, Trophy, Coins, User as UserIcon, Gift, X, Star, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MemoryManager } from './lib/memory';
 
@@ -86,11 +88,13 @@ function AppContent() {
     switch (currentView) {
       case 'collection': return <CollectionView />;
       case 'open': return <OpenView />;
+      case 'home': return <HomeView />;
+      case 'draft': return <DraftView />;
       case 'packs': return <PacksView />;
       case 'rewards': return <RewardsView />;
       case 'shop': return <ShopView />;
       case 'profile': return <ProfileView />;
-      default: return <OpenView />;
+      default: return <HomeView />;
     }
   };
 
@@ -147,7 +151,7 @@ function AppContent() {
       </div>
       
       {/* Main Content Area - This grows to fill space and its children handle scrolling */}
-      <main className={`flex-1 overflow-hidden relative bg-black ${isPremium ? 'pt-12 pb-16' : 'pt-[108px] pb-[124px]'}`}>
+      <main className={`flex-1 relative bg-black overflow-hidden ${isPremium ? 'pt-14 pb-16' : 'pt-[116px] pb-16'}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={currentView}
@@ -164,9 +168,6 @@ function AppContent() {
 
       {/* Global Navigation Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-[4000] flex flex-col bg-black">
-        {/* Bottom Ad Area */}
-        <StaticAd position="footer" />
-        
         {/* Global Navigation Bar */}
         <nav className="h-16 bg-zinc-950 border-t border-zinc-900 flex items-center justify-around px-2 pb-safe shrink-0">
           {/* Collection */}
@@ -191,15 +192,15 @@ function AppContent() {
             <span className="text-[8px] font-black uppercase tracking-wider">Rewards</span>
           </button>
 
-          {/* OPEN (Center) */}
+          {/* HOME (Center) */}
           <button 
-            onClick={() => handleViewChange('open')}
-            className={`flex-1 relative flex flex-col items-center justify-center transition-all duration-500 ${currentView === 'open' ? 'scale-110 -translate-y-1' : ''}`}
+            onClick={() => handleViewChange('home')}
+            className={`flex-1 relative flex flex-col items-center justify-center transition-all duration-500 ${currentView === 'home' || currentView === 'open' || currentView === 'draft' ? 'scale-110 -translate-y-1' : ''}`}
           >
-            <div className={`p-2.5 rounded-xl transition-all ${currentView === 'open' ? 'bg-amber-500 text-black shadow-[0_0_20px_rgba(245,158,11,0.4)]' : 'bg-zinc-900 text-zinc-500'}`}>
-              <Zap size={24} strokeWidth={3} fill={currentView === 'open' ? "currentColor" : "none"} />
+            <div className={`p-2.5 rounded-xl transition-all ${currentView === 'home' || currentView === 'open' || currentView === 'draft' ? 'bg-amber-500 text-black shadow-[0_0_20px_rgba(245,158,11,0.4)]' : 'bg-zinc-900 text-zinc-500'}`}>
+              <Home size={24} strokeWidth={3} fill={currentView === 'home' || currentView === 'open' || currentView === 'draft' ? "currentColor" : "none"} />
             </div>
-            <span className={`text-[9px] font-black uppercase tracking-[0.1em] mt-1 transition-colors ${currentView === 'open' ? 'text-amber-500' : 'text-zinc-600'}`}>Open</span>
+            <span className={`text-[9px] font-black uppercase tracking-[0.1em] mt-1 transition-colors ${currentView === 'home' || currentView === 'open' || currentView === 'draft' ? 'text-amber-500' : 'text-zinc-600'}`}>Home</span>
           </button>
 
           {/* Packs */}

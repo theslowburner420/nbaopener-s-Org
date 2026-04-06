@@ -38,7 +38,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       coins: initialGuestState?.coins ?? 500,
       collection: initialGuestState?.collection ?? [],
       customCards: initialGuestState?.customCards ?? [],
-      currentView: 'open',
+      currentView: 'home',
       unlockedAchievements: initialGuestState?.unlockedAchievements ?? [],
       lastClaimedDate: initialGuestState?.lastClaimedDate ?? null,
       claimedDays: initialGuestState?.claimedDays ?? [],

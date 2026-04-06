@@ -40,7 +40,7 @@ export interface Card {
   teamLogoUrl?: string;
 }
 
-export type ViewType = 'collection' | 'open' | 'packs' | 'rewards' | 'shop' | 'profile';
+export type ViewType = 'collection' | 'open' | 'packs' | 'rewards' | 'shop' | 'profile' | 'home' | 'draft';
 
 export interface Achievement {
   id: string;

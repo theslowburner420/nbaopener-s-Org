@@ -24,11 +24,11 @@ export default function OpenView() {
   };
 
   return (
-    <div className="h-full w-full flex flex-col items-center bg-black relative overflow-hidden">
+    <div className="h-full w-full flex flex-col items-center justify-center bg-black relative overflow-hidden">
       {/* Dynamic Background Glow */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(245,158,11,0.1)_0%,_transparent_70%)] pointer-events-none" />
       
-      <div className="flex flex-col items-center justify-center w-full max-w-sm z-10 p-4">
+      <div className="flex flex-col items-center justify-center w-full z-10 p-4">
         {/* Giant Random Pack */}
         <motion.div
           animate={{ 

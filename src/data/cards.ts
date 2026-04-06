@@ -9251,7 +9251,11 @@ export const ALL_CARDS: Card[] = rawCards.map((card, index) => {
   const coach = teamCoaches[card.team];
   
   // Calculate OVR based on stats
-  const ovr = Math.round((card.pts * 0.5) + (card.reb * 0.25) + (card.ast * 0.25)) + 60;
+  // Formula: 66 + (PTS * 0.8) + (AST * 0.6) + (REB * 0.6)
+  // Superstars (28/8/7) -> ~97
+  // Rotation (8/2/3) -> ~75
+  const calculatedOvr = Math.round(66 + (card.pts * 0.8) + (card.ast * 0.6) + (card.reb * 0.6));
+  const ovr = Math.min(calculatedOvr, 99);
   
   return {
     ...card,
