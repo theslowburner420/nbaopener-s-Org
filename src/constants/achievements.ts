@@ -5,16 +5,17 @@ export interface Achievement {
   title: string;
   description: string;
   icon: any;
-  category: 'packs' | 'collection' | 'specials';
+  category: 'packs' | 'collection' | 'specials' | 'drafting' | 'tournaments' | 'matches';
   level: 'bronze' | 'silver' | 'gold' | 'diamond';
   requirement: (state: any, allCards: any[]) => boolean;
   getProgress: (state: any, allCards: any[]) => { current: number; total: number };
-  reward: number;
-  packReward?: {
+  rewardCoins: number;
+  rewardPacks?: {
     id: string;
     type: string;
     name: string;
-  };
+    count?: number;
+  }[];
 }
 
 const TEAMS = [
@@ -46,121 +47,121 @@ export const ACHIEVEMENTS: Achievement[] = [
     id: 'pack-1', title: 'First Step', description: 'Open your first pack.', icon: Package, category: 'packs', level: 'bronze',
     requirement: (state) => state.collection.length >= 5, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 5), total: 5 }),
-    reward: 1000 
+    rewardCoins: 1000 
   },
   { 
     id: 'pack-5', title: 'Rookie Opener', description: 'Open 5 packs.', icon: Package, category: 'packs', level: 'bronze',
     requirement: (state) => state.collection.length >= 25, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 25), total: 25 }),
-    reward: 2500 
+    rewardCoins: 2500 
   },
   { 
     id: 'pack-10', title: 'Regular Opener', description: 'Open 10 packs.', icon: Package, category: 'packs', level: 'silver',
     requirement: (state) => state.collection.length >= 50, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 50), total: 50 }),
-    reward: 5000, packReward: { id: 'rookie-pack', type: 'rookie', name: 'Rookie Pack' } 
+    rewardCoins: 5000, rewardPacks: [{ id: 'rookie-pack', type: 'rookie', name: 'Rookie Pack' }] 
   },
   { 
     id: 'pack-25', title: 'Dedicated Opener', description: 'Open 25 packs.', icon: Package, category: 'packs', level: 'silver',
     requirement: (state) => state.collection.length >= 125, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 125), total: 125 }),
-    reward: 10000 
+    rewardCoins: 10000 
   },
   { 
     id: 'pack-50', title: 'Pack Enthusiast', description: 'Open 50 packs.', icon: Package, category: 'packs', level: 'gold',
     requirement: (state) => state.collection.length >= 250, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 250), total: 250 }),
-    reward: 25000, packReward: { id: 'allstar-pack', type: 'allstar', name: 'All-Star Pack' } 
+    rewardCoins: 25000, rewardPacks: [{ id: 'allstar-pack', type: 'allstar', name: 'All-Star Pack' }] 
   },
   { 
     id: 'pack-100', title: 'Pack Addict', description: 'Open 100 packs.', icon: Package, category: 'packs', level: 'gold',
     requirement: (state) => state.collection.length >= 500, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 500), total: 500 }),
-    reward: 50000, packReward: { id: 'mvp-pack', type: 'mvp', name: 'MVP Pack' } 
+    rewardCoins: 50000, rewardPacks: [{ id: 'mvp-pack', type: 'mvp', name: 'MVP Pack' }] 
   },
   { 
     id: 'pack-200', title: 'Bulk Buyer', description: 'Open 200 packs.', icon: Package, category: 'packs', level: 'gold',
     requirement: (state) => state.collection.length >= 1000, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 1000), total: 1000 }),
-    reward: 100000 
+    rewardCoins: 100000 
   },
   { 
     id: 'pack-300', title: 'Crate Collector', description: 'Open 300 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 1500, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 1500), total: 1500 }),
-    reward: 150000 
+    rewardCoins: 150000 
   },
   { 
     id: 'pack-400', title: 'Warehouse Manager', description: 'Open 400 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 2000, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 2000), total: 2000 }),
-    reward: 200000 
+    rewardCoins: 200000 
   },
   { 
     id: 'pack-500', title: 'Halfway to a Thousand', description: 'Open 500 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 2500, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 2500), total: 2500 }),
-    reward: 250000, packReward: { id: 'hof-pack', type: 'hof', name: 'HOF Pack' } 
+    rewardCoins: 250000, rewardPacks: [{ id: 'hof-pack', type: 'hof', name: 'HOF Pack' }] 
   },
   { 
     id: 'pack-750', title: 'Three Quarters', description: 'Open 750 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 3750, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 3750), total: 3750 }),
-    reward: 350000 
+    rewardCoins: 350000 
   },
   { 
     id: 'pack-1000', title: 'Millennial Opener', description: 'Open 1000 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 5000, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 5000), total: 5000 }),
-    reward: 500000, packReward: { id: 'hof-pack', type: 'hof', name: 'HOF Pack' } 
+    rewardCoins: 500000, rewardPacks: [{ id: 'hof-pack', type: 'hof', name: 'HOF Pack' }] 
   },
   { 
     id: 'pack-1500', title: 'Pack Veteran', description: 'Open 1500 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 7500, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 7500), total: 7500 }),
-    reward: 750000 
+    rewardCoins: 750000 
   },
   { 
     id: 'pack-2000', title: 'Double Millennial', description: 'Open 2000 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 10000, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 10000), total: 10000 }),
-    reward: 1000000 
+    rewardCoins: 1000000 
   },
   { 
     id: 'pack-2500', title: 'Pack Legend', description: 'Open 2500 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 12500, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 12500), total: 12500 }),
-    reward: 1250000 
+    rewardCoins: 1250000 
   },
   { 
     id: 'pack-3000', title: 'Triple Millennial', description: 'Open 3000 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 15000, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 15000), total: 15000 }),
-    reward: 1500000 
+    rewardCoins: 1500000 
   },
   { 
     id: 'pack-3500', title: 'Pack Master', description: 'Open 3500 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 17500, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 17500), total: 17500 }),
-    reward: 1750000 
+    rewardCoins: 1750000 
   },
   { 
     id: 'pack-4000', title: 'Quadruple Millennial', description: 'Open 4000 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 20000, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 20000), total: 20000 }),
-    reward: 2000000 
+    rewardCoins: 2000000 
   },
   { 
     id: 'pack-4500', title: 'Pack God', description: 'Open 4500 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 22500, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 22500), total: 22500 }),
-    reward: 2250000 
+    rewardCoins: 2250000 
   },
   { 
     id: 'pack-5000', title: 'Ultimate Opener', description: 'Open 5000 packs.', icon: Package, category: 'packs', level: 'diamond',
     requirement: (state) => state.collection.length >= 25000, 
     getProgress: (state) => ({ current: Math.min(state.collection.length, 25000), total: 25000 }),
-    reward: 5000000, packReward: { id: 'hof-pack', type: 'hof', name: 'HOF Pack' } 
+    rewardCoins: 5000000, rewardPacks: [{ id: 'hof-pack', type: 'hof', name: 'HOF Pack' }] 
   },
 
   // --- FRANCHISES (30) ---
@@ -182,8 +183,8 @@ export const ACHIEVEMENTS: Achievement[] = [
       const owned = teamCards.filter(c => ownedIds.has(c.id)).length;
       return { current: owned, total: teamCards.length || 1 };
     },
-    reward: 5000,
-    packReward: { id: 'mvp-pack', type: 'mvp', name: 'MVP Pack' }
+    rewardCoins: 5000,
+    rewardPacks: [{ id: 'mvp-pack', type: 'mvp', name: 'MVP Pack' }]
   })),
 
   // --- RARITIES (50) ---
@@ -200,7 +201,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       const countOwned = allCards.filter(c => c.rarity === 'bench' && ownedIds.has(c.id)).length;
       return { current: Math.min(countOwned, count), total: count };
     },
-    reward: count * 10
+    rewardCoins: count * 10
   })),
   ...[10, 50, 100, 150, 200, 250, 300, 350, 400, 500].map(count => ({
     id: `rarity-starter-${count}`, title: `Starter Squad ${count}`, description: `Collect ${count} Starter rarity cards.`, icon: Target,
@@ -215,7 +216,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       const countOwned = allCards.filter(c => c.rarity === 'starter' && ownedIds.has(c.id)).length;
       return { current: Math.min(countOwned, count), total: count };
     },
-    reward: count * 25
+    rewardCoins: count * 25
   })),
   ...[5, 10, 15, 20, 25, 30, 40, 50, 75, 100].map(count => ({
     id: `rarity-allstar-${count}`, title: `All-Star Elite ${count}`, description: `Collect ${count} All-Star rarity cards.`, icon: Star,
@@ -230,7 +231,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       const countOwned = allCards.filter(c => c.rarity === 'allstar' && ownedIds.has(c.id)).length;
       return { current: Math.min(countOwned, count), total: count };
     },
-    reward: count * 100
+    rewardCoins: count * 100
   })),
   ...[1, 2, 3, 4, 5, 10, 15, 20, 25, 50].map(count => ({
     id: `rarity-franchise-${count}`, title: `Franchise Face ${count}`, description: `Collect ${count} Franchise rarity cards.`, icon: Flame,
@@ -245,7 +246,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       const countOwned = allCards.filter(c => c.rarity === 'franchise' && ownedIds.has(c.id)).length;
       return { current: Math.min(countOwned, count), total: count };
     },
-    reward: count * 500
+    rewardCoins: count * 500
   })),
   ...[1, 2, 3, 4, 5, 10, 15, 20, 25, 30].map(count => ({
     id: `rarity-legend-${count}`, title: `Legendary Status ${count}`, description: `Collect ${count} Legend rarity cards.`, icon: Crown,
@@ -260,7 +261,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       const countOwned = allCards.filter(c => c.rarity === 'legend' && ownedIds.has(c.id)).length;
       return { current: Math.min(countOwned, count), total: count };
     },
-    reward: count * 2500
+    rewardCoins: count * 2500
   })),
 
   // --- HISTORICAL MOMENTS / PLAYERS (100) ---
@@ -281,7 +282,7 @@ export const ACHIEVEMENTS: Achievement[] = [
         const has = allCards.some(c => c.name.includes(player) && ownedIds.has(c.id));
         return { current: has ? 1 : 0, total: 1 };
       },
-      reward: 2500
+      rewardCoins: 2500
     },
     {
       id: `player-${player.toLowerCase().replace(/ /g, '-')}-2`,
@@ -299,7 +300,7 @@ export const ACHIEVEMENTS: Achievement[] = [
         const count = allCards.filter(c => c.name.includes(player) && ownedIds.has(c.id)).length;
         return { current: Math.min(count, 3), total: 3 };
       },
-      reward: 7500
+      rewardCoins: 7500
     },
     {
       id: `player-${player.toLowerCase().replace(/ /g, '-')}-3`,
@@ -317,7 +318,7 @@ export const ACHIEVEMENTS: Achievement[] = [
         const count = allCards.filter(c => c.name.includes(player) && ownedIds.has(c.id)).length;
         return { current: Math.min(count, 5), total: 5 };
       },
-      reward: 25000
+      rewardCoins: 25000
     },
     {
       id: `player-${player.toLowerCase().replace(/ /g, '-')}-4`,
@@ -335,7 +336,7 @@ export const ACHIEVEMENTS: Achievement[] = [
         const has = allCards.some(c => c.name.includes(player) && c.category === 'Dynasty' && ownedIds.has(c.id));
         return { current: has ? 1 : 0, total: 1 };
       },
-      reward: 15000
+      rewardCoins: 15000
     },
     {
       id: `player-${player.toLowerCase().replace(/ /g, '-')}-5`,
@@ -353,7 +354,147 @@ export const ACHIEVEMENTS: Achievement[] = [
         const has = allCards.some(c => c.name.includes(player) && (c.category === 'Finals MVP' || c.category === 'All-Star MVP') && ownedIds.has(c.id));
         return { current: has ? 1 : 0, total: 1 };
       },
-      reward: 12500
+      rewardCoins: 12500
     }
-  ])
+  ]),
+
+  // --- DRAFT ACHIEVEMENTS (12) ---
+  {
+    id: 'trust_the_process',
+    category: 'drafting',
+    title: 'Trust the Process',
+    description: 'Complete your first HoopsDraft.',
+    icon: Users,
+    level: 'bronze',
+    requirement: (state) => state.unlockedAchievements.includes('trust_the_process'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('trust_the_process') ? 1 : 0, total: 1 }),
+    rewardCoins: 2000
+  },
+  {
+    id: 'superteam',
+    category: 'drafting',
+    title: 'Superteam',
+    description: 'Build a team with a final OVR of 92 or higher.',
+    icon: Star,
+    level: 'silver',
+    requirement: (state) => state.unlockedAchievements.includes('superteam'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('superteam') ? 1 : 0, total: 1 }),
+    rewardCoins: 5000,
+    rewardPacks: [{ id: 'mvp-pack', type: 'mvp', name: 'Finals MVP Pack' }]
+  },
+  {
+    id: 'bench_mob',
+    category: 'drafting',
+    title: 'Bench Mob',
+    description: 'Get your bench average OVR to 85 or higher.',
+    icon: Zap,
+    level: 'silver',
+    requirement: (state) => state.unlockedAchievements.includes('bench_mob'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('bench_mob') ? 1 : 0, total: 1 }),
+    rewardCoins: 5000
+  },
+  {
+    id: 'generational_talent',
+    category: 'drafting',
+    title: 'Generational Talent',
+    description: 'Select a Captain with 97+ OVR.',
+    icon: Crown,
+    level: 'gold',
+    requirement: (state) => state.unlockedAchievements.includes('generational_talent'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('generational_talent') ? 1 : 0, total: 1 }),
+    rewardCoins: 10000,
+    rewardPacks: [{ id: 'allstar-pack', type: 'allstar', name: 'All-Star Pack' }]
+  },
+  {
+    id: 'summer_mvp',
+    category: 'tournaments',
+    title: 'Summer MVP',
+    description: "Win the 'Summer League' tournament for the first time.",
+    icon: Trophy,
+    level: 'silver',
+    requirement: (state) => state.unlockedAchievements.includes('summer_mvp'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('summer_mvp') ? 1 : 0, total: 1 }),
+    rewardCoins: 10000
+  },
+  {
+    id: 'cup_champion',
+    category: 'tournaments',
+    title: 'Cup Champion',
+    description: "Win the 'NBA Cup' tournament.",
+    icon: Award,
+    level: 'gold',
+    requirement: (state) => state.unlockedAchievements.includes('cup_champion'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('cup_champion') ? 1 : 0, total: 1 }),
+    rewardCoins: 25000,
+    rewardPacks: [{ id: 'hof-pack', type: 'hof', name: 'HOF Pack' }]
+  },
+  {
+    id: 'ring_chaser',
+    category: 'tournaments',
+    title: 'Ring Chaser',
+    description: "Win the 'NBA Playoffs' tournament.",
+    icon: Flame,
+    level: 'diamond',
+    requirement: (state) => state.unlockedAchievements.includes('ring_chaser'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('ring_chaser') ? 1 : 0, total: 1 }),
+    rewardCoins: 50000,
+    rewardPacks: [{ id: 'hof-pack', type: 'hof', name: 'HOF Pack', count: 2 }]
+  },
+  {
+    id: 'david_vs_goliath',
+    category: 'tournaments',
+    title: 'David vs Goliath',
+    description: "Win a match in the 'NBA Playoffs' using a team with less than 88 OVR.",
+    icon: Target,
+    level: 'gold',
+    requirement: (state) => state.unlockedAchievements.includes('david_vs_goliath'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('david_vs_goliath') ? 1 : 0, total: 1 }),
+    rewardCoins: 15000
+  },
+  {
+    id: 'the_carry',
+    category: 'matches',
+    title: 'The Carry',
+    description: 'A player on your team scores 40 or more points in a single simulation match.',
+    icon: Flame,
+    level: 'silver',
+    requirement: (state) => state.unlockedAchievements.includes('the_carry'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('the_carry') ? 1 : 0, total: 1 }),
+    rewardCoins: 5000,
+    rewardPacks: [{ id: 'mvp-pack', type: 'mvp', name: 'Finals MVP Pack' }]
+  },
+  {
+    id: 'floor_general',
+    category: 'matches',
+    title: 'Floor General',
+    description: 'A player on your team records 15 or more assists in a match.',
+    icon: Zap,
+    level: 'silver',
+    requirement: (state) => state.unlockedAchievements.includes('floor_general'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('floor_general') ? 1 : 0, total: 1 }),
+    rewardCoins: 5000
+  },
+  {
+    id: 'blowout',
+    category: 'matches',
+    title: 'Blowout',
+    description: 'Win any simulation match by a difference of 20 points or more.',
+    icon: Trophy,
+    level: 'silver',
+    requirement: (state) => state.unlockedAchievements.includes('blowout'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('blowout') ? 1 : 0, total: 1 }),
+    rewardCoins: 5000,
+    rewardPacks: [{ id: 'allstar-pack', type: 'allstar', name: 'All-Star Pack' }]
+  },
+  {
+    id: 'clutch_time',
+    category: 'matches',
+    title: 'Clutch Time',
+    description: 'Win a match by only 1 or 2 points difference.',
+    icon: Zap,
+    level: 'bronze',
+    requirement: (state) => state.unlockedAchievements.includes('clutch_time'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('clutch_time') ? 1 : 0, total: 1 }),
+    rewardCoins: 3000
+  }
 ];

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { GameState, ViewType, Card, User } from '../types';
+import { ACHIEVEMENTS } from '../constants/achievements';
 import { supabase } from '../lib/supabase';
 
 interface GameContextType extends GameState {
@@ -7,22 +8,28 @@ interface GameContextType extends GameState {
   isInitialSyncDone: boolean;
   isOffline: boolean;
   setCoins: (coins: number | ((prev: number) => number)) => void;
-  addCoins: (amount: number) => void;
-  spendCoins: (amount: number) => boolean;
-  addToCollection: (cardIds: string[]) => void;
-  addCustomCard: (card: Card) => void;
-  setCurrentView: (view: ViewType) => void;
-  unlockAchievement: (id: string) => void;
-  claimReward: (day: number, amount: number) => void;
-  addPackToInventory: (pack: { id: string; type: string; name: string }) => void;
-  removePackFromInventory: (packId: string) => void;
-  setPremium: (status: boolean) => void;
-  resetGame: () => void;
+  addCoins: (amount: number, sync?: boolean) => Promise<void>;
+  spendCoins: (amount: number, sync?: boolean) => Promise<boolean>;
+  addToCollection: (cardIds: string[], sync?: boolean) => Promise<void>;
+  addCustomCard: (card: Card, sync?: boolean) => Promise<void>;
+  unlockAchievement: (id: string, sync?: boolean) => Promise<any>;
+  claimAchievementReward: (id: string, sync?: boolean) => Promise<void>;
+  claimReward: (day: number, amount: number, pack?: { id: string; type: string; name: string }, sync?: boolean) => Promise<void>;
+  addPackToInventory: (pack: { id: string; type: string; name: string }, sync?: boolean) => Promise<void>;
+  removePackFromInventory: (packId: string, sync?: boolean) => Promise<void>;
+  setPremium: (status: boolean, sync?: boolean) => Promise<void>;
+  resetGame: (sync?: boolean) => Promise<void>;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   updateGameState: (updates: Partial<GameState>) => void;
+  updateGameStateAsync: (updates: Partial<GameState>) => Promise<void>;
   forceSync: () => Promise<void>;
   isSaving: boolean;
+  isBackgroundSaving: boolean;
+  syncError: string | null;
+  removeNotification: (id: string) => void;
+  showWelcomeGift: boolean;
+  setShowWelcomeGift: (show: boolean) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -40,6 +47,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       customCards: initialGuestState?.customCards ?? [],
       currentView: 'home',
       unlockedAchievements: initialGuestState?.unlockedAchievements ?? [],
+      claimedAchievements: initialGuestState?.claimedAchievements ?? [],
       lastClaimedDate: initialGuestState?.lastClaimedDate ?? null,
       claimedDays: initialGuestState?.claimedDays ?? [],
       inventoryPacks: initialGuestState?.inventoryPacks ?? [],
@@ -49,10 +57,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const authProcessed = React.useRef(false);
   const isSyncingRef = useRef(false);
+  const isBackgroundSyncingRef = useRef(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isInitialSyncDone, setIsInitialSyncDone] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isBackgroundSaving, setIsBackgroundSaving] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
   const [showWelcomeGift, setShowWelcomeGift] = useState(false);
   const stateRef = useRef(state);
   const lastSyncedStateRef = useRef<string>('');
@@ -70,6 +81,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         collection: state.collection,
         customCards: state.customCards,
         unlockedAchievements: state.unlockedAchievements,
+        claimedAchievements: state.claimedAchievements,
         lastClaimedDate: state.lastClaimedDate,
         claimedDays: state.claimedDays,
         inventoryPacks: state.inventoryPacks,
@@ -78,6 +90,102 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('GUEST_PROGRESS', JSON.stringify(guestData));
     }
   }, [state]);
+
+  // Function to force immediate sync to Supabase with retries (IRON RULE: Write Confirmation)
+  const forceSyncToSupabase = useCallback(async (newState: GameState, retries = 5, silent = false) => {
+    if (isBackgroundSyncingRef.current && silent) return;
+    
+    try {
+      if (!newState.user || !supabase) return;
+
+      // Validation of UUID
+      if (!newState.user?.id) return;
+
+      const payload = {
+        username: newState.user.username,
+        avatar_url: newState.user.avatar_url,
+        coins: Number(newState.coins) || 0,
+        cards: Array.isArray(newState.collection) ? newState.collection : [],
+        unlocked_achievements: Array.isArray(newState.unlockedAchievements) ? newState.unlockedAchievements : [],
+        claimed_achievements: Array.isArray(newState.claimedAchievements) ? newState.claimedAchievements : [],
+        inventory_packs: Array.isArray(newState.inventoryPacks) ? newState.inventoryPacks : [],
+        ads_disabled: !!newState.isPremium,
+        updated_at: new Date().toISOString(),
+      };
+
+      const stateString = JSON.stringify({
+        coins: payload.coins,
+        collection: payload.cards,
+        unlockedAchievements: payload.unlocked_achievements,
+        claimedAchievements: payload.claimed_achievements,
+        inventoryPacks: payload.inventory_packs,
+        isPremium: payload.ads_disabled,
+      });
+
+      if (stateString === lastSyncedStateRef.current) {
+        return true;
+      }
+
+      if (silent) {
+        setIsBackgroundSaving(true);
+        isBackgroundSyncingRef.current = true;
+      } else {
+        setIsSaving(true);
+      }
+
+      const performSave = async (attempt: number): Promise<boolean> => {
+        try {
+          const { error } = await supabase!
+            .from('profiles')
+            .update(payload)
+            .eq('id', newState.user!.id);
+          
+          if (error) {
+            if (error.code === 'PGRST116' || error.message.includes('0 rows')) {
+              const { error: upsertError } = await supabase!.from('profiles').upsert({
+                id: newState.user!.id,
+                ...payload
+              });
+              return !upsertError;
+            }
+            return false;
+          }
+          
+          lastSyncedStateRef.current = stateString;
+          localStorage.removeItem('GUEST_PROGRESS');
+          return true;
+        } catch (err) {
+          console.error(`Sync attempt ${attempt} failed:`, err);
+          return false;
+        }
+      };
+
+      let success = await performSave(1);
+      let attempt = 1;
+      while (!success && attempt < retries) {
+        attempt++;
+        const delay = Math.pow(2, attempt) * 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+        success = await performSave(attempt);
+      }
+
+      if (!success && !silent) {
+        setSyncError('Failed to sync progress after multiple attempts. Progress might be lost if you reload.');
+      }
+
+      return success;
+    } catch (err) {
+      console.error('CRITICAL SYNC ERROR:', err);
+      return false;
+    } finally {
+      if (silent) {
+        setIsBackgroundSaving(false);
+        isBackgroundSyncingRef.current = false;
+      } else {
+        setIsSaving(false);
+      }
+    }
+  }, []);
 
   const syncProfile = useCallback(async (user: any) => {
     if (isSyncingRef.current) return;
@@ -116,6 +224,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       collection: Array.from(new Set([...liveState.collection, ...(guestData?.collection || [])])),
       customCards: Array.from(new Set([...liveState.customCards, ...(guestData?.customCards || [])])),
       unlockedAchievements: Array.from(new Set([...liveState.unlockedAchievements, ...(guestData?.unlockedAchievements || [])])),
+      claimedAchievements: Array.from(new Set([...liveState.claimedAchievements, ...(guestData?.claimedAchievements || [])])),
       inventoryPacks: liveState.inventoryPacks.length > 0 ? liveState.inventoryPacks : (guestData?.inventoryPacks || []),
       claimedDays: Array.from(new Set([...liveState.claimedDays, ...(guestData?.claimedDays || [])])),
       lastClaimedDate: liveState.lastClaimedDate || guestData?.lastClaimedDate,
@@ -129,11 +238,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user: userData,
     }));
 
-    // Unblock UI immediately (Optimistic UI)
-    setIsInitialSyncDone(true);
-    setIsAuthLoading(false);
-
-    // --- BACKGROUND CLOUD SYNC ---
+    // --- BLOCKING CLOUD SYNC ---
     try {
       const { data: cloudProfile, error: fetchError } = await supabase!
         .from('profiles')
@@ -142,11 +247,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (fetchError && fetchError.code !== 'PGRST116') {
-        console.error('❌ CLOUD FETCH ERROR:', fetchError);
+        console.error('❌ CRITICAL CLOUD FETCH ERROR:', fetchError);
+        setSyncError('Failed to load your profile. Please check your connection and try again to avoid data loss.');
         setIsOffline(true);
-      } else {
-        setIsOffline(false);
+        setIsAuthLoading(false);
+        isSyncingRef.current = false;
+        return;
       }
+      
+      setSyncError(null);
+      setIsOffline(false);
 
       let finalState: Partial<GameState>;
 
@@ -169,6 +279,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           coins: Number(cloudProfile.coins) || 0,
           cards: Array.isArray(cloudProfile.cards) ? cloudProfile.cards : [],
           unlocked_achievements: Array.isArray(cloudProfile.unlocked_achievements) ? cloudProfile.unlocked_achievements : [],
+          claimed_achievements: Array.isArray(cloudProfile.claimed_achievements) ? cloudProfile.claimed_achievements : [],
           inventory_packs: Array.isArray(cloudProfile.inventory_packs) ? cloudProfile.inventory_packs : [],
           ads_disabled: !!cloudProfile.ads_disabled,
         };
@@ -179,6 +290,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           collection: parsedCloud.cards,
           inventoryPacks: parsedCloud.inventory_packs,
           unlockedAchievements: parsedCloud.unlocked_achievements,
+          claimedAchievements: parsedCloud.claimed_achievements,
           isPremium: parsedCloud.ads_disabled,
         });
 
@@ -216,6 +328,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             coins: Math.max(parsedCloud.coins, localData.coins),
             collection: mergeArrays(parsedCloud.cards, localData.collection),
             unlockedAchievements: mergeArrays(parsedCloud.unlocked_achievements, localData.unlockedAchievements),
+            claimedAchievements: mergeArrays(parsedCloud.claimed_achievements, localData.claimedAchievements),
             inventoryPacks: mergePacks(parsedCloud.inventory_packs, localData.inventoryPacks),
             isPremium: parsedCloud.ads_disabled || localData.isPremium || false,
           };
@@ -268,18 +381,24 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
               collection: updated.cards || prev.collection,
               inventoryPacks: updated.inventory_packs || prev.inventoryPacks,
               unlockedAchievements: updated.unlocked_achievements || prev.unlockedAchievements,
+              claimedAchievements: updated.claimed_achievements || prev.claimedAchievements,
               isPremium: updated.ads_disabled || prev.isPremium,
             }));
           }).subscribe();
       }
 
+      // FINALLY unblock UI after everything is synced
+      setIsInitialSyncDone(true);
+      setIsAuthLoading(false);
+      isSyncingRef.current = false;
+
     } catch (err) {
-      console.error('❌ BACKGROUND SYNC ERROR:', err);
-      setIsOffline(true);
-    } finally {
+      console.error('❌ CRITICAL SYNC ERROR:', err);
+      setSyncError('An unexpected error occurred during profile load. Please reload the app.');
+      setIsAuthLoading(false);
       isSyncingRef.current = false;
     }
-  }, []);
+  }, [forceSyncToSupabase]);
 
   // Auth and Profile sync setup
   useEffect(() => {
@@ -361,107 +480,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Function to force immediate sync to Supabase with retries (IRON RULE: Write Confirmation)
-  const forceSyncToSupabase = useCallback(async (newState: GameState, retries = 5) => {
-    try {
-      if (!newState.user || !supabase) return;
-
-      // Validation of UUID
-      console.log('🔍 VALIDATING UUID:', newState.user?.id);
-      if (!newState.user?.id) {
-        console.error('❌ UUID VALIDATION FAILED: user.id is null or undefined');
-        return;
-      }
-
-      // Payload Cleanup & Data Mapping Validation
-      // We only include columns that exist in the CSV/Table to avoid 400 errors
-      const payload = {
-        username: newState.user.username,
-        avatar_url: newState.user.avatar_url,
-        coins: Number(newState.coins) || 0,
-        // Serialización Estricta: Ensure arrays are sent as arrays (JSONB)
-        cards: Array.isArray(newState.collection) ? newState.collection : [],
-        unlocked_achievements: Array.isArray(newState.unlockedAchievements) ? newState.unlockedAchievements : [],
-        inventory_packs: Array.isArray(newState.inventoryPacks) ? newState.inventoryPacks : [],
-        ads_disabled: !!newState.isPremium,
-        updated_at: new Date().toISOString(),
-      };
-
-      const stateString = JSON.stringify({
-        coins: payload.coins,
-        collection: payload.cards,
-        unlockedAchievements: payload.unlocked_achievements,
-        inventoryPacks: payload.inventory_packs,
-        isPremium: payload.ads_disabled,
-      });
-
-      if (stateString === lastSyncedStateRef.current) {
-        return;
-      }
-
-      setIsSaving(true);
-      console.log('📤 CLOUD SYNC: Attempting to save state...', payload);
-      
-      const performSave = async (attempt: number): Promise<boolean> => {
-        try {
-          // Use .update().eq() for existing profiles
-          const { error } = await supabase!
-            .from('profiles')
-            .update(payload)
-            .eq('id', newState.user!.id);
-          
-          if (error) {
-            console.error(`❌ CLOUD SAVE ERROR (Attempt ${attempt}):`, error.message, error.details, error.hint);
-            // If update fails because record doesn't exist, try upsert
-            if (error.code === 'PGRST116' || error.message.includes('0 rows')) {
-              console.log('ℹ️ Profile not found, attempting upsert...');
-              const { error: upsertError } = await supabase!.from('profiles').upsert({
-                id: newState.user!.id,
-                ...payload
-              });
-              if (upsertError) {
-                console.error('❌ UPSERT FAILED:', upsertError.message);
-                return false;
-              }
-              return true;
-            }
-            return false;
-          }
-          
-          lastSyncedStateRef.current = stateString;
-          localStorage.removeItem('GUEST_PROGRESS');
-          return true;
-        } catch (err) {
-          console.error(`❌ UNEXPECTED SYNC ERROR (Attempt ${attempt}):`, err);
-          return false;
-        }
-      };
-
-      let success = await performSave(1);
-      let currentAttempt = 1;
-
-      while (!success && currentAttempt < retries) {
-        currentAttempt++;
-        const delay = 1000 * Math.pow(2, currentAttempt - 1);
-        console.log(`🔄 SYNC RETRY: Attempt ${currentAttempt}/${retries} in ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        success = await performSave(currentAttempt);
-      }
-
-      if (!success) {
-        console.error('🚨 CRITICAL SYNC FAILURE: Could not persist progress to cloud.');
-        setIsOffline(true);
-      } else {
-        setIsOffline(false);
-      }
-      
-      setTimeout(() => setIsSaving(false), 800);
-    } catch (criticalErr) {
-      console.error('🚨 CRITICAL SYNC ENGINE ERROR (Anti-Crash Protection):', criticalErr);
-      setIsSaving(false);
-    }
-  }, []);
-
   // Debounced sync effect to handle rapid state changes (proactive saving)
   useEffect(() => {
     if (!state.user || !isInitialSyncDone) return;
@@ -471,8 +489,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     syncTimeoutRef.current = setTimeout(() => {
-      forceSyncToSupabase(state);
-    }, 2000); // 2 second debounce for automatic sync
+      forceSyncToSupabase(state, 3, true);
+    }, 3000); // 3 second debounce for silent background sync
 
     return () => {
       if (syncTimeoutRef.current) {
@@ -486,6 +504,22 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setState(prev => ({ ...prev, ...updates }));
   }, []);
 
+  const updateGameStateAsync = useCallback(async (updates: Partial<GameState>) => {
+    const newState = { ...stateRef.current, ...updates };
+    
+    if (newState.user) {
+      setIsSaving(true);
+      const success = await forceSyncToSupabase(newState);
+      if (!success) {
+        setIsSaving(false);
+        throw new Error('Sync failed. Action aborted to ensure data integrity.');
+      }
+      setIsSaving(false);
+    }
+    
+    setState(prev => ({ ...prev, ...updates }));
+  }, [forceSyncToSupabase]);
+
   const setCoins = useCallback((coins: number | ((prev: number) => number)) => {
     setState(prev => {
       const newCoins = typeof coins === 'function' ? coins(prev.coins) : coins;
@@ -493,97 +527,183 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
-  const addCoins = useCallback((amount: number) => {
-    setState(prev => ({ ...prev, coins: prev.coins + amount }));
-  }, []);
+  const addCoins = useCallback(async (amount: number, sync: boolean = true) => {
+    const newCoins = stateRef.current.coins + amount;
+    if (sync) {
+      await updateGameStateAsync({ coins: newCoins });
+    } else {
+      updateGameState({ coins: newCoins });
+    }
+  }, [updateGameStateAsync, updateGameState]);
 
-  const spendCoins = useCallback((amount: number) => {
-    let success = false;
-    setState(prev => {
-      if (prev.coins >= amount) {
-        success = true;
-        return { ...prev, coins: prev.coins - amount };
+  const spendCoins = useCallback(async (amount: number, sync: boolean = true) => {
+    if (stateRef.current.coins >= amount) {
+      const newCoins = stateRef.current.coins - amount;
+      if (sync) {
+        await updateGameStateAsync({ coins: newCoins });
+      } else {
+        updateGameState({ coins: newCoins });
       }
-      return prev;
-    });
-    return success;
-  }, []);
+      return true;
+    }
+    return false;
+  }, [updateGameStateAsync, updateGameState]);
 
-  const addToCollection = useCallback((cardIds: string[]) => {
-    setState(prev => ({ ...prev, collection: [...prev.collection, ...cardIds] }));
-  }, []);
+  const addToCollection = useCallback(async (cardIds: string[], sync: boolean = true) => {
+    const newCollection = [...stateRef.current.collection, ...cardIds];
+    if (sync) {
+      await updateGameStateAsync({ collection: newCollection });
+    } else {
+      updateGameState({ collection: newCollection });
+    }
+  }, [updateGameStateAsync, updateGameState]);
 
-  const addCustomCard = useCallback((card: Card) => {
-    setState(prev => ({ ...prev, customCards: [...prev.customCards, card] }));
-  }, []);
+  const addCustomCard = useCallback(async (card: Card, sync: boolean = true) => {
+    const newCustomCards = [...stateRef.current.customCards, card];
+    if (sync) {
+      await updateGameStateAsync({ customCards: newCustomCards });
+    } else {
+      updateGameState({ customCards: newCustomCards });
+    }
+  }, [updateGameStateAsync, updateGameState]);
 
   const setCurrentView = useCallback((currentView: ViewType) => {
     setState(prev => ({ ...prev, currentView }));
   }, []);
 
-  const unlockAchievement = useCallback((id: string) => {
-    setState(prev => {
-      if (prev.unlockedAchievements.includes(id)) return prev;
-      return { ...prev, unlockedAchievements: [...prev.unlockedAchievements, id] };
-    });
+  const unlockAchievement = useCallback(async (id: string, sync: boolean = true) => {
+    const achievement = ACHIEVEMENTS.find((a: any) => a.id === id);
+    if (!achievement) return null;
+
+    if (stateRef.current.unlockedAchievements.includes(id)) return null;
+    
+    if (sync) {
+      await updateGameStateAsync({ 
+        unlockedAchievements: [...stateRef.current.unlockedAchievements, id]
+      });
+    } else {
+      updateGameState({ 
+        unlockedAchievements: [...stateRef.current.unlockedAchievements, id]
+      });
+    }
+    return achievement;
+  }, [updateGameStateAsync, updateGameState]);
+
+  const claimAchievementReward = useCallback(async (id: string, sync: boolean = true) => {
+    const achievement = ACHIEVEMENTS.find((a: any) => a.id === id);
+    if (!achievement) return;
+
+    if (stateRef.current.claimedAchievements.includes(id)) return;
+    
+    // Grant rewards
+    let newCoins = stateRef.current.coins + (achievement.rewardCoins || 0);
+    let newPacks = [...stateRef.current.inventoryPacks];
+
+    if (achievement.rewardPacks) {
+      achievement.rewardPacks.forEach((r: any) => {
+        const existing = newPacks.find(p => p.id === r.type);
+        if (existing) {
+          newPacks = newPacks.map(p => p.id === r.type ? { ...p, count: p.count + (r.count || 1) } : p);
+        } else {
+          newPacks.push({ id: r.type, type: r.type, name: r.name, count: r.count || 1 });
+        }
+      });
+    }
+
+    if (sync) {
+      await updateGameStateAsync({ 
+        claimedAchievements: [...stateRef.current.claimedAchievements, id],
+        coins: newCoins,
+        inventoryPacks: newPacks
+      });
+    } else {
+      updateGameState({ 
+        claimedAchievements: [...stateRef.current.claimedAchievements, id],
+        coins: newCoins,
+        inventoryPacks: newPacks
+      });
+    }
+  }, [updateGameStateAsync, updateGameState]);
+
+  const removeNotification = useCallback((id: string) => {
+    // No-op since we're using NotificationContext
   }, []);
 
-  const claimReward = useCallback((day: number, amount: number) => {
-    setState(prev => ({
-      ...prev,
-      coins: prev.coins + amount,
-      claimedDays: [...prev.claimedDays, day],
-      lastClaimedDate: new Date().toISOString().split('T')[0]
-    }));
-  }, []);
-
-  const addPackToInventory = useCallback((pack: { id: string; type: string; name: string }) => {
-    setState(prev => {
-      const existing = prev.inventoryPacks.find(p => p.id === pack.id);
+  const claimReward = useCallback(async (day: number, amount: number, pack?: { id: string; type: string; name: string }, sync: boolean = true) => {
+    let newPacks = [...stateRef.current.inventoryPacks];
+    if (pack) {
+      const existing = newPacks.find(p => p.id === pack.id);
       if (existing) {
-        return {
-          ...prev,
-          inventoryPacks: prev.inventoryPacks.map(p => p.id === pack.id ? { ...p, count: p.count + 1 } : p)
-        };
+        newPacks = newPacks.map(p => p.id === pack.id ? { ...p, count: p.count + 1 } : p);
       } else {
-        return {
-          ...prev,
-          inventoryPacks: [...prev.inventoryPacks, { ...pack, count: 1 }]
-        };
+        newPacks.push({ ...pack, count: 1 });
       }
-    });
-  }, []);
+    }
 
-  const removePackFromInventory = useCallback((packId: string) => {
-    setState(prev => {
-      const existing = prev.inventoryPacks.find(p => p.id === packId);
-      if (!existing) return prev;
-      
-      if (existing.count > 1) {
-        return {
-          ...prev,
-          inventoryPacks: prev.inventoryPacks.map(p => p.id === packId ? { ...p, count: p.count - 1 } : p)
-        };
-      } else {
-        return {
-          ...prev,
-          inventoryPacks: prev.inventoryPacks.filter(p => p.id !== packId)
-        };
-      }
-    });
-  }, []);
+    const updates = {
+      coins: stateRef.current.coins + amount,
+      inventoryPacks: newPacks,
+      claimedDays: [...stateRef.current.claimedDays, day],
+      lastClaimedDate: new Date().toISOString().split('T')[0]
+    };
 
-  const setPremium = useCallback((isPremium: boolean) => {
-    setState(prev => ({ ...prev, isPremium }));
-  }, []);
+    if (sync) {
+      await updateGameStateAsync(updates);
+    } else {
+      updateGameState(updates);
+    }
+  }, [updateGameStateAsync, updateGameState]);
 
-  const resetGame = useCallback(async () => {
+  const addPackToInventory = useCallback(async (pack: { id: string; type: string; name: string }, sync: boolean = true) => {
+    const existing = stateRef.current.inventoryPacks.find(p => p.id === pack.id);
+    let newPacks;
+    if (existing) {
+      newPacks = stateRef.current.inventoryPacks.map(p => p.id === pack.id ? { ...p, count: p.count + 1 } : p);
+    } else {
+      newPacks = [...stateRef.current.inventoryPacks, { ...pack, count: 1 }];
+    }
+
+    if (sync) {
+      await updateGameStateAsync({ inventoryPacks: newPacks });
+    } else {
+      updateGameState({ inventoryPacks: newPacks });
+    }
+  }, [updateGameStateAsync, updateGameState]);
+
+  const removePackFromInventory = useCallback(async (packId: string, sync: boolean = true) => {
+    const existing = stateRef.current.inventoryPacks.find(p => p.id === packId);
+    if (!existing) return;
+    
+    let newPacks;
+    if (existing.count > 1) {
+      newPacks = stateRef.current.inventoryPacks.map(p => p.id === packId ? { ...p, count: p.count - 1 } : p);
+    } else {
+      newPacks = stateRef.current.inventoryPacks.filter(p => p.id !== packId);
+    }
+
+    if (sync) {
+      await updateGameStateAsync({ inventoryPacks: newPacks });
+    } else {
+      updateGameState({ inventoryPacks: newPacks });
+    }
+  }, [updateGameStateAsync, updateGameState]);
+
+  const setPremium = useCallback(async (isPremium: boolean, sync: boolean = true) => {
+    if (sync) {
+      await updateGameStateAsync({ isPremium });
+    } else {
+      updateGameState({ isPremium });
+    }
+  }, [updateGameStateAsync, updateGameState]);
+
+  const resetGame = useCallback(async (sync: boolean = true) => {
     const newState = {
       ...stateRef.current,
       coins: 500,
       collection: [],
       customCards: [],
       unlockedAchievements: [],
+      claimedAchievements: [],
       lastClaimedDate: null,
       claimedDays: [],
       inventoryPacks: [],
@@ -592,7 +712,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setState(newState);
 
-    if (newState.user) {
+    if (sync && newState.user) {
       await forceSyncToSupabase(newState);
     }
   }, [forceSyncToSupabase]);
@@ -614,21 +734,26 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     addCustomCard,
     setCurrentView,
     unlockAchievement,
+    claimAchievementReward,
     claimReward,
     addPackToInventory,
     removePackFromInventory,
     setPremium,
     resetGame,
     updateGameState,
+    updateGameStateAsync,
     forceSync,
     isSaving,
+    isBackgroundSaving,
+    syncError,
+    removeNotification,
     isInitialSyncDone,
     isOffline,
     showWelcomeGift,
     setShowWelcomeGift,
     login,
     logout
-  }), [state, isAuthLoading, isInitialSyncDone, isOffline, showWelcomeGift, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, forceSync, isSaving, login, logout]);
+  }), [state, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, forceSync, isSaving, isBackgroundSaving, login, logout]);
 
   return (
     <GameContext.Provider value={contextValue}>
