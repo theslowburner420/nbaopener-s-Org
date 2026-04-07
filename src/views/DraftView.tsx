@@ -14,8 +14,7 @@ import {
   RotateCcw,
   LayoutGrid,
   X,
-  Package,
-  Star
+  Package
 } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useNotification } from '../context/NotificationContext';
@@ -253,8 +252,7 @@ const Slot: React.FC<{
   onClick: () => void; 
   disabled?: boolean; 
   isSelected?: boolean;
-  isCaptain?: boolean;
-}> = ({ slot, mini, onClick, disabled, isSelected, isCaptain }) => {
+}> = ({ slot, mini, onClick, disabled, isSelected }) => {
   return (
     <button 
       onClick={onClick}
@@ -271,11 +269,11 @@ const Slot: React.FC<{
               "0 0 20px rgba(245,158,11,0.4)",
               "0 0 40px rgba(245,158,11,0.8)",
               "0 0 20px rgba(245,158,11,0.4)"
-            ] : (isCaptain ? "0 0 30px rgba(245,158,11,0.3)" : "0 10px 25px rgba(0,0,0,0.5)")
+            ] : "0 10px 25px rgba(0,0,0,0.5)"
           }}
           whileTap={{ scale: 0.95 }}
           transition={isSelected ? { repeat: Infinity, duration: 1.5 } : { duration: 0.3 }}
-          className={`h-full w-full bg-zinc-900 rounded-xl border-2 overflow-hidden transition-all ${isSelected ? 'border-amber-500 ring-4 ring-amber-500/20' : (isCaptain ? 'border-amber-500/50' : 'border-zinc-800 group-hover:border-amber-500')}`}
+          className={`h-full w-full bg-zinc-900 rounded-xl border-2 overflow-hidden transition-all ${isSelected ? 'border-amber-500 ring-4 ring-amber-500/20' : 'border-zinc-800 group-hover:border-amber-500'}`}
         >
           <img src={slot.card.imageUrl} alt={slot.card.name} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
@@ -283,11 +281,6 @@ const Slot: React.FC<{
             <p className={`font-black uppercase italic text-white truncate ${mini ? 'text-[6px]' : 'text-[8px]'}`}>{slot.card.name}</p>
             <p className={`font-bold text-amber-500 ${mini ? 'text-[5px]' : 'text-[7px]'}`}>{slot.card.stats?.ovr} OVR</p>
           </div>
-          {isCaptain && (
-            <div className="absolute top-1 right-1 bg-amber-500 text-black rounded-full p-0.5 shadow-lg">
-              <Star size={mini ? 6 : 10} fill="currentColor" />
-            </div>
-          )}
           {isSelected && (
             <div className="absolute inset-0 bg-amber-500/10 animate-pulse pointer-events-none" />
           )}
@@ -347,7 +340,6 @@ const DraftView: React.FC = () => {
   const [isFlipping, setIsFlipping] = useState(false);
   const [selectedCardForDetail, setSelectedCardForDetail] = useState<Card | null>(null);
   const [swapSource, setSwapSource] = useState<string | null>(null);
-  const [captainId, setCaptainId] = useState<string | null>(null);
 
   // Tournament State
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
@@ -382,7 +374,6 @@ const DraftView: React.FC = () => {
         setBracket(parsed.bracket || []);
         setCurrentRound(parsed.currentRound || 'QF');
         setSelectedTournament(parsed.selectedTournament || null);
-        setCaptainId(parsed.captainId || null);
       } catch (e) {
         console.error("Failed to load state", e);
       }
@@ -390,9 +381,9 @@ const DraftView: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const state = { phase, starters, bench, bracket, currentRound, selectedTournament, captainId };
+    const state = { phase, starters, bench, bracket, currentRound, selectedTournament };
     localStorage.setItem('hoops_draft_state', JSON.stringify(state));
-  }, [phase, starters, bench, bracket, currentRound, selectedTournament, captainId]);
+  }, [phase, starters, bench, bracket, currentRound, selectedTournament]);
 
   // Performance: Image Preloading
   useEffect(() => {
@@ -432,25 +423,20 @@ const DraftView: React.FC = () => {
     setSelectedTournament(null);
     setCurrentRound('QF');
     
-    // Start with Captain phase
-    setPhase('captain');
+    // Start with Starters phase, but don't show options yet
+    // User must click a slot to pick their first player (Captain)
+    setPhase('starters');
     setCurrentOptions([]);
     setIsFlipping(false);
-    
-    // Automatically trigger captain selection
-    const options = generateDraftOptions(5, null, [], true);
-    setCurrentOptions(options);
-    setActiveSlotId('captain');
   };
 
   const handleSelectCard = async (card: Card) => {
     // If it's the very first card picked, it's the captain
-    const isFirstPick = phase === 'captain';
+    const isFirstPick = starters.every(s => !s.card) && bench.every(b => !b.card);
 
     if (isFirstPick) {
-      // First pick (Captain) goes to their position automatically
+      // First pick goes to their position automatically
       setStarters(prev => prev.map(s => s.position === card.position ? { ...s, card } : s));
-      setCaptainId(card.id);
       setPhase('starters');
       setCurrentOptions([]);
       setActiveSlotId(null);
@@ -652,9 +638,9 @@ const DraftView: React.FC = () => {
       };
     });
 
-    // Normalize total score to realistic NBA range (90-125)
+    // Normalize total score to realistic NBA range (90-130)
     let userScore = stats.reduce((acc, s) => acc + s.pts, 0);
-    const targetUserScore = Math.floor(90 + Math.random() * 35) + (ovrDiff > 0 ? Math.min(5, ovrDiff) : Math.max(-5, ovrDiff));
+    const targetUserScore = Math.floor(95 + Math.random() * 30) + (ovrDiff > 0 ? Math.min(10, ovrDiff) : Math.max(-10, ovrDiff));
     const normalizationFactor = targetUserScore / userScore;
     
     stats.forEach(s => {
@@ -675,8 +661,8 @@ const DraftView: React.FC = () => {
     }
 
     // 3. Opponent Score Logic (Simulated based on their OVR)
-    const oppTargetScore = Math.floor(90 + Math.random() * 35) - (ovrDiff > 0 ? Math.min(5, ovrDiff) : Math.max(-5, ovrDiff));
-    const oppScore = Math.max(85, Math.round(oppTargetScore));
+    const oppTargetScore = Math.floor(95 + Math.random() * 30) - (ovrDiff > 0 ? Math.min(10, ovrDiff) : Math.max(-10, ovrDiff));
+    const oppScore = Math.max(80, Math.round(oppTargetScore));
 
     const s1Final = match.team1 === 'USER' ? userScore : oppScore;
     const s2Final = match.team1 === 'USER' ? oppScore : userScore;
@@ -1054,149 +1040,141 @@ const DraftView: React.FC = () => {
     </div>
   );
 
-  const renderDraftBoard = () => {
-    return (
-      <div className="flex-1 flex flex-col px-4 py-2 md:p-4 space-y-2 md:space-y-4 max-w-6xl mx-auto w-full h-full relative overflow-hidden">
-        {/* Tactical Board Header */}
-        <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-2 md:p-4 flex items-center justify-between shadow-xl shrink-0 z-30">
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="text-center">
-              <p className="text-[6px] md:text-[7px] font-black uppercase tracking-widest text-zinc-500">Team OVR</p>
-              <p className="text-lg md:text-xl font-black italic text-amber-500">{teamOVR}</p>
-            </div>
-            <div className="w-px h-5 md:h-6 bg-zinc-900" />
-            <div className="text-center">
-              <p className="text-[6px] md:text-[7px] font-black uppercase tracking-widest text-zinc-500">Chemistry</p>
-              <p className="text-lg md:text-xl font-black italic text-blue-500">{teamChemistry}%</p>
-            </div>
+  const renderDraftBoard = () => (
+    <div className="flex-1 flex flex-col px-4 py-2 md:p-4 space-y-2 md:space-y-4 max-w-6xl mx-auto w-full h-full relative overflow-hidden">
+      {/* Tactical Board Header */}
+      <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-2 md:p-4 flex items-center justify-between shadow-xl shrink-0 z-30">
+        <div className="flex items-center gap-2 md:gap-3">
+          <div className="text-center">
+            <p className="text-[6px] md:text-[7px] font-black uppercase tracking-widest text-zinc-500">Team OVR</p>
+            <p className="text-lg md:text-xl font-black italic text-amber-500">{teamOVR}</p>
           </div>
-          <div className="text-right">
-            <p className="text-[8px] md:text-[9px] font-black uppercase tracking-tighter text-white italic">Draft Mode</p>
-            <p className="text-[6px] md:text-[7px] font-bold text-zinc-600 uppercase tracking-widest">
-              {phase === 'captain' ? 'Captain Pick' : phase === 'starters' ? 'Starters' : 'Bench'}
-            </p>
+          <div className="w-px h-5 md:h-6 bg-zinc-900" />
+          <div className="text-center">
+            <p className="text-[6px] md:text-[7px] font-black uppercase tracking-widest text-zinc-500">Chemistry</p>
+            <p className="text-lg md:text-xl font-black italic text-blue-500">{teamChemistry}%</p>
           </div>
         </div>
-
-        {/* Main Board Container (Full Screen Split) */}
-        <div className="flex-1 flex flex-col min-h-0 gap-1 md:gap-4 relative">
-          {/* Top Half: Tactical Starting Five */}
-          <div className="flex-[1.8] md:flex-[1.2] bg-zinc-950/50 border border-zinc-900/50 md:border-zinc-900 rounded-[2rem] md:rounded-[2.5rem] p-2 md:p-6 flex flex-col justify-center relative overflow-hidden shadow-2xl">
-            {/* Court Lines Overlay (More prominent for tactical feel) */}
-            <div className="absolute inset-0 opacity-5 md:opacity-10 pointer-events-none">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[95%] md:w-[80%] h-1/2 border-b-2 border-x-2 border-white rounded-b-[80px] md:rounded-b-[100px]" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 md:w-32 h-20 md:h-32 border-2 border-white rounded-full" />
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 md:w-48 h-16 md:h-24 border-t-2 border-x-2 border-white" />
-            </div>
-
-            <div className="relative z-10 h-full w-full flex flex-col justify-between py-1 md:py-4">
-              {/* Row 1: PG (Top Center) */}
-              <div className="flex justify-center">
-                <div className="transform scale-90 md:scale-100">
-                  <Slot 
-                    slot={starters[0]} 
-                    onClick={() => handleSlotClick(starters[0])} 
-                    disabled={phase === 'captain'} 
-                    isSelected={swapSource === starters[0].id || activeSlotId === starters[0].id}
-                    isCaptain={starters[0].card?.id === captainId}
-                  />
-                </div>
-              </div>
-              
-              {/* Row 2: SG & SF (Middle Wings) */}
-              <div className="flex justify-between px-2 md:px-[15%]">
-                <div className="transform scale-90 md:scale-100 -translate-x-1 md:-translate-x-4">
-                  <Slot 
-                    slot={starters[1]} 
-                    onClick={() => handleSlotClick(starters[1])} 
-                    disabled={phase === 'captain'} 
-                    isSelected={swapSource === starters[1].id || activeSlotId === starters[1].id}
-                    isCaptain={starters[1].card?.id === captainId}
-                  />
-                </div>
-                <div className="transform scale-90 md:scale-100 translate-x-1 md:translate-x-4">
-                  <Slot 
-                    slot={starters[2]} 
-                    onClick={() => handleSlotClick(starters[2])} 
-                    disabled={phase === 'captain'} 
-                    isSelected={swapSource === starters[2].id || activeSlotId === starters[2].id}
-                    isCaptain={starters[2].card?.id === captainId}
-                  />
-                </div>
-              </div>
-              
-              {/* Row 3: PF & C (Bottom Paint) */}
-              <div className="flex justify-center gap-2 md:gap-16">
-                <div className="transform scale-90 md:scale-100 translate-y-1">
-                  <Slot 
-                    slot={starters[3]} 
-                    onClick={() => handleSlotClick(starters[3])} 
-                    disabled={phase === 'captain'} 
-                    isSelected={swapSource === starters[3].id || activeSlotId === starters[3].id}
-                    isCaptain={starters[3].card?.id === captainId}
-                  />
-                </div>
-                <div className="transform scale-90 md:scale-100 translate-y-1">
-                  <Slot 
-                    slot={starters[4]} 
-                    onClick={() => handleSlotClick(starters[4])} 
-                    disabled={phase === 'captain'} 
-                    isSelected={swapSource === starters[4].id || activeSlotId === starters[4].id}
-                    isCaptain={starters[4].card?.id === captainId}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Squad Review Button Overlay */}
-            {phase === 'review' && (
-              <div className="absolute inset-x-0 bottom-8 flex justify-center z-50 px-8">
-                <motion.button
-                  initial={{ y: 50, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  onClick={() => setPhase('summary')}
-                  className="w-full max-w-xs bg-amber-500 text-black py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all active:scale-95"
-                >
-                  <span>Finish Draft and Play</span>
-                  <ArrowRight size={20} />
-                </motion.button>
-              </div>
-            )}
-          </div>
-
-          {/* Bottom Half: Bench Strip */}
-          <div className="flex-none bg-zinc-950/80 border border-zinc-900/50 md:border-zinc-900 rounded-2xl md:rounded-3xl p-3 md:p-4 flex flex-col shadow-xl">
-            <div className="flex items-center gap-3 mb-2 md:mb-3 shrink-0">
-              <div className="h-px flex-1 bg-zinc-900" />
-              <h3 className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 px-2">Bench</h3>
-              <div className="h-px flex-1 bg-zinc-900" />
-            </div>
-            
-            <div className="flex justify-start md:justify-center items-center gap-1.5 md:gap-3 w-full overflow-x-auto scrollbar-hide py-1 px-1">
-              {bench.map(slot => (
-                <div key={slot.id} className="shrink-0">
-                  <Slot 
-                    key={slot.id} 
-                    slot={slot} 
-                    mini 
-                    onClick={() => handleSlotClick(slot)} 
-                    disabled={phase === 'captain'} 
-                    isSelected={swapSource === slot.id || activeSlotId === slot.id}
-                    isCaptain={slot.card?.id === captainId}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Captain Selection Backdrop Overlay */}
-          {phase === 'captain' && (
-            <div className="absolute inset-0 z-20 bg-black/60 backdrop-blur-md rounded-[2.5rem] pointer-events-none transition-all duration-500" />
-          )}
+        <div className="text-right">
+          <p className="text-[8px] md:text-[9px] font-black uppercase tracking-tighter text-white italic">Draft Mode</p>
+          <p className="text-[6px] md:text-[7px] font-bold text-zinc-600 uppercase tracking-widest">
+            {phase === 'captain' ? 'Captain Pick' : phase === 'starters' ? 'Starters' : 'Bench'}
+          </p>
         </div>
       </div>
-    );
-  };
+
+      {/* Main Board Container (Full Screen Split) */}
+      <div className="flex-1 flex flex-col min-h-0 gap-1 md:gap-4 relative">
+        {/* Top Half: Tactical Starting Five */}
+        <div className="flex-[1.8] md:flex-[1.2] bg-zinc-950/50 border border-zinc-900/50 md:border-zinc-900 rounded-[2rem] md:rounded-[2.5rem] p-2 md:p-6 flex flex-col justify-center relative overflow-hidden shadow-2xl">
+          {/* Court Lines Overlay (More prominent for tactical feel) */}
+          <div className="absolute inset-0 opacity-5 md:opacity-10 pointer-events-none">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[95%] md:w-[80%] h-1/2 border-b-2 border-x-2 border-white rounded-b-[80px] md:rounded-b-[100px]" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 md:w-32 h-20 md:h-32 border-2 border-white rounded-full" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 md:w-48 h-16 md:h-24 border-t-2 border-x-2 border-white" />
+          </div>
+
+          <div className="relative z-10 h-full w-full flex flex-col justify-between py-1 md:py-4">
+            {/* Row 1: PG (Top Center) */}
+            <div className="flex justify-center">
+              <div className="transform scale-90 md:scale-100">
+                <Slot 
+                  slot={starters[0]} 
+                  onClick={() => handleSlotClick(starters[0])} 
+                  disabled={phase === 'captain'} 
+                  isSelected={swapSource === starters[0].id || activeSlotId === starters[0].id}
+                />
+              </div>
+            </div>
+            
+            {/* Row 2: SG & SF (Middle Wings) */}
+            <div className="flex justify-between px-2 md:px-[15%]">
+              <div className="transform scale-90 md:scale-100 -translate-x-1 md:-translate-x-4">
+                <Slot 
+                  slot={starters[1]} 
+                  onClick={() => handleSlotClick(starters[1])} 
+                  disabled={phase === 'captain'} 
+                  isSelected={swapSource === starters[1].id || activeSlotId === starters[1].id}
+                />
+              </div>
+              <div className="transform scale-90 md:scale-100 translate-x-1 md:translate-x-4">
+                <Slot 
+                  slot={starters[2]} 
+                  onClick={() => handleSlotClick(starters[2])} 
+                  disabled={phase === 'captain'} 
+                  isSelected={swapSource === starters[2].id || activeSlotId === starters[2].id}
+                />
+              </div>
+            </div>
+            
+            {/* Row 3: PF & C (Bottom Paint) */}
+            <div className="flex justify-center gap-2 md:gap-16">
+              <div className="transform scale-90 md:scale-100 translate-y-1">
+                <Slot 
+                  slot={starters[3]} 
+                  onClick={() => handleSlotClick(starters[3])} 
+                  disabled={phase === 'captain'} 
+                  isSelected={swapSource === starters[3].id || activeSlotId === starters[3].id}
+                />
+              </div>
+              <div className="transform scale-90 md:scale-100 translate-y-1">
+                <Slot 
+                  slot={starters[4]} 
+                  onClick={() => handleSlotClick(starters[4])} 
+                  disabled={phase === 'captain'} 
+                  isSelected={swapSource === starters[4].id || activeSlotId === starters[4].id}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Squad Review Button Overlay */}
+          {phase === 'review' && (
+            <div className="absolute inset-x-0 bottom-8 flex justify-center z-50 px-8">
+              <motion.button
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                onClick={() => setPhase('summary')}
+                className="w-full max-w-xs bg-amber-500 text-black py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all active:scale-95"
+              >
+                <span>Finish Draft and Play</span>
+                <ArrowRight size={20} />
+              </motion.button>
+            </div>
+          )}
+        </div>
+
+        {/* Bottom Half: Bench Strip */}
+        <div className="flex-none bg-zinc-950/80 border border-zinc-900/50 md:border-zinc-900 rounded-2xl md:rounded-3xl p-3 md:p-4 flex flex-col shadow-xl">
+          <div className="flex items-center gap-3 mb-2 md:mb-3 shrink-0">
+            <div className="h-px flex-1 bg-zinc-900" />
+            <h3 className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 px-2">Bench</h3>
+            <div className="h-px flex-1 bg-zinc-900" />
+          </div>
+          
+          <div className="flex justify-start md:justify-center items-center gap-1.5 md:gap-3 w-full overflow-x-auto scrollbar-hide py-1 px-1">
+            {bench.map(slot => (
+              <div key={slot.id} className="shrink-0">
+                <Slot 
+                  key={slot.id} 
+                  slot={slot} 
+                  mini 
+                  onClick={() => handleSlotClick(slot)} 
+                  disabled={phase === 'captain'} 
+                  isSelected={swapSource === slot.id || activeSlotId === slot.id}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Captain Selection Backdrop Overlay */}
+        {phase === 'captain' && (
+          <div className="absolute inset-0 z-20 bg-black/60 backdrop-blur-md rounded-[2.5rem] pointer-events-none transition-all duration-500" />
+        )}
+      </div>
+    </div>
+  );
 
   const renderSelection = () => (
     <div className="fixed inset-0 z-[8000] flex flex-col items-center justify-end md:justify-center p-0 md:p-4">
@@ -1228,8 +1206,8 @@ const DraftView: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex-1 w-full overflow-y-auto no-scrollbar pb-8 px-2">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 w-full">
+        <div className="flex-1 w-full overflow-y-auto no-scrollbar pb-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 w-full">
             {currentOptions.map((card, idx) => (
               <motion.div
                 key={card.id}
@@ -1241,31 +1219,31 @@ const DraftView: React.FC = () => {
                 className="flex flex-col gap-2 cursor-pointer group"
                 onClick={() => handleSelectCard(card)}
               >
-                <div className="relative aspect-[2.5/3.5] w-full bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden group-hover:border-amber-500 transition-all shadow-2xl">
+                <div className="relative aspect-[2.5/3.5] w-full bg-zinc-900 rounded-xl md:rounded-2xl border border-zinc-800 overflow-hidden group-hover:border-amber-500 transition-all shadow-2xl">
                   <img src={card.imageUrl} alt={card.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
                   <div className="absolute bottom-2 left-2 right-2">
-                    <p className="text-[10px] md:text-[12px] font-black uppercase italic text-white truncate">{card.name}</p>
+                    <p className="text-[8px] md:text-[10px] font-black uppercase italic text-white truncate">{card.name}</p>
                     <div className="flex items-center justify-between mt-0.5">
-                      <span className="text-[8px] md:text-[10px] font-bold text-amber-500">{card.stats?.ovr} OVR</span>
-                      <span className="text-[8px] md:text-[10px] font-bold text-zinc-400">{card.position}</span>
+                      <span className="text-[7px] md:text-[8px] font-bold text-amber-500">{card.stats?.ovr} OVR</span>
+                      <span className="text-[7px] md:text-[8px] font-bold text-zinc-400">{card.position}</span>
                     </div>
                   </div>
                 </div>
                 
                 {/* Stats Panel */}
-                <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-2 md:p-3 grid grid-cols-3 gap-1 group-hover:border-amber-500/30 transition-colors">
+                <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg md:rounded-xl p-1.5 md:p-2 grid grid-cols-3 gap-1 group-hover:border-amber-500/30 transition-colors">
                   <div className="text-center">
-                    <p className="text-[6px] md:text-[8px] font-black text-zinc-600 uppercase">PTS</p>
-                    <p className="text-[10px] md:text-[12px] font-black text-white">{card.pts}</p>
+                    <p className="text-[5px] md:text-[6px] font-black text-zinc-600 uppercase">PTS</p>
+                    <p className="text-[8px] md:text-[9px] font-black text-white">{card.pts}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-[6px] md:text-[8px] font-black text-zinc-600 uppercase">REB</p>
-                    <p className="text-[10px] md:text-[12px] font-black text-white">{card.reb}</p>
+                    <p className="text-[5px] md:text-[6px] font-black text-zinc-600 uppercase">REB</p>
+                    <p className="text-[8px] md:text-[9px] font-black text-white">{card.reb}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-[6px] md:text-[8px] font-black text-zinc-600 uppercase">AST</p>
-                    <p className="text-[10px] md:text-[12px] font-black text-white">{card.ast}</p>
+                    <p className="text-[5px] md:text-[6px] font-black text-zinc-600 uppercase">AST</p>
+                    <p className="text-[8px] md:text-[9px] font-black text-white">{card.ast}</p>
                   </div>
                 </div>
               </motion.div>
@@ -1615,11 +1593,11 @@ const DraftView: React.FC = () => {
 
         {/* Bracket Tree Container */}
         <div className="flex-1 flex items-center min-h-0 overflow-x-auto pb-24 md:pb-8 snap-x snap-mandatory scrollbar-hide cursor-grab active:cursor-grabbing">
-          <div className="flex items-start gap-12 md:gap-24 min-w-max px-8 md:px-24 mx-auto pt-8">
+          <div className="flex items-center gap-6 md:gap-20 min-w-max px-8 md:px-24 mx-auto">
             {/* Quarterfinals */}
-            <div className={`flex flex-col gap-8 md:gap-12 transition-all duration-500 snap-center shrink-0 ${currentRound !== 'QF' ? 'opacity-40 scale-95 blur-[1px]' : ''}`}>
-              <div className="text-center mb-4 md:mb-6">
-                <span className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.4em] text-zinc-600 border-b-2 border-zinc-900 pb-2 px-4">Quarterfinals</span>
+            <div className={`flex flex-col gap-6 md:gap-10 transition-all duration-500 snap-center shrink-0 ${currentRound !== 'QF' ? 'opacity-40 scale-95 blur-[1px]' : ''}`}>
+              <div className="text-center mb-2 md:mb-4">
+                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">Quarterfinals</span>
               </div>
               {qfMatches.map((m) => (
                 <BracketMatchCard 
@@ -1633,10 +1611,21 @@ const DraftView: React.FC = () => {
               ))}
             </div>
 
+            {/* Connector Lines 1 */}
+            <div className="flex flex-col justify-around h-[300px] md:h-[400px] w-12 md:w-20 relative">
+              <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-zinc-800 to-transparent" />
+              <div className="h-1/2 border-y border-r border-zinc-800/50 rounded-r-[2rem] relative">
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-zinc-800 rounded-full" />
+              </div>
+              <div className="h-1/2 border-y border-r border-zinc-800/50 rounded-r-[2rem] relative">
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-zinc-800 rounded-full" />
+              </div>
+            </div>
+
             {/* Semifinals */}
-            <div className={`flex flex-col gap-32 md:gap-48 transition-all duration-500 snap-center shrink-0 pt-16 md:pt-24 ${currentRound !== 'SF' ? 'opacity-40 scale-95 blur-[1px]' : ''}`}>
-              <div className="text-center mb-4 md:mb-6">
-                <span className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.4em] text-zinc-600 border-b-2 border-zinc-900 pb-2 px-4">Semifinals</span>
+            <div className={`flex flex-col gap-24 md:gap-32 transition-all duration-500 snap-center shrink-0 ${currentRound !== 'SF' ? 'opacity-40 scale-95 blur-[1px]' : ''}`}>
+              <div className="text-center mb-2 md:mb-4">
+                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">Semifinals</span>
               </div>
               {sfMatches.length > 0 ? sfMatches.map((m) => (
                 <BracketMatchCard 
@@ -1652,10 +1641,17 @@ const DraftView: React.FC = () => {
               ))}
             </div>
 
+            {/* Connector Lines 2 */}
+            <div className="flex flex-col justify-center h-[300px] md:h-[400px] w-12 md:w-20 relative">
+              <div className="h-1/4 border-y border-r border-zinc-800/50 rounded-r-[2rem] relative">
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-zinc-800 rounded-full" />
+              </div>
+            </div>
+
             {/* Finals */}
-            <div className={`flex flex-col gap-8 transition-all duration-500 snap-center shrink-0 pt-48 md:pt-64 ${currentRound !== 'F' ? 'opacity-40 scale-95 blur-[1px]' : ''}`}>
-              <div className="text-center mb-4 md:mb-6">
-                <span className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.4em] text-amber-500 border-b-2 border-amber-500/20 pb-2 px-4">Finals</span>
+            <div className={`flex flex-col gap-8 transition-all duration-500 snap-center shrink-0 ${currentRound !== 'F' ? 'opacity-40 scale-95 blur-[1px]' : ''}`}>
+              <div className="text-center mb-2 md:mb-4">
+                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-amber-500">Finals</span>
               </div>
               {fMatch ? (
                 <BracketMatchCard 
