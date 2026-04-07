@@ -87,7 +87,7 @@ const TEAM_CARDS_MAP = ALL_CARDS.reduce((acc, card) => {
 const ALL_TEAMS = Object.keys(TEAM_CARDS_MAP);
 
 export function useEngine() {
-  const { collection, coins, updateGameState, updateGameStateAsync, unlockedAchievements, inventoryPacks } = useGame();
+  const { collection, coins, updateGameState, updateGameStateAsync, unlockedAchievements, inventoryPacks, isSaving } = useGame();
   const { notify } = useNotification();
 
   const generateCard = (packType: PackType): Card => {
@@ -372,5 +372,5 @@ export function useEngine() {
     return options;
   };
 
-  return { openPack, openInventoryPack, generateDraftOptions, PACK_SIZES };
+  return { openPack, openInventoryPack, generateDraftOptions, PACK_SIZES, isSaving };
 }

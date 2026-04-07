@@ -8,18 +8,17 @@ interface GameContextType extends GameState {
   isInitialSyncDone: boolean;
   isOffline: boolean;
   setCoins: (coins: number | ((prev: number) => number)) => void;
-  addCoins: (amount: number) => Promise<void>;
-  spendCoins: (amount: number) => Promise<boolean>;
-  addToCollection: (cardIds: string[]) => Promise<void>;
-  addCustomCard: (card: Card) => Promise<void>;
-  setCurrentView: (view: ViewType) => void;
-  unlockAchievement: (id: string) => Promise<any>;
-  claimAchievementReward: (id: string) => Promise<void>;
-  claimReward: (day: number, amount: number, pack?: { id: string; type: string; name: string }) => Promise<void>;
-  addPackToInventory: (pack: { id: string; type: string; name: string }) => Promise<void>;
-  removePackFromInventory: (packId: string) => Promise<void>;
-  setPremium: (status: boolean) => Promise<void>;
-  resetGame: () => Promise<void>;
+  addCoins: (amount: number, sync?: boolean) => Promise<void>;
+  spendCoins: (amount: number, sync?: boolean) => Promise<boolean>;
+  addToCollection: (cardIds: string[], sync?: boolean) => Promise<void>;
+  addCustomCard: (card: Card, sync?: boolean) => Promise<void>;
+  unlockAchievement: (id: string, sync?: boolean) => Promise<any>;
+  claimAchievementReward: (id: string, sync?: boolean) => Promise<void>;
+  claimReward: (day: number, amount: number, pack?: { id: string; type: string; name: string }, sync?: boolean) => Promise<void>;
+  addPackToInventory: (pack: { id: string; type: string; name: string }, sync?: boolean) => Promise<void>;
+  removePackFromInventory: (packId: string, sync?: boolean) => Promise<void>;
+  setPremium: (status: boolean, sync?: boolean) => Promise<void>;
+  resetGame: (sync?: boolean) => Promise<void>;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   updateGameState: (updates: Partial<GameState>) => void;
@@ -502,18 +501,19 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const updateGameStateAsync = useCallback(async (updates: Partial<GameState>) => {
-    return new Promise<void>(async (resolve) => {
-      setState(prev => {
-        const newState = { ...prev, ...updates };
-        // We need to call forceSyncToSupabase with the NEW state
-        if (newState.user) {
-          forceSyncToSupabase(newState).then(() => resolve());
-        } else {
-          resolve();
-        }
-        return newState;
-      });
-    });
+    const newState = { ...stateRef.current, ...updates };
+    
+    if (newState.user) {
+      setIsSaving(true);
+      const success = await forceSyncToSupabase(newState);
+      if (!success) {
+        setIsSaving(false);
+        throw new Error('Sync failed. Action aborted to ensure data integrity.');
+      }
+      setIsSaving(false);
+    }
+    
+    setState(prev => ({ ...prev, ...updates }));
   }, [forceSyncToSupabase]);
 
   const setCoins = useCallback((coins: number | ((prev: number) => number)) => {
@@ -523,43 +523,69 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
-  const addCoins = useCallback(async (amount: number) => {
-    await updateGameStateAsync({ coins: stateRef.current.coins + amount });
-  }, [updateGameStateAsync]);
+  const addCoins = useCallback(async (amount: number, sync: boolean = true) => {
+    const newCoins = stateRef.current.coins + amount;
+    if (sync) {
+      await updateGameStateAsync({ coins: newCoins });
+    } else {
+      updateGameState({ coins: newCoins });
+    }
+  }, [updateGameStateAsync, updateGameState]);
 
-  const spendCoins = useCallback(async (amount: number) => {
+  const spendCoins = useCallback(async (amount: number, sync: boolean = true) => {
     if (stateRef.current.coins >= amount) {
-      await updateGameStateAsync({ coins: stateRef.current.coins - amount });
+      const newCoins = stateRef.current.coins - amount;
+      if (sync) {
+        await updateGameStateAsync({ coins: newCoins });
+      } else {
+        updateGameState({ coins: newCoins });
+      }
       return true;
     }
     return false;
-  }, [updateGameStateAsync]);
+  }, [updateGameStateAsync, updateGameState]);
 
-  const addToCollection = useCallback(async (cardIds: string[]) => {
-    await updateGameStateAsync({ collection: [...stateRef.current.collection, ...cardIds] });
-  }, [updateGameStateAsync]);
+  const addToCollection = useCallback(async (cardIds: string[], sync: boolean = true) => {
+    const newCollection = [...stateRef.current.collection, ...cardIds];
+    if (sync) {
+      await updateGameStateAsync({ collection: newCollection });
+    } else {
+      updateGameState({ collection: newCollection });
+    }
+  }, [updateGameStateAsync, updateGameState]);
 
-  const addCustomCard = useCallback(async (card: Card) => {
-    await updateGameStateAsync({ customCards: [...stateRef.current.customCards, card] });
-  }, [updateGameStateAsync]);
+  const addCustomCard = useCallback(async (card: Card, sync: boolean = true) => {
+    const newCustomCards = [...stateRef.current.customCards, card];
+    if (sync) {
+      await updateGameStateAsync({ customCards: newCustomCards });
+    } else {
+      updateGameState({ customCards: newCustomCards });
+    }
+  }, [updateGameStateAsync, updateGameState]);
 
   const setCurrentView = useCallback((currentView: ViewType) => {
     setState(prev => ({ ...prev, currentView }));
   }, []);
 
-  const unlockAchievement = useCallback(async (id: string) => {
+  const unlockAchievement = useCallback(async (id: string, sync: boolean = true) => {
     const achievement = ACHIEVEMENTS.find((a: any) => a.id === id);
     if (!achievement) return null;
 
     if (stateRef.current.unlockedAchievements.includes(id)) return null;
     
-    await updateGameStateAsync({ 
-      unlockedAchievements: [...stateRef.current.unlockedAchievements, id]
-    });
+    if (sync) {
+      await updateGameStateAsync({ 
+        unlockedAchievements: [...stateRef.current.unlockedAchievements, id]
+      });
+    } else {
+      updateGameState({ 
+        unlockedAchievements: [...stateRef.current.unlockedAchievements, id]
+      });
+    }
     return achievement;
-  }, [updateGameStateAsync]);
+  }, [updateGameStateAsync, updateGameState]);
 
-  const claimAchievementReward = useCallback(async (id: string) => {
+  const claimAchievementReward = useCallback(async (id: string, sync: boolean = true) => {
     const achievement = ACHIEVEMENTS.find((a: any) => a.id === id);
     if (!achievement) return;
 
@@ -580,18 +606,26 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     }
 
-    await updateGameStateAsync({ 
-      claimedAchievements: [...stateRef.current.claimedAchievements, id],
-      coins: newCoins,
-      inventoryPacks: newPacks
-    });
-  }, [updateGameStateAsync]);
+    if (sync) {
+      await updateGameStateAsync({ 
+        claimedAchievements: [...stateRef.current.claimedAchievements, id],
+        coins: newCoins,
+        inventoryPacks: newPacks
+      });
+    } else {
+      updateGameState({ 
+        claimedAchievements: [...stateRef.current.claimedAchievements, id],
+        coins: newCoins,
+        inventoryPacks: newPacks
+      });
+    }
+  }, [updateGameStateAsync, updateGameState]);
 
   const removeNotification = useCallback((id: string) => {
     // No-op since we're using NotificationContext
   }, []);
 
-  const claimReward = useCallback(async (day: number, amount: number, pack?: { id: string; type: string; name: string }) => {
+  const claimReward = useCallback(async (day: number, amount: number, pack?: { id: string; type: string; name: string }, sync: boolean = true) => {
     let newPacks = [...stateRef.current.inventoryPacks];
     if (pack) {
       const existing = newPacks.find(p => p.id === pack.id);
@@ -602,47 +636,63 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    await updateGameStateAsync({
+    const updates = {
       coins: stateRef.current.coins + amount,
       inventoryPacks: newPacks,
       claimedDays: [...stateRef.current.claimedDays, day],
       lastClaimedDate: new Date().toISOString().split('T')[0]
-    });
-  }, [updateGameStateAsync]);
+    };
 
-  const addPackToInventory = useCallback(async (pack: { id: string; type: string; name: string }) => {
-    const existing = stateRef.current.inventoryPacks.find(p => p.id === pack.id);
-    if (existing) {
-      await updateGameStateAsync({
-        inventoryPacks: stateRef.current.inventoryPacks.map(p => p.id === pack.id ? { ...p, count: p.count + 1 } : p)
-      });
+    if (sync) {
+      await updateGameStateAsync(updates);
     } else {
-      await updateGameStateAsync({
-        inventoryPacks: [...stateRef.current.inventoryPacks, { ...pack, count: 1 }]
-      });
+      updateGameState(updates);
     }
-  }, [updateGameStateAsync]);
+  }, [updateGameStateAsync, updateGameState]);
 
-  const removePackFromInventory = useCallback(async (packId: string) => {
+  const addPackToInventory = useCallback(async (pack: { id: string; type: string; name: string }, sync: boolean = true) => {
+    const existing = stateRef.current.inventoryPacks.find(p => p.id === pack.id);
+    let newPacks;
+    if (existing) {
+      newPacks = stateRef.current.inventoryPacks.map(p => p.id === pack.id ? { ...p, count: p.count + 1 } : p);
+    } else {
+      newPacks = [...stateRef.current.inventoryPacks, { ...pack, count: 1 }];
+    }
+
+    if (sync) {
+      await updateGameStateAsync({ inventoryPacks: newPacks });
+    } else {
+      updateGameState({ inventoryPacks: newPacks });
+    }
+  }, [updateGameStateAsync, updateGameState]);
+
+  const removePackFromInventory = useCallback(async (packId: string, sync: boolean = true) => {
     const existing = stateRef.current.inventoryPacks.find(p => p.id === packId);
     if (!existing) return;
     
+    let newPacks;
     if (existing.count > 1) {
-      await updateGameStateAsync({
-        inventoryPacks: stateRef.current.inventoryPacks.map(p => p.id === packId ? { ...p, count: p.count - 1 } : p)
-      });
+      newPacks = stateRef.current.inventoryPacks.map(p => p.id === packId ? { ...p, count: p.count - 1 } : p);
     } else {
-      await updateGameStateAsync({
-        inventoryPacks: stateRef.current.inventoryPacks.filter(p => p.id !== packId)
-      });
+      newPacks = stateRef.current.inventoryPacks.filter(p => p.id !== packId);
     }
-  }, [updateGameStateAsync]);
 
-  const setPremium = useCallback(async (isPremium: boolean) => {
-    await updateGameStateAsync({ isPremium });
-  }, [updateGameStateAsync]);
+    if (sync) {
+      await updateGameStateAsync({ inventoryPacks: newPacks });
+    } else {
+      updateGameState({ inventoryPacks: newPacks });
+    }
+  }, [updateGameStateAsync, updateGameState]);
 
-  const resetGame = useCallback(async () => {
+  const setPremium = useCallback(async (isPremium: boolean, sync: boolean = true) => {
+    if (sync) {
+      await updateGameStateAsync({ isPremium });
+    } else {
+      updateGameState({ isPremium });
+    }
+  }, [updateGameStateAsync, updateGameState]);
+
+  const resetGame = useCallback(async (sync: boolean = true) => {
     const newState = {
       ...stateRef.current,
       coins: 500,
@@ -658,7 +708,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setState(newState);
 
-    if (newState.user) {
+    if (sync && newState.user) {
       await forceSyncToSupabase(newState);
     }
   }, [forceSyncToSupabase]);

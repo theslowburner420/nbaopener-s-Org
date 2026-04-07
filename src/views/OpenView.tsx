@@ -9,17 +9,24 @@ export default function OpenView() {
   const [isOpening, setIsOpening] = useState(false);
   const [openedCards, setOpenedCards] = useState<Card[] | null>(null);
   const [newlyUnlocked, setNewlyUnlocked] = useState<any[]>([]);
-  const { openPack } = useEngine();
+  const { openPack, isSaving } = useEngine();
 
   const handleOpenFreePack = async () => {
-    const result = await openPack('random');
-    if (result) {
-      setIsOpening(true);
-      setTimeout(() => {
-        setIsOpening(false);
-        setOpenedCards(result.cards);
-        setNewlyUnlocked(result.newlyUnlocked);
-      }, 1500);
+    if (isSaving) return;
+    
+    try {
+      const result = await openPack('random');
+      if (result) {
+        setIsOpening(true);
+        setTimeout(() => {
+          setIsOpening(false);
+          setOpenedCards(result.cards);
+          setNewlyUnlocked(result.newlyUnlocked);
+        }, 1500);
+      }
+    } catch (error) {
+      console.error('Failed to open pack:', error);
+      // Error is handled by GameContext and displayed via ErrorBoundary or Toast if implemented
     }
   };
 
@@ -70,11 +77,12 @@ export default function OpenView() {
         <div className="mt-16 flex flex-col items-center">
           <button
             onClick={handleOpenFreePack}
-            className="group relative bg-white text-black font-black px-14 py-5 rounded-full shadow-[0_10px_40px_rgba(255,255,255,0.2)] active:scale-95 transition-all text-sm uppercase tracking-widest overflow-hidden hover:bg-amber-400"
+            disabled={isSaving}
+            className="group relative bg-white text-black font-black px-14 py-5 rounded-full shadow-[0_10px_40px_rgba(255,255,255,0.2)] active:scale-95 transition-all text-sm uppercase tracking-widest overflow-hidden hover:bg-amber-400 disabled:opacity-50"
           >
             <span className="relative z-10 flex items-center gap-2">
               <Sparkles size={18} />
-              Open Free Pack
+              {isSaving ? 'Syncing...' : 'Open Free Pack'}
             </span>
           </button>
           

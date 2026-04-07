@@ -155,7 +155,8 @@ const TournamentSummaryModal: React.FC<{
   position: string;
   rewards: { coins: number; packs: any[] } | null;
   onClaim: () => void;
-}> = ({ show, position, rewards, onClaim }) => {
+  isSaving: boolean;
+}> = ({ show, position, rewards, onClaim, isSaving }) => {
   if (!show || !rewards) return null;
 
   return (
@@ -234,9 +235,10 @@ const TournamentSummaryModal: React.FC<{
 
         <button
           onClick={onClaim}
-          className="w-full bg-amber-500 text-black py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 hover:bg-amber-400 transition-all shadow-[0_20px_40px_rgba(245,158,11,0.2)] active:scale-95 relative z-10"
+          disabled={isSaving}
+          className="w-full bg-amber-500 text-black py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 hover:bg-amber-400 transition-all shadow-[0_20px_40px_rgba(245,158,11,0.2)] active:scale-95 relative z-10 disabled:opacity-50"
         >
-          <span>Claim Rewards</span>
+          <span>{isSaving ? 'Saving Progress...' : 'Claim Rewards'}</span>
           <ArrowRight size={20} />
         </button>
       </motion.div>
@@ -435,9 +437,9 @@ const DraftView: React.FC = () => {
       setPhase('starters');
       setCurrentOptions([]);
 
-      // Achievement: Generational Talent
+      // Achievement: Generational Talent (Local only during draft)
       if ((card.stats?.ovr || 0) >= 97) {
-        const unlocked = await unlockAchievement('generational_talent');
+        const unlocked = await unlockAchievement('generational_talent', false);
         if (unlocked) notify(unlocked);
       }
     } else if (activeSlotId) {
@@ -459,50 +461,30 @@ const DraftView: React.FC = () => {
       } else if (allStartersFilled && allBenchFilled) {
         setPhase('review');
         
-        // Achievement: Trust the Process
-        const unlocked1 = await unlockAchievement('trust_the_process');
+        // Achievement: Trust the Process (Local only during draft)
+        const unlocked1 = await unlockAchievement('trust_the_process', false);
         if (unlocked1) notify(unlocked1);
 
-        // Achievement: Superteam
+        // Achievement: Superteam (Local only during draft)
         if (teamOVR >= 92) {
-          const unlocked2 = await unlockAchievement('superteam');
+          const unlocked2 = await unlockAchievement('superteam', false);
           if (unlocked2) notify(unlocked2);
         }
 
-        // Achievement: Bench Mob
+        // Achievement: Bench Mob (Local only during draft)
         const benchPlayers = bench.map(s => s.card).filter(Boolean) as Card[];
         const benchAvg = benchPlayers.length > 0 
           ? benchPlayers.reduce((acc, p) => acc + (p.stats?.ovr || 0), 0) / benchPlayers.length 
           : 0;
         if (benchAvg >= 85) {
-          const unlocked3 = await unlockAchievement('bench_mob');
+          const unlocked3 = await unlockAchievement('bench_mob', false);
           if (unlocked3) notify(unlocked3);
         }
       }
     }
   };
 
-  // Automatic sequential drafting logic
-  useEffect(() => {
-    if (currentOptions.length > 0 || isSimulating || phase === 'entry' || phase === 'captain' || phase === 'review' || phase === 'summary' || phase === 'tournament_selection' || phase === 'bracket') return;
-
-    if (phase === 'starters') {
-      const nextEmptyStarter = starters.find(s => !s.card);
-      if (nextEmptyStarter) {
-        setActiveSlotId(nextEmptyStarter.id);
-        const options = generateDraftOptions(5, nextEmptyStarter.position, seenCardIds, false);
-        setCurrentOptions(options);
-      }
-    } else if (phase === 'bench') {
-      const nextEmptyBench = bench.find(b => !b.card);
-      if (nextEmptyBench) {
-        setActiveSlotId(nextEmptyBench.id);
-        const options = generateDraftOptions(5, null, seenCardIds, false);
-        setCurrentOptions(options);
-      }
-    }
-  }, [phase, starters, bench, currentOptions, isSimulating, seenCardIds]);
-
+  // Manual slot selection logic (FUT Draft Style)
   const handleSlotClick = (slot: DraftSlot) => {
     // If we're in a phase where drafting is done, allow swapping
     const isDraftFinished = phase === 'review' || phase === 'summary' || phase === 'tournament_selection' || phase === 'bracket';
@@ -511,10 +493,8 @@ const DraftView: React.FC = () => {
       if (!swapSource) {
         setSwapSource(slot.id);
       } else if (swapSource === slot.id) {
-        // Deselect if clicking the same card
         setSwapSource(null);
-        setSelectedCardForDetail(slot.card); // Show detail on second click of same card? Or just deselect?
-        // Let's just deselect and show detail
+        setSelectedCardForDetail(slot.card);
       } else {
         // Perform Swap
         const sourceId = swapSource;
@@ -556,9 +536,13 @@ const DraftView: React.FC = () => {
       return;
     }
     
-    setActiveSlotId(slot.id);
-    const options = generateDraftOptions(5, slot.position, seenCardIds, false);
-    setCurrentOptions(options);
+    // Drafting logic: only allow clicking empty slots if in the right phase
+    if ((phase === 'starters' && starters.some(s => s.id === slot.id)) || 
+        (phase === 'bench' && bench.some(b => b.id === slot.id))) {
+      setActiveSlotId(slot.id);
+      const options = generateDraftOptions(5, slot.position, seenCardIds, false);
+      setCurrentOptions(options);
+    }
   };
 
   const generateGhostTeam = (tournament: Tournament): GhostTeam => {
@@ -901,13 +885,14 @@ const DraftView: React.FC = () => {
 
   const claimRewards = async () => {
     if (earnedRewards) {
-      await addCoins(earnedRewards.coins);
+      // Final sync to Supabase
+      await addCoins(earnedRewards.coins, true);
       for (const pack of earnedRewards.packs) {
         await addPackToInventory({ 
           id: `${pack.type}-${Date.now()}-${Math.random()}`, 
           type: pack.type, 
           name: pack.name 
-        });
+        }, true);
       }
     }
     // Reset Draft State
@@ -919,7 +904,7 @@ const DraftView: React.FC = () => {
     setShowTournamentSummary(false);
     setFinalPosition(null);
     setEarnedRewards(null);
-    localStorage.removeItem('DRAFT_STATE'); // Clear saved draft
+    localStorage.removeItem('hoops_draft_state'); // Corrected key
   };
 
   const advanceRound = () => {
@@ -1026,16 +1011,17 @@ const DraftView: React.FC = () => {
       <div className="grid grid-cols-1 gap-4 w-full max-w-xs">
         <button 
           onClick={() => handleStartDraft('coins')}
-          disabled={coins < DRAFT_COST}
+          disabled={coins < DRAFT_COST || isSaving}
           className="group relative bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-amber-400 transition-all disabled:opacity-50"
         >
           <Coins size={18} />
-          <span>Entry: {DRAFT_COST.toLocaleString()}</span>
+          <span>{isSaving ? 'Processing...' : `Entry: ${DRAFT_COST.toLocaleString()}`}</span>
         </button>
         
         <button 
           onClick={() => handleStartDraft('ad')}
-          className="group relative bg-zinc-900 text-white border border-zinc-800 py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all"
+          disabled={isSaving}
+          className="group relative bg-zinc-900 text-white border border-zinc-800 py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all disabled:opacity-50"
         >
           <Play size={18} />
           <span>Watch Ad to Enter</span>
@@ -1189,7 +1175,7 @@ const DraftView: React.FC = () => {
         className="absolute inset-0 bg-black/90 backdrop-blur-xl"
         onClick={() => {
           if (phase !== 'captain' && phase !== 'starters' && phase !== 'bench') {
-            setSelectionModalOpen(false);
+            setCurrentOptions([]);
           }
         }}
       />
