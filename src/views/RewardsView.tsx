@@ -1,15 +1,17 @@
 import { useGame } from '../context/GameContext';
 import { ALL_CARDS } from '../data/cards';
-import { ACHIEVEMENTS } from '../constants/achievements';
-import { Check, Lock, Gift, Trophy } from 'lucide-react';
+import { ACHIEVEMENTS as OLD_ACHIEVEMENTS } from '../constants/achievements';
+import { ACHIEVEMENTS as DRAFT_ACHIEVEMENTS } from '../data/achievements';
+import { Check, Lock, Gift, Trophy, Star, Zap, Users, Award, Flame, Target, Coins, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useMemo } from 'react';
 import AchievementsModal from '../components/AchievementsModal';
 
 export default function RewardsView() {
   const state = useGame();
-  const { coins, claimedDays, lastClaimedDate, claimReward, unlockedAchievements } = state;
+  const { coins, claimedDays, lastClaimedDate, claimReward, unlockedAchievements, claimedAchievements, claimAchievementReward } = state;
   const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'daily' | 'draft'>('daily');
 
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   const canClaimToday = lastClaimedDate !== today;
@@ -19,11 +21,11 @@ export default function RewardsView() {
 
   const achievementsPercent = useMemo(() => {
     // Only calculate if we have the necessary data
-    const unlockedCount = ACHIEVEMENTS.filter(ach => 
+    const unlockedCount = OLD_ACHIEVEMENTS.filter(ach => 
       unlockedAchievements.includes(ach.id) || ach.requirement(state, ALL_CARDS)
     ).length;
-    return Math.round((unlockedCount / ACHIEVEMENTS.length) * 100);
-  }, [unlockedAchievements, state.collection, state.inventoryPacks]); // More specific dependencies to avoid re-calculating on coin changes
+    return Math.round((unlockedCount / OLD_ACHIEVEMENTS.length) * 100);
+  }, [unlockedAchievements, state.collection, state.inventoryPacks]);
 
   const rewards = useMemo(() => [
     { day: 1, amount: 100, label: 'Starter Bonus' },
@@ -47,7 +49,7 @@ export default function RewardsView() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <div className="w-1 h-3 bg-amber-500 rounded-full" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Daily Stimulus</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Rewards Center</span>
           </div>
           <h1 className="text-3xl font-black uppercase tracking-tighter italic leading-none">Rewards</h1>
         </div>
@@ -78,71 +80,174 @@ export default function RewardsView() {
         </div>
       </header>
 
+      {/* Tabs */}
+      <div className="px-6 mb-4">
+        <div className="flex bg-zinc-900/50 p-1 rounded-xl border border-zinc-800/50">
+          <button
+            onClick={() => setActiveTab('daily')}
+            className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+              activeTab === 'daily' ? 'bg-amber-500 text-black shadow-lg' : 'text-zinc-500 hover:text-zinc-300'
+            }`}
+          >
+            Daily Stimulus
+          </button>
+          <button
+            onClick={() => setActiveTab('draft')}
+            className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+              activeTab === 'draft' ? 'bg-amber-500 text-black shadow-lg' : 'text-zinc-500 hover:text-zinc-300'
+            }`}
+          >
+            Draft Achievements
+          </button>
+        </div>
+      </div>
+
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3 no-scrollbar pb-24">
-        {rewards.map((reward) => {
-          const isClaimed = claimedDays.includes(reward.day);
-          const isNext = reward.day === nextDayToClaim;
-          const isLocked = reward.day > nextDayToClaim;
-          const canClaim = isNext && canClaimToday;
-
-          return (
+        <AnimatePresence mode="wait">
+          {activeTab === 'daily' ? (
             <motion.div
-              key={reward.day}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: reward.day * 0.05 }}
-              onClick={() => canClaim && handleClaim(reward.day, reward.amount)}
-              className={`relative p-5 rounded-2xl border transition-all duration-300 flex justify-between items-center group ${
-                isClaimed 
-                  ? 'bg-zinc-900/30 border-zinc-800 opacity-60' 
-                  : isNext 
-                    ? canClaim 
-                      ? 'bg-zinc-900 border-amber-500/50 cursor-pointer hover:border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.1)]' 
-                      : 'bg-zinc-900 border-zinc-700 opacity-80'
-                    : 'bg-zinc-950 border-zinc-900 opacity-40'
-              }`}
+              key="daily"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-3"
             >
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
-                  isClaimed ? 'bg-zinc-800 text-zinc-500' : isNext ? 'bg-amber-500 text-black' : 'bg-zinc-900 text-zinc-700'
-                }`}>
-                  {isClaimed ? <Check size={24} strokeWidth={3} /> : <Gift size={24} strokeWidth={2.5} />}
-                </div>
-                
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Day {reward.day}</p>
-                  <h3 className="text-lg font-black italic tracking-tighter uppercase leading-none mt-0.5">
-                    {reward.label}
-                  </h3>
-                  <p className={`text-xs font-bold mt-1 ${isClaimed ? 'text-zinc-600' : 'text-amber-500'}`}>
-                    +{reward.amount} Coins
-                  </p>
-                </div>
-              </div>
+              {rewards.map((reward) => {
+                const isClaimed = claimedDays.includes(reward.day);
+                const isNext = reward.day === nextDayToClaim;
+                const canClaim = isNext && canClaimToday;
 
-              <div className="flex flex-col items-end gap-2">
-                {isClaimed ? (
-                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600 italic">Claimed</span>
-                ) : isNext ? (
-                  canClaim ? (
-                    <button className="bg-white text-black text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg group-hover:bg-amber-400 transition-colors">
-                      Claim
-                    </button>
-                  ) : (
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 italic">Tomorrow</span>
-                  )
-                ) : (
-                  <Lock size={16} className="text-zinc-800" />
-                )}
-              </div>
+                return (
+                  <motion.div
+                    key={reward.day}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: reward.day * 0.05 }}
+                    onClick={() => canClaim && handleClaim(reward.day, reward.amount)}
+                    className={`relative p-5 rounded-2xl border transition-all duration-300 flex justify-between items-center group ${
+                      isClaimed 
+                        ? 'bg-zinc-900/30 border-zinc-800 opacity-60' 
+                        : isNext 
+                          ? canClaim 
+                            ? 'bg-zinc-900 border-amber-500/50 cursor-pointer hover:border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.1)]' 
+                            : 'bg-zinc-900 border-zinc-700 opacity-80'
+                          : 'bg-zinc-950 border-zinc-900 opacity-40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                        isClaimed ? 'bg-zinc-800 text-zinc-500' : isNext ? 'bg-amber-500 text-black' : 'bg-zinc-900 text-zinc-700'
+                      }`}>
+                        {isClaimed ? <Check size={24} strokeWidth={3} /> : <Gift size={24} strokeWidth={2.5} />}
+                      </div>
+                      
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Day {reward.day}</p>
+                        <h3 className="text-lg font-black italic tracking-tighter uppercase leading-none mt-0.5">
+                          {reward.label}
+                        </h3>
+                        <p className={`text-xs font-bold mt-1 ${isClaimed ? 'text-zinc-600' : 'text-amber-500'}`}>
+                          +{reward.amount} Coins
+                        </p>
+                      </div>
+                    </div>
 
-              {/* Progress Line */}
-              {reward.day < 7 && (
-                <div className="absolute -bottom-3 left-11 w-0.5 h-3 bg-zinc-800" />
-              )}
+                    <div className="flex flex-col items-end gap-2">
+                      {isClaimed ? (
+                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600 italic">Claimed</span>
+                      ) : isNext ? (
+                        canClaim ? (
+                          <button className="bg-white text-black text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg group-hover:bg-amber-400 transition-colors">
+                            Claim
+                          </button>
+                        ) : (
+                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 italic">Tomorrow</span>
+                        )
+                      ) : (
+                        <Lock size={16} className="text-zinc-800" />
+                      )}
+                    </div>
+
+                    {reward.day < 7 && (
+                      <div className="absolute -bottom-3 left-11 w-0.5 h-3 bg-zinc-800" />
+                    )}
+                  </motion.div>
+                );
+              })}
             </motion.div>
-          );
-        })}
+          ) : (
+            <motion.div
+              key="draft"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-3"
+            >
+              {DRAFT_ACHIEVEMENTS.map((ach, idx) => {
+                const isUnlocked = unlockedAchievements.includes(ach.id);
+                const isClaimed = claimedAchievements.includes(ach.id);
+                const canClaim = isUnlocked && !isClaimed;
+
+                return (
+                  <motion.div
+                    key={ach.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className={`relative p-5 rounded-2xl border transition-all duration-300 flex justify-between items-center group ${
+                      isClaimed 
+                        ? 'bg-zinc-900/30 border-zinc-800 opacity-60' 
+                        : isUnlocked 
+                          ? canClaim 
+                            ? 'bg-zinc-900 border-amber-500/50 shadow-[0_0_20px_rgba(245,158,11,0.1)]' 
+                            : 'bg-zinc-900 border-zinc-700 opacity-80'
+                          : 'bg-zinc-950 border-zinc-900 opacity-40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                        isClaimed ? 'bg-zinc-800 text-zinc-500' : isUnlocked ? 'bg-amber-500 text-black' : 'bg-zinc-900 text-zinc-700'
+                      }`}>
+                        {isClaimed ? <Check size={24} strokeWidth={3} /> : <ach.icon size={24} strokeWidth={2.5} />}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{ach.category}</p>
+                        <h3 className="text-lg font-black italic tracking-tighter uppercase leading-none mt-0.5 truncate">
+                          {ach.title}
+                        </h3>
+                        <p className="text-[10px] text-zinc-500 font-medium leading-tight mt-1 line-clamp-1">
+                          {ach.description}
+                        </p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">Reward:</span>
+                          <span className={`text-[10px] font-black italic tracking-tighter uppercase ${isClaimed ? 'text-zinc-600' : 'text-amber-500'}`}>
+                            {ach.rewardText}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-end gap-2 ml-4">
+                      {isClaimed ? (
+                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600 italic">Claimed</span>
+                      ) : isUnlocked ? (
+                        <button 
+                          onClick={() => claimAchievementReward(ach.id)}
+                          className="bg-white text-black text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-amber-400 transition-colors shadow-lg active:scale-95"
+                        >
+                          Claim
+                        </button>
+                      ) : (
+                        <Lock size={16} className="text-zinc-800" />
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <AchievementsModal 

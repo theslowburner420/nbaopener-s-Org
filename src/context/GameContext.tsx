@@ -14,6 +14,7 @@ interface GameContextType extends GameState {
   addCustomCard: (card: Card) => void;
   setCurrentView: (view: ViewType) => void;
   unlockAchievement: (id: string) => void;
+  claimAchievementReward: (id: string) => void;
   claimReward: (day: number, amount: number) => void;
   addPackToInventory: (pack: { id: string; type: string; name: string }) => void;
   removePackFromInventory: (packId: string) => void;
@@ -42,6 +43,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       customCards: initialGuestState?.customCards ?? [],
       currentView: 'home',
       unlockedAchievements: initialGuestState?.unlockedAchievements ?? [],
+      claimedAchievements: initialGuestState?.claimedAchievements ?? [],
       lastClaimedDate: initialGuestState?.lastClaimedDate ?? null,
       claimedDays: initialGuestState?.claimedDays ?? [],
       inventoryPacks: initialGuestState?.inventoryPacks ?? [],
@@ -72,6 +74,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         collection: state.collection,
         customCards: state.customCards,
         unlockedAchievements: state.unlockedAchievements,
+        claimedAchievements: state.claimedAchievements,
         lastClaimedDate: state.lastClaimedDate,
         claimedDays: state.claimedDays,
         inventoryPacks: state.inventoryPacks,
@@ -118,6 +121,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       collection: Array.from(new Set([...liveState.collection, ...(guestData?.collection || [])])),
       customCards: Array.from(new Set([...liveState.customCards, ...(guestData?.customCards || [])])),
       unlockedAchievements: Array.from(new Set([...liveState.unlockedAchievements, ...(guestData?.unlockedAchievements || [])])),
+      claimedAchievements: Array.from(new Set([...liveState.claimedAchievements, ...(guestData?.claimedAchievements || [])])),
       inventoryPacks: liveState.inventoryPacks.length > 0 ? liveState.inventoryPacks : (guestData?.inventoryPacks || []),
       claimedDays: Array.from(new Set([...liveState.claimedDays, ...(guestData?.claimedDays || [])])),
       lastClaimedDate: liveState.lastClaimedDate || guestData?.lastClaimedDate,
@@ -171,6 +175,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           coins: Number(cloudProfile.coins) || 0,
           cards: Array.isArray(cloudProfile.cards) ? cloudProfile.cards : [],
           unlocked_achievements: Array.isArray(cloudProfile.unlocked_achievements) ? cloudProfile.unlocked_achievements : [],
+          claimed_achievements: Array.isArray(cloudProfile.claimed_achievements) ? cloudProfile.claimed_achievements : [],
           inventory_packs: Array.isArray(cloudProfile.inventory_packs) ? cloudProfile.inventory_packs : [],
           ads_disabled: !!cloudProfile.ads_disabled,
         };
@@ -181,6 +186,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           collection: parsedCloud.cards,
           inventoryPacks: parsedCloud.inventory_packs,
           unlockedAchievements: parsedCloud.unlocked_achievements,
+          claimedAchievements: parsedCloud.claimed_achievements,
           isPremium: parsedCloud.ads_disabled,
         });
 
@@ -218,6 +224,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             coins: Math.max(parsedCloud.coins, localData.coins),
             collection: mergeArrays(parsedCloud.cards, localData.collection),
             unlockedAchievements: mergeArrays(parsedCloud.unlocked_achievements, localData.unlockedAchievements),
+            claimedAchievements: mergeArrays(parsedCloud.claimed_achievements, localData.claimedAchievements),
             inventoryPacks: mergePacks(parsedCloud.inventory_packs, localData.inventoryPacks),
             isPremium: parsedCloud.ads_disabled || localData.isPremium || false,
           };
@@ -270,6 +277,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
               collection: updated.cards || prev.collection,
               inventoryPacks: updated.inventory_packs || prev.inventoryPacks,
               unlockedAchievements: updated.unlocked_achievements || prev.unlockedAchievements,
+              claimedAchievements: updated.claimed_achievements || prev.claimedAchievements,
               isPremium: updated.ads_disabled || prev.isPremium,
             }));
           }).subscribe();
@@ -384,6 +392,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Serialización Estricta: Ensure arrays are sent as arrays (JSONB)
         cards: Array.isArray(newState.collection) ? newState.collection : [],
         unlocked_achievements: Array.isArray(newState.unlockedAchievements) ? newState.unlockedAchievements : [],
+        claimed_achievements: Array.isArray(newState.claimedAchievements) ? newState.claimedAchievements : [],
         inventory_packs: Array.isArray(newState.inventoryPacks) ? newState.inventoryPacks : [],
         ads_disabled: !!newState.isPremium,
         updated_at: new Date().toISOString(),
@@ -393,6 +402,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         coins: payload.coins,
         collection: payload.cards,
         unlockedAchievements: payload.unlocked_achievements,
+        claimedAchievements: payload.claimed_achievements,
         inventoryPacks: payload.inventory_packs,
         isPremium: payload.ads_disabled,
       });
@@ -531,9 +541,23 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setState(prev => {
       if (prev.unlockedAchievements.includes(id)) return prev;
-      
       newlyUnlocked = achievement;
+      return { 
+        ...prev, 
+        unlockedAchievements: [...prev.unlockedAchievements, id]
+      };
+    });
 
+    return newlyUnlocked;
+  }, []);
+
+  const claimAchievementReward = useCallback((id: string) => {
+    const achievement = ACHIEVEMENTS.find((a: any) => a.id === id);
+    if (!achievement) return;
+
+    setState(prev => {
+      if (prev.claimedAchievements.includes(id)) return prev;
+      
       // Grant rewards
       let newCoins = prev.coins;
       let newPacks = [...prev.inventoryPacks];
@@ -553,13 +577,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return { 
         ...prev, 
-        unlockedAchievements: [...prev.unlockedAchievements, id],
+        claimedAchievements: [...prev.claimedAchievements, id],
         coins: newCoins,
         inventoryPacks: newPacks
       };
     });
-
-    return newlyUnlocked;
   }, []);
 
   const removeNotification = useCallback((id: string) => {
@@ -622,6 +644,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       collection: [],
       customCards: [],
       unlockedAchievements: [],
+      claimedAchievements: [],
       lastClaimedDate: null,
       claimedDays: [],
       inventoryPacks: [],
@@ -652,6 +675,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     addCustomCard,
     setCurrentView,
     unlockAchievement,
+    claimAchievementReward,
     claimReward,
     addPackToInventory,
     removePackFromInventory,

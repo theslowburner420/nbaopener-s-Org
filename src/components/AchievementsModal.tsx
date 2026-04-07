@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useGame } from '../context/GameContext';
-import { ACHIEVEMENTS, Achievement } from '../constants/achievements';
+import { ACHIEVEMENTS as GENERAL_ACHIEVEMENTS } from '../constants/achievements';
+import { ACHIEVEMENTS as DRAFT_ACHIEVEMENTS } from '../data/achievements';
 import { ALL_CARDS } from '../data/cards';
 import { Trophy, X, CheckCircle2, Lock, Medal, Star, Package, Gem, Shield, Search, Filter, LayoutGrid, ListFilter, Coins } from 'lucide-react';
 
@@ -10,7 +11,7 @@ interface AchievementsModalProps {
   onClose: () => void;
 }
 
-type Category = 'all' | 'packs' | 'collection' | 'specials';
+type Category = 'all' | 'packs' | 'collection' | 'specials' | 'drafting' | 'tournaments' | 'matches';
 type StatusFilter = 'all' | 'completed' | 'pending';
 
 const LEVEL_ICONS = {
@@ -29,17 +30,31 @@ const LEVEL_COLORS = {
 
 export default function AchievementsModal({ isOpen, onClose }: AchievementsModalProps) {
   const state = useGame();
-  const { unlockedAchievements } = state;
+  const { unlockedAchievements, claimedAchievements } = state;
   const [activeCategory, setActiveCategory] = useState<Category>('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Combine all achievements
+  const ALL_ACHIEVEMENTS = useMemo(() => {
+    return [
+      ...GENERAL_ACHIEVEMENTS.map(a => ({ ...a, type: 'general' as const })),
+      ...DRAFT_ACHIEVEMENTS.map(a => ({ ...a, type: 'draft' as const }))
+    ];
+  }, []);
 
   // Performance Optimization: Only calculate achievements when the modal is open
   const filteredAchievements = useMemo(() => {
     if (!isOpen) return [];
     
-    return ACHIEVEMENTS.filter(ach => {
-      const isUnlocked = unlockedAchievements.includes(ach.id) || ach.requirement(state, ALL_CARDS);
+    return ALL_ACHIEVEMENTS.filter(ach => {
+      let isUnlocked = false;
+      if (ach.type === 'general') {
+        isUnlocked = unlockedAchievements.includes(ach.id) || (ach as any).requirement(state, ALL_CARDS);
+      } else {
+        isUnlocked = unlockedAchievements.includes(ach.id);
+      }
+
       const matchesCategory = activeCategory === 'all' || ach.category === activeCategory;
       const matchesStatus = statusFilter === 'all' || 
                            (statusFilter === 'completed' && isUnlocked) || 
@@ -49,17 +64,20 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
       
       return matchesCategory && matchesStatus && matchesSearch;
     });
-  }, [isOpen, activeCategory, statusFilter, searchQuery, unlockedAchievements, state]);
+  }, [isOpen, activeCategory, statusFilter, searchQuery, unlockedAchievements, state, ALL_ACHIEVEMENTS]);
 
   const stats = useMemo(() => {
-    if (!isOpen) return { total: ACHIEVEMENTS.length, unlocked: 0, percent: 0 };
+    if (!isOpen) return { total: ALL_ACHIEVEMENTS.length, unlocked: 0, percent: 0 };
     
-    const total = ACHIEVEMENTS.length;
-    const unlocked = ACHIEVEMENTS.filter(ach => 
-      unlockedAchievements.includes(ach.id) || ach.requirement(state, ALL_CARDS)
-    ).length;
+    const total = ALL_ACHIEVEMENTS.length;
+    const unlocked = ALL_ACHIEVEMENTS.filter(ach => {
+      if (ach.type === 'general') {
+        return unlockedAchievements.includes(ach.id) || (ach as any).requirement(state, ALL_CARDS);
+      }
+      return unlockedAchievements.includes(ach.id);
+    }).length;
     return { total, unlocked, percent: Math.round((unlocked / total) * 100) };
-  }, [isOpen, unlockedAchievements, state]);
+  }, [isOpen, unlockedAchievements, state, ALL_ACHIEVEMENTS]);
 
   return (
     <AnimatePresence>
@@ -154,11 +172,11 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
               {/* Navigation & Filters */}
               <div className="mt-4 sm:mt-8 flex flex-col gap-3">
                 <div className="flex bg-zinc-900/50 p-1 rounded-xl border border-zinc-800/50 overflow-x-auto no-scrollbar">
-                  {(['all', 'packs', 'collection', 'specials'] as Category[]).map((cat) => (
+                  {(['all', 'packs', 'collection', 'specials', 'drafting', 'tournaments', 'matches'] as Category[]).map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setActiveCategory(cat)}
-                      className={`flex-1 min-w-[70px] px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${
+                      className={`flex-none px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${
                         activeCategory === cat ? 'bg-amber-500 text-black' : 'text-zinc-500 hover:text-zinc-300'
                       }`}
                     >
@@ -195,10 +213,25 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
             <div className="flex-1 overflow-y-auto p-4 sm:p-8 no-scrollbar scroll-smooth">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                 {filteredAchievements.map((ach) => {
-                  const isUnlocked = unlockedAchievements.includes(ach.id) || ach.requirement(state, ALL_CARDS);
-                  const progress = ach.getProgress(state, ALL_CARDS);
-                  const progressPercent = Math.round((progress.current / progress.total) * 100);
-                  const LevelIcon = LEVEL_ICONS[ach.level];
+                  let isUnlocked = false;
+                  let progress = { current: 0, total: 1 };
+                  let progressPercent = 0;
+                  let level: any = 'bronze';
+                  let LevelIcon: any = Shield;
+
+                  if (ach.type === 'general') {
+                    isUnlocked = unlockedAchievements.includes(ach.id) || (ach as any).requirement(state, ALL_CARDS);
+                    progress = (ach as any).getProgress(state, ALL_CARDS);
+                    progressPercent = Math.round((progress.current / progress.total) * 100);
+                    level = (ach as any).level;
+                    LevelIcon = LEVEL_ICONS[level as keyof typeof LEVEL_ICONS];
+                  } else {
+                    isUnlocked = unlockedAchievements.includes(ach.id);
+                    progress = { current: isUnlocked ? 1 : 0, total: 1 };
+                    progressPercent = isUnlocked ? 100 : 0;
+                    level = 'gold'; // Default for draft
+                    LevelIcon = Trophy;
+                  }
                   
                   return (
                     <motion.div
@@ -220,8 +253,8 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
                           }`}>
                             <ach.icon size={20} sm:size={24} />
                           </div>
-                          <div className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-tighter border ${LEVEL_COLORS[ach.level]}`}>
-                            {ach.level}
+                          <div className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-tighter border ${LEVEL_COLORS[level as keyof typeof LEVEL_COLORS]}`}>
+                            {level}
                           </div>
                         </div>
 
@@ -256,16 +289,25 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
 
                           {/* Reward */}
                           <div className="mt-3 sm:mt-4 flex items-center gap-2 sm:gap-3">
-                            {ach.reward > 0 && (
+                            {ach.type === 'general' ? (
+                              <>
+                                {(ach as any).reward > 0 && (
+                                  <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-zinc-900/50 rounded-lg border border-zinc-800/50">
+                                    <span className="text-[8px] sm:text-[10px] font-black text-amber-500 italic">+{(ach as any).reward}</span>
+                                    <Coins size={8} sm:size={10} className="text-amber-500" />
+                                  </div>
+                                )}
+                                {(ach as any).packReward && (
+                                  <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-zinc-900/50 rounded-lg border border-zinc-800/50">
+                                    <span className="text-[8px] sm:text-[10px] font-black text-zinc-400 italic truncate max-w-[60px] sm:max-w-none">{(ach as any).packReward.name}</span>
+                                    <Package size={8} sm:size={10} className="text-zinc-500" />
+                                  </div>
+                                )}
+                              </>
+                            ) : (
                               <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-zinc-900/50 rounded-lg border border-zinc-800/50">
-                                <span className="text-[8px] sm:text-[10px] font-black text-amber-500 italic">+{ach.reward}</span>
-                                <Coins size={8} sm:size={10} className="text-amber-500" />
-                              </div>
-                            )}
-                            {ach.packReward && (
-                              <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-zinc-900/50 rounded-lg border border-zinc-800/50">
-                                <span className="text-[8px] sm:text-[10px] font-black text-zinc-400 italic truncate max-w-[60px] sm:max-w-none">{ach.packReward.name}</span>
-                                <Package size={8} sm:size={10} className="text-zinc-500" />
+                                <span className="text-[8px] sm:text-[10px] font-black text-amber-500 italic">{(ach as any).rewardText}</span>
+                                <Star size={8} sm:size={10} className="text-amber-500" />
                               </div>
                             )}
                           </div>

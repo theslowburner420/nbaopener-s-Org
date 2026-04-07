@@ -78,6 +78,7 @@ export interface GameState {
   customCards: Card[];
   currentView: ViewType;
   unlockedAchievements: string[];
+  claimedAchievements: string[];
   lastClaimedDate: string | null;
   claimedDays: number[]; // Array of day indices (1-7)
   inventoryPacks: InventoryPack[];
