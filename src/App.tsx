@@ -15,7 +15,7 @@ import HomeView from './views/HomeView';
 import DraftView from './views/DraftView';
 import RewardsView from './views/RewardsView';
 import ProfileView from './views/ProfileView';
-import { LayoutGrid, ShoppingBag, Zap, Trophy, Coins, User as UserIcon, Gift, X, Star, Home, AlertTriangle, RefreshCw } from 'lucide-react';
+import { LayoutGrid, ShoppingBag, Zap, Trophy, Coins, User as UserIcon, Gift, X, Star, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MemoryManager } from './lib/memory';
 
@@ -23,7 +23,7 @@ import Header from './components/Header';
 import StaticAd from './components/StaticAd';
 
 function AppContent() {
-  const { currentView, setCurrentView, isPremium, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setShowWelcomeGift } = useGame();
+  const { currentView, setCurrentView, isPremium, isAuthLoading, isInitialSyncDone, isOffline, showWelcomeGift, setShowWelcomeGift } = useGame();
 
   // Adsterra Script Logic - ONLY load if NOT premium
   useEffect(() => {
@@ -98,7 +98,7 @@ function AppContent() {
     }
   };
 
-  if (isAuthLoading || (!isInitialSyncDone && !syncError)) {
+  if (isAuthLoading) {
     return (
       <div className="h-[100dvh] w-full bg-black flex flex-col items-center justify-center gap-6">
         <div className="relative">
@@ -120,29 +120,6 @@ function AppContent() {
             />
           </div>
         </div>
-      </div>
-    );
-  }
-
-  if (syncError) {
-    return (
-      <div className="h-[100dvh] w-full bg-black flex flex-col items-center justify-center p-8 text-center gap-6">
-        <div className="w-20 h-20 bg-red-500/20 border border-red-500/50 rounded-3xl flex items-center justify-center text-red-500 shadow-[0_0_50px_rgba(239,68,68,0.2)]">
-          <AlertTriangle size={40} />
-        </div>
-        <div className="space-y-2">
-          <h2 className="text-2xl font-black uppercase tracking-tighter text-white">Connection Error</h2>
-          <p className="text-zinc-500 text-sm max-w-xs mx-auto leading-relaxed">
-            {syncError}
-          </p>
-        </div>
-        <button 
-          onClick={() => window.location.reload()}
-          className="px-8 py-4 bg-white text-black rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-amber-400 transition-all flex items-center gap-3"
-        >
-          <RefreshCw size={16} />
-          Retry Connection
-        </button>
       </div>
     );
   }

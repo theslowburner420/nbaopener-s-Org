@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { supabase } from '../lib/supabase';
-import { LogOut, Trash2, User as UserIcon, Check, AlertTriangle, X, CloudUpload, RefreshCw, Twitter, Trophy } from 'lucide-react';
+import { LogOut, Trash2, User as UserIcon, Check, AlertTriangle, X, CloudUpload, RefreshCw, Twitter } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 const ProfileView: React.FC = () => {
@@ -12,8 +12,7 @@ const ProfileView: React.FC = () => {
     unlockedAchievements, 
     coins, 
     inventoryPacks, 
-    updateGameState,
-    setCurrentView
+    updateGameState 
   } = useGame();
   const [username, setUsername] = useState(user?.username || '');
   const [isUpdating, setIsUpdating] = useState(false);

@@ -44,17 +44,10 @@ export type ViewType = 'collection' | 'open' | 'packs' | 'rewards' | 'shop' | 'p
 
 export interface Achievement {
   id: string;
-  category: 'drafting' | 'tournaments' | 'matches';
   title: string;
   description: string;
-  rewardText: string;
-  rewards: Array<{
-    type: 'coins' | 'pack';
-    amount?: number;
-    packType?: string;
-    packName?: string;
-  }>;
-  icon: any;
+  reward: string;
+  icon?: any;
 }
 
 export interface InventoryPack {
@@ -78,7 +71,6 @@ export interface GameState {
   customCards: Card[];
   currentView: ViewType;
   unlockedAchievements: string[];
-  claimedAchievements: string[];
   lastClaimedDate: string | null;
   claimedDays: number[]; // Array of day indices (1-7)
   inventoryPacks: InventoryPack[];

@@ -49,7 +49,7 @@ const COIN_PACKS: CoinPack[] = [
 const ADS_FREE_PRICE = 2.00;
 
 export default function ShopView() {
-  const { coins, addCoins, isPremium, setPremium, forceSync, isSaving } = useGame();
+  const { coins, addCoins, isPremium, setPremium, forceSync } = useGame();
   const { notifySuccess, notifyError } = useNotification();
   const [isAdPlaying, setIsAdPlaying] = useState(false);
   const [adCountdown, setAdCountdown] = useState(30);
@@ -112,10 +112,14 @@ export default function ShopView() {
 
   const handlePaymentSuccess = async (rewardType: 'coins' | 'isPremium', amount: number, transactionId?: string) => {
     if (rewardType === 'coins') {
-      await addCoins(amount);
+      addCoins(amount);
     } else {
-      await setPremium(true);
+      setPremium(true);
     }
+    
+    // Force immediate sync to database using the secure function
+    // This ensures the purchase is persisted even if the user closes the tab immediately
+    await forceSync();
     
     console.log(`💰 PURCHASE VERIFIED: ${rewardType} - Amount: ${amount} - TX: ${transactionId}`);
     notifySuccess("Purchase Successful! Your progress has been synced to the cloud.");
