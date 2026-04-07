@@ -17,7 +17,6 @@ import {
   Package
 } from 'lucide-react';
 import { useGame } from '../context/GameContext';
-import { useNotification } from '../context/NotificationContext';
 import { useEngine } from '../hooks/useEngine';
 import { Card } from '../types';
 import { ALL_CARDS } from '../data/cards';
@@ -316,16 +315,7 @@ const Slot: React.FC<{
 };
 
 const DraftView: React.FC = () => {
-  const { 
-    coins, 
-    spendCoins, 
-    setCurrentView, 
-    addCoins, 
-    addPackToInventory, 
-    unlockAchievement,
-    updateGameState 
-  } = useGame();
-  const { notify } = useNotification();
+  const { coins, spendCoins, setCurrentView, addCoins, addPackToInventory } = useGame();
   const { generateDraftOptions } = useEngine();
 
   const [phase, setPhase] = useState<DraftPhase>('entry');
@@ -424,12 +414,6 @@ const DraftView: React.FC = () => {
       setStarters(prev => prev.map(s => s.position === card.position ? { ...s, card } : s));
       setPhase('starters');
       setCurrentOptions([]);
-
-      // Achievement: Generational Talent
-      if ((card.stats?.ovr || 0) >= 97) {
-        const unlocked = unlockAchievement('generational_talent');
-        if (unlocked) notify(unlocked);
-      }
     } else if (activeSlotId) {
       // Regular selection
       if (activeSlotId.startsWith('bench')) {
@@ -448,26 +432,6 @@ const DraftView: React.FC = () => {
         setPhase('bench');
       } else if (allStartersFilled && allBenchFilled) {
         setPhase('review');
-        
-        // Achievement: Trust the Process
-        const unlocked1 = unlockAchievement('trust_the_process');
-        if (unlocked1) notify(unlocked1);
-
-        // Achievement: Superteam
-        if (teamOVR >= 92) {
-          const unlocked2 = unlockAchievement('superteam');
-          if (unlocked2) notify(unlocked2);
-        }
-
-        // Achievement: Bench Mob
-        const benchPlayers = bench.map(s => s.card).filter(Boolean) as Card[];
-        const benchAvg = benchPlayers.length > 0 
-          ? benchPlayers.reduce((acc, p) => acc + (p.stats?.ovr || 0), 0) / benchPlayers.length 
-          : 0;
-        if (benchAvg >= 85) {
-          const unlocked3 = unlockAchievement('bench_mob');
-          if (unlocked3) notify(unlocked3);
-        }
       }
     }
   };
@@ -624,16 +588,6 @@ const DraftView: React.FC = () => {
     const userScore = stats.reduce((acc, s) => acc + s.pts, 0);
     setBoxScore(stats);
 
-    // Achievements: In-Match Feats (Stats)
-    if (stats.some(s => s.pts >= 40)) {
-      const unlocked = unlockAchievement('the_carry');
-      if (unlocked) notify(unlocked);
-    }
-    if (stats.some(s => s.ast >= 15)) {
-      const unlocked = unlockAchievement('floor_general');
-      if (unlocked) notify(unlocked);
-    }
-
     // 3. Opponent Score Logic (Simulated based on their OVR)
     const oppBasePts = 105 * oppBoost;
     const oppScore = Math.round(oppBasePts * (0.9 + Math.random() * 0.2));
@@ -788,25 +742,6 @@ const DraftView: React.FC = () => {
         winner: winner === 'USER' ? 'Your Team' : (winner as GhostTeam).name 
       });
 
-      // Achievements: In-Match Feats (Score)
-      if (winner === 'USER') {
-        const diff = Math.abs(s1 - s2);
-        if (diff >= 20) {
-          const unlocked = unlockAchievement('blowout');
-          if (unlocked) notify(unlocked);
-        }
-        if (diff >= 1 && diff <= 2) {
-          const unlocked = unlockAchievement('clutch_time');
-          if (unlocked) notify(unlocked);
-        }
-
-        // Achievement: David vs Goliath
-        if (selectedTournament?.name === 'NBA Playoffs' && teamOVR < 88) {
-          const unlocked = unlockAchievement('david_vs_goliath');
-          if (unlocked) notify(unlocked);
-        }
-      }
-
       setBracket(prev => prev.map(m => m.id === matchId ? { 
         ...m, 
         winner, 
@@ -825,20 +760,6 @@ const DraftView: React.FC = () => {
     setFinalPosition(position);
     setEarnedRewards(rewards);
     setShowTournamentSummary(true);
-
-    // Achievements: Tournament Success
-    if (position === 'champion') {
-      if (selectedTournament.name === 'Summer League') {
-        const unlocked = unlockAchievement('summer_mvp');
-        if (unlocked) notify(unlocked);
-      } else if (selectedTournament.name === 'NBA Cup') {
-        const unlocked = unlockAchievement('cup_champion');
-        if (unlocked) notify(unlocked);
-      } else if (selectedTournament.name === 'NBA Playoffs') {
-        const unlocked = unlockAchievement('ring_chaser');
-        if (unlocked) notify(unlocked);
-      }
-    }
   };
 
   const claimRewards = () => {
