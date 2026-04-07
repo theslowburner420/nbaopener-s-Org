@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useGame } from '../context/GameContext';
-import { ACHIEVEMENTS as ALL_ACHIEVEMENTS } from '../constants/achievements';
+import { ACHIEVEMENTS, Achievement } from '../constants/achievements';
 import { ALL_CARDS } from '../data/cards';
 import { Trophy, X, CheckCircle2, Lock, Medal, Star, Package, Gem, Shield, Search, Filter, LayoutGrid, ListFilter, Coins } from 'lucide-react';
 
@@ -10,7 +10,7 @@ interface AchievementsModalProps {
   onClose: () => void;
 }
 
-type Category = 'all' | 'packs' | 'collection' | 'specials' | 'drafting' | 'tournaments' | 'matches';
+type Category = 'all' | 'packs' | 'collection' | 'specials';
 type StatusFilter = 'all' | 'completed' | 'pending';
 
 const LEVEL_ICONS = {
@@ -29,7 +29,7 @@ const LEVEL_COLORS = {
 
 export default function AchievementsModal({ isOpen, onClose }: AchievementsModalProps) {
   const state = useGame();
-  const { unlockedAchievements, claimedAchievements } = state;
+  const { unlockedAchievements } = state;
   const [activeCategory, setActiveCategory] = useState<Category>('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,9 +38,8 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
   const filteredAchievements = useMemo(() => {
     if (!isOpen) return [];
     
-    return ALL_ACHIEVEMENTS.filter(ach => {
+    return ACHIEVEMENTS.filter(ach => {
       const isUnlocked = unlockedAchievements.includes(ach.id) || ach.requirement(state, ALL_CARDS);
-
       const matchesCategory = activeCategory === 'all' || ach.category === activeCategory;
       const matchesStatus = statusFilter === 'all' || 
                            (statusFilter === 'completed' && isUnlocked) || 
@@ -53,12 +52,12 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
   }, [isOpen, activeCategory, statusFilter, searchQuery, unlockedAchievements, state]);
 
   const stats = useMemo(() => {
-    if (!isOpen) return { total: ALL_ACHIEVEMENTS.length, unlocked: 0, percent: 0 };
+    if (!isOpen) return { total: ACHIEVEMENTS.length, unlocked: 0, percent: 0 };
     
-    const total = ALL_ACHIEVEMENTS.length;
-    const unlocked = ALL_ACHIEVEMENTS.filter(ach => {
-      return unlockedAchievements.includes(ach.id) || ach.requirement(state, ALL_CARDS);
-    }).length;
+    const total = ACHIEVEMENTS.length;
+    const unlocked = ACHIEVEMENTS.filter(ach => 
+      unlockedAchievements.includes(ach.id) || ach.requirement(state, ALL_CARDS)
+    ).length;
     return { total, unlocked, percent: Math.round((unlocked / total) * 100) };
   }, [isOpen, unlockedAchievements, state]);
 
@@ -155,11 +154,11 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
               {/* Navigation & Filters */}
               <div className="mt-4 sm:mt-8 flex flex-col gap-3">
                 <div className="flex bg-zinc-900/50 p-1 rounded-xl border border-zinc-800/50 overflow-x-auto no-scrollbar">
-                  {(['all', 'packs', 'collection', 'specials', 'drafting', 'tournaments', 'matches'] as Category[]).map((cat) => (
+                  {(['all', 'packs', 'collection', 'specials'] as Category[]).map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setActiveCategory(cat)}
-                      className={`flex-none px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${
+                      className={`flex-1 min-w-[70px] px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${
                         activeCategory === cat ? 'bg-amber-500 text-black' : 'text-zinc-500 hover:text-zinc-300'
                       }`}
                     >
@@ -195,84 +194,83 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
             {/* Content Area */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-8 no-scrollbar scroll-smooth">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                  {filteredAchievements.map((ach) => {
-                    const isUnlocked = unlockedAchievements.includes(ach.id) || ach.requirement(state, ALL_CARDS);
-                    const progress = ach.getProgress(state, ALL_CARDS);
-                    const progressPercent = Math.round((progress.current / progress.total) * 100);
-                    const level = ach.level;
-                    const LevelIcon = LEVEL_ICONS[level as keyof typeof LEVEL_ICONS];
+                {filteredAchievements.map((ach) => {
+                  const isUnlocked = unlockedAchievements.includes(ach.id) || ach.requirement(state, ALL_CARDS);
+                  const progress = ach.getProgress(state, ALL_CARDS);
+                  const progressPercent = Math.round((progress.current / progress.total) * 100);
+                  const LevelIcon = LEVEL_ICONS[ach.level];
                   
-                    return (
-                      <motion.div
-                        layout
-                        key={ach.id}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className={`relative p-4 sm:p-5 rounded-2xl border transition-all duration-300 ${
-                          isUnlocked 
-                            ? 'bg-zinc-900/40 border-amber-500/20 shadow-xl' 
-                            : 'bg-zinc-950 border-zinc-900/50'
-                        }`}
-                      >
-                        <div className="flex gap-3 sm:gap-4">
-                          {/* Icon & Level */}
-                          <div className="shrink-0 flex flex-col items-center gap-1.5 sm:gap-2">
-                            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-all ${
-                              isUnlocked ? 'bg-amber-500 text-black' : 'bg-zinc-900 text-zinc-700'
-                            }`}>
-                              <ach.icon size={20} sm:size={24} />
-                            </div>
-                            <div className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-tighter border ${LEVEL_COLORS[level as keyof typeof LEVEL_COLORS]}`}>
-                              {level}
-                            </div>
+                  return (
+                    <motion.div
+                      layout
+                      key={ach.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className={`relative p-4 sm:p-5 rounded-2xl border transition-all duration-300 ${
+                        isUnlocked 
+                          ? 'bg-zinc-900/40 border-amber-500/20 shadow-xl' 
+                          : 'bg-zinc-950 border-zinc-900/50'
+                      }`}
+                    >
+                      <div className="flex gap-3 sm:gap-4">
+                        {/* Icon & Level */}
+                        <div className="shrink-0 flex flex-col items-center gap-1.5 sm:gap-2">
+                          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-all ${
+                            isUnlocked ? 'bg-amber-500 text-black' : 'bg-zinc-900 text-zinc-700'
+                          }`}>
+                            <ach.icon size={20} sm:size={24} />
                           </div>
-
-                          {/* Info */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2 mb-1">
-                              <h3 className={`text-xs sm:text-sm font-black uppercase italic tracking-tight truncate ${isUnlocked ? 'text-white' : 'text-zinc-500'}`}>
-                                {ach.title}
-                              </h3>
-                              {isUnlocked && <CheckCircle2 size={14} sm:size={16} className="text-green-500 shrink-0" />}
-                            </div>
-                            <p className="text-[9px] sm:text-[10px] text-zinc-500 font-medium leading-tight line-clamp-2 mb-3 sm:mb-4">
-                              {ach.description}
-                            </p>
-
-                            {/* Progress Bar */}
-                            {!isUnlocked && (
-                              <div className="space-y-1 sm:space-y-1.5">
-                                <div className="flex justify-between text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-zinc-600">
-                                  <span>Progress</span>
-                                  <span>{progress.current} / {progress.total}</span>
-                                </div>
-                                <div className="h-1 sm:h-1.5 bg-zinc-900 rounded-full overflow-hidden">
-                                  <motion.div 
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${progressPercent}%` }}
-                                    className="h-full bg-zinc-700"
-                                  />
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Reward */}
-                            <div className="mt-3 sm:mt-4 flex items-center gap-2 sm:gap-3">
-                              {ach.rewardCoins > 0 && (
-                                <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-zinc-900/50 rounded-lg border border-zinc-800/50">
-                                  <span className="text-[8px] sm:text-[10px] font-black text-amber-500 italic">+{ach.rewardCoins}</span>
-                                  <Coins size={8} sm:size={10} className="text-amber-500" />
-                                </div>
-                              )}
-                              {ach.rewardPacks && ach.rewardPacks.map((p, pIdx) => (
-                                <div key={pIdx} className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-zinc-900/50 rounded-lg border border-zinc-800/50">
-                                  <span className="text-[8px] sm:text-[10px] font-black text-zinc-400 italic truncate max-w-[60px] sm:max-w-none">{p.name} {p.count && p.count > 1 ? `x${p.count}` : ''}</span>
-                                  <Package size={8} sm:size={10} className="text-zinc-500" />
-                                </div>
-                              ))}
-                            </div>
+                          <div className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-tighter border ${LEVEL_COLORS[ach.level]}`}>
+                            {ach.level}
                           </div>
                         </div>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2 mb-1">
+                            <h3 className={`text-xs sm:text-sm font-black uppercase italic tracking-tight truncate ${isUnlocked ? 'text-white' : 'text-zinc-500'}`}>
+                              {ach.title}
+                            </h3>
+                            {isUnlocked && <CheckCircle2 size={14} sm:size={16} className="text-green-500 shrink-0" />}
+                          </div>
+                          <p className="text-[9px] sm:text-[10px] text-zinc-500 font-medium leading-tight line-clamp-2 mb-3 sm:mb-4">
+                            {ach.description}
+                          </p>
+
+                          {/* Progress Bar */}
+                          {!isUnlocked && (
+                            <div className="space-y-1 sm:space-y-1.5">
+                              <div className="flex justify-between text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-zinc-600">
+                                <span>Progress</span>
+                                <span>{progress.current} / {progress.total}</span>
+                              </div>
+                              <div className="h-1 sm:h-1.5 bg-zinc-900 rounded-full overflow-hidden">
+                                <motion.div 
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${progressPercent}%` }}
+                                  className="h-full bg-zinc-700"
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Reward */}
+                          <div className="mt-3 sm:mt-4 flex items-center gap-2 sm:gap-3">
+                            {ach.reward > 0 && (
+                              <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-zinc-900/50 rounded-lg border border-zinc-800/50">
+                                <span className="text-[8px] sm:text-[10px] font-black text-amber-500 italic">+{ach.reward}</span>
+                                <Coins size={8} sm:size={10} className="text-amber-500" />
+                              </div>
+                            )}
+                            {ach.packReward && (
+                              <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-zinc-900/50 rounded-lg border border-zinc-800/50">
+                                <span className="text-[8px] sm:text-[10px] font-black text-zinc-400 italic truncate max-w-[60px] sm:max-w-none">{ach.packReward.name}</span>
+                                <Package size={8} sm:size={10} className="text-zinc-500" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
 
                       {/* Level Indicator Icon in corner */}
                       <div className="absolute top-2 right-2 sm:top-3 sm:right-3 opacity-10 pointer-events-none">

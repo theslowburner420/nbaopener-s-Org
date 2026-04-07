@@ -5043,7 +5043,7 @@ const rawCards = [
     ast: 5.4,
     nbaId: 977,
     imageUrl: 'https://i.pinimg.com/736x/72/ee/58/72ee5850608aaace557b32469e1e9dd7.jpg',
-    quote: '28.3 PTS - The Mamba mentality at its finest.'
+    quote: '28.3 PTS - La mentalidad Mamba en su máximo esplendor.'
   },
   {
     id: 'mvp-2009',
@@ -5332,7 +5332,7 @@ const rawCards = [
     ast: 6.2,
     nbaId: 1628983,
     imageUrl: 'https://www.cbc.ca/kidsnews/images/shai-mvp-trophy-may2025-860x484.png',
-    quote: '30.1 PTS - Leading the new generation of the Thunder.'
+    quote: '30.1 PTS - Liderando a la nueva generación del Thunder.'
   },
     // DPOY SERIES
     {
@@ -6982,7 +6982,7 @@ const rawCards = [
     ast: 5.0,
     nbaId: 1938,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTuy4BB46wSY9HO3p_SbIjGMQyNXOYsVbWvaA&s',
-    quote: 'The ultimate 6th man. Sacrificed starting for the good of the dynasty.'
+    quote: 'El 6º hombre definitivo. Sacrificó ser titular por el bien de la dinastía.'
   },
   {
     id: 'xfactor-004',
@@ -7078,7 +7078,7 @@ const rawCards = [
     ast: 2.0,
     nbaId: 2203,
     imageUrl: 'https://media.newyorker.com/photos/59095788c14b3c606c104a1d/master/pass/ShaneBattier_AP120617051483_Original_opt.jpg',
-    quote: 'The king of "invisible stats" and elite defensive marking.'
+    quote: 'El rey de las "estadísticas invisibles" y el marcaje defensivo de élite.'
   },
   {
     id: 'xfactor-010',
@@ -7110,7 +7110,7 @@ const rawCards = [
     ast: 4.0,
     nbaId: 1885,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/LamarOdomLakers.jpg/250px-LamarOdomLakers.jpg',
-    quote: 'Total versatility. Could play point guard or center for Kobe\'s Lakers.'
+    quote: 'Versatilidad total. Podía jugar de base o de pívot para los Lakers de Kobe.'
   },
   {
     id: 'xfactor-012',

@@ -142,6 +142,28 @@ const ProfileView: React.FC = () => {
           </div>
         </div>
 
+        {/* Achievements Quick Access */}
+        <button
+          onClick={() => setCurrentView('achievements')}
+          className="w-full bg-zinc-950 border-2 border-amber-500/20 hover:border-amber-500/50 rounded-2xl p-5 flex items-center justify-between transition-all group overflow-hidden relative"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 blur-[40px] -translate-y-1/2 translate-x-1/2 group-hover:bg-amber-500/10 transition-all" />
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center text-black shadow-[0_0_20px_rgba(245,158,11,0.3)]">
+              <Trophy size={24} />
+            </div>
+            <div className="text-left">
+              <h3 className="text-sm font-black uppercase italic text-white tracking-widest">Draft Achievements</h3>
+              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                {unlockedAchievements.length} / 12 Completed
+              </p>
+            </div>
+          </div>
+          <div className="relative z-10 w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-black transition-all">
+            <RefreshCw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
+          </div>
+        </button>
+
         {/* Social Missions */}
         <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 space-y-4">
           <div className="flex items-center justify-between">

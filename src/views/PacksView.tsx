@@ -61,7 +61,7 @@ const PACKS: Pack[] = [
 ];
 
 export default function PacksView() {
-  const { coins, collection, inventoryPacks, isSaving } = useGame();
+  const { coins, collection, inventoryPacks } = useGame();
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const { openPack, openInventoryPack } = useEngine();
   const { notifyError } = useNotification();
@@ -99,20 +99,20 @@ export default function PacksView() {
     }, {} as Record<string, { total: number, owned: number, percent: number }>);
   }, [collection]);
 
-  const handleBuy = async (pack: Pack) => {
+  const handleBuy = (pack: Pack) => {
     if (coins < pack.price) {
       notifyError(`Need ${pack.price - coins} more coins!`);
       return;
     }
-    const result = await openPack(pack.id as PackType);
+    const result = openPack(pack.id);
     if (result) {
       setOpenedCards(result.cards);
       setNewlyUnlocked(result.newlyUnlocked);
     }
   };
 
-  const handleOpenInventory = async (packId: string, packType: string) => {
-    const result = await openInventoryPack(packId, packType as PackType);
+  const handleOpenInventory = (packId: string, packType: string) => {
+    const result = openInventoryPack(packId, packType as PackType);
     if (result) {
       setOpenedCards(result.cards);
       setNewlyUnlocked(result.newlyUnlocked);
@@ -232,20 +232,13 @@ export default function PacksView() {
                     {/* Buy Button - Premium Redesign */}
                     <button 
                       onClick={() => handleBuy(pack)}
-                      disabled={coins < pack.price || isSaving}
-                      className="mt-2 sm:mt-3 w-full group relative overflow-hidden rounded-xl active:scale-95 transition-all shrink-0 disabled:opacity-50"
+                      className="mt-2 sm:mt-3 w-full group relative overflow-hidden rounded-xl active:scale-95 transition-all shrink-0"
                     >
                       <div className="absolute inset-0 bg-white group-hover:bg-amber-400 transition-colors" />
                       <div className="relative px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between">
                         <div className="flex items-center gap-1.5 sm:gap-2">
-                          {isSaving ? (
-                            <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                          ) : (
-                            <ShoppingCart size={12} className="text-black sm:size-14" />
-                          )}
-                          <span className="text-[8px] sm:text-[10px] font-black text-black uppercase tracking-widest italic">
-                            {isSaving ? 'Saving...' : 'Get Pack'}
-                          </span>
+                          <ShoppingCart size={12} className="text-black sm:size-14" />
+                          <span className="text-[8px] sm:text-[10px] font-black text-black uppercase tracking-widest italic">Get Pack</span>
                         </div>
                         <div className="flex items-center gap-0.5 sm:gap-1 bg-black/10 px-1.5 sm:px-2 py-0.5 rounded-full">
                           <Zap size={8} className="text-amber-600 sm:size-10" fill="currentColor" />
@@ -293,14 +286,9 @@ export default function PacksView() {
                         </div>
                         <button
                           onClick={() => handleOpenInventory(pack.id, pack.type)}
-                          disabled={isSaving}
-                          className="bg-white text-black px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg shrink-0 disabled:opacity-50 flex items-center justify-center min-w-[70px]"
+                          className="bg-white text-black px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg shrink-0"
                         >
-                          {isSaving ? (
-                            <div className="w-3 h-3 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                          ) : (
-                            'Open'
-                          )}
+                          Open
                         </button>
                       </motion.div>
                     );

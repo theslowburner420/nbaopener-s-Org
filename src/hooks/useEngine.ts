@@ -87,7 +87,7 @@ const TEAM_CARDS_MAP = ALL_CARDS.reduce((acc, card) => {
 const ALL_TEAMS = Object.keys(TEAM_CARDS_MAP);
 
 export function useEngine() {
-  const { collection, coins, updateGameState, updateGameStateAsync, unlockedAchievements, inventoryPacks, isSaving } = useGame();
+  const { collection, coins, updateGameState, unlockedAchievements, inventoryPacks } = useGame();
   const { notify } = useNotification();
 
   const generateCard = (packType: PackType): Card => {
@@ -144,17 +144,14 @@ export function useEngine() {
           };
 
           if (ach.requirement(tempState, ALL_CARDS)) {
-            const packRewardText = ach.rewardPacks ? ` & ${ach.rewardPacks.map(p => p.name).join(', ')}` : '';
-            const rewardText = `+${ach.rewardCoins.toLocaleString()} Coins${packRewardText}`;
-            
             const achievementData = {
               id: ach.id,
               title: ach.title,
               description: ach.description,
-              reward: rewardText,
+              reward: ach.packReward ? `+${ach.reward} Coins & ${ach.packReward.name}` : `+${ach.reward} Coins`,
               icon: ach.icon,
-              rewardCoins: ach.rewardCoins,
-              rewardPacks: ach.rewardPacks,
+              rewardCoins: ach.reward,
+              packReward: ach.packReward,
               triggeredByCardId: cardId
             };
             
@@ -163,11 +160,9 @@ export function useEngine() {
             
             if (!silent) {
               notify(achievementData);
-              bonusCoins += ach.rewardCoins;
-              if (ach.rewardPacks) {
-                ach.rewardPacks.forEach(p => {
-                  newInventoryPacks.push(p);
-                });
+              bonusCoins += ach.reward;
+              if (ach.packReward) {
+                newInventoryPacks.push(ach.packReward);
               }
             }
           }
@@ -219,7 +214,7 @@ export function useEngine() {
     return { newlyUnlocked, bonusCoins, newInventoryPacks, newlyUnlockedIds };
   };
 
-  const openPack = async (packType: PackType) => {
+  const openPack = (packType: PackType) => {
     let currentCoins = coins;
     if (packType !== 'random') {
       const price = PACK_PRICES[packType];
@@ -255,7 +250,7 @@ export function useEngine() {
       }
     });
 
-    // Batch update everything in ONE single call to ensure ONE cloud request (Local-first)
+    // Batch update everything in ONE single call to ensure ONE cloud request
     updateGameState({
       coins: currentCoins + bonusCoins,
       collection: finalCollection,
@@ -266,7 +261,7 @@ export function useEngine() {
     return { cards: cardsWithNewFlag, newlyUnlocked };
   };
 
-  const openInventoryPack = async (packId: string, packType: PackType) => {
+  const openInventoryPack = (packId: string, packType: PackType) => {
     const newCards = Array.from({ length: PACK_SIZES[packType] }).map(() => generateCard(packType));
     const newIds = newCards.map(c => c.id);
     
@@ -301,7 +296,6 @@ export function useEngine() {
       }
     });
 
-    // Local-first update
     updateGameState({
       coins: coins + bonusCoins,
       collection: finalCollection,
@@ -373,5 +367,5 @@ export function useEngine() {
     return options;
   };
 
-  return { openPack, openInventoryPack, generateDraftOptions, PACK_SIZES, isSaving };
+  return { openPack, openInventoryPack, generateDraftOptions, PACK_SIZES };
 }
