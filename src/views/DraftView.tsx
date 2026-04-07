@@ -643,11 +643,11 @@ const DraftView: React.FC = () => {
 
     // Achievements: In-Match Feats (Stats)
     if (stats.some(s => s.pts >= 40)) {
-      const unlocked = unlockAchievement('the_carry');
+      const unlocked = await unlockAchievement('the_carry', false);
       if (unlocked) notify(unlocked);
     }
     if (stats.some(s => s.ast >= 15)) {
-      const unlocked = unlockAchievement('floor_general');
+      const unlocked = await unlockAchievement('floor_general', false);
       if (unlocked) notify(unlocked);
     }
 
@@ -819,11 +819,11 @@ const DraftView: React.FC = () => {
     };
   };
 
-  const finishMatch = (matchId: string, s1: number, s2: number, winner: 'USER' | GhostTeam) => {
+  const finishMatch = async (matchId: string, s1: number, s2: number, winner: 'USER' | GhostTeam) => {
     const match = bracket.find(m => m.id === matchId);
     if (!match) return;
 
-    setTimeout(() => {
+    setTimeout(async () => {
       setMatchResult({ 
         score1: s1, 
         score2: s2, 
@@ -834,17 +834,17 @@ const DraftView: React.FC = () => {
       if (winner === 'USER') {
         const diff = Math.abs(s1 - s2);
         if (diff >= 20) {
-          const unlocked = unlockAchievement('blowout');
+          const unlocked = await unlockAchievement('blowout', false);
           if (unlocked) notify(unlocked);
         }
         if (diff >= 1 && diff <= 2) {
-          const unlocked = unlockAchievement('clutch_time');
+          const unlocked = await unlockAchievement('clutch_time', false);
           if (unlocked) notify(unlocked);
         }
 
         // Achievement: David vs Goliath
         if (selectedTournament?.name === 'NBA Playoffs' && teamOVR < 88) {
-          const unlocked = unlockAchievement('david_vs_goliath');
+          const unlocked = await unlockAchievement('david_vs_goliath', false);
           if (unlocked) notify(unlocked);
         }
       }
@@ -861,7 +861,7 @@ const DraftView: React.FC = () => {
     }, 2000);
   };
 
-  const handleTournamentEnd = (position: 'quarters' | 'semis' | 'finalist' | 'champion') => {
+  const handleTournamentEnd = async (position: 'quarters' | 'semis' | 'finalist' | 'champion') => {
     if (!selectedTournament) return;
     const rewards = REWARDS[selectedTournament.name as keyof typeof REWARDS][position];
     setFinalPosition(position);
@@ -871,13 +871,13 @@ const DraftView: React.FC = () => {
     // Achievements: Tournament Success
     if (position === 'champion') {
       if (selectedTournament.name === 'Summer League') {
-        const unlocked = unlockAchievement('summer_mvp');
+        const unlocked = await unlockAchievement('summer_mvp', false);
         if (unlocked) notify(unlocked);
       } else if (selectedTournament.name === 'NBA Cup') {
-        const unlocked = unlockAchievement('cup_champion');
+        const unlocked = await unlockAchievement('cup_champion', false);
         if (unlocked) notify(unlocked);
       } else if (selectedTournament.name === 'NBA Playoffs') {
-        const unlocked = unlockAchievement('ring_chaser');
+        const unlocked = await unlockAchievement('ring_chaser', false);
         if (unlocked) notify(unlocked);
       }
     }

@@ -255,8 +255,8 @@ export function useEngine() {
       }
     });
 
-    // Batch update everything in ONE single call to ensure ONE cloud request
-    await updateGameStateAsync({
+    // Batch update everything in ONE single call to ensure ONE cloud request (Local-first)
+    updateGameState({
       coins: currentCoins + bonusCoins,
       collection: finalCollection,
       unlockedAchievements: [...unlockedAchievements, ...newlyUnlockedIds],
@@ -301,7 +301,8 @@ export function useEngine() {
       }
     });
 
-    await updateGameStateAsync({
+    // Local-first update
+    updateGameState({
       coins: coins + bonusCoins,
       collection: finalCollection,
       unlockedAchievements: [...unlockedAchievements, ...newlyUnlockedIds],

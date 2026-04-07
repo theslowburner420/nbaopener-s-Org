@@ -25,6 +25,7 @@ interface GameContextType extends GameState {
   updateGameStateAsync: (updates: Partial<GameState>) => Promise<void>;
   forceSync: () => Promise<void>;
   isSaving: boolean;
+  isBackgroundSaving: boolean;
   removeNotification: (id: string) => void;
   showWelcomeGift: boolean;
   setShowWelcomeGift: (show: boolean) => void;
@@ -55,9 +56,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const authProcessed = React.useRef(false);
   const isSyncingRef = useRef(false);
+  const isBackgroundSyncingRef = useRef(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isInitialSyncDone, setIsInitialSyncDone] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isBackgroundSaving, setIsBackgroundSaving] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
   const [showWelcomeGift, setShowWelcomeGift] = useState(false);
   const stateRef = useRef(state);
@@ -374,24 +377,19 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Function to force immediate sync to Supabase with retries (IRON RULE: Write Confirmation)
-  const forceSyncToSupabase = useCallback(async (newState: GameState, retries = 5) => {
+  const forceSyncToSupabase = useCallback(async (newState: GameState, retries = 5, silent = false) => {
+    if (isBackgroundSyncingRef.current && silent) return;
+    
     try {
       if (!newState.user || !supabase) return;
 
       // Validation of UUID
-      console.log('🔍 VALIDATING UUID:', newState.user?.id);
-      if (!newState.user?.id) {
-        console.error('❌ UUID VALIDATION FAILED: user.id is null or undefined');
-        return;
-      }
+      if (!newState.user?.id) return;
 
-      // Payload Cleanup & Data Mapping Validation
-      // We only include columns that exist in the CSV/Table to avoid 400 errors
       const payload = {
         username: newState.user.username,
         avatar_url: newState.user.avatar_url,
         coins: Number(newState.coins) || 0,
-        // Serialización Estricta: Ensure arrays are sent as arrays (JSONB)
         cards: Array.isArray(newState.collection) ? newState.collection : [],
         unlocked_achievements: Array.isArray(newState.unlockedAchievements) ? newState.unlockedAchievements : [],
         claimed_achievements: Array.isArray(newState.claimedAchievements) ? newState.claimedAchievements : [],
@@ -410,34 +408,30 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (stateString === lastSyncedStateRef.current) {
-        return;
+        return true;
       }
 
-      setIsSaving(true);
-      console.log('📤 CLOUD SYNC: Attempting to save state...', payload);
-      
+      if (silent) {
+        setIsBackgroundSaving(true);
+        isBackgroundSyncingRef.current = true;
+      } else {
+        setIsSaving(true);
+      }
+
       const performSave = async (attempt: number): Promise<boolean> => {
         try {
-          // Use .update().eq() for existing profiles
           const { error } = await supabase!
             .from('profiles')
             .update(payload)
             .eq('id', newState.user!.id);
           
           if (error) {
-            console.error(`❌ CLOUD SAVE ERROR (Attempt ${attempt}):`, error.message, error.details, error.hint);
-            // If update fails because record doesn't exist, try upsert
             if (error.code === 'PGRST116' || error.message.includes('0 rows')) {
-              console.log('ℹ️ Profile not found, attempting upsert...');
               const { error: upsertError } = await supabase!.from('profiles').upsert({
                 id: newState.user!.id,
                 ...payload
               });
-              if (upsertError) {
-                console.error('❌ UPSERT FAILED:', upsertError.message);
-                return false;
-              }
-              return true;
+              return !upsertError;
             }
             return false;
           }
@@ -446,7 +440,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.removeItem('GUEST_PROGRESS');
           return true;
         } catch (err) {
-          console.error(`❌ UNEXPECTED SYNC ERROR (Attempt ${attempt}):`, err);
           return false;
         }
       };
@@ -457,22 +450,28 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       while (!success && currentAttempt < retries) {
         currentAttempt++;
         const delay = 1000 * Math.pow(2, currentAttempt - 1);
-        console.log(`🔄 SYNC RETRY: Attempt ${currentAttempt}/${retries} in ${delay}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
         success = await performSave(currentAttempt);
       }
 
       if (!success) {
-        console.error('🚨 CRITICAL SYNC FAILURE: Could not persist progress to cloud.');
         setIsOffline(true);
       } else {
         setIsOffline(false);
       }
       
-      setTimeout(() => setIsSaving(false), 800);
+      if (silent) {
+        setIsBackgroundSaving(false);
+        isBackgroundSyncingRef.current = false;
+      } else {
+        setTimeout(() => setIsSaving(false), 800);
+      }
+      return success;
     } catch (criticalErr) {
-      console.error('🚨 CRITICAL SYNC ENGINE ERROR (Anti-Crash Protection):', criticalErr);
       setIsSaving(false);
+      setIsBackgroundSaving(false);
+      isBackgroundSyncingRef.current = false;
+      return false;
     }
   }, []);
 
@@ -485,8 +484,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     syncTimeoutRef.current = setTimeout(() => {
-      forceSyncToSupabase(state);
-    }, 2000); // 2 second debounce for automatic sync
+      forceSyncToSupabase(state, 3, true);
+    }, 3000); // 3 second debounce for silent background sync
 
     return () => {
       if (syncTimeoutRef.current) {
@@ -740,6 +739,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateGameStateAsync,
     forceSync,
     isSaving,
+    isBackgroundSaving,
     removeNotification,
     isInitialSyncDone,
     isOffline,
@@ -747,7 +747,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setShowWelcomeGift,
     login,
     logout
-  }), [state, isAuthLoading, isInitialSyncDone, isOffline, showWelcomeGift, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, forceSync, isSaving, login, logout]);
+  }), [state, isAuthLoading, isInitialSyncDone, isOffline, showWelcomeGift, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, forceSync, isSaving, isBackgroundSaving, login, logout]);
 
   return (
     <GameContext.Provider value={contextValue}>
