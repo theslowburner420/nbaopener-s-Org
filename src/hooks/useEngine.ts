@@ -144,14 +144,17 @@ export function useEngine() {
           };
 
           if (ach.requirement(tempState, ALL_CARDS)) {
+            const packRewardText = ach.rewardPacks ? ` & ${ach.rewardPacks.map(p => p.name).join(', ')}` : '';
+            const rewardText = `+${ach.rewardCoins.toLocaleString()} Coins${packRewardText}`;
+            
             const achievementData = {
               id: ach.id,
               title: ach.title,
               description: ach.description,
-              reward: ach.packReward ? `+${ach.reward} Coins & ${ach.packReward.name}` : `+${ach.reward} Coins`,
+              reward: rewardText,
               icon: ach.icon,
-              rewardCoins: ach.reward,
-              packReward: ach.packReward,
+              rewardCoins: ach.rewardCoins,
+              rewardPacks: ach.rewardPacks,
               triggeredByCardId: cardId
             };
             
@@ -160,9 +163,11 @@ export function useEngine() {
             
             if (!silent) {
               notify(achievementData);
-              bonusCoins += ach.reward;
-              if (ach.packReward) {
-                newInventoryPacks.push(ach.packReward);
+              bonusCoins += ach.rewardCoins;
+              if (ach.rewardPacks) {
+                ach.rewardPacks.forEach(p => {
+                  newInventoryPacks.push(p);
+                });
               }
             }
           }

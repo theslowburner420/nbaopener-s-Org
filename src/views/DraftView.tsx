@@ -255,7 +255,7 @@ const Slot: React.FC<{
     <button 
       onClick={onClick}
       disabled={disabled}
-      className={`relative group transition-all duration-500 ${mini ? 'w-[11vw] max-w-[65px] aspect-[2.5/3.5]' : 'w-[18vw] max-w-[115px] aspect-[2.5/3.5]'} ${disabled ? 'opacity-40 cursor-not-allowed grayscale-[0.5]' : ''} ${isSelected ? 'scale-110 z-50' : ''}`}
+      className={`relative group transition-all duration-500 ${mini ? 'w-[12vw] md:w-[11vw] max-w-[65px] aspect-[2.5/3.5]' : 'w-[22vw] md:w-[18vw] max-w-[115px] aspect-[2.5/3.5]'} ${disabled ? 'opacity-40 cursor-not-allowed grayscale-[0.5]' : ''} ${isSelected ? 'scale-110 z-50' : ''}`}
     >
       {slot.card ? (
         <motion.div 
@@ -575,37 +575,30 @@ const DraftView: React.FC = () => {
     const starterNames = userStarters.map(s => s.name);
     const oppName = match.team1 === 'USER' ? (match.team2 as GhostTeam).name : (match.team1 as GhostTeam).name;
 
-    // 1. OVR Boost Logic
+    // 1. OVR Boost Logic (More subtle for realism)
     const ovrDiff = (match.team1 === 'USER' ? t1Ovr - t2Ovr : t2Ovr - t1Ovr);
     let userBoost = 1.0;
     let oppBoost = 1.0;
 
-    if (ovrDiff >= 10) {
-      userBoost = 1.15;
-      oppBoost = 0.85;
-    } else if (ovrDiff <= -10) {
-      userBoost = 0.85;
-      oppBoost = 1.15;
-    } else {
-      const factor = (ovrDiff / 10) * 0.15;
-      userBoost = 1 + factor;
-      oppBoost = 1 - factor;
-    }
+    // Subtle boost: 1% per OVR point difference
+    const boostFactor = (ovrDiff * 0.01);
+    userBoost = 1 + boostFactor;
+    oppBoost = 1 - boostFactor;
 
     // 2. Individual Stats Engine (Realistic based on card attributes)
     const stats: PlayerStats[] = allUserPlayers.map(player => {
       const isStarter = userStarters.some(s => s.id === player.id);
-      const roleWeight = isStarter ? 1.0 : 0.4;
+      const roleWeight = isStarter ? 1.0 : 0.35; // Bench plays less
       
-      // Points: card.pts +/- 20% * boost * role
+      // Points: Realistic NBA distribution
+      // Starters take more shots. High OVR players take more shots.
       const basePts = (player.pts || 15) * userBoost * roleWeight;
-      const pts = Math.round(basePts * (0.8 + Math.random() * 0.4));
+      // Randomness factor: +/- 15%
+      const pts = Math.round(basePts * (0.85 + Math.random() * 0.3));
       
-      // Rebounds: card.reb +/- 20% * boost * role
       const baseReb = (player.reb || 5) * userBoost * roleWeight;
       const reb = Math.round(baseReb * (0.8 + Math.random() * 0.4));
 
-      // Assists: card.ast +/- 20% * boost * role
       const baseAst = (player.ast || 5) * userBoost * roleWeight;
       const ast = Math.round(baseAst * (0.8 + Math.random() * 0.4));
 
@@ -621,7 +614,16 @@ const DraftView: React.FC = () => {
       };
     });
 
-    const userScore = stats.reduce((acc, s) => acc + s.pts, 0);
+    // Normalize total score to realistic NBA range (90-130)
+    let userScore = stats.reduce((acc, s) => acc + s.pts, 0);
+    const targetUserScore = Math.floor(95 + Math.random() * 30) + (ovrDiff > 0 ? Math.min(10, ovrDiff) : Math.max(-10, ovrDiff));
+    const normalizationFactor = targetUserScore / userScore;
+    
+    stats.forEach(s => {
+      s.pts = Math.round(s.pts * normalizationFactor);
+    });
+    userScore = stats.reduce((acc, s) => acc + s.pts, 0);
+
     setBoxScore(stats);
 
     // Achievements: In-Match Feats (Stats)
@@ -635,28 +637,43 @@ const DraftView: React.FC = () => {
     }
 
     // 3. Opponent Score Logic (Simulated based on their OVR)
-    const oppBasePts = 105 * oppBoost;
-    const oppScore = Math.round(oppBasePts * (0.9 + Math.random() * 0.2));
+    const oppTargetScore = Math.floor(95 + Math.random() * 30) - (ovrDiff > 0 ? Math.min(10, ovrDiff) : Math.max(-10, ovrDiff));
+    const oppScore = Math.max(80, Math.round(oppTargetScore));
 
     const s1Final = match.team1 === 'USER' ? userScore : oppScore;
     const s2Final = match.team1 === 'USER' ? oppScore : userScore;
 
     const eventTemplates = [
-      "{player} anota una bandeja en reverso (+2)",
-      "{player} clava un triple desde la esquina (+3)",
-      "¡Robo y mate en contraataque de {player}! (+2)",
-      "{player} encesta tras un rebote ofensivo (+2)",
-      "¡Triple frontal de {player}! (+3)",
-      "{player} anota un tiro de media distancia (+2)",
-      "¡{player} machaca el aro con potencia! (+2)"
+      "{player} scores with a reverse layup (+2)",
+      "{player} drains a corner three! (+3)",
+      "Steal and fastbreak dunk by {player}! (+2)",
+      "{player} scores on a tough second-chance bucket (+2)",
+      "Deep three from the top of the key by {player}! (+3)",
+      "{player} hits a smooth mid-range jumper (+2)",
+      "{player} throws it down with authority! (+2)",
+      "{player} finishes the alley-oop! (+2)",
+      "Clutch bucket from {player} in the paint (+2)"
     ];
 
     const oppTemplates = [
-      "{opp} anota tras una buena jugada colectiva (+2)",
-      "¡Triple lejano de {opp}! (+3)",
-      "{opp} encesta una bandeja fácil (+2)",
-      "{opp} castiga desde la línea de tres (+3)",
-      "{opp} anota en suspensión (+2)"
+      "{opp} scores after a great team play (+2)",
+      "Deep three-pointer from {opp}! (+3)",
+      "{opp} scores an easy layup (+2)",
+      "{opp} punishes the defense from downtown (+3)",
+      "{opp} hits a contested fadeaway (+2)",
+      "{opp} converts the and-one play (+3)",
+      "Powerful finish at the rim by {opp} (+2)"
+    ];
+
+    const commentaryPhrases = [
+      "Clutch bucket!",
+      "Defensive stop!",
+      "Three point dagger!",
+      "What a move!",
+      "The crowd is going wild!",
+      "Total dominance!",
+      "Unstoppable force!",
+      "Lockdown defense!"
     ];
 
     // 3. Event Generation to reach final scores
@@ -716,6 +733,11 @@ const DraftView: React.FC = () => {
             r -= (p.pts || 10);
           }
           text = eventTemplates[Math.floor(Math.random() * eventTemplates.length)].replace("{player}", selectedPlayer);
+          
+          // Add random commentary phrase
+          if (Math.random() > 0.7) {
+            text = `${commentaryPhrases[Math.floor(Math.random() * commentaryPhrases.length)]} ${text}`;
+          }
         } else {
           text = oppTemplates[Math.floor(Math.random() * oppTemplates.length)].replace("{opp}", oppName);
         }
@@ -735,6 +757,11 @@ const DraftView: React.FC = () => {
             r -= (p.pts || 10);
           }
           text = eventTemplates[Math.floor(Math.random() * eventTemplates.length)].replace("{player}", selectedPlayer);
+          
+          // Add random commentary phrase
+          if (Math.random() > 0.7) {
+            text = `${commentaryPhrases[Math.floor(Math.random() * commentaryPhrases.length)]} ${text}`;
+          }
         }
       }
 
@@ -987,9 +1014,9 @@ const DraftView: React.FC = () => {
   );
 
   const renderDraftBoard = () => (
-    <div className="flex-1 flex flex-col p-2 md:p-4 space-y-2 overflow-hidden max-w-6xl mx-auto w-full h-full relative">
+    <div className="flex-1 flex flex-col p-0 md:p-4 space-y-2 overflow-hidden max-w-6xl mx-auto w-full h-full relative">
       {/* Tactical Board Header */}
-      <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-3 flex items-center justify-between shadow-xl shrink-0 z-10">
+      <div className="bg-zinc-950 border-b md:border border-zinc-900 md:rounded-2xl p-3 flex items-center justify-between shadow-xl shrink-0 z-10">
         <div className="flex items-center gap-3">
           <div className="text-center">
             <p className="text-[7px] font-black uppercase tracking-widest text-zinc-500">Team OVR</p>
@@ -1010,20 +1037,20 @@ const DraftView: React.FC = () => {
       </div>
 
       {/* Main Board Container (Full Screen Split) */}
-      <div className="flex-1 flex flex-col min-h-0 gap-4 relative">
+      <div className="flex-1 flex flex-col min-h-0 gap-2 md:gap-4 relative">
         {/* Top Half: Tactical Starting Five */}
-        <div className="flex-[1.2] bg-zinc-950/50 border border-zinc-900 rounded-[2.5rem] p-4 flex flex-col justify-center relative overflow-hidden shadow-2xl">
+        <div className="flex-[1.5] md:flex-[1.2] bg-zinc-950/50 md:border border-zinc-900 md:rounded-[2.5rem] p-2 md:p-4 flex flex-col justify-center relative overflow-hidden shadow-2xl">
           {/* Court Lines Overlay (More prominent for tactical feel) */}
-          <div className="absolute inset-0 opacity-10 pointer-events-none">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-1/2 border-b-2 border-x-2 border-white rounded-b-[100px]" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-2 border-white rounded-full" />
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-24 border-t-2 border-x-2 border-white" />
+          <div className="absolute inset-0 opacity-5 md:opacity-10 pointer-events-none">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[90%] md:w-[80%] h-1/2 border-b-2 border-x-2 border-white rounded-b-[100px]" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 md:w-32 h-24 md:h-32 border-2 border-white rounded-full" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-40 md:w-48 h-20 md:h-24 border-t-2 border-x-2 border-white" />
           </div>
 
-          <div className="relative z-10 h-full w-full flex flex-col justify-around py-4">
+          <div className="relative z-10 h-full w-full flex flex-col justify-around py-2 md:py-4">
             {/* Row 1: PG (Top Center) */}
             <div className="flex justify-center">
-              <div className="transform -translate-y-2">
+              <div className="transform -translate-y-1 md:-translate-y-2">
                 <Slot 
                   slot={starters[0]} 
                   onClick={() => handleSlotClick(starters[0])} 
@@ -1034,8 +1061,8 @@ const DraftView: React.FC = () => {
             </div>
             
             {/* Row 2: SG & SF (Middle Wings) */}
-            <div className="flex justify-between px-[10%] md:px-[20%]">
-              <div className="transform -translate-x-4">
+            <div className="flex justify-between px-4 md:px-[20%]">
+              <div className="transform -translate-x-2 md:-translate-x-4">
                 <Slot 
                   slot={starters[1]} 
                   onClick={() => handleSlotClick(starters[1])} 
@@ -1054,8 +1081,8 @@ const DraftView: React.FC = () => {
             </div>
             
             {/* Row 3: PF & C (Bottom Paint) */}
-            <div className="flex justify-center gap-8 md:gap-16">
-              <div className="transform translate-y-2">
+            <div className="flex justify-center gap-4 md:gap-16">
+              <div className="transform translate-y-1 md:translate-y-2">
                 <Slot 
                   slot={starters[3]} 
                   onClick={() => handleSlotClick(starters[3])} 
@@ -1083,7 +1110,7 @@ const DraftView: React.FC = () => {
                 onClick={() => setPhase('summary')}
                 className="w-full max-w-xs bg-amber-500 text-black py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all active:scale-95"
               >
-                <span>Finalizar Draft y Jugar</span>
+                <span>Finish Draft and Play</span>
                 <ArrowRight size={20} />
               </motion.button>
             </div>
@@ -1091,14 +1118,14 @@ const DraftView: React.FC = () => {
         </div>
 
         {/* Bottom Half: Bench Strip */}
-        <div className="flex-none bg-zinc-950/80 border border-zinc-900 rounded-3xl p-4 flex flex-col shadow-xl">
-          <div className="flex items-center gap-3 mb-3 shrink-0">
+        <div className="flex-none bg-zinc-950/80 md:border border-zinc-900 md:rounded-3xl p-3 md:p-4 flex flex-col shadow-xl">
+          <div className="flex items-center gap-3 mb-2 md:mb-3 shrink-0">
             <div className="h-px flex-1 bg-zinc-900" />
-            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 px-2">Bench</h3>
+            <h3 className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 px-2">Bench</h3>
             <div className="h-px flex-1 bg-zinc-900" />
           </div>
           
-          <div className="flex justify-center items-center gap-2 md:gap-3 w-full overflow-x-auto scrollbar-hide py-1">
+          <div className="flex justify-start md:justify-center items-center gap-2 md:gap-3 w-full overflow-x-auto scrollbar-hide py-1 px-2">
             {bench.map(slot => (
               <div key={slot.id} className="shrink-0">
                 <Slot 
@@ -1123,41 +1150,43 @@ const DraftView: React.FC = () => {
   );
 
   const renderSelection = () => (
-    <div className="fixed inset-0 z-[8000] flex flex-col items-center justify-center p-4">
+    <div className="fixed inset-0 z-[8000] flex flex-col items-center justify-end md:justify-center p-0 md:p-4">
       {/* Backdrop for the modal */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="absolute inset-0 bg-black/80 backdrop-blur-md"
+        className="absolute inset-0 bg-black/90 backdrop-blur-xl"
       />
 
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="relative z-10 w-full max-w-5xl bg-zinc-950 border border-zinc-900 rounded-[2.5rem] p-6 md:p-10 shadow-[0_0_100px_rgba(0,0,0,0.8)] flex flex-col items-center"
+        initial={{ y: "100%", opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="relative z-10 w-full max-w-5xl bg-zinc-950 border-t md:border border-zinc-900 rounded-t-[2.5rem] md:rounded-[2.5rem] p-6 md:p-10 shadow-[0_-20px_100px_rgba(0,0,0,0.8)] flex flex-col items-center max-h-[90vh] overflow-y-auto"
       >
-        <div className="text-center mb-8 md:mb-12">
-          <h2 className="text-2xl md:text-3xl font-black italic uppercase tracking-tighter text-white">
+        <div className="w-12 h-1.5 bg-zinc-800 rounded-full mb-6 md:hidden" />
+        
+        <div className="text-center mb-6 md:mb-12">
+          <h2 className="text-xl md:text-3xl font-black italic uppercase tracking-tighter text-white">
             {phase === 'captain' ? 'Choose Your Captain' : `Select ${activeSlotId?.toUpperCase()}`}
           </h2>
-          <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mt-2">
+          <p className="text-[9px] md:text-[10px] font-bold text-amber-500 uppercase tracking-widest mt-2">
             {phase === 'captain' ? 'Elite & Legend Stars Only' : 'Select one to add to your roster'}
           </p>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-4 md:gap-6 w-full">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 w-full pb-8">
           {currentOptions.map((card, idx) => (
             <motion.div
               key={card.id}
-              initial={{ opacity: 0, y: 20, rotateY: phase === 'captain' ? 180 : 0 }}
-              animate={{ opacity: 1, y: 0, rotateY: 0 }}
-              transition={{ delay: idx * 0.1, duration: 0.5 }}
-              className="w-[35vw] max-w-[160px] md:max-w-[180px] flex flex-col gap-2 cursor-pointer group"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.05, duration: 0.4 }}
+              className="flex flex-col gap-2 cursor-pointer group"
               onClick={() => handleSelectCard(card)}
             >
-              <div className="relative aspect-[2.5/3.5] w-full bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden group-hover:border-amber-500 transition-all group-hover:scale-105 shadow-2xl">
-                <img src={card.imageUrl} alt={card.name} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+              <div className="relative aspect-[2.5/3.5] w-full bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden group-hover:border-amber-500 transition-all group-hover:scale-[1.02] shadow-2xl">
+                <img src={card.imageUrl} alt={card.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
                 <div className="absolute bottom-2 left-2 right-2">
                   <p className="text-[9px] md:text-[10px] font-black uppercase italic text-white truncate">{card.name}</p>
                   <div className="flex items-center justify-between mt-1">
@@ -1168,18 +1197,18 @@ const DraftView: React.FC = () => {
               </div>
               
               {/* Stats Panel */}
-              <div className="bg-zinc-900/80 border border-zinc-800 rounded-lg p-1.5 grid grid-cols-3 gap-1 group-hover:border-amber-500/30 transition-colors">
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-2 grid grid-cols-3 gap-1 group-hover:border-amber-500/30 transition-colors">
                 <div className="text-center">
-                  <p className="text-[5px] font-black text-zinc-500 uppercase">PTS</p>
-                  <p className="text-[9px] font-black text-white">{card.stats.points}</p>
+                  <p className="text-[6px] font-black text-zinc-600 uppercase">PTS</p>
+                  <p className="text-[9px] font-black text-white">{card.pts}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-[5px] font-black text-zinc-500 uppercase">AST</p>
-                  <p className="text-[9px] font-black text-white">{card.stats.assists}</p>
+                  <p className="text-[6px] font-black text-zinc-600 uppercase">REB</p>
+                  <p className="text-[9px] font-black text-white">{card.reb}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-[5px] font-black text-zinc-500 uppercase">REB</p>
-                  <p className="text-[9px] font-black text-white">{card.stats.rebounds}</p>
+                  <p className="text-[6px] font-black text-zinc-600 uppercase">AST</p>
+                  <p className="text-[9px] font-black text-white">{card.ast}</p>
                 </div>
               </div>
             </motion.div>
@@ -1268,7 +1297,7 @@ const DraftView: React.FC = () => {
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className={`text-[8px] font-black uppercase tracking-widest ${event.team === 'USER' ? 'text-amber-500' : 'text-zinc-500'}`}>
-                      {event.team === 'USER' ? 'Tu Equipo' : 'Oponente'}
+                      {event.team === 'USER' ? 'Your Team' : 'Opponent'}
                     </span>
                     <span className="text-[8px] font-bold text-zinc-600">Q{event.quarter}</span>
                   </div>
@@ -1279,7 +1308,7 @@ const DraftView: React.FC = () => {
             {liveEvents.length === 0 && (
               <div className="flex-1 flex flex-col items-center justify-center text-zinc-700 space-y-4">
                 <div className="w-12 h-12 border-4 border-zinc-800 border-t-amber-500 rounded-full animate-spin" />
-                <p className="text-xs font-black uppercase tracking-widest">Esperando el salto inicial...</p>
+                <p className="text-xs font-black uppercase tracking-widest">Waiting for tip-off...</p>
               </div>
             )}
           </div>
@@ -1292,7 +1321,7 @@ const DraftView: React.FC = () => {
             className="px-8 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center gap-3"
           >
             <Zap size={16} className="fill-amber-500 text-amber-500" />
-            Saltar Simulación
+            Skip Simulation
           </button>
         </div>
       </motion.div>
@@ -1309,8 +1338,8 @@ const DraftView: React.FC = () => {
       >
         <div className="max-w-4xl mx-auto w-full flex flex-col h-full space-y-8">
           <div className="text-center space-y-2">
-            <h2 className="text-4xl font-black italic uppercase tracking-tighter text-white">Resumen del Partido</h2>
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Box Score Individual</p>
+            <h2 className="text-4xl font-black italic uppercase tracking-tighter text-white">Match Summary</h2>
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Individual Box Score</p>
           </div>
 
           <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide">
@@ -1318,7 +1347,7 @@ const DraftView: React.FC = () => {
               <table className="w-full text-left border-collapse min-w-[400px]">
                 <thead>
                   <tr className="bg-zinc-900/50 border-b border-zinc-800">
-                    <th className="p-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Jugador</th>
+                    <th className="p-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Player</th>
                     <th className="p-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest text-center">PTS</th>
                     <th className="p-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest text-center">REB</th>
                     <th className="p-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest text-center">AST</th>
@@ -1358,7 +1387,7 @@ const DraftView: React.FC = () => {
             onClick={advanceRound}
             className="w-full bg-amber-500 text-black py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 hover:bg-amber-400 transition-all shadow-[0_20px_40px_rgba(245,158,11,0.2)] active:scale-95"
           >
-            <span>Continuar Torneo</span>
+            <span>Continue Tournament</span>
             <ArrowRight size={20} />
           </button>
         </div>
@@ -1425,13 +1454,13 @@ const DraftView: React.FC = () => {
         <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">Choose your challenge level</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
+      <div className="flex md:grid md:grid-cols-3 gap-6 w-full max-w-6xl overflow-x-auto md:overflow-x-visible pb-8 md:pb-0 snap-x snap-mandatory scrollbar-hide px-4 md:px-0">
         {TOURNAMENTS.map((t) => (
           <motion.div
             key={t.id}
             whileHover={{ scale: 1.02, translateY: -5 }}
             onClick={() => handleSelectTournament(t)}
-            className="relative group cursor-pointer bg-zinc-950 border border-zinc-900 rounded-[2rem] p-8 flex flex-col items-center text-center space-y-6 overflow-hidden shadow-2xl"
+            className="relative group cursor-pointer bg-zinc-950 border border-zinc-900 rounded-[2rem] p-8 flex flex-col items-center text-center space-y-6 overflow-hidden shadow-2xl min-w-[85%] md:min-w-0 snap-center"
           >
             {/* Difficulty Badge */}
             <div className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
@@ -1493,42 +1522,42 @@ const DraftView: React.FC = () => {
     const fMatch = currentRound === 'F' ? bracket[0] : null;
 
     return (
-      <div className="flex-1 flex flex-col p-4 md:p-8 space-y-8 overflow-hidden relative bg-zinc-950">
-        <div className="flex items-center justify-between shrink-0 z-10">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center">
-              <Trophy size={24} className="text-amber-500" />
+      <div className="flex-1 flex flex-col p-0 md:p-8 space-y-4 md:space-y-8 overflow-hidden relative bg-zinc-950">
+        <div className="flex items-center justify-between shrink-0 z-10 p-4 md:p-0 border-b md:border-none border-zinc-900 bg-zinc-950/80 backdrop-blur-md md:bg-transparent">
+          <div className="flex items-center gap-3 md:gap-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-zinc-900 border border-zinc-800 rounded-xl md:rounded-2xl flex items-center justify-center">
+              <Trophy size={20} className="text-amber-500" />
             </div>
             <div>
-              <h2 className="text-2xl font-black italic uppercase text-white leading-none">{selectedTournament?.name}</h2>
-              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
-                {currentRound === 'QF' ? 'Quarter-Finals' : currentRound === 'SF' ? 'Semi-Finals' : 'Grand Final'}
+              <h2 className="text-lg md:text-2xl font-black italic uppercase text-white leading-none truncate max-w-[150px] md:max-w-none">{selectedTournament?.name}</h2>
+              <p className="text-[8px] md:text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
+                {currentRound === 'QF' ? 'Quarterfinals' : currentRound === 'SF' ? 'Semifinals' : 'Finals'}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 md:gap-6">
             <div className="text-right">
-              <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Your Team</p>
-              <p className="text-lg font-black italic text-amber-500">{teamOVR} OVR</p>
+              <p className="text-[7px] md:text-[8px] font-black text-zinc-500 uppercase tracking-widest">Your Team</p>
+              <p className="text-sm md:text-lg font-black italic text-amber-500">{teamOVR} OVR</p>
             </div>
-            <div className="w-px h-8 bg-zinc-900" />
+            <div className="w-px h-6 md:h-8 bg-zinc-900" />
             <button 
               onClick={() => setPhase('tournament_selection')}
-              className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-white transition-colors"
+              className="p-2 md:p-3 bg-zinc-900 border border-zinc-800 rounded-lg md:rounded-xl text-zinc-400 hover:text-white transition-colors"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
         </div>
 
         {/* Bracket Tree Container */}
-        <div className="flex-1 flex items-center justify-center min-h-0 overflow-x-auto pb-8">
-          <div className="flex items-center gap-4 md:gap-16 min-w-max px-8">
-            {/* Quarter Finals */}
-            <div className={`flex flex-col gap-4 md:gap-8 transition-all duration-500 ${currentRound !== 'QF' ? 'opacity-30 scale-90 blur-[2px]' : ''}`}>
-              <div className="text-center mb-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Quarter Finals</span>
+        <div className="flex-1 flex items-center min-h-0 overflow-x-auto pb-24 md:pb-8 snap-x snap-mandatory scrollbar-hide">
+          <div className="flex items-center gap-6 md:gap-16 min-w-max px-8 md:px-16 mx-auto">
+            {/* Quarterfinals */}
+            <div className={`flex flex-col gap-6 md:gap-8 transition-all duration-500 snap-center ${currentRound !== 'QF' ? 'opacity-30 scale-90 blur-[2px]' : ''}`}>
+              <div className="text-center mb-2 md:mb-4">
+                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Quarterfinals</span>
               </div>
               {currentRound === 'QF' ? bracket.map((m) => (
                 <BracketMatchCard 
@@ -1545,15 +1574,15 @@ const DraftView: React.FC = () => {
             </div>
 
             {/* Connector Lines 1 */}
-            <div className="hidden md:flex flex-col justify-around h-[400px] w-12 text-zinc-800">
-              <div className="h-1/2 border-y-2 border-r-2 rounded-r-2xl" />
-              <div className="h-1/2 border-y-2 border-r-2 rounded-r-2xl" />
+            <div className="flex flex-col justify-around h-[300px] md:h-[400px] w-8 md:w-12 text-zinc-800/50">
+              <div className="h-1/2 border-y-2 border-r-2 rounded-r-xl md:rounded-r-2xl" />
+              <div className="h-1/2 border-y-2 border-r-2 rounded-r-xl md:rounded-r-2xl" />
             </div>
 
-            {/* Semi Finals */}
-            <div className={`flex flex-col gap-8 md:gap-24 transition-all duration-500 ${currentRound !== 'SF' ? 'opacity-30 scale-90 blur-[2px]' : ''}`}>
-              <div className="text-center mb-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Semi Finals</span>
+            {/* Semifinals */}
+            <div className={`flex flex-col gap-12 md:gap-24 transition-all duration-500 snap-center ${currentRound !== 'SF' ? 'opacity-30 scale-90 blur-[2px]' : ''}`}>
+              <div className="text-center mb-2 md:mb-4">
+                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Semifinals</span>
               </div>
               {currentRound === 'SF' ? bracket.map((m) => (
                 <BracketMatchCard 
@@ -1570,14 +1599,14 @@ const DraftView: React.FC = () => {
             </div>
 
             {/* Connector Lines 2 */}
-            <div className="hidden md:flex flex-col justify-center h-[400px] w-12 text-zinc-800">
-              <div className="h-1/4 border-y-2 border-r-2 rounded-r-2xl" />
+            <div className="flex flex-col justify-center h-[300px] md:h-[400px] w-8 md:w-12 text-zinc-800/50">
+              <div className="h-1/4 border-y-2 border-r-2 rounded-r-xl md:rounded-r-2xl" />
             </div>
 
-            {/* Final */}
-            <div className={`flex flex-col gap-8 transition-all duration-500 ${currentRound !== 'F' ? 'opacity-30 scale-90 blur-[2px]' : ''}`}>
-              <div className="text-center mb-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500">The Grand Final</span>
+            {/* Finals */}
+            <div className={`flex flex-col gap-8 transition-all duration-500 snap-center ${currentRound !== 'F' ? 'opacity-30 scale-90 blur-[2px]' : ''}`}>
+              <div className="text-center mb-2 md:mb-4">
+                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-amber-500">Finals</span>
               </div>
               {currentRound === 'F' ? (
                 <BracketMatchCard 
@@ -1594,6 +1623,30 @@ const DraftView: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Fixed Bottom Action Button */}
+        <AnimatePresence>
+          {bracket.some(m => (m.team1 === 'USER' || m.team2 === 'USER') && m.status === 'pending') && (
+            <motion.div 
+              initial={{ y: 100 }}
+              animate={{ y: 0 }}
+              exit={{ y: 100 }}
+              className="fixed bottom-0 inset-x-0 p-4 md:p-8 bg-gradient-to-t from-black via-black/90 to-transparent z-50 flex justify-center"
+            >
+              <button
+                onClick={() => {
+                  const userMatch = bracket.find(m => (m.team1 === 'USER' || m.team2 === 'USER') && m.status === 'pending');
+                  if (userMatch) simulateMatch(userMatch.id);
+                }}
+                disabled={isSimulating}
+                className="w-full max-w-md bg-amber-500 text-black py-4 md:py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs md:text-sm flex items-center justify-center gap-3 shadow-[0_20px_50px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all active:scale-95"
+              >
+                <Play size={20} fill="currentColor" />
+                <span>Simulate Match</span>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Match Result Modal Overlay */}
         <AnimatePresence>
@@ -1706,7 +1759,7 @@ const BracketMatchCard: React.FC<{
       initial={{ opacity: 0, scale: 0.9, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ type: "spring", damping: 20, stiffness: 100 }}
-      className={`w-full max-w-[200px] md:max-w-[240px] bg-zinc-950 border-2 rounded-[1.5rem] p-3 md:p-4 relative overflow-hidden transition-all duration-500 ${
+      className={`w-full min-w-[180px] max-w-[200px] md:max-w-[240px] bg-zinc-950 border-2 rounded-[1.5rem] p-3 md:p-4 relative overflow-hidden transition-all duration-500 ${
         isUserMatch ? 'border-amber-500/40 shadow-[0_0_40px_rgba(245,158,11,0.1)]' : 'border-zinc-900'
       } ${isFinal ? 'scale-110 md:scale-125 shadow-[0_0_60px_rgba(245,158,11,0.2)] border-amber-500/60' : ''} ${isFinished ? 'opacity-90' : ''}`}
     >
