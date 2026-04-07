@@ -1,9 +1,27 @@
-# Supabase Configuration
-VITE_SUPABASE_URL=https://xcoeunkptlcnrkiaofsk.supabase.co
-VITE_SUPABASE_ANON_KEY=
-
-# PayPal Configuration
-VITE_PAYPAL_CLIENT_ID=
-
-# Adsterra Configuration
-VITE_ADSTERRA_DIRECT_LINK=
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "module": "ESNext",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "allowJs": true,
+    "jsx": "react-jsx",
+    "types": ["vite/client"],
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  }
+}
