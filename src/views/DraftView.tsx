@@ -85,7 +85,7 @@ const TOURNAMENTS: Tournament[] = [
     name: 'Summer League',
     difficulty: 'Easy',
     recommendedOvr: 75,
-    rewards: '2,500 Coins + Draft Pack',
+    rewards: '15,000 Coins + 2 Rookie Packs',
     minOpponentOvr: 70,
     maxOpponentOvr: 80,
     opponentPool: ['Lakers Summer Roster', 'Celtics Rookies', 'Heat Prospects', 'Warriors G-League', 'Bucks Summer Squad', 'Suns Young Guns', 'Nets Future', 'Bulls Newcomers']
@@ -95,7 +95,7 @@ const TOURNAMENTS: Tournament[] = [
     name: 'NBA Cup',
     difficulty: 'Medium',
     recommendedOvr: 85,
-    rewards: '10,000 Coins + Elite Pack',
+    rewards: '50,000 Coins + 2 All-Star Packs',
     minOpponentOvr: 82,
     maxOpponentOvr: 90,
     opponentPool: ['Los Angeles Lakers', 'Boston Celtics', 'Golden State Warriors', 'Milwaukee Bucks', 'Phoenix Suns', 'Miami Heat', 'Denver Nuggets', 'Philadelphia 76ers']
@@ -105,7 +105,7 @@ const TOURNAMENTS: Tournament[] = [
     name: 'NBA Playoffs',
     difficulty: 'Hard',
     recommendedOvr: 94,
-    rewards: '50,000 Coins + Legend Pack',
+    rewards: '150,000 Coins + MVP & HOF Packs',
     minOpponentOvr: 92,
     maxOpponentOvr: 98,
     opponentPool: ['Celtics \'24', 'Warriors \'17', 'Bulls \'96', 'Lakers \'01', 'Spurs \'14', 'Heat \'13', 'Cavaliers \'16', 'Bucks \'71']
@@ -255,7 +255,7 @@ const Slot: React.FC<{
     <button 
       onClick={onClick}
       disabled={disabled}
-      className={`relative group transition-all duration-500 ${mini ? 'w-[12vw] md:w-[11vw] max-w-[65px] aspect-[2.5/3.5]' : 'w-[22vw] md:w-[18vw] max-w-[115px] aspect-[2.5/3.5]'} ${disabled ? 'opacity-40 cursor-not-allowed grayscale-[0.5]' : ''} ${isSelected ? 'scale-110 z-50' : ''}`}
+      className={`relative group transition-all duration-500 ${mini ? 'w-[11vw] md:w-[11vw] max-w-[60px] aspect-[2.5/3.5]' : 'w-[20vw] md:w-[18vw] max-w-[105px] aspect-[2.5/3.5]'} ${disabled ? 'opacity-40 cursor-not-allowed grayscale-[0.5]' : ''} ${isSelected ? 'scale-110 z-50' : ''}`}
     >
       {slot.card ? (
         <motion.div 
@@ -269,6 +269,7 @@ const Slot: React.FC<{
               "0 0 20px rgba(245,158,11,0.4)"
             ] : "0 10px 25px rgba(0,0,0,0.5)"
           }}
+          whileTap={{ scale: 0.95 }}
           transition={isSelected ? { repeat: Infinity, duration: 1.5 } : { duration: 0.3 }}
           className={`h-full w-full bg-zinc-900 rounded-xl border-2 overflow-hidden transition-all ${isSelected ? 'border-amber-500 ring-4 ring-amber-500/20' : 'border-zinc-800 group-hover:border-amber-500'}`}
         >
@@ -294,8 +295,8 @@ const Slot: React.FC<{
             </div>
           </div>
           
-          <span className={`font-black uppercase tracking-[0.2em] text-zinc-700 group-hover:text-amber-500/50 transition-colors ${mini ? 'text-[7px]' : 'text-[11px]'}`}>
-            {slot.label}
+          <span className={`font-black uppercase tracking-[0.2em] text-zinc-700 group-hover:text-amber-500/50 transition-colors ${mini ? 'text-[7px]' : 'text-[10px]'}`}>
+            {slot.position || slot.label}
           </span>
 
           {/* Decorative Corner Accents */}
@@ -323,7 +324,8 @@ const DraftView: React.FC = () => {
     addCoins, 
     addPackToInventory, 
     unlockAchievement,
-    updateGameState 
+    updateGameState,
+    isSaving 
   } = useGame();
   const { notify } = useNotification();
   const { generateDraftOptions } = useEngine();
@@ -406,10 +408,18 @@ const DraftView: React.FC = () => {
     return Array.from(ids);
   }, [starters, bench]);
 
-  const handleStartDraft = (method: 'coins' | 'ad') => {
+  const handleStartDraft = async (method: 'coins' | 'ad') => {
     if (method === 'coins') {
-      if (!spendCoins(DRAFT_COST)) return;
+      const success = await spendCoins(DRAFT_COST);
+      if (!success) return;
     }
+    
+    // Reset slots
+    setStarters(STARTER_SLOTS.map(s => ({ ...s, card: null })));
+    setBench(BENCH_SLOTS.map(b => ({ ...b, card: null })));
+    setBracket([]);
+    setSelectedTournament(null);
+    setCurrentRound('QF');
     
     // Start with Captain selection
     const options = generateDraftOptions(5, null, [], true);
@@ -418,7 +428,7 @@ const DraftView: React.FC = () => {
     setIsFlipping(true);
   };
 
-  const handleSelectCard = (card: Card) => {
+  const handleSelectCard = async (card: Card) => {
     if (phase === 'captain') {
       // Captain goes to their position automatically
       setStarters(prev => prev.map(s => s.position === card.position ? { ...s, card } : s));
@@ -427,7 +437,7 @@ const DraftView: React.FC = () => {
 
       // Achievement: Generational Talent
       if ((card.stats?.ovr || 0) >= 97) {
-        const unlocked = unlockAchievement('generational_talent');
+        const unlocked = await unlockAchievement('generational_talent');
         if (unlocked) notify(unlocked);
       }
     } else if (activeSlotId) {
@@ -450,12 +460,12 @@ const DraftView: React.FC = () => {
         setPhase('review');
         
         // Achievement: Trust the Process
-        const unlocked1 = unlockAchievement('trust_the_process');
+        const unlocked1 = await unlockAchievement('trust_the_process');
         if (unlocked1) notify(unlocked1);
 
         // Achievement: Superteam
         if (teamOVR >= 92) {
-          const unlocked2 = unlockAchievement('superteam');
+          const unlocked2 = await unlockAchievement('superteam');
           if (unlocked2) notify(unlocked2);
         }
 
@@ -465,12 +475,33 @@ const DraftView: React.FC = () => {
           ? benchPlayers.reduce((acc, p) => acc + (p.stats?.ovr || 0), 0) / benchPlayers.length 
           : 0;
         if (benchAvg >= 85) {
-          const unlocked3 = unlockAchievement('bench_mob');
+          const unlocked3 = await unlockAchievement('bench_mob');
           if (unlocked3) notify(unlocked3);
         }
       }
     }
   };
+
+  // Automatic sequential drafting logic
+  useEffect(() => {
+    if (currentOptions.length > 0 || isSimulating || phase === 'entry' || phase === 'captain' || phase === 'review' || phase === 'summary' || phase === 'tournament_selection' || phase === 'bracket') return;
+
+    if (phase === 'starters') {
+      const nextEmptyStarter = starters.find(s => !s.card);
+      if (nextEmptyStarter) {
+        setActiveSlotId(nextEmptyStarter.id);
+        const options = generateDraftOptions(5, nextEmptyStarter.position, seenCardIds, false);
+        setCurrentOptions(options);
+      }
+    } else if (phase === 'bench') {
+      const nextEmptyBench = bench.find(b => !b.card);
+      if (nextEmptyBench) {
+        setActiveSlotId(nextEmptyBench.id);
+        const options = generateDraftOptions(5, null, seenCardIds, false);
+        setCurrentOptions(options);
+      }
+    }
+  }, [phase, starters, bench, currentOptions, isSimulating, seenCardIds]);
 
   const handleSlotClick = (slot: DraftSlot) => {
     // If we're in a phase where drafting is done, allow swapping
@@ -868,16 +899,16 @@ const DraftView: React.FC = () => {
     }
   };
 
-  const claimRewards = () => {
+  const claimRewards = async () => {
     if (earnedRewards) {
-      addCoins(earnedRewards.coins);
-      earnedRewards.packs.forEach(pack => {
-        addPackToInventory({ 
+      await addCoins(earnedRewards.coins);
+      for (const pack of earnedRewards.packs) {
+        await addPackToInventory({ 
           id: `${pack.type}-${Date.now()}-${Math.random()}`, 
           type: pack.type, 
           name: pack.name 
         });
-      });
+      }
     }
     // Reset Draft State
     setPhase('entry');
@@ -1014,88 +1045,88 @@ const DraftView: React.FC = () => {
   );
 
   const renderDraftBoard = () => (
-    <div className="flex-1 flex flex-col p-0 md:p-4 space-y-2 overflow-hidden max-w-6xl mx-auto w-full h-full relative">
+    <div className="flex-1 flex flex-col px-4 py-2 md:p-4 space-y-2 md:space-y-4 max-w-6xl mx-auto w-full h-full relative overflow-hidden">
       {/* Tactical Board Header */}
-      <div className="bg-zinc-950 border-b md:border border-zinc-900 md:rounded-2xl p-3 flex items-center justify-between shadow-xl shrink-0 z-10">
-        <div className="flex items-center gap-3">
+      <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-2 md:p-4 flex items-center justify-between shadow-xl shrink-0 z-30">
+        <div className="flex items-center gap-2 md:gap-3">
           <div className="text-center">
-            <p className="text-[7px] font-black uppercase tracking-widest text-zinc-500">Team OVR</p>
-            <p className="text-xl font-black italic text-amber-500">{teamOVR}</p>
+            <p className="text-[6px] md:text-[7px] font-black uppercase tracking-widest text-zinc-500">Team OVR</p>
+            <p className="text-lg md:text-xl font-black italic text-amber-500">{teamOVR}</p>
           </div>
-          <div className="w-px h-6 bg-zinc-900" />
+          <div className="w-px h-5 md:h-6 bg-zinc-900" />
           <div className="text-center">
-            <p className="text-[7px] font-black uppercase tracking-widest text-zinc-500">Chemistry</p>
-            <p className="text-xl font-black italic text-blue-500">{teamChemistry}%</p>
+            <p className="text-[6px] md:text-[7px] font-black uppercase tracking-widest text-zinc-500">Chemistry</p>
+            <p className="text-lg md:text-xl font-black italic text-blue-500">{teamChemistry}%</p>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-[9px] font-black uppercase tracking-tighter text-white italic">Draft Mode</p>
-          <p className="text-[7px] font-bold text-zinc-600 uppercase tracking-widest">
+          <p className="text-[8px] md:text-[9px] font-black uppercase tracking-tighter text-white italic">Draft Mode</p>
+          <p className="text-[6px] md:text-[7px] font-bold text-zinc-600 uppercase tracking-widest">
             {phase === 'captain' ? 'Captain Pick' : phase === 'starters' ? 'Starters' : 'Bench'}
           </p>
         </div>
       </div>
 
       {/* Main Board Container (Full Screen Split) */}
-      <div className="flex-1 flex flex-col min-h-0 gap-2 md:gap-4 relative">
+      <div className="flex-1 flex flex-col min-h-0 gap-1 md:gap-4 relative">
         {/* Top Half: Tactical Starting Five */}
-        <div className="flex-[1.5] md:flex-[1.2] bg-zinc-950/50 md:border border-zinc-900 md:rounded-[2.5rem] p-2 md:p-4 flex flex-col justify-center relative overflow-hidden shadow-2xl">
+        <div className="flex-[1.8] md:flex-[1.2] bg-zinc-950/50 border border-zinc-900/50 md:border-zinc-900 rounded-[2rem] md:rounded-[2.5rem] p-2 md:p-6 flex flex-col justify-center relative overflow-hidden shadow-2xl">
           {/* Court Lines Overlay (More prominent for tactical feel) */}
           <div className="absolute inset-0 opacity-5 md:opacity-10 pointer-events-none">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[90%] md:w-[80%] h-1/2 border-b-2 border-x-2 border-white rounded-b-[100px]" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 md:w-32 h-24 md:h-32 border-2 border-white rounded-full" />
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-40 md:w-48 h-20 md:h-24 border-t-2 border-x-2 border-white" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[95%] md:w-[80%] h-1/2 border-b-2 border-x-2 border-white rounded-b-[80px] md:rounded-b-[100px]" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 md:w-32 h-20 md:h-32 border-2 border-white rounded-full" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 md:w-48 h-16 md:h-24 border-t-2 border-x-2 border-white" />
           </div>
 
-          <div className="relative z-10 h-full w-full flex flex-col justify-around py-2 md:py-4">
+          <div className="relative z-10 h-full w-full flex flex-col justify-between py-1 md:py-4">
             {/* Row 1: PG (Top Center) */}
             <div className="flex justify-center">
-              <div className="transform -translate-y-1 md:-translate-y-2">
+              <div className="transform scale-90 md:scale-100">
                 <Slot 
                   slot={starters[0]} 
                   onClick={() => handleSlotClick(starters[0])} 
                   disabled={phase === 'captain'} 
-                  isSelected={swapSource === starters[0].id}
+                  isSelected={swapSource === starters[0].id || activeSlotId === starters[0].id}
                 />
               </div>
             </div>
             
             {/* Row 2: SG & SF (Middle Wings) */}
-            <div className="flex justify-between px-4 md:px-[20%]">
-              <div className="transform -translate-x-2 md:-translate-x-4">
+            <div className="flex justify-between px-2 md:px-[15%]">
+              <div className="transform scale-90 md:scale-100 -translate-x-1 md:-translate-x-4">
                 <Slot 
                   slot={starters[1]} 
                   onClick={() => handleSlotClick(starters[1])} 
                   disabled={phase === 'captain'} 
-                  isSelected={swapSource === starters[1].id}
+                  isSelected={swapSource === starters[1].id || activeSlotId === starters[1].id}
                 />
               </div>
-              <div className="transform translate-x-4">
+              <div className="transform scale-90 md:scale-100 translate-x-1 md:translate-x-4">
                 <Slot 
                   slot={starters[2]} 
                   onClick={() => handleSlotClick(starters[2])} 
                   disabled={phase === 'captain'} 
-                  isSelected={swapSource === starters[2].id}
+                  isSelected={swapSource === starters[2].id || activeSlotId === starters[2].id}
                 />
               </div>
             </div>
             
             {/* Row 3: PF & C (Bottom Paint) */}
-            <div className="flex justify-center gap-4 md:gap-16">
-              <div className="transform translate-y-1 md:translate-y-2">
+            <div className="flex justify-center gap-2 md:gap-16">
+              <div className="transform scale-90 md:scale-100 translate-y-1">
                 <Slot 
                   slot={starters[3]} 
                   onClick={() => handleSlotClick(starters[3])} 
                   disabled={phase === 'captain'} 
-                  isSelected={swapSource === starters[3].id}
+                  isSelected={swapSource === starters[3].id || activeSlotId === starters[3].id}
                 />
               </div>
-              <div className="transform translate-y-2">
+              <div className="transform scale-90 md:scale-100 translate-y-1">
                 <Slot 
                   slot={starters[4]} 
                   onClick={() => handleSlotClick(starters[4])} 
                   disabled={phase === 'captain'} 
-                  isSelected={swapSource === starters[4].id}
+                  isSelected={swapSource === starters[4].id || activeSlotId === starters[4].id}
                 />
               </div>
             </div>
@@ -1118,14 +1149,14 @@ const DraftView: React.FC = () => {
         </div>
 
         {/* Bottom Half: Bench Strip */}
-        <div className="flex-none bg-zinc-950/80 md:border border-zinc-900 md:rounded-3xl p-3 md:p-4 flex flex-col shadow-xl">
+        <div className="flex-none bg-zinc-950/80 border border-zinc-900/50 md:border-zinc-900 rounded-2xl md:rounded-3xl p-3 md:p-4 flex flex-col shadow-xl">
           <div className="flex items-center gap-3 mb-2 md:mb-3 shrink-0">
             <div className="h-px flex-1 bg-zinc-900" />
             <h3 className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 px-2">Bench</h3>
             <div className="h-px flex-1 bg-zinc-900" />
           </div>
           
-          <div className="flex justify-start md:justify-center items-center gap-2 md:gap-3 w-full overflow-x-auto scrollbar-hide py-1 px-2">
+          <div className="flex justify-start md:justify-center items-center gap-1.5 md:gap-3 w-full overflow-x-auto scrollbar-hide py-1 px-1">
             {bench.map(slot => (
               <div key={slot.id} className="shrink-0">
                 <Slot 
@@ -1134,7 +1165,7 @@ const DraftView: React.FC = () => {
                   mini 
                   onClick={() => handleSlotClick(slot)} 
                   disabled={phase === 'captain'} 
-                  isSelected={swapSource === slot.id}
+                  isSelected={swapSource === slot.id || activeSlotId === slot.id}
                 />
               </div>
             ))}
@@ -1156,63 +1187,72 @@ const DraftView: React.FC = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="absolute inset-0 bg-black/90 backdrop-blur-xl"
+        onClick={() => {
+          if (phase !== 'captain' && phase !== 'starters' && phase !== 'bench') {
+            setSelectionModalOpen(false);
+          }
+        }}
       />
 
       <motion.div
         initial={{ y: "100%", opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="relative z-10 w-full max-w-5xl bg-zinc-950 border-t md:border border-zinc-900 rounded-t-[2.5rem] md:rounded-[2.5rem] p-6 md:p-10 shadow-[0_-20px_100px_rgba(0,0,0,0.8)] flex flex-col items-center max-h-[90vh] overflow-y-auto"
+        className="relative z-10 w-full max-w-5xl bg-zinc-950 border-t md:border border-zinc-900 rounded-t-[2.5rem] md:rounded-[2.5rem] p-4 md:p-10 shadow-[0_-20px_100px_rgba(0,0,0,0.8)] flex flex-col items-center max-h-[85vh] overflow-hidden"
       >
-        <div className="w-12 h-1.5 bg-zinc-800 rounded-full mb-6 md:hidden" />
+        <div className="w-12 h-1.5 bg-zinc-800 rounded-full mb-4 md:hidden shrink-0" />
         
-        <div className="text-center mb-6 md:mb-12">
-          <h2 className="text-xl md:text-3xl font-black italic uppercase tracking-tighter text-white">
+        <div className="text-center mb-4 md:mb-10 shrink-0">
+          <h2 className="text-lg md:text-3xl font-black italic uppercase tracking-tighter text-white">
             {phase === 'captain' ? 'Choose Your Captain' : `Select ${activeSlotId?.toUpperCase()}`}
           </h2>
-          <p className="text-[9px] md:text-[10px] font-bold text-amber-500 uppercase tracking-widest mt-2">
+          <p className="text-[8px] md:text-[10px] font-bold text-amber-500 uppercase tracking-widest mt-1">
             {phase === 'captain' ? 'Elite & Legend Stars Only' : 'Select one to add to your roster'}
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 w-full pb-8">
-          {currentOptions.map((card, idx) => (
-            <motion.div
-              key={card.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.05, duration: 0.4 }}
-              className="flex flex-col gap-2 cursor-pointer group"
-              onClick={() => handleSelectCard(card)}
-            >
-              <div className="relative aspect-[2.5/3.5] w-full bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden group-hover:border-amber-500 transition-all group-hover:scale-[1.02] shadow-2xl">
-                <img src={card.imageUrl} alt={card.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
-                <div className="absolute bottom-2 left-2 right-2">
-                  <p className="text-[9px] md:text-[10px] font-black uppercase italic text-white truncate">{card.name}</p>
-                  <div className="flex items-center justify-between mt-1">
-                    <span className="text-[8px] font-bold text-amber-500">{card.stats?.ovr} OVR</span>
-                    <span className="text-[8px] font-bold text-zinc-400">{card.position}</span>
+        <div className="flex-1 w-full overflow-y-auto no-scrollbar pb-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 w-full">
+            {currentOptions.map((card, idx) => (
+              <motion.div
+                key={card.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.02, y: -5 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ delay: idx * 0.05, duration: 0.4 }}
+                className="flex flex-col gap-2 cursor-pointer group"
+                onClick={() => handleSelectCard(card)}
+              >
+                <div className="relative aspect-[2.5/3.5] w-full bg-zinc-900 rounded-xl md:rounded-2xl border border-zinc-800 overflow-hidden group-hover:border-amber-500 transition-all shadow-2xl">
+                  <img src={card.imageUrl} alt={card.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
+                  <div className="absolute bottom-2 left-2 right-2">
+                    <p className="text-[8px] md:text-[10px] font-black uppercase italic text-white truncate">{card.name}</p>
+                    <div className="flex items-center justify-between mt-0.5">
+                      <span className="text-[7px] md:text-[8px] font-bold text-amber-500">{card.stats?.ovr} OVR</span>
+                      <span className="text-[7px] md:text-[8px] font-bold text-zinc-400">{card.position}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              
-              {/* Stats Panel */}
-              <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-2 grid grid-cols-3 gap-1 group-hover:border-amber-500/30 transition-colors">
-                <div className="text-center">
-                  <p className="text-[6px] font-black text-zinc-600 uppercase">PTS</p>
-                  <p className="text-[9px] font-black text-white">{card.pts}</p>
+                
+                {/* Stats Panel */}
+                <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg md:rounded-xl p-1.5 md:p-2 grid grid-cols-3 gap-1 group-hover:border-amber-500/30 transition-colors">
+                  <div className="text-center">
+                    <p className="text-[5px] md:text-[6px] font-black text-zinc-600 uppercase">PTS</p>
+                    <p className="text-[8px] md:text-[9px] font-black text-white">{card.pts}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[5px] md:text-[6px] font-black text-zinc-600 uppercase">REB</p>
+                    <p className="text-[8px] md:text-[9px] font-black text-white">{card.reb}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[5px] md:text-[6px] font-black text-zinc-600 uppercase">AST</p>
+                    <p className="text-[8px] md:text-[9px] font-black text-white">{card.ast}</p>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <p className="text-[6px] font-black text-zinc-600 uppercase">REB</p>
-                  <p className="text-[9px] font-black text-white">{card.reb}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-[6px] font-black text-zinc-600 uppercase">AST</p>
-                  <p className="text-[9px] font-black text-white">{card.ast}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </div>
         </div>
       </motion.div>
     </div>
@@ -1517,12 +1557,16 @@ const DraftView: React.FC = () => {
 
   const renderBracket = () => {
     // Group matches by round for easier rendering
-    const qfMatches = currentRound === 'QF' ? bracket : [];
-    const sfMatches = currentRound === 'SF' ? bracket : [];
-    const fMatch = currentRound === 'F' ? bracket[0] : null;
+    const qfMatches = bracket.filter(m => m.id.startsWith('qf'));
+    const sfMatches = bracket.filter(m => m.id.startsWith('sf'));
+    const fMatch = bracket.find(m => m.id.startsWith('f'));
 
     return (
       <div className="flex-1 flex flex-col p-0 md:p-8 space-y-4 md:space-y-8 overflow-hidden relative bg-zinc-950">
+        {/* Mobile Edge Gradients */}
+        <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-black to-transparent z-20 pointer-events-none md:hidden" />
+        <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-black to-transparent z-20 pointer-events-none md:hidden" />
+
         <div className="flex items-center justify-between shrink-0 z-10 p-4 md:p-0 border-b md:border-none border-zinc-900 bg-zinc-950/80 backdrop-blur-md md:bg-transparent">
           <div className="flex items-center gap-3 md:gap-4">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-zinc-900 border border-zinc-800 rounded-xl md:rounded-2xl flex items-center justify-center">
@@ -1553,44 +1597,47 @@ const DraftView: React.FC = () => {
 
         {/* Bracket Tree Container */}
         <div className="flex-1 flex items-center min-h-0 overflow-x-auto pb-24 md:pb-8 snap-x snap-mandatory scrollbar-hide">
-          <div className="flex items-center gap-6 md:gap-16 min-w-max px-8 md:px-16 mx-auto">
+          <div className="flex items-center gap-6 md:gap-20 min-w-max px-12 md:px-24 mx-auto">
             {/* Quarterfinals */}
-            <div className={`flex flex-col gap-6 md:gap-8 transition-all duration-500 snap-center ${currentRound !== 'QF' ? 'opacity-30 scale-90 blur-[2px]' : ''}`}>
+            <div className={`flex flex-col gap-6 md:gap-10 transition-all duration-500 snap-center ${currentRound !== 'QF' ? 'opacity-40 scale-95 blur-[1px]' : ''}`}>
               <div className="text-center mb-2 md:mb-4">
-                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Quarterfinals</span>
+                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">Quarterfinals</span>
               </div>
-              {currentRound === 'QF' ? bracket.map((m) => (
+              {qfMatches.map((m) => (
                 <BracketMatchCard 
                   key={m.id} 
                   match={m} 
                   isUserMatch={m.team1 === 'USER' || m.team2 === 'USER'} 
                   onSimulate={() => simulateMatch(m.id)}
-                  isSimulating={isSimulating}
+                  isSimulating={isSimulating && activeMatchId === m.id}
                   teamOVR={teamOVR}
                 />
-              )) : Array.from({ length: 4 }).map((_, i) => (
-                <BracketMatchCard key={`qf-placeholder-${i}`} match={null} isUserMatch={false} onSimulate={() => {}} isSimulating={false} teamOVR={teamOVR} />
               ))}
             </div>
 
             {/* Connector Lines 1 */}
-            <div className="flex flex-col justify-around h-[300px] md:h-[400px] w-8 md:w-12 text-zinc-800/50">
-              <div className="h-1/2 border-y-2 border-r-2 rounded-r-xl md:rounded-r-2xl" />
-              <div className="h-1/2 border-y-2 border-r-2 rounded-r-xl md:rounded-r-2xl" />
+            <div className="flex flex-col justify-around h-[300px] md:h-[400px] w-12 md:w-20 relative">
+              <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-zinc-800 to-transparent" />
+              <div className="h-1/2 border-y border-r border-zinc-800/50 rounded-r-[2rem] relative">
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-zinc-800 rounded-full" />
+              </div>
+              <div className="h-1/2 border-y border-r border-zinc-800/50 rounded-r-[2rem] relative">
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-zinc-800 rounded-full" />
+              </div>
             </div>
 
             {/* Semifinals */}
-            <div className={`flex flex-col gap-12 md:gap-24 transition-all duration-500 snap-center ${currentRound !== 'SF' ? 'opacity-30 scale-90 blur-[2px]' : ''}`}>
+            <div className={`flex flex-col gap-24 md:gap-32 transition-all duration-500 snap-center ${currentRound !== 'SF' ? 'opacity-40 scale-95 blur-[1px]' : ''}`}>
               <div className="text-center mb-2 md:mb-4">
-                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Semifinals</span>
+                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">Semifinals</span>
               </div>
-              {currentRound === 'SF' ? bracket.map((m) => (
+              {sfMatches.length > 0 ? sfMatches.map((m) => (
                 <BracketMatchCard 
                   key={m.id} 
                   match={m} 
                   isUserMatch={m.team1 === 'USER' || m.team2 === 'USER'} 
                   onSimulate={() => simulateMatch(m.id)}
-                  isSimulating={isSimulating}
+                  isSimulating={isSimulating && activeMatchId === m.id}
                   teamOVR={teamOVR}
                 />
               )) : Array.from({ length: 2 }).map((_, i) => (
@@ -1599,21 +1646,23 @@ const DraftView: React.FC = () => {
             </div>
 
             {/* Connector Lines 2 */}
-            <div className="flex flex-col justify-center h-[300px] md:h-[400px] w-8 md:w-12 text-zinc-800/50">
-              <div className="h-1/4 border-y-2 border-r-2 rounded-r-xl md:rounded-r-2xl" />
+            <div className="flex flex-col justify-center h-[300px] md:h-[400px] w-12 md:w-20 relative">
+              <div className="h-1/4 border-y border-r border-zinc-800/50 rounded-r-[2rem] relative">
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-zinc-800 rounded-full" />
+              </div>
             </div>
 
             {/* Finals */}
-            <div className={`flex flex-col gap-8 transition-all duration-500 snap-center ${currentRound !== 'F' ? 'opacity-30 scale-90 blur-[2px]' : ''}`}>
+            <div className={`flex flex-col gap-8 transition-all duration-500 snap-center ${currentRound !== 'F' ? 'opacity-40 scale-95 blur-[1px]' : ''}`}>
               <div className="text-center mb-2 md:mb-4">
-                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-amber-500">Finals</span>
+                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-amber-500">Finals</span>
               </div>
-              {currentRound === 'F' ? (
+              {fMatch ? (
                 <BracketMatchCard 
-                  match={bracket[0]} 
-                  isUserMatch={bracket[0].team1 === 'USER' || bracket[0].team2 === 'USER'} 
-                  onSimulate={() => simulateMatch(bracket[0].id)}
-                  isSimulating={isSimulating}
+                  match={fMatch} 
+                  isUserMatch={fMatch.team1 === 'USER' || fMatch.team2 === 'USER'} 
+                  onSimulate={() => simulateMatch(fMatch.id)}
+                  isSimulating={isSimulating && activeMatchId === fMatch.id}
                   teamOVR={teamOVR}
                   isFinal
                 />
@@ -1742,7 +1791,7 @@ const BracketMatchCard: React.FC<{
 }> = ({ match, isUserMatch, onSimulate, isSimulating, teamOVR, isFinal }) => {
   if (!match) {
     return (
-      <div className={`w-full max-w-[200px] md:max-w-[240px] bg-zinc-900/10 border border-zinc-800/30 border-dashed rounded-2xl p-4 flex flex-col items-center justify-center gap-2 opacity-30 ${isFinal ? 'scale-110' : ''}`}>
+      <div className={`w-48 md:w-64 bg-zinc-900/10 border border-zinc-800/30 border-dashed rounded-2xl p-4 flex flex-col items-center justify-center gap-2 opacity-30 ${isFinal ? 'scale-110' : ''}`}>
         <div className="w-full h-8 bg-zinc-800/20 rounded-lg" />
         <div className="w-4 h-4 bg-zinc-800/20 rounded-full" />
         <div className="w-full h-8 bg-zinc-800/20 rounded-lg" />
@@ -1752,79 +1801,103 @@ const BracketMatchCard: React.FC<{
 
   const isFinished = match.status === 'finished';
   const isSim = match.status === 'simulating';
+  const isPending = match.status === 'pending';
 
   return (
     <motion.div
       layout
       initial={{ opacity: 0, scale: 0.9, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ type: "spring", damping: 20, stiffness: 100 }}
-      className={`w-full min-w-[180px] max-w-[200px] md:max-w-[240px] bg-zinc-950 border-2 rounded-[1.5rem] p-3 md:p-4 relative overflow-hidden transition-all duration-500 ${
-        isUserMatch ? 'border-amber-500/40 shadow-[0_0_40px_rgba(245,158,11,0.1)]' : 'border-zinc-900'
-      } ${isFinal ? 'scale-110 md:scale-125 shadow-[0_0_60px_rgba(245,158,11,0.2)] border-amber-500/60' : ''} ${isFinished ? 'opacity-90' : ''}`}
+      className={`relative ${isFinal ? 'w-64 md:w-80' : 'w-48 md:w-64'} transition-all duration-500`}
     >
-      <div className="flex flex-col gap-3">
-        {/* Team 1 */}
-        <div className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${match.winner === match.team1 ? 'bg-green-500/10 border border-green-500/20 shadow-[inset_0_0_20px_rgba(34,197,94,0.05)]' : 'bg-zinc-900/40 border border-transparent'}`}>
-          <div className="flex items-center gap-2 overflow-hidden">
-            <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0 ${match.team1 === 'USER' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'bg-zinc-800 text-zinc-400'}`}>
-              {match.team1 === 'USER' ? 'YOU' : (match.team1 as GhostTeam)?.name?.[0] || '?'}
-            </div>
-            <div className="min-w-0">
-              <p className={`text-[10px] font-black uppercase truncate ${match.winner === match.team1 ? 'text-green-500' : 'text-white'}`}>
-                {match.team1 === 'USER' ? 'Your Team' : (match.team1 as GhostTeam)?.name || 'Unknown Team'}
-              </p>
-              <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-tighter">OVR: {match.team1 === 'USER' ? teamOVR : (match.team1 as GhostTeam)?.ovr || 0}</p>
-            </div>
-          </div>
+      {/* Connector Lines - Premium Design */}
+      {!isFinal && (
+        <div className="absolute -right-10 md:-right-20 top-1/2 w-10 md:w-20 h-px bg-gradient-to-r from-zinc-800 to-transparent z-0" />
+      )}
+
+      <div className={`
+        relative overflow-hidden rounded-[2rem] border transition-all duration-500 z-10
+        ${isFinished ? 'bg-zinc-950/60 border-zinc-900 opacity-50 grayscale-[0.5]' : 
+          isUserMatch && isPending ? 'bg-zinc-900 border-amber-500/50 shadow-[0_0_40px_rgba(245,158,11,0.15)] scale-105' : 
+          'bg-zinc-900/80 border-zinc-800'}
+        ${isFinal ? 'border-amber-500/40 shadow-[0_0_60px_rgba(245,158,11,0.2)]' : ''}
+      `}>
+        {/* Match Header */}
+        <div className="px-4 py-2 bg-black/40 border-b border-zinc-800/50 flex justify-between items-center">
+          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500">
+            {isFinal ? 'Championship' : 'Matchup'}
+          </span>
           {isFinished && (
-            <p className={`text-sm font-black italic ${match.winner === match.team1 ? 'text-white' : 'text-zinc-600'}`}>{match.score1}</p>
+            <div className="flex items-center gap-1">
+              <div className="w-1 h-1 bg-amber-500 rounded-full animate-pulse" />
+              <span className="text-[8px] font-black text-amber-500 uppercase tracking-widest">Final</span>
+            </div>
           )}
         </div>
 
-        <div className="flex items-center justify-center -my-1">
-          <span className="text-[8px] font-black text-zinc-800 italic tracking-widest">VS</span>
-        </div>
-
-        {/* Team 2 */}
-        <div className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${match.winner === match.team2 ? 'bg-green-500/10 border border-green-500/20 shadow-[inset_0_0_20px_rgba(34,197,94,0.05)]' : 'bg-zinc-900/40 border border-transparent'}`}>
-          <div className="flex items-center gap-2 overflow-hidden">
-            <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0 ${match.team2 === 'USER' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'bg-zinc-800 text-zinc-400'}`}>
-              {match.team2 === 'USER' ? 'YOU' : (match.team2 as GhostTeam)?.name?.[0] || '?'}
+        <div className="p-4 space-y-3">
+          {/* Team 1 */}
+          <div className={`flex items-center justify-between p-2.5 rounded-2xl transition-all ${match.winner === match.team1 ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-zinc-900/40 border border-transparent'}`}>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-lg ${match.team1 === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-500'}`}>
+                {match.team1 === 'USER' ? <UserIcon size={16} /> : <Shield size={16} />}
+              </div>
+              <div className="min-w-0">
+                <p className={`text-xs font-black uppercase italic truncate ${match.winner === match.team1 ? 'text-amber-500' : 'text-white'}`}>
+                  {match.team1 === 'USER' ? 'Your Team' : (match.team1 as GhostTeam)?.name || 'TBD'}
+                </p>
+                <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-tighter">OVR: {match.team1 === 'USER' ? teamOVR : (match.team1 as GhostTeam)?.ovr || '??'}</p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className={`text-[10px] font-black uppercase truncate ${match.winner === match.team2 ? 'text-green-500' : 'text-white'}`}>
-                {match.team2 === 'USER' ? 'Your Team' : (match.team2 as GhostTeam)?.name || 'Unknown Team'}
-              </p>
-              <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-tighter">OVR: {match.team2 === 'USER' ? teamOVR : (match.team2 as GhostTeam)?.ovr || 0}</p>
-            </div>
+            {isFinished && (
+              <span className={`text-sm font-black italic ${match.winner === match.team1 ? 'text-amber-500' : 'text-zinc-600'}`}>{match.score1}</span>
+            )}
           </div>
-          {isFinished && (
-            <p className={`text-sm font-black italic ${match.winner === match.team2 ? 'text-white' : 'text-zinc-600'}`}>{match.score2}</p>
-          )}
-        </div>
-      </div>
 
-      {/* Action Overlay */}
-      {isUserMatch && !isFinished && !isSim && (
-        <div className="mt-4">
-          <button
+          {/* VS Divider */}
+          <div className="flex items-center gap-3 px-2">
+            <div className="h-px flex-1 bg-zinc-800/50" />
+            <span className="text-[9px] font-black text-zinc-800 italic tracking-widest">VS</span>
+            <div className="h-px flex-1 bg-zinc-800/50" />
+          </div>
+
+          {/* Team 2 */}
+          <div className={`flex items-center justify-between p-2.5 rounded-2xl transition-all ${match.winner === match.team2 ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-zinc-900/40 border border-transparent'}`}>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-lg ${match.team2 === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-500'}`}>
+                {match.team2 === 'USER' ? <UserIcon size={16} /> : <Shield size={16} />}
+              </div>
+              <div className="min-w-0">
+                <p className={`text-xs font-black uppercase italic truncate ${match.winner === match.team2 ? 'text-amber-500' : 'text-white'}`}>
+                  {match.team2 === 'USER' ? 'Your Team' : (match.team2 as GhostTeam)?.name || 'TBD'}
+                </p>
+                <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-tighter">OVR: {match.team2 === 'USER' ? teamOVR : (match.team2 as GhostTeam)?.ovr || '??'}</p>
+              </div>
+            </div>
+            {isFinished && (
+              <span className={`text-sm font-black italic ${match.winner === match.team2 ? 'text-amber-500' : 'text-zinc-600'}`}>{match.score2}</span>
+            )}
+          </div>
+        </div>
+
+        {/* Action Area */}
+        {isUserMatch && isPending && !isSimulating && (
+          <button 
             onClick={onSimulate}
-            disabled={isSimulating}
-            className="w-full bg-amber-500 text-black py-2.5 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-amber-400 transition-all shadow-xl shadow-amber-500/10 active:scale-95"
+            className="w-full py-3 bg-amber-500 text-black text-[10px] font-black uppercase tracking-[0.2em] hover:bg-amber-400 transition-all flex items-center justify-center gap-2 active:scale-95"
           >
             <Play size={12} fill="currentColor" />
-            <span>Simulate</span>
+            Play Match
           </button>
-        </div>
-      )}
+        )}
 
-      {isSim && (
-        <div className="absolute inset-0 bg-black/70 backdrop-blur-md flex flex-col items-center justify-center space-y-3 z-20">
-          <div className="w-8 h-8 border-3 border-amber-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-[8px] font-black uppercase tracking-[0.3em] text-amber-500 animate-pulse">Simulating...</p>
-        </div>
-      )}
+        {isSimulating && (
+          <div className="w-full py-3 bg-zinc-800 flex items-center justify-center gap-2">
+            <div className="w-2 h-2 bg-amber-500 rounded-full animate-ping" />
+            <span className="text-[10px] font-black text-white uppercase tracking-widest">Simulating...</span>
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 };

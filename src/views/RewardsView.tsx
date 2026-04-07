@@ -8,7 +8,7 @@ import AchievementsModal from '../components/AchievementsModal';
 
 export default function RewardsView() {
   const state = useGame();
-  const { coins, claimedDays, lastClaimedDate, claimReward, unlockedAchievements, claimedAchievements, claimAchievementReward } = state;
+  const { coins, claimedDays, lastClaimedDate, claimReward, unlockedAchievements, claimedAchievements, claimAchievementReward, isSaving } = state;
   const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'daily' | 'draft'>('daily');
 
@@ -43,9 +43,9 @@ export default function RewardsView() {
     { day: 7, amount: 50000, label: 'Grand Prize', pack: { id: 'mvp-pack', type: 'mvp', name: 'Finals MVP Pack' } },
   ], []);
 
-  const handleClaim = (day: number, amount: number, pack?: any) => {
+  const handleClaim = async (day: number, amount: number, pack?: any) => {
     if (day === nextDayToClaim && canClaimToday) {
-      claimReward(day, amount, pack);
+      await claimReward(day, amount, pack);
     }
   };
 
@@ -149,8 +149,15 @@ export default function RewardsView() {
                       <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600 italic">Claimed</span>
                     ) : isNext ? (
                       canClaim ? (
-                        <button className="bg-white text-black text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg group-hover:bg-amber-400 transition-colors shadow-lg active:scale-95">
-                          Claim
+                        <button 
+                          disabled={isSaving}
+                          className="bg-white text-black text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg group-hover:bg-amber-400 transition-colors shadow-lg active:scale-95 disabled:opacity-50 min-w-[70px] flex items-center justify-center"
+                        >
+                          {isSaving ? (
+                            <div className="w-3 h-3 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                          ) : (
+                            'Claim'
+                          )}
                         </button>
                       ) : (
                         <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 italic">Tomorrow</span>
@@ -206,9 +213,14 @@ export default function RewardsView() {
                   </div>
                   <button 
                     onClick={() => claimAchievementReward(ach.id)}
-                    className="bg-white text-black text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-amber-400 transition-colors shadow-lg active:scale-95"
+                    disabled={isSaving}
+                    className="bg-white text-black text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-amber-400 transition-colors shadow-lg active:scale-95 disabled:opacity-50 min-w-[70px] flex items-center justify-center"
                   >
-                    Claim
+                    {isSaving ? (
+                      <div className="w-3 h-3 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                    ) : (
+                      'Claim'
+                    )}
                   </button>
                 </motion.div>
               ))

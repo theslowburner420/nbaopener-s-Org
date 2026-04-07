@@ -87,7 +87,7 @@ const TEAM_CARDS_MAP = ALL_CARDS.reduce((acc, card) => {
 const ALL_TEAMS = Object.keys(TEAM_CARDS_MAP);
 
 export function useEngine() {
-  const { collection, coins, updateGameState, unlockedAchievements, inventoryPacks } = useGame();
+  const { collection, coins, updateGameState, updateGameStateAsync, unlockedAchievements, inventoryPacks } = useGame();
   const { notify } = useNotification();
 
   const generateCard = (packType: PackType): Card => {
@@ -219,7 +219,7 @@ export function useEngine() {
     return { newlyUnlocked, bonusCoins, newInventoryPacks, newlyUnlockedIds };
   };
 
-  const openPack = (packType: PackType) => {
+  const openPack = async (packType: PackType) => {
     let currentCoins = coins;
     if (packType !== 'random') {
       const price = PACK_PRICES[packType];
@@ -256,7 +256,7 @@ export function useEngine() {
     });
 
     // Batch update everything in ONE single call to ensure ONE cloud request
-    updateGameState({
+    await updateGameStateAsync({
       coins: currentCoins + bonusCoins,
       collection: finalCollection,
       unlockedAchievements: [...unlockedAchievements, ...newlyUnlockedIds],
@@ -266,7 +266,7 @@ export function useEngine() {
     return { cards: cardsWithNewFlag, newlyUnlocked };
   };
 
-  const openInventoryPack = (packId: string, packType: PackType) => {
+  const openInventoryPack = async (packId: string, packType: PackType) => {
     const newCards = Array.from({ length: PACK_SIZES[packType] }).map(() => generateCard(packType));
     const newIds = newCards.map(c => c.id);
     
@@ -301,7 +301,7 @@ export function useEngine() {
       }
     });
 
-    updateGameState({
+    await updateGameStateAsync({
       coins: coins + bonusCoins,
       collection: finalCollection,
       unlockedAchievements: [...unlockedAchievements, ...newlyUnlockedIds],

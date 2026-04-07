@@ -11,8 +11,8 @@ export default function OpenView() {
   const [newlyUnlocked, setNewlyUnlocked] = useState<any[]>([]);
   const { openPack } = useEngine();
 
-  const handleOpenFreePack = () => {
-    const result = openPack('random');
+  const handleOpenFreePack = async () => {
+    const result = await openPack('random');
     if (result) {
       setIsOpening(true);
       setTimeout(() => {
