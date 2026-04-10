@@ -1071,7 +1071,7 @@ const DraftView: React.FC = () => {
   );
 
   const renderDraftBoard = () => (
-    <div className="flex-1 flex flex-col lg:flex-row px-4 py-2 md:p-4 gap-4 max-w-7xl mx-auto w-full h-full relative overflow-y-auto no-scrollbar">
+    <div className="flex-1 flex flex-col lg:flex-row px-4 py-2 md:p-4 gap-4 max-w-7xl mx-auto w-full h-full relative">
       {/* Tactical Board Header - Floating on Mobile, Sidebar on Desktop */}
       <div className="lg:w-48 flex flex-col gap-4 shrink-0 z-30">
         <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-4 flex lg:flex-col items-center justify-between lg:justify-center gap-4 shadow-xl">
@@ -1107,9 +1107,9 @@ const DraftView: React.FC = () => {
       </div>
 
       {/* Main Board Container */}
-      <div className="flex-1 flex flex-col min-h-0 gap-4 relative pb-10 lg:pb-0">
+      <div className="flex-1 flex flex-col min-h-0 gap-4 relative pb-20 lg:pb-0">
         {/* Top Half: Tactical Starting Five */}
-        <div className="flex-1 bg-zinc-950/50 border border-zinc-900 rounded-[2.5rem] p-4 md:p-8 flex flex-col justify-center relative overflow-hidden shadow-2xl mb-8">
+        <div className="flex-1 bg-zinc-950/50 border border-zinc-900 rounded-[2.5rem] p-4 md:p-8 flex flex-col justify-center relative overflow-hidden shadow-2xl mb-4">
           {/* Court Lines Overlay */}
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[90%] h-1/2 border-b-2 border-x-2 border-white/20 rounded-b-[100px]" />
@@ -1206,10 +1206,10 @@ const DraftView: React.FC = () => {
         </div>
 
         {/* Mobile Bench Accordion - Hidden on Desktop */}
-        <div className="lg:hidden flex-none relative z-[100] mt-8">
+        <div className="lg:hidden flex-none relative z-50 mt-auto">
           <button 
             onClick={() => setIsBenchExpanded(!isBenchExpanded)}
-            className="w-full bg-zinc-950 border border-zinc-900 rounded-xl py-4 px-6 flex items-center justify-between shadow-2xl active:bg-zinc-900 transition-all relative z-[110]"
+            className="w-full bg-zinc-950 border border-zinc-900 rounded-xl py-3 px-6 flex items-center justify-between shadow-2xl active:bg-zinc-900 transition-all relative z-10"
           >
             <div className="flex-1 flex justify-center items-center gap-2">
               <span className="text-[11px] font-black uppercase tracking-[0.4em] text-white">
@@ -1230,7 +1230,7 @@ const DraftView: React.FC = () => {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden mt-2 z-[105] relative"
+                className="absolute top-full left-0 right-0 mt-2 z-[6000]"
               >
                 <div className="bg-zinc-950/98 border border-zinc-900 rounded-3xl p-6 shadow-[0_20px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl max-h-[50vh] overflow-y-auto scrollbar-hide">
                   <div className="grid grid-cols-3 gap-4">
