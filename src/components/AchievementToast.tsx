@@ -28,7 +28,7 @@ const AchievementToast: React.FC<AchievementToastProps> = ({ achievement }) => {
         <div className="flex items-center mt-1">
           <span className="text-[9px] text-zinc-400 uppercase font-bold tracking-widest mr-2">Reward:</span>
           <span className="text-[10px] text-green-400 font-black italic tracking-tighter uppercase">
-            {achievement.reward}
+            {achievement.rewardText}
           </span>
         </div>
       </div>

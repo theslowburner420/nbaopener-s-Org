@@ -87,7 +87,7 @@ const TEAM_CARDS_MAP = ALL_CARDS.reduce((acc, card) => {
 const ALL_TEAMS = Object.keys(TEAM_CARDS_MAP);
 
 export function useEngine() {
-  const { collection, coins, updateGameState, unlockedAchievements, inventoryPacks } = useGame();
+  const { collection, coins, updateGameState, updateGameStateAsync, unlockedAchievements, inventoryPacks, isSaving } = useGame();
   const { notify } = useNotification();
 
   const generateCard = (packType: PackType): Card => {
@@ -144,14 +144,17 @@ export function useEngine() {
           };
 
           if (ach.requirement(tempState, ALL_CARDS)) {
+            const packRewardText = ach.rewardPacks ? ` & ${ach.rewardPacks.map(p => p.name).join(', ')}` : '';
+            const rewardText = `+${ach.rewardCoins.toLocaleString()} Coins${packRewardText}`;
+            
             const achievementData = {
               id: ach.id,
               title: ach.title,
               description: ach.description,
-              reward: ach.packReward ? `+${ach.reward} Coins & ${ach.packReward.name}` : `+${ach.reward} Coins`,
+              reward: rewardText,
               icon: ach.icon,
-              rewardCoins: ach.reward,
-              packReward: ach.packReward,
+              rewardCoins: ach.rewardCoins,
+              rewardPacks: ach.rewardPacks,
               triggeredByCardId: cardId
             };
             
@@ -160,9 +163,11 @@ export function useEngine() {
             
             if (!silent) {
               notify(achievementData);
-              bonusCoins += ach.reward;
-              if (ach.packReward) {
-                newInventoryPacks.push(ach.packReward);
+              bonusCoins += ach.rewardCoins;
+              if (ach.rewardPacks) {
+                ach.rewardPacks.forEach(p => {
+                  newInventoryPacks.push(p);
+                });
               }
             }
           }
@@ -214,7 +219,7 @@ export function useEngine() {
     return { newlyUnlocked, bonusCoins, newInventoryPacks, newlyUnlockedIds };
   };
 
-  const openPack = (packType: PackType) => {
+  const openPack = async (packType: PackType) => {
     let currentCoins = coins;
     if (packType !== 'random') {
       const price = PACK_PRICES[packType];
@@ -239,18 +244,18 @@ export function useEngine() {
     // Check achievements
     const { newlyUnlocked, bonusCoins, newInventoryPacks, newlyUnlockedIds } = checkAchievements(finalCollection, currentCoins, unlockedAchievements, newIds, false);
 
-    // Corrected inventory merge
-    const updatedInventory = [...inventoryPacks]; // Get current inventory
+    // Corrected inventory merge: Group by type
+    const updatedInventory = [...inventoryPacks];
     newInventoryPacks.forEach(pack => {
-      const existing = updatedInventory.find(p => p.id === pack.id);
+      const existing = updatedInventory.find(p => p.type === pack.type);
       if (existing) {
-        existing.count += 1;
+        existing.count += (pack.count || 1);
       } else {
-        updatedInventory.push({ ...pack, count: 1 });
+        updatedInventory.push({ ...pack, id: pack.type, count: pack.count || 1 });
       }
     });
 
-    // Batch update everything in ONE single call to ensure ONE cloud request
+    // Batch update everything in ONE single call to ensure ONE cloud request (Local-first)
     updateGameState({
       coins: currentCoins + bonusCoins,
       collection: finalCollection,
@@ -261,7 +266,7 @@ export function useEngine() {
     return { cards: cardsWithNewFlag, newlyUnlocked };
   };
 
-  const openInventoryPack = (packId: string, packType: PackType) => {
+  const openInventoryPack = async (packId: string, packType: PackType) => {
     const newCards = Array.from({ length: PACK_SIZES[packType] }).map(() => generateCard(packType));
     const newIds = newCards.map(c => c.id);
     
@@ -276,7 +281,7 @@ export function useEngine() {
     // Check achievements
     const { newlyUnlocked, bonusCoins, newInventoryPacks, newlyUnlockedIds } = checkAchievements(finalCollection, coins, unlockedAchievements, newIds, false);
 
-    // Handle inventory removal and additions
+    // Handle inventory removal and additions (Grouping by type)
     const currentInventory = [...inventoryPacks];
     const packIndex = currentInventory.findIndex(p => p.id === packId);
     if (packIndex !== -1) {
@@ -288,14 +293,15 @@ export function useEngine() {
     }
 
     newInventoryPacks.forEach(pack => {
-      const existing = currentInventory.find(p => p.id === pack.id);
+      const existing = currentInventory.find(p => p.type === pack.type);
       if (existing) {
-        existing.count += 1;
+        existing.count += (pack.count || 1);
       } else {
-        currentInventory.push({ ...pack, count: 1 });
+        currentInventory.push({ ...pack, id: pack.type, count: pack.count || 1 });
       }
     });
 
+    // Local-first update
     updateGameState({
       coins: coins + bonusCoins,
       collection: finalCollection,
@@ -367,5 +373,5 @@ export function useEngine() {
     return options;
   };
 
-  return { openPack, openInventoryPack, generateDraftOptions, PACK_SIZES };
+  return { openPack, openInventoryPack, generateDraftOptions, PACK_SIZES, isSaving };
 }

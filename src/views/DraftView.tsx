@@ -17,10 +17,12 @@ import {
   Package
 } from 'lucide-react';
 import { useGame } from '../context/GameContext';
+import { useNotification } from '../context/NotificationContext';
 import { useEngine } from '../hooks/useEngine';
 import { Card } from '../types';
 import { ALL_CARDS } from '../data/cards';
 import CardDetailModal from '../components/CardDetailModal';
+import CardItem from '../components/CardItem';
 
 type DraftPhase = 'entry' | 'captain' | 'starters' | 'bench' | 'review' | 'summary' | 'tournament_selection' | 'bracket';
 
@@ -84,7 +86,7 @@ const TOURNAMENTS: Tournament[] = [
     name: 'Summer League',
     difficulty: 'Easy',
     recommendedOvr: 75,
-    rewards: '2,500 Coins + Draft Pack',
+    rewards: '15,000 Coins + 2 Rookie Packs',
     minOpponentOvr: 70,
     maxOpponentOvr: 80,
     opponentPool: ['Lakers Summer Roster', 'Celtics Rookies', 'Heat Prospects', 'Warriors G-League', 'Bucks Summer Squad', 'Suns Young Guns', 'Nets Future', 'Bulls Newcomers']
@@ -94,7 +96,7 @@ const TOURNAMENTS: Tournament[] = [
     name: 'NBA Cup',
     difficulty: 'Medium',
     recommendedOvr: 85,
-    rewards: '10,000 Coins + Elite Pack',
+    rewards: '50,000 Coins + 2 All-Star Packs',
     minOpponentOvr: 82,
     maxOpponentOvr: 90,
     opponentPool: ['Los Angeles Lakers', 'Boston Celtics', 'Golden State Warriors', 'Milwaukee Bucks', 'Phoenix Suns', 'Miami Heat', 'Denver Nuggets', 'Philadelphia 76ers']
@@ -104,7 +106,7 @@ const TOURNAMENTS: Tournament[] = [
     name: 'NBA Playoffs',
     difficulty: 'Hard',
     recommendedOvr: 94,
-    rewards: '50,000 Coins + Legend Pack',
+    rewards: '150,000 Coins + MVP & HOF Packs',
     minOpponentOvr: 92,
     maxOpponentOvr: 98,
     opponentPool: ['Celtics \'24', 'Warriors \'17', 'Bulls \'96', 'Lakers \'01', 'Spurs \'14', 'Heat \'13', 'Cavaliers \'16', 'Bucks \'71']
@@ -154,7 +156,8 @@ const TournamentSummaryModal: React.FC<{
   position: string;
   rewards: { coins: number; packs: any[] } | null;
   onClaim: () => void;
-}> = ({ show, position, rewards, onClaim }) => {
+  isSaving: boolean;
+}> = ({ show, position, rewards, onClaim, isSaving }) => {
   if (!show || !rewards) return null;
 
   return (
@@ -233,9 +236,10 @@ const TournamentSummaryModal: React.FC<{
 
         <button
           onClick={onClaim}
-          className="w-full bg-amber-500 text-black py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 hover:bg-amber-400 transition-all shadow-[0_20px_40px_rgba(245,158,11,0.2)] active:scale-95 relative z-10"
+          disabled={isSaving}
+          className="w-full bg-amber-500 text-black py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 hover:bg-amber-400 transition-all shadow-[0_20px_40px_rgba(245,158,11,0.2)] active:scale-95 relative z-10 disabled:opacity-50"
         >
-          <span>Claim Rewards</span>
+          <span>{isSaving ? 'Saving Progress...' : 'Claim Rewards'}</span>
           <ArrowRight size={20} />
         </button>
       </motion.div>
@@ -254,7 +258,7 @@ const Slot: React.FC<{
     <button 
       onClick={onClick}
       disabled={disabled}
-      className={`relative group transition-all duration-500 ${mini ? 'w-[11vw] max-w-[65px] aspect-[2.5/3.5]' : 'w-[18vw] max-w-[115px] aspect-[2.5/3.5]'} ${disabled ? 'opacity-40 cursor-not-allowed grayscale-[0.5]' : ''} ${isSelected ? 'scale-110 z-50' : ''}`}
+      className={`relative group transition-all duration-500 w-full aspect-[2.5/3.5] ${disabled ? 'opacity-40 cursor-not-allowed grayscale-[0.5]' : ''} ${isSelected ? 'scale-110 z-50' : ''}`}
     >
       {slot.card ? (
         <motion.div 
@@ -268,6 +272,7 @@ const Slot: React.FC<{
               "0 0 20px rgba(245,158,11,0.4)"
             ] : "0 10px 25px rgba(0,0,0,0.5)"
           }}
+          whileTap={{ scale: 0.95 }}
           transition={isSelected ? { repeat: Infinity, duration: 1.5 } : { duration: 0.3 }}
           className={`h-full w-full bg-zinc-900 rounded-xl border-2 overflow-hidden transition-all ${isSelected ? 'border-amber-500 ring-4 ring-amber-500/20' : 'border-zinc-800 group-hover:border-amber-500'}`}
         >
@@ -293,8 +298,8 @@ const Slot: React.FC<{
             </div>
           </div>
           
-          <span className={`font-black uppercase tracking-[0.2em] text-zinc-700 group-hover:text-amber-500/50 transition-colors ${mini ? 'text-[7px]' : 'text-[11px]'}`}>
-            {slot.label}
+          <span className={`font-black uppercase tracking-[0.2em] text-zinc-700 group-hover:text-amber-500/50 transition-colors ${mini ? 'text-[7px]' : 'text-[10px]'}`}>
+            {slot.position || slot.label}
           </span>
 
           {/* Decorative Corner Accents */}
@@ -315,7 +320,17 @@ const Slot: React.FC<{
 };
 
 const DraftView: React.FC = () => {
-  const { coins, spendCoins, setCurrentView, addCoins, addPackToInventory } = useGame();
+  const { 
+    coins, 
+    spendCoins, 
+    setCurrentView, 
+    addCoins, 
+    addPackToInventory, 
+    unlockAchievement,
+    updateGameState,
+    isSaving 
+  } = useGame();
+  const { notify } = useNotification();
   const { generateDraftOptions } = useEngine();
 
   const [phase, setPhase] = useState<DraftPhase>('entry');
@@ -326,6 +341,7 @@ const DraftView: React.FC = () => {
   const [isFlipping, setIsFlipping] = useState(false);
   const [selectedCardForDetail, setSelectedCardForDetail] = useState<Card | null>(null);
   const [swapSource, setSwapSource] = useState<string | null>(null);
+  const [isBenchExpanded, setIsBenchExpanded] = useState(false);
 
   // Tournament State
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
@@ -396,33 +412,50 @@ const DraftView: React.FC = () => {
     return Array.from(ids);
   }, [starters, bench]);
 
-  const handleStartDraft = (method: 'coins' | 'ad') => {
+  const handleStartDraft = async (method: 'coins' | 'ad') => {
     if (method === 'coins') {
-      if (!spendCoins(DRAFT_COST)) return;
+      const success = await spendCoins(DRAFT_COST);
+      if (!success) return;
     }
     
-    // Start with Captain selection
-    const options = generateDraftOptions(5, null, [], true);
-    setCurrentOptions(options);
-    setPhase('captain');
-    setIsFlipping(true);
+    // Reset slots
+    setStarters(STARTER_SLOTS.map(s => ({ ...s, card: null })));
+    setBench(BENCH_SLOTS.map(b => ({ ...b, card: null })));
+    setBracket([]);
+    setSelectedTournament(null);
+    setCurrentRound('QF');
+    
+    // Start with Starters phase, but don't show options yet
+    // User must click a slot to pick their first player (Captain)
+    setPhase('starters');
+    setCurrentOptions([]);
+    setIsFlipping(false);
+    setActiveSlotId(null);
   };
 
-  const handleSelectCard = (card: Card) => {
-    if (phase === 'captain') {
-      // Captain goes to their position automatically
-      setStarters(prev => prev.map(s => s.position === card.position ? { ...s, card } : s));
-      setPhase('starters');
-      setCurrentOptions([]);
-    } else if (activeSlotId) {
-      // Regular selection
+  const handleSelectCard = async (card: Card) => {
+    // If it's the very first card picked, it's the captain
+    const isFirstPick = starters.every(s => !s.card) && bench.every(b => !b.card);
+
+    if (activeSlotId) {
+      // Selection
       if (activeSlotId.startsWith('bench')) {
         setBench(prev => prev.map(s => s.id === activeSlotId ? { ...s, card } : s));
       } else {
         setStarters(prev => prev.map(s => s.id === activeSlotId ? { ...s, card } : s));
       }
+
+      if (isFirstPick) {
+        // Achievement: Generational Talent (Local only during draft)
+        if ((card.stats?.ovr || 0) >= 97) {
+          const unlocked = await unlockAchievement('generational_talent', false);
+          if (unlocked) notify(unlocked);
+        }
+      }
+
       setActiveSlotId(null);
       setCurrentOptions([]);
+      setIsBenchExpanded(false);
       
       // Check if all starters are filled
       const allStartersFilled = starters.every(s => s.card || (s.id === activeSlotId && card));
@@ -432,10 +465,31 @@ const DraftView: React.FC = () => {
         setPhase('bench');
       } else if (allStartersFilled && allBenchFilled) {
         setPhase('review');
+        
+        // Achievement: Trust the Process (Local only during draft)
+        const unlocked1 = await unlockAchievement('trust_the_process', false);
+        if (unlocked1) notify(unlocked1);
+
+        // Achievement: Superteam (Local only during draft)
+        if (teamOVR >= 92) {
+          const unlocked2 = await unlockAchievement('superteam', false);
+          if (unlocked2) notify(unlocked2);
+        }
+
+        // Achievement: Bench Mob (Local only during draft)
+        const benchPlayers = bench.map(s => s.card).filter(Boolean) as Card[];
+        const benchAvg = benchPlayers.length > 0 
+          ? benchPlayers.reduce((acc, p) => acc + (p.stats?.ovr || 0), 0) / benchPlayers.length 
+          : 0;
+        if (benchAvg >= 85) {
+          const unlocked3 = await unlockAchievement('bench_mob', false);
+          if (unlocked3) notify(unlocked3);
+        }
       }
     }
   };
 
+  // Manual slot selection logic (FUT Draft Style)
   const handleSlotClick = (slot: DraftSlot) => {
     // If we're in a phase where drafting is done, allow swapping
     const isDraftFinished = phase === 'review' || phase === 'summary' || phase === 'tournament_selection' || phase === 'bracket';
@@ -444,10 +498,8 @@ const DraftView: React.FC = () => {
       if (!swapSource) {
         setSwapSource(slot.id);
       } else if (swapSource === slot.id) {
-        // Deselect if clicking the same card
         setSwapSource(null);
-        setSelectedCardForDetail(slot.card); // Show detail on second click of same card? Or just deselect?
-        // Let's just deselect and show detail
+        setSelectedCardForDetail(slot.card);
       } else {
         // Perform Swap
         const sourceId = swapSource;
@@ -480,6 +532,7 @@ const DraftView: React.FC = () => {
         setStarters(newStarters);
         setBench(newBench);
         setSwapSource(null);
+        setIsBenchExpanded(false);
       }
       return;
     }
@@ -489,9 +542,19 @@ const DraftView: React.FC = () => {
       return;
     }
     
-    setActiveSlotId(slot.id);
-    const options = generateDraftOptions(5, slot.position, seenCardIds, false);
-    setCurrentOptions(options);
+    // Drafting logic: only allow clicking empty slots if in the right phase
+    if ((phase === 'starters' && starters.some(s => s.id === slot.id)) || 
+        (phase === 'bench' && bench.some(b => b.id === slot.id))) {
+      setActiveSlotId(slot.id);
+      setIsBenchExpanded(false);
+      
+      // If it's the first pick, it's a Captain pick (Elite options)
+      const isFirstPick = starters.every(s => !s.card) && bench.every(b => !b.card);
+      const options = generateDraftOptions(5, slot.position, seenCardIds, isFirstPick);
+      
+      setCurrentOptions(options);
+      setIsFlipping(true);
+    }
   };
 
   const generateGhostTeam = (tournament: Tournament): GhostTeam => {
@@ -536,48 +599,95 @@ const DraftView: React.FC = () => {
     const userBench = bench.map(s => s.card).filter(Boolean) as Card[];
     const allUserPlayers = [...userStarters, ...userBench];
     
-    const starterNames = userStarters.map(s => s.name);
     const oppName = match.team1 === 'USER' ? (match.team2 as GhostTeam).name : (match.team1 as GhostTeam).name;
 
-    // 1. OVR Boost Logic
+    // 1. Realistic Team Score Generation (90-130)
+    // Base score 105 +/- 15
+    const baseScore = 105 + (Math.random() * 30 - 15);
     const ovrDiff = (match.team1 === 'USER' ? t1Ovr - t2Ovr : t2Ovr - t1Ovr);
-    let userBoost = 1.0;
-    let oppBoost = 1.0;
+    
+    // OVR impact on total score (subtle)
+    const userScoreTarget = Math.round(baseScore + (ovrDiff * 0.5));
+    const finalUserScore = Math.max(90, Math.min(130, userScoreTarget));
 
-    if (ovrDiff >= 10) {
-      userBoost = 1.15;
-      oppBoost = 0.85;
-    } else if (ovrDiff <= -10) {
-      userBoost = 0.85;
-      oppBoost = 1.15;
-    } else {
-      const factor = (ovrDiff / 10) * 0.15;
-      userBoost = 1 + factor;
-      oppBoost = 1 - factor;
+    // 2. Opponent Score Logic (Round Difficulty)
+    // Round multipliers: QF (0.95), SF (1.0), F (1.05)
+    const roundMultiplier = currentRound === 'QF' ? 0.95 : currentRound === 'SF' ? 1.0 : 1.05;
+    const oppBaseScore = 105 + (Math.random() * 20 - 10);
+    const oppScoreTarget = Math.round((oppBaseScore - (ovrDiff * 0.5)) * roundMultiplier);
+    
+    // Ensure close matches (2-15 points difference usually)
+    let finalOppScore = Math.max(85, Math.min(135, oppScoreTarget));
+    const scoreDiff = Math.abs(finalUserScore - finalOppScore);
+    if (scoreDiff > 20) {
+      // Pull it closer if it's a blowout
+      finalOppScore = finalUserScore + (finalOppScore > finalUserScore ? 15 : -15);
+    } else if (scoreDiff < 2) {
+      // Ensure at least 2 points diff if not a tie (NBA rarely ties in regulation, but we'll just ensure a winner)
+      finalOppScore = finalUserScore + (Math.random() > 0.5 ? 2 : -2);
     }
 
-    // 2. Individual Stats Engine (Realistic based on card attributes)
-    const stats: PlayerStats[] = allUserPlayers.map(player => {
+    // 3. Player Scoring Distribution (Hierarchy)
+    // Identify Captain (Highest OVR starter)
+    const captain = [...userStarters].sort((a, b) => (b.stats?.ovr || 0) - (a.stats?.ovr || 0))[0];
+    
+    const playerWeights = allUserPlayers.map(player => {
+      const isCaptain = player.id === captain?.id;
       const isStarter = userStarters.some(s => s.id === player.id);
-      const roleWeight = isStarter ? 1.0 : 0.4;
+      const ovr = player.stats?.ovr || 70;
       
-      // Points: card.pts +/- 20% * boost * role
-      const basePts = (player.pts || 15) * userBoost * roleWeight;
-      const pts = Math.round(basePts * (0.8 + Math.random() * 0.4));
+      let weight = ovr / 100;
+      if (isCaptain) weight *= 2.5; // Captain gets most shots
+      else if (isStarter) weight *= 1.5; // Starters get more shots
+      else weight *= 0.4; // Bench gets fewer shots
       
-      // Rebounds: card.reb +/- 20% * boost * role
-      const baseReb = (player.reb || 5) * userBoost * roleWeight;
-      const reb = Math.round(baseReb * (0.8 + Math.random() * 0.4));
+      return { id: player.id, weight };
+    });
 
-      // Assists: card.ast +/- 20% * boost * role
-      const baseAst = (player.ast || 5) * userBoost * roleWeight;
-      const ast = Math.round(baseAst * (0.8 + Math.random() * 0.4));
+    const totalWeight = playerWeights.reduce((acc, w) => acc + w.weight, 0);
+    let distributedPoints = 0;
+    
+    const stats: PlayerStats[] = allUserPlayers.map((player, index) => {
+      const weight = playerWeights.find(w => w.id === player.id)!.weight;
+      let pPts = 0;
+      
+      if (index === allUserPlayers.length - 1) {
+        // Last player gets the remainder to ensure exact total
+        pPts = finalUserScore - distributedPoints;
+      } else {
+        // Proportional distribution with some variance
+        const share = weight / totalWeight;
+        const variance = 0.85 + Math.random() * 0.3; // +/- 15%
+        pPts = Math.round(finalUserScore * share * variance);
+        
+        // Clamp to realistic ranges
+        const isCaptain = player.id === captain?.id;
+        const isStarter = userStarters.some(s => s.id === player.id);
+        
+        if (isCaptain) pPts = Math.max(20, Math.min(45, pPts));
+        else if (isStarter) pPts = Math.max(8, Math.min(30, pPts));
+        else pPts = Math.max(0, Math.min(15, pPts));
+        
+        // Check if we're exceeding total
+        if (distributedPoints + pPts > finalUserScore - (allUserPlayers.length - index - 1)) {
+          pPts = Math.max(0, finalUserScore - distributedPoints - (allUserPlayers.length - index - 1));
+        }
+      }
+
+      distributedPoints += pPts;
+
+      // Rebounds and Assists (Standard logic)
+      const roleWeight = userStarters.some(s => s.id === player.id) ? 1.0 : 0.4;
+      const baseReb = (player.reb || 5) * roleWeight;
+      const reb = Math.round(baseReb * (0.7 + Math.random() * 0.6));
+      const baseAst = (player.ast || 5) * roleWeight;
+      const ast = Math.round(baseAst * (0.7 + Math.random() * 0.6));
 
       return {
         cardId: player.id,
         name: player.name,
         imageUrl: player.imageUrl,
-        pts: Math.max(0, pts),
+        pts: pPts,
         reb: Math.max(0, reb),
         ast: Math.max(0, ast),
         ovr: player.stats?.ovr || 0,
@@ -585,32 +695,52 @@ const DraftView: React.FC = () => {
       };
     });
 
-    const userScore = stats.reduce((acc, s) => acc + s.pts, 0);
     setBoxScore(stats);
 
-    // 3. Opponent Score Logic (Simulated based on their OVR)
-    const oppBasePts = 105 * oppBoost;
-    const oppScore = Math.round(oppBasePts * (0.9 + Math.random() * 0.2));
+    // Achievements: In-Match Feats (Stats)
+    if (stats.some(s => s.pts >= 40)) {
+      const unlocked = await unlockAchievement('the_carry', false);
+      if (unlocked) notify(unlocked);
+    }
+    if (stats.some(s => s.ast >= 15)) {
+      const unlocked = await unlockAchievement('floor_general', false);
+      if (unlocked) notify(unlocked);
+    }
 
-    const s1Final = match.team1 === 'USER' ? userScore : oppScore;
-    const s2Final = match.team1 === 'USER' ? oppScore : userScore;
+    const s1Final = match.team1 === 'USER' ? finalUserScore : finalOppScore;
+    const s2Final = match.team1 === 'USER' ? finalOppScore : finalUserScore;
 
     const eventTemplates = [
-      "{player} anota una bandeja en reverso (+2)",
-      "{player} clava un triple desde la esquina (+3)",
-      "¡Robo y mate en contraataque de {player}! (+2)",
-      "{player} encesta tras un rebote ofensivo (+2)",
-      "¡Triple frontal de {player}! (+3)",
-      "{player} anota un tiro de media distancia (+2)",
-      "¡{player} machaca el aro con potencia! (+2)"
+      "{player} scores with a reverse layup (+2)",
+      "{player} drains a corner three! (+3)",
+      "Steal and fastbreak dunk by {player}! (+2)",
+      "{player} scores on a tough second-chance bucket (+2)",
+      "Deep three from the top of the key by {player}! (+3)",
+      "{player} hits a smooth mid-range jumper (+2)",
+      "{player} throws it down with authority! (+2)",
+      "{player} finishes the alley-oop! (+2)",
+      "Clutch bucket from {player} in the paint (+2)"
     ];
 
     const oppTemplates = [
-      "{opp} anota tras una buena jugada colectiva (+2)",
-      "¡Triple lejano de {opp}! (+3)",
-      "{opp} encesta una bandeja fácil (+2)",
-      "{opp} castiga desde la línea de tres (+3)",
-      "{opp} anota en suspensión (+2)"
+      "{opp} scores after a great team play (+2)",
+      "Deep three-pointer from {opp}! (+3)",
+      "{opp} scores an easy layup (+2)",
+      "{opp} punishes the defense from downtown (+3)",
+      "{opp} hits a contested fadeaway (+2)",
+      "{opp} converts the and-one play (+3)",
+      "Powerful finish at the rim by {opp} (+2)"
+    ];
+
+    const commentaryPhrases = [
+      "Clutch bucket!",
+      "Defensive stop!",
+      "Three point dagger!",
+      "What a move!",
+      "The crowd is going wild!",
+      "Total dominance!",
+      "Unstoppable force!",
+      "Lockdown defense!"
     ];
 
     // 3. Event Generation to reach final scores
@@ -670,6 +800,11 @@ const DraftView: React.FC = () => {
             r -= (p.pts || 10);
           }
           text = eventTemplates[Math.floor(Math.random() * eventTemplates.length)].replace("{player}", selectedPlayer);
+          
+          // Add random commentary phrase
+          if (Math.random() > 0.7) {
+            text = `${commentaryPhrases[Math.floor(Math.random() * commentaryPhrases.length)]} ${text}`;
+          }
         } else {
           text = oppTemplates[Math.floor(Math.random() * oppTemplates.length)].replace("{opp}", oppName);
         }
@@ -689,6 +824,11 @@ const DraftView: React.FC = () => {
             r -= (p.pts || 10);
           }
           text = eventTemplates[Math.floor(Math.random() * eventTemplates.length)].replace("{player}", selectedPlayer);
+          
+          // Add random commentary phrase
+          if (Math.random() > 0.7) {
+            text = `${commentaryPhrases[Math.floor(Math.random() * commentaryPhrases.length)]} ${text}`;
+          }
         }
       }
 
@@ -731,47 +871,82 @@ const DraftView: React.FC = () => {
     };
   };
 
-  const finishMatch = (matchId: string, s1: number, s2: number, winner: 'USER' | GhostTeam) => {
+  const finishMatch = async (matchId: string, s1: number, s2: number, winner: 'USER' | GhostTeam) => {
     const match = bracket.find(m => m.id === matchId);
     if (!match) return;
 
-    setTimeout(() => {
-      setMatchResult({ 
-        score1: s1, 
-        score2: s2, 
-        winner: winner === 'USER' ? 'Your Team' : (winner as GhostTeam).name 
-      });
+    // Wait 2 seconds for the "Match Finished" feel
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-      setBracket(prev => prev.map(m => m.id === matchId ? { 
-        ...m, 
-        winner, 
-        score1: s1, 
-        score2: s2, 
-        status: 'finished' 
-      } : m));
+    setMatchResult({ 
+      score1: s1, 
+      score2: s2, 
+      winner: winner === 'USER' ? 'Your Team' : (winner as GhostTeam).name 
+    });
 
-      setIsLiveMatchActive(false);
-    }, 2000);
+    // Achievements: In-Match Feats (Score)
+    if (winner === 'USER') {
+      const diff = Math.abs(s1 - s2);
+      if (diff >= 20) {
+        const unlocked = await unlockAchievement('blowout', false);
+        if (unlocked) notify(unlocked);
+      }
+      if (diff >= 1 && diff <= 2) {
+        const unlocked = await unlockAchievement('clutch_time', false);
+        if (unlocked) notify(unlocked);
+      }
+
+      // Achievement: David vs Goliath
+      if (selectedTournament?.name === 'NBA Playoffs' && teamOVR < 88) {
+        const unlocked = await unlockAchievement('david_vs_goliath', false);
+        if (unlocked) notify(unlocked);
+      }
+    }
+
+    setBracket(prev => prev.map(m => m.id === matchId ? { 
+      ...m, 
+      winner, 
+      score1: s1, 
+      score2: s2, 
+      status: 'finished' 
+    } : m));
+
+    setIsLiveMatchActive(false);
   };
 
-  const handleTournamentEnd = (position: 'quarters' | 'semis' | 'finalist' | 'champion') => {
+  const handleTournamentEnd = async (position: 'quarters' | 'semis' | 'finalist' | 'champion') => {
     if (!selectedTournament) return;
     const rewards = REWARDS[selectedTournament.name as keyof typeof REWARDS][position];
     setFinalPosition(position);
     setEarnedRewards(rewards);
     setShowTournamentSummary(true);
+
+    // Achievements: Tournament Success
+    if (position === 'champion') {
+      if (selectedTournament.name === 'Summer League') {
+        const unlocked = await unlockAchievement('summer_mvp', false);
+        if (unlocked) notify(unlocked);
+      } else if (selectedTournament.name === 'NBA Cup') {
+        const unlocked = await unlockAchievement('cup_champion', false);
+        if (unlocked) notify(unlocked);
+      } else if (selectedTournament.name === 'NBA Playoffs') {
+        const unlocked = await unlockAchievement('ring_chaser', false);
+        if (unlocked) notify(unlocked);
+      }
+    }
   };
 
-  const claimRewards = () => {
+  const claimRewards = async () => {
     if (earnedRewards) {
-      addCoins(earnedRewards.coins);
-      earnedRewards.packs.forEach(pack => {
-        addPackToInventory({ 
+      // Final sync to Supabase
+      await addCoins(earnedRewards.coins, true);
+      for (const pack of earnedRewards.packs) {
+        await addPackToInventory({ 
           id: `${pack.type}-${Date.now()}-${Math.random()}`, 
           type: pack.type, 
           name: pack.name 
-        });
-      });
+        }, true);
+      }
     }
     // Reset Draft State
     setPhase('entry');
@@ -782,7 +957,7 @@ const DraftView: React.FC = () => {
     setShowTournamentSummary(false);
     setFinalPosition(null);
     setEarnedRewards(null);
-    localStorage.removeItem('DRAFT_STATE'); // Clear saved draft
+    localStorage.removeItem('hoops_draft_state'); // Corrected key
   };
 
   const advanceRound = () => {
@@ -810,9 +985,13 @@ const DraftView: React.FC = () => {
       if (m.winner) return m.winner;
       const t1Ovr = m.team1 === 'USER' ? teamOVR : (m.team1 as GhostTeam).ovr;
       const t2Ovr = m.team2 === 'USER' ? teamOVR : (m.team2 as GhostTeam).ovr;
-      const t1Strength = t1Ovr + Math.random() * 12;
-      const t2Strength = t2Ovr + Math.random() * 12;
-      return t1Strength > t2Strength ? m.team1 : m.team2;
+      
+      // Realistic NBA scoring for ghost matches too
+      const baseScore = 105 + (Math.random() * 20 - 10);
+      const t1Score = Math.round(baseScore + (t1Ovr - 85) + (Math.random() * 10 - 5));
+      const t2Score = Math.round(baseScore + (t2Ovr - 85) + (Math.random() * 10 - 5));
+      
+      return t1Score > t2Score ? m.team1 : m.team2;
     };
 
     if (currentRound === 'QF') {
@@ -858,23 +1037,6 @@ const DraftView: React.FC = () => {
     return Math.round(finalOvr);
   }, [starters, bench]);
 
-  const teamChemistry = useMemo(() => {
-    // Simple chemistry logic: +5 for each pair of teammates
-    const allPlayers = [...starters, ...bench].map(s => s.card).filter(Boolean) as Card[];
-    if (allPlayers.length === 0) return 0;
-    
-    const teams = allPlayers.map(p => p.team);
-    const teamCounts: Record<string, number> = {};
-    teams.forEach(t => teamCounts[t] = (teamCounts[t] || 0) + 1);
-    
-    let chem = 50; // Base chemistry
-    Object.values(teamCounts).forEach(count => {
-      if (count > 1) chem += (count - 1) * 10;
-    });
-    
-    return Math.min(100, chem);
-  }, [starters, bench]);
-
   const renderEntry = () => (
     <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-8">
       <div className="w-24 h-24 bg-blue-600 rounded-3xl flex items-center justify-center shadow-[0_0_50px_rgba(59,130,246,0.4)]">
@@ -889,16 +1051,17 @@ const DraftView: React.FC = () => {
       <div className="grid grid-cols-1 gap-4 w-full max-w-xs">
         <button 
           onClick={() => handleStartDraft('coins')}
-          disabled={coins < DRAFT_COST}
+          disabled={coins < DRAFT_COST || isSaving}
           className="group relative bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-amber-400 transition-all disabled:opacity-50"
         >
           <Coins size={18} />
-          <span>Entry: {DRAFT_COST.toLocaleString()}</span>
+          <span>{isSaving ? 'Processing...' : `Entry: ${DRAFT_COST.toLocaleString()}`}</span>
         </button>
         
         <button 
           onClick={() => handleStartDraft('ad')}
-          className="group relative bg-zinc-900 text-white border border-zinc-800 py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all"
+          disabled={isSaving}
+          className="group relative bg-zinc-900 text-white border border-zinc-800 py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all disabled:opacity-50"
         >
           <Play size={18} />
           <span>Watch Ad to Enter</span>
@@ -908,88 +1071,119 @@ const DraftView: React.FC = () => {
   );
 
   const renderDraftBoard = () => (
-    <div className="flex-1 flex flex-col p-2 md:p-4 space-y-2 overflow-hidden max-w-6xl mx-auto w-full h-full relative">
-      {/* Tactical Board Header */}
-      <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-3 flex items-center justify-between shadow-xl shrink-0 z-10">
-        <div className="flex items-center gap-3">
+    <div className="flex-1 flex flex-col lg:flex-row px-4 py-2 md:p-4 gap-4 max-w-7xl mx-auto w-full h-full relative overflow-y-auto no-scrollbar">
+      {/* Tactical Board Header - Floating on Mobile, Sidebar on Desktop */}
+      <div className="lg:w-48 flex flex-col gap-4 shrink-0 z-30">
+        <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-4 flex lg:flex-col items-center justify-between lg:justify-center gap-4 shadow-xl">
           <div className="text-center">
-            <p className="text-[7px] font-black uppercase tracking-widest text-zinc-500">Team OVR</p>
-            <p className="text-xl font-black italic text-amber-500">{teamOVR}</p>
+            <p className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-zinc-500">Team OVR</p>
+            <p className="text-2xl md:text-3xl font-black italic text-amber-500">{teamOVR}</p>
           </div>
-          <div className="w-px h-6 bg-zinc-900" />
-          <div className="text-center">
-            <p className="text-[7px] font-black uppercase tracking-widest text-zinc-500">Chemistry</p>
-            <p className="text-xl font-black italic text-blue-500">{teamChemistry}%</p>
+          <div className="hidden lg:block w-full h-px bg-zinc-900" />
+          <div className="text-right lg:text-center">
+            <p className="text-[9px] md:text-[10px] font-black uppercase tracking-tighter text-white italic">Draft Mode</p>
+            <p className="text-[7px] md:text-[8px] font-bold text-zinc-600 uppercase tracking-widest">
+              {phase === 'captain' ? 'Captain Pick' : phase === 'starters' ? 'Starters' : 'Bench'}
+            </p>
           </div>
         </div>
-        <div className="text-right">
-          <p className="text-[9px] font-black uppercase tracking-tighter text-white italic">Draft Mode</p>
-          <p className="text-[7px] font-bold text-zinc-600 uppercase tracking-widest">
-            {phase === 'captain' ? 'Captain Pick' : phase === 'starters' ? 'Starters' : 'Bench'}
-          </p>
+
+        {/* Desktop Bench - Visible on the side */}
+        <div className="hidden lg:flex flex-col bg-zinc-950/80 border border-zinc-900 rounded-3xl p-4 shadow-xl flex-1 overflow-hidden">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-4 text-center">Bench</h3>
+          <div className="flex flex-col gap-3 overflow-y-auto pr-2 scrollbar-hide">
+            {bench.map(slot => (
+              <Slot 
+                key={slot.id} 
+                slot={slot} 
+                mini 
+                onClick={() => handleSlotClick(slot)} 
+                disabled={phase === 'captain'} 
+                isSelected={swapSource === slot.id || activeSlotId === slot.id}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Main Board Container (Full Screen Split) */}
-      <div className="flex-1 flex flex-col min-h-0 gap-4 relative">
+      {/* Main Board Container */}
+      <div className="flex-1 flex flex-col min-h-0 gap-4 relative pb-10 lg:pb-0">
         {/* Top Half: Tactical Starting Five */}
-        <div className="flex-[1.2] bg-zinc-950/50 border border-zinc-900 rounded-[2.5rem] p-4 flex flex-col justify-center relative overflow-hidden shadow-2xl">
-          {/* Court Lines Overlay (More prominent for tactical feel) */}
+        <div className="flex-1 bg-zinc-950/50 border border-zinc-900 rounded-[2.5rem] p-4 md:p-8 flex flex-col justify-center relative overflow-hidden shadow-2xl mb-8">
+          {/* Court Lines Overlay */}
           <div className="absolute inset-0 opacity-10 pointer-events-none">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-1/2 border-b-2 border-x-2 border-white rounded-b-[100px]" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-2 border-white rounded-full" />
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-24 border-t-2 border-x-2 border-white" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[90%] h-1/2 border-b-2 border-x-2 border-white/20 rounded-b-[100px]" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-2 border-white/20 rounded-full" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-24 border-t-2 border-x-2 border-white/20" />
           </div>
 
-          <div className="relative z-10 h-full w-full flex flex-col justify-around py-4">
-            {/* Row 1: PG (Top Center) */}
-            <div className="flex justify-center">
-              <div className="transform -translate-y-2">
+          <div className="relative z-10 h-full w-full flex flex-col justify-around py-2 md:py-4">
+            {/* Mobile Layout: 2 Rows (3+2) | Desktop: Tactical 1-2-2 */}
+            <div className="lg:hidden flex flex-col gap-4 md:gap-8">
+              {/* Row 1: PG, SG, SF */}
+              <div className="flex justify-center gap-2 md:gap-4">
+                {[starters[0], starters[1], starters[2]].map(slot => (
+                  <div key={slot.id} className="w-[30%] max-w-[100px]">
+                    <Slot 
+                      slot={slot} 
+                      onClick={() => handleSlotClick(slot)} 
+                      disabled={phase === 'captain'} 
+                      isSelected={swapSource === slot.id || activeSlotId === slot.id}
+                    />
+                  </div>
+                ))}
+              </div>
+              {/* Row 2: PF, C */}
+              <div className="flex justify-center gap-4 md:gap-8">
+                {[starters[3], starters[4]].map(slot => (
+                  <div key={slot.id} className="w-[35%] max-w-[110px]">
+                    <Slot 
+                      slot={slot} 
+                      onClick={() => handleSlotClick(slot)} 
+                      disabled={phase === 'captain'} 
+                      isSelected={swapSource === slot.id || activeSlotId === slot.id}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Desktop Tactical Layout */}
+            <div className="hidden lg:flex flex-col justify-between h-full">
+              <div className="flex justify-center">
                 <Slot 
                   slot={starters[0]} 
                   onClick={() => handleSlotClick(starters[0])} 
                   disabled={phase === 'captain'} 
-                  isSelected={swapSource === starters[0].id}
+                  isSelected={swapSource === starters[0].id || activeSlotId === starters[0].id}
                 />
               </div>
-            </div>
-            
-            {/* Row 2: SG & SF (Middle Wings) */}
-            <div className="flex justify-between px-[10%] md:px-[20%]">
-              <div className="transform -translate-x-4">
+              <div className="flex justify-between px-[15%]">
                 <Slot 
                   slot={starters[1]} 
                   onClick={() => handleSlotClick(starters[1])} 
                   disabled={phase === 'captain'} 
-                  isSelected={swapSource === starters[1].id}
+                  isSelected={swapSource === starters[1].id || activeSlotId === starters[1].id}
                 />
-              </div>
-              <div className="transform translate-x-4">
                 <Slot 
                   slot={starters[2]} 
                   onClick={() => handleSlotClick(starters[2])} 
                   disabled={phase === 'captain'} 
-                  isSelected={swapSource === starters[2].id}
+                  isSelected={swapSource === starters[2].id || activeSlotId === starters[2].id}
                 />
               </div>
-            </div>
-            
-            {/* Row 3: PF & C (Bottom Paint) */}
-            <div className="flex justify-center gap-8 md:gap-16">
-              <div className="transform translate-y-2">
+              <div className="flex justify-center gap-24">
                 <Slot 
                   slot={starters[3]} 
                   onClick={() => handleSlotClick(starters[3])} 
                   disabled={phase === 'captain'} 
-                  isSelected={swapSource === starters[3].id}
+                  isSelected={swapSource === starters[3].id || activeSlotId === starters[3].id}
                 />
-              </div>
-              <div className="transform translate-y-2">
                 <Slot 
                   slot={starters[4]} 
                   onClick={() => handleSlotClick(starters[4])} 
                   disabled={phase === 'captain'} 
-                  isSelected={swapSource === starters[4].id}
+                  isSelected={swapSource === starters[4].id || activeSlotId === starters[4].id}
                 />
               </div>
             </div>
@@ -1004,35 +1198,57 @@ const DraftView: React.FC = () => {
                 onClick={() => setPhase('summary')}
                 className="w-full max-w-xs bg-amber-500 text-black py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all active:scale-95"
               >
-                <span>Finalizar Draft y Jugar</span>
+                <span>Finish Draft and Play</span>
                 <ArrowRight size={20} />
               </motion.button>
             </div>
           )}
         </div>
 
-        {/* Bottom Half: Bench Strip */}
-        <div className="flex-none bg-zinc-950/80 border border-zinc-900 rounded-3xl p-4 flex flex-col shadow-xl">
-          <div className="flex items-center gap-3 mb-3 shrink-0">
-            <div className="h-px flex-1 bg-zinc-900" />
-            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 px-2">Bench</h3>
-            <div className="h-px flex-1 bg-zinc-900" />
-          </div>
-          
-          <div className="flex justify-center items-center gap-2 md:gap-3 w-full overflow-x-auto scrollbar-hide py-1">
-            {bench.map(slot => (
-              <div key={slot.id} className="shrink-0">
-                <Slot 
-                  key={slot.id} 
-                  slot={slot} 
-                  mini 
-                  onClick={() => handleSlotClick(slot)} 
-                  disabled={phase === 'captain'} 
-                  isSelected={swapSource === slot.id}
-                />
-              </div>
-            ))}
-          </div>
+        {/* Mobile Bench Accordion - Hidden on Desktop */}
+        <div className="lg:hidden flex-none relative z-[100] mt-8">
+          <button 
+            onClick={() => setIsBenchExpanded(!isBenchExpanded)}
+            className="w-full bg-zinc-950 border border-zinc-900 rounded-xl py-4 px-6 flex items-center justify-between shadow-2xl active:bg-zinc-900 transition-all relative z-[110]"
+          >
+            <div className="flex-1 flex justify-center items-center gap-2">
+              <span className="text-[11px] font-black uppercase tracking-[0.4em] text-white">
+                Bench <span className="text-zinc-500 ml-2">({bench.filter(s => s.card).length}/{bench.length})</span>
+              </span>
+            </div>
+            <motion.div
+              animate={{ rotate: isBenchExpanded ? 180 : 0 }}
+              className="text-amber-500"
+            >
+              <ArrowRight size={18} className="rotate-90" />
+            </motion.div>
+          </button>
+
+          <AnimatePresence>
+            {isBenchExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden mt-2 z-[105] relative"
+              >
+                <div className="bg-zinc-950/98 border border-zinc-900 rounded-3xl p-6 shadow-[0_20px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl max-h-[50vh] overflow-y-auto scrollbar-hide">
+                  <div className="grid grid-cols-3 gap-4">
+                    {bench.map(slot => (
+                      <div key={slot.id} className="w-full">
+                        <Slot 
+                          slot={slot} 
+                          onClick={() => handleSlotClick(slot)} 
+                          disabled={phase === 'captain'} 
+                          isSelected={swapSource === slot.id || activeSlotId === slot.id}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Captain Selection Backdrop Overlay */}
@@ -1044,67 +1260,58 @@ const DraftView: React.FC = () => {
   );
 
   const renderSelection = () => (
-    <div className="fixed inset-0 z-[8000] flex flex-col items-center justify-center p-4">
+    <div className="fixed inset-0 z-[8000] flex flex-col items-center justify-center p-4 md:p-8">
       {/* Backdrop for the modal */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="absolute inset-0 bg-black/80 backdrop-blur-md"
+        className="absolute inset-0 bg-black/95 backdrop-blur-2xl"
+        onClick={() => {
+          if (phase !== 'captain' && phase !== 'starters' && phase !== 'bench') {
+            setCurrentOptions([]);
+          }
+        }}
       />
 
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="relative z-10 w-full max-w-5xl bg-zinc-950 border border-zinc-900 rounded-[2.5rem] p-6 md:p-10 shadow-[0_0_100px_rgba(0,0,0,0.8)] flex flex-col items-center"
+        initial={{ scale: 0.9, opacity: 0, y: 50 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        className="relative z-10 w-full max-w-6xl flex flex-col items-center"
       >
-        <div className="text-center mb-8 md:mb-12">
-          <h2 className="text-2xl md:text-3xl font-black italic uppercase tracking-tighter text-white">
+        <div className="text-center mb-8 md:mb-12 shrink-0">
+          <h2 className="text-2xl md:text-5xl font-black italic uppercase tracking-tighter text-white">
             {phase === 'captain' ? 'Choose Your Captain' : `Select ${activeSlotId?.toUpperCase()}`}
           </h2>
-          <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mt-2">
+          <p className="text-[10px] md:text-sm font-bold text-amber-500 uppercase tracking-[0.3em] mt-3">
             {phase === 'captain' ? 'Elite & Legend Stars Only' : 'Select one to add to your roster'}
           </p>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-4 md:gap-6 w-full">
-          {currentOptions.map((card, idx) => (
-            <motion.div
-              key={card.id}
-              initial={{ opacity: 0, y: 20, rotateY: phase === 'captain' ? 180 : 0 }}
-              animate={{ opacity: 1, y: 0, rotateY: 0 }}
-              transition={{ delay: idx * 0.1, duration: 0.5 }}
-              className="w-[35vw] max-w-[160px] md:max-w-[180px] flex flex-col gap-2 cursor-pointer group"
-              onClick={() => handleSelectCard(card)}
-            >
-              <div className="relative aspect-[2.5/3.5] w-full bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden group-hover:border-amber-500 transition-all group-hover:scale-105 shadow-2xl">
-                <img src={card.imageUrl} alt={card.name} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                <div className="absolute bottom-2 left-2 right-2">
-                  <p className="text-[9px] md:text-[10px] font-black uppercase italic text-white truncate">{card.name}</p>
-                  <div className="flex items-center justify-between mt-1">
-                    <span className="text-[8px] font-bold text-amber-500">{card.stats?.ovr} OVR</span>
-                    <span className="text-[8px] font-bold text-zinc-400">{card.position}</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Stats Panel */}
-              <div className="bg-zinc-900/80 border border-zinc-800 rounded-lg p-1.5 grid grid-cols-3 gap-1 group-hover:border-amber-500/30 transition-colors">
-                <div className="text-center">
-                  <p className="text-[5px] font-black text-zinc-500 uppercase">PTS</p>
-                  <p className="text-[9px] font-black text-white">{card.stats.points}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-[5px] font-black text-zinc-500 uppercase">AST</p>
-                  <p className="text-[9px] font-black text-white">{card.stats.assists}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-[5px] font-black text-zinc-500 uppercase">REB</p>
-                  <p className="text-[9px] font-black text-white">{card.stats.rebounds}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+        <div className="w-full overflow-x-auto no-scrollbar pb-12 px-4">
+          <div className="flex flex-row gap-4 md:gap-8 min-w-max px-4 md:px-0">
+            {currentOptions.map((card, idx) => (
+              <motion.div
+                key={card.id}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1, duration: 0.5, type: "spring" }}
+                className="w-[240px] md:w-[280px] shrink-0"
+              >
+                <CardItem 
+                  card={card} 
+                  isOwned={true} 
+                  mode="large" 
+                  onClick={() => handleSelectCard(card)}
+                />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center gap-2 text-zinc-500 animate-pulse lg:hidden">
+          <ArrowRight size={14} className="rotate-180" />
+          <span className="text-[10px] font-black uppercase tracking-widest">Swipe to explore</span>
+          <ArrowRight size={14} />
         </div>
       </motion.div>
     </div>
@@ -1189,7 +1396,7 @@ const DraftView: React.FC = () => {
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className={`text-[8px] font-black uppercase tracking-widest ${event.team === 'USER' ? 'text-amber-500' : 'text-zinc-500'}`}>
-                      {event.team === 'USER' ? 'Tu Equipo' : 'Oponente'}
+                      {event.team === 'USER' ? 'Your Team' : 'Opponent'}
                     </span>
                     <span className="text-[8px] font-bold text-zinc-600">Q{event.quarter}</span>
                   </div>
@@ -1200,7 +1407,7 @@ const DraftView: React.FC = () => {
             {liveEvents.length === 0 && (
               <div className="flex-1 flex flex-col items-center justify-center text-zinc-700 space-y-4">
                 <div className="w-12 h-12 border-4 border-zinc-800 border-t-amber-500 rounded-full animate-spin" />
-                <p className="text-xs font-black uppercase tracking-widest">Esperando el salto inicial...</p>
+                <p className="text-xs font-black uppercase tracking-widest">Waiting for tip-off...</p>
               </div>
             )}
           </div>
@@ -1213,7 +1420,7 @@ const DraftView: React.FC = () => {
             className="px-8 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center gap-3"
           >
             <Zap size={16} className="fill-amber-500 text-amber-500" />
-            Saltar Simulación
+            Skip Simulation
           </button>
         </div>
       </motion.div>
@@ -1230,8 +1437,8 @@ const DraftView: React.FC = () => {
       >
         <div className="max-w-4xl mx-auto w-full flex flex-col h-full space-y-8">
           <div className="text-center space-y-2">
-            <h2 className="text-4xl font-black italic uppercase tracking-tighter text-white">Resumen del Partido</h2>
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Box Score Individual</p>
+            <h2 className="text-4xl font-black italic uppercase tracking-tighter text-white">Match Summary</h2>
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Individual Box Score</p>
           </div>
 
           <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide">
@@ -1239,7 +1446,7 @@ const DraftView: React.FC = () => {
               <table className="w-full text-left border-collapse min-w-[400px]">
                 <thead>
                   <tr className="bg-zinc-900/50 border-b border-zinc-800">
-                    <th className="p-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Jugador</th>
+                    <th className="p-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Player</th>
                     <th className="p-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest text-center">PTS</th>
                     <th className="p-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest text-center">REB</th>
                     <th className="p-5 text-[10px] font-black text-zinc-500 uppercase tracking-widest text-center">AST</th>
@@ -1279,7 +1486,7 @@ const DraftView: React.FC = () => {
             onClick={advanceRound}
             className="w-full bg-amber-500 text-black py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 hover:bg-amber-400 transition-all shadow-[0_20px_40px_rgba(245,158,11,0.2)] active:scale-95"
           >
-            <span>Continuar Torneo</span>
+            <span>Continue Tournament</span>
             <ArrowRight size={20} />
           </button>
         </div>
@@ -1302,14 +1509,10 @@ const DraftView: React.FC = () => {
         <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">Your dynasty is ready for the playoffs</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+      <div className="grid grid-cols-1 gap-4 w-full max-w-sm">
         <div className="bg-zinc-950 border border-zinc-900 p-6 rounded-3xl">
           <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1">Team OVR</p>
           <p className="text-4xl font-black italic text-amber-500">{teamOVR}</p>
-        </div>
-        <div className="bg-zinc-950 border border-zinc-900 p-6 rounded-3xl">
-          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1">Chemistry</p>
-          <p className="text-4xl font-black italic text-blue-500">{teamChemistry}%</p>
         </div>
       </div>
 
@@ -1346,13 +1549,13 @@ const DraftView: React.FC = () => {
         <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">Choose your challenge level</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
+      <div className="flex md:grid md:grid-cols-3 gap-6 w-full max-w-6xl overflow-x-auto md:overflow-x-visible pb-8 md:pb-0 snap-x snap-mandatory scrollbar-hide px-4 md:px-0">
         {TOURNAMENTS.map((t) => (
           <motion.div
             key={t.id}
             whileHover={{ scale: 1.02, translateY: -5 }}
             onClick={() => handleSelectTournament(t)}
-            className="relative group cursor-pointer bg-zinc-950 border border-zinc-900 rounded-[2rem] p-8 flex flex-col items-center text-center space-y-6 overflow-hidden shadow-2xl"
+            className="relative group cursor-pointer bg-zinc-950 border border-zinc-900 rounded-[2rem] p-8 flex flex-col items-center text-center space-y-6 overflow-hidden shadow-2xl min-w-[85%] md:min-w-0 snap-center"
           >
             {/* Difficulty Badge */}
             <div className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
@@ -1409,112 +1612,133 @@ const DraftView: React.FC = () => {
 
   const renderBracket = () => {
     // Group matches by round for easier rendering
-    const qfMatches = currentRound === 'QF' ? bracket : [];
-    const sfMatches = currentRound === 'SF' ? bracket : [];
-    const fMatch = currentRound === 'F' ? bracket[0] : null;
+    const qfMatches = bracket.filter(m => m.id.startsWith('qf'));
+    const sfMatches = bracket.filter(m => m.id.startsWith('sf'));
+    const fMatch = bracket.find(m => m.id.startsWith('f'));
 
     return (
-      <div className="flex-1 flex flex-col p-4 md:p-8 space-y-8 overflow-hidden relative bg-zinc-950">
-        <div className="flex items-center justify-between shrink-0 z-10">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center">
-              <Trophy size={24} className="text-amber-500" />
+      <div className="flex-1 flex flex-col p-0 md:p-8 space-y-4 md:space-y-8 overflow-hidden relative bg-zinc-950">
+        {/* Header */}
+        <div className="flex items-center justify-between shrink-0 z-10 p-4 md:p-0 border-b md:border-none border-zinc-900 bg-zinc-950/80 backdrop-blur-md md:bg-transparent">
+          <div className="flex items-center gap-3 md:gap-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-zinc-900 border border-zinc-800 rounded-xl md:rounded-2xl flex items-center justify-center">
+              <Trophy size={20} className="text-amber-500" />
             </div>
             <div>
-              <h2 className="text-2xl font-black italic uppercase text-white leading-none">{selectedTournament?.name}</h2>
-              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
-                {currentRound === 'QF' ? 'Quarter-Finals' : currentRound === 'SF' ? 'Semi-Finals' : 'Grand Final'}
+              <h2 className="text-lg md:text-2xl font-black italic uppercase text-white leading-none truncate max-w-[150px] md:max-w-none">{selectedTournament?.name}</h2>
+              <p className="text-[8px] md:text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
+                Playoff Bracket
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 md:gap-6">
             <div className="text-right">
-              <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Your Team</p>
-              <p className="text-lg font-black italic text-amber-500">{teamOVR} OVR</p>
+              <p className="text-[7px] md:text-[8px] font-black text-zinc-500 uppercase tracking-widest">Your Team</p>
+              <p className="text-sm md:text-lg font-black italic text-amber-500">{teamOVR} OVR</p>
             </div>
-            <div className="w-px h-8 bg-zinc-900" />
+            <div className="w-px h-6 md:h-8 bg-zinc-900" />
             <button 
               onClick={() => setPhase('tournament_selection')}
-              className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-white transition-colors"
+              className="p-2 md:p-3 bg-zinc-900 border border-zinc-800 rounded-lg md:rounded-xl text-zinc-400 hover:text-white transition-colors"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
         </div>
 
         {/* Bracket Tree Container */}
-        <div className="flex-1 flex items-center justify-center min-h-0 overflow-x-auto pb-8">
-          <div className="flex items-center gap-4 md:gap-16 min-w-max px-8">
-            {/* Quarter Finals */}
-            <div className={`flex flex-col gap-4 md:gap-8 transition-all duration-500 ${currentRound !== 'QF' ? 'opacity-30 scale-90 blur-[2px]' : ''}`}>
+        <div className="flex-1 flex items-center min-h-0 overflow-x-auto pb-24 md:pb-8 scrollbar-hide snap-x snap-mandatory">
+          <div className="flex items-center gap-8 md:gap-24 min-w-max px-8 md:px-24 mx-auto h-full py-10">
+            {/* Quarterfinals */}
+            <div className="flex flex-col justify-center gap-8 md:gap-12 relative snap-center">
               <div className="text-center mb-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Quarter Finals</span>
+                <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-zinc-600">Quarterfinals</span>
               </div>
-              {currentRound === 'QF' ? bracket.map((m) => (
-                <BracketMatchCard 
-                  key={m.id} 
-                  match={m} 
-                  isUserMatch={m.team1 === 'USER' || m.team2 === 'USER'} 
-                  onSimulate={() => simulateMatch(m.id)}
-                  isSimulating={isSimulating}
-                  teamOVR={teamOVR}
-                />
-              )) : Array.from({ length: 4 }).map((_, i) => (
-                <BracketMatchCard key={`qf-placeholder-${i}`} match={null} isUserMatch={false} onSimulate={() => {}} isSimulating={false} teamOVR={teamOVR} />
-              ))}
+              <div className="flex flex-col gap-8 md:gap-12">
+                {qfMatches.map((m) => (
+                  <BracketMatchCard 
+                    key={m.id} 
+                    match={m} 
+                    isUserMatch={m.team1 === 'USER' || m.team2 === 'USER'} 
+                    onSimulate={() => simulateMatch(m.id)}
+                    isSimulating={isSimulating && activeMatchId === m.id}
+                    teamOVR={teamOVR}
+                    isActive={currentRound === 'QF' && (m.team1 === 'USER' || m.team2 === 'USER') && m.status === 'pending'}
+                  />
+                ))}
+              </div>
             </div>
 
-            {/* Connector Lines 1 */}
-            <div className="hidden md:flex flex-col justify-around h-[400px] w-12 text-zinc-800">
-              <div className="h-1/2 border-y-2 border-r-2 rounded-r-2xl" />
-              <div className="h-1/2 border-y-2 border-r-2 rounded-r-2xl" />
-            </div>
-
-            {/* Semi Finals */}
-            <div className={`flex flex-col gap-8 md:gap-24 transition-all duration-500 ${currentRound !== 'SF' ? 'opacity-30 scale-90 blur-[2px]' : ''}`}>
+            {/* Semifinals */}
+            <div className="flex flex-col justify-center gap-24 md:gap-48 relative snap-center">
               <div className="text-center mb-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Semi Finals</span>
+                <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-zinc-600">Semifinals</span>
               </div>
-              {currentRound === 'SF' ? bracket.map((m) => (
-                <BracketMatchCard 
-                  key={m.id} 
-                  match={m} 
-                  isUserMatch={m.team1 === 'USER' || m.team2 === 'USER'} 
-                  onSimulate={() => simulateMatch(m.id)}
-                  isSimulating={isSimulating}
-                  teamOVR={teamOVR}
-                />
-              )) : Array.from({ length: 2 }).map((_, i) => (
-                <BracketMatchCard key={`sf-placeholder-${i}`} match={null} isUserMatch={false} onSimulate={() => {}} isSimulating={false} teamOVR={teamOVR} />
-              ))}
+              <div className="flex flex-col gap-24 md:gap-48">
+                {sfMatches.length > 0 ? sfMatches.map((m) => (
+                  <BracketMatchCard 
+                    key={m.id} 
+                    match={m} 
+                    isUserMatch={m.team1 === 'USER' || m.team2 === 'USER'} 
+                    onSimulate={() => simulateMatch(m.id)}
+                    isSimulating={isSimulating && activeMatchId === m.id}
+                    teamOVR={teamOVR}
+                    isActive={currentRound === 'SF' && (m.team1 === 'USER' || m.team2 === 'USER') && m.status === 'pending'}
+                  />
+                )) : Array.from({ length: 2 }).map((_, i) => (
+                  <BracketMatchCard key={`sf-placeholder-${i}`} match={null} isUserMatch={false} onSimulate={() => {}} isSimulating={false} teamOVR={teamOVR} />
+                ))}
+              </div>
             </div>
 
-            {/* Connector Lines 2 */}
-            <div className="hidden md:flex flex-col justify-center h-[400px] w-12 text-zinc-800">
-              <div className="h-1/4 border-y-2 border-r-2 rounded-r-2xl" />
-            </div>
-
-            {/* Final */}
-            <div className={`flex flex-col gap-8 transition-all duration-500 ${currentRound !== 'F' ? 'opacity-30 scale-90 blur-[2px]' : ''}`}>
+            {/* Finals */}
+            <div className="flex flex-col justify-center relative snap-center">
               <div className="text-center mb-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500">The Grand Final</span>
+                <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-amber-500">Finals</span>
               </div>
-              {currentRound === 'F' ? (
-                <BracketMatchCard 
-                  match={bracket[0]} 
-                  isUserMatch={bracket[0].team1 === 'USER' || bracket[0].team2 === 'USER'} 
-                  onSimulate={() => simulateMatch(bracket[0].id)}
-                  isSimulating={isSimulating}
-                  teamOVR={teamOVR}
-                  isFinal
-                />
-              ) : (
-                <BracketMatchCard match={null} isUserMatch={false} onSimulate={() => {}} isSimulating={false} teamOVR={teamOVR} isFinal />
-              )}
+              <div className="flex flex-col">
+                {fMatch ? (
+                  <BracketMatchCard 
+                    match={fMatch} 
+                    isUserMatch={fMatch.team1 === 'USER' || fMatch.team2 === 'USER'} 
+                    onSimulate={() => simulateMatch(fMatch.id)}
+                    isSimulating={isSimulating && activeMatchId === fMatch.id}
+                    teamOVR={teamOVR}
+                    isFinal
+                    isActive={currentRound === 'F' && (fMatch.team1 === 'USER' || fMatch.team2 === 'USER') && fMatch.status === 'pending'}
+                  />
+                ) : (
+                  <BracketMatchCard match={null} isUserMatch={false} onSimulate={() => {}} isSimulating={false} teamOVR={teamOVR} isFinal />
+                )}
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Fixed Bottom Action Button */}
+        <AnimatePresence>
+          {bracket.some(m => (m.team1 === 'USER' || m.team2 === 'USER') && m.status === 'pending') && (
+            <motion.div 
+              initial={{ y: 100 }}
+              animate={{ y: 0 }}
+              exit={{ y: 100 }}
+              className="fixed bottom-0 inset-x-0 p-4 md:p-8 bg-gradient-to-t from-black via-black/90 to-transparent z-50 flex justify-center"
+            >
+              <button
+                onClick={() => {
+                  const userMatch = bracket.find(m => (m.team1 === 'USER' || m.team2 === 'USER') && m.status === 'pending');
+                  if (userMatch) simulateMatch(userMatch.id);
+                }}
+                disabled={isSimulating}
+                className="w-full max-w-md bg-amber-500 text-black py-4 md:py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs md:text-sm flex items-center justify-center gap-3 shadow-[0_20px_50px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all active:scale-95"
+              >
+                <Play size={20} fill="currentColor" />
+                <span>Simulate Match</span>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Match Result Modal Overlay */}
         <AnimatePresence>
@@ -1607,10 +1831,11 @@ const BracketMatchCard: React.FC<{
   isSimulating: boolean;
   teamOVR: number;
   isFinal?: boolean;
-}> = ({ match, isUserMatch, onSimulate, isSimulating, teamOVR, isFinal }) => {
+  isActive?: boolean;
+}> = ({ match, isUserMatch, onSimulate, isSimulating, teamOVR, isFinal, isActive }) => {
   if (!match) {
     return (
-      <div className={`w-full max-w-[200px] md:max-w-[240px] bg-zinc-900/10 border border-zinc-800/30 border-dashed rounded-2xl p-4 flex flex-col items-center justify-center gap-2 opacity-30 ${isFinal ? 'scale-110' : ''}`}>
+      <div className={`w-48 md:w-64 bg-zinc-900/10 border border-zinc-800/30 border-dashed rounded-2xl p-4 flex flex-col items-center justify-center gap-2 opacity-30 ${isFinal ? 'scale-110' : ''}`}>
         <div className="w-full h-8 bg-zinc-800/20 rounded-lg" />
         <div className="w-4 h-4 bg-zinc-800/20 rounded-full" />
         <div className="w-full h-8 bg-zinc-800/20 rounded-lg" />
@@ -1619,80 +1844,109 @@ const BracketMatchCard: React.FC<{
   }
 
   const isFinished = match.status === 'finished';
-  const isSim = match.status === 'simulating';
+  const isPending = match.status === 'pending';
 
   return (
     <motion.div
       layout
       initial={{ opacity: 0, scale: 0.9, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ type: "spring", damping: 20, stiffness: 100 }}
-      className={`w-full max-w-[200px] md:max-w-[240px] bg-zinc-950 border-2 rounded-[1.5rem] p-3 md:p-4 relative overflow-hidden transition-all duration-500 ${
-        isUserMatch ? 'border-amber-500/40 shadow-[0_0_40px_rgba(245,158,11,0.1)]' : 'border-zinc-900'
-      } ${isFinal ? 'scale-110 md:scale-125 shadow-[0_0_60px_rgba(245,158,11,0.2)] border-amber-500/60' : ''} ${isFinished ? 'opacity-90' : ''}`}
+      className={`relative ${isFinal ? 'w-64 md:w-80' : 'w-48 md:w-64'} transition-all duration-500`}
     >
-      <div className="flex flex-col gap-3">
-        {/* Team 1 */}
-        <div className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${match.winner === match.team1 ? 'bg-green-500/10 border border-green-500/20 shadow-[inset_0_0_20px_rgba(34,197,94,0.05)]' : 'bg-zinc-900/40 border border-transparent'}`}>
-          <div className="flex items-center gap-2 overflow-hidden">
-            <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0 ${match.team1 === 'USER' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'bg-zinc-800 text-zinc-400'}`}>
-              {match.team1 === 'USER' ? 'YOU' : (match.team1 as GhostTeam)?.name?.[0] || '?'}
-            </div>
-            <div className="min-w-0">
-              <p className={`text-[10px] font-black uppercase truncate ${match.winner === match.team1 ? 'text-green-500' : 'text-white'}`}>
-                {match.team1 === 'USER' ? 'Your Team' : (match.team1 as GhostTeam)?.name || 'Unknown Team'}
-              </p>
-              <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-tighter">OVR: {match.team1 === 'USER' ? teamOVR : (match.team1 as GhostTeam)?.ovr || 0}</p>
-            </div>
-          </div>
+      {/* Connector Lines - Professional Tree Look */}
+      {!isFinal && (
+        <div className="absolute -right-8 md:-right-24 top-1/2 w-8 md:w-24 h-px bg-zinc-800 z-0" />
+      )}
+
+      <div className={`
+        relative overflow-hidden rounded-[2rem] border transition-all duration-500 z-10
+        ${isFinished ? 'bg-zinc-950/60 border-zinc-900 opacity-50 grayscale-[0.5]' : 
+          isActive ? 'bg-zinc-900 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.3)] scale-110 z-20' : 
+          'bg-zinc-900/80 border-zinc-800'}
+        ${isFinal ? 'border-amber-500/40 shadow-[0_0_60px_rgba(245,158,11,0.2)]' : ''}
+      `}>
+        {/* Match Header */}
+        <div className="px-4 py-2 bg-black/40 border-b border-zinc-800/50 flex justify-between items-center">
+          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500">
+            {isFinal ? 'Championship' : 'Matchup'}
+          </span>
           {isFinished && (
-            <p className={`text-sm font-black italic ${match.winner === match.team1 ? 'text-white' : 'text-zinc-600'}`}>{match.score1}</p>
+            <div className="flex items-center gap-1">
+              <div className="w-1 h-1 bg-amber-500 rounded-full animate-pulse" />
+              <span className="text-[8px] font-black text-amber-500 uppercase tracking-widest">Final</span>
+            </div>
+          )}
+          {isActive && (
+            <div className="flex items-center gap-1">
+              <div className="w-1 h-1 bg-amber-500 rounded-full animate-ping" />
+              <span className="text-[8px] font-black text-amber-500 uppercase tracking-widest">Next Match</span>
+            </div>
           )}
         </div>
 
-        <div className="flex items-center justify-center -my-1">
-          <span className="text-[8px] font-black text-zinc-800 italic tracking-widest">VS</span>
-        </div>
-
-        {/* Team 2 */}
-        <div className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${match.winner === match.team2 ? 'bg-green-500/10 border border-green-500/20 shadow-[inset_0_0_20px_rgba(34,197,94,0.05)]' : 'bg-zinc-900/40 border border-transparent'}`}>
-          <div className="flex items-center gap-2 overflow-hidden">
-            <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0 ${match.team2 === 'USER' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'bg-zinc-800 text-zinc-400'}`}>
-              {match.team2 === 'USER' ? 'YOU' : (match.team2 as GhostTeam)?.name?.[0] || '?'}
+        <div className="p-4 space-y-3">
+          {/* Team 1 */}
+          <div className={`flex items-center justify-between p-2.5 rounded-2xl transition-all ${match.winner === match.team1 ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-zinc-900/40 border border-transparent'}`}>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-lg ${match.team1 === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-500'}`}>
+                {match.team1 === 'USER' ? <UserIcon size={16} /> : <Shield size={16} />}
+              </div>
+              <div className="min-w-0">
+                <p className={`text-xs font-black uppercase italic truncate ${match.winner === match.team1 ? 'text-amber-500' : 'text-white'}`}>
+                  {match.team1 === 'USER' ? 'Your Team' : (match.team1 as GhostTeam)?.name || 'TBD'}
+                </p>
+                <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-tighter">OVR: {match.team1 === 'USER' ? teamOVR : (match.team1 as GhostTeam)?.ovr || '??'}</p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className={`text-[10px] font-black uppercase truncate ${match.winner === match.team2 ? 'text-green-500' : 'text-white'}`}>
-                {match.team2 === 'USER' ? 'Your Team' : (match.team2 as GhostTeam)?.name || 'Unknown Team'}
-              </p>
-              <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-tighter">OVR: {match.team2 === 'USER' ? teamOVR : (match.team2 as GhostTeam)?.ovr || 0}</p>
-            </div>
+            {isFinished && (
+              <span className={`text-sm font-black italic ${match.winner === match.team1 ? 'text-white' : 'text-zinc-600'}`}>{match.score1}</span>
+            )}
           </div>
-          {isFinished && (
-            <p className={`text-sm font-black italic ${match.winner === match.team2 ? 'text-white' : 'text-zinc-600'}`}>{match.score2}</p>
-          )}
-        </div>
-      </div>
 
-      {/* Action Overlay */}
-      {isUserMatch && !isFinished && !isSim && (
-        <div className="mt-4">
-          <button
+          {/* VS Divider */}
+          <div className="flex items-center gap-3 px-2">
+            <div className="h-px flex-1 bg-zinc-800/50" />
+            <span className="text-[9px] font-black text-zinc-800 italic tracking-widest">VS</span>
+            <div className="h-px flex-1 bg-zinc-800/50" />
+          </div>
+
+          {/* Team 2 */}
+          <div className={`flex items-center justify-between p-2.5 rounded-2xl transition-all ${match.winner === match.team2 ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-zinc-900/40 border border-transparent'}`}>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-lg ${match.team2 === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-500'}`}>
+                {match.team2 === 'USER' ? <UserIcon size={16} /> : <Shield size={16} />}
+              </div>
+              <div className="min-w-0">
+                <p className={`text-xs font-black uppercase italic truncate ${match.winner === match.team2 ? 'text-amber-500' : 'text-white'}`}>
+                  {match.team2 === 'USER' ? 'Your Team' : (match.team2 as GhostTeam)?.name || 'TBD'}
+                </p>
+                <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-tighter">OVR: {match.team2 === 'USER' ? teamOVR : (match.team2 as GhostTeam)?.ovr || '??'}</p>
+              </div>
+            </div>
+            {isFinished && (
+              <span className={`text-sm font-black italic ${match.winner === match.team2 ? 'text-white' : 'text-zinc-600'}`}>{match.score2}</span>
+            )}
+          </div>
+        </div>
+
+        {/* Action Area */}
+        {isUserMatch && isPending && !isSimulating && (
+          <button 
             onClick={onSimulate}
-            disabled={isSimulating}
-            className="w-full bg-amber-500 text-black py-2.5 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-amber-400 transition-all shadow-xl shadow-amber-500/10 active:scale-95"
+            className="w-full py-3 bg-amber-500 text-black text-[10px] font-black uppercase tracking-[0.2em] hover:bg-amber-400 transition-all flex items-center justify-center gap-2 active:scale-95"
           >
             <Play size={12} fill="currentColor" />
-            <span>Simulate</span>
+            Play Match
           </button>
-        </div>
-      )}
+        )}
 
-      {isSim && (
-        <div className="absolute inset-0 bg-black/70 backdrop-blur-md flex flex-col items-center justify-center space-y-3 z-20">
-          <div className="w-8 h-8 border-3 border-amber-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-[8px] font-black uppercase tracking-[0.3em] text-amber-500 animate-pulse">Simulating...</p>
-        </div>
-      )}
+        {isSimulating && (
+          <div className="w-full py-3 bg-zinc-800 flex items-center justify-center gap-2">
+            <div className="w-2 h-2 bg-amber-500 rounded-full animate-ping" />
+            <span className="text-[10px] font-black text-white uppercase tracking-widest">Simulating...</span>
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 };

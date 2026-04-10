@@ -5043,7 +5043,7 @@ const rawCards = [
     ast: 5.4,
     nbaId: 977,
     imageUrl: 'https://i.pinimg.com/736x/72/ee/58/72ee5850608aaace557b32469e1e9dd7.jpg',
-    quote: '28.3 PTS - La mentalidad Mamba en su máximo esplendor.'
+    quote: '28.3 PTS - The Mamba mentality at its finest.'
   },
   {
     id: 'mvp-2009',
@@ -5332,7 +5332,7 @@ const rawCards = [
     ast: 6.2,
     nbaId: 1628983,
     imageUrl: 'https://www.cbc.ca/kidsnews/images/shai-mvp-trophy-may2025-860x484.png',
-    quote: '30.1 PTS - Liderando a la nueva generación del Thunder.'
+    quote: '30.1 PTS - Leading the new generation of the Thunder.'
   },
     // DPOY SERIES
     {
@@ -6982,7 +6982,7 @@ const rawCards = [
     ast: 5.0,
     nbaId: 1938,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTuy4BB46wSY9HO3p_SbIjGMQyNXOYsVbWvaA&s',
-    quote: 'El 6º hombre definitivo. Sacrificó ser titular por el bien de la dinastía.'
+    quote: 'The ultimate 6th man. Sacrificed starting for the good of the dynasty.'
   },
   {
     id: 'xfactor-004',
@@ -7078,7 +7078,7 @@ const rawCards = [
     ast: 2.0,
     nbaId: 2203,
     imageUrl: 'https://media.newyorker.com/photos/59095788c14b3c606c104a1d/master/pass/ShaneBattier_AP120617051483_Original_opt.jpg',
-    quote: 'El rey de las "estadísticas invisibles" y el marcaje defensivo de élite.'
+    quote: 'The king of "invisible stats" and elite defensive marking.'
   },
   {
     id: 'xfactor-010',
@@ -7110,7 +7110,7 @@ const rawCards = [
     ast: 4.0,
     nbaId: 1885,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/LamarOdomLakers.jpg/250px-LamarOdomLakers.jpg',
-    quote: 'Versatilidad total. Podía jugar de base o de pívot para los Lakers de Kobe.'
+    quote: 'Total versatility. Could play point guard or center for Kobe\'s Lakers.'
   },
   {
     id: 'xfactor-012',
@@ -9252,10 +9252,53 @@ export const ALL_CARDS: Card[] = rawCards.map((card, index) => {
   
   // Calculate OVR based on stats
   // Formula: 66 + (PTS * 0.8) + (AST * 0.6) + (REB * 0.6)
-  // Superstars (28/8/7) -> ~97
-  // Rotation (8/2/3) -> ~75
-  const calculatedOvr = Math.round(66 + (card.pts * 0.8) + (card.ast * 0.6) + (card.reb * 0.6));
-  const ovr = Math.min(calculatedOvr, 99);
+  const baseOvr = Math.round(66 + (card.pts * 0.8) + (card.ast * 0.6) + (card.reb * 0.6));
+  
+  let ovr = baseOvr;
+  const category = (card as any).category || 'Base';
+  const rarity = card.rarity;
+
+  // Apply Hierarchy Ranges (FIFA-style balancing)
+  if (category === 'Finals MVP' || category === 'MVP' || card.id.startsWith('mvp')) {
+    // MVP / Finals MVP: 95-99
+    ovr = Math.max(95, Math.min(baseOvr, 99));
+  } else if (category === 'All-Star MVP' || card.id.startsWith('as-mvp')) {
+    // All-Star MVP: 92-94
+    ovr = Math.max(92, Math.min(baseOvr, 94));
+  } else if (category === '6th Man' || card.id.startsWith('6moy')) {
+    // 6th Man: 80-84
+    ovr = Math.max(80, Math.min(baseOvr, 84));
+  } else if (rarity === 'legend' || card.id.startsWith('record')) {
+    // Legends / Records: 92-96
+    ovr = Math.max(92, Math.min(baseOvr, 96));
+  } else if (rarity === 'dpoy' || card.id.startsWith('dpoy')) {
+    // DPOY: 90-94
+    ovr = Math.max(90, Math.min(baseOvr, 94));
+  } else if (rarity === 'roty' || card.id.startsWith('roty')) {
+    // ROTY: 86-90
+    ovr = Math.max(86, Math.min(baseOvr, 90));
+  } else {
+    // Base Cards
+    switch (rarity) {
+      case 'bench':
+        ovr = Math.max(65, Math.min(baseOvr, 74));
+        break;
+      case 'starter':
+        ovr = Math.max(75, Math.min(baseOvr, 83));
+        break;
+      case 'allstar':
+        ovr = Math.max(84, Math.min(baseOvr, 88));
+        break;
+      case 'franchise':
+        ovr = Math.max(89, Math.min(baseOvr, 91));
+        break;
+      case 'rookie':
+        ovr = Math.max(70, Math.min(baseOvr, 79));
+        break;
+      default:
+        ovr = Math.min(baseOvr, 99);
+    }
+  }
   
   return {
     ...card,
@@ -9301,7 +9344,7 @@ export const ALL_CARDS: Card[] = rawCards.map((card, index) => {
       points: card.pts,
       rebounds: card.reb,
       assists: card.ast,
-      ovr: (card as any).category === 'Coach' ? (card as any).ovr || 90 : Math.min(ovr, 99), // Cap at 99
+      ovr: (card as any).category === 'Coach' ? (card as any).ovr || 90 : ovr,
     },
     description: card.quote,
   };

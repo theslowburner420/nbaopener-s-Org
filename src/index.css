@@ -10,6 +10,38 @@
   color-scheme: dark;
 }
 
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  position: relative;
+  touch-action: pan-y; /* Prevent accidental horizontal swipes on body */
+}
+
+/* Ensure the app container doesn't overflow */
+#root {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Carousel Snap Behavior */
+.snap-x {
+  scroll-snap-type: x mandatory;
+}
+
+.snap-center {
+  scroll-snap-align: center;
+}
+
+/* Interactive Map/Bracket Behavior */
+.bracket-container {
+  cursor: grab;
+  user-select: none;
+}
+
+.bracket-container:active {
+  cursor: grabbing;
+}
+
 body {
   background-color: black;
   margin: 0;
