@@ -36,7 +36,6 @@ const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<GameState>(() => {
-    // Try to load guest progress if it exists
     const saved = localStorage.getItem('GUEST_PROGRESS');
     const initialGuestState = saved ? JSON.parse(saved) : null;
 
@@ -55,9 +54,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   });
 
-  const authProcessed = React.useRef(false);
   const isSyncingRef = useRef(false);
-  const isBackgroundSyncingRef = useRef(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isInitialSyncDone, setIsInitialSyncDone] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -65,17 +62,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isOffline, setIsOffline] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [showWelcomeGift, setShowWelcomeGift] = useState(false);
+  
   const stateRef = useRef(state);
   const lastSyncedStateRef = useRef<string>('');
-  const lastReceivedCloudStateRef = useRef<string>('');
   const profileSubscriptionRef = useRef<any>(null);
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const initialSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isFirstLoad = useRef(true);
 
+  // Actualización del estado local (Ref) y LocalStorage para invitados
   useEffect(() => {
     stateRef.current = state;
-    // Save guest progress to localStorage ONLY if not logged in
     if (!state.user) {
       const guestData = {
         coins: state.coins,
@@ -92,13 +87,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [state]);
 
-  // Function to force immediate sync to Supabase with retries (IRON RULE: Write Confirmation)
-  const forceSyncToSupabase = useCallback(async (newState: GameState, retries = 5, silent = false) => {
+  // Función principal de guardado en la base de datos
+  const forceSyncToSupabase = useCallback(async (newState: GameState, retries = 3, silent = false) => {
     if (!newState.user || !supabase) return false;
     
     try {
       const payload = {
-        id: newState.user.id, // Ensure ID is present for upsert
+        id: newState.user.id,
         username: newState.user.username,
         avatar_url: newState.user.avatar_url,
         coins: Number(newState.coins) || 0,
@@ -120,31 +115,28 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         userId: newState.user.id
       });
 
-      // Avoid redundant sync if state hasn't changed since last success
+      // Si no ha cambiado nada importante, no malgastamos peticiones
       if (stateString === lastSyncedStateRef.current) {
         return true;
       }
 
-      if (!silent) {
-        setIsSaving(true);
-      }
+      if (!silent) setIsSaving(true);
 
       const performSave = async (attempt: number): Promise<boolean> => {
         try {
-          console.log(`📡 Cloud Sync Attempt ${attempt} for user ${newState.user!.id} (${silent ? 'Silent' : 'Forced'})`);
+          console.log(`📡 Sincronizando con Supabase... (Intento ${attempt}, ${silent ? 'Silencioso' : 'Forzado'})`);
           
-          // Using upsert with onConflict to be more robust than update
           const { error } = await supabase!
             .from('profiles')
             .upsert(payload, { onConflict: 'id' });
           
           if (error) {
-            console.error(`❌ Supabase Error (Attempt ${attempt}):`, error);
+            console.error(`❌ Error en Supabase (Intento ${attempt}):`, error);
             return false;
           }
           
-          if (silent) console.log('✅ Silent save successful');
-          lastSyncedStateRef.current = stateString;
+          if (silent) console.log('✅ Guardado silencioso completado');
+          lastSyncedStateRef.current = stateString; // Actualizamos la referencia del último guardado
           localStorage.removeItem('GUEST_PROGRESS');
           return true;
         } catch (err) {
@@ -157,7 +149,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let attempt = 1;
       while (!success && attempt < retries) {
         attempt++;
-        const delay = Math.pow(2, attempt) * 500; // Shorter backoff
+        const delay = attempt * 1000;
         await new Promise(resolve => setTimeout(resolve, delay));
         success = await performSave(attempt);
       }
@@ -167,24 +159,19 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('CRITICAL SYNC ERROR:', err);
       return false;
     } finally {
-      if (!silent) {
-        setIsSaving(false);
-      }
+      if (!silent) setIsSaving(false);
     }
   }, []);
 
   const syncProfile = useCallback(async (user: any) => {
-    // If signing out, we must ALWAYS proceed to clear state and reset refs
     if (!user) {
-      console.log('👤 Logout detected: Clearing state');
+      console.log('👤 Logout detectado: Limpiando estado');
       isSyncingRef.current = false;
       lastSyncedStateRef.current = '';
-      lastReceivedCloudStateRef.current = '';
       
       setState(prev => ({ 
         ...prev, 
         user: null,
-        // Reset coins and collection to default guest values on logout
         coins: 500,
         collection: [],
         customCards: [],
@@ -200,13 +187,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    if (isSyncingRef.current) {
-      console.log('⏳ Sync already in progress, skipping redundant trigger');
-      return;
-    }
-
+    if (isSyncingRef.current) return;
     isSyncingRef.current = true;
-    console.log('🔄 STARTING CONSOLIDATION for user:', user.id);
     
     const userData: User = {
       id: user.id,
@@ -215,16 +197,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       avatar_url: user.user_metadata?.avatar_url,
     };
 
-    // --- OPTIMISTIC HYDRATION (Local -> Merge -> Cloud) ---
     try {
       const currentLiveState = stateRef.current;
       const savedGuest = localStorage.getItem('GUEST_PROGRESS');
-      let guestData = null;
-      try {
-        guestData = savedGuest ? JSON.parse(savedGuest) : null;
-      } catch (e) {
-        console.error('Local data corrupt', e);
-      }
+      let guestData = savedGuest ? JSON.parse(savedGuest) : null;
       
       const localProgress = {
         coins: Math.max(currentLiveState.coins, guestData?.coins ?? 0),
@@ -235,24 +211,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isPremium: currentLiveState.isPremium || guestData?.isPremium || false,
       };
 
-      // 1. Fetch Cloud Data
       const { data: cloudProfile, error: fetchError } = await supabase!
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
 
-      if (fetchError && fetchError.code !== 'PGRST116') {
-        throw fetchError;
-      }
+      if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
       
-      setSyncError(null);
-      setIsOffline(false);
-
       let finalMergedData: Partial<GameState>;
 
       if (!cloudProfile) {
-        console.log('✨ NEW USER: First sync');
         finalMergedData = {
           ...localProgress,
           coins: Math.max(localProgress.coins, 50000), // Welcome bonus
@@ -263,8 +232,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         setShowWelcomeGift(true);
       } else {
-        console.log('🧬 MERGING CLOUD DATA');
-        
         const pc = {
           coins: Number(cloudProfile.coins) || 0,
           cards: Array.isArray(cloudProfile.cards) ? cloudProfile.cards : [],
@@ -290,17 +257,23 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...currentLiveState,
         ...finalMergedData,
         user: userData,
-        currentView: currentLiveState.currentView // Keep what user is doing
+        currentView: currentLiveState.currentView
       };
 
-      // Update state once
       setState(mergedState);
 
-      // Reset sync ref so it's not blocking the immediate save
-      lastSyncedStateRef.current = ''; 
-      await forceSyncToSupabase(mergedState, 3, true);
+      // Guardamos la referencia de lo que acabamos de descargar para que el Debounce no lo resuba inmediatamente
+      lastSyncedStateRef.current = JSON.stringify({
+        coins: mergedState.coins,
+        collection: mergedState.collection,
+        unlockedAchievements: mergedState.unlockedAchievements,
+        claimedAchievements: mergedState.claimedAchievements,
+        inventoryPacks: mergedState.inventoryPacks,
+        isPremium: mergedState.isPremium,
+        userId: userData.id
+      });
 
-      // Setup/Refresh Real-time
+      // Configuración en tiempo real (Realtime updates)
       if (!profileSubscriptionRef.current && supabase) {
         profileSubscriptionRef.current = supabase
           .channel(`profile_realtime_${user.id}`)
@@ -311,7 +284,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             filter: `id=eq.${user.id}` 
           }, (payload) => {
             const updated = payload.new as any;
-            console.log('🔔 Remote update received');
             setState(prev => ({
               ...prev,
               coins: updated.coins ?? prev.coins,
@@ -325,14 +297,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsInitialSyncDone(true);
       setIsAuthLoading(false);
     } catch (err) {
-      console.error('❌ MISSION CRITICAL SYNC FAIL:', err);
+      console.error('❌ ERROR AL CARGAR DATOS INICIALES:', err);
       setIsAuthLoading(false);
     } finally {
       isSyncingRef.current = false;
     }
-  }, [forceSyncToSupabase]);
+  }, []);
 
-  // Auth and Profile sync setup
+  // 1. Inicialización de Autenticación
   useEffect(() => {
     if (!supabase) {
       setIsAuthLoading(false);
@@ -342,26 +314,19 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     let mounted = true;
 
-    // 1. Initial Session Check (Fast path)
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return;
       if (session?.user) {
-        console.log('Session found on mount:', session.user.id);
         syncProfile(session.user);
       } else {
-        console.log('No session found on mount');
         setIsAuthLoading(false);
         setIsInitialSyncDone(true);
       }
     });
 
-    // 2. Auth Listener - Subscribed once
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
-      console.log(`🔐 AUTH EVENT: ${event}`);
-      
       if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'INITIAL_SESSION') {
-        // Only trigger sync if user changed or session is fresh
         if (session?.user && stateRef.current.user?.id !== session.user.id) {
           await syncProfile(session.user);
         }
@@ -370,181 +335,117 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    const safetyTimeout = setTimeout(() => {
-      if (mounted && isAuthLoading) {
-        console.warn('⚠️ Force unblocking auth UI');
-        setIsAuthLoading(false);
-        setIsInitialSyncDone(true);
-      }
-    }, 10000);
-
     return () => {
       mounted = false;
-      clearTimeout(safetyTimeout);
       subscription.unsubscribe();
     };
-  }, []); // Strictly empty array to prevent listener re-runs
+  }, []); // Array vacío para no re-suscribirse
 
-  // Debounced sync effect - Optimized to avoid redundant triggers from UI changes (like currentView)
-  const syncRelevantData = useMemo(() => ({
-    coins: state.coins,
-    collection: state.collection,
-    customCards: state.customCards,
-    unlockedAchievements: state.unlockedAchievements,
-    claimedAchievements: state.claimedAchievements,
-    inventoryPacks: state.inventoryPacks,
-    isPremium: state.isPremium,
-    user: state.user?.id
-  }), [state.coins, state.collection, state.customCards, state.unlockedAchievements, state.claimedAchievements, state.inventoryPacks, state.isPremium, state.user?.id]);
-
-  // Periodic Save (Debounced) - Silent Background Auto-Save
+  // =========================================================================
+  // EL MOTOR DE GUARDADO EN SEGUNDO PLANO (DEBOUNCE DEFINITIVO)
+  // =========================================================================
   useEffect(() => {
-    // Only proceed if a user is logged in and the initial data hydration is complete
     if (!state.user || !isInitialSyncDone) return;
 
-    // RULE 1: Guard against the loop created by the initial data injection (syncProfile)
-    if (isFirstLoad.current) {
-      console.log('🛡️ Auto-save blocked: Data hydration in progress');
-      isFirstLoad.current = false;
+    // Calculamos el string del estado actual
+    const currentStateString = JSON.stringify({
+      coins: state.coins,
+      collection: state.collection,
+      unlockedAchievements: state.unlockedAchievements,
+      claimedAchievements: state.claimedAchievements,
+      inventoryPacks: state.inventoryPacks,
+      isPremium: state.isPremium,
+      userId: state.user.id
+    });
+
+    // Si el estado es idéntico a lo último guardado, no hacemos nada (evita bucles)
+    if (currentStateString === lastSyncedStateRef.current) {
       return;
     }
 
-    // RULE 2: IMPLEMENT DEBOUNCE (Anti-Spam)
-    // We clear the previous timer every time a relevant state change occurs.
-    // The actual network call only happens after the user stops interacting for 3 seconds.
+    // Si hay un temporizador activo, lo cancelamos (esto es el Debounce)
     if (syncTimeoutRef.current) {
       clearTimeout(syncTimeoutRef.current);
     }
 
+    // Iniciamos un nuevo temporizador de 2 segundos
     syncTimeoutRef.current = setTimeout(() => {
-      // RULE 3: OPTIMISTIC & SILENT
-      // We pass 'true' as the silent parameter to avoid showing spinners or blocking UI.
-      // stateRef.current ensures we always have the freshest state data at the moment of execution.
-      console.log('☁️ Auto-save: Consolidating progress to Supabase');
-      forceSyncToSupabase(stateRef.current, 1, true); 
-    }, 2000); // 2 second grace period
-
+      forceSyncToSupabase(stateRef.current, 3, true); 
+    }, 2000);
 
     return () => {
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current);
-      }
+      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     };
-  }, [syncRelevantData, isInitialSyncDone, forceSyncToSupabase]);
+  }, [
+    state.coins, 
+    state.collection, 
+    state.unlockedAchievements, 
+    state.claimedAchievements, 
+    state.inventoryPacks, 
+    state.isPremium,
+    isInitialSyncDone
+  ]);
+  // =========================================================================
 
   const login = useCallback(async () => {
     if (!supabase) return;
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin }
-    });
+    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin }});
   }, []);
 
   const logout = useCallback(async () => {
     if (!supabase) return;
-    console.log('Logging out...');
-    // Manual state trigger for instant feedback
     await syncProfile(null);
     await supabase.auth.signOut();
   }, [syncProfile]);
 
-  // Optimized batch update to prevent redundant network calls
   const updateGameState = useCallback((updates: Partial<GameState>) => {
     setState(prev => ({ ...prev, ...updates }));
   }, []);
 
   const updateGameStateAsync = useCallback(async (updates: Partial<GameState>) => {
-    const newState = { ...stateRef.current, ...updates };
-    
-    if (newState.user) {
-      setIsSaving(true);
-      const success = await forceSyncToSupabase(newState);
-      if (!success) {
-        setIsSaving(false);
-        throw new Error('Sync failed. Action aborted to ensure data integrity.');
-      }
-      setIsSaving(false);
-    }
-    
     setState(prev => ({ ...prev, ...updates }));
-  }, [forceSyncToSupabase]);
-
-  const setCoins = useCallback((coins: number | ((prev: number) => number)) => {
-    setState(prev => {
-      const newCoins = typeof coins === 'function' ? coins(prev.coins) : coins;
-      return { ...prev, coins: newCoins };
-    });
   }, []);
 
-  const addCoins = useCallback(async (amount: number, sync: boolean = true) => {
-    const newCoins = stateRef.current.coins + amount;
-    if (sync) {
-      await updateGameStateAsync({ coins: newCoins });
-    } else {
-      updateGameState({ coins: newCoins });
-    }
-  }, [updateGameStateAsync, updateGameState]);
+  const setCoins = useCallback((coins: number | ((prev: number) => number)) => {
+    setState(prev => ({ ...prev, coins: typeof coins === 'function' ? coins(prev.coins) : coins }));
+  }, []);
 
-  const spendCoins = useCallback(async (amount: number, sync: boolean = true) => {
+  // NOTA IMPORTANTE: Ahora sync por defecto es FALSE, para que use el motor silencioso.
+  const addCoins = useCallback(async (amount: number, sync: boolean = false) => {
+    updateGameState({ coins: stateRef.current.coins + amount });
+  }, [updateGameState]);
+
+  const spendCoins = useCallback(async (amount: number, sync: boolean = false) => {
     if (stateRef.current.coins >= amount) {
-      const newCoins = stateRef.current.coins - amount;
-      if (sync) {
-        await updateGameStateAsync({ coins: newCoins });
-      } else {
-        updateGameState({ coins: newCoins });
-      }
+      updateGameState({ coins: stateRef.current.coins - amount });
       return true;
     }
     return false;
-  }, [updateGameStateAsync, updateGameState]);
+  }, [updateGameState]);
 
-  const addToCollection = useCallback(async (cardIds: string[], sync: boolean = true) => {
-    const newCollection = [...stateRef.current.collection, ...cardIds];
-    if (sync) {
-      await updateGameStateAsync({ collection: newCollection });
-    } else {
-      updateGameState({ collection: newCollection });
-    }
-  }, [updateGameStateAsync, updateGameState]);
+  const addToCollection = useCallback(async (cardIds: string[], sync: boolean = false) => {
+    updateGameState({ collection: [...stateRef.current.collection, ...cardIds] });
+  }, [updateGameState]);
 
-  const addCustomCard = useCallback(async (card: Card, sync: boolean = true) => {
-    const newCustomCards = [...stateRef.current.customCards, card];
-    if (sync) {
-      await updateGameStateAsync({ customCards: newCustomCards });
-    } else {
-      updateGameState({ customCards: newCustomCards });
-    }
-  }, [updateGameStateAsync, updateGameState]);
+  const addCustomCard = useCallback(async (card: Card, sync: boolean = false) => {
+    updateGameState({ customCards: [...stateRef.current.customCards, card] });
+  }, [updateGameState]);
 
   const setCurrentView = useCallback((currentView: ViewType) => {
     setState(prev => ({ ...prev, currentView }));
   }, []);
 
-  const unlockAchievement = useCallback(async (id: string, sync: boolean = true) => {
-    const achievement = ACHIEVEMENTS.find((a: any) => a.id === id);
-    if (!achievement) return null;
-
+  const unlockAchievement = useCallback(async (id: string, sync: boolean = false) => {
     if (stateRef.current.unlockedAchievements.includes(id)) return null;
-    
-    if (sync) {
-      await updateGameStateAsync({ 
-        unlockedAchievements: [...stateRef.current.unlockedAchievements, id]
-      });
-    } else {
-      updateGameState({ 
-        unlockedAchievements: [...stateRef.current.unlockedAchievements, id]
-      });
-    }
-    return achievement;
-  }, [updateGameStateAsync, updateGameState]);
+    updateGameState({ unlockedAchievements: [...stateRef.current.unlockedAchievements, id] });
+    return ACHIEVEMENTS.find((a: any) => a.id === id) || null;
+  }, [updateGameState]);
 
-  const claimAchievementReward = useCallback(async (id: string, sync: boolean = true) => {
+  const claimAchievementReward = useCallback(async (id: string, sync: boolean = false) => {
+    if (stateRef.current.claimedAchievements.includes(id)) return;
     const achievement = ACHIEVEMENTS.find((a: any) => a.id === id);
     if (!achievement) return;
 
-    if (stateRef.current.claimedAchievements.includes(id)) return;
-    
-    // Grant rewards
     let newCoins = stateRef.current.coins + (achievement.rewardCoins || 0);
     let newPacks = [...stateRef.current.inventoryPacks];
 
@@ -559,156 +460,51 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     }
 
-    if (sync) {
-      await updateGameStateAsync({ 
-        claimedAchievements: [...stateRef.current.claimedAchievements, id],
-        coins: newCoins,
-        inventoryPacks: newPacks
-      });
-    } else {
-      updateGameState({ 
-        claimedAchievements: [...stateRef.current.claimedAchievements, id],
-        coins: newCoins,
-        inventoryPacks: newPacks
-      });
-    }
-  }, [updateGameStateAsync, updateGameState]);
+    updateGameState({ claimedAchievements: [...stateRef.current.claimedAchievements, id], coins: newCoins, inventoryPacks: newPacks });
+  }, [updateGameState]);
 
-  const removeNotification = useCallback((id: string) => {
-    // No-op since we're using NotificationContext
-  }, []);
+  const removeNotification = useCallback((id: string) => {}, []);
 
-  const claimReward = useCallback(async (day: number, amount: number, pack?: { id: string; type: string; name: string }, sync: boolean = true) => {
+  const claimReward = useCallback(async (day: number, amount: number, pack?: { id: string; type: string; name: string }, sync: boolean = false) => {
     let newPacks = [...stateRef.current.inventoryPacks];
     if (pack) {
       const existing = newPacks.find(p => p.type === pack.type);
-      if (existing) {
-        newPacks = newPacks.map(p => p.type === pack.type ? { ...p, count: p.count + 1 } : p);
-      } else {
-        newPacks.push({ ...pack, id: pack.type, count: 1 });
-      }
+      if (existing) newPacks = newPacks.map(p => p.type === pack.type ? { ...p, count: p.count + 1 } : p);
+      else newPacks.push({ ...pack, id: pack.type, count: 1 });
     }
+    updateGameState({ coins: stateRef.current.coins + amount, inventoryPacks: newPacks, claimedDays: [...stateRef.current.claimedDays, day], lastClaimedDate: new Date().toISOString().split('T')[0] });
+  }, [updateGameState]);
 
-    const updates = {
-      coins: stateRef.current.coins + amount,
-      inventoryPacks: newPacks,
-      claimedDays: [...stateRef.current.claimedDays, day],
-      lastClaimedDate: new Date().toISOString().split('T')[0]
-    };
-
-    if (sync) {
-      await updateGameStateAsync(updates);
-    } else {
-      updateGameState(updates);
-    }
-  }, [updateGameStateAsync, updateGameState]);
-
-  const addPackToInventory = useCallback(async (pack: { id: string; type: string; name: string }, sync: boolean = true) => {
+  const addPackToInventory = useCallback(async (pack: { id: string; type: string; name: string }, sync: boolean = false) => {
     const existing = stateRef.current.inventoryPacks.find(p => p.type === pack.type);
-    let newPacks;
-    if (existing) {
-      newPacks = stateRef.current.inventoryPacks.map(p => p.type === pack.type ? { ...p, count: p.count + 1 } : p);
-    } else {
-      newPacks = [...stateRef.current.inventoryPacks, { ...pack, id: pack.type, count: 1 }];
-    }
+    let newPacks = existing ? stateRef.current.inventoryPacks.map(p => p.type === pack.type ? { ...p, count: p.count + 1 } : p) : [...stateRef.current.inventoryPacks, { ...pack, id: pack.type, count: 1 }];
+    updateGameState({ inventoryPacks: newPacks });
+  }, [updateGameState]);
 
-    if (sync) {
-      await updateGameStateAsync({ inventoryPacks: newPacks });
-    } else {
-      updateGameState({ inventoryPacks: newPacks });
-    }
-  }, [updateGameStateAsync, updateGameState]);
-
-  const removePackFromInventory = useCallback(async (packId: string, sync: boolean = true) => {
+  const removePackFromInventory = useCallback(async (packId: string, sync: boolean = false) => {
     const existing = stateRef.current.inventoryPacks.find(p => p.id === packId);
     if (!existing) return;
-    
-    let newPacks;
-    if (existing.count > 1) {
-      newPacks = stateRef.current.inventoryPacks.map(p => p.id === packId ? { ...p, count: p.count - 1 } : p);
-    } else {
-      newPacks = stateRef.current.inventoryPacks.filter(p => p.id !== packId);
-    }
+    let newPacks = existing.count > 1 ? stateRef.current.inventoryPacks.map(p => p.id === packId ? { ...p, count: p.count - 1 } : p) : stateRef.current.inventoryPacks.filter(p => p.id !== packId);
+    updateGameState({ inventoryPacks: newPacks });
+  }, [updateGameState]);
 
-    if (sync) {
-      await updateGameStateAsync({ inventoryPacks: newPacks });
-    } else {
-      updateGameState({ inventoryPacks: newPacks });
-    }
-  }, [updateGameStateAsync, updateGameState]);
+  const setPremium = useCallback(async (isPremium: boolean, sync: boolean = false) => {
+    updateGameState({ isPremium });
+  }, [updateGameState]);
 
-  const setPremium = useCallback(async (isPremium: boolean, sync: boolean = true) => {
-    if (sync) {
-      await updateGameStateAsync({ isPremium });
-    } else {
-      updateGameState({ isPremium });
-    }
-  }, [updateGameStateAsync, updateGameState]);
-
-  const resetGame = useCallback(async (sync: boolean = true) => {
-    const newState = {
-      ...stateRef.current,
-      coins: 500,
-      collection: [],
-      customCards: [],
-      unlockedAchievements: [],
-      claimedAchievements: [],
-      lastClaimedDate: null,
-      claimedDays: [],
-      inventoryPacks: [],
-      isPremium: false,
-    };
-
-    setState(newState);
-
-    if (sync && newState.user) {
-      await forceSyncToSupabase(newState);
-    }
-  }, [forceSyncToSupabase]);
+  const resetGame = useCallback(async (sync: boolean = false) => {
+    setState(prev => ({ ...prev, coins: 500, collection: [], customCards: [], unlockedAchievements: [], claimedAchievements: [], lastClaimedDate: null, claimedDays: [], inventoryPacks: [], isPremium: false }));
+  }, []);
 
   const forceSync = useCallback(async () => {
-    if (stateRef.current.user) {
-      lastSyncedStateRef.current = '';
-      await forceSyncToSupabase(stateRef.current);
-    }
+    if (stateRef.current.user) await forceSyncToSupabase(stateRef.current, 1, false);
   }, [forceSyncToSupabase]);
 
   const contextValue = useMemo(() => ({
-    ...state,
-    isAuthLoading,
-    setCoins,
-    addCoins,
-    spendCoins,
-    addToCollection,
-    addCustomCard,
-    setCurrentView,
-    unlockAchievement,
-    claimAchievementReward,
-    claimReward,
-    addPackToInventory,
-    removePackFromInventory,
-    setPremium,
-    resetGame,
-    updateGameState,
-    updateGameStateAsync,
-    forceSync,
-    isSaving,
-    isBackgroundSaving,
-    syncError,
-    removeNotification,
-    isInitialSyncDone,
-    isOffline,
-    showWelcomeGift,
-    setShowWelcomeGift,
-    login,
-    logout
+    ...state, isAuthLoading, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimAchievementReward, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, updateGameStateAsync, forceSync, isSaving, isBackgroundSaving, syncError, removeNotification, isInitialSyncDone, isOffline, showWelcomeGift, setShowWelcomeGift, login, logout
   }), [state, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, forceSync, isSaving, isBackgroundSaving, login, logout]);
 
-  return (
-    <GameContext.Provider value={contextValue}>
-      {children}
-    </GameContext.Provider>
-  );
+  return <GameContext.Provider value={contextValue}>{children}</GameContext.Provider>;
 };
 
 export const useGame = () => {
