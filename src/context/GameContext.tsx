@@ -188,13 +188,22 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const syncProfile = useCallback(async (user: any) => {
-    if (isSyncingRef.current) return;
-    
+    // If signing out, we must ALWAYS proceed to clear state regardless of isSyncingRef
     if (!user) {
-      console.log('👤 No user detected, keeping guest state');
-      setState(prev => ({ ...prev, user: null }));
+      console.log('👤 No user detected, resetting to guest state');
+      isSyncingRef.current = false; // Reset sync ref on logout
+      setState(prev => ({ 
+        ...prev, 
+        user: null,
+        // Optional: Keep guest data but ensure user is null
+      }));
       setIsInitialSyncDone(true);
       setIsAuthLoading(false);
+      return;
+    }
+
+    if (isSyncingRef.current) {
+      console.log('⏳ Sync already in progress, skipping redundant trigger');
       return;
     }
 
@@ -210,7 +219,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // --- OPTIMISTIC HYDRATION ---
     // Load local data immediately to unblock the UI
-    const liveState = stateRef.current;
+    const currentLiveState = stateRef.current;
     const savedGuest = localStorage.getItem('GUEST_PROGRESS');
     let guestData = null;
     try {
@@ -220,15 +229,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     
     const localData = {
-      coins: Math.max(liveState.coins, guestData?.coins ?? 0),
-      collection: Array.from(new Set([...liveState.collection, ...(guestData?.collection || [])])),
-      customCards: Array.from(new Set([...liveState.customCards, ...(guestData?.customCards || [])])),
-      unlockedAchievements: Array.from(new Set([...liveState.unlockedAchievements, ...(guestData?.unlockedAchievements || [])])),
-      claimedAchievements: Array.from(new Set([...liveState.claimedAchievements, ...(guestData?.claimedAchievements || [])])),
-      inventoryPacks: liveState.inventoryPacks.length > 0 ? liveState.inventoryPacks : (guestData?.inventoryPacks || []),
-      claimedDays: Array.from(new Set([...liveState.claimedDays, ...(guestData?.claimedDays || [])])),
-      lastClaimedDate: liveState.lastClaimedDate || guestData?.lastClaimedDate,
-      isPremium: liveState.isPremium || guestData?.isPremium || false,
+      coins: Math.max(currentLiveState.coins, guestData?.coins ?? 0),
+      collection: Array.from(new Set([...currentLiveState.collection, ...(guestData?.collection || [])])),
+      customCards: Array.from(new Set([...currentLiveState.customCards, ...(guestData?.customCards || [])])),
+      unlockedAchievements: Array.from(new Set([...currentLiveState.unlockedAchievements, ...(guestData?.unlockedAchievements || [])])),
+      claimedAchievements: Array.from(new Set([...currentLiveState.claimedAchievements, ...(guestData?.claimedAchievements || [])])),
+      inventoryPacks: currentLiveState.inventoryPacks.length > 0 ? currentLiveState.inventoryPacks : (guestData?.inventoryPacks || []),
+      claimedDays: Array.from(new Set([...currentLiveState.claimedDays, ...(guestData?.claimedDays || [])])),
+      lastClaimedDate: currentLiveState.lastClaimedDate || guestData?.lastClaimedDate,
+      isPremium: currentLiveState.isPremium || guestData?.isPremium || false,
     };
 
     // Set initial state from local data immediately
@@ -248,7 +257,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (fetchError && fetchError.code !== 'PGRST116') {
         console.error('❌ CRITICAL CLOUD FETCH ERROR:', fetchError);
-        setSyncError('Failed to load your profile. Please check your connection and try again to avoid data loss.');
+        setSyncError('Failed to load your profile. Please check your connection.');
         setIsOffline(true);
         setIsAuthLoading(false);
         isSyncingRef.current = false;
@@ -258,13 +267,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSyncError(null);
       setIsOffline(false);
 
-      let finalState: Partial<GameState>;
+      let mergedFields: Partial<GameState>;
 
       if (!cloudProfile) {
         console.log('🚀 NEW USER REGISTRATION: Granting welcome gift');
-        // Grant 50,000 coins and 3 MVP Packs
-        finalState = {
-          ...localData,
+        mergedFields = {
           coins: 50000,
           inventoryPacks: [
             ...localData.inventoryPacks,
@@ -284,7 +291,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ads_disabled: !!cloudProfile.ads_disabled,
         };
 
-        // Update the last received cloud state to prevent loops
         lastReceivedCloudStateRef.current = JSON.stringify({
           coins: parsedCloud.coins,
           collection: parsedCloud.cards,
@@ -297,34 +303,28 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const isFreshGuest = localData.coins === 500 && localData.collection.length === 0;
         
         if (isFreshGuest) {
-          finalState = {
+          mergedFields = {
             coins: parsedCloud.coins,
             collection: parsedCloud.cards,
             unlockedAchievements: parsedCloud.unlocked_achievements,
+            claimedAchievements: parsedCloud.claimed_achievements,
             inventoryPacks: parsedCloud.inventory_packs,
             isPremium: parsedCloud.ads_disabled,
           };
         } else {
-          const mergeArrays = (arr1: any[], arr2: any[]) => {
-            const set = new Set([...(arr1 || []), ...(arr2 || [])]);
-            return Array.from(set);
-          };
-
+          const mergeArrays = (arr1: any[], arr2: any[]) => Array.from(new Set([...(arr1 || []), ...(arr2 || [])]));
           const mergePacks = (packs1: any[], packs2: any[]) => {
             const map = new Map();
             [...(packs1 || []), ...(packs2 || [])].forEach(p => {
-              if (p && p.id) {
-                if (map.has(p.id)) {
-                  map.get(p.id).count = Math.max(map.get(p.id).count, p.count || 1);
-                } else {
-                  map.set(p.id, { ...p, count: p.count || 1 });
-                }
+              if (p?.id) {
+                if (map.has(p.id)) map.get(p.id).count = Math.max(map.get(p.id).count, p.count || 1);
+                else map.set(p.id, { ...p, count: p.count || 1 });
               }
             });
             return Array.from(map.values());
           };
 
-          finalState = {
+          mergedFields = {
             coins: Math.max(parsedCloud.coins, localData.coins),
             collection: mergeArrays(parsedCloud.cards, localData.collection),
             unlockedAchievements: mergeArrays(parsedCloud.unlocked_achievements, localData.unlockedAchievements),
@@ -335,21 +335,20 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
-      // Sync definitive state back to cloud
-      await forceSyncToSupabase({
-        ...stateRef.current,
-        ...finalState,
+      // Update state with definitive merged data
+      const finalState: GameState = {
+        ...currentLiveState,
+        ...localData,
+        ...mergedFields,
         user: userData,
-      } as GameState);
+      };
 
-      // Update local state with merged data
-      setState(prev => ({
-        ...prev,
-        ...finalState,
-        user: userData,
-      }));
+      setState(finalState);
 
-      // Setup Real-time Subscription
+      // Sync definitive state back to cloud immediately
+      await forceSyncToSupabase(finalState, 3, true);
+
+      // Setup Real-time Subscription (if not already active)
       if (!profileSubscriptionRef.current && supabase) {
         profileSubscriptionRef.current = supabase
           .channel(`profile_realtime_${user.id}`)
@@ -368,9 +367,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
               isPremium: updated.ads_disabled,
             });
 
-            if (receivedString === lastSyncedStateRef.current || receivedString === lastReceivedCloudStateRef.current) {
-              return;
-            }
+            if (receivedString === lastSyncedStateRef.current || receivedString === lastReceivedCloudStateRef.current) return;
 
             console.log('🔔 CLOUD UPDATE: Received via Real-time');
             lastReceivedCloudStateRef.current = receivedString;
@@ -387,14 +384,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }).subscribe();
       }
 
-      // FINALLY unblock UI after everything is synced
       setIsInitialSyncDone(true);
       setIsAuthLoading(false);
       isSyncingRef.current = false;
 
     } catch (err) {
       console.error('❌ CRITICAL SYNC ERROR:', err);
-      setSyncError('An unexpected error occurred during profile load. Please reload the app.');
       setIsAuthLoading(false);
       isSyncingRef.current = false;
     }
@@ -411,26 +406,46 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     let mounted = true;
 
-    // Listen for auth changes
+    // 1. Initial Session Check (Fast path)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      if (session?.user) {
+        console.log('Session found on mount:', session.user.id);
+        syncProfile(session.user);
+      } else {
+        console.log('No session found on mount');
+        setIsAuthLoading(false);
+      }
+    });
+
+    // 2. Listen for auth changes (Real-time path)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
       console.log('🔄 Auth event:', event, 'User:', session?.user?.id);
       
-      // TRIGGER SYNC only on meaningful events to avoid loops
-      if (['INITIAL_SESSION', 'SIGNED_IN', 'SIGNED_OUT', 'USER_UPDATED'].includes(event)) {
+      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
         await syncProfile(session?.user || null);
+      } else if (event === 'SIGNED_OUT') {
+        await syncProfile(null);
+      }
+
+      // Cleanup URL params
+      if (window.location.search.includes('code=') || window.location.hash.includes('access_token=')) {
+        const url = new URL(window.location.href);
+        url.search = '';
+        url.hash = '';
+        window.history.replaceState({}, document.title, url.toString());
       }
     });
 
-    // Safety fallback: if after 10 seconds we are still loading, force unblock
-    // This prevents the "Checking session" forever hang if Supabase fails to respond
+    // Safety fallback
     const safetyTimeout = setTimeout(() => {
       if (mounted && isAuthLoading) {
         console.warn('⏳ Auth timeout reached, forcing unblock');
         setIsAuthLoading(false);
         setIsInitialSyncDone(true);
       }
-    }, 10000);
+    }, 15000); // 15s to be safer
 
     return () => {
       mounted = false;
@@ -463,7 +478,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     syncTimeoutRef.current = setTimeout(() => {
       forceSyncToSupabase(stateRef.current, 3, true);
-    }, 3000);
+    }, 5000); // 5s debounce for background sync
 
     return () => {
       if (syncTimeoutRef.current) {
@@ -472,20 +487,23 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [syncRelevantData, isInitialSyncDone, forceSyncToSupabase]);
 
-  const login = async () => {
+  const login = useCallback(async () => {
     if (!supabase) return;
     const redirectTo = window.location.origin;
+    console.log('Initiating Google Login');
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo }
     });
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     if (supabase) {
+      console.log('Initiating Logout');
       await supabase.auth.signOut();
+      // State change is handled by onAuthStateChange listener
     }
-  };
+  }, []);
 
   // Optimized batch update to prevent redundant network calls
   const updateGameState = useCallback((updates: Partial<GameState>) => {
