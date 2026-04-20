@@ -125,15 +125,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return true;
       }
 
-      if (silent) {
-        setIsBackgroundSaving(true);
-      } else {
+      if (!silent) {
         setIsSaving(true);
       }
 
       const performSave = async (attempt: number): Promise<boolean> => {
         try {
-          console.log(`📡 Cloud Sync Attempt ${attempt} for user ${newState.user!.id}`);
+          console.log(`📡 Cloud Sync Attempt ${attempt} for user ${newState.user!.id} (${silent ? 'Silent' : 'Forced'})`);
           
           // Using upsert with onConflict to be more robust than update
           const { error } = await supabase!
@@ -145,6 +143,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return false;
           }
           
+          if (silent) console.log('✅ Silent save successful');
           lastSyncedStateRef.current = stateString;
           localStorage.removeItem('GUEST_PROGRESS');
           return true;
@@ -168,8 +167,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('CRITICAL SYNC ERROR:', err);
       return false;
     } finally {
-      setIsBackgroundSaving(false);
-      setIsSaving(false);
+      if (!silent) {
+        setIsSaving(false);
+      }
     }
   }, []);
 
@@ -422,7 +422,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // stateRef.current ensures we always have the freshest state data at the moment of execution.
       console.log('☁️ Auto-save: Consolidating progress to Supabase');
       forceSyncToSupabase(stateRef.current, 1, true); 
-    }, 3000); // 3 second grace period
+    }, 2000); // 2 second grace period
+
 
     return () => {
       if (syncTimeoutRef.current) {
