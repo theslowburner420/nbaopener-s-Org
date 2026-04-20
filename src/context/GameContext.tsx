@@ -402,35 +402,39 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Auth and Profile sync setup
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabase) {
+      console.warn('⚠️ Supabase not configured, running in GUEST MODE');
+      setIsAuthLoading(false);
+      setIsInitialSyncDone(true);
+      return;
+    }
+
+    let mounted = true;
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth event:', event, 'User:', session?.user?.id);
-      // Always sync profile when auth state changes
-      syncProfile(session?.user || null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+      console.log('🔄 Auth event:', event, 'User:', session?.user?.id);
       
-      // Clean URL if we have auth params (PKCE or Implicit)
-      if (window.location.search.includes('code=') || window.location.hash.includes('access_token=')) {
-        const url = new URL(window.location.href);
-        url.search = '';
-        url.hash = '';
-        window.history.replaceState({}, document.title, url.toString());
+      // TRIGGER SYNC only on meaningful events to avoid loops
+      if (['INITIAL_SESSION', 'SIGNED_IN', 'SIGNED_OUT', 'USER_UPDATED'].includes(event)) {
+        await syncProfile(session?.user || null);
       }
     });
 
-    // Initial check for session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        console.log('Session found on mount:', session.user.id);
-        syncProfile(session.user);
-      } else {
-        console.log('No session found on mount');
+    // Safety fallback: if after 10 seconds we are still loading, force unblock
+    // This prevents the "Checking session" forever hang if Supabase fails to respond
+    const safetyTimeout = setTimeout(() => {
+      if (mounted && isAuthLoading) {
+        console.warn('⏳ Auth timeout reached, forcing unblock');
         setIsAuthLoading(false);
+        setIsInitialSyncDone(true);
       }
-    });
+    }, 10000);
 
     return () => {
+      mounted = false;
+      clearTimeout(safetyTimeout);
       subscription.unsubscribe();
       if (profileSubscriptionRef.current) {
         supabase.removeChannel(profileSubscriptionRef.current);
@@ -438,49 +442,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [syncProfile]);
 
-  // Handle Auth Callback (PKCE) - Simplified to just error handling since detectSessionInUrl is true
-  useEffect(() => {
-    if (!supabase) return;
+  // Debounced sync effect - Optimized to avoid redundant triggers from UI changes (like currentView)
+  const syncRelevantData = useMemo(() => ({
+    coins: state.coins,
+    collection: state.collection,
+    customCards: state.customCards,
+    unlockedAchievements: state.unlockedAchievements,
+    claimedAchievements: state.claimedAchievements,
+    inventoryPacks: state.inventoryPacks,
+    isPremium: state.isPremium,
+    user: state.user?.id
+  }), [state.coins, state.collection, state.customCards, state.unlockedAchievements, state.claimedAchievements, state.inventoryPacks, state.isPremium, state.user?.id]);
 
-    const params = new URLSearchParams(window.location.search);
-    const error = params.get('error');
-    const errorDescription = params.get('error_description');
-
-    if (error || errorDescription) {
-      console.error('Auth error detected in URL:', error, errorDescription);
-      const url = new URL(window.location.href);
-      url.searchParams.delete('error');
-      url.searchParams.delete('error_description');
-      window.history.replaceState({}, document.title, url.toString());
-    }
-  }, []);
-
-  // Remove background sync and localStorage persistence to ensure Supabase is the only source of truth
-  // and all updates are immediate via forceSyncToSupabase.
-  
-  const login = async () => {
-    if (!supabase) {
-      console.error('Supabase not configured');
-      return;
-    }
-    const redirectTo = window.location.origin;
-    console.log('Initiating Google Login, redirecting to:', redirectTo);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo
-      }
-    });
-    if (error) console.error('Login error', error);
-  };
-
-  const logout = async () => {
-    if (supabase) {
-      await supabase.auth.signOut();
-    }
-  };
-
-  // Debounced sync effect to handle rapid state changes (proactive saving)
   useEffect(() => {
     if (!state.user || !isInitialSyncDone) return;
 
@@ -489,15 +462,30 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     syncTimeoutRef.current = setTimeout(() => {
-      forceSyncToSupabase(state, 3, true);
-    }, 3000); // 3 second debounce for silent background sync
+      forceSyncToSupabase(stateRef.current, 3, true);
+    }, 3000);
 
     return () => {
       if (syncTimeoutRef.current) {
         clearTimeout(syncTimeoutRef.current);
       }
     };
-  }, [state, isInitialSyncDone, forceSyncToSupabase]);
+  }, [syncRelevantData, isInitialSyncDone, forceSyncToSupabase]);
+
+  const login = async () => {
+    if (!supabase) return;
+    const redirectTo = window.location.origin;
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo }
+    });
+  };
+
+  const logout = async () => {
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+  };
 
   // Optimized batch update to prevent redundant network calls
   const updateGameState = useCallback((updates: Partial<GameState>) => {

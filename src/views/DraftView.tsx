@@ -1867,53 +1867,51 @@ const DraftView: React.FC = () => {
     const fMatch = currentRound === 'F' ? bracket[0] : null;
 
     return (
-      <div className="flex-1 flex flex-col p-0 md:p-8 space-y-4 md:space-y-8 overflow-hidden relative bg-zinc-950">
-        {/* Header */}
-        <div className="flex items-center justify-between shrink-0 z-10 p-4 md:p-0 border-b md:border-none border-zinc-900 bg-zinc-950/80 backdrop-blur-md md:bg-transparent">
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-zinc-900 border border-zinc-800 rounded-xl md:rounded-2xl flex items-center justify-center">
-              <Trophy size={20} className="text-amber-500" />
+      <div className="flex-1 flex flex-col p-10 space-y-10 overflow-hidden relative bg-zinc-950">
+        {/* Background Gradients for Atmosphere */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none">
+          <div className="absolute top-0 left-0 w-1/3 h-full bg-[radial-gradient(circle_at_20%_50%,rgba(59,130,246,0.1),transparent_70%)]" />
+          <div className="absolute top-0 right-0 w-1/3 h-full bg-[radial-gradient(circle_at_80%_50%,rgba(239,68,68,0.1),transparent_70%)]" />
+        </div>
+
+        {/* Header - Fixed to Top */}
+        <div className="flex items-center justify-between shrink-0 z-50">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 md:w-16 md:h-16 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center transform rotate-3 shadow-2xl">
+              <Trophy size={32} className="text-amber-500" />
             </div>
             <div>
-              <h2 className="text-lg md:text-2xl font-black italic uppercase text-white leading-none truncate max-w-[150px] md:max-w-none">{selectedTournament?.name}</h2>
-              <p className="text-[8px] md:text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
-                NBA Cup Playoffs
-              </p>
+              <h2 className="text-2xl md:text-4xl font-black italic uppercase text-white leading-none tracking-tighter">{selectedTournament?.name}</h2>
+              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.5em] mt-1">Playoff Brackets</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 md:gap-6">
-            <div className="text-right">
-              <p className="text-[7px] md:text-[8px] font-black text-zinc-500 uppercase tracking-widest">Your Team</p>
-              <p className="text-sm md:text-lg font-black italic text-amber-500">{teamOVR} OVR</p>
-            </div>
-            <div className="w-px h-6 md:h-8 bg-zinc-900" />
-            <button 
-              onClick={() => setPhase('tournament_selection')}
-              className="p-2 md:p-3 bg-zinc-900 border border-zinc-800 rounded-lg md:rounded-xl text-zinc-400 hover:text-white transition-colors"
-            >
-              <X size={18} />
-            </button>
-          </div>
+          <button 
+            onClick={() => setPhase('tournament_selection')}
+            className="group flex items-center gap-3 px-6 py-3 bg-zinc-900 border border-zinc-800 rounded-2xl text-zinc-400 hover:text-white transition-all hover:bg-zinc-800"
+          >
+            <span className="text-[10px] font-black uppercase tracking-widest hidden md:inline">Forfeit Tournament</span>
+            <X size={18} />
+          </button>
         </div>
 
-        {/* NBA Style Bracket Tree */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-x-auto pb-24 md:pb-8 scrollbar-hide snap-x snap-mandatory items-center justify-center">
-          <div className="flex items-center gap-8 md:gap-20 min-w-max px-12 md:px-24 mx-auto pb-20 pt-10">
+        {/* The Bracket Tree - Convergent Format */}
+        <div className="flex-1 overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory flex items-center">
+          <div className="flex items-center gap-0 min-w-max px-20 mx-auto relative h-full">
             
-            {/* WEST CONFERENCE - Left Side */}
-            <div className="flex items-center gap-8 md:gap-16">
-              {/* West QFs */}
-              <div className="flex flex-col gap-12 md:gap-24">
-                <div className="text-center group">
-                  <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 group-hover:text-zinc-500 transition-colors">West Quarters</span>
-                </div>
-                <div className="flex flex-col gap-8 md:gap-16">
-                  {['qf1', 'qf2'].map(id => {
-                    const m = qfMatches.find(match => match.id === id);
-                    return (
+            {/* WEST CONFERENCE - LADO IZQUIERDO */}
+            <div className="flex items-center gap-12 relative h-full py-20">
+              <div className="absolute -top-4 left-0 w-full text-center">
+                <span className="text-[11px] font-black uppercase tracking-[0.6em] text-blue-500/40">Western Conference</span>
+              </div>
+              
+              {/* West QFs (Leftmost) */}
+              <div className="flex flex-col gap-24 relative">
+                {['qf1', 'qf2'].map((id, i) => {
+                  const m = qfMatches.find(match => match.id === id);
+                  return (
+                    <div key={id} className="relative">
                       <BracketMatchCard 
-                        key={id} 
                         match={m || null} 
                         isUserMatch={m?.team1 === 'USER' || m?.team2 === 'USER'} 
                         onSimulate={() => m && simulateMatch(m.id)}
@@ -1921,87 +1919,87 @@ const DraftView: React.FC = () => {
                         teamOVR={teamOVR}
                         isActive={currentRound === 'QF' && (m?.team1 === 'USER' || m?.team2 === 'USER') && m?.status === 'pending'}
                       />
-                    );
-                  })}
-                </div>
+                      {/* Outbound Connector */}
+                      <div className={`absolute -right-12 top-1/2 w-12 h-px bg-zinc-800 z-0
+                        ${i === 0 ? 'after:content-[""] after:absolute after:top-0 after:right-0 after:w-px after:h-[6rem] after:bg-zinc-800' : 
+                          'after:content-[""] after:absolute after:bottom-0 after:right-0 after:w-px after:h-[6rem] after:bg-zinc-800'}
+                      `} />
+                    </div>
+                  );
+                })}
               </div>
 
-              {/* West Semis */}
-              <div className="flex flex-col gap-12">
-                <div className="text-center group">
-                  <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 group-hover:text-zinc-500 transition-colors">West Finals</span>
+              {/* West Finals (Middle-Left) */}
+              <div className="flex flex-col justify-center h-full relative">
+                <div className="relative">
+                  {/* Inbound Connector */}
+                  <div className="absolute -left-12 top-1/2 w-12 h-px bg-zinc-800 z-0" />
+                  
+                  <BracketMatchCard 
+                    match={sfMatches.find(m => m.id === 'sf1') || null} 
+                    isUserMatch={sfMatches.find(m => m.id === 'sf1')?.team1 === 'USER' || sfMatches.find(m => m.id === 'sf1')?.team2 === 'USER'} 
+                    onSimulate={() => simulateMatch('sf1')}
+                    isSimulating={isSimulating && activeMatchId === 'sf1'}
+                    teamOVR={teamOVR}
+                    isActive={currentRound === 'SF' && (sfMatches.find(m => m.id === 'sf1')?.team1 === 'USER' || sfMatches.find(m => m.id === 'sf1')?.team2 === 'USER') && sfMatches.find(m => m.id === 'sf1')?.status === 'pending'}
+                  />
+
+                  {/* Final Connector */}
+                  <div className="absolute -right-24 top-1/2 w-24 h-px bg-zinc-800 z-0" />
                 </div>
-                <BracketMatchCard 
-                  match={sfMatches.find(m => m.id === 'sf1') || null} 
-                  isUserMatch={sfMatches.find(m => m.id === 'sf1')?.team1 === 'USER' || sfMatches.find(m => m.id === 'sf1')?.team2 === 'USER'} 
-                  onSimulate={() => simulateMatch('sf1')}
-                  isSimulating={isSimulating && activeMatchId === 'sf1'}
-                  teamOVR={teamOVR}
-                  isActive={currentRound === 'SF' && (sfMatches.find(m => m.id === 'sf1')?.team1 === 'USER' || sfMatches.find(m => m.id === 'sf1')?.team2 === 'USER') && sfMatches.find(m => m.id === 'sf1')?.status === 'pending'}
-                />
               </div>
             </div>
 
-            {/* THE NBA FINAL - Center Piece */}
-            <div className="flex flex-col items-center gap-10 px-12 md:px-20 relative snap-center">
-              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-64 bg-amber-500/5 rounded-full blur-[100px] pointer-events-none" />
+            {/* THE NBA FINAL - CENTRAL PIECE */}
+            <div className="flex flex-col items-center gap-12 px-24 relative snap-center min-w-[400px]">
+              {/* Glow for the Champion center */}
+              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[500px] w-full bg-amber-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
               
-              <div className="flex flex-col items-center gap-4 relative z-10">
-                <motion.div 
-                  animate={{ 
-                    scale: [1, 1.1, 1],
-                    rotate: [12, 15, 12] 
-                  }}
-                  transition={{ repeat: Infinity, duration: 4 }}
-                  className="w-20 h-20 md:w-28 md:h-28 bg-amber-500 rounded-[2.5rem] flex items-center justify-center shadow-[0_0_80px_rgba(245,158,11,0.3)] border-4 border-amber-400"
-                >
-                  <Trophy size={48} className="text-black" />
-                </motion.div>
-                <div className="text-center">
-                  <h3 className="text-2xl md:text-4xl font-black italic uppercase text-white tracking-tighter">NBA Finals</h3>
-                  <p className="text-[10px] font-bold text-amber-500/50 uppercase tracking-[0.5em] mt-1">World Champion</p>
-                </div>
+              <div className="flex flex-col items-center gap-8 relative z-50">
+                 <div className="flex flex-col items-center gap-2">
+                    <motion.div 
+                      key={currentRound}
+                      initial={{ scale: 0, rotate: -20 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      className="w-24 h-24 bg-gradient-to-br from-amber-400 to-amber-600 rounded-[2.5rem] flex items-center justify-center shadow-[0_0_80px_rgba(245,158,11,0.4)] border-b-4 border-amber-300"
+                    >
+                      <Trophy size={48} className="text-black drop-shadow-lg" />
+                    </motion.div>
+                    <h3 className="text-4xl md:text-6xl font-black italic uppercase text-white tracking-tighter text-center">NBA Finals</h3>
+                    <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.8em]">World Championship</p>
+                 </div>
+
+                 <div className="relative group scale-125">
+                    {/* Inbound Connectors from both sides */}
+                    <div className="absolute -left-20 top-1/2 w-20 h-px bg-zinc-800 z-0" />
+                    <div className="absolute -right-20 top-1/2 w-20 h-px bg-zinc-800 z-0" />
+                    
+                    <BracketMatchCard 
+                      match={fMatch || null} 
+                      isUserMatch={fMatch?.team1 === 'USER' || fMatch?.team2 === 'USER'} 
+                      onSimulate={() => fMatch && simulateMatch(fMatch.id)}
+                      isSimulating={isSimulating && activeMatchId === 'f1'}
+                      teamOVR={teamOVR}
+                      isActive={currentRound === 'F' && (fMatch?.team1 === 'USER' || fMatch?.team2 === 'USER') && fMatch?.status === 'pending'}
+                      isFinal
+                    />
+                 </div>
               </div>
-              
-              <BracketMatchCard 
-                match={fMatch || null} 
-                isUserMatch={fMatch?.team1 === 'USER' || fMatch?.team2 === 'USER'} 
-                onSimulate={() => fMatch && simulateMatch(fMatch.id)}
-                isSimulating={isSimulating && activeMatchId === 'f1'}
-                teamOVR={teamOVR}
-                isActive={currentRound === 'F' && (fMatch?.team1 === 'USER' || fMatch?.team2 === 'USER') && fMatch?.status === 'pending'}
-                isFinal
-              />
             </div>
 
-            {/* EAST CONFERENCE - Right Side (Mirror) */}
-            <div className="flex items-center gap-8 md:gap-16">
-              {/* East Semis */}
-              <div className="flex flex-col gap-12">
-                <div className="text-center group">
-                  <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 group-hover:text-zinc-500 transition-colors">East Finals</span>
-                </div>
-                <BracketMatchCard 
-                  match={sfMatches.find(m => m.id === 'sf2') || null} 
-                  isUserMatch={sfMatches.find(m => m.id === 'sf2')?.team1 === 'USER' || sfMatches.find(m => m.id === 'sf2')?.team2 === 'USER'} 
-                  onSimulate={() => simulateMatch('sf2')}
-                  isSimulating={isSimulating && activeMatchId === 'sf2'}
-                  teamOVR={teamOVR}
-                  isActive={currentRound === 'SF' && (sfMatches.find(m => m.id === 'sf2')?.team1 === 'USER' || sfMatches.find(m => m.id === 'sf2')?.team2 === 'USER') && sfMatches.find(m => m.id === 'sf2')?.status === 'pending'}
-                />
+            {/* EAST CONFERENCE - LADO DERECHO (Mirrored) */}
+            <div className="flex flex-row-reverse items-center gap-12 relative h-full py-20">
+              <div className="absolute -top-4 left-0 w-full text-center">
+                <span className="text-[11px] font-black uppercase tracking-[0.6em] text-red-500/40">Eastern Conference</span>
               </div>
 
-              {/* East QFs */}
-              <div className="flex flex-col gap-12 md:gap-24">
-                <div className="text-center group">
-                  <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 group-hover:text-zinc-500 transition-colors">East Quarters</span>
-                </div>
-                <div className="flex flex-col gap-8 md:gap-16">
-                  {['qf3', 'qf4'].map(id => {
-                    const m = qfMatches.find(match => match.id === id);
-                    return (
+              {/* East QFs (Rightmost) */}
+              <div className="flex flex-col gap-24 relative">
+                {['qf3', 'qf4'].map((id, i) => {
+                  const m = qfMatches.find(match => match.id === id);
+                  return (
+                    <div key={id} className="relative">
                       <BracketMatchCard 
-                        key={id} 
                         match={m || null} 
                         isUserMatch={m?.team1 === 'USER' || m?.team2 === 'USER'} 
                         onSimulate={() => m && simulateMatch(m.id)}
@@ -2009,8 +2007,33 @@ const DraftView: React.FC = () => {
                         teamOVR={teamOVR}
                         isActive={currentRound === 'QF' && (m?.team1 === 'USER' || m?.team2 === 'USER') && m?.status === 'pending'}
                       />
-                    );
-                  })}
+                      {/* Outbound Connector (Going Left) */}
+                      <div className={`absolute -left-12 top-1/2 w-12 h-px bg-zinc-800 z-0
+                        ${i === 0 ? 'after:content-[""] after:absolute after:top-0 after:left-0 after:w-px after:h-[6rem] after:bg-zinc-800' : 
+                          'after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-px after:h-[6rem] after:bg-zinc-800'}
+                      `} />
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* East Finals (Middle-Right) */}
+              <div className="flex flex-col justify-center h-full relative">
+                <div className="relative">
+                  {/* Inbound Connector from R1 */}
+                  <div className="absolute -right-12 top-1/2 w-12 h-px bg-zinc-800 z-0" />
+                  
+                  <BracketMatchCard 
+                    match={sfMatches.find(m => m.id === 'sf2') || null} 
+                    isUserMatch={sfMatches.find(m => m.id === 'sf2')?.team1 === 'USER' || sfMatches.find(m => m.id === 'sf2')?.team2 === 'USER'} 
+                    onSimulate={() => simulateMatch('sf2')}
+                    isSimulating={isSimulating && activeMatchId === 'sf2'}
+                    teamOVR={teamOVR}
+                    isActive={currentRound === 'SF' && (sfMatches.find(m => m.id === 'sf2')?.team1 === 'USER' || sfMatches.find(m => m.id === 'sf2')?.team2 === 'USER') && sfMatches.find(m => m.id === 'sf2')?.status === 'pending'}
+                  />
+
+                  {/* Final Connector going left */}
+                  <div className="absolute -left-24 top-1/2 w-24 h-px bg-zinc-800 z-0" />
                 </div>
               </div>
             </div>
@@ -2018,14 +2041,14 @@ const DraftView: React.FC = () => {
           </div>
         </div>
 
-        {/* Fixed Bottom Action Button */}
+        {/* Floating Controls */}
         <AnimatePresence>
           {bracket.some(m => (m.team1 === 'USER' || m.team2 === 'USER') && m.status === 'pending') && (
             <motion.div 
-              initial={{ y: 100 }}
-              animate={{ y: 0 }}
-              exit={{ y: 100 }}
-              className="fixed bottom-0 inset-x-0 p-4 md:p-8 bg-gradient-to-t from-black via-black/90 to-transparent z-50 flex justify-center"
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 50, opacity: 0 }}
+              className="absolute bottom-10 inset-x-0 flex justify-center z-[100]"
             >
               <button
                 onClick={() => {
@@ -2033,61 +2056,19 @@ const DraftView: React.FC = () => {
                   if (userMatch) simulateMatch(userMatch.id);
                 }}
                 disabled={isSimulating}
-                className="w-full max-w-md bg-amber-500 text-black py-4 md:py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs md:text-sm flex items-center justify-center gap-3 shadow-[0_20px_50px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all active:scale-95"
+                className="bg-white text-black h-16 px-12 rounded-[2rem] font-black uppercase tracking-[0.4em] text-xs shadow-[0_20px_60px_rgba(255,255,255,0.15)] flex items-center gap-4 hover:bg-amber-400 transition-all active:scale-95"
               >
                 <Play size={20} fill="currentColor" />
-                <span>Simulate Match</span>
+                <span>Next Playoff Match</span>
               </button>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Match Result Modal Overlay */}
-        <AnimatePresence>
-          {matchResult && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[9000] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6"
-            >
-              <motion.div
-                initial={{ scale: 0.8, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                className="w-full max-w-md bg-zinc-950 border border-zinc-900 rounded-[3rem] p-10 text-center space-y-8 shadow-[0_0_100px_rgba(245,158,11,0.2)]"
-              >
-                <div className="space-y-2">
-                  <h3 className="text-5xl font-black italic uppercase tracking-tighter text-white leading-none">
-                    {matchResult.winner === 'Your Team' ? 'Victory!' : 'Defeat'}
-                  </h3>
-                  <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                    {matchResult.winner === 'Your Team' ? 'You advanced to the next round' : 'Your tournament run has ended'}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-center gap-8">
-                  <div className="text-center">
-                    <p className="text-[10px] font-black text-zinc-600 uppercase mb-2">YOU</p>
-                    <p className={`text-6xl font-black italic ${matchResult.winner === 'Your Team' ? 'text-white' : 'text-zinc-700'}`}>{matchResult.score1}</p>
-                  </div>
-                  <div className="text-4xl font-black italic text-zinc-800">VS</div>
-                  <div className="text-center">
-                    <p className="text-[10px] font-black text-zinc-600 uppercase mb-2">OPP</p>
-                    <p className={`text-6xl font-black italic ${matchResult.winner !== 'Your Team' ? 'text-white' : 'text-zinc-700'}`}>{matchResult.score2}</p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={advanceRound}
-                  className="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 hover:bg-amber-400 transition-all"
-                >
-                  <span>{matchResult.winner === 'Your Team' ? (currentRound === 'F' ? 'Claim Rewards' : 'Continue') : 'Exit Tournament'}</span>
-                  <ArrowRight size={20} />
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        
+        {/* Mobile Helper Text */}
+        <div className="md:hidden flex justify-center text-[8px] font-bold text-zinc-700 uppercase tracking-widest gap-2">
+          <ArrowLeft size={8} /> Swipe to navigate <ArrowRight size={8} />
+        </div>
       </div>
     );
   };
@@ -2138,6 +2119,53 @@ const DraftView: React.FC = () => {
         )}
         {showBoxScore && renderBoxScore()}
       </AnimatePresence>
+
+      {/* Match Result Modal Overlay */}
+        <AnimatePresence>
+          {matchResult && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[9000] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6"
+            >
+              <motion.div
+                initial={{ scale: 0.8, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                className="w-full max-w-md bg-zinc-950 border border-zinc-900 rounded-[3rem] p-10 text-center space-y-8 shadow-[0_0_100px_rgba(245,158,11,0.2)]"
+              >
+                <div className="space-y-2">
+                  <h3 className="text-5xl font-black italic uppercase tracking-tighter text-white leading-none">
+                    {matchResult.winner === 'Your Team' ? 'Victory!' : 'Defeat'}
+                  </h3>
+                  <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                    {matchResult.winner === 'Your Team' ? 'You advanced to the next round' : 'Your tournament run has ended'}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-center gap-8">
+                  <div className="text-center">
+                    <p className="text-[10px] font-black text-zinc-600 uppercase mb-2">YOU</p>
+                    <p className={`text-6xl font-black italic ${matchResult.winner === 'Your Team' ? 'text-white' : 'text-zinc-700'}`}>{matchResult.score1}</p>
+                  </div>
+                  <div className="text-4xl font-black italic text-zinc-800">VS</div>
+                  <div className="text-center">
+                    <p className="text-[10px] font-black text-zinc-600 uppercase mb-2">OPP</p>
+                    <p className={`text-6xl font-black italic ${matchResult.winner !== 'Your Team' ? 'text-white' : 'text-zinc-700'}`}>{matchResult.score2}</p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={advanceRound}
+                  className="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 hover:bg-amber-400 transition-all"
+                >
+                  <span>{matchResult.winner === 'Your Team' ? (currentRound === 'F' ? 'Claim Rewards' : 'Continue') : 'Exit Tournament'}</span>
+                  <ArrowRight size={20} />
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
     </div>
   );
 };
@@ -2153,118 +2181,114 @@ const BracketMatchCard = memo<{
 }>(({ match, isUserMatch, onSimulate, isSimulating, teamOVR, isFinal, isActive }) => {
   if (!match) {
     return (
-      <div className={`w-48 md:w-64 bg-zinc-900/10 border border-zinc-800/30 border-dashed rounded-2xl p-4 flex flex-col items-center justify-center gap-2 opacity-30 ${isFinal ? 'scale-110' : ''}`}>
+      <div className={`w-48 md:w-56 bg-zinc-900/10 border border-zinc-800/30 border-dashed rounded-xl p-4 flex flex-col items-center justify-center gap-2 opacity-30`}>
         <div className="w-full h-8 bg-zinc-800/20 rounded-lg" />
-        <div className="w-4 h-4 bg-zinc-800/20 rounded-full" />
         <div className="w-full h-8 bg-zinc-800/20 rounded-lg" />
       </div>
     );
   }
 
   const isFinished = match.status === 'finished';
-  const isPending = match.status === 'pending';
+  const getTeamName = (t: GhostTeam | 'USER') => t === 'USER' ? 'Your Team' : (t as GhostTeam)?.name || 'TBD';
+  const getTeamOvr = (t: GhostTeam | 'USER') => t === 'USER' ? teamOVR : (t as GhostTeam)?.ovr || '??';
+  
+  const isWinner = (t: GhostTeam | 'USER') => match.winner === t;
+  const isLoser = (t: GhostTeam | 'USER') => isFinished && match.winner !== t;
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.9, y: 20 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      className={`relative ${isFinal ? 'w-64 md:w-80' : 'w-48 md:w-64'} transition-all duration-500`}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className={`relative ${isFinal ? 'w-64 md:w-80' : 'w-48 md:w-56'} transition-all duration-500 group z-10`}
     >
-      {/* Connector Lines - Professional Tree Look */}
-      {!isFinal && (
-        <div className="absolute -right-8 md:-right-24 top-1/2 w-8 md:w-24 h-px bg-zinc-800 z-0" />
-      )}
-
       <div className={`
-        relative overflow-hidden rounded-[2rem] border transition-all duration-500 z-10
-        ${isFinished ? 'bg-zinc-950/60 border-zinc-900 opacity-50 grayscale-[0.5]' : 
-          isActive ? 'bg-zinc-900 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.3)] scale-110 z-20' : 
+        relative overflow-hidden rounded-2xl border transition-all duration-500
+        ${isFinished ? 'bg-zinc-950/40 border-zinc-900' : 
+          isActive ? 'bg-zinc-900 border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.2)]' : 
           'bg-zinc-900/80 border-zinc-800'}
         ${isFinal ? 'border-amber-500/40 shadow-[0_0_60px_rgba(245,158,11,0.2)]' : ''}
       `}>
-        {/* Match Header */}
-        <div className="px-4 py-2 bg-black/40 border-b border-zinc-800/50 flex justify-between items-center">
-          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500">
-            {isFinal ? 'Championship' : 'Matchup'}
-          </span>
-          {isFinished && (
-            <div className="flex items-center gap-1">
-              <div className="w-1 h-1 bg-amber-500 rounded-full animate-pulse" />
-              <span className="text-[8px] font-black text-amber-500 uppercase tracking-widest">Final</span>
+        {/* Team 1 */}
+        <div className={`
+          flex items-center justify-between px-4 py-3 border-b border-zinc-800/50 transition-all
+          ${isLoser(match.team1) ? 'opacity-30' : 'opacity-100'}
+          ${isWinner(match.team1) ? 'bg-amber-500/5' : ''}
+        `}>
+          <div className="flex items-center gap-3">
+            <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black
+              ${match.team1 === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-400'}
+            `}>
+              {getTeamName(match.team1).substring(0, 2).toUpperCase()}
             </div>
-          )}
-          {isActive && (
-            <div className="flex items-center gap-1">
-              <div className="w-1 h-1 bg-amber-500 rounded-full animate-ping" />
-              <span className="text-[8px] font-black text-amber-500 uppercase tracking-widest">Next Match</span>
-            </div>
-          )}
-        </div>
-
-        <div className="p-4 space-y-3">
-          {/* Team 1 */}
-          <div className={`flex items-center justify-between p-2.5 rounded-2xl transition-all ${match.winner === match.team1 ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-zinc-900/40 border border-transparent'}`}>
-            <div className="flex items-center gap-3 min-w-0">
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-lg ${match.team1 === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-500'}`}>
-                {match.team1 === 'USER' ? <UserIcon size={16} /> : <Shield size={16} />}
-              </div>
-              <div className="min-w-0">
-                <p className={`text-xs font-black uppercase italic truncate ${match.winner === match.team1 ? 'text-amber-500' : 'text-white'}`}>
-                  {match.team1 === 'USER' ? 'Your Team' : (match.team1 as GhostTeam)?.name || 'TBD'}
-                </p>
-                <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-tighter">OVR: {match.team1 === 'USER' ? teamOVR : (match.team1 as GhostTeam)?.ovr || '??'}</p>
-              </div>
-            </div>
-            {isFinished && (
-              <span className={`text-sm font-black italic ${match.winner === match.team1 ? 'text-white' : 'text-zinc-600'}`}>{match.score1}</span>
-            )}
+            <span className={`text-[10px] font-bold uppercase tracking-wide truncate max-w-[80px] md:max-w-[100px] 
+              ${isWinner(match.team1) ? 'text-amber-500' : 'text-white'}
+            `}>
+              {getTeamName(match.team1)}
+            </span>
           </div>
-
-          {/* VS Divider */}
-          <div className="flex items-center gap-3 px-2">
-            <div className="h-px flex-1 bg-zinc-800/50" />
-            <span className="text-[9px] font-black text-zinc-800 italic tracking-widest">VS</span>
-            <div className="h-px flex-1 bg-zinc-800/50" />
-          </div>
-
-          {/* Team 2 */}
-          <div className={`flex items-center justify-between p-2.5 rounded-2xl transition-all ${match.winner === match.team2 ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-zinc-900/40 border border-transparent'}`}>
-            <div className="flex items-center gap-3 min-w-0">
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-lg ${match.team2 === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-500'}`}>
-                {match.team2 === 'USER' ? <UserIcon size={16} /> : <Shield size={16} />}
-              </div>
-              <div className="min-w-0">
-                <p className={`text-xs font-black uppercase italic truncate ${match.winner === match.team2 ? 'text-amber-500' : 'text-white'}`}>
-                  {match.team2 === 'USER' ? 'Your Team' : (match.team2 as GhostTeam)?.name || 'TBD'}
-                </p>
-                <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-tighter">OVR: {match.team2 === 'USER' ? teamOVR : (match.team2 as GhostTeam)?.ovr || '??'}</p>
-              </div>
-            </div>
-            {isFinished && (
-              <span className={`text-sm font-black italic ${match.winner === match.team2 ? 'text-white' : 'text-zinc-600'}`}>{match.score2}</span>
+          <div className="flex items-center gap-2">
+            {isFinished ? (
+              <span className={`text-sm font-black italic ${isWinner(match.team1) ? 'text-white' : 'text-zinc-600'}`}>
+                {match.score1}
+              </span>
+            ) : (
+              <span className="text-[8px] font-black text-zinc-700">{getTeamOvr(match.team1)}</span>
             )}
+            {isWinner(match.team1) && <Trophy size={10} className="text-amber-500" />}
           </div>
         </div>
 
-        {/* Action Area */}
-        {isUserMatch && isPending && !isSimulating && (
-          <button 
-            onClick={onSimulate}
-            className="w-full py-3 bg-amber-500 text-black text-[10px] font-black uppercase tracking-[0.2em] hover:bg-amber-400 transition-all flex items-center justify-center gap-2 active:scale-95"
-          >
-            <Play size={12} fill="currentColor" />
-            Play Match
-          </button>
-        )}
+        {/* Team 2 */}
+        <div className={`
+          flex items-center justify-between px-4 py-3 transition-all
+          ${isLoser(match.team2) ? 'opacity-30' : 'opacity-100'}
+          ${isWinner(match.team2) ? 'bg-amber-500/5' : ''}
+        `}>
+          <div className="flex items-center gap-3">
+            <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black
+              ${match.team2 === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-400'}
+            `}>
+              {getTeamName(match.team2).substring(0, 2).toUpperCase()}
+            </div>
+            <span className={`text-[10px] font-bold uppercase tracking-wide truncate max-w-[80px] md:max-w-[100px] 
+              ${isWinner(match.team2) ? 'text-amber-500' : 'text-white'}
+            `}>
+              {getTeamName(match.team2)}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {isFinished ? (
+              <span className={`text-sm font-black italic ${isWinner(match.team2) ? 'text-white' : 'text-zinc-600'}`}>
+                {match.score2}
+              </span>
+            ) : (
+              <span className="text-[8px] font-black text-zinc-700">{getTeamOvr(match.team2)}</span>
+            )}
+            {isWinner(match.team2) && <Trophy size={10} className="text-amber-500" />}
+          </div>
+        </div>
 
+        {/* Playing/Status Overlay */}
         {isSimulating && (
-          <div className="w-full py-3 bg-zinc-800 flex items-center justify-center gap-2">
-            <div className="w-2 h-2 bg-amber-500 rounded-full animate-ping" />
-            <span className="text-[10px] font-black text-white uppercase tracking-widest">Simulating...</span>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" />
+              <span className="text-[8px] font-black text-white uppercase tracking-[0.2em]">Playing...</span>
+            </div>
           </div>
         )}
       </div>
+
+      {isActive && !isSimulating && (
+        <motion.div 
+          animate={{ scale: [1, 1.1, 1], rotate: [0, 2, -2, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+          className="absolute -top-3 -right-3 z-20 bg-amber-500 text-black px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-xl cursor-default"
+        >
+          UP NEXT
+        </motion.div>
+      )}
     </motion.div>
   );
 });
