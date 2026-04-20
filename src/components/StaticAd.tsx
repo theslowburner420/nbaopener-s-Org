@@ -46,6 +46,7 @@ export default function StaticAd({ position }: StaticAdProps) {
     invokeScript.type = 'text/javascript';
     invokeScript.src = 'https://www.highperformanceformat.com/7b956296dd611d148eef5572569c1535/invoke.js';
     invokeScript.async = true;
+    invokeScript.defer = true; // Added defer for non-blocking
 
     containerRef.current.appendChild(optionsScript);
     containerRef.current.appendChild(invokeScript);

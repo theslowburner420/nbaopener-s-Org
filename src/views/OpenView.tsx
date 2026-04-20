@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, ShoppingBag } from 'lucide-react';
+import { Sparkles, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { useGame } from '../context/GameContext';
 import { useEngine } from '../hooks/useEngine';
 import PackOpener from '../components/PackOpener';
 import { Card } from '../types';
 
 export default function OpenView() {
+  const { setCurrentView } = useGame();
   const [isOpening, setIsOpening] = useState(false);
   const [openedCards, setOpenedCards] = useState<Card[] | null>(null);
   const [newlyUnlocked, setNewlyUnlocked] = useState<any[]>([]);
@@ -31,7 +33,15 @@ export default function OpenView() {
   };
 
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center bg-black relative overflow-hidden">
+    <div className="h-[100dvh] w-full flex flex-col items-center justify-center bg-black relative overflow-hidden">
+      {/* Back Button */}
+      <button 
+        onClick={() => setCurrentView('home')}
+        className="absolute top-4 left-4 z-[5500] w-10 h-10 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-full flex items-center justify-center text-white hover:bg-zinc-800 transition-all active:scale-95 shadow-lg"
+      >
+        <ArrowLeft size={20} />
+      </button>
+
       {/* Dynamic Background Glow */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(245,158,11,0.1)_0%,_transparent_70%)] pointer-events-none" />
       

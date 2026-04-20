@@ -99,6 +99,7 @@ export default function ShopView() {
       invokeScript.type = 'text/javascript';
       invokeScript.src = 'https://www.highperformanceformat.com/7b956296dd611d148eef5572569c1535/invoke.js';
       invokeScript.async = true;
+      invokeScript.defer = true;
 
       container.appendChild(optionsScript);
       container.appendChild(invokeScript);

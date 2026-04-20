@@ -10,11 +10,13 @@ import {
   Users, 
   Play, 
   ArrowRight, 
+  ArrowLeft,
   Sparkles, 
   RotateCcw,
   LayoutGrid,
   X,
-  Package
+  Package,
+  Home
 } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useNotification } from '../context/NotificationContext';
@@ -57,6 +59,69 @@ interface MatchEvent {
   team: 'USER' | 'OPP';
   points: number;
 }
+
+interface InteractiveOption {
+  label: string;
+  risk: 'low' | 'medium' | 'high';
+  successText: string;
+  failText: string;
+  points: number;
+}
+
+interface RandomEventScenario {
+  id: string;
+  type: 'attack' | 'defense' | 'clutch';
+  title: string;
+  description: string;
+  options: InteractiveOption[];
+}
+
+const INTERACTIVE_POOL: RandomEventScenario[] = [
+  {
+    id: 'fastbreak',
+    type: 'attack',
+    title: 'Fast Break!',
+    description: '{player} is running the floor on a break. How does he finish?',
+    options: [
+      { label: 'Safe Layup', risk: 'low', points: 2, successText: 'finishes with a smooth finger roll.', failText: 'misses the layup somehow!' },
+      { label: 'Power Dunk', risk: 'medium', points: 2, successText: 'posterizes the defender with a huge slam!', failText: 'gets blocked by the rim!' },
+      { label: 'Flashy Step-back', risk: 'high', points: 3, successText: 'hits a nasty step-back three!', failText: 'shoots an absolute airball.' }
+    ]
+  },
+  {
+    id: 'isolation',
+    type: 'attack',
+    title: 'ISO Play',
+    description: 'Possession is stuck. {player} takes it one-on-one. What\'s the move?',
+    options: [
+      { label: 'Drive to rim', risk: 'low', points: 2, successText: 'blows past his man for the layup.', failText: 'gets stripped on the way up.' },
+      { label: 'Fadeaway J', risk: 'medium', points: 2, successText: 'hits a pure turnaround jump-shot.', failText: 'clanks it off the front iron.' },
+      { label: 'Step-back 3', risk: 'high', points: 3, successText: 'drains it right in the defender\'s face!', failText: 'shoots a contested brick.' }
+    ]
+  },
+  {
+    id: 'rim_protection',
+    type: 'defense',
+    title: 'Defensive Stand!',
+    description: 'The rival is attacking the rim. How do you respond?',
+    options: [
+      { label: 'Stay vertical', risk: 'low', points: 0, successText: 'forces a difficult miss.', failText: 'commits a shooting foul.' },
+      { label: 'Go for the block', risk: 'medium', points: 0, successText: 'swats the ball into the 5th row!', failText: 'gets posterized.' },
+      { label: 'Draw the charge', risk: 'high', points: 0, successText: 'stands his ground and gets the whistle!', failText: 'gets called for a blocking foul.' }
+    ]
+  },
+  {
+    id: 'perimeter_d',
+    type: 'defense',
+    title: 'Perimeter Lockdown',
+    description: 'The opponent is hunting for a dagger 3. Defensive tactical choice?',
+    options: [
+      { label: 'Heavy Contest', risk: 'low', points: 0, successText: 'smothers the shooter for a miss.', failText: 'bites on the pump fake.' },
+      { label: 'Risk the Steal', risk: 'medium', points: 0, successText: 'picks the pocket and starts a break!', failText: 'gets blown past for an easy bucket.' },
+      { label: 'Double Team', risk: 'high', points: 0, successText: 'traps the ball handler into a turnover!', failText: 'leaves an open shooter for 3.' }
+    ]
+  }
+];
 
 interface PlayerStats {
   cardId: string;
@@ -333,20 +398,71 @@ const DraftView: React.FC = () => {
   const { notify } = useNotification();
   const { generateDraftOptions } = useEngine();
 
-  const [phase, setPhase] = useState<DraftPhase>('entry');
-  const [starters, setStarters] = useState<DraftSlot[]>(STARTER_SLOTS);
-  const [bench, setBench] = useState<DraftSlot[]>(BENCH_SLOTS);
+  const [phase, setPhase] = useState<DraftPhase>(() => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('hoops_draft_state') : null;
+    if (saved) {
+      try { return JSON.parse(saved).phase || 'entry'; } catch(e) {}
+    }
+    return 'entry';
+  });
+  const [starters, setStarters] = useState<DraftSlot[]>(() => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('hoops_draft_state') : null;
+    if (saved) {
+      try { return JSON.parse(saved).starters || STARTER_SLOTS; } catch(e) {}
+    }
+    return STARTER_SLOTS;
+  });
+  const [bench, setBench] = useState<DraftSlot[]>(() => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('hoops_draft_state') : null;
+    if (saved) {
+      try { return JSON.parse(saved).bench || BENCH_SLOTS; } catch(e) {}
+    }
+    return BENCH_SLOTS;
+  });
   const [currentOptions, setCurrentOptions] = useState<Card[]>([]);
   const [activeSlotId, setActiveSlotId] = useState<string | null>(null);
   const [isFlipping, setIsFlipping] = useState(false);
   const [selectedCardForDetail, setSelectedCardForDetail] = useState<Card | null>(null);
   const [swapSource, setSwapSource] = useState<string | null>(null);
-  const [isBenchExpanded, setIsBenchExpanded] = useState(false);
+  const [isBenchVisibleMobile, setIsBenchVisibleMobile] = useState(false);
+  const [shouldAutoStartCaptain, setShouldAutoStartCaptain] = useState(false);
 
   // Tournament State
-  const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
-  const [bracket, setBracket] = useState<BracketMatch[]>([]);
-  const [currentRound, setCurrentRound] = useState<'QF' | 'SF' | 'F'>('QF');
+  const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(() => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('hoops_draft_state') : null;
+    if (saved) {
+      try { return JSON.parse(saved).selectedTournament || null; } catch(e) {}
+    }
+    return null;
+  });
+  const [bracket, setBracket] = useState<BracketMatch[]>(() => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('hoops_draft_state') : null;
+    if (saved) {
+      try { return JSON.parse(saved).bracket || []; } catch(e) {}
+    }
+    return [];
+  });
+  const [currentRound, setCurrentRound] = useState<'QF' | 'SF' | 'F'>(() => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('hoops_draft_state') : null;
+    if (saved) {
+      try { return JSON.parse(saved).currentRound || 'QF'; } catch(e) {}
+    }
+    return 'QF';
+  });
+
+  // Interactive Match Event States
+  const [activeInteractiveEvent, setActiveInteractiveEvent] = useState<RandomEventScenario | null>(null);
+  const [interactiveResolution, setInteractiveResolution] = useState<{ text: string, points: number, success: boolean } | null>(null);
+  const [interactiveTriggers, setInteractiveTriggers] = useState<number[]>([]);
+  const [isSimulationPaused, setIsSimulationPaused] = useState(false);
+  const [matchSimulationData, setMatchSimulationData] = useState<{ 
+    events: MatchEvent[], 
+    idx: number, 
+    matchId: string, 
+    s1Final: number, 
+    s2Final: number, 
+    winner: any 
+  } | null>(null);
   const [isSimulating, setIsSimulating] = useState(false);
   const [matchResult, setMatchResult] = useState<{ score1: number, score2: number, winner: string } | null>(null);
 
@@ -366,42 +482,41 @@ const DraftView: React.FC = () => {
 
   // State Persistence
   useEffect(() => {
-    const savedState = localStorage.getItem('hoops_draft_state');
-    if (savedState) {
-      try {
-        const parsed = JSON.parse(savedState);
-        setPhase(parsed.phase || 'entry');
-        setStarters(parsed.starters || STARTER_SLOTS);
-        setBench(parsed.bench || BENCH_SLOTS);
-        setBracket(parsed.bracket || []);
-        setCurrentRound(parsed.currentRound || 'QF');
-        setSelectedTournament(parsed.selectedTournament || null);
-      } catch (e) {
-        console.error("Failed to load state", e);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
     const state = { phase, starters, bench, bracket, currentRound, selectedTournament };
     localStorage.setItem('hoops_draft_state', JSON.stringify(state));
   }, [phase, starters, bench, bracket, currentRound, selectedTournament]);
 
-  // Performance: Image Preloading
+  useEffect(() => {
+    if (shouldAutoStartCaptain && phase === 'starters') {
+      const emptyStarters = starters.filter(s => !s.card);
+      if (emptyStarters.length === STARTER_SLOTS.length) {
+        const randomIndex = Math.floor(Math.random() * starters.length);
+        const randomSlot = starters[randomIndex];
+        handleSlotClick(randomSlot);
+        setShouldAutoStartCaptain(false);
+      }
+    }
+  }, [shouldAutoStartCaptain, phase, starters]);
+
+  // Performance: Smart Image Preloading (Only first 50 common/captain cards)
   useEffect(() => {
     const preloadImages = () => {
       const urls = [
-        ...ALL_CARDS.map(c => c.imageUrl),
-        'https://picsum.photos/seed/nba1/1920/1080',
-        'https://picsum.photos/seed/nba2/1920/1080',
-        'https://picsum.photos/seed/nba3/1920/1080'
+        ...ALL_CARDS.slice(0, 50).map(c => c.imageUrl),
+        'https://i.postimg.cc/rz5Tvhqp/hoopslogo.jpg'
       ];
       urls.forEach(url => {
         const img = new Image();
         img.src = url;
+        img.decode().catch(() => {}); // Decode as well
       });
     };
-    preloadImages();
+    
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(preloadImages);
+    } else {
+      setTimeout(preloadImages, 3000);
+    }
   }, []);
 
   // Track all cards seen in this draft to prevent duplicates
@@ -419,72 +534,93 @@ const DraftView: React.FC = () => {
     }
     
     // Reset slots
+    const freshStarters = STARTER_SLOTS.map(s => ({ ...s, card: null }));
+    const freshBench = BENCH_SLOTS.map(b => ({ ...b, card: null }));
+    
+    setStarters(freshStarters);
+    setBench(freshBench);
+    setBracket([]);
+    setSelectedTournament(null);
+    setCurrentRound('QF');
+    
+    // Logic: Autostart with a random Captain pick
+    const randomStarterIndex = Math.floor(Math.random() * freshStarters.length);
+    const firstSlot = freshStarters[randomStarterIndex];
+    
+    setPhase('starters');
+    setCurrentOptions([]);
+    setIsFlipping(false);
+    setShouldAutoStartCaptain(true);
+  };
+
+  const resetDraftState = (targetView: 'home' | 'entry' = 'home') => {
+    localStorage.removeItem('hoops_draft_state');
+    setPhase('entry');
     setStarters(STARTER_SLOTS.map(s => ({ ...s, card: null })));
     setBench(BENCH_SLOTS.map(b => ({ ...b, card: null })));
     setBracket([]);
     setSelectedTournament(null);
     setCurrentRound('QF');
-    
-    // Start with Starters phase, but don't show options yet
-    // User must click a slot to pick their first player (Captain)
-    setPhase('starters');
-    setCurrentOptions([]);
-    setIsFlipping(false);
     setActiveSlotId(null);
+    setCurrentOptions([]);
+    setSwapSource(null);
+    if (targetView === 'home') {
+      setCurrentView('home');
+    }
   };
 
   const handleSelectCard = async (card: Card) => {
-    // If it's the very first card picked, it's the captain
     const isFirstPick = starters.every(s => !s.card) && bench.every(b => !b.card);
+    let targetSlotId = activeSlotId;
 
-    if (activeSlotId) {
+    // Logic: If it's the captain pick, force it into its natural position
+    if (isFirstPick && targetSlotId) {
+      const naturalSlot = starters.find(s => s.position === card.position);
+      if (naturalSlot) {
+        targetSlotId = naturalSlot.id;
+      }
+    }
+
+    if (targetSlotId) {
       // Selection
-      if (activeSlotId.startsWith('bench')) {
-        setBench(prev => prev.map(s => s.id === activeSlotId ? { ...s, card } : s));
+      if (targetSlotId.startsWith('bench')) {
+        setBench(prev => prev.map(s => s.id === targetSlotId ? { ...s, card } : s));
       } else {
-        setStarters(prev => prev.map(s => s.id === activeSlotId ? { ...s, card } : s));
+        setStarters(prev => prev.map(s => s.id === targetSlotId ? { ...s, card } : s));
       }
 
-      if (isFirstPick) {
-        // Achievement: Generational Talent (Local only during draft)
-        if ((card.stats?.ovr || 0) >= 97) {
-          const unlocked = await unlockAchievement('generational_talent', false);
+      // Achievement: Generational Talent
+      if (isFirstPick && (card.stats?.ovr || 0) >= 97) {
+        unlockAchievement('generational_talent', false).then(unlocked => {
           if (unlocked) notify(unlocked);
-        }
+        });
       }
 
       setActiveSlotId(null);
       setCurrentOptions([]);
-      setIsBenchExpanded(false);
       
-      // Check if all starters are filled
-      const allStartersFilled = starters.every(s => s.card || (s.id === activeSlotId && card));
-      const allBenchFilled = bench.every(b => b.card || (b.id === activeSlotId && card));
+      // Calculate filled state using updated data
+      const isPickBench = targetSlotId.startsWith('bench');
+      const updatedStarters = isPickBench ? starters : starters.map(s => s.id === targetSlotId ? { ...s, card } : s);
+      const updatedBench = isPickBench ? bench.map(s => s.id === targetSlotId ? { ...s, card } : s) : bench;
 
+      const allStartersFilled = updatedStarters.every(s => s.card);
+      const allBenchFilled = updatedBench.every(b => b.card);
+
+      // UX Improvement: Maintain bench visibility while drafting bench slots
+      const stillDraftingBench = (phase === 'bench' || allStartersFilled) && !allBenchFilled;
+      if (!stillDraftingBench) {
+        setIsBenchVisibleMobile(false);
+      }
+      
       if (allStartersFilled && !allBenchFilled) {
         setPhase('bench');
       } else if (allStartersFilled && allBenchFilled) {
         setPhase('review');
         
-        // Achievement: Trust the Process (Local only during draft)
-        const unlocked1 = await unlockAchievement('trust_the_process', false);
-        if (unlocked1) notify(unlocked1);
-
-        // Achievement: Superteam (Local only during draft)
-        if (teamOVR >= 92) {
-          const unlocked2 = await unlockAchievement('superteam', false);
-          if (unlocked2) notify(unlocked2);
-        }
-
-        // Achievement: Bench Mob (Local only during draft)
-        const benchPlayers = bench.map(s => s.card).filter(Boolean) as Card[];
-        const benchAvg = benchPlayers.length > 0 
-          ? benchPlayers.reduce((acc, p) => acc + (p.stats?.ovr || 0), 0) / benchPlayers.length 
-          : 0;
-        if (benchAvg >= 85) {
-          const unlocked3 = await unlockAchievement('bench_mob', false);
-          if (unlocked3) notify(unlocked3);
-        }
+        // Trigger achievements background
+        unlockAchievement('trust_the_process', false).then(u => u && notify(u));
+        if (teamOVR >= 92) unlockAchievement('superteam', false).then(u => u && notify(u));
       }
     }
   };
@@ -532,7 +668,7 @@ const DraftView: React.FC = () => {
         setStarters(newStarters);
         setBench(newBench);
         setSwapSource(null);
-        setIsBenchExpanded(false);
+        setIsBenchVisibleMobile(false);
       }
       return;
     }
@@ -543,14 +679,19 @@ const DraftView: React.FC = () => {
     }
     
     // Drafting logic: only allow clicking empty slots if in the right phase
+    const isFirstPick = starters.every(s => !s.card) && bench.every(b => !b.card);
+
     if ((phase === 'starters' && starters.some(s => s.id === slot.id)) || 
         (phase === 'bench' && bench.some(b => b.id === slot.id))) {
       setActiveSlotId(slot.id);
-      setIsBenchExpanded(false);
       
-      // If it's the first pick, it's a Captain pick (Elite options)
-      const isFirstPick = starters.every(s => !s.card) && bench.every(b => !b.card);
-      const options = generateDraftOptions(5, slot.position, seenCardIds, isFirstPick);
+      // Maintain bench visibility if picking from the bench
+      if (!bench.some(b => b.id === slot.id)) {
+        setIsBenchVisibleMobile(false);
+      }
+      
+      // If no cards are in the squad, this first pick is automatically the "Captain" pick
+      const options = generateDraftOptions(5, slot.position, seenCardIds, isFirstPick, isFirstPick);
       
       setCurrentOptions(options);
       setIsFlipping(true);
@@ -847,10 +988,48 @@ const DraftView: React.FC = () => {
     const winner = s1Final > s2Final ? match.team1 : (s1Final < s2Final ? match.team2 : (Math.random() > 0.5 ? match.team1 : match.team2));
     
     // Start the simulation loop
-    let eventIdx = 0;
+    const numTriggers = 2 + Math.floor(Math.random() * 2);
+    const triggers: number[] = [];
+    while (triggers.length < numTriggers) {
+      const idx = Math.floor(Math.random() * (newEvents.length - 10)) + 5;
+      if (!triggers.includes(idx)) triggers.push(idx);
+    }
+    setInteractiveTriggers(triggers);
+
+    setMatchSimulationData({
+      events: newEvents,
+      idx: 0,
+      matchId,
+      s1Final,
+      s2Final,
+      winner
+    });
+
+    startSimulation(0, newEvents, matchId, s1Final, s2Final, winner, triggers);
+  };
+
+  const startSimulation = (
+    startIdx: number, 
+    events: MatchEvent[], 
+    matchId: string, 
+    s1Final: number, 
+    s2Final: number, 
+    winner: any,
+    triggers: number[]
+  ) => {
+    let eventIdx = startIdx;
+    
     const interval = setInterval(() => {
-      if (eventIdx < newEvents.length) {
-        const event = newEvents[eventIdx];
+      if (eventIdx < events.length) {
+        // Check for interactive trigger
+        if (triggers.includes(eventIdx)) {
+          clearInterval(interval);
+          setMatchSimulationData({ events, idx: eventIdx, matchId, s1Final, s2Final, winner });
+          triggerInteractiveEvent();
+          return;
+        }
+
+        const event = events[eventIdx];
         setLiveEvents(prev => [event, ...prev]);
         setLiveScore({ s1: event.score1, s2: event.score2 });
         setLiveQuarter(event.quarter);
@@ -859,16 +1038,91 @@ const DraftView: React.FC = () => {
         clearInterval(interval);
         finishMatch(matchId, s1Final, s2Final, winner);
       }
-    }, 800); // Faster rhythm to reach higher scores in reasonable time
+    }, 800);
 
     (window as any).matchInterval = interval;
     (window as any).skipMatch = () => {
       clearInterval((window as any).matchInterval);
-      setLiveEvents(newEvents.reverse());
+      setLiveEvents(events.reverse());
       setLiveScore({ s1: s1Final, s2: s2Final });
       setLiveQuarter(4);
       finishMatch(matchId, s1Final, s2Final, winner);
+      setActiveInteractiveEvent(null);
+      setIsSimulationPaused(false);
     };
+  };
+
+  const triggerInteractiveEvent = () => {
+    setIsSimulationPaused(true);
+    const randomEvent = INTERACTIVE_POOL[Math.floor(Math.random() * INTERACTIVE_POOL.length)];
+    
+    // Replace {player} with a random starter
+    const userStarters = starters.map(s => s.card).filter(Boolean) as Card[];
+    const randomPlayer = userStarters[Math.floor(Math.random() * userStarters.length)];
+    const scenario = {
+      ...randomEvent,
+      description: randomEvent.description.replace('{player}', randomPlayer.name)
+    };
+    
+    setActiveInteractiveEvent(scenario);
+  };
+
+  const handleInteractiveChoice = async (option: InteractiveOption) => {
+    if (!matchSimulationData) return;
+    
+    // Probability based on Team OVR and risk
+    const baseProbs = { low: 0.85, medium: 0.65, high: 0.45 };
+    const successProb = baseProbs[option.risk] + ((teamOVR - 80) * 0.015);
+    const isSuccess = Math.random() < successProb;
+
+    let resText = isSuccess ? option.successText : option.failText;
+    let addedPoints = isSuccess ? option.points : 0;
+
+    setInteractiveResolution({ 
+      text: resText, 
+      points: addedPoints,
+      success: isSuccess
+    });
+
+    // Wait 2 seconds to show resolution
+    setTimeout(() => {
+      // Add custom event to live feed
+      const resolutionEvent: MatchEvent = {
+        id: `interactive-res-${Date.now()}`,
+        text: `INTERACTIVE: ${resText}`,
+        score1: matchSimulationData.events[matchSimulationData.idx].score1 + (addedPoints && matchSimulationData.matchId.includes('USER') ? addedPoints : 0),
+        score2: matchSimulationData.events[matchSimulationData.idx].score2,
+        quarter: matchSimulationData.events[matchSimulationData.idx].quarter,
+        team: 'USER',
+        points: addedPoints
+      };
+
+      setLiveEvents(prev => [resolutionEvent, ...prev]);
+      if (addedPoints) {
+        setLiveScore(prev => ({ ...prev, s1: prev.s1 + addedPoints }));
+        // Note: we don't strictly update final scores here for simplicity, 
+        // as the sim loop will continue toward its pre-calculated final scores.
+      }
+
+      setActiveInteractiveEvent(null);
+      setInteractiveResolution(null);
+      setIsSimulationPaused(false);
+      
+      // Remove this trigger so it doesn't fire again
+      const newTriggers = interactiveTriggers.filter(t => t !== matchSimulationData.idx);
+      setInteractiveTriggers(newTriggers);
+
+      // Resume simulation
+      startSimulation(
+        matchSimulationData.idx + 1, 
+        matchSimulationData.events, 
+        matchSimulationData.matchId, 
+        matchSimulationData.s1Final + addedPoints, // Slightly adjust final score if it was a user match
+        matchSimulationData.s2Final, 
+        matchSimulationData.winner,
+        newTriggers
+      );
+    }, 2500);
   };
 
   const finishMatch = async (matchId: string, s1: number, s2: number, winner: 'USER' | GhostTeam) => {
@@ -1032,9 +1286,7 @@ const DraftView: React.FC = () => {
       ? benchPlayers.reduce((acc, p) => acc + (p.stats?.ovr || 0), 0) / benchPlayers.length 
       : 0;
 
-    // Weighted OVR: 80% Starters, 20% Bench
-    const finalOvr = (startersAvg * 0.8) + (benchAvg * 0.2);
-    return Math.round(finalOvr);
+    return Math.round((startersAvg * 0.8) + (benchAvg * 0.2));
   }, [starters, bench]);
 
   const renderEntry = () => (
@@ -1071,203 +1323,206 @@ const DraftView: React.FC = () => {
   );
 
   const renderDraftBoard = () => (
-    <div className="flex-1 flex flex-col lg:flex-row px-4 py-2 md:p-4 gap-4 max-w-7xl mx-auto w-full h-full relative">
-      {/* Tactical Board Header - Floating on Mobile, Sidebar on Desktop */}
-      <div className="lg:w-48 flex flex-col gap-4 shrink-0 z-30">
-        <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-4 flex lg:flex-col items-center justify-between lg:justify-center gap-4 shadow-xl">
-          <div className="text-center">
-            <p className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-zinc-500">Team OVR</p>
-            <p className="text-2xl md:text-3xl font-black italic text-amber-500">{teamOVR}</p>
+    <div className="h-[100dvh] w-full flex flex-col bg-zinc-950 overflow-hidden relative">
+      {/* Back Button */}
+      <button 
+        onClick={() => setCurrentView('home')}
+        className="absolute top-4 left-4 z-[5500] w-10 h-10 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-full flex items-center justify-center text-white hover:bg-zinc-800 transition-all active:scale-95 shadow-lg"
+      >
+        <ArrowLeft size={20} />
+      </button>
+
+      <div className="flex-1 flex flex-col lg:flex-row px-4 pt-16 pb-2 md:p-4 gap-4 max-w-7xl mx-auto w-full h-full relative overflow-hidden">
+        {/* Tactical Board Header - Floating on Mobile, Sidebar on Desktop */}
+        <div className="lg:w-48 flex flex-col gap-4 shrink-0 z-30">
+          <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-4 flex lg:flex-col items-center justify-between lg:justify-center gap-4 shadow-xl">
+            <div className="text-center">
+              <p className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-zinc-500">Team OVR</p>
+              <p className="text-2xl md:text-3xl font-black italic text-amber-500">{teamOVR}</p>
+            </div>
+            <div className="hidden lg:block w-full h-px bg-zinc-900" />
+            <div className="text-right lg:text-center">
+              <p className="text-[9px] md:text-[10px] font-black uppercase tracking-tighter text-white italic">Draft Mode</p>
+              <p className="text-[7px] md:text-[8px] font-bold text-zinc-600 uppercase tracking-widest">
+                {phase === 'starters' && starters.some(s => s.card) ? 'Starters' : phase === 'bench' ? 'Bench' : 'Captain Pick'}
+              </p>
+            </div>
           </div>
-          <div className="hidden lg:block w-full h-px bg-zinc-900" />
-          <div className="text-right lg:text-center">
-            <p className="text-[9px] md:text-[10px] font-black uppercase tracking-tighter text-white italic">Draft Mode</p>
-            <p className="text-[7px] md:text-[8px] font-bold text-zinc-600 uppercase tracking-widest">
-              {phase === 'captain' ? 'Captain Pick' : phase === 'starters' ? 'Starters' : 'Bench'}
-            </p>
+  
+          {/* Desktop Bench - Visible on the side */}
+          <div className="hidden lg:flex flex-col bg-zinc-950/80 border border-zinc-900 rounded-3xl p-4 shadow-xl flex-1 overflow-hidden">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-4 text-center">Bench</h3>
+            <div className="flex flex-col gap-3 overflow-y-auto pr-2 scrollbar-hide">
+              {bench.map(slot => (
+                <Slot 
+                  key={slot.id} 
+                  slot={slot} 
+                  mini 
+                  onClick={() => handleSlotClick(slot)} 
+                  isSelected={swapSource === slot.id || activeSlotId === slot.id}
+                />
+              ))}
+            </div>
           </div>
         </div>
-
-        {/* Desktop Bench - Visible on the side */}
-        <div className="hidden lg:flex flex-col bg-zinc-950/80 border border-zinc-900 rounded-3xl p-4 shadow-xl flex-1 overflow-hidden">
-          <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-4 text-center">Bench</h3>
-          <div className="flex flex-col gap-3 overflow-y-auto pr-2 scrollbar-hide">
-            {bench.map(slot => (
-              <Slot 
-                key={slot.id} 
-                slot={slot} 
-                mini 
-                onClick={() => handleSlotClick(slot)} 
-                disabled={phase === 'captain'} 
-                isSelected={swapSource === slot.id || activeSlotId === slot.id}
-              />
-            ))}
+  
+        {/* Main Board Container */}
+        <div className="flex-1 flex flex-col min-h-0 gap-2 lg:gap-4 relative overflow-hidden h-full">
+          {/* Top Half: Tactical Starting Five */}
+          <div className="flex-1 lg:flex-[3] min-h-0 bg-zinc-950/50 border border-zinc-900 rounded-[2.5rem] p-4 md:p-8 flex flex-col justify-center relative overflow-hidden shadow-2xl">
+            {/* Court Lines Overlay */}
+            <div className="absolute inset-0 opacity-10 pointer-events-none">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[90%] h-1/2 border-b-2 border-x-2 border-white/20 rounded-b-[100px]" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-2 border-white/20 rounded-full" />
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-24 border-t-2 border-x-2 border-white/20" />
+            </div>
+  
+            <div className="relative z-10 h-full w-full flex flex-col justify-around py-1 md:py-4 min-h-0">
+              {/* Mobile Layout: 2 Rows (3+2) | Desktop: Tactical 1-2-2 */}
+              <div className="lg:hidden flex flex-col gap-1 md:gap-4 justify-around h-full">
+                {/* Row 1: PG, SG, SF */}
+                <div className="flex justify-center gap-2 md:gap-4 h-[44%]">
+                  {[starters[0], starters[1], starters[2]].map(slot => (
+                    <div key={slot.id} className="w-[30%] max-w-[85px] h-full flex items-center">
+                      <Slot 
+                        slot={slot} 
+                        onClick={() => handleSlotClick(slot)} 
+                        isSelected={swapSource === slot.id || activeSlotId === slot.id}
+                      />
+                    </div>
+                  ))}
+                </div>
+                {/* Row 2: PF, C */}
+                <div className="flex justify-center gap-4 md:gap-8 h-[44%]">
+                  {[starters[3], starters[4]].map(slot => (
+                    <div key={slot.id} className="w-[35%] max-w-[95px] h-full flex items-center">
+                      <Slot 
+                        slot={slot} 
+                        onClick={() => handleSlotClick(slot)} 
+                        isSelected={swapSource === slot.id || activeSlotId === slot.id}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+  
+              {/* Desktop Tactical Layout */}
+              <div className="hidden lg:flex flex-col justify-between h-full">
+                <div className="flex justify-center">
+                  <Slot 
+                    slot={starters[0]} 
+                    onClick={() => handleSlotClick(starters[0])} 
+                    isSelected={swapSource === starters[0].id || activeSlotId === starters[0].id}
+                  />
+                </div>
+                <div className="flex justify-between px-[15%]">
+                  <Slot 
+                    slot={starters[1]} 
+                    onClick={() => handleSlotClick(starters[1])} 
+                    isSelected={swapSource === starters[1].id || activeSlotId === starters[1].id}
+                  />
+                  <Slot 
+                    slot={starters[2]} 
+                    onClick={() => handleSlotClick(starters[2])} 
+                    isSelected={swapSource === starters[2].id || activeSlotId === starters[2].id}
+                  />
+                </div>
+                <div className="flex justify-center gap-24">
+                  <Slot 
+                    slot={starters[3]} 
+                    onClick={() => handleSlotClick(starters[3])} 
+                    isSelected={swapSource === starters[3].id || activeSlotId === starters[3].id}
+                  />
+                  <Slot 
+                    slot={starters[4]} 
+                    onClick={() => handleSlotClick(starters[4])} 
+                    isSelected={swapSource === starters[4].id || activeSlotId === starters[4].id}
+                  />
+                </div>
+              </div>
+            </div>
+  
+            {/* Squad Review Button Overlay */}
+            {phase === 'review' && (
+              <div className="absolute inset-x-0 bottom-4 flex justify-center z-50 px-8">
+                <motion.button
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  onClick={() => setPhase('summary')}
+                  className="w-full max-w-xs bg-amber-500 text-black py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all active:scale-95"
+                >
+                  <span>Finish Draft and Play</span>
+                  <ArrowRight size={20} />
+                </motion.button>
+              </div>
+            )}
           </div>
-        </div>
-      </div>
-
-      {/* Main Board Container */}
-      <div className="flex-1 flex flex-col min-h-0 gap-4 relative pb-20 lg:pb-0">
-        {/* Top Half: Tactical Starting Five */}
-        <div className="flex-1 bg-zinc-950/50 border border-zinc-900 rounded-[2.5rem] p-4 md:p-8 flex flex-col justify-center relative overflow-hidden shadow-2xl mb-4">
-          {/* Court Lines Overlay */}
-          <div className="absolute inset-0 opacity-10 pointer-events-none">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[90%] h-1/2 border-b-2 border-x-2 border-white/20 rounded-b-[100px]" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-2 border-white/20 rounded-full" />
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-24 border-t-2 border-x-2 border-white/20" />
-          </div>
-
-          <div className="relative z-10 h-full w-full flex flex-col justify-around py-2 md:py-4">
-            {/* Mobile Layout: 2 Rows (3+2) | Desktop: Tactical 1-2-2 */}
-            <div className="lg:hidden flex flex-col gap-4 md:gap-8">
-              {/* Row 1: PG, SG, SF */}
-              <div className="flex justify-center gap-2 md:gap-4">
-                {[starters[0], starters[1], starters[2]].map(slot => (
-                  <div key={slot.id} className="w-[30%] max-w-[100px]">
-                    <Slot 
-                      slot={slot} 
-                      onClick={() => handleSlotClick(slot)} 
-                      disabled={phase === 'captain'} 
-                      isSelected={swapSource === slot.id || activeSlotId === slot.id}
-                    />
-                  </div>
-                ))}
-              </div>
-              {/* Row 2: PF, C */}
-              <div className="flex justify-center gap-4 md:gap-8">
-                {[starters[3], starters[4]].map(slot => (
-                  <div key={slot.id} className="w-[35%] max-w-[110px]">
-                    <Slot 
-                      slot={slot} 
-                      onClick={() => handleSlotClick(slot)} 
-                      disabled={phase === 'captain'} 
-                      isSelected={swapSource === slot.id || activeSlotId === slot.id}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Desktop Tactical Layout */}
-            <div className="hidden lg:flex flex-col justify-between h-full">
-              <div className="flex justify-center">
-                <Slot 
-                  slot={starters[0]} 
-                  onClick={() => handleSlotClick(starters[0])} 
-                  disabled={phase === 'captain'} 
-                  isSelected={swapSource === starters[0].id || activeSlotId === starters[0].id}
-                />
-              </div>
-              <div className="flex justify-between px-[15%]">
-                <Slot 
-                  slot={starters[1]} 
-                  onClick={() => handleSlotClick(starters[1])} 
-                  disabled={phase === 'captain'} 
-                  isSelected={swapSource === starters[1].id || activeSlotId === starters[1].id}
-                />
-                <Slot 
-                  slot={starters[2]} 
-                  onClick={() => handleSlotClick(starters[2])} 
-                  disabled={phase === 'captain'} 
-                  isSelected={swapSource === starters[2].id || activeSlotId === starters[2].id}
-                />
-              </div>
-              <div className="flex justify-center gap-24">
-                <Slot 
-                  slot={starters[3]} 
-                  onClick={() => handleSlotClick(starters[3])} 
-                  disabled={phase === 'captain'} 
-                  isSelected={swapSource === starters[3].id || activeSlotId === starters[3].id}
-                />
-                <Slot 
-                  slot={starters[4]} 
-                  onClick={() => handleSlotClick(starters[4])} 
-                  disabled={phase === 'captain'} 
-                  isSelected={swapSource === starters[4].id || activeSlotId === starters[4].id}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Squad Review Button Overlay */}
-          {phase === 'review' && (
-            <div className="absolute inset-x-0 bottom-8 flex justify-center z-50 px-8">
-              <motion.button
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                onClick={() => setPhase('summary')}
-                className="w-full max-w-xs bg-amber-500 text-black py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(245,158,11,0.3)] hover:bg-amber-400 transition-all active:scale-95"
-              >
-                <span>Finish Draft and Play</span>
-                <ArrowRight size={20} />
-              </motion.button>
-            </div>
-          )}
-        </div>
-
-        {/* Mobile Bench Accordion - Hidden on Desktop */}
-        <div className="lg:hidden flex-none relative z-50 mt-auto">
-          <button 
-            onClick={() => setIsBenchExpanded(!isBenchExpanded)}
-            className="w-full bg-zinc-950 border border-zinc-900 rounded-xl py-3 px-6 flex items-center justify-between shadow-2xl active:bg-zinc-900 transition-all relative z-10"
-          >
-            <div className="flex-1 flex justify-center items-center gap-2">
-              <span className="text-[11px] font-black uppercase tracking-[0.4em] text-white">
-                Bench <span className="text-zinc-500 ml-2">({bench.filter(s => s.card).length}/{bench.length})</span>
-              </span>
-            </div>
-            <motion.div
-              animate={{ rotate: isBenchExpanded ? 180 : 0 }}
-              className="text-amber-500"
+  
+          {/* Mobile Mobile Bench - Collapsible Tab Style */}
+          <div className="lg:hidden flex flex-col gap-2 relative mt-auto pb-4 shrink-0">
+            <button 
+              onClick={() => setIsBenchVisibleMobile(!isBenchVisibleMobile)}
+              className="w-full bg-zinc-900 border border-zinc-800 py-3 flex items-center justify-center gap-2 rounded-2xl hover:bg-zinc-800 transition-all active:scale-x-95"
             >
-              <ArrowRight size={18} className="rotate-90" />
-            </motion.div>
-          </button>
-
-          <AnimatePresence>
-            {isBenchExpanded && (
+              <div className="flex items-center gap-2">
+                <Sparkles size={14} className={isBenchVisibleMobile ? 'text-amber-500' : 'text-zinc-500'} />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                  {isBenchVisibleMobile ? 'Close Bench' : 'Open Bench (SUB / RES)'}
+                </span>
+              </div>
               <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="absolute top-full left-0 right-0 mt-2 z-[6000]"
+                animate={{ rotate: isBenchVisibleMobile ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
               >
-                <div className="bg-zinc-950/98 border border-zinc-900 rounded-3xl p-6 shadow-[0_20px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl max-h-[50vh] overflow-y-auto scrollbar-hide">
-                  <div className="grid grid-cols-3 gap-4">
+                <LayoutGrid size={14} className="text-zinc-500" />
+              </motion.div>
+            </button>
+  
+            <AnimatePresence>
+              {isBenchVisibleMobile && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden bg-zinc-950/90 border border-zinc-900 rounded-2xl shadow-[0_-10px_30px_rgba(0,0,0,0.5)]"
+                >
+                  <div className="flex items-center gap-2 px-4 py-2 border-b border-zinc-900/50">
+                    <div className="h-px flex-1 bg-zinc-900/50" />
+                    <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">Reserve Players</span>
+                    <div className="h-px flex-1 bg-zinc-900/50" />
+                  </div>
+                  
+                  <div className="flex justify-center flex-wrap gap-2 p-4">
                     {bench.map(slot => (
-                      <div key={slot.id} className="w-full">
+                      <div key={slot.id} className="w-[20%] min-w-[60px] max-w-[80px]">
                         <Slot 
                           slot={slot} 
+                          mini 
                           onClick={() => handleSlotClick(slot)} 
-                          disabled={phase === 'captain'} 
                           isSelected={swapSource === slot.id || activeSlotId === slot.id}
                         />
                       </div>
                     ))}
                   </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
-
-        {/* Captain Selection Backdrop Overlay */}
-        {phase === 'captain' && (
-          <div className="absolute inset-0 z-20 bg-black/60 backdrop-blur-md rounded-[2.5rem] pointer-events-none transition-all duration-500" />
-        )}
       </div>
     </div>
   );
 
   const renderSelection = () => (
-    <div className="fixed inset-0 z-[8000] flex flex-col items-center justify-center p-4 md:p-8">
+    <div className="fixed inset-0 z-[8000] flex flex-col items-center justify-center p-2 md:p-8 h-[100dvh]">
       {/* Backdrop for the modal */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="absolute inset-0 bg-black/95 backdrop-blur-2xl"
+        className="absolute inset-0 bg-black/95 backdrop-blur-3xl"
         onClick={() => {
-          if (phase !== 'captain' && phase !== 'starters' && phase !== 'bench') {
+          // Block escape during captain pick if needed, but usually we allow it if they want to cancel draft
+          if (starters.some(s => s.card)) {
             setCurrentOptions([]);
           }
         }}
@@ -1276,42 +1531,34 @@ const DraftView: React.FC = () => {
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 50 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        className="relative z-10 w-full max-w-6xl flex flex-col items-center"
+        className="relative z-10 w-full flex flex-col items-center px-1"
       >
-        <div className="text-center mb-8 md:mb-12 shrink-0">
-          <h2 className="text-2xl md:text-5xl font-black italic uppercase tracking-tighter text-white">
-            {phase === 'captain' ? 'Choose Your Captain' : `Select ${activeSlotId?.toUpperCase()}`}
+        <div className="text-center mb-6 md:mb-12 shrink-0">
+          <h2 className="text-xl md:text-5xl font-black italic uppercase tracking-tighter text-white leading-none">
+            {currentOptions.length > 0 && starters.every(s => !s.card) && bench.every(b => !b.card) ? 'Choose Your Captain' : `Select Player`}
           </h2>
-          <p className="text-[10px] md:text-sm font-bold text-amber-500 uppercase tracking-[0.3em] mt-3">
-            {phase === 'captain' ? 'Elite & Legend Stars Only' : 'Select one to add to your roster'}
+          <p className="text-[9px] md:text-sm font-bold text-amber-500 uppercase tracking-[0.3em] mt-2">
+            {currentOptions.length > 0 && starters.every(s => !s.card) && bench.every(b => !b.card) ? 'Draft Leader' : 'Pick the best talent'}
           </p>
         </div>
 
-        <div className="w-full overflow-x-auto no-scrollbar pb-12 px-4">
-          <div className="flex flex-row gap-4 md:gap-8 min-w-max px-4 md:px-0">
-            {currentOptions.map((card, idx) => (
-              <motion.div
-                key={card.id}
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.1, duration: 0.5, type: "spring" }}
-                className="w-[240px] md:w-[280px] shrink-0"
-              >
-                <CardItem 
-                  card={card} 
-                  isOwned={true} 
-                  mode="large" 
-                  onClick={() => handleSelectCard(card)}
-                />
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-4 flex items-center gap-2 text-zinc-500 animate-pulse lg:hidden">
-          <ArrowRight size={14} className="rotate-180" />
-          <span className="text-[10px] font-black uppercase tracking-widest">Swipe to explore</span>
-          <ArrowRight size={14} />
+        <div className="w-full flex flex-row flex-nowrap items-center justify-center gap-1 sm:gap-4 max-w-full overflow-visible">
+          {currentOptions.map((card, idx) => (
+            <motion.div
+              key={card.id + idx}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.05 }}
+              className="w-[19%] max-w-[180px] sm:max-w-[220px] aspect-[2.5/3.5] shrink-0"
+            >
+              <CardItem 
+                card={card} 
+                isOwned={true} 
+                mode="mini" 
+                onClick={() => handleSelectCard(card)}
+              />
+            </motion.div>
+          ))}
         </div>
       </motion.div>
     </div>
@@ -1389,18 +1636,24 @@ const DraftView: React.FC = () => {
                   initial={{ opacity: 0, x: -20, scale: 0.95 }}
                   animate={{ opacity: 1, x: 0, scale: 1 }}
                   className={`p-4 rounded-2xl border ${
-                    event.team === 'USER' 
-                      ? 'bg-amber-500/10 border-amber-500/20' 
-                      : 'bg-zinc-900/50 border-zinc-800'
+                    event.text.startsWith('INTERACTIVE:')
+                      ? 'bg-amber-500 text-black border-amber-400'
+                      : event.team === 'USER' 
+                        ? 'bg-amber-500/10 border-amber-500/20' 
+                        : 'bg-zinc-900/50 border-zinc-800'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className={`text-[8px] font-black uppercase tracking-widest ${event.team === 'USER' ? 'text-amber-500' : 'text-zinc-500'}`}>
-                      {event.team === 'USER' ? 'Your Team' : 'Opponent'}
+                    <span className={`text-[8px] font-black uppercase tracking-widest ${
+                      event.text.startsWith('INTERACTIVE:') ? 'text-black/60' : 
+                      event.team === 'USER' ? 'text-amber-500' : 'text-zinc-500'
+                    }`}>
+                      {event.text.startsWith('INTERACTIVE:') ? 'Event Outcome' : 
+                       event.team === 'USER' ? 'Your Team' : 'Opponent'}
                     </span>
-                    <span className="text-[8px] font-bold text-zinc-600">Q{event.quarter}</span>
+                    <span className={`text-[8px] font-bold ${event.text.startsWith('INTERACTIVE:') ? 'text-black/60' : 'text-zinc-600'}`}>Q{event.quarter}</span>
                   </div>
-                  <p className="text-sm font-bold text-white">{event.text}</p>
+                  <p className={`text-sm font-bold ${event.text.startsWith('INTERACTIVE:') ? 'text-black' : 'text-white'}`}>{event.text.replace('INTERACTIVE: ', '')}</p>
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -1411,17 +1664,96 @@ const DraftView: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Interactive Choice Overlay */}
+          <AnimatePresence>
+            {activeInteractiveEvent && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6"
+              >
+                <div className="w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-6 md:p-8 space-y-6 md:space-y-8 shadow-2xl overflow-y-auto max-h-full">
+                  {!interactiveResolution ? (
+                    <>
+                      <div className="text-center space-y-3">
+                        <div className="inline-block px-4 py-1 bg-amber-500 text-black rounded-full text-[10px] font-black uppercase tracking-widest">
+                          Decision Moment
+                        </div>
+                        <h3 className="text-xl md:text-2xl font-black italic uppercase text-white leading-tight">{activeInteractiveEvent.title}</h3>
+                        <p className="text-zinc-400 font-medium text-sm md:text-base">{activeInteractiveEvent.description}</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-2 md:gap-3">
+                        {activeInteractiveEvent.options.map((opt, i) => (
+                          <button
+                            key={i}
+                            onClick={() => handleInteractiveChoice(opt)}
+                            className="w-full p-4 bg-zinc-950 border border-zinc-800 rounded-2xl hover:border-amber-500 active:scale-[0.98] group transition-all text-left flex items-center justify-between"
+                          >
+                            <div>
+                              <p className="text-xs md:text-sm font-black uppercase italic text-white group-hover:text-amber-500">{opt.label}</p>
+                              <p className="text-[9px] md:text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+                                Risk: <span className={
+                                  opt.risk === 'low' ? 'text-green-500' :
+                                  opt.risk === 'medium' ? 'text-amber-500' :
+                                  'text-red-500'
+                                }>{opt.risk.toUpperCase()}</span>
+                              </p>
+                            </div>
+                            <div className="w-8 h-8 rounded-xl bg-zinc-900 flex items-center justify-center text-zinc-500 group-hover:text-amber-500">
+                              <ArrowRight size={16} />
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <motion.div 
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="text-center space-y-6 py-4 md:py-8"
+                    >
+                      <div className={`w-16 h-16 md:w-20 md:h-20 rounded-full mx-auto flex items-center justify-center shadow-2xl ${interactiveResolution.success ? 'bg-green-500 shadow-green-500/20' : 'bg-red-500 shadow-red-500/20'}`}>
+                        {interactiveResolution.success ? <Zap size={32} className="text-black" /> : <X size={32} className="text-black" />}
+                      </div>
+                      <div className="space-y-2 px-4">
+                        <h3 className={`text-3xl md:text-4xl font-black italic uppercase ${interactiveResolution.success ? 'text-green-500' : 'text-red-500'}`}>
+                          {interactiveResolution.success ? 'SUCCESS!' : 'FAILED'}
+                        </h3>
+                        <p className="text-base md:text-lg font-bold text-white leading-tight">{interactiveResolution.text}</p>
+                      </div>
+                      {interactiveResolution.points > 0 && (
+                        <div className="inline-block px-6 py-2 bg-amber-500 text-black rounded-full font-black uppercase italic tracking-widest shadow-xl text-xs md:text-sm">
+                          +{interactiveResolution.points} Points
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Footer / Controls */}
-        <div className="p-6 md:p-10 bg-zinc-900/30 border-t border-zinc-800 flex justify-center relative z-10">
-          <button
-            onClick={() => (window as any).skipMatch?.()}
-            className="px-8 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center gap-3"
-          >
-            <Zap size={16} className="fill-amber-500 text-amber-500" />
-            Skip Simulation
-          </button>
+        <div className="p-6 md:p-10 bg-zinc-900/30 border-t border-zinc-800 flex justify-center relative z-10 transition-all">
+          {!isSimulationPaused && (
+            <button
+              onClick={() => (window as any).skipMatch?.()}
+              className="px-8 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center gap-3 active:scale-95"
+            >
+              <Zap size={16} className="fill-amber-500 text-amber-500" />
+              Skip Simulation
+            </button>
+          )}
+          {isSimulationPaused && !interactiveResolution && (
+            <div className="flex items-center gap-3 text-zinc-500">
+              <div className="w-2 h-2 bg-zinc-700 rounded-full animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Waiting for Decision...</span>
+            </div>
+          )}
         </div>
       </motion.div>
     );
@@ -1526,16 +1858,18 @@ const DraftView: React.FC = () => {
         </button>
         
         <button 
-          onClick={() => {
-            setPhase('entry');
-            setStarters(prev => prev.map(s => ({ ...s, card: null })));
-            setBench(prev => prev.map(b => ({ ...b, card: null })));
-            setBracket([]);
-            setSelectedTournament(null);
-          }}
-          className="w-full bg-zinc-900 text-white border border-zinc-800 py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all"
+          onClick={() => resetDraftState('home')}
+          className="w-full bg-zinc-900 text-amber-500 border border-amber-500/20 py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all"
         >
-          <RotateCcw size={16} />
+          <Home size={16} />
+          <span>Finalize and Exit</span>
+        </button>
+
+        <button 
+          onClick={() => resetDraftState('entry')}
+          className="w-full bg-zinc-900/50 text-zinc-500 border border-zinc-800 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all"
+        >
+          <RotateCcw size={14} />
           <span>New Draft</span>
         </button>
       </div>
@@ -1611,10 +1945,14 @@ const DraftView: React.FC = () => {
   );
 
   const renderBracket = () => {
-    // Group matches by round for easier rendering
-    const qfMatches = bracket.filter(m => m.id.startsWith('qf'));
-    const sfMatches = bracket.filter(m => m.id.startsWith('sf'));
-    const fMatch = bracket.find(m => m.id.startsWith('f'));
+    // NBA Structure: West (Left), East (Right), Final (Center)
+    // West: qf1/qf2 -> sf1
+    // East: qf3/qf4 -> sf2
+    // Middle: f1
+    
+    const qfMatches = currentRound === 'QF' ? bracket : [];
+    const sfMatches = currentRound === 'SF' ? bracket : [];
+    const fMatch = currentRound === 'F' ? bracket[0] : null;
 
     return (
       <div className="flex-1 flex flex-col p-0 md:p-8 space-y-4 md:space-y-8 overflow-hidden relative bg-zinc-950">
@@ -1627,7 +1965,7 @@ const DraftView: React.FC = () => {
             <div>
               <h2 className="text-lg md:text-2xl font-black italic uppercase text-white leading-none truncate max-w-[150px] md:max-w-none">{selectedTournament?.name}</h2>
               <p className="text-[8px] md:text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
-                Playoff Bracket
+                NBA Cup Playoffs
               </p>
             </div>
           </div>
@@ -1647,72 +1985,124 @@ const DraftView: React.FC = () => {
           </div>
         </div>
 
-        {/* Bracket Tree Container */}
-        <div className="flex-1 flex items-center min-h-0 overflow-x-auto pb-24 md:pb-8 scrollbar-hide snap-x snap-mandatory">
-          <div className="flex items-center gap-8 md:gap-24 min-w-max px-8 md:px-24 mx-auto h-full py-10">
-            {/* Quarterfinals */}
-            <div className="flex flex-col justify-center gap-8 md:gap-12 relative snap-center">
-              <div className="text-center mb-4">
-                <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-zinc-600">Quarterfinals</span>
+        {/* NBA Style Bracket Tree */}
+        <div className="flex-1 flex flex-col min-h-0 overflow-x-auto pb-24 md:pb-8 scrollbar-hide snap-x snap-mandatory items-center justify-center">
+          <div className="flex items-center gap-8 md:gap-20 min-w-max px-12 md:px-24 mx-auto pb-20 pt-10">
+            
+            {/* WEST CONFERENCE - Left Side */}
+            <div className="flex items-center gap-8 md:gap-16">
+              {/* West QFs */}
+              <div className="flex flex-col gap-12 md:gap-24">
+                <div className="text-center group">
+                  <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 group-hover:text-zinc-500 transition-colors">West Quarters</span>
+                </div>
+                <div className="flex flex-col gap-8 md:gap-16">
+                  {['qf1', 'qf2'].map(id => {
+                    const m = qfMatches.find(match => match.id === id);
+                    return (
+                      <BracketMatchCard 
+                        key={id} 
+                        match={m || null} 
+                        isUserMatch={m?.team1 === 'USER' || m?.team2 === 'USER'} 
+                        onSimulate={() => m && simulateMatch(m.id)}
+                        isSimulating={isSimulating && activeMatchId === id}
+                        teamOVR={teamOVR}
+                        isActive={currentRound === 'QF' && (m?.team1 === 'USER' || m?.team2 === 'USER') && m?.status === 'pending'}
+                      />
+                    );
+                  })}
+                </div>
               </div>
-              <div className="flex flex-col gap-8 md:gap-12">
-                {qfMatches.map((m) => (
-                  <BracketMatchCard 
-                    key={m.id} 
-                    match={m} 
-                    isUserMatch={m.team1 === 'USER' || m.team2 === 'USER'} 
-                    onSimulate={() => simulateMatch(m.id)}
-                    isSimulating={isSimulating && activeMatchId === m.id}
-                    teamOVR={teamOVR}
-                    isActive={currentRound === 'QF' && (m.team1 === 'USER' || m.team2 === 'USER') && m.status === 'pending'}
-                  />
-                ))}
+
+              {/* West Semis */}
+              <div className="flex flex-col gap-12">
+                <div className="text-center group">
+                  <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 group-hover:text-zinc-500 transition-colors">West Finals</span>
+                </div>
+                <BracketMatchCard 
+                  match={sfMatches.find(m => m.id === 'sf1') || null} 
+                  isUserMatch={sfMatches.find(m => m.id === 'sf1')?.team1 === 'USER' || sfMatches.find(m => m.id === 'sf1')?.team2 === 'USER'} 
+                  onSimulate={() => simulateMatch('sf1')}
+                  isSimulating={isSimulating && activeMatchId === 'sf1'}
+                  teamOVR={teamOVR}
+                  isActive={currentRound === 'SF' && (sfMatches.find(m => m.id === 'sf1')?.team1 === 'USER' || sfMatches.find(m => m.id === 'sf1')?.team2 === 'USER') && sfMatches.find(m => m.id === 'sf1')?.status === 'pending'}
+                />
               </div>
             </div>
 
-            {/* Semifinals */}
-            <div className="flex flex-col justify-center gap-24 md:gap-48 relative snap-center">
-              <div className="text-center mb-4">
-                <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-zinc-600">Semifinals</span>
+            {/* THE NBA FINAL - Center Piece */}
+            <div className="flex flex-col items-center gap-10 px-12 md:px-20 relative snap-center">
+              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-64 bg-amber-500/5 rounded-full blur-[100px] pointer-events-none" />
+              
+              <div className="flex flex-col items-center gap-4 relative z-10">
+                <motion.div 
+                  animate={{ 
+                    scale: [1, 1.1, 1],
+                    rotate: [12, 15, 12] 
+                  }}
+                  transition={{ repeat: Infinity, duration: 4 }}
+                  className="w-20 h-20 md:w-28 md:h-28 bg-amber-500 rounded-[2.5rem] flex items-center justify-center shadow-[0_0_80px_rgba(245,158,11,0.3)] border-4 border-amber-400"
+                >
+                  <Trophy size={48} className="text-black" />
+                </motion.div>
+                <div className="text-center">
+                  <h3 className="text-2xl md:text-4xl font-black italic uppercase text-white tracking-tighter">NBA Finals</h3>
+                  <p className="text-[10px] font-bold text-amber-500/50 uppercase tracking-[0.5em] mt-1">World Champion</p>
+                </div>
               </div>
-              <div className="flex flex-col gap-24 md:gap-48">
-                {sfMatches.length > 0 ? sfMatches.map((m) => (
-                  <BracketMatchCard 
-                    key={m.id} 
-                    match={m} 
-                    isUserMatch={m.team1 === 'USER' || m.team2 === 'USER'} 
-                    onSimulate={() => simulateMatch(m.id)}
-                    isSimulating={isSimulating && activeMatchId === m.id}
-                    teamOVR={teamOVR}
-                    isActive={currentRound === 'SF' && (m.team1 === 'USER' || m.team2 === 'USER') && m.status === 'pending'}
-                  />
-                )) : Array.from({ length: 2 }).map((_, i) => (
-                  <BracketMatchCard key={`sf-placeholder-${i}`} match={null} isUserMatch={false} onSimulate={() => {}} isSimulating={false} teamOVR={teamOVR} />
-                ))}
+              
+              <BracketMatchCard 
+                match={fMatch || null} 
+                isUserMatch={fMatch?.team1 === 'USER' || fMatch?.team2 === 'USER'} 
+                onSimulate={() => fMatch && simulateMatch(fMatch.id)}
+                isSimulating={isSimulating && activeMatchId === 'f1'}
+                teamOVR={teamOVR}
+                isActive={currentRound === 'F' && (fMatch?.team1 === 'USER' || fMatch?.team2 === 'USER') && fMatch?.status === 'pending'}
+                isFinal
+              />
+            </div>
+
+            {/* EAST CONFERENCE - Right Side (Mirror) */}
+            <div className="flex items-center gap-8 md:gap-16">
+              {/* East Semis */}
+              <div className="flex flex-col gap-12">
+                <div className="text-center group">
+                  <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 group-hover:text-zinc-500 transition-colors">East Finals</span>
+                </div>
+                <BracketMatchCard 
+                  match={sfMatches.find(m => m.id === 'sf2') || null} 
+                  isUserMatch={sfMatches.find(m => m.id === 'sf2')?.team1 === 'USER' || sfMatches.find(m => m.id === 'sf2')?.team2 === 'USER'} 
+                  onSimulate={() => simulateMatch('sf2')}
+                  isSimulating={isSimulating && activeMatchId === 'sf2'}
+                  teamOVR={teamOVR}
+                  isActive={currentRound === 'SF' && (sfMatches.find(m => m.id === 'sf2')?.team1 === 'USER' || sfMatches.find(m => m.id === 'sf2')?.team2 === 'USER') && sfMatches.find(m => m.id === 'sf2')?.status === 'pending'}
+                />
+              </div>
+
+              {/* East QFs */}
+              <div className="flex flex-col gap-12 md:gap-24">
+                <div className="text-center group">
+                  <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 group-hover:text-zinc-500 transition-colors">East Quarters</span>
+                </div>
+                <div className="flex flex-col gap-8 md:gap-16">
+                  {['qf3', 'qf4'].map(id => {
+                    const m = qfMatches.find(match => match.id === id);
+                    return (
+                      <BracketMatchCard 
+                        key={id} 
+                        match={m || null} 
+                        isUserMatch={m?.team1 === 'USER' || m?.team2 === 'USER'} 
+                        onSimulate={() => m && simulateMatch(m.id)}
+                        isSimulating={isSimulating && activeMatchId === id}
+                        teamOVR={teamOVR}
+                        isActive={currentRound === 'QF' && (m?.team1 === 'USER' || m?.team2 === 'USER') && m?.status === 'pending'}
+                      />
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
-            {/* Finals */}
-            <div className="flex flex-col justify-center relative snap-center">
-              <div className="text-center mb-4">
-                <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-amber-500">Finals</span>
-              </div>
-              <div className="flex flex-col">
-                {fMatch ? (
-                  <BracketMatchCard 
-                    match={fMatch} 
-                    isUserMatch={fMatch.team1 === 'USER' || fMatch.team2 === 'USER'} 
-                    onSimulate={() => simulateMatch(fMatch.id)}
-                    isSimulating={isSimulating && activeMatchId === fMatch.id}
-                    teamOVR={teamOVR}
-                    isFinal
-                    isActive={currentRound === 'F' && (fMatch.team1 === 'USER' || fMatch.team2 === 'USER') && fMatch.status === 'pending'}
-                  />
-                ) : (
-                  <BracketMatchCard match={null} isUserMatch={false} onSimulate={() => {}} isSimulating={false} teamOVR={teamOVR} isFinal />
-                )}
-              </div>
-            </div>
           </div>
         </div>
 
@@ -1793,11 +2183,11 @@ const DraftView: React.FC = () => {
   return (
     <div className="h-full w-full bg-black overflow-hidden flex flex-col">
       <AnimatePresence mode="wait">
-        {phase === 'entry' && <motion.div key="entry" exit={{ opacity: 0 }} className="flex-1 flex flex-col">{renderEntry()}</motion.div>}
-        {(phase === 'captain' || phase === 'starters' || phase === 'bench' || phase === 'review') && <motion.div key="board" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col">{renderDraftBoard()}</motion.div>}
-        {phase === 'summary' && <motion.div key="summary" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col">{renderSummary()}</motion.div>}
-        {phase === 'tournament_selection' && <motion.div key="tournament" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col">{renderTournamentSelection()}</motion.div>}
-        {phase === 'bracket' && <motion.div key="bracket" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col">{renderBracket()}</motion.div>}
+        {phase === 'entry' && <motion.div key="entry" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col">{renderEntry()}</motion.div>}
+        {(phase === 'captain' || phase === 'starters' || phase === 'bench' || phase === 'review') && <motion.div key="board" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className="flex-1 flex flex-col">{renderDraftBoard()}</motion.div>}
+        {phase === 'summary' && <motion.div key="summary" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className="flex-1 flex flex-col">{renderSummary()}</motion.div>}
+        {phase === 'tournament_selection' && <motion.div key="tournament" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className="flex-1 flex flex-col">{renderTournamentSelection()}</motion.div>}
+        {phase === 'bracket' && <motion.div key="bracket" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className="flex-1 flex flex-col">{renderBracket()}</motion.div>}
       </AnimatePresence>
 
       <AnimatePresence>

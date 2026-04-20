@@ -137,9 +137,10 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
   const gpuStyles = useMemo(() => ({
     transform: 'translateZ(0)',
     willChange: 'transform, opacity, filter',
-    backfaceVisibility: 'hidden',
+    backfaceVisibility: 'hidden' as const,
     perspective: '1000px',
-    WebkitFontSmoothing: 'antialiased',
+    WebkitFontSmoothing: 'antialiased' as const,
+    contentVisibility: 'auto' as any,
   } as React.CSSProperties), []);
 
   const cardStyle = useMemo(() => {
@@ -289,6 +290,7 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
           referrerPolicy="no-referrer"
           loading="lazy"
           decoding="async"
+          {...(isFocused || !isMini ? { fetchPriority: "high" } : { fetchPriority: "low" })}
         />
         <div className={`absolute inset-0 ${isMini ? 'bg-gradient-to-t from-black/90 via-transparent to-transparent' : 'opacity-30 z-10'}`} 
              style={!isMini ? { background: `linear-gradient(to bottom, ${card.teamColor}, transparent)` } : {}} />

@@ -312,55 +312,53 @@ export function useEngine() {
     return { cards: cardsWithNewFlag, newlyUnlocked };
   };
 
-  const generateDraftOptions = (count: number, position: string | null, excludedIds: string[], isElite: boolean = false): Card[] => {
+  const generateDraftOptions = (count: number, position: string | null, excludedIds: string[], isElite: boolean = false, isCaptain: boolean = false): Card[] => {
     const options: Card[] = [];
     const seenIds = new Set(excludedIds);
 
-    for (let i = 0; i < count; i++) {
-      let selectedRarity: Rarity = 'bench';
-      
-      if (isElite) {
-        // Elite pool: Legend, Franchise, Record, etc.
-        const eliteRarities: Rarity[] = ['legend', 'franchise', 'record', 'allstar'];
-        selectedRarity = eliteRarities[Math.floor(Math.random() * eliteRarities.length)];
-      } else {
-        // Weighted RNG
-        const rand = Math.random() * 100;
-        if (rand < 70) {
-          selectedRarity = Math.random() > 0.5 ? 'bench' : 'starter';
-        } else if (rand < 95) {
-          selectedRarity = Math.random() > 0.5 ? 'allstar' : 'franchise';
-        } else {
-          const superRarities: Rarity[] = ['legend', 'roty', 'dpoy', 'record'];
-          selectedRarity = superRarities[Math.floor(Math.random() * superRarities.length)];
-        }
-      }
+    // If captain, we look for the top 5% OVR cards
+    const captainThreshold = isCaptain ? 94 : 0;
 
+    for (let i = 0; i < count; i++) {
       let pool = ALL_CARDS.filter(c => {
         if (seenIds.has(c.id)) return false;
-        if (c.rarity === 'coach') return false; // No coaches in player draft
-        // Exclude multi-player cards strictly
+        if (c.rarity === 'coach') return false;
         if (['Duo', 'Dynasty', 'Big Three'].includes(c.category)) return false; 
+        
+        if (isCaptain) {
+          // Captain logic: Top OVR players, regardless of position
+          return (c.stats?.ovr || 0) >= captainThreshold;
+        }
+
         if (position && c.position !== position) return false;
-        if (!isElite && c.rarity !== selectedRarity) return false;
-        if (isElite && !['legend', 'franchise', 'record', 'allstar'].includes(c.rarity)) return false;
-        return true;
+
+        if (isElite) {
+          return ['legend', 'franchise', 'record', 'allstar'].includes(c.rarity);
+        }
+
+        // Weighted RNG for normal picks
+        const rand = Math.random() * 100;
+        let selectedRarities: Rarity[] = [];
+        if (rand < 70) {
+          selectedRarities = ['bench', 'starter'];
+        } else if (rand < 95) {
+          selectedRarities = ['allstar', 'franchise'];
+        } else {
+          selectedRarities = ['legend', 'roty', 'dpoy', 'record'];
+        }
+        return selectedRarities.includes(c.rarity);
       });
 
-      // Fallback if pool is too small - try to keep position strictness
+      // Fallback if pool is empty
       if (pool.length === 0) {
         pool = ALL_CARDS.filter(c => {
           if (seenIds.has(c.id)) return false;
           if (c.rarity === 'coach') return false;
           if (['Duo', 'Dynasty', 'Big Three'].includes(c.category)) return false;
-          if (position && c.position !== position) return false; // Still try to match position
+          if (isCaptain) return (c.stats?.ovr || 0) >= 90; // Slightly lower threshold if empty
+          if (position && c.position !== position) return false;
           return true;
         });
-      }
-
-      // Final fallback if still empty (very unlikely)
-      if (pool.length === 0) {
-        pool = ALL_CARDS.filter(c => !seenIds.has(c.id) && c.rarity !== 'coach');
       }
 
       const selectedCard = pool[Math.floor(Math.random() * pool.length)];

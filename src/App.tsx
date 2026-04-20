@@ -18,6 +18,7 @@ import ProfileView from './views/ProfileView';
 import { LayoutGrid, ShoppingBag, Zap, Trophy, Coins, User as UserIcon, Gift, X, Star, Home, AlertTriangle, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MemoryManager } from './lib/memory';
+import { Analytics } from "@vercel/analytics/react";
 
 import Header from './components/Header';
 import StaticAd from './components/StaticAd';
@@ -165,16 +166,18 @@ function AppContent() {
       </AnimatePresence>
 
       {/* Header Area - Fixed at top to prevent layout shifts */}
-      <div className="fixed top-0 left-0 right-0 z-[5000] flex flex-col bg-black">
-        {/* Top Ad Area */}
-        <StaticAd position="header" />
-        
-        {/* Global Header */}
-        <Header />
-      </div>
+      {!(currentView === 'draft' || currentView === 'open') && (
+        <div className="fixed top-0 left-0 right-0 z-[5000] flex flex-col bg-black">
+          {/* Top Ad Area */}
+          <StaticAd position="header" />
+          
+          {/* Global Header */}
+          <Header />
+        </div>
+      )}
       
       {/* Main Content Area - This grows to fill space and its children handle scrolling */}
-      <main className={`flex-1 relative bg-black overflow-hidden ${isPremium ? 'pt-14 pb-16' : 'pt-[116px] pb-16'}`}>
+      <main className={`flex-1 relative bg-black overflow-hidden ${(currentView === 'draft' || currentView === 'open') ? 'pt-0 pb-0' : (isPremium ? 'pt-14 pb-16' : 'pt-[116px] pb-16')}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={currentView}
@@ -190,65 +193,67 @@ function AppContent() {
       </main>
 
       {/* Global Navigation Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-[4000] flex flex-col bg-black">
-        {/* Global Navigation Bar */}
-        <nav className="h-16 bg-zinc-950 border-t border-zinc-900 flex items-center justify-around px-2 pb-safe shrink-0">
-          {/* Collection */}
-          <button 
-            onClick={() => handleViewChange('collection')}
-            className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'collection' ? 'text-white' : 'text-zinc-600'}`}
-          >
-            <div className={`p-1.5 rounded-lg transition-all ${currentView === 'collection' ? 'bg-zinc-900' : ''}`}>
-              <LayoutGrid size={20} strokeWidth={currentView === 'collection' ? 2.5 : 2} />
-            </div>
-            <span className="text-[8px] font-black uppercase tracking-wider">Roster</span>
-          </button>
-
-          {/* Rewards */}
-          <button 
-            onClick={() => handleViewChange('rewards')}
-            className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'rewards' ? 'text-white' : 'text-zinc-600'}`}
-          >
-            <div className={`p-1.5 rounded-lg transition-all ${currentView === 'rewards' ? 'bg-zinc-900' : ''}`}>
-              <Trophy size={20} strokeWidth={currentView === 'rewards' ? 2.5 : 2} />
-            </div>
-            <span className="text-[8px] font-black uppercase tracking-wider">Rewards</span>
-          </button>
-
-          {/* HOME (Center) */}
-          <button 
-            onClick={() => handleViewChange('home')}
-            className={`flex-1 relative flex flex-col items-center justify-center transition-all duration-500 ${currentView === 'home' || currentView === 'open' || currentView === 'draft' ? 'scale-110 -translate-y-1' : ''}`}
-          >
-            <div className={`p-2.5 rounded-xl transition-all ${currentView === 'home' || currentView === 'open' || currentView === 'draft' ? 'bg-amber-500 text-black shadow-[0_0_20px_rgba(245,158,11,0.4)]' : 'bg-zinc-900 text-zinc-500'}`}>
-              <Home size={24} strokeWidth={3} fill={currentView === 'home' || currentView === 'open' || currentView === 'draft' ? "currentColor" : "none"} />
-            </div>
-            <span className={`text-[9px] font-black uppercase tracking-[0.1em] mt-1 transition-colors ${currentView === 'home' || currentView === 'open' || currentView === 'draft' ? 'text-amber-500' : 'text-zinc-600'}`}>Home</span>
-          </button>
-
-          {/* Packs */}
-          <button 
-            onClick={() => handleViewChange('packs')}
-            className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'packs' ? 'text-white' : 'text-zinc-600'}`}
-          >
-            <div className={`p-1.5 rounded-lg transition-all ${currentView === 'packs' ? 'bg-zinc-900' : ''}`}>
-              <ShoppingBag size={20} strokeWidth={currentView === 'packs' ? 2.5 : 2} />
-            </div>
-            <span className="text-[8px] font-black uppercase tracking-wider">Packs</span>
-          </button>
-
-          {/* Shop */}
-          <button 
-            onClick={() => handleViewChange('shop')}
-            className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'shop' ? 'text-white' : 'text-zinc-600'}`}
-          >
-            <div className={`p-1.5 rounded-lg transition-all ${currentView === 'shop' ? 'bg-zinc-900' : ''}`}>
-              <Coins size={20} strokeWidth={currentView === 'shop' ? 2.5 : 2} />
-            </div>
-            <span className="text-[8px] font-black uppercase tracking-wider">Shop</span>
-          </button>
-        </nav>
-      </div>
+      {!(currentView === 'draft' || currentView === 'open') && (
+        <div className="fixed bottom-0 left-0 right-0 z-[4000] flex flex-col bg-black">
+          {/* Global Navigation Bar */}
+          <nav className="h-16 bg-zinc-950 border-t border-zinc-900 flex items-center justify-around px-2 pb-safe shrink-0">
+            {/* Collection */}
+            <button 
+              onClick={() => handleViewChange('collection')}
+              className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'collection' ? 'text-white' : 'text-zinc-600'}`}
+            >
+              <div className={`p-1.5 rounded-lg transition-all ${currentView === 'collection' ? 'bg-zinc-900' : ''}`}>
+                <LayoutGrid size={20} strokeWidth={currentView === 'collection' ? 2.5 : 2} />
+              </div>
+              <span className="text-[8px] font-black uppercase tracking-wider">Roster</span>
+            </button>
+  
+            {/* Rewards */}
+            <button 
+              onClick={() => handleViewChange('rewards')}
+              className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'rewards' ? 'text-white' : 'text-zinc-600'}`}
+            >
+              <div className={`p-1.5 rounded-lg transition-all ${currentView === 'rewards' ? 'bg-zinc-900' : ''}`}>
+                <Trophy size={20} strokeWidth={currentView === 'rewards' ? 2.5 : 2} />
+              </div>
+              <span className="text-[8px] font-black uppercase tracking-wider">Rewards</span>
+            </button>
+  
+            {/* HOME (Center) */}
+            <button 
+              onClick={() => handleViewChange('home')}
+              className={`flex-1 relative flex flex-col items-center justify-center transition-all duration-500 ${currentView === 'home' || currentView === 'open' || currentView === 'draft' ? 'scale-110 -translate-y-1' : ''}`}
+            >
+              <div className={`p-2.5 rounded-xl transition-all ${currentView === 'home' || currentView === 'open' || currentView === 'draft' ? 'bg-amber-500 text-black shadow-[0_0_20px_rgba(245,158,11,0.4)]' : 'bg-zinc-900 text-zinc-500'}`}>
+                <Home size={24} strokeWidth={3} fill={currentView === 'home' || currentView === 'open' || currentView === 'draft' ? "currentColor" : "none"} />
+              </div>
+              <span className={`text-[9px] font-black uppercase tracking-[0.1em] mt-1 transition-colors ${currentView === 'home' || currentView === 'open' || currentView === 'draft' ? 'text-amber-500' : 'text-zinc-600'}`}>Home</span>
+            </button>
+  
+            {/* Packs */}
+            <button 
+              onClick={() => handleViewChange('packs')}
+              className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'packs' ? 'text-white' : 'text-zinc-600'}`}
+            >
+              <div className={`p-1.5 rounded-lg transition-all ${currentView === 'packs' ? 'bg-zinc-900' : ''}`}>
+                <ShoppingBag size={20} strokeWidth={currentView === 'packs' ? 2.5 : 2} />
+              </div>
+              <span className="text-[8px] font-black uppercase tracking-wider">Packs</span>
+            </button>
+  
+            {/* Shop */}
+            <button 
+              onClick={() => handleViewChange('shop')}
+              className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'shop' ? 'text-white' : 'text-zinc-600'}`}
+            >
+              <div className={`p-1.5 rounded-lg transition-all ${currentView === 'shop' ? 'bg-zinc-900' : ''}`}>
+                <Coins size={20} strokeWidth={currentView === 'shop' ? 2.5 : 2} />
+              </div>
+              <span className="text-[8px] font-black uppercase tracking-wider">Shop</span>
+            </button>
+          </nav>
+        </div>
+      )}
 
       {/* Welcome Gift Modal */}
       <AnimatePresence>
@@ -324,6 +329,7 @@ function AppContent() {
           </motion.div>
         )}
       </AnimatePresence>
+      <Analytics />
     </div>
   );
 }
