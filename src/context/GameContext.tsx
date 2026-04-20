@@ -71,6 +71,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const profileSubscriptionRef = useRef<any>(null);
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const initialSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isFirstLoad = useRef(true);
 
   useEffect(() => {
     stateRef.current = state;
@@ -341,22 +342,29 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     let mounted = true;
 
-    // 1. Initial Check
+    // 1. Initial Session Check (Fast path)
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (mounted && session?.user) {
+      if (!mounted) return;
+      if (session?.user) {
+        console.log('Session found on mount:', session.user.id);
         syncProfile(session.user);
-      } else if (mounted) {
+      } else {
+        console.log('No session found on mount');
         setIsAuthLoading(false);
+        setIsInitialSyncDone(true);
       }
     });
 
-    // 2. Auth Listener
+    // 2. Auth Listener - Subscribed once
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
       console.log(`🔐 AUTH EVENT: ${event}`);
       
       if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'INITIAL_SESSION') {
-        if (session?.user) await syncProfile(session.user);
+        // Only trigger sync if user changed or session is fresh
+        if (session?.user && stateRef.current.user?.id !== session.user.id) {
+          await syncProfile(session.user);
+        }
       } else if (event === 'SIGNED_OUT') {
         await syncProfile(null);
       }
@@ -375,7 +383,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       clearTimeout(safetyTimeout);
       subscription.unsubscribe();
     };
-  }, [syncProfile]);
+  }, []); // Strictly empty array to prevent listener re-runs
 
   // Debounced sync effect - Optimized to avoid redundant triggers from UI changes (like currentView)
   const syncRelevantData = useMemo(() => ({
@@ -392,6 +400,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Periodic Save (Debounced)
   useEffect(() => {
     if (!state.user || !isInitialSyncDone) return;
+
+    // RULE 1: Never trigger on first data injection to break the loop
+    if (isFirstLoad.current) {
+      console.log('🛡️ Breaking loop: Blocking first auto-save after hydration');
+      isFirstLoad.current = false;
+      return;
+    }
 
     if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     syncTimeoutRef.current = setTimeout(() => {
