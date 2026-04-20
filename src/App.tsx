@@ -3,25 +3,37 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { GameProvider, useGame } from './context/GameContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ALL_CARDS } from './data/cards';
-import PacksView from './views/PacksView';
-import ShopView from './views/ShopView';
-import CollectionView from './views/CollectionView';
-import OpenView from './views/OpenView';
-import HomeView from './views/HomeView';
-import DraftView from './views/DraftView';
-import RewardsView from './views/RewardsView';
-import ProfileView from './views/ProfileView';
-import { LayoutGrid, ShoppingBag, Zap, Trophy, Coins, User as UserIcon, Gift, X, Star, Home, AlertTriangle, RefreshCw } from 'lucide-react';
+import { LayoutGrid, ShoppingBag, Zap, Trophy, Coins, User as UserIcon, Gift, X, Star, Home, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MemoryManager } from './lib/memory';
 import { Analytics } from "@vercel/analytics/react";
 
 import Header from './components/Header';
 import StaticAd from './components/StaticAd';
+
+// Lazy load views for code splitting
+const HomeView = lazy(() => import('./views/HomeView'));
+const CollectionView = lazy(() => import('./views/CollectionView'));
+const OpenView = lazy(() => import('./views/OpenView'));
+const DraftView = lazy(() => import('./views/DraftView'));
+const PacksView = lazy(() => import('./views/PacksView'));
+const RewardsView = lazy(() => import('./views/RewardsView'));
+const ShopView = lazy(() => import('./views/ShopView'));
+const ProfileView = lazy(() => import('./views/ProfileView'));
+
+// Simple View Loader
+const ViewLoader = () => (
+  <div className="h-full w-full flex items-center justify-center bg-black">
+    <div className="flex flex-col items-center gap-4">
+      <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
+      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Loading Module...</span>
+    </div>
+  </div>
+);
 
 function AppContent() {
   const { currentView, setCurrentView, isPremium, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setShowWelcomeGift } = useGame();
@@ -36,36 +48,54 @@ function AppContent() {
     }
   }, [isPremium]);
 
-  // Pre-fetch common images and assets
+  // Tactical Image Preloading
   useEffect(() => {
-    const prefetch = () => {
-      // Prefetch first 100 cards (increased coverage)
-      const cardsToPrefetch = ALL_CARDS.slice(0, 100);
+    const prefetchAssets = () => {
+      // 1. Essential UI Images
+      const uiAssets = [
+        '/assets/card-back.png', // Assuming these exist or use picsum
+        '/assets/pack-texture.png'
+      ];
       
-      // Use a small delay between batches to avoid blocking the main thread
+      // 2. Critical Team Logos (Top 10 most popular teams)
+      const criticalLogos = [
+        'https://cdn.nba.com/logos/nba/1610612747/primary/L/logo.svg', // Lakers
+        'https://cdn.nba.com/logos/nba/1610612744/primary/L/logo.svg', // Warriors
+        'https://cdn.nba.com/logos/nba/1610612738/primary/L/logo.svg', // Celtics
+        'https://cdn.nba.com/logos/nba/1610612741/primary/L/logo.svg', // Bulls
+      ];
+
+      // 3. Top Tier Players (Legends & Superstars)
+      const criticalPlayers = ALL_CARDS.slice(0, 30).map(c => c.imageUrl);
+
+      const allCritical = [...uiAssets, ...criticalLogos, ...criticalPlayers];
+
+      allCritical.forEach(url => {
+        const img = new Image();
+        img.src = url;
+      });
+
+      // 4. Background prefetch of the rest in chunks
+      const remainingCards = ALL_CARDS.slice(30, 200);
       const batchSize = 10;
-      for (let i = 0; i < cardsToPrefetch.length; i += batchSize) {
+      for (let i = 0; i < remainingCards.length; i += batchSize) {
         setTimeout(() => {
-          cardsToPrefetch.slice(i, i + batchSize).forEach(card => {
+          remainingCards.slice(i, i + batchSize).forEach(card => {
             const img = new Image();
             img.src = card.imageUrl;
             if (card.teamLogoUrl) {
               const logo = new Image();
               logo.src = card.teamLogoUrl;
             }
-            if ((card.category === 'Duo' || card.category === 'NBA Record' || card.category === 'All-Star MVP') && card.player2Id) {
-              const img2 = new Image();
-              img2.src = `https://cdn.nba.com/headshots/nba/latest/1040x760/${card.player2Id}.png`;
-            }
           });
-        }, i * 150);
+        }, 1000 + (i * 200)); // Start after 1s
       }
     };
     
     if ('requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(prefetch);
+      (window as any).requestIdleCallback(prefetchAssets);
     } else {
-      setTimeout(prefetch, 2000);
+      setTimeout(prefetchAssets, 1500);
     }
   }, []);
 
@@ -86,17 +116,23 @@ function AppContent() {
   };
 
   const renderView = () => {
-    switch (currentView) {
-      case 'collection': return <CollectionView />;
-      case 'open': return <OpenView />;
-      case 'home': return <HomeView />;
-      case 'draft': return <DraftView />;
-      case 'packs': return <PacksView />;
-      case 'rewards': return <RewardsView />;
-      case 'shop': return <ShopView />;
-      case 'profile': return <ProfileView />;
-      default: return <HomeView />;
-    }
+    return (
+      <Suspense fallback={<ViewLoader />}>
+        {(() => {
+          switch (currentView) {
+            case 'collection': return <CollectionView />;
+            case 'open': return <OpenView />;
+            case 'home': return <HomeView />;
+            case 'draft': return <DraftView />;
+            case 'packs': return <PacksView />;
+            case 'rewards': return <RewardsView />;
+            case 'shop': return <ShopView />;
+            case 'profile': return <ProfileView />;
+            default: return <HomeView />;
+          }
+        })()}
+      </Suspense>
+    );
   };
 
   if (isAuthLoading || (!isInitialSyncDone && !syncError)) {

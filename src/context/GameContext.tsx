@@ -397,24 +397,37 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user: state.user?.id
   }), [state.coins, state.collection, state.customCards, state.unlockedAchievements, state.claimedAchievements, state.inventoryPacks, state.isPremium, state.user?.id]);
 
-  // Periodic Save (Debounced)
+  // Periodic Save (Debounced) - Silent Background Auto-Save
   useEffect(() => {
+    // Only proceed if a user is logged in and the initial data hydration is complete
     if (!state.user || !isInitialSyncDone) return;
 
-    // RULE 1: Never trigger on first data injection to break the loop
+    // RULE 1: Guard against the loop created by the initial data injection (syncProfile)
     if (isFirstLoad.current) {
-      console.log('🛡️ Breaking loop: Blocking first auto-save after hydration');
+      console.log('🛡️ Auto-save blocked: Data hydration in progress');
       isFirstLoad.current = false;
       return;
     }
 
-    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    // RULE 2: IMPLEMENT DEBOUNCE (Anti-Spam)
+    // We clear the previous timer every time a relevant state change occurs.
+    // The actual network call only happens after the user stops interacting for 3 seconds.
+    if (syncTimeoutRef.current) {
+      clearTimeout(syncTimeoutRef.current);
+    }
+
     syncTimeoutRef.current = setTimeout(() => {
-      forceSyncToSupabase(stateRef.current, 1, true);
-    }, 5000);
+      // RULE 3: OPTIMISTIC & SILENT
+      // We pass 'true' as the silent parameter to avoid showing spinners or blocking UI.
+      // stateRef.current ensures we always have the freshest state data at the moment of execution.
+      console.log('☁️ Auto-save: Consolidating progress to Supabase');
+      forceSyncToSupabase(stateRef.current, 1, true); 
+    }, 3000); // 3 second grace period
 
     return () => {
-      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+      if (syncTimeoutRef.current) {
+        clearTimeout(syncTimeoutRef.current);
+      }
     };
   }, [syncRelevantData, isInitialSyncDone, forceSyncToSupabase]);
 

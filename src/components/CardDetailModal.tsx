@@ -1,3 +1,4 @@
+import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
 import { Card } from '../types';
@@ -8,7 +9,7 @@ interface CardDetailModalProps {
   onClose: () => void;
 }
 
-export default function CardDetailModal({ card, onClose }: CardDetailModalProps) {
+const CardDetailModal = React.memo(({ card, onClose }: CardDetailModalProps) => {
   return (
     <AnimatePresence>
       {card && (
@@ -45,4 +46,6 @@ export default function CardDetailModal({ card, onClose }: CardDetailModalProps)
       )}
     </AnimatePresence>
   );
-}
+});
+
+export default CardDetailModal;

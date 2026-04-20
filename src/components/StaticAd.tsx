@@ -10,7 +10,7 @@ interface StaticAdProps {
  * Renders the ad script only if ads are not disabled (isPremium is false).
  * Uses fixed dimensions to prevent layout shifts.
  */
-export default function StaticAd({ position }: StaticAdProps) {
+const StaticAd = React.memo(({ position }: StaticAdProps) => {
   const { isPremium } = useGame();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -100,4 +100,6 @@ export default function StaticAd({ position }: StaticAdProps) {
       </div>
     </div>
   );
-}
+});
+
+export default StaticAd;
