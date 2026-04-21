@@ -1,71 +1,119 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { Search, UserPlus, Globe, Shield, Zap, RefreshCw, ArrowLeft, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useGame } from '../context/GameContext';
 import { useNotification } from '../context/NotificationContext';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
 interface TradingLobbyProps {
   onJoinedRoom: (roomId: string) => void;
   onMatching: (active: boolean) => void;
+  isMatching?: boolean;
 }
 
-const TradingLobby: React.FC<TradingLobbyProps> = ({ onJoinedRoom, onMatching }) => {
+const TradingLobby: React.FC<TradingLobbyProps> = ({ onJoinedRoom, onMatching, isMatching }) => {
   const { user, setCurrentView } = useGame();
-  const { notifyError, notifySuccess } = useNotification();
+  const { notifyError, notifySuccess, notifyInfo } = useNotification();
   const [friendUsername, setFriendUsername] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [isSearchingFriend, setIsSearchingFriend] = useState(false);
+  
+  const lobbyChannelRef = useRef<RealtimeChannel | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Hard cleanup on unmount
+  useEffect(() => {
+    return () => {
+      cleanupSearch();
+    };
+  }, []);
+
+  // Listen for external cancellations (e.g. from TradingView overlay)
+  useEffect(() => {
+    if (isSearching && isMatching === false) {
+      console.log('🛑 External cancel detected. Cleaning up search...');
+      cleanupSearch();
+    }
+  }, [isMatching, isSearching]);
+
+  const cleanupSearch = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    if (lobbyChannelRef.current) {
+      console.log('🔌 Unsubscribing from trading lobby channel...');
+      lobbyChannelRef.current.unsubscribe();
+      lobbyChannelRef.current = null;
+    }
+    setIsSearching(false);
+    onMatching(false);
+  };
 
   const startRandomMatch = async () => {
-    if (!supabase) return;
+    if (!supabase || !user) return;
+    
+    // Prevent double starts
+    if (isSearching) return;
+
+    console.log('🔍 Starting random match search...');
     setIsSearching(true);
     onMatching(true);
+    notifyInfo("Searching for trade partners...");
 
     try {
-      // 1. Join global lobby channel
+      // 1. Create global lobby channel
       const channel = supabase.channel('trading_lobby', {
-        config: { presence: { key: user?.id } }
+        config: { presence: { key: user.id } }
       });
+      lobbyChannelRef.current = channel;
 
       channel
         .on('presence', { event: 'sync' }, () => {
+          if (!lobbyChannelRef.current) return;
+          
           const state = channel.presenceState();
           // Look for someone else searching
           const others = Object.entries(state).filter(([key, presences]) => 
-            key !== user?.id && (presences[0] as any).status === 'searching'
+            key !== user.id && (presences[0] as any).status === 'searching'
           );
 
           if (others.length > 0) {
-            // Found a match!
+            console.log('🤝 Partner found! Initializing room...');
             const [otherId] = others[0];
-            // Deterministic room ID based on both user IDs
-            const roomId = [user?.id, otherId].sort().join('_');
-            onJoinedRoom(roomId);
-            onMatching(false);
-            setIsSearching(false);
-            channel.unsubscribe();
+            const roomId = [user.id, otherId].sort().join('_');
+            
+            // Critical: Cleanup BEFORE moving to room
+            const foundRoomId = roomId;
+            cleanupSearch();
+            onJoinedRoom(foundRoomId);
           }
         })
         .subscribe(async (status) => {
           if (status === 'SUBSCRIBED') {
-            await channel.track({ status: 'searching', username: user?.username });
+            await channel.track({ 
+              status: 'searching', 
+              username: user.username,
+              timestamp: Date.now() 
+            });
+          } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+            console.error('❌ Lobby channel error/closed:', status);
+            cleanupSearch();
+            notifyError("Connection lost. Please try again.");
           }
         });
 
-      // Cleanup timeout after 30s
-      setTimeout(() => {
-        if (isSearching) {
-          setIsSearching(false);
-          onMatching(false);
-          channel.unsubscribe();
-          notifyError("No players found. Try again later.");
-        }
-      }, 30000);
+      // 2. Strict Emergency Timeout (18 seconds)
+      timeoutRef.current = setTimeout(() => {
+        console.warn('⏱️ Matchmaking timeout reached.');
+        cleanupSearch();
+        notifyError("No players found. Try again in a moment.");
+      }, 18000);
 
     } catch (err) {
-      onMatching(false);
-      setIsSearching(false);
+      console.error('❌ Matchmaking exception:', err);
+      cleanupSearch();
       notifyError("Failed to connect to matchmaking.");
     }
   };

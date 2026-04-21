@@ -60,6 +60,7 @@ const TradingView: React.FC = () => {
                 setCurrentState('room');
               }}
               onMatching={(active) => setCurrentState(active ? 'matching' : 'lobby')}
+              isMatching={currentState === 'matching'}
             />
           </motion.div>
         ) : (
