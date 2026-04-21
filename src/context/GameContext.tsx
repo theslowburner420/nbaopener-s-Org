@@ -58,8 +58,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const authProcessed = React.useRef(false);
   const isSyncingRef = useRef(false);
   const isBackgroundSyncingRef = useRef(false);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [isInitialSyncDone, setIsInitialSyncDone] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(false); // Start unblocked
+  const [isInitialSyncDone, setIsInitialSyncDone] = useState(true); // Start as guest/local ready
   const [isSaving, setIsSaving] = useState(false);
   const [isBackgroundSaving, setIsBackgroundSaving] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
@@ -192,6 +192,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [supabase, setSyncError]);
 
   const syncProfile = useCallback(async (user: any) => {
+    // 1. Immediately unblock UI if we have a user (Background Hydration)
+    if (user) {
+      setIsInitialSyncDone(true);
+      setIsAuthLoading(false);
+    }
+
     // If signing out, we must ALWAYS proceed to clear state and reset refs
     if (!user) {
       console.log('👤 Logout detected: Clearing state');
@@ -204,7 +210,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user: null,
         // Reset coins and collection to default guest values on logout
         coins: 500,
-        collection: {}, // Reset to empty object, not array
+        collection: {},
         customCards: [],
         inventoryPacks: [],
         unlockedAchievements: [],
@@ -224,7 +230,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     isSyncingRef.current = true;
-    console.log('🔄 STARTING CONSOLIDATION for user:', user.id);
+    setIsBackgroundSaving(true);
+    console.log('🔄 STARTING BACKGROUND SYNC for user:', user.id);
     
     const userData: User = {
       id: user.id,
@@ -381,9 +388,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setIsInitialSyncDone(true);
       setIsAuthLoading(false);
+      setIsBackgroundSaving(false);
     } catch (err) {
-      console.error('❌ MISSION CRITICAL SYNC FAIL:', err);
+      console.error('❌ BACKGROUND SYNC ERROR:', err);
       setIsAuthLoading(false);
+      setIsInitialSyncDone(true);
+      setIsBackgroundSaving(false);
     } finally {
       isSyncingRef.current = false;
     }
@@ -428,12 +438,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     const safetyTimeout = setTimeout(() => {
-      if (mounted && isAuthLoading) {
-        console.warn('⚠️ Force unblocking auth UI');
-        setIsAuthLoading(false);
-        setIsInitialSyncDone(true);
-      }
-    }, 10000);
+      // Safety unblock is no longer strictly needed but kept as fallback
+      setIsAuthLoading(false);
+      setIsInitialSyncDone(true);
+    }, 5000);
 
     return () => {
       mounted = false;
@@ -474,12 +482,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     syncTimeoutRef.current = setTimeout(() => {
-      // RULE 3: OPTIMISTIC & SILENT
-      // We pass 'true' as the silent parameter to avoid showing spinners or blocking UI.
-      // stateRef.current ensures we always have the freshest state data at the moment of execution.
+      // Background Sync only on important events or after 5s of inactivity
       console.log('☁️ Auto-save: Consolidating progress to Supabase');
       forceSyncToSupabase(stateRef.current, 1, true); 
-    }, 2000); // 2 second grace period
+    }, 5000); // 5 second grace period to prevent server flooding
 
 
     return () => {

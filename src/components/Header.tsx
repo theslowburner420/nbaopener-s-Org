@@ -5,9 +5,11 @@ import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'motion/react';
 
 const Header: React.FC = React.memo(() => {
-  const { user, coins, login, logout, setCurrentView, isAuthLoading, isSaving } = useGame();
+  const { user, coins, login, logout, setCurrentView, isAuthLoading, isSaving, isBackgroundSaving } = useGame();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const isSyncing = isSaving || isBackgroundSaving;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -51,20 +53,20 @@ const Header: React.FC = React.memo(() => {
         <AnimatePresence mode="wait">
           {user && (
             <motion.div
-              key={isSaving ? 'saving' : 'saved'}
+              key={isSyncing ? 'saving' : 'saved'}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-zinc-900/50 border border-zinc-800/30"
-              title={isSaving ? "Syncing to Cloud..." : "Progress Saved"}
+              title={isSyncing ? (isBackgroundSaving ? "Hydrating Profile..." : "Syncing to Cloud...") : "Progress Saved"}
             >
-              {isSaving ? (
+              {isSyncing ? (
                 <RefreshCw size={10} className="text-amber-500 animate-spin" />
               ) : (
                 <Cloud size={10} className="text-green-500" />
               )}
-              <span className={`text-[8px] font-black uppercase tracking-widest ${isSaving ? 'text-amber-500/70' : 'text-green-500/70'}`}>
-                {isSaving ? 'Syncing' : 'Cloud'}
+              <span className={`text-[8px] font-black uppercase tracking-widest ${isSyncing ? 'text-amber-500/70' : 'text-green-500/70'}`}>
+                {isSyncing ? (isBackgroundSaving ? 'Loading' : 'Syncing') : 'Cloud'}
               </span>
             </motion.div>
           )}
