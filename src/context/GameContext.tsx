@@ -43,7 +43,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return {
       user: null,
       coins: initialGuestState?.coins ?? 500,
-      collection: initialGuestState?.collection ?? [],
+      collection: initialGuestState?.collection ?? {},
       customCards: initialGuestState?.customCards ?? [],
       currentView: 'home',
       unlockedAchievements: initialGuestState?.unlockedAchievements ?? [],
@@ -102,7 +102,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         username: newState.user.username,
         avatar_url: newState.user.avatar_url,
         coins: Number(newState.coins) || 0,
-        cards: Array.isArray(newState.collection) ? newState.collection : [],
+        cards: newState.collection || {},
         unlocked_achievements: Array.isArray(newState.unlockedAchievements) ? newState.unlockedAchievements : [],
         claimed_achievements: Array.isArray(newState.claimedAchievements) ? newState.claimedAchievements : [],
         inventory_packs: Array.isArray(newState.inventoryPacks) ? newState.inventoryPacks : [],
@@ -228,7 +228,31 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const localProgress = {
         coins: Math.max(currentLiveState.coins, guestData?.coins ?? 0),
-        collection: Array.from(new Set([...currentLiveState.collection, ...(guestData?.collection || [])])),
+        collection: (() => {
+          let merged: Record<string, number> = {};
+          
+          // Handle currentLiveState (cloud/guest)
+          const liveColl = currentLiveState.collection;
+          if (Array.isArray(liveColl)) {
+            liveColl.forEach((id: string) => merged[id] = (merged[id] || 0) + 1);
+          } else if (liveColl && typeof liveColl === 'object') {
+            merged = { ...liveColl };
+          }
+
+          const guestColl = guestData?.collection;
+          if (guestColl) {
+            if (Array.isArray(guestColl)) {
+              // Migrate guest array collection
+              guestColl.forEach((id: string) => merged[id] = (merged[id] || 0) + 1);
+            } else if (typeof guestColl === 'object') {
+              // Merge guest object collection
+              Object.entries(guestColl).forEach(([id, count]) => {
+                merged[id] = (merged[id] || 0) + (count as number);
+              });
+            }
+          }
+          return merged;
+        })(),
         unlockedAchievements: Array.from(new Set([...currentLiveState.unlockedAchievements, ...(guestData?.unlockedAchievements || [])])),
         claimedAchievements: Array.from(new Set([...currentLiveState.claimedAchievements, ...(guestData?.claimedAchievements || [])])),
         inventoryPacks: currentLiveState.inventoryPacks.length > 0 ? currentLiveState.inventoryPacks : (guestData?.inventoryPacks || []),
@@ -267,7 +291,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         const pc = {
           coins: Number(cloudProfile.coins) || 0,
-          cards: Array.isArray(cloudProfile.cards) ? cloudProfile.cards : [],
+          cards: (() => {
+            const raw = cloudProfile.cards;
+            if (Array.isArray(raw)) {
+              // Migrate cloud legacy array
+              const migrated: Record<string, number> = {};
+              raw.forEach((id: string) => migrated[id] = (migrated[id] || 0) + 1);
+              return migrated;
+            }
+            return (raw && typeof raw === 'object') ? raw : {};
+          })(),
           unlocked_achievements: Array.isArray(cloudProfile.unlocked_achievements) ? cloudProfile.unlocked_achievements : [],
           claimed_achievements: Array.isArray(cloudProfile.claimed_achievements) ? cloudProfile.claimed_achievements : [],
           inventory_packs: Array.isArray(cloudProfile.inventory_packs) ? cloudProfile.inventory_packs : [],
@@ -278,7 +311,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         finalMergedData = {
           coins: Math.max(pc.coins, localProgress.coins),
-          collection: mergeArrays(pc.cards, localProgress.collection),
+          collection: (() => {
+            const merged = { ...pc.cards };
+            Object.entries(localProgress.collection).forEach(([id, count]) => {
+              merged[id] = Math.max(merged[id] || 0, count); // Conservatively take max for duplicates during cloud sync if conflict
+            });
+            return merged;
+          })(),
           unlockedAchievements: mergeArrays(pc.unlocked_achievements, localProgress.unlockedAchievements),
           claimedAchievements: mergeArrays(pc.claimed_achievements, localProgress.claimedAchievements),
           inventoryPacks: pc.inventory_packs.length > localProgress.inventoryPacks.length ? pc.inventory_packs : localProgress.inventoryPacks,
@@ -499,7 +538,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [updateGameStateAsync, updateGameState]);
 
   const addToCollection = useCallback(async (cardIds: string[], sync: boolean = true) => {
-    const newCollection = [...stateRef.current.collection, ...cardIds];
+    const newCollection = { ...stateRef.current.collection };
+    cardIds.forEach(id => {
+      newCollection[id] = (newCollection[id] || 0) + 1;
+    });
+
     if (sync) {
       await updateGameStateAsync({ collection: newCollection });
     } else {
@@ -649,7 +692,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const newState = {
       ...stateRef.current,
       coins: 500,
-      collection: [],
+      collection: {},
       customCards: [],
       unlockedAchievements: [],
       claimedAchievements: [],

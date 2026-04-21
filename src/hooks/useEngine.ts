@@ -122,7 +122,7 @@ export function useEngine() {
     return pool[Math.floor(Math.random() * pool.length)];
   };
 
-  const checkAchievements = (newCollection: string[], currentCoins: number, currentUnlocked: string[] = [], newlyAddedCardIds: string[] = [], silent: boolean = false) => {
+  const checkAchievements = (newCollection: Record<string, number>, currentCoins: number, currentUnlocked: string[] = [], newlyAddedCardIds: string[] = [], silent: boolean = false) => {
     let bonusCoins = 0;
     const newlyUnlocked: any[] = [];
     const unlockedSet = new Set(currentUnlocked || []);
@@ -130,20 +130,28 @@ export function useEngine() {
     const newlyUnlockedIds: string[] = [];
     
     // We'll track the collection as we "add" cards one by one to see which one triggers what
-    const tempCollection = [...newCollection.filter(id => !newlyAddedCardIds.includes(id))];
-    const tempCollectionSet = new Set(tempCollection);
+    const tempCollection: Record<string, number> = {};
+    Object.entries(newCollection).forEach(([id, count]) => {
+      // Start with the collection MINUS the newly added ones
+      const newlyAddedCount = newlyAddedCardIds.filter(newId => newId === id).length;
+      if (count > newlyAddedCount) {
+        tempCollection[id] = count - newlyAddedCount;
+      }
+    });
 
     const checkAll = (cardId: string | null) => {
       for (const ach of ACHIEVEMENTS) {
         if (!unlockedSet.has(ach.id) && !newlyUnlocked.some(a => a.id === ach.id)) {
           const tempState = {
-            collection: [...tempCollection],
+            collection: tempCollection,
             coins: currentCoins,
             claimedDays: [],
             unlockedAchievements: currentUnlocked
           };
 
-          if (ach.requirement(tempState, ALL_CARDS)) {
+          // Re-map achievement requirement logic if it expects array
+          // Usually they just check if ID is present
+          if (ach.requirement(tempState as any, ALL_CARDS)) {
             const packRewardText = ach.rewardPacks ? ` & ${ach.rewardPacks.map(p => p.name).join(', ')}` : '';
             const rewardText = `+${ach.rewardCoins.toLocaleString()} Coins${packRewardText}`;
             
@@ -183,7 +191,7 @@ export function useEngine() {
         const achievementId = `team-master-${team}`;
         if (!unlockedSet.has(achievementId) && !newlyUnlocked.some(a => a.id === achievementId)) {
           const teamCardIds = TEAM_CARDS_MAP[team];
-          const hasAll = teamCardIds.every(id => tempCollectionSet.has(id));
+          const hasAll = teamCardIds.every(id => !!tempCollection[id]);
           if (hasAll) {
             const achievementData = {
               id: achievementId,
@@ -211,8 +219,7 @@ export function useEngine() {
 
     // Then check card by card
     for (const cardId of newlyAddedCardIds) {
-      tempCollection.push(cardId);
-      tempCollectionSet.add(cardId);
+      tempCollection[cardId] = (tempCollection[cardId] || 0) + 1;
       checkAll(cardId);
     }
 
@@ -236,10 +243,13 @@ export function useEngine() {
     // Determine which cards are new BEFORE adding to collection
     const cardsWithNewFlag = newCards.map(card => ({
       ...card,
-      isNew: !collection.includes(card.id)
+      isNew: !collection[card.id]
     }));
 
-    const finalCollection = [...collection, ...newIds];
+    const finalCollection = { ...collection };
+    newIds.forEach(id => {
+      finalCollection[id] = (finalCollection[id] || 0) + 1;
+    });
     
     // Check achievements
     const { newlyUnlocked, bonusCoins, newInventoryPacks, newlyUnlockedIds } = checkAchievements(finalCollection, currentCoins, unlockedAchievements, newIds, false);
@@ -273,10 +283,13 @@ export function useEngine() {
     // Determine which cards are new BEFORE adding to collection
     const cardsWithNewFlag = newCards.map(card => ({
       ...card,
-      isNew: !collection.includes(card.id)
+      isNew: !collection[card.id]
     }));
 
-    const finalCollection = [...collection, ...newIds];
+    const finalCollection = { ...collection };
+    newIds.forEach(id => {
+      finalCollection[id] = (finalCollection[id] || 0) + 1;
+    });
     
     // Check achievements
     const { newlyUnlocked, bonusCoins, newInventoryPacks, newlyUnlockedIds } = checkAchievements(finalCollection, coins, unlockedAchievements, newIds, false);

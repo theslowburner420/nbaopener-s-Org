@@ -69,7 +69,7 @@ export default function PacksView() {
   const [newlyUnlocked, setNewlyUnlocked] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'shop' | 'inventory'>('shop');
 
-  const uniqueOwned = useMemo(() => Array.from(new Set(collection)).length, [collection]);
+  const uniqueOwned = useMemo(() => Object.keys(collection).filter(id => collection[id] > 0).length, [collection]);
   const totalCards = ALL_CARDS.length;
   const progressPercent = Math.round((uniqueOwned / totalCards) * 100);
 
@@ -88,7 +88,7 @@ export default function PacksView() {
         pool = ALL_CARDS.filter(c => mainRarities.includes(c.rarity));
       }
 
-      const uniqueOwnedInPool = Array.from(new Set(pool.filter(c => collection.includes(c.id)).map(c => c.id))).length;
+      const uniqueOwnedInPool = pool.filter(c => !!collection[c.id]).length;
       
       acc[packId] = {
         total: pool.length,

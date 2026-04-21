@@ -40,7 +40,7 @@ export interface Card {
   teamLogoUrl?: string;
 }
 
-export type ViewType = 'collection' | 'open' | 'packs' | 'rewards' | 'shop' | 'profile' | 'home' | 'draft';
+export type ViewType = 'collection' | 'open' | 'packs' | 'rewards' | 'shop' | 'profile' | 'home' | 'draft' | 'trading';
 
 export interface Achievement {
   id: string;
@@ -74,7 +74,7 @@ export interface User {
 export interface GameState {
   user: User | null;
   coins: number;
-  collection: string[]; // Array of card IDs
+  collection: Record<string, number>; // Map of card ID to quantity
   customCards: Card[];
   currentView: ViewType;
   unlockedAchievements: string[];

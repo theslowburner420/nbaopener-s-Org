@@ -24,6 +24,7 @@ const PacksView = lazy(() => import('./views/PacksView'));
 const RewardsView = lazy(() => import('./views/RewardsView'));
 const ShopView = lazy(() => import('./views/ShopView'));
 const ProfileView = lazy(() => import('./views/ProfileView'));
+const TradingView = lazy(() => import('./views/TradingView'));
 
 // Simple View Loader
 const ViewLoader = () => (
@@ -128,6 +129,7 @@ function AppContent() {
             case 'rewards': return <RewardsView />;
             case 'shop': return <ShopView />;
             case 'profile': return <ProfileView />;
+            case 'trading': return <TradingView />;
             default: return <HomeView />;
           }
         })()}

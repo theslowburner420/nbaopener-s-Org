@@ -27,11 +27,12 @@ export default function CollectionView() {
   const [visibleCount, setVisibleCount] = useState(24);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [easterEggType, setEasterEggType] = useState<'unlock' | 'reset'>('unlock');
+  const [viewMode, setViewMode] = useState<'roster' | 'duplicates'>('roster');
 
   // Reset pagination when filters change
   React.useEffect(() => {
     setVisibleCount(24);
-  }, [activeFilter, categoryFilter, teamFilter, seriesFilter, debouncedSearch, sortBy, sortOrder]);
+  }, [activeFilter, categoryFilter, teamFilter, seriesFilter, debouncedSearch, sortBy, sortOrder, viewMode]);
 
   // Debounce search input
   React.useEffect(() => {
@@ -41,13 +42,8 @@ export default function CollectionView() {
       setPremium(true);
       
       // Add all cards to collection (deduplicated)
-      const currentCollection = new Set(collection);
       const allCardIds = ALL_CARDS.map(c => c.id);
-      const newCardIds = allCardIds.filter(id => !currentCollection.has(id));
-      
-      if (newCardIds.length > 0) {
-        addToCollection(newCardIds);
-      }
+      addToCollection(allCardIds);
       
       // Feedback
       setSearch('');
@@ -75,14 +71,13 @@ export default function CollectionView() {
     return () => clearTimeout(timer);
   }, [search, collection, addCoins, setPremium, addToCollection, resetGame]);
 
-  const safeCollection = useMemo(() => new Set(collection || []), [collection]);
-
   const handleCardClick = useCallback((card: Card) => {
     setSelectedCard(card);
   }, []);
 
   const renderGridItem = useCallback((card: Card) => {
-    const isOwned = safeCollection.has(card.id);
+    const quantity = collection[card.id] || 0;
+    const isOwned = quantity > 0;
     return (
       <CardItem 
         key={`${card.id}-${card.number}`}
@@ -90,12 +85,13 @@ export default function CollectionView() {
         isOwned={isOwned} 
         mode="mini"
         onClick={handleCardClick}
+        quantity={quantity}
       />
     );
-  }, [safeCollection, handleCardClick]);
+  }, [collection, handleCardClick]);
 
   const totalCards = ALL_CARDS.length;
-  const collectedCount = safeCollection.size;
+  const collectedCount = useMemo(() => Object.keys(collection).filter(id => collection[id] > 0).length, [collection]);
   const progressPercent = Math.round((collectedCount / totalCards) * 100);
 
   const teams = useMemo(() => {
@@ -112,6 +108,9 @@ export default function CollectionView() {
     const searchLower = debouncedSearch.toLowerCase();
     
     const filtered = ALL_CARDS.filter(card => {
+      // Duplicates mode filter
+      if (viewMode === 'duplicates' && (collection[card.id] || 0) <= 1) return false;
+
       const matchesRarity = activeFilter === 'All' || card.rarity === activeFilter;
       const matchesCategory = categoryFilter === 'All' || card.category === categoryFilter;
       const matchesTeam = teamFilter === 'All' || card.team === teamFilter;
@@ -141,7 +140,7 @@ export default function CollectionView() {
       }
       return sortOrder === 'asc' ? comparison : -comparison;
     });
-  }, [activeFilter, categoryFilter, teamFilter, seriesFilter, debouncedSearch, sortBy, sortOrder]);
+  }, [activeFilter, categoryFilter, teamFilter, seriesFilter, debouncedSearch, sortBy, sortOrder, viewMode, collection]);
 
   const filters: FilterType[] = ['All', 'bench', 'starter', 'allstar', 'franchise', 'legend', 'roty', 'coach', 'dpoy', 'record', 'rookie'];
 
@@ -179,13 +178,33 @@ export default function CollectionView() {
                 <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500">Player Registry</span>
               </div>
               <h1 className="text-lg font-black uppercase tracking-tighter italic leading-none flex items-center gap-2">
-                My Roster
+                {viewMode === 'roster' ? 'My Roster' : 'Duplicates'}
                 {isVintageCollector && (
                   <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-[7px] font-black uppercase tracking-widest text-amber-500 italic">
                     History
                   </span>
                 )}
               </h1>
+            </div>
+            
+            {/* View Toggle */}
+            <div className="flex bg-zinc-900/80 rounded-full p-1 border border-zinc-800 self-center">
+              <button
+                onClick={() => setViewMode('roster')}
+                className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                  viewMode === 'roster' ? 'bg-amber-500 text-black shadow-lg' : 'text-zinc-500 hover:text-white'
+                }`}
+              >
+                Roster
+              </button>
+              <button
+                onClick={() => setViewMode('duplicates')}
+                className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                  viewMode === 'duplicates' ? 'bg-amber-500 text-black shadow-lg' : 'text-zinc-500 hover:text-white'
+                }`}
+              >
+                Duplicates
+              </button>
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">

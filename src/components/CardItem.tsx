@@ -11,6 +11,7 @@ interface CardItemProps {
   showBack?: boolean;
   isFocused?: boolean;
   isNew?: boolean;
+  quantity?: number;
 }
 
 const getRarityClass = (rarity: Rarity) => {
@@ -42,7 +43,7 @@ const RARITY_COLORS: Record<Rarity, string> = {
   'rookie': '#3B82F6', // Blue
 };
 
-const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', onClick, showBack = false, isFocused = false, isNew = false }) => {
+const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', onClick, showBack = false, isFocused = false, isNew = false, quantity = 0 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const isMini = mode === 'mini';
   
@@ -215,6 +216,18 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
     return (
       <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/10">
         <Lock size={isMini ? 36 : 48} className="text-white/20 drop-shadow-lg" strokeWidth={2.5} />
+      </div>
+    );
+  };
+
+  const renderQuantityBadge = () => {
+    if (!quantity || quantity <= 1) return null;
+    return (
+      <div className={isMini 
+        ? "absolute bottom-12 right-2 z-[60] bg-blue-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full shadow-lg border border-white/20 scale-90"
+        : "absolute bottom-16 right-4 z-[60] bg-blue-600 text-white text-sm font-black px-3 py-1 rounded-full shadow-xl border-2 border-white/20"
+      }>
+        x{quantity}
       </div>
     );
   };
@@ -456,6 +469,7 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
       {renderHoloEffects()}
       {!isMini && !isHolo && <div className="card-shine" />}
       {renderNewBadge()}
+      {renderQuantityBadge()}
 
       <div className="h-[65%] shrink-0 flex flex-col relative overflow-hidden">
         {renderHeader()}
