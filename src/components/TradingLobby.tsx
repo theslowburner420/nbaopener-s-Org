@@ -19,74 +19,117 @@ const TradingLobby: React.FC<TradingLobbyProps> = ({ onJoinedRoom, onMatching, i
   const [isSearching, setIsSearching] = useState(false);
   const [isSearchingFriend, setIsSearchingFriend] = useState(false);
   
-  const lobbyChannelRef = useRef<any>(null);
+  const matchmakingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isMatchFoundRef = useRef(false);
 
-  // Main Matchmaking Management Effect
+  // Matchmaking Management Logic (Database-Driven)
   useEffect(() => {
-    // Only search if isSearching is true AND we have an active user
     if (!isSearching || !supabase || !user) {
+      if (matchmakingIntervalRef.current) clearInterval(matchmakingIntervalRef.current);
       return;
     }
 
-    // Connect to global lobby channel
-    const channel = supabase.channel('trading_lobby', {
-      config: { 
-        presence: { key: user.id },
-        broadcast: { self: false }
-      }
-    });
-    lobbyChannelRef.current = channel;
+    isMatchFoundRef.current = false;
+    
+    const conductMatchmaking = async () => {
+      if (isMatchFoundRef.current) return;
 
-    channel
-      .on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState();
-        const others = Object.entries(state).filter(([key, presences]) => 
-          key !== user.id && (presences[0] as any).status === 'searching'
-        );
+      try {
+        // 1. Check if there's an existing room waiting for me (someone joined my host request)
+        const { data: myHostRequest, error: hostError } = await supabase!
+          .from('trading_queues')
+          .select('*')
+          .eq('host_id', user.id)
+          .single();
 
-        if (others.length > 0) {
-          const [otherId] = others[0];
-          const roomId = [user.id, otherId].sort().join('_');
+        if (myHostRequest && myHostRequest.status === 'matched') {
+          isMatchFoundRef.current = true;
+          handleMatchFound(myHostRequest.room_id);
+          return;
+        }
+
+        // 2. If no request exists, try to find someone else waiting
+        const { data: othersWaiting, error: findError } = await supabase!
+          .from('trading_queues')
+          .select('*')
+          .eq('status', 'waiting')
+          .neq('host_id', user.id)
+          .order('created_at', { ascending: true })
+          .limit(1);
+
+        if (othersWaiting && othersWaiting.length > 0) {
+          const target = othersWaiting[0];
+          const roomId = [user.id, target.host_id].sort().join('_');
           
-          // Stop searching locally first to break any possible re-renders
-          setIsSearching(false);
-          onMatching(false);
-          onJoinedRoom(roomId);
-        }
-      })
-      .subscribe(async (status, err) => {
-        if (status === 'SUBSCRIBED') {
-          await channel.track({ 
-            status: 'searching', 
-            username: user.username,
-            timestamp: Date.now() 
-          });
-        } else if (status === 'CHANNEL_ERROR') {
-          console.error('❌ [Matchmaking] Subscription Error:', err);
-          setIsSearching(false);
-          onMatching(false);
-          notifyError(`Connection failed: ${err?.message || 'Check RLS policies'}`);
-        }
-      });
+          // Try to "claim" this guest slot
+          const { error: joinError } = await supabase!
+            .from('trading_queues')
+            .update({ 
+               guest_id: user.id, 
+               status: 'matched',
+               room_id: roomId 
+            })
+            .eq('id', target.id)
+            .eq('status', 'waiting'); // Atomic check
 
-    // Timeout (18s)
+          if (!joinError) {
+            isMatchFoundRef.current = true;
+            handleMatchFound(roomId);
+            return;
+          }
+        }
+
+        // 3. If nobody found, ensure my own host request is active
+        if (!myHostRequest) {
+          await supabase!
+            .from('trading_queues')
+            .upsert({ 
+              host_id: user.id, 
+              host_username: user.username,
+              status: 'waiting',
+              created_at: new Date().toISOString()
+            });
+        }
+      } catch (err) {
+        console.error("Matchmaking error:", err);
+      }
+    };
+
+    const handleMatchFound = (roomId: string) => {
+      setIsSearching(false);
+      onMatching(false);
+      if (matchmakingIntervalRef.current) clearInterval(matchmakingIntervalRef.current);
+      
+      // Cleanup the queue entry after a short delay or let room handle it
+      supabase!.from('trading_queues').delete().eq('host_id', user.id).then(() => {
+        onJoinedRoom(roomId);
+      });
+    };
+
+    // Poll every 3 seconds instead of socket chaos
+    conductMatchmaking();
+    matchmakingIntervalRef.current = setInterval(conductMatchmaking, 3000);
+
+    // Timeout (25s)
     const timeout = setTimeout(() => {
-      if (isSearching) {
+      if (isSearching && !isMatchFoundRef.current) {
         setIsSearching(false);
         onMatching(false);
-        notifyError("No players found. Try again in a moment.");
+        notifyError("No players found. Try again.");
+        cleanupDatabaseQueue();
       }
-    }, 18000);
+    }, 25000);
 
-    // CLEANUP: This is the ONLY place where we unsubscribe
+    const cleanupDatabaseQueue = async () => {
+      if (matchmakingIntervalRef.current) clearInterval(matchmakingIntervalRef.current);
+      await supabase!.from('trading_queues').delete().eq('host_id', user.id);
+    };
+
     return () => {
       clearTimeout(timeout);
-      if (channel) {
-        channel.unsubscribe();
-      }
-      lobbyChannelRef.current = null;
+      cleanupDatabaseQueue();
     };
-  }, [isSearching, user?.id]); // Strictly controlled triggers
+  }, [isSearching, user?.id]);
 
   // External cancellation sync
   useEffect(() => {

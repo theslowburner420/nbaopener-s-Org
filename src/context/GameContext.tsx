@@ -58,8 +58,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const authProcessed = React.useRef(false);
   const isSyncingRef = useRef(false);
   const isBackgroundSyncingRef = useRef(false);
-  const [isAuthLoading, setIsAuthLoading] = useState(false); // Start unblocked
-  const [isInitialSyncDone, setIsInitialSyncDone] = useState(true); // Start as guest/local ready
+  const [isAuthLoading, setIsAuthLoading] = useState(true); // Re-blocking for session stability
+  const [isInitialSyncDone, setIsInitialSyncDone] = useState(false); // Re-blocking
   const [isSaving, setIsSaving] = useState(false);
   const [isBackgroundSaving, setIsBackgroundSaving] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
@@ -192,11 +192,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [supabase, setSyncError]);
 
   const syncProfile = useCallback(async (user: any) => {
-    // 1. Immediately unblock UI if we have a user (Background Hydration)
-    if (user) {
-      setIsInitialSyncDone(true);
-      setIsAuthLoading(false);
-    }
+    // Reverting background hydration to fix session loss on refresh
+    // We must wait for auth verification before unblocking UI
 
     // If signing out, we must ALWAYS proceed to clear state and reset refs
     if (!user) {
@@ -230,8 +227,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     isSyncingRef.current = true;
-    setIsBackgroundSaving(true);
-    console.log('🔄 STARTING BACKGROUND SYNC for user:', user.id);
+    console.log('🔄 STARTING SYNC for user:', user.id);
     
     const userData: User = {
       id: user.id,
