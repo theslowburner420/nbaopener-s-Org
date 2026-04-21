@@ -34,6 +34,8 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
     return ALL_CARDS.filter(card => (collection[card.id] || 0) > 1);
   }, [collection]);
 
+  const channelRef = React.useRef<any>(null);
+
   // Real-time Channel Setup
   useEffect(() => {
     if (!supabase || !user) return;
@@ -43,6 +45,7 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
         broadcast: { self: false }
       }
     });
+    channelRef.current = channel;
 
     channel
       .on('broadcast', { event: 'offer_update' }, ({ payload }) => {
@@ -54,17 +57,15 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
       })
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
-        // Check if partner is still there
         const others = Object.keys(state).filter(k => k !== user.id);
         if (others.length === 0) {
-          // notifyError("Partner disconnected.");
-          // onLeave();
+          // notifyError("Partner left.");
         }
       })
-      .subscribe(async (status) => {
+      .subscribe(async (status, err) => {
         if (status === 'SUBSCRIBED') {
           await channel.track({ username: user.username });
-          // Initial broadcast of my empty offer
+          // Initial broadcast
           channel.send({
             type: 'broadcast',
             event: 'offer_update',
@@ -75,19 +76,20 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
 
     return () => {
       channel.unsubscribe();
+      channelRef.current = null;
     };
-  }, [roomId, user]);
+  }, [roomId, user?.id]);
 
   // Sync my offer changes
   useEffect(() => {
-    if (!supabase || !user) return;
-    const channel = supabase.channel(`trade:${roomId}`);
-    channel.send({
-      type: 'broadcast',
-      event: 'offer_update',
-      payload: { offer: myOffer, username: user.username }
-    });
-  }, [myOffer]);
+    if (channelRef.current && myOffer && user) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'offer_update',
+        payload: { offer: myOffer, username: user.username }
+      });
+    }
+  }, [myOffer, user?.username]);
 
   const toggleReady = () => {
     setMyOffer(prev => ({ ...prev, ready: !prev.ready }));

@@ -19,103 +19,87 @@ const TradingLobby: React.FC<TradingLobbyProps> = ({ onJoinedRoom, onMatching, i
   const [isSearching, setIsSearching] = useState(false);
   const [isSearchingFriend, setIsSearchingFriend] = useState(false);
   
-  const lobbyChannelRef = useRef<RealtimeChannel | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lobbyChannelRef = useRef<any>(null);
 
-  // Hard cleanup on unmount
+  // Main Matchmaking Management Effect
   useEffect(() => {
-    return () => {
-      cleanupSearch();
-    };
-  }, []);
+    // Only search if isSearching is true AND we have an active user
+    if (!isSearching || !supabase || !user) {
+      return;
+    }
 
-  // Listen for external cancellations (e.g. from TradingView overlay)
+    // Connect to global lobby channel
+    const channel = supabase.channel('trading_lobby', {
+      config: { 
+        presence: { key: user.id },
+        broadcast: { self: false }
+      }
+    });
+    lobbyChannelRef.current = channel;
+
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState();
+        const others = Object.entries(state).filter(([key, presences]) => 
+          key !== user.id && (presences[0] as any).status === 'searching'
+        );
+
+        if (others.length > 0) {
+          const [otherId] = others[0];
+          const roomId = [user.id, otherId].sort().join('_');
+          
+          // Stop searching locally first to break any possible re-renders
+          setIsSearching(false);
+          onMatching(false);
+          onJoinedRoom(roomId);
+        }
+      })
+      .subscribe(async (status, err) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({ 
+            status: 'searching', 
+            username: user.username,
+            timestamp: Date.now() 
+          });
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('❌ [Matchmaking] Subscription Error:', err);
+          setIsSearching(false);
+          onMatching(false);
+          notifyError(`Connection failed: ${err?.message || 'Check RLS policies'}`);
+        }
+      });
+
+    // Timeout (18s)
+    const timeout = setTimeout(() => {
+      if (isSearching) {
+        setIsSearching(false);
+        onMatching(false);
+        notifyError("No players found. Try again in a moment.");
+      }
+    }, 18000);
+
+    // CLEANUP: This is the ONLY place where we unsubscribe
+    return () => {
+      clearTimeout(timeout);
+      if (channel) {
+        channel.unsubscribe();
+      }
+      lobbyChannelRef.current = null;
+    };
+  }, [isSearching, user?.id]); // Strictly controlled triggers
+
+  // External cancellation sync
   useEffect(() => {
     if (isSearching && isMatching === false) {
-      console.log('🛑 External cancel detected. Cleaning up search...');
-      cleanupSearch();
+      setIsSearching(false);
     }
   }, [isMatching, isSearching]);
 
-  const cleanupSearch = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-    if (lobbyChannelRef.current) {
-      console.log('🔌 Unsubscribing from trading lobby channel...');
-      lobbyChannelRef.current.unsubscribe();
-      lobbyChannelRef.current = null;
-    }
-    setIsSearching(false);
-    onMatching(false);
-  };
-
   const startRandomMatch = async () => {
     if (!supabase || !user) return;
-    
-    // Prevent double starts
     if (isSearching) return;
-
-    console.log('🔍 Starting random match search...');
     setIsSearching(true);
     onMatching(true);
-    notifyInfo("Searching for trade partners...");
-
-    try {
-      // 1. Create global lobby channel
-      const channel = supabase.channel('trading_lobby', {
-        config: { presence: { key: user.id } }
-      });
-      lobbyChannelRef.current = channel;
-
-      channel
-        .on('presence', { event: 'sync' }, () => {
-          if (!lobbyChannelRef.current) return;
-          
-          const state = channel.presenceState();
-          // Look for someone else searching
-          const others = Object.entries(state).filter(([key, presences]) => 
-            key !== user.id && (presences[0] as any).status === 'searching'
-          );
-
-          if (others.length > 0) {
-            console.log('🤝 Partner found! Initializing room...');
-            const [otherId] = others[0];
-            const roomId = [user.id, otherId].sort().join('_');
-            
-            // Critical: Cleanup BEFORE moving to room
-            const foundRoomId = roomId;
-            cleanupSearch();
-            onJoinedRoom(foundRoomId);
-          }
-        })
-        .subscribe(async (status) => {
-          if (status === 'SUBSCRIBED') {
-            await channel.track({ 
-              status: 'searching', 
-              username: user.username,
-              timestamp: Date.now() 
-            });
-          } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
-            console.error('❌ Lobby channel error/closed:', status);
-            cleanupSearch();
-            notifyError("Connection lost. Please try again.");
-          }
-        });
-
-      // 2. Strict Emergency Timeout (18 seconds)
-      timeoutRef.current = setTimeout(() => {
-        console.warn('⏱️ Matchmaking timeout reached.');
-        cleanupSearch();
-        notifyError("No players found. Try again in a moment.");
-      }, 18000);
-
-    } catch (err) {
-      console.error('❌ Matchmaking exception:', err);
-      cleanupSearch();
-      notifyError("Failed to connect to matchmaking.");
-    }
   };
 
   const startPrivateTrade = async () => {

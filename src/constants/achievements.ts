@@ -45,122 +45,122 @@ export const ACHIEVEMENTS: Achievement[] = [
   // --- OPENING MILESTONES (20) ---
   { 
     id: 'pack-1', title: 'First Step', description: 'Open your first pack.', icon: Package, category: 'packs', level: 'bronze',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 5, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 5), total: 5 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 5, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 5), total: 5 }),
     rewardCoins: 1000 
   },
   { 
     id: 'pack-5', title: 'Rookie Opener', description: 'Open 5 packs.', icon: Package, category: 'packs', level: 'bronze',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 25, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 25), total: 25 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 25, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 25), total: 25 }),
     rewardCoins: 2500 
   },
   { 
     id: 'pack-10', title: 'Regular Opener', description: 'Open 10 packs.', icon: Package, category: 'packs', level: 'silver',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 50, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 50), total: 50 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 50, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 50), total: 50 }),
     rewardCoins: 5000, rewardPacks: [{ id: 'rookie-pack', type: 'rookie', name: 'Rookie Pack' }] 
   },
   { 
     id: 'pack-25', title: 'Dedicated Opener', description: 'Open 25 packs.', icon: Package, category: 'packs', level: 'silver',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 125, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 125), total: 125 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 125, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 125), total: 125 }),
     rewardCoins: 10000 
   },
   { 
     id: 'pack-50', title: 'Pack Enthusiast', description: 'Open 50 packs.', icon: Package, category: 'packs', level: 'gold',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 250, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 250), total: 250 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 250, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 250), total: 250 }),
     rewardCoins: 25000, rewardPacks: [{ id: 'allstar-pack', type: 'allstar', name: 'All-Star Pack' }] 
   },
   { 
     id: 'pack-100', title: 'Pack Addict', description: 'Open 100 packs.', icon: Package, category: 'packs', level: 'gold',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 500, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 500), total: 500 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 500, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 500), total: 500 }),
     rewardCoins: 50000, rewardPacks: [{ id: 'mvp-pack', type: 'mvp', name: 'Finals MVP Pack' }] 
   },
   { 
     id: 'pack-200', title: 'Bulk Buyer', description: 'Open 200 packs.', icon: Package, category: 'packs', level: 'gold',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 1000, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 1000), total: 1000 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 1000, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 1000), total: 1000 }),
     rewardCoins: 100000 
   },
   { 
     id: 'pack-300', title: 'Crate Collector', description: 'Open 300 packs.', icon: Package, category: 'packs', level: 'diamond',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 1500, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 1500), total: 1500 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 1500, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 1500), total: 1500 }),
     rewardCoins: 150000 
   },
   { 
     id: 'pack-400', title: 'Warehouse Manager', description: 'Open 400 packs.', icon: Package, category: 'packs', level: 'diamond',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 2000, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 2000), total: 2000 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 2000, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 2000), total: 2000 }),
     rewardCoins: 200000 
   },
   { 
     id: 'pack-500', title: 'Halfway to a Thousand', description: 'Open 500 packs.', icon: Package, category: 'packs', level: 'diamond',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 2500, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 2500), total: 2500 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 2500, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 2500), total: 2500 }),
     rewardCoins: 250000, rewardPacks: [{ id: 'hof-pack', type: 'hof', name: 'HOF Pack' }] 
   },
   { 
     id: 'pack-750', title: 'Three Quarters', description: 'Open 750 packs.', icon: Package, category: 'packs', level: 'diamond',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 3750, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 3750), total: 3750 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 3750, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 3750), total: 3750 }),
     rewardCoins: 350000 
   },
   { 
     id: 'pack-1000', title: 'Millennial Opener', description: 'Open 1000 packs.', icon: Package, category: 'packs', level: 'diamond',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 5000, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 5000), total: 5000 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 5000, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 5000), total: 5000 }),
     rewardCoins: 500000, rewardPacks: [{ id: 'hof-pack', type: 'hof', name: 'HOF Pack' }] 
   },
   { 
     id: 'pack-1500', title: 'Pack Veteran', description: 'Open 1500 packs.', icon: Package, category: 'packs', level: 'diamond',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 7500, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 7500), total: 7500 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 7500, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 7500), total: 7500 }),
     rewardCoins: 750000 
   },
   { 
     id: 'pack-2000', title: 'Double Millennial', description: 'Open 2000 packs.', icon: Package, category: 'packs', level: 'diamond',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 10000, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 10000), total: 10000 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 10000, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 10000), total: 10000 }),
     rewardCoins: 1000000 
   },
   { 
     id: 'pack-2500', title: 'Pack Legend', description: 'Open 2500 packs.', icon: Package, category: 'packs', level: 'diamond',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 12500, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 12500), total: 12500 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 12500, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 12500), total: 12500 }),
     rewardCoins: 1250000 
   },
   { 
     id: 'pack-3000', title: 'Triple Millennial', description: 'Open 3000 packs.', icon: Package, category: 'packs', level: 'diamond',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 15000, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 15000), total: 15000 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 15000, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 15000), total: 15000 }),
     rewardCoins: 1500000 
   },
   { 
     id: 'pack-3500', title: 'Pack Master', description: 'Open 3500 packs.', icon: Package, category: 'packs', level: 'diamond',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 17500, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 17500), total: 17500 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 17500, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 17500), total: 17500 }),
     rewardCoins: 1750000 
   },
   { 
     id: 'pack-4000', title: 'Quadruple Millennial', description: 'Open 4000 packs.', icon: Package, category: 'packs', level: 'diamond',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 20000, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 20000), total: 20000 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 20000, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 20000), total: 20000 }),
     rewardCoins: 2000000 
   },
   { 
     id: 'pack-4500', title: 'Pack God', description: 'Open 4500 packs.', icon: Package, category: 'packs', level: 'diamond',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 22500, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 22500), total: 22500 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 22500, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 22500), total: 22500 }),
     rewardCoins: 2250000 
   },
   { 
     id: 'pack-5000', title: 'Ultimate Opener', description: 'Open 5000 packs.', icon: Package, category: 'packs', level: 'diamond',
-    requirement: (state) => Object.values(state.collection).reduce((a, b) => a + b, 0) >= 25000, 
-    getProgress: (state) => ({ current: Math.min(Object.values(state.collection).reduce((a, b) => a + b, 0), 25000), total: 25000 }),
+    requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 25000, 
+    getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 25000), total: 25000 }),
     rewardCoins: 5000000, rewardPacks: [{ id: 'hof-pack', type: 'hof', name: 'HOF Pack' }] 
   },
 

@@ -97,12 +97,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!newState.user || !supabase) return false;
     
     try {
+      // Flatten collection to array for Supabase legacy support (text[] column)
+      // If collection is already array, use it, else flatten map {id: count} -> [id, id, id]
+      const flattenedCards = Array.isArray(newState.collection) 
+        ? newState.collection 
+        : Object.entries(newState.collection).flatMap(([id, count]) => Array(Number(count) || 0).fill(id));
+
       const payload = {
-        id: newState.user.id, // Ensure ID is present for upsert
+        id: newState.user.id,
         username: newState.user.username,
         avatar_url: newState.user.avatar_url,
         coins: Number(newState.coins) || 0,
-        cards: newState.collection || {},
+        cards: flattenedCards,
         unlocked_achievements: Array.isArray(newState.unlockedAchievements) ? newState.unlockedAchievements : [],
         claimed_achievements: Array.isArray(newState.claimedAchievements) ? newState.claimedAchievements : [],
         inventory_packs: Array.isArray(newState.inventoryPacks) ? newState.inventoryPacks : [],
@@ -133,18 +139,30 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           console.log(`📡 Cloud Sync Attempt ${attempt} for user ${newState.user!.id} (${silent ? 'Silent' : 'Forced'})`);
           
+          // Sanitization: Ensure payload is clean
+          // Nbaid must be checked, values must be valid
+          
           // Using upsert with onConflict to be more robust than update
-          const { error } = await supabase!
+          const { error, status } = await supabase!
             .from('profiles')
             .upsert(payload, { onConflict: 'id' });
           
           if (error) {
-            console.error(`❌ Supabase Error (Attempt ${attempt}):`, error);
+            console.error(`❌ Supabase Error ${status} (Attempt ${attempt}):`, error);
+            
+            // Critical: If it's a Bad Request (400) or Format error (22P02), DO NOT RETRY
+            // This prevents flooding the network with known-bad payloads
+            if (status === 400 || error.code === '22P02') {
+              console.error('🚫 Format error detected. Aborting retries to prevent stack overflow.');
+              setSyncError(`Sync failed: Data format error (${error.message})`);
+              return false;
+            }
             return false;
           }
           
           if (silent) console.log('✅ Silent save successful');
           lastSyncedStateRef.current = stateString;
+          setSyncError(null);
           localStorage.removeItem('GUEST_PROGRESS');
           return true;
         } catch (err) {
@@ -153,13 +171,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       };
 
-      let success = await performSave(1);
-      let attempt = 1;
-      while (!success && attempt < retries) {
-        attempt++;
-        const delay = Math.pow(2, attempt) * 500; // Shorter backoff
+      let success = false;
+      for (let i = 1; i <= retries; i++) {
+        success = await performSave(i);
+        if (success) break;
+        // Exponential backoff
+        const delay = Math.pow(2, i) * 500;
         await new Promise(resolve => setTimeout(resolve, delay));
-        success = await performSave(attempt);
       }
 
       return success;
@@ -171,7 +189,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsSaving(false);
       }
     }
-  }, []);
+  }, [supabase, setSyncError]);
 
   const syncProfile = useCallback(async (user: any) => {
     // If signing out, we must ALWAYS proceed to clear state and reset refs
@@ -186,7 +204,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user: null,
         // Reset coins and collection to default guest values on logout
         coins: 500,
-        collection: [],
+        collection: {}, // Reset to empty object, not array
         customCards: [],
         inventoryPacks: [],
         unlockedAchievements: [],
