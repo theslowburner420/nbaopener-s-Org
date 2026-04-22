@@ -365,17 +365,21 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const mergeArrays = (a: any[], b: any[]) => Array.from(new Set([...(a || []), ...(b || [])]));
         
         finalMergedData = {
-          coins: Math.max(pc.coins, localProgress.coins),
+          // If we haven't finished our very first sync ever, we merge guest + cloud cautiously (additive)
+          // Once the app is running (isInitialSyncDoneRef), we TRUST the cloud as the master for logged-in sessions
+          coins: isInitialSyncDoneRef.current ? pc.coins : Math.max(pc.coins, localProgress.coins),
           collection: (() => {
+            if (isInitialSyncDoneRef.current) return pc.cards; // Trust cloud master during active session
+            
             const merged = { ...pc.cards };
             Object.entries(localProgress.collection).forEach(([id, count]) => {
-              merged[id] = Math.max(merged[id] || 0, count); // Conservatively take max for duplicates during cloud sync if conflict
+              merged[id] = Math.max(merged[id] || 0, count);
             });
             return merged;
           })(),
-          unlockedAchievements: mergeArrays(pc.unlocked_achievements, localProgress.unlockedAchievements),
-          claimedAchievements: mergeArrays(pc.claimed_achievements, localProgress.claimedAchievements),
-          inventoryPacks: pc.inventory_packs.length > localProgress.inventoryPacks.length ? pc.inventory_packs : localProgress.inventoryPacks,
+          unlockedAchievements: isInitialSyncDoneRef.current ? pc.unlocked_achievements : mergeArrays(pc.unlocked_achievements, localProgress.unlockedAchievements),
+          claimedAchievements: isInitialSyncDoneRef.current ? pc.claimed_achievements : mergeArrays(pc.claimed_achievements, localProgress.claimedAchievements),
+          inventoryPacks: isInitialSyncDoneRef.current ? pc.inventory_packs : (pc.inventory_packs.length > localProgress.inventoryPacks.length ? pc.inventory_packs : localProgress.inventoryPacks),
           isPremium: pc.ads_disabled || localProgress.isPremium,
         };
       }

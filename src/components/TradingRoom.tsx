@@ -29,6 +29,12 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
   const [isExecuting, setIsExecuting] = useState(false);
   const [showDuplicatePicker, setShowDuplicatePicker] = useState(false);
 
+  const myOfferRef = React.useRef(myOffer);
+  const theirOfferRef = React.useRef(theirOffer);
+
+  useEffect(() => { myOfferRef.current = myOffer; }, [myOffer]);
+  useEffect(() => { theirOfferRef.current = theirOffer; }, [theirOffer]);
+
   // Filter duplicate cards for picking
   const duplicateCards = useMemo(() => {
     return ALL_CARDS.filter(card => (collection[card.id] || 0) > 1);
@@ -146,10 +152,10 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
         const payload = {
           p_host_id: id1,
           p_guest_id: id2,
-          p_host_coins: isPrimaryHost ? myOffer.coins : theirOffer.coins,
-          p_guest_coins: isPrimaryHost ? theirOffer.coins : myOffer.coins,
-          p_host_cards: isPrimaryHost ? myOffer.cards : theirOffer.cards,
-          p_guest_cards: isPrimaryHost ? theirOffer.cards : myOffer.cards
+          p_host_coins: myOfferRef.current.coins,
+          p_guest_coins: theirOfferRef.current.coins,
+          p_host_cards: myOfferRef.current.cards,
+          p_guest_cards: theirOfferRef.current.cards
         };
 
         console.log("⚡ Host executing Atomic Swap via RPC...");
