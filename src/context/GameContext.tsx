@@ -260,24 +260,38 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const currentLiveState = stateRef.current;
       const savedGuest = localStorage.getItem('GUEST_PROGRESS');
+      const savedBackup = localStorage.getItem(`BACKUP_${user.id}`);
+      
       let guestData = null;
+      let backupData = null;
+      
       try {
         guestData = savedGuest ? JSON.parse(savedGuest) : null;
+        backupData = savedBackup ? JSON.parse(savedBackup) : null;
       } catch (e) {
         console.error('Local data corrupt', e);
       }
       
       const localProgress = {
-        coins: Math.max(currentLiveState.coins, guestData?.coins ?? 0),
+        coins: Math.max(currentLiveState.coins, guestData?.coins ?? 0, backupData?.coins ?? 0),
         collection: (() => {
           let merged: Record<string, number> = {};
           
+          // Merge Backup (Most reliable local source for this user)
+          if (backupData?.collection) {
+            Object.entries(backupData.collection).forEach(([id, count]) => {
+              merged[id] = (merged[id] || 0) + (count as number);
+            });
+          }
+
           // Handle currentLiveState (cloud/guest)
           const liveColl = currentLiveState.collection;
           if (Array.isArray(liveColl)) {
             liveColl.forEach((id: string) => merged[id] = (merged[id] || 0) + 1);
           } else if (liveColl && typeof liveColl === 'object') {
-            merged = { ...liveColl };
+            Object.entries(liveColl).forEach(([id, count]) => {
+              merged[id] = (merged[id] || 0) + (count as number);
+            });
           }
 
           const guestColl = guestData?.collection;
@@ -469,10 +483,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     const safetyTimeout = setTimeout(() => {
-      // Safety unblock is no longer strictly needed but kept as fallback
-      setIsAuthLoading(false);
-      setIsInitialSyncDone(true);
-    }, 5000);
+      // Extended safety unblock to 10s
+      if (!isInitialSyncDoneRef.current) {
+        console.warn('⚠️ Safety unblock triggered after 10s');
+        setIsAuthLoading(false);
+        setIsInitialSyncDone(true);
+      }
+    }, 10000);
 
     return () => {
       mounted = false;

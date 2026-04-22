@@ -20,7 +20,7 @@ interface TradeOffer {
 }
 
 const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
-  const { user, collection, coins: myTotalCoins, refreshFromCloud } = useGame();
+  const { user, collection, coins: myTotalCoins, refreshFromCloud, forceSync } = useGame();
   const { notifyError, notifySuccess, notifyInfo } = useNotification();
   
   const [myOffer, setMyOffer] = useState<TradeOffer>({ cards: [], coins: 0, ready: false });
@@ -180,7 +180,6 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
       setIsExecuting(false);
     }
   };
- Jonah
 
   const acceptTrade = async () => {
     if (!myOffer.ready || !theirOffer.ready) return;
