@@ -52,10 +52,9 @@ function AppContent() {
   // Tactical Image Preloading
   useEffect(() => {
     const prefetchAssets = () => {
-      // 1. Essential UI Images
+      // 1. Essential UI Images (Only if they exist, or use known CDNs)
       const uiAssets = [
-        '/assets/card-back.png', // Assuming these exist or use picsum
-        '/assets/pack-texture.png'
+        'https://picsum.photos/seed/cards/400/600', // Placeholder for card back
       ];
       
       // 2. Critical Team Logos (Top 10 most popular teams)
@@ -137,9 +136,30 @@ function AppContent() {
     );
   };
 
-  if (isAuthLoading || (!isInitialSyncDone && !syncError)) {
+  if (syncError) {
     return (
-      <div className="h-[100dvh] w-full bg-black flex flex-col items-center justify-center gap-6">
+      <div className="h-[100dvh] w-full bg-black flex flex-col items-center justify-center p-8 text-center">
+        <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center text-red-500 mb-6">
+          <AlertTriangle size={40} />
+        </div>
+        <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white mb-2">Connection Error</h2>
+        <p className="text-zinc-500 text-sm max-w-xs mb-8 leading-relaxed">
+          {syncError}
+        </p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-10 py-4 bg-white text-black rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-amber-400 transition-all active:scale-95 flex items-center gap-3"
+        >
+          <RefreshCw size={16} />
+          Retry Connection
+        </button>
+      </div>
+    );
+  }
+
+  if (isAuthLoading || !isInitialSyncDone) {
+    return (
+      <div className="h-[100dvh] w-full bg-black flex flex-col items-center justify-center gap-6 overflow-hidden">
         <div className="relative">
           <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)] border border-zinc-200 animate-bounce">
             <span className="text-black font-black text-xl italic tracking-tighter">HC</span>
@@ -148,16 +168,17 @@ function AppContent() {
         </div>
         <div className="flex flex-col items-center gap-2">
           <p className="text-xs font-black uppercase tracking-[0.3em] text-white animate-pulse">
-            Checking Session...
+            Establishing Link...
           </p>
           <div className="w-32 h-1 bg-zinc-900 rounded-full overflow-hidden">
             <motion.div 
               className="h-full bg-amber-500"
               initial={{ width: "0%" }}
               animate={{ width: "100%" }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
             />
           </div>
+          <p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mt-2">Checking Cloud Session</p>
         </div>
       </div>
     );

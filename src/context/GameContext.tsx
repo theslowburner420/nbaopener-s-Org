@@ -24,6 +24,7 @@ interface GameContextType extends GameState {
   updateGameState: (updates: Partial<GameState>) => void;
   updateGameStateAsync: (updates: Partial<GameState>) => Promise<void>;
   forceSync: () => Promise<void>;
+  refreshFromCloud: () => Promise<void>;
   isSaving: boolean;
   isBackgroundSaving: boolean;
   syncError: string | null;
@@ -93,8 +94,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [state]);
 
   // Function to force immediate sync to Supabase with retries (IRON RULE: Write Confirmation)
-  const forceSyncToSupabase = useCallback(async (newState: GameState, retries = 5, silent = false) => {
+  const forceSyncToSupabase = useCallback(async (newState: GameState, retries = 5, silent = false, isInitSync = false) => {
     if (!newState.user || !supabase) return false;
+    
+    // CRITICAL GUARD: Never allow an auto-sync or manual sync to overwrite cloud data 
+    // unless the initial hydration from cloud has successfully completed.
+    if (!isInitialSyncDone && !isInitSync) {
+      console.warn('🛡️ Data Guard: Blocking sync until initial hydration is complete');
+      return false;
+    }
     
     try {
       // Flatten collection to array for Supabase legacy support (text[] column)
@@ -358,7 +366,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Reset sync ref so it's not blocking the immediate save
       lastSyncedStateRef.current = ''; 
-      await forceSyncToSupabase(mergedState, 3, true);
+      await forceSyncToSupabase(mergedState, 3, true, true);
 
       // Setup/Refresh Real-time
       if (!profileSubscriptionRef.current && supabase) {
@@ -385,10 +393,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsInitialSyncDone(true);
       setIsAuthLoading(false);
       setIsBackgroundSaving(false);
-    } catch (err) {
-      console.error('❌ BACKGROUND SYNC ERROR:', err);
+    } catch (err: any) {
+      console.error('❌ CRITICAL SYNC ERROR:', err);
+      setSyncError(`Data Sync Failed: ${err.message || 'Network error'}`);
       setIsAuthLoading(false);
-      setIsInitialSyncDone(true);
+      // NEVER set isInitialSyncDone(true) here, or auto-save will nuke the cloud data with empty state
       setIsBackgroundSaving(false);
     } finally {
       isSyncingRef.current = false;
@@ -736,6 +745,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [forceSyncToSupabase]);
 
+  const refreshFromCloud = useCallback(async () => {
+    if (stateRef.current.user) {
+      console.log('🔄 Manually refreshing state from cloud...');
+      isSyncingRef.current = false; // Reset to allow syncProfile to run
+      await syncProfile(stateRef.current.user);
+    }
+  }, [syncProfile]);
+
   const contextValue = useMemo(() => ({
     ...state,
     isAuthLoading,
@@ -755,6 +772,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateGameState,
     updateGameStateAsync,
     forceSync,
+    refreshFromCloud,
     isSaving,
     isBackgroundSaving,
     syncError,

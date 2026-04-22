@@ -20,7 +20,7 @@ interface TradeOffer {
 }
 
 const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
-  const { user, collection, coins: myTotalCoins, addToCollection, updateGameStateAsync } = useGame();
+  const { user, collection, coins: myTotalCoins, refreshFromCloud } = useGame();
   const { notifyError, notifySuccess, notifyInfo } = useNotification();
   
   const [myOffer, setMyOffer] = useState<TradeOffer>({ cards: [], coins: 0, ready: false });
@@ -52,8 +52,10 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
         setTheirOffer(payload.offer);
         setPartnerUsername(payload.username || 'Partner');
       })
-      .on('broadcast', { event: 'trade_confirmed' }, () => {
-        handleTradeFinalized();
+      .on('broadcast', { event: 'trade_confirmed' }, async ({ payload }) => {
+        // When we receive confirmation from the other player, we trigger the finalization
+        console.log("Partner confirmed trade:", payload.by);
+        await handleTradeFinalized();
       })
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
@@ -131,36 +133,49 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
   };
 
   const handleTradeFinalized = async () => {
-    // This is called when the other player confirms OR locally after we confirm and send success
+    if (isExecuting) return;
     setIsExecuting(true);
+
     try {
-      // 1. Calculate local state changes
-      const newCollection = { ...collection };
+      // 1. Identify Host and Guest for the RPC (Order matters for atomicity)
+      // We use the roomId logic (sorted IDs) to determine who is host/guest in the DB
+      const [id1, id2] = roomId.split('_');
+      const isHost = user?.id === id1;
       
-      // Remove my items
-      myOffer.cards.forEach(id => {
-        newCollection[id] = (newCollection[id] || 0) - 1;
-      });
+      const hostId = id1;
+      const guestId = id2;
+
+      // Extract current offers
+      // Note: In a real app we'd verify room state in DB, 
+      // but here we trust the broadcasted/state offers for the RPC.
+      const payload = {
+        p_host_id: hostId,
+        p_guest_id: guestId,
+        p_host_offer_coins: isHost ? myOffer.coins : theirOffer.coins,
+        p_guest_offer_coins: isHost ? theirOffer.coins : myOffer.coins,
+        p_host_offer_cards: isHost ? myOffer.cards : theirOffer.cards,
+        p_guest_offer_cards: isHost ? theirOffer.cards : myOffer.cards
+      };
+
+      console.log("⚡ Executing Atomic Swap...");
       
-      // Add their items
-      theirOffer.cards.forEach(id => {
-        newCollection[id] = (newCollection[id] || 0) + 1;
-      });
+      // 2. Call the Atomic RPC
+      const { data, error } = await supabase!.rpc('complete_nba_trade', payload);
 
-      // Update coins
-      const newCoins = myTotalCoins - myOffer.coins + theirOffer.coins;
+      if (error || !data.success) {
+        throw new Error(error?.message || data?.error || "Transaction failed");
+      }
 
-      // 2. Persist to DB (Atomic update)
-      // Since this is a demo, we update GameContext which syncs to Supabase
-      await updateGameStateAsync({
-        collection: newCollection,
-        coins: newCoins
-      });
+      // 3. Update local state immediately via cloud refresh
+      await refreshFromCloud();
 
-      notifySuccess("Trade completed successfully!");
-      onLeave();
-    } catch (err) {
-      notifyError("An error occurred finalizing the trade.");
+      notifySuccess("Trade Completed! Balances updated.");
+      
+      // Leave room after delay to see success
+      setTimeout(() => onLeave(), 2000);
+    } catch (err: any) {
+      console.error("Critical Trade Fail:", err);
+      notifyError(`Trade Failed: ${err.message}`);
     } finally {
       setIsExecuting(false);
     }
@@ -168,17 +183,23 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
 
   const acceptTrade = async () => {
     if (!myOffer.ready || !theirOffer.ready) return;
+    if (isExecuting) return;
     
     setIsExecuting(true);
-    // Broadcast confirmation
-    const channel = supabase!.channel(`trade:${roomId}`);
-    await channel.send({
-      type: 'broadcast',
-      event: 'trade_confirmed',
-      payload: { by: user?.id }
-    });
-    
-    await handleTradeFinalized();
+    try {
+      // Broadcast confirmation so both clients know it's time to finalize
+      await channelRef.current.send({
+        type: 'broadcast',
+        event: 'trade_confirmed',
+        payload: { by: user?.id }
+      });
+
+      // Also execute locally
+      await handleTradeFinalized();
+    } catch (err) {
+      notifyError("Failed to send confirmation.");
+      setIsExecuting(false);
+    }
   };
 
   const offerCards = myOffer.cards.map(id => ALL_CARDS.find(c => c.id === id)).filter(Boolean) as Card[];

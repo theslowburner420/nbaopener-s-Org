@@ -35,12 +35,12 @@ const TradingLobby: React.FC<TradingLobbyProps> = ({ onJoinedRoom, onMatching, i
       if (isMatchFoundRef.current) return;
 
       try {
-        // 1. Check if there's an existing room waiting for me (someone joined my host request)
+        // 1. Check if there's an existing room waiting for me using maybeSingle to avoid 406
         const { data: myHostRequest, error: hostError } = await supabase!
           .from('trading_queues')
           .select('*')
           .eq('host_id', user.id)
-          .single();
+          .maybeSingle();
 
         if (myHostRequest && myHostRequest.status === 'matched') {
           isMatchFoundRef.current = true;
@@ -70,7 +70,7 @@ const TradingLobby: React.FC<TradingLobbyProps> = ({ onJoinedRoom, onMatching, i
                room_id: roomId 
             })
             .eq('id', target.id)
-            .eq('status', 'waiting'); // Atomic check
+            .eq('status', 'waiting'); // Atomic check to prevent double join
 
           if (!joinError) {
             isMatchFoundRef.current = true;
@@ -79,7 +79,7 @@ const TradingLobby: React.FC<TradingLobbyProps> = ({ onJoinedRoom, onMatching, i
           }
         }
 
-        // 3. If nobody found, ensure my own host request is active
+        // 3. If nobody found, ensure my own host request is active (upsert handles creation)
         if (!myHostRequest) {
           await supabase!
             .from('trading_queues')
@@ -88,7 +88,7 @@ const TradingLobby: React.FC<TradingLobbyProps> = ({ onJoinedRoom, onMatching, i
               host_username: user.username,
               status: 'waiting',
               created_at: new Date().toISOString()
-            });
+            }, { onConflict: 'host_id' });
         }
       } catch (err) {
         console.error("Matchmaking error:", err);
