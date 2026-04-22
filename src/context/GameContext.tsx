@@ -280,17 +280,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Merge Backup (Most reliable local source for this user)
           if (backupData?.collection) {
             Object.entries(backupData.collection).forEach(([id, count]) => {
-              merged[id] = (merged[id] || 0) + (count as number);
+              merged[id] = Math.max(merged[id] || 0, count as number);
             });
           }
 
           // Handle currentLiveState (cloud/guest)
           const liveColl = currentLiveState.collection;
           if (Array.isArray(liveColl)) {
-            liveColl.forEach((id: string) => merged[id] = (merged[id] || 0) + 1);
+            liveColl.forEach((id: string) => merged[id] = Math.max(merged[id] || 0, 1));
           } else if (liveColl && typeof liveColl === 'object') {
             Object.entries(liveColl).forEach(([id, count]) => {
-              merged[id] = (merged[id] || 0) + (count as number);
+              merged[id] = Math.max(merged[id] || 0, count as number);
             });
           }
 
@@ -298,11 +298,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (guestColl) {
             if (Array.isArray(guestColl)) {
               // Migrate guest array collection
-              guestColl.forEach((id: string) => merged[id] = (merged[id] || 0) + 1);
+              guestColl.forEach((id: string) => merged[id] = Math.max(merged[id] || 0, 1));
             } else if (typeof guestColl === 'object') {
               // Merge guest object collection
               Object.entries(guestColl).forEach(([id, count]) => {
-                merged[id] = (merged[id] || 0) + (count as number);
+                merged[id] = Math.max(merged[id] || 0, count as number);
               });
             }
           }
