@@ -67,6 +67,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [syncError, setSyncError] = useState<string | null>(null);
   const [showWelcomeGift, setShowWelcomeGift] = useState(false);
   const stateRef = useRef(state);
+  const isInitialSyncDoneRef = useRef(isInitialSyncDone);
   const lastSyncedStateRef = useRef<string>('');
   const lastReceivedCloudStateRef = useRef<string>('');
   const profileSubscriptionRef = useRef<any>(null);
@@ -76,6 +77,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     stateRef.current = state;
+    isInitialSyncDoneRef.current = isInitialSyncDone;
+    
     // Save guest progress to localStorage ONLY if not logged in
     if (!state.user) {
       const guestData = {
@@ -108,7 +111,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // CRITICAL GUARD: Never allow an auto-sync or manual sync to overwrite cloud data 
     // unless the initial hydration from cloud has successfully completed.
-    if (!isInitialSyncDone && !isInitSync) {
+    if (!isInitialSyncDoneRef.current && !isInitSync) {
       console.warn('🛡️ Data Guard: Blocking sync until initial hydration is complete');
       return false;
     }
