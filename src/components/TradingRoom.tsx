@@ -134,52 +134,53 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
 
   const handleTradeFinalized = async () => {
     if (isExecuting) return;
+    
+    // Safety check: Only the "host" of the room (lexicographically first ID) 
+    // initiates the DB transaction to avoid double execution/race conditions.
+    const [id1, id2] = roomId.split('_');
+    const isPrimaryHost = user?.id === id1;
+
     setIsExecuting(true);
-
     try {
-      // 1. Identify Host and Guest for the RPC (Order matters for atomicity)
-      // We use the roomId logic (sorted IDs) to determine who is host/guest in the DB
-      const [id1, id2] = roomId.split('_');
-      const isHost = user?.id === id1;
-      
-      const hostId = id1;
-      const guestId = id2;
+      if (isPrimaryHost) {
+        const payload = {
+          p_host_id: id1,
+          p_guest_id: id2,
+          p_host_coins: isPrimaryHost ? myOffer.coins : theirOffer.coins,
+          p_guest_coins: isPrimaryHost ? theirOffer.coins : myOffer.coins,
+          p_host_cards: isPrimaryHost ? myOffer.cards : theirOffer.cards,
+          p_guest_cards: isPrimaryHost ? theirOffer.cards : myOffer.cards
+        };
 
-      // Extract current offers
-      // Note: In a real app we'd verify room state in DB, 
-      // but here we trust the broadcasted/state offers for the RPC.
-      const payload = {
-        p_host_id: hostId,
-        p_guest_id: guestId,
-        p_host_offer_coins: isHost ? myOffer.coins : theirOffer.coins,
-        p_guest_offer_coins: isHost ? theirOffer.coins : myOffer.coins,
-        p_host_offer_cards: isHost ? myOffer.cards : theirOffer.cards,
-        p_guest_offer_cards: isHost ? theirOffer.cards : myOffer.cards
-      };
+        console.log("⚡ Host executing Atomic Swap via RPC...");
+        const { data, error } = await supabase!.rpc('complete_nba_trade', payload);
 
-      console.log("⚡ Executing Atomic Swap...");
-      
-      // 2. Call the Atomic RPC
-      const { data, error } = await supabase!.rpc('complete_nba_trade', payload);
+        if (error) throw error;
+        if (data && !data.success) throw new Error(data.error);
 
-      if (error || !data.success) {
-        throw new Error(error?.message || data?.error || "Transaction failed");
+        console.log("✅ RPC Success!");
+      } else {
+        console.log("⏳ Guest waiting for host to finalize transaction...");
+        // Wait a bit for DB to catch up before refreshing
+        await new Promise(r => setTimeout(r, 1500));
       }
 
-      // 3. Update local state immediately via cloud refresh
+      // Both refresh to see the new data
       await refreshFromCloud();
-
       notifySuccess("Trade Completed! Balances updated.");
       
-      // Leave room after delay to see success
+      // Cleanup: Final forceful sync to ensure everything is mirrored
+      await forceSync();
+      
       setTimeout(() => onLeave(), 2000);
     } catch (err: any) {
       console.error("Critical Trade Fail:", err);
-      notifyError(`Trade Failed: ${err.message}`);
+      notifyError(`Trade Failed: ${err.message || 'Error en el servidor'}`);
     } finally {
       setIsExecuting(false);
     }
   };
+ Jonah
 
   const acceptTrade = async () => {
     if (!myOffer.ready || !theirOffer.ready) return;

@@ -90,6 +90,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isPremium: state.isPremium,
       };
       localStorage.setItem('GUEST_PROGRESS', JSON.stringify(guestData));
+    } else {
+      // Emergency Mirror for logged in users (prevents loss if cloud fetch fails)
+      const mirrorData = {
+        coins: state.coins,
+        collection: state.collection,
+        inventoryPacks: state.inventoryPacks,
+        isPremium: state.isPremium
+      };
+      localStorage.setItem(`BACKUP_${state.user.id}`, JSON.stringify(mirrorData));
     }
   }, [state]);
 
@@ -379,14 +388,28 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             filter: `id=eq.${user.id}` 
           }, (payload) => {
             const updated = payload.new as any;
-            console.log('🔔 Remote update received');
+            console.log('🔔 Remote update received via Realtime');
+            
+            // CRITICAL: Transform remote cards array to local collection map
+            let migratedCollection = stateRef.current.collection;
+            if (updated.cards && Array.isArray(updated.cards)) {
+              const newMap: Record<string, number> = {};
+              updated.cards.forEach((id: string) => {
+                newMap[id] = (newMap[id] || 0) + 1;
+              });
+              migratedCollection = newMap;
+            }
+
             setState(prev => ({
               ...prev,
-              coins: updated.coins ?? prev.coins,
-              collection: updated.cards || prev.collection,
+              coins: updated.coins !== undefined ? Number(updated.coins) : prev.coins,
+              collection: migratedCollection,
               inventoryPacks: updated.inventory_packs || prev.inventoryPacks,
-              isPremium: updated.ads_disabled || prev.isPremium,
+              isPremium: updated.ads_disabled !== undefined ? !!updated.ads_disabled : prev.isPremium,
             }));
+            
+            // Sync the ref too to prevent immediate bounce-back save
+            lastSyncedStateRef.current = ''; 
           }).subscribe();
       }
 
@@ -474,26 +497,31 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // RULE 1: Guard against the loop created by the initial data injection (syncProfile)
     if (isFirstLoad.current) {
-      console.log('🛡️ Auto-save blocked: Data hydration in progress');
       isFirstLoad.current = false;
       return;
     }
 
-    // RULE 2: IMPLEMENT DEBOUNCE (Anti-Spam)
-    // We clear the previous timer every time a relevant state change occurs.
-    // The actual network call only happens after the user stops interacting for 3 seconds.
+    // RULE 2: Tab closure protection
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Attempt a synchronous-like last effort (or just warn if sync fails)
+      // Note: Browsers are strict with async in beforeunload, so this is "best effort"
+      forceSyncToSupabase(stateRef.current, 1, true);
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // RULE 3: IMPLEMENT DEBOUNCE (Anti-Spam)
     if (syncTimeoutRef.current) {
       clearTimeout(syncTimeoutRef.current);
     }
 
     syncTimeoutRef.current = setTimeout(() => {
-      // Background Sync only on important events or after 5s of inactivity
       console.log('☁️ Auto-save: Consolidating progress to Supabase');
       forceSyncToSupabase(stateRef.current, 1, true); 
-    }, 5000); // 5 second grace period to prevent server flooding
+    }, 3000); // 3 second grace period (reduced from 5s for better responsiveness)
 
 
     return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
       if (syncTimeoutRef.current) {
         clearTimeout(syncTimeoutRef.current);
       }
