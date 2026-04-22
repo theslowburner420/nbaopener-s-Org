@@ -166,11 +166,13 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
       }
 
       // Both refresh to see the new data
+      // This pulls the authoritative state from the server
       await refreshFromCloud();
       notifySuccess("Trade Completed! Balances updated.");
       
-      // Cleanup: Final forceful sync to ensure everything is mirrored
-      await forceSync();
+      // IMPORTANT: We do NOT call forceSync here anymore. 
+      // Doing so would push the old local state back to Supabase, 
+      // effectively undoing the trade or causing coin drift.
       
       setTimeout(() => onLeave(), 2000);
     } catch (err: any) {
