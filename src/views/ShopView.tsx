@@ -78,7 +78,7 @@ export default function ShopView() {
       const container = adContainerRef.current;
       container.innerHTML = '';
 
-      const adId = 'adsterra-reward-ad-7b956296dd611d148eef5572569c1535';
+      const adId = 'adsterra-reward-ad-ca59b0dcdd453b6300a8f085b2df6f47';
       const adWrapper = document.createElement('div');
       adWrapper.id = adId;
       container.appendChild(adWrapper);
@@ -87,17 +87,17 @@ export default function ShopView() {
       optionsScript.type = 'text/javascript';
       optionsScript.text = `
         atOptions = {
-          'key' : '7b956296dd611d148eef5572569c1535',
+          'key' : 'ca59b0dcdd453b6300a8f085b2df6f47',
           'format' : 'iframe',
-          'height' : 250,
-          'width' : 300,
+          'height' : 90,
+          'width' : 728,
           'params' : {}
         };
       `;
       
       const invokeScript = document.createElement('script');
       invokeScript.type = 'text/javascript';
-      invokeScript.src = 'https://www.highperformanceformat.com/7b956296dd611d148eef5572569c1535/invoke.js';
+      invokeScript.src = 'https://www.highperformanceformat.com/ca59b0dcdd453b6300a8f085b2df6f47/invoke.js';
       invokeScript.async = true;
       invokeScript.defer = true;
 
@@ -377,23 +377,24 @@ export default function ShopView() {
               <div 
                 className="relative z-10 flex items-center justify-center bg-zinc-950/50 rounded-xl overflow-hidden adsterra-container"
                 style={{ 
-                  width: '300px',
-                  height: '250px',
-                  minWidth: '300px',
-                  maxWidth: '300px',
-                  minHeight: '250px',
-                  maxHeight: '250px',
+                  width: '728px',
+                  height: '90px',
+                  minWidth: '728px',
+                  maxWidth: '728px',
+                  minHeight: '90px',
+                  maxHeight: '90px',
                   overflow: 'hidden',
                   display: 'flex',
-                  position: 'relative'
+                  position: 'relative',
+                  scale: '0.45' // Scale down to fit the reward modal
                 }}
               >
                 <div 
                   ref={adContainerRef}
                   className="w-full h-full flex items-center justify-center pointer-events-auto"
                   style={{
-                    width: '300px',
-                    height: '250px',
+                    width: '728px',
+                    height: '90px',
                     overflow: 'hidden',
                     position: 'absolute',
                     top: 0,
@@ -401,9 +402,9 @@ export default function ShopView() {
                   }}
                 >
                   <div className="flex flex-col items-center">
-                    <Play size={48} className="text-amber-500 mb-4 animate-bounce" />
-                    <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">Hoops Collector Ad</h2>
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mt-2">Premium Experience Loading...</p>
+                    <Play size={32} className="text-amber-500 mb-2 animate-bounce" />
+                    <h2 className="text-sm font-black italic uppercase tracking-tighter text-white">Hoops Collector Ad</h2>
+                    <p className="text-[8px] text-zinc-500 uppercase tracking-widest font-bold mt-1">Premium Experience Loading...</p>
                   </div>
                 </div>
               </div>

@@ -247,165 +247,164 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
       </header>
 
       {/* Main Trading Area */}
-      <div className="flex-1 overflow-y-auto no-scrollbar pb- safe">
-        <div className="flex flex-col h-full divide-y divide-zinc-900">
-          
-          {/* Partner's Offer (Top) */}
-          <div className="flex-1 p-6 space-y-6 bg-zinc-950/30">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center border border-zinc-800">
-                  <span className="text-zinc-600 font-black uppercase tracking-tighter">?</span>
-                </div>
-                <div>
-                  <h3 className="text-lg font-black italic uppercase tracking-tighter text-white leading-none">{partnerUsername}</h3>
-                  <p className="text-[8px] text-zinc-600 uppercase font-black tracking-widest mt-1">Their Offer</p>
-                </div>
+      <div className="flex-1 min-h-0 flex flex-col lg:flex-row bg-zinc-950/50">
+        
+        {/* Left Side: Partner's Offer */}
+        <section className="flex-1 border-r border-zinc-900 flex flex-col min-h-0">
+          <div className="p-4 bg-zinc-900/20 flex items-center justify-between border-b border-zinc-900">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-zinc-800 rounded-lg flex items-center justify-center border border-zinc-700">
+                <span className="text-zinc-600 font-black text-xs uppercase">?</span>
               </div>
-              <div className={`px-4 py-1.5 rounded-full border transition-all duration-500 ${theirOffer.ready ? 'bg-green-500/10 border-green-500 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>
-                <span className="text-[10px] font-black uppercase tracking-widest italic">{theirOffer.ready ? 'Locked & Ready' : 'Deciding...'}</span>
+              <div>
+                <h3 className="text-sm font-black italic uppercase tracking-tighter text-white leading-none">{partnerUsername}</h3>
+                <p className="text-[7px] text-zinc-600 uppercase font-black tracking-widest mt-1">Their Proposal</p>
               </div>
             </div>
+            <div className={`px-3 py-1 rounded-md border transition-all duration-500 ${theirOffer.ready ? 'bg-green-500/10 border-green-500/50 text-green-500' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>
+              <span className="text-[9px] font-black uppercase tracking-widest italic">{theirOffer.ready ? 'LOCKED' : 'PENDING'}</span>
+            </div>
+          </div>
 
-            <div className="grid grid-cols-3 gap-3 min-h-[160px]">
+          <div className="flex-1 p-4 overflow-y-auto no-scrollbar space-y-4">
+            <div className="grid grid-cols-3 gap-2">
               {partnerCards.map((card, i) => (
-                <div key={i} className="aspect-[2.5/3.5] relative">
-                  <div className="scale-75 origin-top-left w-[133.33%] h-[133.33%]">
-                    <CardItem card={card} isOwned={true} mode="mini" />
-                  </div>
+                <div key={i} className="aspect-[2.5/3.5] relative rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900/50">
+                   <div className="scale-[0.85] origin-center h-full">
+                     <CardItem card={card} isOwned={true} mode="mini" />
+                   </div>
                 </div>
               ))}
-              {partnerCards.length === 0 && (
-                <div className="col-span-3 flex flex-col items-center justify-center border-2 border-dashed border-zinc-900 rounded-3xl h-full py-10 opacity-30">
-                  <Loader2 size={24} className="text-zinc-700 animate-spin-slow" />
-                  <p className="text-[8px] font-black uppercase tracking-widest mt-2">Waiting for cards</p>
+              {partnerCards.length === 0 && Array.from({length: 3}).map((_, i) => (
+                <div key={i} className="aspect-[2.5/3.5] border border-dashed border-zinc-900 rounded-xl flex items-center justify-center opacity-20">
+                  <span className="text-[7px] font-black uppercase tracking-widest">SLOT {i+1}</span>
                 </div>
-              )}
+              ))}
             </div>
 
-            <div className="flex items-center gap-4 px-5 py-4 bg-black/40 border border-zinc-900/50 rounded-2xl">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/5 flex items-center justify-center text-amber-500">
-                <Coins size={16} />
+            <div className="bg-black/60 border border-zinc-900 p-3 rounded-xl flex items-center gap-3">
+              <div className="w-6 h-6 rounded bg-amber-500/10 flex items-center justify-center text-amber-500">
+                <Coins size={14} />
               </div>
-              <span className={`text-xl font-black italic ${theirOffer.coins > 0 ? 'text-white' : 'text-zinc-800'}`}>
+              <span className={`text-sm font-mono font-black ${theirOffer.coins > 0 ? 'text-white' : 'text-zinc-800'}`}>
                 {theirOffer.coins.toLocaleString()}
               </span>
             </div>
           </div>
+        </section>
 
-          {/* VS Divider / Action Status */}
-          <div className="relative h-12 flex items-center justify-center z-10 shrink-0">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
-            </div>
-            <div className="relative w-12 h-12 bg-black border border-zinc-900 shadow-[0_0_20px_bg-black] rounded-2xl flex items-center justify-center rotate-45 group">
-              <div className="-rotate-45">
-                <RefreshCw size={20} className={`text-zinc-600 ${isExecuting ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'}`} />
+        {/* Central Vertical Connector (Desktop) / Horizontal (Mobile) */}
+        <div className="relative group shrink-0 lg:w-px lg:h-full h-px w-full bg-zinc-900 flex items-center justify-center">
+          <div className="absolute z-20 w-8 h-8 bg-black border border-zinc-800 rounded-lg flex items-center justify-center rotate-45 shadow-xl">
+             <RefreshCw size={14} className={`text-zinc-500 -rotate-45 ${isExecuting ? 'animate-spin' : ''}`} />
+          </div>
+        </div>
+
+        {/* Right Side: My Offer */}
+        <section className="flex-1 flex flex-col min-h-0 bg-black/20">
+          <div className="p-4 bg-zinc-900/20 flex items-center justify-between border-b border-zinc-900">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center shadow-lg border border-purple-500/50">
+                <RefreshCw size={14} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black italic uppercase tracking-tighter text-white leading-none">Your Offer</h3>
+                <p className="text-[7px] text-zinc-600 uppercase font-black tracking-widest mt-1">Select Duplicates</p>
               </div>
             </div>
+            
+            <button 
+              onClick={toggleReady}
+              disabled={myOffer.cards.length === 0 && myOffer.coins === 0}
+              className={`px-4 py-1 rounded-md border transition-all duration-500 font-black uppercase tracking-widest text-[9px] active:scale-95 disabled:opacity-20 ${
+                myOffer.ready 
+                  ? 'bg-purple-600 border-purple-500 text-white' 
+                  : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-white'
+              }`}
+            >
+              {myOffer.ready ? 'LOCKED' : 'READY TO LOCK'}
+            </button>
           </div>
 
-          {/* My Offer (Bottom) */}
-          <div className="flex-1 p-6 space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                  <RefreshCw size={20} className="text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-black italic uppercase tracking-tighter text-white leading-none">Your Offer</h3>
-                  <p className="text-[8px] text-zinc-600 uppercase font-black tracking-widest mt-1">Trading Duplicates Only</p>
-                </div>
-              </div>
-              
-              <button 
-                onClick={toggleReady}
-                disabled={myOffer.cards.length === 0 && myOffer.coins === 0}
-                className={`px-6 py-2 rounded-xl border transition-all duration-500 font-black uppercase tracking-widest text-[10px] active:scale-95 disabled:opacity-30 ${
-                  myOffer.ready 
-                    ? 'bg-purple-600 border-purple-500 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)]' 
-                    : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'
-                }`}
-              >
-                {myOffer.ready ? 'Locked' : 'Ready'}
-              </button>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 min-h-[160px]">
+          <div className="flex-1 p-4 overflow-y-auto no-scrollbar space-y-4">
+            <div className="grid grid-cols-3 gap-2">
               {offerCards.map((card, i) => (
-                <div key={i} className="aspect-[2.5/3.5] relative group">
-                  <div className="scale-75 origin-top-left w-[133.33%] h-[133.33%]">
+                <div key={i} className="aspect-[2.5/3.5] relative group rounded-xl overflow-hidden border border-purple-500/20 bg-purple-500/5">
+                  <div className="scale-[0.85] origin-center h-full">
                     <CardItem card={card} isOwned={true} mode="mini" />
                   </div>
                   <button 
                     onClick={() => removeCardFromOffer(i)}
-                    className="absolute -top-1 -right-1 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                    className="absolute top-1 right-1 w-5 h-5 bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10"
                   >
-                    <X size={12} strokeWidth={3} />
+                    <X size={10} strokeWidth={3} />
                   </button>
                 </div>
               ))}
               {offerCards.length < 3 && (
                 <button 
                   onClick={() => setShowDuplicatePicker(true)}
-                  className="aspect-[2.5/3.5] border-2 border-dashed border-zinc-800 rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all text-zinc-700 hover:text-purple-500"
+                  className="aspect-[2.5/3.5] border border-dashed border-zinc-800 rounded-xl flex flex-col items-center justify-center gap-1 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all text-zinc-700 hover:text-purple-500"
                 >
-                  <RefreshCw size={20} />
-                  <span className="text-[8px] font-black uppercase tracking-widest">Add Card</span>
+                  <RefreshCw size={14} />
+                  <span className="text-[6px] font-black uppercase tracking-widest">ADD CARD</span>
                 </button>
               )}
             </div>
 
-            <div className="flex items-center gap-4 bg-zinc-950/50 border border-zinc-900 px-4 py-1.5 rounded-2xl">
-              <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 shrink-0">
-                <Coins size={16} />
+            <div className="space-y-1">
+              <div className="bg-zinc-900 border border-zinc-800 p-3 rounded-xl flex items-center gap-3 focus-within:border-purple-500/50 transition-colors">
+                <div className="w-6 h-6 rounded bg-amber-500/10 flex items-center justify-center text-amber-500">
+                  <Coins size={14} />
+                </div>
+                <input 
+                  type="number"
+                  value={myOffer.coins === 0 ? '' : myOffer.coins}
+                  onChange={(e) => setCoinsOffer(parseInt(e.target.value) || 0)}
+                  placeholder="Offer coins..."
+                  className="flex-1 bg-transparent border-none outline-none text-sm font-mono font-black text-white placeholder:text-zinc-800"
+                />
               </div>
-              <input 
-                type="number"
-                value={myOffer.coins === 0 ? '' : myOffer.coins}
-                onChange={(e) => setCoinsOffer(parseInt(e.target.value) || 0)}
-                placeholder="Coins to give..."
-                className="flex-1 bg-transparent border-none outline-none text-lg font-black italic text-white placeholder:text-zinc-800"
-              />
-              <div className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">
-                Max: {myTotalCoins.toLocaleString()}
+              <div className="px-2 flex justify-between items-center text-[7px] font-bold text-zinc-600 uppercase tracking-widest">
+                <span>Your Balance</span>
+                <span className="text-zinc-500">{myTotalCoins.toLocaleString()} Coins</span>
               </div>
             </div>
           </div>
-        </div>
+        </section>
       </div>
 
       {/* Confirmation Section (Footer) */}
-      <footer className="p-6 bg-zinc-950 border-t border-zinc-900 shrink-0 z-30">
+      <footer className="p-4 bg-black border-t border-zinc-900 shrink-0 z-30 flex flex-col gap-3">
         {myOffer.ready && theirOffer.ready ? (
           <motion.button
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
             onClick={acceptTrade}
-            className="w-full py-5 bg-white text-black rounded-3xl font-black uppercase tracking-[0.2em] italic text-sm hover:bg-amber-400 transition-all shadow-[0_0_40px_rgba(255,255,255,0.1)] active:scale-95 flex items-center justify-center gap-4"
+            className="w-full py-4 bg-white text-black rounded-xl font-black uppercase tracking-[0.2em] italic text-xs hover:bg-purple-500 hover:text-white transition-all shadow-[0_0_50px_rgba(168,85,247,0.2)] active:scale-95 flex items-center justify-center gap-4"
           >
-            <ShieldCheck size={20} />
-            Accept Deal
-            <ArrowRight size={20} />
+            <ShieldCheck size={18} />
+            EXPLICIT CONFIRMATION: COMPLETE TRADE
+            <ArrowRight size={18} />
           </motion.button>
         ) : (
-          <div className="flex flex-col items-center gap-3 py-4">
-             <div className="flex items-center gap-2 opacity-40">
-                <AlertTriangle size={14} className="text-amber-500" />
-                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Awaiting Both Players to Lock</p>
+          <div className="flex flex-col items-center gap-2 py-2">
+             <div className="flex items-center gap-2 opacity-60">
+                <AlertTriangle size={12} className="text-amber-500" />
+                <p className="text-[8px] font-black uppercase tracking-widest text-zinc-400">
+                  {!myOffer.ready && !theirOffer.ready ? 'Waiting for both players' : !myOffer.ready ? 'Waiting for you to lock' : 'Waiting for partner to lock'}
+                </p>
              </div>
-             <div className="w-48 h-1.5 bg-zinc-900 rounded-full overflow-hidden">
+             <div className="w-full max-w-xs h-1 bg-zinc-900 rounded-full overflow-hidden flex">
                 <motion.div 
                    initial={{ width: 0 }}
-                   animate={{ width: (myOffer.ready ? 100 : 0) + '%' }}
-                   className="h-full bg-purple-500 flex justify-end"
-                >
-                   <div className="w-1 h-full bg-white/20" />
-                </motion.div>
+                   animate={{ width: (myOffer.ready ? 50 : 0) + '%' }}
+                   className="h-full bg-purple-500"
+                />
                 <motion.div 
                    initial={{ width: 0 }}
-                   animate={{ width: (theirOffer.ready ? 100 : 0) + '%' }}
-                   className="h-full bg-amber-500 mt-[-6px] opacity-50"
+                   animate={{ width: (theirOffer.ready ? 50 : 0) + '%' }}
+                   className="h-full bg-amber-500"
                 />
              </div>
           </div>

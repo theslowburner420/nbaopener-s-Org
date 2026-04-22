@@ -23,8 +23,8 @@ const StaticAd = React.memo(({ position }: StaticAdProps) => {
 
     // Create unique ID for this instance
     const adId = position === 'header' 
-      ? 'adsterra-banner-header-7b956296dd611d148eef5572569c1535'
-      : 'adsterra-banner-footer-7b956296dd611d148eef5572569c1535';
+      ? 'adsterra-banner-header-ca59b0dcdd453b6300a8f085b2df6f47'
+      : 'adsterra-banner-footer-ca59b0dcdd453b6300a8f085b2df6f47';
 
     const adWrapper = document.createElement('div');
     adWrapper.id = adId;
@@ -34,17 +34,17 @@ const StaticAd = React.memo(({ position }: StaticAdProps) => {
     optionsScript.type = 'text/javascript';
     optionsScript.text = `
       atOptions = {
-        'key' : '7b956296dd611d148eef5572569c1535',
+        'key' : 'ca59b0dcdd453b6300a8f085b2df6f47',
         'format' : 'iframe',
-        'height' : 50,
-        'width' : 320,
+        'height' : 90,
+        'width' : 728,
         'params' : {}
       };
     `;
     
     const invokeScript = document.createElement('script');
     invokeScript.type = 'text/javascript';
-    invokeScript.src = 'https://www.highperformanceformat.com/7b956296dd611d148eef5572569c1535/invoke.js';
+    invokeScript.src = 'https://www.highperformanceformat.com/ca59b0dcdd453b6300a8f085b2df6f47/invoke.js';
     invokeScript.async = true;
     invokeScript.defer = true; // Added defer for non-blocking
 
@@ -62,8 +62,8 @@ const StaticAd = React.memo(({ position }: StaticAdProps) => {
   if (isPremium) return null;
 
   const containerClasses = position === 'header'
-    ? "w-full bg-zinc-950 border-b border-zinc-900 flex justify-center items-center h-[60px] shrink-0 z-10 overflow-hidden relative"
-    : "w-full bg-zinc-950 border-t border-zinc-900 flex justify-center items-center h-[60px] shrink-0 z-10 overflow-hidden relative";
+    ? "w-full bg-zinc-950 border-b border-zinc-900 flex justify-center items-center h-[100px] shrink-0 z-10 overflow-hidden relative"
+    : "w-full bg-zinc-950 border-t border-zinc-900 flex justify-center items-center h-[100px] shrink-0 z-10 overflow-hidden relative";
 
   return (
     <div className={containerClasses}>
@@ -71,15 +71,16 @@ const StaticAd = React.memo(({ position }: StaticAdProps) => {
       <div 
         className="flex items-center justify-center bg-zinc-900/50 rounded overflow-hidden relative adsterra-container"
         style={{ 
-          width: '320px',
-          height: '50px',
-          minWidth: '320px',
-          maxWidth: '320px',
-          minHeight: '50px',
-          maxHeight: '50px',
+          width: '728px',
+          height: '90px',
+          minWidth: '728px',
+          maxWidth: '728px',
+          minHeight: '90px',
+          maxHeight: '90px',
           overflow: 'hidden',
           display: 'flex',
-          position: 'relative'
+          position: 'relative',
+          scale: '0.8', // Slightly scale down to fit small desktops
         }}
       >
         {/* Inner container where the script is injected */}
@@ -87,8 +88,8 @@ const StaticAd = React.memo(({ position }: StaticAdProps) => {
           ref={containerRef} 
           className="w-full h-full flex items-center justify-center pointer-events-auto"
           style={{
-            width: '320px',
-            height: '50px',
+            width: '728px',
+            height: '90px',
             overflow: 'hidden',
             position: 'absolute',
             top: 0,
