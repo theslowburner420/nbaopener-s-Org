@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect, memo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, memo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Trophy, 
@@ -25,6 +25,7 @@ import { Card } from '../types';
 import { ALL_CARDS } from '../data/cards';
 import CardDetailModal from '../components/CardDetailModal';
 import CardItem from '../components/CardItem';
+import StaticAd from '../components/StaticAd';
 
 type DraftPhase = 'entry' | 'captain' | 'starters' | 'bench' | 'review' | 'summary' | 'tournament_selection' | 'bracket';
 
@@ -178,7 +179,7 @@ const TOURNAMENTS: Tournament[] = [
   }
 ];
 
-const DRAFT_COST = 5000;
+const DRAFT_COST = 100000;
 
 const STARTER_SLOTS: DraftSlot[] = [
   { id: 'pg', label: 'PG', position: 'PG', card: null },
@@ -221,8 +222,9 @@ const TournamentSummaryModal = memo<{
   position: string;
   rewards: { coins: number; packs: any[] } | null;
   onClaim: () => void;
+  onClaimHome?: () => void;
   isSaving: boolean;
-}>(({ show, position, rewards, onClaim, isSaving }) => {
+}>(({ show, position, rewards, onClaim, onClaimHome, isSaving }) => {
   if (!show || !rewards) return null;
 
   return (
@@ -299,14 +301,25 @@ const TournamentSummaryModal = memo<{
           )}
         </div>
 
-        <button
-          onClick={onClaim}
-          disabled={isSaving}
-          className="w-full bg-amber-500 text-black py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 hover:bg-amber-400 transition-all shadow-[0_20px_40px_rgba(245,158,11,0.2)] active:scale-95 relative z-10 disabled:opacity-50"
-        >
-          <span>{isSaving ? 'Saving Progress...' : 'Claim Rewards'}</span>
-          <ArrowRight size={20} />
-        </button>
+        <div className="flex flex-col gap-4 relative z-10 w-full">
+          <button
+            onClick={onClaim}
+            disabled={isSaving}
+            className="w-full bg-amber-500 text-black py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 hover:bg-amber-400 transition-all shadow-[0_20px_40px_rgba(245,158,11,0.2)] active:scale-95 disabled:opacity-50"
+          >
+            <span>{isSaving ? 'Saving Progress...' : 'Claim & New Draft'}</span>
+            <ArrowRight size={20} />
+          </button>
+
+          <button
+            onClick={onClaimHome}
+            disabled={isSaving}
+            className="w-full bg-zinc-900 text-amber-500 border border-amber-500/20 py-4 rounded-3xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all disabled:opacity-50"
+          >
+            <Home size={16} />
+            <span>Claim & Exit to Home</span>
+          </button>
+        </div>
       </motion.div>
     </motion.div>
   );
@@ -576,34 +589,44 @@ const LiveMatchSimulation = memo<{
     const userStarters = starters.map(s => s.card).filter(Boolean) as Card[];
     
     const eventTemplates = [
-      "{player} hits a contested 3!",
-      "{player} drives past the defender for a slam!",
-      "{player} pulls up from mid-range... Swish!",
-      "{player} drains a corner three on the fast break.",
-      "{player} gets to the line and makes both free throws.",
-      "{player} with a smooth finger roll layup.",
-      "{player} capitalizes on a turnover with a dunk!",
-      "{player} steps back and nails the jumper."
+      "{player} sinks a deep 3-pointer from the logo!",
+      "{player} drives into the lane and finishes with a powerful slam!",
+      "{player} hits a smooth step-back jumper while fading away.",
+      "{player} drains a corner three after a crisp pass.",
+      "{player} gets fouled on the drive and sinks both free throws.",
+      "{player} maneuvers through traffic for a finger roll layup.",
+      "{player} steals the ball and takes it coast-to-coast for a dunk!",
+      "{player} nails a contested triple as the shot clock expires.",
+      "{player} blocks a shot on one end and finishes with an alley-oop on the other!",
+      "{player} creates separation with a crossover and hits the J.",
+      "{player} splashes a catch-and-shoot 3 from the wing.",
+      "{player} uses a screen to get open and drains the mid-range shot.",
+      "{player} grabs a contested rebound and scores on the putback.",
+      "{player} finishes a beautiful Euro-step in the paint."
     ];
     const oppTemplates = [
-      "{opp} scores on a pick-and-roll play.",
-      "{opp} answers with a baseline jumper.",
-      "{opp} converts an and-one play.",
-      "{opp} finds a gap in the defense for a layup.",
-      "{opp} hits a high-arching three-pointer.",
-      "{opp} takes advantage of a defensive mismatch.",
-      "{opp} grabs an offensive board and puts it back.",
-      "{opp} finishes a fast break with a floater."
+      "{opp} answers back with a tough bucket in the paint.",
+      "{opp} nails a wide-open 3-pointer after a defensive breakdown.",
+      "{opp} converts a difficult and-one play through contact.",
+      "{opp} takes advantage of a screen for an easy layup.",
+      "{opp} hits a high-arching three-pointer from the deep corner.",
+      "{opp} draws the double team and finds an open teammate for the score.",
+      "{opp} intercepts a pass and scores on the fast break transition.",
+      "{opp} cleans up a miss with a strong offensive rebound and putback.",
+      "{opp} exploits a mismatch and scores with a smooth post move.",
+      "{opp} drains a pressure-packed mid-range jumper."
     ];
     const commentaryPhrases = [
-      "Unbelievable!", 
-      "The crowd is going wild!", 
-      "Total dominance!", 
-      "Calculated play.", 
-      "Silenced the arena.",
-      "Pure brilliance on the floor.",
-      "High IQ basketball.",
-      "Momentum shift!"
+      "UNREAL!", 
+      "The crowd is electrified!", 
+      "Total dominance in the paint!", 
+      "That is a tactical masterstroke.", 
+      "Absolute silence in the arena...",
+      "Pure brilliance from the superstar.",
+      "High IQ basketball on display here.",
+      "MOMENTUM SHIFT!",
+      "He's heating up!",
+      "Defensive clinic at its best."
     ];
 
     const newEvents: MatchEvent[] = [];
@@ -723,15 +746,18 @@ const LiveMatchSimulation = memo<{
       const resolutionEvent: MatchEvent = {
         id: `interactive-res-${Date.now()}`,
         text: `INTERACTIVE: ${resText}`,
-        score1: matchSimulationData.events[matchSimulationData.idx].score1 + (addedPoints && matchSimulationData.matchId.includes('USER') ? addedPoints : 0),
-        score2: matchSimulationData.events[matchSimulationData.idx].score2,
+        score1: matchSimulationData.events[matchSimulationData.idx].score1 + (match.team1 === 'USER' ? addedPoints : 0),
+        score2: matchSimulationData.events[matchSimulationData.idx].score2 + (match.team2 === 'USER' ? addedPoints : 0),
         quarter: matchSimulationData.events[matchSimulationData.idx].quarter,
         team: 'USER',
         points: addedPoints
       };
 
       setLiveEvents(prev => [resolutionEvent, ...prev]);
-      if (addedPoints) setLiveScore(prev => ({ ...prev, s1: prev.s1 + addedPoints }));
+      if (addedPoints) {
+        if (match.team1 === 'USER') setLiveScore(prev => ({ ...prev, s1: prev.s1 + addedPoints }));
+        else setLiveScore(prev => ({ ...prev, s2: prev.s2 + addedPoints }));
+      }
 
       setActiveInteractiveEvent(null);
       setInteractiveResolution(null);
@@ -743,8 +769,8 @@ const LiveMatchSimulation = memo<{
         matchSimulationData.idx + 1, 
         matchSimulationData.events, 
         matchSimulationData.matchId, 
-        matchSimulationData.s1Final + addedPoints,
-        matchSimulationData.s2Final, 
+        match.team1 === 'USER' ? matchSimulationData.s1Final + addedPoints : matchSimulationData.s1Final,
+        match.team2 === 'USER' ? matchSimulationData.s2Final + addedPoints : matchSimulationData.s2Final, 
         matchSimulationData.winner,
         newTriggers
       );
@@ -858,6 +884,9 @@ const DraftView: React.FC = () => {
     addPackToInventory, 
     unlockAchievement,
     updateGameState,
+    updateGameStateAsync,
+    inventoryPacks,
+    isPremium,
     isSaving 
   } = useGame();
   const { notify } = useNotification();
@@ -923,6 +952,7 @@ const DraftView: React.FC = () => {
   // Live Match State
   const [isLiveMatchActive, setIsLiveMatchActive] = useState(false);
   const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
+  const [isWatchingAd, setIsWatchingAd] = useState(false);
   const [boxScore, setBoxScore] = useState<PlayerStats[]>([]);
   const [showBoxScore, setShowBoxScore] = useState(false);
 
@@ -936,6 +966,17 @@ const DraftView: React.FC = () => {
     const state = { phase, starters, bench, bracket, currentRound, selectedTournament };
     localStorage.setItem('hoops_draft_state', JSON.stringify(state));
   }, [phase, starters, bench, bracket, currentRound, selectedTournament]);
+
+  // Auto-scroll to current match in bracket
+  const bracketRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (phase === 'bracket' && bracketRef.current && activeMatchId) {
+      const matchElem = bracketRef.current.querySelector(`[data-match-id="${activeMatchId}"]`);
+      if (matchElem) {
+        matchElem.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      }
+    }
+  }, [phase, activeMatchId]);
 
   const teamOVR = useMemo(() => {
     const starterPlayers = starters.map(s => s.card).filter(Boolean) as Card[];
@@ -1000,6 +1041,13 @@ const DraftView: React.FC = () => {
     if (method === 'coins') {
       const success = await spendCoins(DRAFT_COST);
       if (!success) return;
+    } else if (method === 'ad') {
+      if (!isPremium) {
+        setIsWatchingAd(true);
+        // Simulate ad watch time
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        setIsWatchingAd(false);
+      }
     }
     
     // Reset slots
@@ -1042,11 +1090,39 @@ const DraftView: React.FC = () => {
     const isFirstPick = starters.every(s => !s.card) && bench.every(b => !b.card);
     let targetSlotId = activeSlotId;
 
-    // Logic: If it's the captain pick, force it into its natural position
-    if (isFirstPick && targetSlotId) {
-      const naturalSlot = starters.find(s => s.position === card.position);
-      if (naturalSlot) {
-        targetSlotId = naturalSlot.id;
+    // Helper to find the most natural vacant slot for a card
+    const findNaturalSlot = (c: Card) => {
+      const pos = c.position;
+      // 1. Try exact match (e.g. PG -> PG)
+      const exactMatch = starters.find(s => s.position === pos && !s.card);
+      if (exactMatch) return exactMatch.id;
+
+      // 2. Try generic mappings (G -> PG/SG, F -> SF/PF)
+      if (pos === 'G') {
+        const match = starters.find(s => (s.id === 'pg' || s.id === 'sg') && !s.card);
+        if (match) return match.id;
+      }
+      if (pos === 'F') {
+        const match = starters.find(s => (s.id === 'sf' || s.id === 'pf') && !s.card);
+        if (match) return match.id;
+      }
+      if (pos === 'G-F') {
+        const match = starters.find(s => (s.id === 'sg' || s.id === 'sf') && !s.card);
+        if (match) return match.id;
+      }
+      if (pos === 'F-C') {
+        const match = starters.find(s => (s.id === 'pf' || s.id === 'c') && !s.card);
+        if (match) return match.id;
+      }
+      return null;
+    };
+
+    // Logic: If it's the captain pick OR the active slot doesn't match the card's position, 
+    // try to find a more natural empty slot in the starters.
+    if (phase === 'starters' && targetSlotId && !targetSlotId.startsWith('bench')) {
+      const naturalId = findNaturalSlot(card);
+      if (naturalId) {
+        targetSlotId = naturalId;
       }
     }
 
@@ -1230,17 +1306,36 @@ const DraftView: React.FC = () => {
 
     setIsLiveMatchActive(false);
 
-    // Box Score Generation
-    const finalStats: PlayerStats[] = starters.map(s => ({
-      cardId: s.id,
-      name: s.card?.name || 'Unknown',
-      imageUrl: s.card?.imageUrl || '',
-      pts: Math.floor(Math.random() * (s.card?.stats.points || 20) + 10),
-      reb: Math.floor(Math.random() * (s.card?.stats.rebounds || 10) + 2),
-      ast: Math.floor(Math.random() * (s.card?.stats.assists || 10) + 2),
-      ovr: s.card?.stats.ovr || 0,
-      position: s.position || 'BN'
-    }));
+    // Box Score Generation: Distribute s1 points among starters based on their points stat weight
+    const starterPlayers = starters.map(s => s.card).filter(Boolean) as Card[];
+    const totalWeight = starterPlayers.reduce((acc, p) => acc + (p.stats.points || 10), 0);
+    
+    let remainingPts = s1;
+    const finalStats: PlayerStats[] = starters.map((s, idx) => {
+      if (!s.card) return {
+        cardId: s.id, name: 'Unknown', imageUrl: '', pts: 0, reb: 0, ast: 0, ovr: 0, position: s.position || 'BN'
+      };
+
+      let playerPts = 0;
+      if (idx === starterPlayers.length - 1) {
+        playerPts = remainingPts; // Last player gets remainder
+      } else {
+        const weight = (s.card.stats.points || 10) / totalWeight;
+        playerPts = Math.min(remainingPts, Math.round(s1 * weight * (0.8 + Math.random() * 0.4)));
+        remainingPts -= playerPts;
+      }
+
+      return {
+        cardId: s.id,
+        name: s.card.name,
+        imageUrl: s.card.imageUrl,
+        pts: playerPts,
+        reb: Math.floor(Math.random() * (s.card.stats.rebounds || 10) + 2),
+        ast: Math.floor(Math.random() * (s.card.stats.assists || 10) + 2),
+        ovr: s.card.stats.ovr,
+        position: s.position || 'BN'
+      };
+    });
     setBoxScore(finalStats);
   }, [bracket, selectedTournament, teamOVR, starters, unlockAchievement, notify]);
 
@@ -1265,18 +1360,31 @@ const DraftView: React.FC = () => {
     }
   };
 
-  const claimRewards = async () => {
+  const claimRewards = async (targetView: 'draft' | 'home' = 'draft') => {
     if (earnedRewards) {
-      // Final sync to Supabase
-      await addCoins(earnedRewards.coins, true);
+      // Batch update everything (coins + stacked packs)
+      const currentInventory = JSON.parse(JSON.stringify(inventoryPacks)); // Deep clone
+      
       for (const pack of earnedRewards.packs) {
-        await addPackToInventory({ 
-          id: `${pack.type}-${Date.now()}-${Math.random()}`, 
-          type: pack.type, 
-          name: pack.name 
-        }, true);
+        const existing = currentInventory.find((p: any) => p.type === pack.type);
+        if (existing) {
+          existing.count = (existing.count || 1) + 1;
+        } else {
+          currentInventory.push({ 
+            id: pack.type, 
+            type: pack.type, 
+            name: pack.name, 
+            count: 1 
+          });
+        }
       }
+
+      await updateGameStateAsync({
+        coins: coins + earnedRewards.coins,
+        inventoryPacks: currentInventory
+      });
     }
+
     // Reset Draft State
     setPhase('entry');
     setStarters(STARTER_SLOTS);
@@ -1286,7 +1394,11 @@ const DraftView: React.FC = () => {
     setShowTournamentSummary(false);
     setFinalPosition(null);
     setEarnedRewards(null);
-    localStorage.removeItem('hoops_draft_state'); // Corrected key
+    localStorage.removeItem('hoops_draft_state');
+
+    if (targetView === 'home') {
+      setCurrentView('home');
+    }
   };
 
   const advanceRound = () => {
@@ -1348,21 +1460,31 @@ const DraftView: React.FC = () => {
   };
 
   const renderEntry = () => (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-8">
+    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-8 relative">
+      {isWatchingAd && (
+        <div className="absolute inset-0 z-[100] bg-black flex flex-col items-center justify-center space-y-6">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-white font-black uppercase tracking-widest text-sm">Watching Ad...</p>
+          <div className="mt-8 scale-75 md:scale-90">
+             <StaticAd position="footer" />
+          </div>
+        </div>
+      )}
+
       <div className="w-24 h-24 bg-blue-600 rounded-3xl flex items-center justify-center shadow-[0_0_50px_rgba(59,130,246,0.4)]">
         <Trophy size={48} className="text-white" />
       </div>
       
-      <div className="space-y-2">
-        <h2 className="text-4xl font-black italic uppercase tracking-tighter text-white">Hoops Draft</h2>
-        <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">Build your dream squad and compete</p>
+      <div className="space-y-1">
+        <h2 className="text-4xl font-black italic uppercase tracking-tighter text-white leading-none">Hoops Draft</h2>
+        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">Draft Selection & Tournament Mode</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 w-full max-w-xs">
         <button 
           onClick={() => handleStartDraft('coins')}
-          disabled={coins < DRAFT_COST || isSaving}
-          className="group relative bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-amber-400 transition-all disabled:opacity-50"
+          disabled={coins < DRAFT_COST || isSaving || isWatchingAd}
+          className="group relative bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-amber-400 transition-all disabled:opacity-50 active:scale-95 shadow-xl"
         >
           <Coins size={18} />
           <span>{isSaving ? 'Processing...' : `Entry: ${DRAFT_COST.toLocaleString()}`}</span>
@@ -1370,13 +1492,20 @@ const DraftView: React.FC = () => {
         
         <button 
           onClick={() => handleStartDraft('ad')}
-          disabled={isSaving}
-          className="group relative bg-zinc-900 text-white border border-zinc-800 py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all disabled:opacity-50"
+          disabled={isSaving || isWatchingAd}
+          className="group relative bg-zinc-900 text-white border border-zinc-800 py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all disabled:opacity-50 active:scale-95 shadow-lg"
         >
           <Play size={18} />
-          <span>Watch Ad to Enter</span>
+          <span>{isPremium ? 'Free Entry (Premium)' : 'Watch Ad to Enter'}</span>
         </button>
       </div>
+
+      {!isPremium && (
+        <div className="mt-4 flex flex-col items-center gap-2">
+          <p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">Sponsored Content</p>
+          <StaticAd position="footer" />
+        </div>
+      )}
     </div>
   );
 
@@ -1857,184 +1986,185 @@ const DraftView: React.FC = () => {
   );
 
   const renderBracket = () => {
-    // NBA Structure: West (Left), East (Right), Final (Center)
-    // West: qf1/qf2 -> sf1
-    // East: qf3/qf4 -> sf2
-    // Middle: f1
-    
     const qfMatches = currentRound === 'QF' ? bracket : [];
     const sfMatches = currentRound === 'SF' ? bracket : [];
     const fMatch = currentRound === 'F' ? bracket[0] : null;
 
+    const isUserSideMatch = (matchId: string) => {
+       const m = bracket.find(b => b.id === matchId);
+       return m?.team1 === 'USER' || m?.team2 === 'USER';
+    };
+
     return (
-      <div className="flex-1 flex flex-col p-10 space-y-10 overflow-hidden relative bg-zinc-950">
-        {/* Background Gradients for Atmosphere */}
+      <div className="flex-1 flex flex-col p-6 md:p-10 space-y-8 md:space-y-12 overflow-hidden relative bg-zinc-950">
+        {/* Background Atmosphere */}
         <div className="absolute inset-0 opacity-20 pointer-events-none">
-          <div className="absolute top-0 left-0 w-1/3 h-full bg-[radial-gradient(circle_at_20%_50%,rgba(59,130,246,0.1),transparent_70%)]" />
-          <div className="absolute top-0 right-0 w-1/3 h-full bg-[radial-gradient(circle_at_80%_50%,rgba(239,68,68,0.1),transparent_70%)]" />
+          <div className="absolute top-0 left-0 w-1/2 h-full bg-[radial-gradient(circle_at_10%_50%,rgba(59,130,246,0.1),transparent_70%)]" />
+          <div className="absolute top-0 right-0 w-1/2 h-full bg-[radial-gradient(circle_at_90%_50%,rgba(239,68,68,0.1),transparent_70%)]" />
         </div>
 
-        {/* Header - Fixed to Top */}
+        {/* Improved Header */}
         <div className="flex items-center justify-between shrink-0 z-50">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 md:w-16 md:h-16 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center transform rotate-3 shadow-2xl">
-              <Trophy size={32} className="text-amber-500" />
+            <div className="w-12 h-12 md:w-16 md:h-16 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center transform -rotate-3 shadow-2xl relative">
+              <div className="absolute inset-0 bg-amber-500/10 animate-pulse rounded-2xl" />
+              <Trophy size={32} className="text-amber-500 relative z-10" />
             </div>
             <div>
-              <h2 className="text-2xl md:text-4xl font-black italic uppercase text-white leading-none tracking-tighter">{selectedTournament?.name}</h2>
-              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.5em] mt-1">Playoff Brackets</p>
+              <h2 className="text-2xl md:text-5xl font-black italic uppercase text-white leading-none tracking-tighter drop-shadow-lg">{selectedTournament?.name}</h2>
+              <div className="flex items-center gap-2 mt-1">
+                 <span className="text-[9px] font-black text-amber-500 uppercase tracking-[0.4em]">Tournament Finals</span>
+                 <div className="h-px w-8 bg-zinc-800" />
+                 <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">{currentRound === 'QF' ? 'Quarter Finals' : currentRound === 'SF' ? 'Semi Finals' : 'Championship'}</span>
+              </div>
             </div>
           </div>
 
           <button 
             onClick={() => setPhase('tournament_selection')}
-            className="group flex items-center gap-3 px-6 py-3 bg-zinc-900 border border-zinc-800 rounded-2xl text-zinc-400 hover:text-white transition-all hover:bg-zinc-800"
+            className="group flex items-center gap-3 px-6 py-3 bg-zinc-900/50 border border-zinc-800 rounded-2xl text-zinc-500 hover:text-white transition-all hover:bg-red-500/10 hover:border-red-500/50"
           >
-            <span className="text-[10px] font-black uppercase tracking-widest hidden md:inline">Forfeit Tournament</span>
+            <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Forfeit</span>
             <X size={18} />
           </button>
         </div>
 
-        {/* The Bracket Tree - Convergent Format */}
-        <div className="flex-1 overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory flex items-center">
-          <div className="flex items-center gap-0 min-w-max px-20 mx-auto relative h-full">
+        {/* The New & Improved Bracket Tree */}
+        <div className="flex-1 overflow-x-auto overflow-y-hidden no-scrollbar snap-x snap-mandatory flex items-center cursor-grab active:cursor-grabbing" ref={bracketRef}>
+          <div className="flex items-center gap-0 min-w-max px-10 md:px-20 mx-auto relative h-full">
             
-            {/* WEST CONFERENCE - LADO IZQUIERDO */}
-            <div className="flex items-center gap-12 relative h-full py-20">
-              <div className="absolute -top-4 left-0 w-full text-center">
-                <span className="text-[11px] font-black uppercase tracking-[0.6em] text-blue-500/40">Western Conference</span>
+            {/* --- WESTERN CONFERENCE (LEFT) --- */}
+            <div className="flex items-center gap-12 md:gap-20 h-full py-10 relative">
+              <div className="absolute -top-4 inset-x-0 text-center">
+                 <span className="text-[10px] font-black uppercase tracking-[0.6em] text-blue-500/30">Western Division</span>
               </div>
-              
-              {/* West QFs (Leftmost) */}
-              <div className="flex flex-col gap-24 relative">
+
+              {/* West Quarter Finals */}
+              <div className="bracket-round gap-16 md:gap-24">
                 {['qf1', 'qf2'].map((id, i) => {
                   const m = qfMatches.find(match => match.id === id);
+                  const isActive = currentRound === 'QF' && isUserSideMatch(id) && m?.status === 'pending';
+                  const isWinningMatch = m?.status === 'finished' && isUserSideMatch(id) && m?.winner === 'USER';
+                  
                   return (
-                    <div key={id} className="relative">
+                    <div key={id} className="bracket-match-wrapper" data-match-id={id}>
                       <BracketMatchCard 
                         match={m || null} 
-                        isUserMatch={m?.team1 === 'USER' || m?.team2 === 'USER'} 
+                        isUserMatch={isUserSideMatch(id)} 
                         onSimulate={() => m && simulateMatch(m.id)}
                         isSimulating={isSimulating && activeMatchId === id}
                         teamOVR={teamOVR}
-                        isActive={currentRound === 'QF' && (m?.team1 === 'USER' || m?.team2 === 'USER') && m?.status === 'pending'}
+                        isActive={isActive}
                       />
-                      {/* Outbound Connector */}
-                      <div className={`absolute -right-12 top-1/2 w-12 h-px bg-zinc-800 z-0
-                        ${i === 0 ? 'after:content-[""] after:absolute after:top-0 after:right-0 after:w-px after:h-[6rem] after:bg-zinc-800' : 
-                          'after:content-[""] after:absolute after:bottom-0 after:right-0 after:w-px after:h-[6rem] after:bg-zinc-800'}
-                      `} />
+                      {/* L-Shaped Connection Point */}
+                      <div className={`west-connector-out ${isActive || isWinningMatch ? 'bracket-line-active' : ''}`} />
+                      <div className={`west-connector-vertical ${i === 0 ? 'down' : 'up'} ${isWinningMatch ? 'bracket-line-active' : ''}`} />
                     </div>
                   );
                 })}
               </div>
 
-              {/* West Finals (Middle-Left) */}
-              <div className="flex flex-col justify-center h-full relative">
-                <div className="relative">
-                  {/* Inbound Connector */}
-                  <div className="absolute -left-12 top-1/2 w-12 h-px bg-zinc-800 z-0" />
-                  
-                  <BracketMatchCard 
+              {/* West Semi Finals */}
+              <div className="bracket-round">
+                <div className="bracket-match-wrapper" data-match-id="sf1">
+                   <BracketMatchCard 
                     match={sfMatches.find(m => m.id === 'sf1') || null} 
-                    isUserMatch={sfMatches.find(m => m.id === 'sf1')?.team1 === 'USER' || sfMatches.find(m => m.id === 'sf1')?.team2 === 'USER'} 
+                    isUserMatch={isUserSideMatch('sf1')} 
                     onSimulate={() => simulateMatch('sf1')}
                     isSimulating={isSimulating && activeMatchId === 'sf1'}
                     teamOVR={teamOVR}
-                    isActive={currentRound === 'SF' && (sfMatches.find(m => m.id === 'sf1')?.team1 === 'USER' || sfMatches.find(m => m.id === 'sf1')?.team2 === 'USER') && sfMatches.find(m => m.id === 'sf1')?.status === 'pending'}
+                    isActive={currentRound === 'SF' && isUserSideMatch('sf1') && sfMatches.find(m => m.id === 'sf1')?.status === 'pending'}
                   />
-
-                  {/* Final Connector */}
-                  <div className="absolute -right-24 top-1/2 w-24 h-px bg-zinc-800 z-0" />
+                  {/* Long Final Connector */}
+                  <div className={`absolute -right-12 md:-right-20 top-1/2 w-12 md:w-20 h-px bg-zinc-800 z-0 ${isUserSideMatch('sf1') && sfMatches.find(m => m.id === 'sf1')?.winner === 'USER' ? 'bracket-line-active' : ''}`} />
                 </div>
               </div>
             </div>
 
-            {/* THE NBA FINAL - CENTRAL PIECE */}
-            <div className="flex flex-col items-center gap-12 px-24 relative snap-center min-w-[400px]">
-              {/* Glow for the Champion center */}
-              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[500px] w-full bg-amber-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
-              
-              <div className="flex flex-col items-center gap-8 relative z-50">
-                 <div className="flex flex-col items-center gap-2">
-                    <motion.div 
-                      key={currentRound}
-                      initial={{ scale: 0, rotate: -20 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      className="w-24 h-24 bg-gradient-to-br from-amber-400 to-amber-600 rounded-[2.5rem] flex items-center justify-center shadow-[0_0_80px_rgba(245,158,11,0.4)] border-b-4 border-amber-300"
-                    >
-                      <Trophy size={48} className="text-black drop-shadow-lg" />
-                    </motion.div>
-                    <h3 className="text-4xl md:text-6xl font-black italic uppercase text-white tracking-tighter text-center">NBA Finals</h3>
-                    <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.8em]">World Championship</p>
-                 </div>
+            {/* --- THE NBA CHAMPIONSHIP (CENTER) --- */}
+            <div className="flex flex-col items-center justify-center px-12 md:px-24 snap-center relative min-w-[320px] md:min-w-[450px]" data-match-id="f1">
+               <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[400px] w-full bg-amber-500/[0.05] rounded-full blur-[100px] pointer-events-none" />
+               
+               <div className="flex flex-col items-center gap-8 relative z-50">
+                  <div className="flex flex-col items-center gap-2">
+                     <motion.div 
+                       initial={{ scale: 0, rotate: -45 }}
+                       animate={{ scale: 1, rotate: 0 }}
+                       className="w-20 h-20 md:w-28 md:h-28 bg-gradient-to-br from-amber-400 to-amber-600 rounded-[2.5rem] flex items-center justify-center shadow-[0_0_100px_rgba(245,158,11,0.5)] border-b-8 border-amber-800 sm:scale-110"
+                     >
+                       <Trophy size={48} className="text-black drop-shadow-xl" />
+                     </motion.div>
+                     <h3 className="text-4xl md:text-7xl font-black italic uppercase text-white tracking-tighter text-center scale-90 md:scale-100">NBA Finals</h3>
+                     <div className="flex items-center gap-1.5 opacity-50">
+                        <Sparkles size={12} className="text-amber-500" />
+                        <span className="text-[9px] font-black text-white uppercase tracking-[0.5em]">World Series</span>
+                        <Sparkles size={12} className="text-amber-500" />
+                     </div>
+                  </div>
 
-                 <div className="relative group scale-125">
-                    {/* Inbound Connectors from both sides */}
-                    <div className="absolute -left-20 top-1/2 w-20 h-px bg-zinc-800 z-0" />
-                    <div className="absolute -right-20 top-1/2 w-20 h-px bg-zinc-800 z-0" />
-                    
-                    <BracketMatchCard 
-                      match={fMatch || null} 
-                      isUserMatch={fMatch?.team1 === 'USER' || fMatch?.team2 === 'USER'} 
-                      onSimulate={() => fMatch && simulateMatch(fMatch.id)}
-                      isSimulating={isSimulating && activeMatchId === 'f1'}
-                      teamOVR={teamOVR}
-                      isActive={currentRound === 'F' && (fMatch?.team1 === 'USER' || fMatch?.team2 === 'USER') && fMatch?.status === 'pending'}
-                      isFinal
-                    />
-                 </div>
-              </div>
+                  <div className="relative group hover:scale-105 transition-transform duration-700">
+                     {/* Horizontal line indicators */}
+                     <div className="absolute -left-12 md:-left-24 top-1/2 w-12 md:w-24 h-px bg-zinc-800 z-0" />
+                     <div className="absolute -right-12 md:-right-24 top-1/2 w-12 md:w-24 h-px bg-zinc-800 z-0" />
+                     
+                     <BracketMatchCard 
+                       match={fMatch || null} 
+                       isUserMatch={fMatch?.team1 === 'USER' || fMatch?.team2 === 'USER'} 
+                       onSimulate={() => fMatch && simulateMatch(fMatch.id)}
+                       isSimulating={isSimulating && activeMatchId === 'f1'}
+                       teamOVR={teamOVR}
+                       isActive={currentRound === 'F' && (fMatch?.team1 === 'USER' || fMatch?.team2 === 'USER') && fMatch?.status === 'pending'}
+                       isFinal
+                     />
+                  </div>
+               </div>
             </div>
 
-            {/* EAST CONFERENCE - LADO DERECHO (Mirrored) */}
-            <div className="flex flex-row-reverse items-center gap-12 relative h-full py-20">
-              <div className="absolute -top-4 left-0 w-full text-center">
-                <span className="text-[11px] font-black uppercase tracking-[0.6em] text-red-500/40">Eastern Conference</span>
+            {/* --- EASTERN CONFERENCE (RIGHT) --- */}
+            <div className="flex flex-row-reverse items-center gap-12 md:gap-20 h-full py-10 relative">
+               <div className="absolute -top-4 inset-x-0 text-center">
+                 <span className="text-[10px] font-black uppercase tracking-[0.6em] text-red-500/30">Eastern Division</span>
               </div>
 
-              {/* East QFs (Rightmost) */}
-              <div className="flex flex-col gap-24 relative">
+              {/* East Quarter Finals */}
+              <div className="bracket-round gap-16 md:gap-24">
                 {['qf3', 'qf4'].map((id, i) => {
                   const m = qfMatches.find(match => match.id === id);
+                  const isActive = currentRound === 'QF' && isUserSideMatch(id) && m?.status === 'pending';
+                  const isWinningMatch = m?.status === 'finished' && isUserSideMatch(id) && m?.winner === 'USER';
+
                   return (
-                    <div key={id} className="relative">
+                    <div key={id} className="bracket-match-wrapper" data-match-id={id}>
                       <BracketMatchCard 
                         match={m || null} 
-                        isUserMatch={m?.team1 === 'USER' || m?.team2 === 'USER'} 
+                        isUserMatch={isUserSideMatch(id)} 
                         onSimulate={() => m && simulateMatch(m.id)}
                         isSimulating={isSimulating && activeMatchId === id}
                         teamOVR={teamOVR}
-                        isActive={currentRound === 'QF' && (m?.team1 === 'USER' || m?.team2 === 'USER') && m?.status === 'pending'}
+                        isActive={isActive}
                       />
-                      {/* Outbound Connector (Going Left) */}
-                      <div className={`absolute -left-12 top-1/2 w-12 h-px bg-zinc-800 z-0
-                        ${i === 0 ? 'after:content-[""] after:absolute after:top-0 after:left-0 after:w-px after:h-[6rem] after:bg-zinc-800' : 
-                          'after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-px after:h-[6rem] after:bg-zinc-800'}
-                      `} />
+                      {/* Reverse L-Shaped Connection Point */}
+                      <div className={`east-connector-out ${isActive || isWinningMatch ? 'bracket-line-active' : ''}`} />
+                      <div className={`east-connector-vertical ${i === 0 ? 'down' : 'up'} ${isWinningMatch ? 'bracket-line-active' : ''}`} />
                     </div>
                   );
                 })}
               </div>
 
-              {/* East Finals (Middle-Right) */}
-              <div className="flex flex-col justify-center h-full relative">
-                <div className="relative">
-                  {/* Inbound Connector from R1 */}
-                  <div className="absolute -right-12 top-1/2 w-12 h-px bg-zinc-800 z-0" />
-                  
-                  <BracketMatchCard 
-                    match={sfMatches.find(m => m.id === 'sf2') || null} 
-                    isUserMatch={sfMatches.find(m => m.id === 'sf2')?.team1 === 'USER' || sfMatches.find(m => m.id === 'sf2')?.team2 === 'USER'} 
-                    onSimulate={() => simulateMatch('sf2')}
-                    isSimulating={isSimulating && activeMatchId === 'sf2'}
-                    teamOVR={teamOVR}
-                    isActive={currentRound === 'SF' && (sfMatches.find(m => m.id === 'sf2')?.team1 === 'USER' || sfMatches.find(m => m.id === 'sf2')?.team2 === 'USER') && sfMatches.find(m => m.id === 'sf2')?.status === 'pending'}
-                  />
-
-                  {/* Final Connector going left */}
-                  <div className="absolute -left-24 top-1/2 w-24 h-px bg-zinc-800 z-0" />
-                </div>
+              {/* East Semi Finals */}
+              <div className="bracket-round">
+                 <div className="bracket-match-wrapper" data-match-id="sf2">
+                    <BracketMatchCard 
+                      match={sfMatches.find(m => m.id === 'sf2') || null} 
+                      isUserMatch={isUserSideMatch('sf2')} 
+                      onSimulate={() => simulateMatch('sf2')}
+                      isSimulating={isSimulating && activeMatchId === 'sf2'}
+                      teamOVR={teamOVR}
+                      isActive={currentRound === 'SF' && isUserSideMatch('sf2') && sfMatches.find(m => m.id === 'sf2')?.status === 'pending'}
+                    />
+                    {/* Final Connector */}
+                    <div className={`absolute -left-12 md:-left-20 top-1/2 w-12 md:w-20 h-px bg-zinc-800 z-0 ${isUserSideMatch('sf2') && sfMatches.find(m => m.id === 'sf2')?.winner === 'USER' ? 'bracket-line-active' : ''}`} />
+                 </div>
               </div>
             </div>
 
@@ -2103,7 +2233,8 @@ const DraftView: React.FC = () => {
         show={showTournamentSummary}
         position={finalPosition || ''}
         rewards={earnedRewards}
-        onClaim={claimRewards}
+        onClaim={() => claimRewards('draft')}
+        onClaimHome={() => claimRewards('home')}
         isSaving={isSaving}
       />
 
@@ -2181,9 +2312,9 @@ const BracketMatchCard = memo<{
 }>(({ match, isUserMatch, onSimulate, isSimulating, teamOVR, isFinal, isActive }) => {
   if (!match) {
     return (
-      <div className={`w-48 md:w-56 bg-zinc-900/10 border border-zinc-800/30 border-dashed rounded-xl p-4 flex flex-col items-center justify-center gap-2 opacity-30`}>
-        <div className="w-full h-8 bg-zinc-800/20 rounded-lg" />
-        <div className="w-full h-8 bg-zinc-800/20 rounded-lg" />
+      <div className={`w-52 md:w-60 h-28 bg-zinc-900/10 border border-zinc-800/30 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 opacity-20`}>
+        <div className="w-10 h-10 bg-zinc-800/20 rounded-full" />
+        <span className="text-[8px] font-black tracking-widest text-zinc-700">TBD</span>
       </div>
     );
   }
@@ -2200,93 +2331,138 @@ const BracketMatchCard = memo<{
       layout
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className={`relative ${isFinal ? 'w-64 md:w-80' : 'w-48 md:w-56'} transition-all duration-500 group z-10`}
+      className={`relative ${isFinal ? 'w-72 md:w-80' : 'w-52 md:w-60'} transition-all duration-500 group z-10`}
     >
       <div className={`
         relative overflow-hidden rounded-2xl border transition-all duration-500
-        ${isFinished ? 'bg-zinc-950/40 border-zinc-900' : 
-          isActive ? 'bg-zinc-900 border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.2)]' : 
-          'bg-zinc-900/80 border-zinc-800'}
-        ${isFinal ? 'border-amber-500/40 shadow-[0_0_60px_rgba(245,158,11,0.2)]' : ''}
+        ${isFinished ? 'bg-zinc-950/40 border-zinc-900/50' : 
+          isActive ? 'bg-zinc-900 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.25)] ring-4 ring-amber-500/10' : 
+          'bg-zinc-900/90 border-zinc-800'}
+        ${isFinal ? 'scale-110 border-amber-500/40 shadow-[0_0_80px_rgba(245,158,11,0.2)]' : ''}
+        ${isUserMatch && !isFinished ? 'bracket-glow-user' : ''}
       `}>
+        {/* Progress indicator */}
+        {!isFinished && isActive && (
+          <div className="absolute top-0 left-0 w-full h-1 bg-amber-500 overflow-hidden">
+            <motion.div 
+               animate={{ x: ['-100%', '100%'] }}
+               transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+               className="w-1/2 h-full bg-white/40 blur-sm"
+            />
+          </div>
+        )}
+
         {/* Team 1 */}
         <div className={`
-          flex items-center justify-between px-4 py-3 border-b border-zinc-800/50 transition-all
+          flex items-center justify-between px-4 py-4 border-b border-zinc-800/50 transition-all
           ${isLoser(match.team1) ? 'opacity-30' : 'opacity-100'}
-          ${isWinner(match.team1) ? 'bg-amber-500/5' : ''}
+          ${isWinner(match.team1) ? 'bg-amber-500/10' : ''}
         `}>
           <div className="flex items-center gap-3">
-            <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-[11px] font-black shadow-lg
               ${match.team1 === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-400'}
             `}>
               {getTeamName(match.team1).substring(0, 2).toUpperCase()}
             </div>
-            <span className={`text-[10px] font-bold uppercase tracking-wide truncate max-w-[80px] md:max-w-[100px] 
-              ${isWinner(match.team1) ? 'text-amber-500' : 'text-white'}
-            `}>
-              {getTeamName(match.team1)}
-            </span>
+            <div className="flex flex-col">
+              <span className={`text-[11px] font-black uppercase italic tracking-tight truncate max-w-[80px] md:max-w-[110px] 
+                ${isWinner(match.team1) ? 'text-amber-500' : 'text-white'}
+              `}>
+                {getTeamName(match.team1)}
+              </span>
+              {!isFinished && <span className="text-[7px] font-bold text-zinc-600 uppercase tracking-widest">{getTeamOvr(match.team1)} OVR</span>}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {isFinished ? (
-              <span className={`text-sm font-black italic ${isWinner(match.team1) ? 'text-white' : 'text-zinc-600'}`}>
+              <span className={`text-xl font-black italic tabular-nums ${isWinner(match.team1) ? 'text-white' : 'text-zinc-700'}`}>
                 {match.score1}
               </span>
             ) : (
-              <span className="text-[8px] font-black text-zinc-700">{getTeamOvr(match.team1)}</span>
+               <Shield size={12} className={match.team1 === 'USER' ? 'text-amber-500' : 'text-zinc-800'} />
             )}
-            {isWinner(match.team1) && <Trophy size={10} className="text-amber-500" />}
+            {isWinner(match.team1) && (
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
+                <Trophy size={14} className="text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+              </motion.div>
+            )}
           </div>
         </div>
 
         {/* Team 2 */}
         <div className={`
-          flex items-center justify-between px-4 py-3 transition-all
+          flex items-center justify-between px-4 py-4 transition-all
           ${isLoser(match.team2) ? 'opacity-30' : 'opacity-100'}
-          ${isWinner(match.team2) ? 'bg-amber-500/5' : ''}
+          ${isWinner(match.team2) ? 'bg-amber-500/10' : ''}
         `}>
           <div className="flex items-center gap-3">
-            <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-[11px] font-black shadow-lg
               ${match.team2 === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-400'}
             `}>
               {getTeamName(match.team2).substring(0, 2).toUpperCase()}
             </div>
-            <span className={`text-[10px] font-bold uppercase tracking-wide truncate max-w-[80px] md:max-w-[100px] 
-              ${isWinner(match.team2) ? 'text-amber-500' : 'text-white'}
-            `}>
-              {getTeamName(match.team2)}
-            </span>
+            <div className="flex flex-col">
+              <span className={`text-[11px] font-black uppercase italic tracking-tight truncate max-w-[80px] md:max-w-[110px] 
+                ${isWinner(match.team2) ? 'text-amber-500' : 'text-white'}
+              `}>
+                {getTeamName(match.team2)}
+              </span>
+              {!isFinished && <span className="text-[7px] font-bold text-zinc-600 uppercase tracking-widest">{getTeamOvr(match.team2)} OVR</span>}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {isFinished ? (
-              <span className={`text-sm font-black italic ${isWinner(match.team2) ? 'text-white' : 'text-zinc-600'}`}>
+              <span className={`text-xl font-black italic tabular-nums ${isWinner(match.team2) ? 'text-white' : 'text-zinc-700'}`}>
                 {match.score2}
               </span>
             ) : (
-              <span className="text-[8px] font-black text-zinc-700">{getTeamOvr(match.team2)}</span>
+              <Shield size={12} className={match.team2 === 'USER' ? 'text-amber-500' : 'text-zinc-800'} />
             )}
-            {isWinner(match.team2) && <Trophy size={10} className="text-amber-500" />}
+            {isWinner(match.team2) && (
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
+                 <Trophy size={14} className="text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+              </motion.div>
+            )}
           </div>
         </div>
 
-        {/* Playing/Status Overlay */}
+        {/* Action Overlay */}
+        {isActive && !isSimulating && (
+          <button 
+            onClick={onSimulate}
+            className="absolute inset-0 bg-amber-500/0 hover:bg-amber-500/5 transition-colors flex items-center justify-center group/btn"
+          >
+             <div className="bg-amber-500 text-black px-6 py-2 rounded-xl font-black uppercase italic text-[10px] tracking-widest opacity-0 group-hover/btn:opacity-100 transition-all transform translate-y-2 group-hover/btn:translate-y-0 shadow-2xl">
+               Play Match
+             </div>
+          </button>
+        )}
+
+        {/* Simulating View */}
         {isSimulating && (
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" />
-              <span className="text-[8px] font-black text-white uppercase tracking-[0.2em]">Playing...</span>
-            </div>
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center gap-3">
+             <div className="flex gap-1.5">
+                {[0, 1, 2].map(i => (
+                  <motion.div 
+                    key={i}
+                    animate={{ height: [8, 16, 8] }}
+                    transition={{ repeat: Infinity, duration: 0.6, delay: i * 0.2 }}
+                    className="w-1 bg-amber-500 rounded-full"
+                  />
+                ))}
+             </div>
+             <span className="text-[9px] font-black text-white uppercase tracking-[0.3em] animate-pulse">Live Game</span>
           </div>
         )}
       </div>
 
       {isActive && !isSimulating && (
         <motion.div 
-          animate={{ scale: [1, 1.1, 1], rotate: [0, 2, -2, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="absolute -top-3 -right-3 z-20 bg-amber-500 text-black px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-xl cursor-default"
+          animate={{ x: [0, 5, 0] }}
+          transition={{ repeat: Infinity, duration: 1.5 }}
+          className="absolute -left-12 top-1/2 -translate-y-1/2 text-amber-500 hidden md:block"
         >
-          UP NEXT
+          <ArrowRight size={20} className="drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
         </motion.div>
       )}
     </motion.div>

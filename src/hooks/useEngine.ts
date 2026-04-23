@@ -328,6 +328,11 @@ export function useEngine() {
   const generateDraftOptions = (count: number, position: string | null, excludedIds: string[], isElite: boolean = false, isCaptain: boolean = false): Card[] => {
     const options: Card[] = [];
     const seenIds = new Set(excludedIds);
+    
+    // Get names of already drafted players to prevent different versions of same player
+    const draftedNames = new Set(
+      ALL_CARDS.filter(c => excludedIds.includes(c.id)).map(c => c.name)
+    );
 
     // If captain, we look for the top 5% OVR cards
     const captainThreshold = isCaptain ? 94 : 0;
@@ -335,6 +340,7 @@ export function useEngine() {
     for (let i = 0; i < count; i++) {
       let pool = ALL_CARDS.filter(c => {
         if (seenIds.has(c.id)) return false;
+        if (draftedNames.has(c.name)) return false; // Prevent duplicate players by name
         if (c.rarity === 'coach') return false;
         if (['Duo', 'Dynasty', 'Big Three'].includes(c.category)) return false; 
         
@@ -366,6 +372,7 @@ export function useEngine() {
       if (pool.length === 0) {
         pool = ALL_CARDS.filter(c => {
           if (seenIds.has(c.id)) return false;
+          if (draftedNames.has(c.name)) return false; // Still exclude by name in fallback
           if (c.rarity === 'coach') return false;
           if (['Duo', 'Dynasty', 'Big Three'].includes(c.category)) return false;
           if (isCaptain) return (c.stats?.ovr || 0) >= 90; // Slightly lower threshold if empty
@@ -374,10 +381,16 @@ export function useEngine() {
         });
       }
 
+      // Final fallback: allow duplicates if absolutely necessary (shouldn't happen with large pool)
+      if (pool.length === 0) {
+        pool = ALL_CARDS.filter(c => !seenIds.has(c.id) && c.rarity !== 'coach');
+      }
+
       const selectedCard = pool[Math.floor(Math.random() * pool.length)];
       if (selectedCard) {
         options.push(selectedCard);
         seenIds.add(selectedCard.id);
+        draftedNames.add(selectedCard.name);
       }
     }
 

@@ -42,6 +42,83 @@ html, body {
   cursor: grabbing;
 }
 
+/* Perfect Tournament Brackets */
+.bracket-round {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  height: 100%;
+}
+
+.bracket-match-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* West Connectors (Left to Right) */
+.west-connector-out {
+  position: absolute;
+  right: -3rem;
+  top: 50%;
+  width: 3rem;
+  height: 2px;
+  background: var(--color-zinc-800);
+}
+
+.west-connector-vertical {
+  position: absolute;
+  right: -3rem;
+  width: 2px;
+  background: var(--color-zinc-800);
+}
+
+.west-connector-vertical.up {
+  bottom: 50%;
+  height: calc(50% + 24px + 1px);
+}
+
+.west-connector-vertical.down {
+  top: 50%;
+  height: calc(50% + 24px + 1px);
+}
+
+/* East Connectors (Right to Left) */
+.east-connector-out {
+  position: absolute;
+  left: -3rem;
+  top: 50%;
+  width: 3rem;
+  height: 2px;
+  background: var(--color-zinc-800);
+}
+
+.east-connector-vertical {
+  position: absolute;
+  left: -3rem;
+  width: 2px;
+  background: var(--color-zinc-800);
+}
+
+.east-connector-vertical.up {
+  bottom: 50%;
+  height: calc(100% + 24px + 1px);
+}
+
+.east-connector-vertical.down {
+  top: 50%;
+  height: calc(100% + 24px + 1px);
+}
+
+.bracket-glow-user {
+  box-shadow: 0 0 40px rgba(245, 158, 11, 0.15);
+}
+
+.bracket-line-active {
+  background: var(--color-amber-500) !important;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
 body {
   background-color: black;
   margin: 0;
