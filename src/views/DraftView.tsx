@@ -2277,8 +2277,8 @@ const DraftView: React.FC = () => {
         </div>
 
         {/* The New & Improved Bracket Tree */}
-        <div className="flex-1 overflow-x-auto no-scrollbar snap-x snap-mandatory flex items-center cursor-grab active:cursor-grabbing" ref={bracketRef}>
-          <div className="flex items-center gap-0 min-w-max px-10 md:px-20 mx-auto relative h-[500px]">
+        <div className="flex-1 overflow-x-auto bracket-container flex items-center touch-pan-x" ref={bracketRef}>
+          <div className="flex items-center gap-0 min-w-max px-[30vw] md:px-[40vw] relative h-[500px]">
             
             {/* --- WESTERN CONFERENCE (LEFT) --- */}
             <div className="flex items-center gap-12 md:gap-24 h-full py-10 relative">
@@ -2339,7 +2339,7 @@ const DraftView: React.FC = () => {
             </div>
 
             {/* --- THE NBA CHAMPIONSHIP (CENTER) --- */}
-            <div className="flex flex-col items-center justify-center px-12 md:px-24 snap-center relative min-w-[320px] md:min-w-[450px]" data-match-id="f1">
+            <div className="flex flex-col items-center justify-center px-12 md:px-24 relative min-w-[320px] md:min-w-[450px]" data-match-id="f1">
                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[400px] w-full bg-amber-500/[0.05] rounded-full blur-[100px] pointer-events-none" />
                
                <div className="flex flex-col items-center gap-8 relative z-50">

@@ -34,12 +34,27 @@ html, body {
 
 /* Interactive Map/Bracket Behavior */
 .bracket-container {
-  cursor: grab;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(245, 158, 11, 0.3) transparent;
   user-select: none;
+  -webkit-overflow-scrolling: touch;
 }
 
-.bracket-container:active {
-  cursor: grabbing;
+.bracket-container::-webkit-scrollbar {
+  height: 4px;
+}
+
+.bracket-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bracket-container::-webkit-scrollbar-thumb {
+  background: rgba(245, 158, 11, 0.2);
+  border-radius: 10px;
+}
+
+.bracket-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 158, 11, 0.4);
 }
 
 /* Perfect Tournament Brackets */
