@@ -351,7 +351,17 @@ function AppContent() {
                       </div>
                       <span className="text-sm font-black uppercase tracking-widest text-zinc-400">Coins</span>
                     </div>
-                    <span className="text-xl font-black italic text-white">+50,000</span>
+                    <span className="text-xl font-black italic text-white">+100,000</span>
+                  </div>
+
+                  <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                        <ShoppingBag size={16} />
+                      </div>
+                      <span className="text-sm font-black uppercase tracking-widest text-zinc-400">Welcome Mega</span>
+                    </div>
+                    <span className="text-xl font-black italic text-white">x5</span>
                   </div>
                   
                   <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex items-center justify-between">
@@ -366,7 +376,7 @@ function AppContent() {
                 </div>
                 
                 <p className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest leading-relaxed mb-8 max-w-[240px]">
-                  Here is your gift: 50,000 coins and 3 MVP Packs to start your collection.
+                  Here is your gift: 100,000 coins, 5 Welcome Mega Packs and 3 MVP Packs to start your collection.
                 </p>
                 
                 <button

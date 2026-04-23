@@ -331,12 +331,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let finalMergedData: Partial<GameState>;
 
       if (!cloudProfile) {
-        console.log('✨ NEW USER: First sync');
+        console.log('✨ NEW USER: First sync - Awarding Welcome Pack');
         finalMergedData = {
           ...localProgress,
-          coins: Math.max(localProgress.coins, 50000), // Welcome bonus
+          coins: Math.max(localProgress.coins, 100000), // Increased Welcome bonus: 100k
           inventoryPacks: [
             ...localProgress.inventoryPacks,
+            { id: `welcome-mega-${Date.now()}`, type: 'premium', name: 'Welcome Mega Pack', count: 5 },
             { id: `gift-${Date.now()}`, type: 'mvp', name: 'Finals MVP Pack', count: 3 }
           ]
         };

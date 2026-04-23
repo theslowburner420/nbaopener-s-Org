@@ -69,18 +69,23 @@ interface InteractiveOption {
   points: number;
 }
 
+type EventMechanic = 'choice' | 'meter' | 'tap';
+
 interface RandomEventScenario {
   id: string;
   type: 'attack' | 'defense' | 'clutch';
+  mechanic: EventMechanic;
   title: string;
   description: string;
-  options: InteractiveOption[];
+  options?: InteractiveOption[];
+  points?: number; // base points for skill events
 }
 
 const INTERACTIVE_POOL: RandomEventScenario[] = [
   {
     id: 'fastbreak',
     type: 'attack',
+    mechanic: 'choice',
     title: 'Fast Break!',
     description: '{player} is running the floor on a break. How does he finish?',
     options: [
@@ -90,37 +95,44 @@ const INTERACTIVE_POOL: RandomEventScenario[] = [
     ]
   },
   {
-    id: 'isolation',
+    id: 'jump_shot',
     type: 'attack',
-    title: 'ISO Play',
-    description: 'Possession is stuck. {player} takes it one-on-one. What\'s the move?',
-    options: [
-      { label: 'Drive to rim', risk: 'low', points: 2, successText: 'blows past his man for the layup.', failText: 'gets stripped on the way up.' },
-      { label: 'Fadeaway J', risk: 'medium', points: 2, successText: 'hits a pure turnaround jump-shot.', failText: 'clanks it off the front iron.' },
-      { label: 'Step-back 3', risk: 'high', points: 3, successText: 'drains it right in the defender\'s face!', failText: 'shoots a contested brick.' }
-    ]
+    mechanic: 'meter',
+    title: 'Shot Mechanic',
+    description: '{player} creates space for a jump shot. Time the release perfectly!',
+    points: 2
   },
   {
-    id: 'rim_protection',
-    type: 'defense',
-    title: 'Defensive Stand!',
-    description: 'The rival is attacking the rim. How do you respond?',
-    options: [
-      { label: 'Stay vertical', risk: 'low', points: 0, successText: 'forces a difficult miss.', failText: 'commits a shooting foul.' },
-      { label: 'Go for the block', risk: 'medium', points: 0, successText: 'swats the ball into the 5th row!', failText: 'gets posterized.' },
-      { label: 'Draw the charge', risk: 'high', points: 0, successText: 'stands his ground and gets the whistle!', failText: 'gets called for a blocking foul.' }
-    ]
+    id: 'dunk_contest',
+    type: 'attack',
+    mechanic: 'meter',
+    title: 'Posterizer Attempt',
+    description: '{player} is flying to the rim! Hit the green zone to finish the slam.',
+    points: 2
   },
   {
-    id: 'perimeter_d',
+    id: 'scramble',
     type: 'defense',
-    title: 'Perimeter Lockdown',
-    description: 'The opponent is hunting for a dagger 3. Defensive tactical choice?',
-    options: [
-      { label: 'Heavy Contest', risk: 'low', points: 0, successText: 'smothers the shooter for a miss.', failText: 'bites on the pump fake.' },
-      { label: 'Risk the Steal', risk: 'medium', points: 0, successText: 'picks the pocket and starts a break!', failText: 'gets blown past for an easy bucket.' },
-      { label: 'Double Team', risk: 'high', points: 0, successText: 'traps the ball handler into a turnover!', failText: 'leaves an open shooter for 3.' }
-    ]
+    mechanic: 'tap',
+    title: 'Scramble for Ball!',
+    description: 'The ball is loose on the floor! Tap as fast as you can to recover it.',
+    points: 0 // Defense stops opponent
+  },
+  {
+    id: 'defensive_intensity',
+    type: 'defense',
+    mechanic: 'tap',
+    title: 'Locked In!',
+    description: 'Rival is trying to blow past! Tap to stay in front and force a turnover.',
+    points: 0
+  },
+  {
+    id: 'clutch_three',
+    type: 'clutch',
+    mechanic: 'meter',
+    title: 'CLUTCH MOMENT',
+    description: 'Game on the line! {player} needs to sink this triple. Release at the peak!',
+    points: 3
   }
 ];
 
@@ -498,6 +510,144 @@ const MatchChatbox = memo<{
   );
 });
 
+const InteractiveMeter = memo<{
+  onFinish: (success: boolean) => void;
+  title: string;
+}>(({ onFinish, title }) => {
+  const [position, setPosition] = useState(0);
+  const [isGoingUp, setIsGoingUp] = useState(true);
+  const [hasStopped, setHasStopped] = useState(false);
+  const requestRef = useRef<number>(null);
+
+  const speed = 2.5;
+  const targetMin = 45;
+  const targetMax = 55;
+
+  const update = useCallback(() => {
+    setPosition(prev => {
+      const next = isGoingUp ? prev + speed : prev - speed;
+      return Math.min(100, Math.max(0, next));
+    });
+    requestRef.current = requestAnimationFrame(update);
+  }, [isGoingUp]);
+
+  useEffect(() => {
+    if (position >= 100 && isGoingUp) setIsGoingUp(false);
+    if (position <= 0 && !isGoingUp) setIsGoingUp(true);
+  }, [position, isGoingUp]);
+
+  useEffect(() => {
+    requestRef.current = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(requestRef.current!);
+  }, [update]);
+
+  const handleStop = () => {
+    if (hasStopped) return;
+    cancelAnimationFrame(requestRef.current!);
+    setHasStopped(true);
+    const success = position >= targetMin && position <= targetMax;
+    onFinish(success);
+  };
+
+  return (
+    <div className="w-full space-y-8 py-4">
+      <div className="relative w-full h-8 bg-zinc-800 rounded-full overflow-hidden border border-zinc-700">
+        {/* Target Zone */}
+        <div 
+          className="absolute h-full bg-green-500/40 border-l border-r border-green-400"
+          style={{ left: `${targetMin}%`, width: `${targetMax - targetMin}%` }}
+        />
+        {/* Indicator */}
+        <div 
+          className="absolute h-full w-2 bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)]"
+          style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
+        />
+      </div>
+      <button 
+        onClick={handleStop}
+        disabled={hasStopped}
+        className="w-full bg-white text-black py-4 rounded-3xl font-black uppercase tracking-[0.2em] text-xs hover:bg-amber-400 transition-all active:scale-95 disabled:opacity-50"
+      >
+        RELEASE NOW!
+      </button>
+      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-center">Hit the green zone for success</p>
+    </div>
+  );
+});
+
+const InteractiveTap = memo<{
+  onFinish: (success: boolean) => void;
+  title: string;
+}>(({ onFinish, title }) => {
+  const [progress, setProgress] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(5);
+  const [hasFinished, setHasFinished] = useState(false);
+  const target = 25;
+
+  useEffect(() => {
+    if (hasFinished) return;
+    const timer = setInterval(() => {
+      setTimeLeft(prev => Math.max(0, prev - 0.1));
+    }, 100);
+    return () => clearInterval(timer);
+  }, [hasFinished]);
+
+  useEffect(() => {
+    if (timeLeft <= 0 && !hasFinished) {
+      setHasFinished(true);
+      onFinish(false);
+    }
+  }, [timeLeft, hasFinished, onFinish]);
+
+  const handleTap = () => {
+    if (hasFinished) return;
+    const next = progress + 1;
+    setProgress(next);
+    if (next >= target) {
+      setHasFinished(true);
+      onFinish(true);
+    }
+  };
+
+  return (
+    <div className="w-full space-y-8 py-4 flex flex-col items-center">
+      <div className="relative w-32 h-32">
+        <svg className="w-full h-full transform -rotate-90">
+          <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-zinc-800" />
+          <circle 
+            cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" 
+            className="text-amber-500 transition-all duration-100"
+            strokeDasharray={364}
+            strokeDashoffset={364 - (progress / target) * 364}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-3xl font-black italic text-white tracking-tighter">{progress}</span>
+          <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">/ {target}</span>
+        </div>
+      </div>
+
+      <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+        <motion.div 
+          className="h-full bg-red-500"
+          initial={{ width: '100%' }}
+          animate={{ width: `${(timeLeft / 5) * 100}%` }}
+          transition={{ duration: 0.1, ease: 'linear' }}
+        />
+      </div>
+
+      <button 
+        onMouseDown={handleTap}
+        className="w-24 h-24 bg-white text-black rounded-full font-black uppercase text-xs flex items-center justify-center hover:bg-amber-400 transition-all active:scale-90 shadow-2xl animate-pulse"
+      >
+        TAP!
+      </button>
+
+      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-center">Tap {target} times before time runs out!</p>
+    </div>
+  );
+});
+
 const LiveMatchSimulation = memo<{
   match: BracketMatch;
   starters: DraftSlot[];
@@ -581,12 +731,58 @@ const LiveMatchSimulation = memo<{
     };
   }, [starters, simulationSpeed, onFinish]);
 
+  const handleFinishSkill = useCallback((success: boolean) => {
+    if (!activeInteractiveEvent || !matchSimulationData) return;
+    
+    const addedPoints = success ? (activeInteractiveEvent.points || 0) : 0;
+    const resText = success 
+      ? (activeInteractiveEvent.mechanic === 'meter' ? 'Perfeclty timed release! It goes in!' : 'Won the physical battle!')
+      : (activeInteractiveEvent.mechanic === 'meter' ? 'Mistimed the shot... clank.' : 'Lost the ball in the scramble!');
+
+    setInteractiveResolution({ text: resText, points: addedPoints, success });
+
+    setTimeout(() => {
+      const resolutionEvent: MatchEvent = {
+        id: `interactive-res-${Date.now()}`,
+        text: `INTERACTIVE: ${resText}`,
+        score1: matchSimulationData.events[matchSimulationData.idx].score1 + (match.team1 === 'USER' ? addedPoints : 0),
+        score2: matchSimulationData.events[matchSimulationData.idx].score2 + (match.team2 === 'USER' ? addedPoints : 0),
+        quarter: matchSimulationData.events[matchSimulationData.idx].quarter,
+        team: 'USER',
+        points: addedPoints
+      };
+
+      setLiveEvents(prev => [resolutionEvent, ...prev]);
+      if (addedPoints) {
+        if (match.team1 === 'USER') setLiveScore(prev => ({ ...prev, s1: prev.s1 + addedPoints }));
+        else setLiveScore(prev => ({ ...prev, s2: prev.s2 + addedPoints }));
+      }
+
+      setActiveInteractiveEvent(null);
+      setInteractiveResolution(null);
+      setIsSimulationPaused(false);
+      const newTriggers = interactiveTriggers.filter(t => t !== matchSimulationData.idx);
+      setInteractiveTriggers(newTriggers);
+
+      startSimulation(
+        matchSimulationData.idx + 1, 
+        matchSimulationData.events, 
+        matchSimulationData.matchId, 
+        match.team1 === 'USER' ? matchSimulationData.s1Final + addedPoints : matchSimulationData.s1Final,
+        match.team2 === 'USER' ? matchSimulationData.s2Final + addedPoints : matchSimulationData.s2Final, 
+        matchSimulationData.winner,
+        newTriggers
+      );
+    }, 2000);
+  }, [activeInteractiveEvent, matchSimulationData, match, interactiveTriggers, startSimulation]);
+
   useEffect(() => {
     // Generate match events once
     const s1Final = Math.floor(Math.random() * 40) + (t1Ovr - 20);
     const s2Final = Math.floor(Math.random() * 40) + (t2Ovr - 20);
     const oppName = match.team1 === 'USER' ? (match.team2 as GhostTeam).name : (match.team1 as GhostTeam).name;
     const userStarters = starters.map(s => s.card).filter(Boolean) as Card[];
+    const totalPtsWeight = userStarters.reduce((acc, p) => acc + (p.stats?.points || 10), 0);
     
     const eventTemplates = [
       "{player} sinks a deep 3-pointer from the logo!",
@@ -665,7 +861,6 @@ const LiveMatchSimulation = memo<{
       let text = "";
       if (match.team1 === 'USER') {
         if (scoringTeam === 'USER') {
-          const totalPtsWeight = userStarters.reduce((acc, p) => acc + (p.stats.points || 10), 0);
           let r = Math.random() * totalPtsWeight;
           let selectedPlayer = userStarters[0].name;
           for (const p of userStarters) {
@@ -684,7 +879,6 @@ const LiveMatchSimulation = memo<{
         if (scoringTeam === 'OPP') {
           text = oppTemplates[Math.floor(Math.random() * oppTemplates.length)].replace("{opp}", oppName);
         } else {
-          const totalPtsWeight = userStarters.reduce((acc, p) => acc + (p.stats.points || 10), 0);
           let r = Math.random() * totalPtsWeight;
           let selectedPlayer = userStarters[0].name;
           for (const p of userStarters) {
@@ -790,15 +984,31 @@ const LiveMatchSimulation = memo<{
         <div className="absolute top-1/2 left-0 w-full h-[2px] bg-white" />
       </div>
 
-      <MatchScoreboard 
-        t1Name={t1Name} t2Name={t2Name} 
-        t1Ovr={t1Ovr} t2Ovr={t2Ovr} 
-        s1={liveScore.s1} s2={liveScore.s2} 
-        quarter={liveQuarter} 
-        isUserT1={match.team1 === 'USER'} isUserT2={match.team2 === 'USER'} 
-      />
+        <MatchScoreboard 
+          t1Name={t1Name} t2Name={t2Name} 
+          t1Ovr={t1Ovr} t2Ovr={t2Ovr} 
+          s1={liveScore.s1} s2={liveScore.s2} 
+          quarter={liveQuarter} 
+          isUserT1={match.team1 === 'USER'} isUserT2={match.team2 === 'USER'} 
+        />
 
-      <div className="flex-1 overflow-hidden flex flex-col p-6 md:p-10 relative z-10">
+        <div className="absolute top-1/4 right-8 z-[200] flex flex-col gap-3">
+           <button 
+             onClick={() => (window as any).skipMatch?.()}
+             className="bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] border border-zinc-700 transition-all flex items-center gap-2"
+           >
+             <RotateCcw size={14} className="animate-spin-slow" />
+             Quick Finale
+           </button>
+           <button 
+             onClick={() => setSimulationSpeed(prev => prev === 1 ? 2 : prev === 2 ? 4 : 1)}
+             className="bg-amber-500 text-black px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all"
+           >
+             Speed: {simulationSpeed}x
+           </button>
+        </div>
+
+        <div className="flex-1 overflow-hidden flex flex-col p-6 md:p-10 relative z-10">
         <MatchChatbox events={liveEvents} />
 
         <AnimatePresence>
@@ -813,23 +1023,36 @@ const LiveMatchSimulation = memo<{
                 {!interactiveResolution ? (
                   <>
                     <div className="text-center space-y-3">
-                      <div className="inline-block px-4 py-1 bg-amber-500 text-black rounded-full text-[10px] font-black uppercase tracking-widest">Decision Moment</div>
+                      <div className="inline-block px-4 py-1 bg-amber-500 text-black rounded-full text-[10px] font-black uppercase tracking-widest">
+                        {activeInteractiveEvent.mechanic === 'choice' ? 'Decision Moment' : activeInteractiveEvent.mechanic === 'meter' ? 'Skill Check' : 'Rapid Action'}
+                      </div>
                       <h3 className="text-xl md:text-2xl font-black italic uppercase text-white leading-tight">{activeInteractiveEvent.title}</h3>
                       <p className="text-zinc-400 font-medium text-sm md:text-base">{activeInteractiveEvent.description}</p>
                     </div>
-                    <div className="grid grid-cols-1 gap-2 md:gap-3">
-                      {activeInteractiveEvent.options.map((opt, i) => (
-                        <button key={i} onClick={() => handleInteractiveChoice(opt)} className="w-full p-4 bg-zinc-950 border border-zinc-800 rounded-2xl hover:border-amber-500 active:scale-[0.98] group transition-all text-left flex items-center justify-between">
-                          <div>
-                            <p className="text-xs md:text-sm font-black uppercase italic text-white group-hover:text-amber-500">{opt.label}</p>
-                            <p className="text-[9px] md:text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
-                              Risk: <span className={opt.risk === 'low' ? 'text-green-500' : opt.risk === 'medium' ? 'text-amber-500' : 'text-red-500'}>{opt.risk.toUpperCase()}</span>
-                            </p>
-                          </div>
-                          <ArrowRight size={16} className="text-zinc-500 group-hover:text-amber-500" />
-                        </button>
-                      ))}
-                    </div>
+
+                    {activeInteractiveEvent.mechanic === 'choice' && (
+                      <div className="grid grid-cols-1 gap-2 md:gap-3">
+                        {activeInteractiveEvent.options?.map((opt, i) => (
+                          <button key={i} onClick={() => handleInteractiveChoice(opt)} className="w-full p-4 bg-zinc-950 border border-zinc-800 rounded-2xl hover:border-amber-500 active:scale-[0.98] group transition-all text-left flex items-center justify-between">
+                            <div>
+                              <p className="text-xs md:text-sm font-black uppercase italic text-white group-hover:text-amber-500">{opt.label}</p>
+                              <p className="text-[9px] md:text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+                                Risk: <span className={opt.risk === 'low' ? 'text-green-500' : opt.risk === 'medium' ? 'text-amber-500' : 'text-red-500'}>{opt.risk.toUpperCase()}</span>
+                              </p>
+                            </div>
+                            <ArrowRight size={16} className="text-zinc-500 group-hover:text-amber-500" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {activeInteractiveEvent.mechanic === 'meter' && (
+                       <InteractiveMeter title={activeInteractiveEvent.title} onFinish={handleFinishSkill} />
+                    )}
+
+                    {activeInteractiveEvent.mechanic === 'tap' && (
+                       <InteractiveTap title={activeInteractiveEvent.title} onFinish={handleFinishSkill} />
+                    )}
                   </>
                 ) : (
                   <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center space-y-6 py-4 md:py-8">
@@ -970,13 +1193,19 @@ const DraftView: React.FC = () => {
   // Auto-scroll to current match in bracket
   const bracketRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (phase === 'bracket' && bracketRef.current && activeMatchId) {
-      const matchElem = bracketRef.current.querySelector(`[data-match-id="${activeMatchId}"]`);
-      if (matchElem) {
-        matchElem.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    if (phase === 'bracket' && bracketRef.current) {
+      // Find active match to scroll to
+      const activeMatch = bracket.find(m => (m.team1 === 'USER' || m.team2 === 'USER') && m.status === 'pending');
+      const targetId = activeMatchId || activeMatch?.id;
+
+      if (targetId) {
+        const matchElem = bracketRef.current.querySelector(`[data-match-id="${targetId}"]`);
+        if (matchElem) {
+          matchElem.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        }
       }
     }
-  }, [phase, activeMatchId]);
+  }, [phase, activeMatchId, bracket, currentRound]);
 
   const teamOVR = useMemo(() => {
     const starterPlayers = starters.map(s => s.card).filter(Boolean) as Card[];
@@ -1996,47 +2225,68 @@ const DraftView: React.FC = () => {
     };
 
     return (
-      <div className="flex-1 flex flex-col p-6 md:p-10 space-y-8 md:space-y-12 overflow-hidden relative bg-zinc-950">
+      <div className="flex-1 flex flex-col p-4 md:p-10 space-y-6 md:space-y-12 overflow-hidden relative bg-zinc-950">
         {/* Background Atmosphere */}
         <div className="absolute inset-0 opacity-20 pointer-events-none">
           <div className="absolute top-0 left-0 w-1/2 h-full bg-[radial-gradient(circle_at_10%_50%,rgba(59,130,246,0.1),transparent_70%)]" />
           <div className="absolute top-0 right-0 w-1/2 h-full bg-[radial-gradient(circle_at_90%_50%,rgba(239,68,68,0.1),transparent_70%)]" />
         </div>
 
-        {/* Improved Header */}
-        <div className="flex items-center justify-between shrink-0 z-50">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 md:w-16 md:h-16 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center transform -rotate-3 shadow-2xl relative">
-              <div className="absolute inset-0 bg-amber-500/10 animate-pulse rounded-2xl" />
-              <Trophy size={32} className="text-amber-500 relative z-10" />
-            </div>
-            <div>
-              <h2 className="text-2xl md:text-5xl font-black italic uppercase text-white leading-none tracking-tighter drop-shadow-lg">{selectedTournament?.name}</h2>
-              <div className="flex items-center gap-2 mt-1">
-                 <span className="text-[9px] font-black text-amber-500 uppercase tracking-[0.4em]">Tournament Finals</span>
-                 <div className="h-px w-8 bg-zinc-800" />
-                 <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">{currentRound === 'QF' ? 'Quarter Finals' : currentRound === 'SF' ? 'Semi Finals' : 'Championship'}</span>
+        {/* Improved Header & Round Tracker */}
+        <div className="flex flex-col gap-6 shrink-0 z-50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center transform -rotate-3 shadow-2xl relative">
+                <div className="absolute inset-0 bg-amber-500/10 animate-pulse rounded-2xl" />
+                <Trophy size={28} className="text-amber-500 relative z-10" />
+              </div>
+              <div>
+                <h2 className="text-2xl md:text-5xl font-black italic uppercase text-white leading-none tracking-tighter drop-shadow-lg">{selectedTournament?.name}</h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[9px] font-black text-amber-500 uppercase tracking-[0.4em]">Bracket Challenge</span>
+                </div>
               </div>
             </div>
+
+            <button 
+              onClick={() => setPhase('tournament_selection')}
+              className="group flex items-center gap-3 px-6 py-3 bg-zinc-900/50 border border-zinc-800 rounded-2xl text-zinc-500 hover:text-white transition-all hover:bg-red-500/10 hover:border-red-500/50"
+            >
+              <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Forfeit</span>
+              <X size={18} />
+            </button>
           </div>
 
-          <button 
-            onClick={() => setPhase('tournament_selection')}
-            className="group flex items-center gap-3 px-6 py-3 bg-zinc-900/50 border border-zinc-800 rounded-2xl text-zinc-500 hover:text-white transition-all hover:bg-red-500/10 hover:border-red-500/50"
-          >
-            <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Forfeit</span>
-            <X size={18} />
-          </button>
+          {/* Round Progress Tracker */}
+          <div className="max-w-md w-full mx-auto flex items-center gap-2">
+            {['QF', 'SF', 'F'].map((r, i) => (
+              <React.Fragment key={r}>
+                <div className="flex flex-col items-center gap-1 flex-1">
+                  <div className={`w-full h-1 rounded-full transition-all duration-500 ${
+                    currentRound === r ? 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 
+                    (['SF', 'F'].includes(currentRound) && r === 'QF') || (currentRound === 'F' && r === 'SF') ? 'bg-zinc-700' : 'bg-zinc-900'
+                  }`} />
+                  <span className={`text-[8px] font-black uppercase tracking-widest ${currentRound === r ? 'text-amber-500' : 'text-zinc-600'}`}>
+                    {r === 'QF' ? 'Octavos' : r === 'SF' ? 'Semis' : 'Final'}
+                  </span>
+                </div>
+                {i < 2 && <div className="w-4 h-px bg-zinc-800 mb-3" />}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
 
         {/* The New & Improved Bracket Tree */}
-        <div className="flex-1 overflow-x-auto overflow-y-hidden no-scrollbar snap-x snap-mandatory flex items-center cursor-grab active:cursor-grabbing" ref={bracketRef}>
-          <div className="flex items-center gap-0 min-w-max px-10 md:px-20 mx-auto relative h-full">
+        <div className="flex-1 overflow-x-auto no-scrollbar snap-x snap-mandatory flex items-center cursor-grab active:cursor-grabbing" ref={bracketRef}>
+          <div className="flex items-center gap-0 min-w-max px-10 md:px-20 mx-auto relative h-[500px]">
             
             {/* --- WESTERN CONFERENCE (LEFT) --- */}
-            <div className="flex items-center gap-12 md:gap-20 h-full py-10 relative">
-              <div className="absolute -top-4 inset-x-0 text-center">
-                 <span className="text-[10px] font-black uppercase tracking-[0.6em] text-blue-500/30">Western Division</span>
+            <div className="flex items-center gap-12 md:gap-24 h-full py-10 relative">
+              <div className="absolute -top-6 inset-x-0 text-center">
+                 <div className="inline-flex flex-col items-center">
+                   <div className="w-1 px-10 h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent mb-2" />
+                   <span className="text-[10px] font-black uppercase tracking-[0.8em] text-blue-500 italic">Western Conference</span>
+                 </div>
               </div>
 
               {/* West Quarter Finals */}
@@ -2056,9 +2306,12 @@ const DraftView: React.FC = () => {
                         teamOVR={teamOVR}
                         isActive={isActive}
                       />
-                      {/* L-Shaped Connection Point */}
-                      <div className={`west-connector-out ${isActive || isWinningMatch ? 'bracket-line-active' : ''}`} />
-                      <div className={`west-connector-vertical ${i === 0 ? 'down' : 'up'} ${isWinningMatch ? 'bracket-line-active' : ''}`} />
+                      <BracketConnector 
+                        type="west" 
+                        round="qf" 
+                        index={i} 
+                        active={isWinningMatch} 
+                      />
                     </div>
                   );
                 })}
@@ -2067,7 +2320,7 @@ const DraftView: React.FC = () => {
               {/* West Semi Finals */}
               <div className="bracket-round">
                 <div className="bracket-match-wrapper" data-match-id="sf1">
-                   <BracketMatchCard 
+                  <BracketMatchCard 
                     match={sfMatches.find(m => m.id === 'sf1') || null} 
                     isUserMatch={isUserSideMatch('sf1')} 
                     onSimulate={() => simulateMatch('sf1')}
@@ -2075,8 +2328,12 @@ const DraftView: React.FC = () => {
                     teamOVR={teamOVR}
                     isActive={currentRound === 'SF' && isUserSideMatch('sf1') && sfMatches.find(m => m.id === 'sf1')?.status === 'pending'}
                   />
-                  {/* Long Final Connector */}
-                  <div className={`absolute -right-12 md:-right-20 top-1/2 w-12 md:w-20 h-px bg-zinc-800 z-0 ${isUserSideMatch('sf1') && sfMatches.find(m => m.id === 'sf1')?.winner === 'USER' ? 'bracket-line-active' : ''}`} />
+                  <BracketConnector 
+                    type="west" 
+                    round="sf" 
+                    index={0} 
+                    active={isUserSideMatch('sf1') && sfMatches.find(m => m.id === 'sf1')?.winner === 'USER'} 
+                  />
                 </div>
               </div>
             </div>
@@ -2143,9 +2400,12 @@ const DraftView: React.FC = () => {
                         teamOVR={teamOVR}
                         isActive={isActive}
                       />
-                      {/* Reverse L-Shaped Connection Point */}
-                      <div className={`east-connector-out ${isActive || isWinningMatch ? 'bracket-line-active' : ''}`} />
-                      <div className={`east-connector-vertical ${i === 0 ? 'down' : 'up'} ${isWinningMatch ? 'bracket-line-active' : ''}`} />
+                      <BracketConnector 
+                        type="east" 
+                        round="qf" 
+                        index={i} 
+                        active={isWinningMatch} 
+                      />
                     </div>
                   );
                 })}
@@ -2162,8 +2422,12 @@ const DraftView: React.FC = () => {
                       teamOVR={teamOVR}
                       isActive={currentRound === 'SF' && isUserSideMatch('sf2') && sfMatches.find(m => m.id === 'sf2')?.status === 'pending'}
                     />
-                    {/* Final Connector */}
-                    <div className={`absolute -left-12 md:-left-20 top-1/2 w-12 md:w-20 h-px bg-zinc-800 z-0 ${isUserSideMatch('sf2') && sfMatches.find(m => m.id === 'sf2')?.winner === 'USER' ? 'bracket-line-active' : ''}`} />
+                    <BracketConnector 
+                      type="east" 
+                      round="sf" 
+                      index={0} 
+                      active={isUserSideMatch('sf2') && sfMatches.find(m => m.id === 'sf2')?.winner === 'USER'} 
+                    />
                  </div>
               </div>
             </div>
@@ -2300,6 +2564,42 @@ const DraftView: React.FC = () => {
     </div>
   );
 };
+
+const BracketConnector = memo<{
+  type: 'west' | 'east';
+  round: 'qf' | 'sf';
+  index: number;
+  active?: boolean;
+}>(({ type, round, index, active }) => {
+  const isUp = index % 2 === 0;
+  
+  if (round === 'qf') {
+    // Connects QF to SF
+    return (
+      <div className={`absolute ${type === 'west' ? '-right-10 md:-right-20' : '-left-10 md:-left-20'} top-1/2 -translate-y-1/2 w-10 md:w-20 h-24 pointer-events-none z-0`}>
+        <svg width="100%" height="100%" viewBox="0 0 80 96" preserveAspectRatio="none">
+          <path 
+            d={type === 'west' 
+              ? `M 0 48 L 40 48 L 40 ${isUp ? 96 : 0} L 80 ${isUp ? 96 : 0}`
+              : `M 80 48 L 40 48 L 40 ${isUp ? 96 : 0} L 0 ${isUp ? 96 : 0}`
+            }
+            fill="none"
+            stroke={active ? "rgb(245, 158, 11)" : "rgb(39, 39, 42)"}
+            strokeWidth="2"
+            strokeDasharray={active ? "none" : "4 2"}
+          />
+        </svg>
+      </div>
+    );
+  }
+
+  // Connects SF to Final (Straight lines usually)
+  return (
+    <div className={`absolute ${type === 'west' ? '-right-10 md:-right-24' : '-left-10 md:-left-24'} top-1/2 -translate-y-1/2 w-10 md:w-24 h-px pointer-events-none z-0`}>
+      <div className={`w-full h-full ${active ? 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'bg-zinc-800'}`} />
+    </div>
+  );
+});
 
 const BracketMatchCard = memo<{ 
   match: BracketMatch | null; 

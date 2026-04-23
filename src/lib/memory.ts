@@ -6,21 +6,14 @@ export const MemoryManager = {
    * Clears image caches and releases object URLs if any were created.
    */
   cleanupAssets: () => {
-    console.log('[MemoryManager] Cleaning up assets...');
-    // In a browser environment, we can't explicitly clear the image cache,
-    // but we can ensure we're not holding onto references.
-    
-    // If we had any URL.createObjectURL references, we would revoke them here.
+    // console.log('[MemoryManager] Cleaning up assets...');
   },
 
-  /**
-   * Suggests a garbage collection hint to the browser if possible.
-   */
   optimizeMemory: () => {
-    if (window.performance && (window.performance as any).memory) {
-      const memory = (window.performance as any).memory;
-      console.log(`[MemoryManager] Current heap: ${Math.round(memory.usedJSHeapSize / 1048576)}MB / ${Math.round(memory.jsHeapSizeLimit / 1048576)}MB`);
-    }
+    // if (window.performance && (window.performance as any).memory) {
+    //   const memory = (window.performance as any).memory;
+    //   console.log(`[MemoryManager] Current heap: ${Math.round(memory.usedJSHeapSize / 1048576)}MB / ${Math.round(memory.jsHeapSizeLimit / 1048576)}MB`);
+    // }
   },
 
   /**
