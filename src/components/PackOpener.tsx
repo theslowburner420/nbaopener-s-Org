@@ -291,7 +291,9 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
 
   // Handle achievement notifications during reveal
   React.useEffect(() => {
-    if (isRevealing && isPreloaded) {
+    // We only trigger notifications when the card is FULLY revealed (!isRevealing)
+    // and correctly preloaded to ensure no spoilers
+    if (!isRevealing && isPreloaded) {
       const currentCard = cards[activeCardIndex];
       const achievementsToTrigger = newlyUnlockedAchievements.filter(ach => 
         !shownAchievementIds.has(ach.id) && 
@@ -301,18 +303,22 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
       if (achievementsToTrigger.length > 0) {
         achievementsToTrigger.forEach(ach => {
           // Mark as shown immediately to prevent duplicate triggers
-          setShownAchievementIds(prev => new Set(prev).add(ach.id));
+          setShownAchievementIds(prev => {
+            const next = new Set(prev);
+            next.add(ach.id);
+            return next;
+          });
           
-          // Delay slightly to align with card impact
+          // Small staggered delay for multiple achievements
           setTimeout(() => {
             notify({
               id: ach.id,
               title: ach.title,
               description: ach.description,
-              reward: ach.reward,
+              rewardText: ach.rewardText, // Correct mapping
               icon: ach.icon
             });
-          }, 400);
+          }, 300);
         });
       }
     }

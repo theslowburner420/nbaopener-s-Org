@@ -159,7 +159,7 @@ export function useEngine() {
               id: ach.id,
               title: ach.title,
               description: ach.description,
-              reward: rewardText,
+              rewardText: rewardText,
               icon: ach.icon,
               rewardCoins: ach.rewardCoins,
               rewardPacks: ach.rewardPacks,
@@ -197,7 +197,7 @@ export function useEngine() {
               id: achievementId,
               title: `Team Master: ${team}`,
               description: `Collected every card from the ${team}`,
-              reward: "+1 MVP Pack",
+              rewardText: "+1 MVP Pack",
               packReward: { id: 'mvp-pack', type: 'mvp' as PackType, name: 'MVP Pack' },
               triggeredByCardId: cardId
             };

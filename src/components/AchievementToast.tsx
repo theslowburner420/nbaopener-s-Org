@@ -25,9 +25,9 @@ const AchievementToast: React.FC<AchievementToastProps> = ({ achievement }) => {
         <p className="text-sm font-bold text-white truncate uppercase italic tracking-tighter">
           {achievement.title}
         </p>
-        <div className="flex items-center mt-1">
-          <span className="text-[9px] text-zinc-400 uppercase font-bold tracking-widest mr-2">Reward:</span>
-          <span className="text-[10px] text-green-400 font-black italic tracking-tighter uppercase">
+        <div className="flex flex-col mt-2 p-2 bg-white/5 rounded-xl border border-white/5 shadow-inner">
+          <span className="text-[8px] text-zinc-500 uppercase font-black tracking-[0.2em] mb-0.5">Your Reward</span>
+          <span className="text-sm font-black italic tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-300 to-green-500 animate-shimmer-sweep">
             {achievement.rewardText}
           </span>
         </div>

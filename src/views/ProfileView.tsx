@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase';
 import { LogOut, Trash2, User as UserIcon, Check, AlertTriangle, X, CloudUpload, RefreshCw, Twitter, Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
+import { useNotification } from '../context/NotificationContext';
+
 const ProfileView: React.FC = () => {
   const { 
     user, 
@@ -15,6 +17,7 @@ const ProfileView: React.FC = () => {
     updateGameState,
     setCurrentView
   } = useGame();
+  const { notifySuccess, notifyError } = useNotification();
   const [username, setUsername] = useState(user?.username || '');
   const [isUpdating, setIsUpdating] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -29,7 +32,7 @@ const ProfileView: React.FC = () => {
     if (isTwitterClaimed) return;
 
     // Open link
-    window.open('https://x.com/HoopsCollector', '_blank');
+    window.open('https://x.com/FastFoodGames_', '_blank');
 
     // Update inventory
     const updatedInventory = [...inventoryPacks];
@@ -57,6 +60,7 @@ const ProfileView: React.FC = () => {
     });
 
     // Show success message
+    notifySuccess('Reward Claimed! 100,000 Coins & 1 MVP Pack added.');
     setMessage({ type: 'success', text: 'Reward Claimed! 100,000 Coins & 1 MVP Pack added.' });
     
     // Force sync
@@ -173,7 +177,7 @@ const ProfileView: React.FC = () => {
                     Follow us on X
                   </p>
                   <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
-                    @HoopsCollector
+                    @FastFoodGames_
                   </p>
                 </div>
               </div>
