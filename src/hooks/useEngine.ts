@@ -4,7 +4,7 @@ import { ALL_CARDS, CARDS_BY_RARITY, CARDS_BY_SERIES } from '../data/cards';
 import { Card, Rarity } from '../types';
 import { ACHIEVEMENTS } from '../constants/achievements';
 
-export type PackType = 'random' | 'rookie' | 'allstar' | 'mvp' | 'hof' | 'legendary_mvp';
+export type PackType = 'random' | 'rookie' | 'allstar' | 'mvp' | 'hof' | 'legendary_mvp' | 'rising_star';
 
 export const DROP_RATES: Record<PackType, { rarity: Rarity; rate: number }[]> = {
   random: [
@@ -55,6 +55,9 @@ export const DROP_RATES: Record<PackType, { rarity: Rarity; rate: number }[]> = 
   legendary_mvp: [
     { rarity: 'legend', rate: 100 },
   ],
+  rising_star: [
+    { rarity: 'rising_star', rate: 100 },
+  ],
 };
 
 const PACK_SIZES: Record<PackType, number> = {
@@ -64,6 +67,7 @@ const PACK_SIZES: Record<PackType, number> = {
   mvp: 5,
   hof: 3,
   legendary_mvp: 1,
+  rising_star: 4,
 };
 
 export const PACK_PRICES: Record<Exclude<PackType, 'random'>, number> = {
@@ -72,10 +76,12 @@ export const PACK_PRICES: Record<Exclude<PackType, 'random'>, number> = {
   mvp: 25000,
   hof: 100000,
   legendary_mvp: 250000,
+  rising_star: 50000,
 };
 
 // Pre-calculate pools for series-specific packs
 const LEGENDARY_MVP_POOL = ALL_CARDS.filter(c => c.series === 'Legendary MVP Series');
+const RISING_STAR_POOL = ALL_CARDS.filter(c => c.rarity === 'rising_star');
 
 // Pre-calculate team card maps for faster achievement checking
 const TEAM_CARDS_MAP = ALL_CARDS.reduce((acc, card) => {
@@ -109,6 +115,8 @@ export function useEngine() {
     // Series-specific packs
     if (packType === 'legendary_mvp') {
       pool = LEGENDARY_MVP_POOL;
+    } else if (packType === 'rising_star') {
+      pool = RISING_STAR_POOL;
     } else {
       // Standard rarity-based generation
       pool = CARDS_BY_RARITY[selectedRarity] || [];

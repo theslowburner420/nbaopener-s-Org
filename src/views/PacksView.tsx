@@ -1,7 +1,7 @@
 import React, { ReactNode, useState, useMemo } from 'react';
 import { useGame } from '../context/GameContext';
 import { useEngine, PackType, DROP_RATES } from '../hooks/useEngine';
-import { ShoppingCart, Zap, Trophy, Crown, Star, CheckCircle2, Shield, Package, Gift } from 'lucide-react';
+import { ShoppingCart, Zap, Trophy, Crown, Star, CheckCircle2, Shield, Package, Gift, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import PackOpener from '../components/PackOpener';
 import { Card } from '../types';
@@ -57,6 +57,14 @@ const PACKS: Pack[] = [
     price: 250000,
     color: 'from-zinc-900 via-amber-900 to-black',
     icon: <Trophy size={48} className="text-amber-500" />
+  },
+  {
+    id: 'rising_star',
+    name: 'Rising Star',
+    description: 'Special edition featuring the best young prospects. Contains 4 cards.',
+    price: 50000,
+    color: 'from-cyan-600 via-teal-900 to-black',
+    icon: <Sparkles size={48} className="text-cyan-400" />
   }
 ];
 

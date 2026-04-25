@@ -183,6 +183,7 @@ body {
   --rarity-scoring-champ: #FF4D4D; /* Fire Crimson */
   --rarity-hof: #E2E8F0; /* Platinum/Silver */
   --rarity-coy: #FDE047; /* Coaching Gold */
+  --rarity-rising-star: #06B6D4; /* Rising Star Cyan */
   
   --pokemon-yellow: #FFCB05;
   --pokemon-blue: #2A75BB;
@@ -429,6 +430,31 @@ body {
   );
   background-size: 200% 200%;
   animation: liquidLight 6s linear infinite;
+  pointer-events: none;
+}
+
+.card-rising-star {
+  background: linear-gradient(135deg, #083344 0%, #0e7490 100%);
+  border-color: #22d3ee !important;
+  position: relative;
+  box-shadow: 0 0 35px rgba(34, 211, 238, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.card-rising-star::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(34, 211, 238, 0.1) 40%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(34, 211, 238, 0.1) 60%,
+    transparent 100%
+  );
+  background-size: 200% 200%;
+  animation: liquidLight 4s linear infinite;
   pointer-events: none;
 }
 

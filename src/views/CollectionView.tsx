@@ -142,7 +142,7 @@ export default function CollectionView() {
     });
   }, [activeFilter, categoryFilter, teamFilter, seriesFilter, debouncedSearch, sortBy, sortOrder, viewMode, collection]);
 
-  const filters: FilterType[] = ['All', 'bench', 'starter', 'allstar', 'franchise', 'legend', 'roty', 'coach', 'dpoy', 'record', 'rookie'];
+  const filters: FilterType[] = ['All', 'bench', 'starter', 'allstar', 'franchise', 'legend', 'roty', 'coach', 'dpoy', 'record', 'rookie', 'rising_star'];
 
   const hasActiveFilters = activeFilter !== 'All' || categoryFilter !== 'All' || teamFilter !== 'All' || seriesFilter !== 'All' || search !== '';
 

@@ -32,6 +32,8 @@ const getRarityClass = (rarity: Rarity) => {
     case 'scoring_champ': return 'card-scoring-champ';
     case 'hof': return 'card-hof';
     case 'coy': return 'card-coy';
+    case 'rising_star': return 'card-rising-star';
+    case 'allnba_1st': return 'card-allnba-1st';
     default: return '';
   }
 };
@@ -53,6 +55,8 @@ const RARITY_COLORS: Record<Rarity, string> = {
   'scoring_champ': '#FF4D4D', // Fire Crimson
   'hof': '#F1F5F9', // Platinum/Silver
   'coy': '#FDE047', // Gold
+  'rising_star': '#06B6D4', // Cyan
+  'allnba_1st': '#F59E0B',   // Gold/Amber
 };
 
 const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', onClick, showBack = false, isFocused = false, isNew = false, quantity = 0 }) => {
@@ -72,6 +76,8 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
     const isScoringChamp = card.category === 'Scoring Champion';
     const isHOF = card.category === 'Hall of Fame';
     const isCOY = card.category === 'Coach of the Year';
+    const isRisingStar = card.category === 'Rising Star';
+    const isAllNBA = card.category === 'All-NBA 1st Team';
     
     const cClass = isAward 
       ? (card.rarity === 'dpoy' ? 'card-dpoy' : 
@@ -85,12 +91,14 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
         isScoringChamp ? 'card-scoring-champ' :
         isHOF ? 'card-hof' :
         isCOY ? 'card-coy' :
+        isRisingStar ? 'card-rising-star' :
+        isAllNBA ? 'card-allnba-1st' :
         card.category === 'All-Star MVP' ? 'card-as-mvp' : 
         card.category === 'Finals MVP' ? 'card-fmvp' : 
         isMoment ? 'card-moment' : '';
         
-    const dark = isAward || card.category === 'Coach' || card.rarity === 'dpoy' || card.rarity === 'roty' || card.rarity === 'record' || card.rarity === 'logo' || card.rarity === 'arena' || card.rarity === 'draft2026' || card.rarity === 'scoring_champ' || card.rarity === 'hof' || card.rarity === 'coy' || isDynasty || isXFactor || card.category === 'NBA Record' || isRookie || isDraft2026 || isScoringChamp || isHOF || isCOY || card.category === 'All-Star MVP' || card.category === 'Finals MVP' || isMoment;
-    const holo = ['allstar', 'franchise', 'legend', 'dpoy', 'roty', 'record', 'rookie', 'logo', 'arena', 'draft2026', 'scoring_champ', 'hof', 'coy'].includes(card.rarity) || isDynasty || isXFactor || isMoment;
+    const dark = isAward || card.category === 'Coach' || card.rarity === 'dpoy' || card.rarity === 'roty' || card.rarity === 'record' || card.rarity === 'logo' || card.rarity === 'arena' || card.rarity === 'draft2026' || card.rarity === 'scoring_champ' || card.rarity === 'hof' || card.rarity === 'coy' || card.rarity === 'rising_star' || card.rarity === 'allnba_1st' || isDynasty || isXFactor || card.category === 'NBA Record' || isRookie || isDraft2026 || isScoringChamp || isHOF || isCOY || isRisingStar || isAllNBA || card.category === 'All-Star MVP' || card.category === 'Finals MVP' || isMoment;
+    const holo = ['allstar', 'franchise', 'legend', 'dpoy', 'roty', 'record', 'rookie', 'logo', 'arena', 'draft2026', 'scoring_champ', 'hof', 'coy', 'rising_star', 'allnba_1st'].includes(card.rarity) || isDynasty || isXFactor || isMoment;
     const franchise = card.rarity === 'franchise';
     const legend = card.rarity === 'legend' || isDynasty || isMoment;
     const dpoy = card.rarity === 'dpoy';

@@ -1,6 +1,6 @@
-export type Rarity = 'bench' | 'starter' | 'allstar' | 'franchise' | 'legend' | 'coach' | 'dpoy' | 'roty' | 'record' | 'rookie' | 'logo' | 'arena' | 'draft2026' | 'scoring_champ' | 'hof' | 'coy';
+export type Rarity = 'bench' | 'starter' | 'allstar' | 'franchise' | 'legend' | 'coach' | 'dpoy' | 'roty' | 'record' | 'rookie' | 'logo' | 'arena' | 'draft2026' | 'scoring_champ' | 'hof' | 'coy' | 'rising_star' | 'allnba_1st';
 
-export type CardCategory = 'Base' | 'Award' | 'Moment' | 'Duo' | 'Coach' | 'Dynasty' | 'X-Factor' | 'NBA Record' | 'Rookie' | 'All-Star MVP' | 'Finals MVP' | 'Logo' | 'Arena' | 'Draft 2026' | 'Scoring Champion' | 'Hall of Fame' | 'Coach of the Year';
+export type CardCategory = 'Base' | 'Award' | 'Moment' | 'Duo' | 'Coach' | 'Dynasty' | 'X-Factor' | 'NBA Record' | 'Rookie' | 'All-Star MVP' | 'Finals MVP' | 'Logo' | 'Arena' | 'Draft 2026' | 'Scoring Champion' | 'Hall of Fame' | 'Coach of the Year' | 'Rising Star' | 'All-NBA 1st Team';
 
 export type RoleTier = 'S' | 'A' | 'B' | 'C' | 'D';
 
