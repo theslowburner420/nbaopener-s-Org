@@ -137,6 +137,7 @@ export interface BoxScorePlayer {
   cardId: string;
   name: string;
   position: string;
+  nbaId?: number;
   minutes: number;
   pts: number;
   reb: number;
@@ -212,6 +213,10 @@ export interface FranchiseState {
   marketPhase: MarketPhase;
   playerSeasonStats: PlayerSeasonStats[];
   standings?: Record<string, { wins: number; losses: number }>;
+  chemistry?: number;
+  fanSupport?: number;
+  playerEnergy?: Record<string, number>;
+  leagueHistory?: Record<string, { home: string; away: string; homeScore: number; awayScore: number }[]>;
   lineup: {
     PG: string | null;
     SG: string | null;
@@ -226,6 +231,8 @@ export interface FranchiseState {
   salaryCap?: number;
   payroll?: number;
   conferenceStandings: TeamStanding[];
+  waiverPool?: string[];
+  gamesSinceWaiverRefresh?: number;
 }
 
 export interface GameState {

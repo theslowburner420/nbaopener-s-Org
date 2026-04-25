@@ -5862,6 +5862,23 @@ const rawCards = [
     imageUrl: 'https://platform.fearthesword.com/wp-content/uploads/sites/78/chorus/uploads/chorus_asset/file/25927821/2206945377.jpg?quality=90&strip=all&crop=16.666666666667,0,66.666666666667,100',
     quote: '1x DPOY. Stepped up as the ultimate defensive anchor for Cleveland, dominating the paint and the perimeter with elite versatility.'
   },
+  {
+    id: 'dpoy-2026',
+    name: 'Victor Wembanyama',
+    year: "2026",
+    team: 'San Antonio Spurs',
+    teamAbbr: 'CLE',
+    position: 'F/C',
+    rarity: 'dpoy' as const,
+    category: 'Award' as const,
+    isHistorical: false,
+    pts: 25.0,
+    reb: 11.5,
+    ast: 3.1,
+    nbaId: 1630596,
+    imageUrl: 'https://dims.apnews.com/dims4/default/285c86c/2147483647/strip/true/crop/6777x4453+0+0/resize/599x394!/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2Ffc%2Fd6%2F5ee0413a2b36a095c85f0113d666%2Fad79761944954cfe9e8bf326e08304ac',
+    quote: 'First unanimous DPOY.'
+  },
   // ROTY SERIES
   {
     id: 'roty-2002',

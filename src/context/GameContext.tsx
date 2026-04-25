@@ -857,6 +857,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       milestones: [],
       salaryCap: 140.5, // 140.5M default
       payroll: 0,
+      chemistry: 60,
+      fanSupport: 50,
+      playerEnergy: {},
       conferenceStandings: [],
       ...fullInitialState
     };

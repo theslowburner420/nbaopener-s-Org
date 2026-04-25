@@ -10,6 +10,24 @@ export interface NBATeamDef {
   secondaryColor: string;
   tier: 'elite' | 'good' | 'average' | 'rebuild';
   dataAbbr?: string;
+  logoUrl?: string;
+}
+
+export function getTeamLogo(teamId: string): string {
+  const team = NBA_TEAMS.find(t => t.id === teamId || t.name === teamId);
+  // Using official NBA CDN for logos
+  const idMap: Record<string, string> = {
+    'ATL': '1610612737', 'BOS': '1610612738', 'CLE': '1610612739', 'NOP': '1610612740',
+    'CHI': '1610612741', 'DAL': '1610612742', 'DEN': '1610612743', 'GSW': '1610612744',
+    'HOU': '1610612745', 'LAC': '1610612746', 'LAL': '1610612747', 'MIA': '1610612748',
+    'MIL': '1610612749', 'MIN': '1610612750', 'BKN': '1610612751', 'NYK': '1610612752',
+    'ORL': '1610612753', 'IND': '1610612754', 'PHI': '1610612755', 'PHX': '1610612756',
+    'POR': '1610612757', 'SAC': '1610612758', 'SAS': '1610612759', 'OKC': '1610612760',
+    'TOR': '1610612761', 'UTA': '1610612762', 'WAS': '1610612763', 'DET': '1610612765',
+    'CHA': '1610612766', 'MEM': '1610612763' // Memphis fix usually 1610612763 is used for both MEM/WAS in some APIs but let's be careful
+  };
+  const nbaId = idMap[team?.id || 'LAL'] || '1610612747';
+  return `https://cdn.nba.com/logos/nba/${nbaId}/primary/L/logo.svg`;
 }
 
 export const NBA_TEAMS: NBATeamDef[] = [
@@ -56,26 +74,31 @@ export const NBA_TEAMS: NBATeamDef[] = [
   { id: 'SAS', name: 'San Antonio Spurs', city: 'San Antonio', conference: 'West', division: 'Southwest', primaryColor: '#C4CED4', secondaryColor: '#000000', tier: 'average', dataAbbr: 'SAS' },
 ];
 
-export function getCPUTeamOVR(teamId: string, allCards: Card[]): number {
+export function getCPUTeamOVR(teamId: string, allCards: Card[], rosterOverride?: string[]): number {
   const team = NBA_TEAMS.find(t => t.id === teamId);
   if (!team) return 75;
   
-  if (team.dataAbbr) {
-    const cards = allCards.filter(c => 
+  let cards: Card[] = [];
+  if (rosterOverride && rosterOverride.length > 0) {
+    cards = rosterOverride.map(id => allCards.find(c => c.id === id)).filter(Boolean) as Card[];
+  } else if (team.dataAbbr) {
+    cards = allCards.filter(c => 
       c.teamAbbr === team.dataAbbr && !c.isHistorical
     );
-    if (cards.length > 0) {
-      const sorted = [...cards].sort((a,b) => b.stats.ovr - a.stats.ovr);
-      const starters = sorted.slice(0, 5);
-      const bench    = sorted.slice(5, 10);
-      const sOVR = starters.reduce((s,c) => s + c.stats.ovr, 0) / starters.length;
-      const bOVR = bench.length ? bench.reduce((s,c) => s + c.stats.ovr, 0) / bench.length : sOVR - 8;
-      return Math.round(sOVR * 0.7 + bOVR * 0.3);
-    }
   }
+
+  if (cards.length > 0) {
+    const sorted = [...cards].sort((a,b) => b.stats.ovr - a.stats.ovr);
+    const starters = sorted.slice(0, 5);
+    const bench    = sorted.slice(5, 10);
+    const sOVR = starters.reduce((s,c) => s + c.stats.ovr, 0) / starters.length;
+    const bOVR = bench.length ? bench.reduce((s,c) => s + c.stats.ovr, 0) / bench.length : sOVR - 8;
+    return Math.round(sOVR * 0.7 + bOVR * 0.3);
+  }
+  
   // Base OVR by tier if no specific cards found
   const base = { elite: 84, good: 80, average: 76, rebuild: 71 };
-  return base[team.tier];
+  return base[team.tier as keyof typeof base] || 75;
 }
 
 export function generateInitialStandings(): any[] {
