@@ -26,6 +26,12 @@ const getRarityClass = (rarity: Rarity) => {
     case 'roty': return 'card-roty';
     case 'record': return 'card-record';
     case 'rookie': return 'card-rookie';
+    case 'logo': return 'card-logo';
+    case 'arena': return 'card-arena';
+    case 'draft2026': return 'card-draft2026';
+    case 'scoring_champ': return 'card-scoring-champ';
+    case 'hof': return 'card-hof';
+    case 'coy': return 'card-coy';
     default: return '';
   }
 };
@@ -41,6 +47,12 @@ const RARITY_COLORS: Record<Rarity, string> = {
   'roty': '#EA580C', // Bright orange
   'record': '#F59E0B', // Gold/Amber
   'rookie': '#3B82F6', // Blue
+  'logo': '#F59E0B',   // Gold
+  'arena': '#10B981',  // Emerald
+  'draft2026': '#6366F1', // Indigo
+  'scoring_champ': '#FF4D4D', // Fire Crimson
+  'hof': '#F1F5F9', // Platinum/Silver
+  'coy': '#FDE047', // Gold
 };
 
 const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', onClick, showBack = false, isFocused = false, isNew = false, quantity = 0 }) => {
@@ -56,6 +68,10 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
     const isXFactor = card.category === 'X-Factor';
     const isRookie = card.category === 'Rookie';
     const isAward = card.category === 'Award';
+    const isDraft2026 = card.category === 'Draft 2026';
+    const isScoringChamp = card.category === 'Scoring Champion';
+    const isHOF = card.category === 'Hall of Fame';
+    const isCOY = card.category === 'Coach of the Year';
     
     const cClass = isAward 
       ? (card.rarity === 'dpoy' ? 'card-dpoy' : 
@@ -65,12 +81,16 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
       : isDynasty ? 'card-dynasty' : 
         isXFactor ? 'card-xfactor' : 
         isRookie ? 'card-rookie' : 
+        isDraft2026 ? 'card-draft2026' :
+        isScoringChamp ? 'card-scoring-champ' :
+        isHOF ? 'card-hof' :
+        isCOY ? 'card-coy' :
         card.category === 'All-Star MVP' ? 'card-as-mvp' : 
         card.category === 'Finals MVP' ? 'card-fmvp' : 
         isMoment ? 'card-moment' : '';
         
-    const dark = isAward || card.category === 'Coach' || card.rarity === 'dpoy' || card.rarity === 'roty' || card.rarity === 'record' || isDynasty || isXFactor || card.category === 'NBA Record' || isRookie || card.category === 'All-Star MVP' || card.category === 'Finals MVP' || isMoment;
-    const holo = ['allstar', 'franchise', 'legend', 'dpoy', 'roty', 'record', 'rookie'].includes(card.rarity) || isDynasty || isXFactor || isMoment;
+    const dark = isAward || card.category === 'Coach' || card.rarity === 'dpoy' || card.rarity === 'roty' || card.rarity === 'record' || card.rarity === 'logo' || card.rarity === 'arena' || card.rarity === 'draft2026' || card.rarity === 'scoring_champ' || card.rarity === 'hof' || card.rarity === 'coy' || isDynasty || isXFactor || card.category === 'NBA Record' || isRookie || isDraft2026 || isScoringChamp || isHOF || isCOY || card.category === 'All-Star MVP' || card.category === 'Finals MVP' || isMoment;
+    const holo = ['allstar', 'franchise', 'legend', 'dpoy', 'roty', 'record', 'rookie', 'logo', 'arena', 'draft2026', 'scoring_champ', 'hof', 'coy'].includes(card.rarity) || isDynasty || isXFactor || isMoment;
     const franchise = card.rarity === 'franchise';
     const legend = card.rarity === 'legend' || isDynasty || isMoment;
     const dpoy = card.rarity === 'dpoy';
@@ -329,9 +349,9 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
 
   const renderStats = () => {
     const stats = [
-      { label: card.category === 'Coach' ? 'WINS' : 'PTS', value: card.stats.points, color: 'bg-amber-400', borderColor: 'border-amber-600' },
-      { label: card.category === 'Coach' ? 'TITLES' : 'REB', value: card.stats.rebounds, color: 'bg-zinc-400', borderColor: 'border-zinc-600' },
-      { label: card.category === 'Coach' ? 'EXP' : 'AST', value: card.stats.assists, color: 'bg-blue-400', borderColor: 'border-blue-600' },
+      { label: card.category === 'Coach' || card.category === 'Coach of the Year' || card.category === 'Logo' ? 'WINS' : card.category === 'Arena' ? 'CAP' : 'PTS', value: card.stats.points, color: 'bg-amber-400', borderColor: 'border-amber-600' },
+      { label: card.category === 'Coach' ? 'TITLES' : card.category === 'Coach of the Year' || card.category === 'Logo' ? 'LOSSES' : card.category === 'Arena' ? 'YEAR' : 'REB', value: card.stats.rebounds, color: 'bg-zinc-400', borderColor: 'border-zinc-600' },
+      { label: card.category === 'Coach' ? 'EXP' : card.category === 'Coach of the Year' || card.category === 'Logo' ? 'TITLES' : card.category === 'Arena' ? 'TYPE' : 'AST', value: card.stats.assists, color: 'bg-blue-400', borderColor: 'border-blue-600' },
     ];
 
     if (isMini) {

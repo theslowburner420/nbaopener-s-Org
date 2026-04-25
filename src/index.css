@@ -177,6 +177,12 @@ body {
   --rarity-dynasty: #EF4444;
   --rarity-xfactor: #94A3B8; /* Steel Gray */
   --rarity-xfactor-glow: #60A5FA; /* Soft Blue */
+  --rarity-logo: #F59E0B; /* Team Gold */
+  --rarity-arena: #10B981; /* Emerald Green */
+  --rarity-draft2026: #6366F1; /* Indigo/Tech Blue */
+  --rarity-scoring-champ: #FF4D4D; /* Fire Crimson */
+  --rarity-hof: #E2E8F0; /* Platinum/Silver */
+  --rarity-coy: #FDE047; /* Coaching Gold */
   
   --pokemon-yellow: #FFCB05;
   --pokemon-blue: #2A75BB;
@@ -294,6 +300,135 @@ body {
   );
   background-size: 200% 200%;
   animation: liquidLight 5s linear infinite;
+  pointer-events: none;
+}
+
+.card-logo {
+  background: linear-gradient(135deg, #18181b 0%, #09090b 100%);
+  border-color: #f59e0b !important;
+  position: relative;
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.2), inset 0 0 15px rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.card-logo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.1), transparent 80%);
+  pointer-events: none;
+}
+
+.card-arena {
+  background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+  border-color: #10b981 !important;
+  position: relative;
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.2), inset 0 0 15px rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.card-arena::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.1), transparent 80%);
+  pointer-events: none;
+}
+
+.card-draft2026 {
+  background: linear-gradient(135deg, #312e81 0%, #1e1b4b 100%);
+  border-color: #6366f1 !important;
+  position: relative;
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.card-draft2026::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    transparent 0%,
+    rgba(99, 102, 241, 0.1) 30%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(99, 102, 241, 0.1) 70%,
+    transparent 100%
+  );
+  background-size: 200% 200%;
+  animation: liquidLight 5s linear infinite;
+  pointer-events: none;
+}
+
+.card-scoring-champ {
+  background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%);
+  border-color: #ef4444 !important;
+  position: relative;
+  box-shadow: 0 0 35px rgba(239, 68, 68, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.card-scoring-champ::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(239, 68, 68, 0.2), transparent 80%);
+  animation: heatVision 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes heatVision {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.2); }
+}
+
+.card-coy {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-color: #fde047 !important;
+  position: relative;
+  box-shadow: 0 0 30px rgba(253, 224, 71, 0.25), inset 0 0 15px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.card-coy::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(253, 224, 71, 0.05) 40%,
+    rgba(253, 224, 71, 0.15) 50%,
+    rgba(253, 224, 71, 0.05) 60%,
+    transparent 100%
+  );
+  background-size: 200% 200%;
+  animation: liquidLight 5s linear infinite;
+  pointer-events: none;
+}
+
+.card-hof {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-color: #f1f5f9 !important;
+  position: relative;
+  box-shadow: 0 0 30px rgba(241, 245, 249, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.card-hof::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 40%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.05) 60%,
+    transparent 100%
+  );
+  background-size: 200% 200%;
+  animation: liquidLight 6s linear infinite;
   pointer-events: none;
 }
 

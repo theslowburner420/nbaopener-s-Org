@@ -177,101 +177,169 @@ const TradingLobby: React.FC<TradingLobbyProps> = ({ onJoinedRoom, onMatching, i
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-black relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-600/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-500/5 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/4 pointer-events-none" />
+
       {/* Header */}
-      <header className="px-6 pt-12 pb-6 shrink-0 relative">
-        <button 
-          onClick={() => setCurrentView('home')}
-          className="absolute top-12 right-6 p-2 bg-zinc-900 rounded-xl text-zinc-500 hover:text-white transition-colors"
-        >
-          <ArrowLeft size={18} />
-        </button>
-        
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-1.5 h-4 bg-purple-500 rounded-full" />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Trading Center</span>
+      <header className="px-6 pt-12 pb-8 shrink-0 relative z-10">
+        <div className="flex items-center justify-between mb-8">
+          <button 
+            onClick={() => setCurrentView('home')}
+            className="group flex items-center gap-2 text-zinc-500 hover:text-white transition-all transform hover:-translate-x-1"
+          >
+            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center group-hover:border-zinc-700">
+              <ArrowLeft size={16} />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest">Back</span>
+          </button>
+
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Live Market</span>
+          </div>
         </div>
-        <h1 className="text-4xl font-black italic uppercase tracking-tighter text-white">Online Lobby</h1>
+        
+        <div className="flex items-end justify-between">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-1 h-3 bg-purple-500 rounded-full" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Global Exchange</span>
+            </div>
+            <h1 className="text-5xl font-black italic uppercase tracking-tighter text-white leading-none">
+              Trading<br />Center
+            </h1>
+          </div>
+
+          <div className="text-right hidden sm:block">
+            <p className="text-[8px] font-black uppercase tracking-widest text-zinc-600 mb-1">Your Reputation</p>
+            <div className="flex items-center gap-1 justify-end">
+              {Array.from({length: 5}).map((_, i) => (
+                <div key={i} className="w-3 h-3 bg-white/10 border border-white/5 rounded-sm flex items-center justify-center">
+                  <Zap size={8} className="text-purple-500 fill-current" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 pb-24 no-scrollbar">
-        {/* Security Info */}
-        <div className="p-4 bg-purple-500/5 border border-purple-500/20 rounded-2xl flex gap-4">
-          <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-500 shrink-0">
-            <Shield size={20} />
+      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-8 pb-32 no-scrollbar relative z-10">
+        {/* Security Info Banner */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-5 bg-gradient-to-br from-zinc-900/80 to-zinc-950 border border-zinc-800 rounded-[2rem] flex gap-5 shadow-2xl backdrop-blur-md"
+        >
+          <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 shrink-0 border border-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.1)]">
+            <Shield size={24} />
           </div>
           <div className="space-y-1">
-            <p className="text-xs font-black text-white uppercase italic tracking-tight">Secured Trade</p>
-            <p className="text-[10px] text-zinc-500 font-medium leading-relaxed">
-              Only duplicate cards are tradable. Roster cards are protected and cannot be exchanged.
+            <p className="text-xs font-black text-white uppercase italic tracking-tight">Verified Protocol v2.5</p>
+            <p className="text-[10px] text-zinc-500 font-medium leading-relaxed italic uppercase">
+              Only duplicates are tradable. Your core roster is locked for safety. All transactions are atomic.
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Random Matchmaking */}
-        <div className="space-y-4">
-          <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 px-1">Social Hub</h2>
-          
-          <motion.div 
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={startRandomMatch}
-            className="group cursor-pointer relative overflow-hidden bg-zinc-900 border border-zinc-800 rounded-3xl p-6 sm:p-8 flex items-center justify-between"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            
-            <div className="relative flex items-center gap-6">
-              <div className="w-14 h-14 bg-purple-600 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.2)]">
-                <Globe size={28} className="text-white" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-xl font-black italic uppercase tracking-tighter text-white">Random Trade</h3>
-                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Match with any online player</p>
+        {/* Action Grid */}
+        <div className="grid grid-cols-1 gap-6">
+          {/* Random Matchmaking */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 italic">Quick Connect</h2>
+              <div className="flex items-center gap-2">
+                <span className="text-[8px] font-bold text-zinc-700 uppercase tracking-widest">Searching: 512 Online</span>
               </div>
             </div>
             
-            <div className="relative flex items-center gap-2 text-purple-500">
-              <span className="text-[10px] font-black uppercase tracking-widest group-hover:mr-2 transition-all">Search</span>
-              <RefreshCw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Invite Friend */}
-        <div className="space-y-4">
-          <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 px-1">Invite Partner</h2>
-          
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 sm:p-8 space-y-6">
-            <div className="space-y-2">
-              <div className="relative">
-                <input 
-                  type="text"
-                  placeholder="Enter Username"
-                  value={friendUsername}
-                  onChange={(e) => setFriendUsername(e.target.value)}
-                  className="w-full bg-black border border-zinc-800 rounded-2xl px-5 py-4 text-sm font-bold text-white placeholder:text-zinc-600 focus:border-purple-500 outline-none transition-colors"
-                />
-                <UserPlus size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-zinc-700" />
-              </div>
-              <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest px-2">Invite a specific friend to a private trade session</p>
-            </div>
-
-            <button 
-              onClick={startPrivateTrade}
-              disabled={isSearchingFriend || !friendUsername}
-              className="w-full h-14 bg-white text-black rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-purple-500 hover:text-white transition-all shadow-xl active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+            <motion.div 
+              whileHover={{ scale: 1.01, rotate: 0.5 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={startRandomMatch}
+              className="group cursor-pointer relative overflow-hidden bg-zinc-900/50 border border-zinc-800 rounded-[2.5rem] p-8 flex items-center justify-between shadow-xl transition-all hover:bg-zinc-800/80 hover:border-purple-500/30"
             >
-              {isSearchingFriend ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
-              {isSearchingFriend ? 'Locating User...' : 'Invite Friend'}
-            </button>
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-purple-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-purple-500/10 transition-colors" />
+              
+              <div className="relative flex items-center gap-8">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-[0_0_40px_rgba(168,85,247,0.3)] group-hover:scale-110 transition-transform">
+                  <Globe size={32} className="text-white" />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-2xl font-black italic uppercase tracking-tighter text-white">Global Lobby</h3>
+                    <div className="px-2 py-0.5 bg-purple-500 rounded text-[8px] font-black text-white uppercase italic">Active</div>
+                  </div>
+                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest italic leading-none">Find a partner across the league</p>
+                </div>
+              </div>
+              
+              <div className="relative flex flex-col items-end gap-1">
+                <div className="flex items-center gap-2 text-purple-400">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] group-hover:mr-2 transition-all">Match Me</span>
+                  <RefreshCw size={16} className="group-hover:rotate-180 transition-transform duration-700" />
+                </div>
+                <p className="text-[8px] font-bold text-zinc-700 uppercase tracking-widest hidden sm:block">Avg 2s wait</p>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Invite Friend */}
+          <div className="space-y-4">
+            <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 px-1 italic">Private Exchange</h2>
+            
+            <div className="bg-gradient-to-br from-zinc-900/40 to-transparent border border-zinc-800 rounded-[2.5rem] p-8 space-y-8 backdrop-blur-sm">
+              <div className="space-y-4">
+                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest px-1">Invite a specific GM to your office</p>
+                <div className="relative group">
+                  <input 
+                    type="text"
+                    placeholder="Enter Username..."
+                    value={friendUsername}
+                    onChange={(e) => setFriendUsername(e.target.value)}
+                    className="w-full bg-black/60 border border-zinc-800 rounded-2xl px-6 py-5 text-sm font-black italic text-white placeholder:text-zinc-800 focus:border-purple-500/50 outline-none transition-all focus:ring-4 focus:ring-purple-500/5"
+                  />
+                  <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-3">
+                    <div className="w-px h-6 bg-zinc-800" />
+                    <UserPlus size={20} className="text-zinc-800 group-focus-within:text-purple-500 transition-colors" />
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                onClick={startPrivateTrade}
+                disabled={isSearchingFriend || !friendUsername}
+                className="w-full h-18 bg-white text-black rounded-[1.5rem] font-black uppercase tracking-[0.25em] italic text-xs hover:bg-purple-500 hover:text-white transition-all shadow-[0_20px_40px_rgba(0,0,0,0.3)] active:scale-95 disabled:opacity-30 disabled:grayscale flex items-center justify-center gap-3"
+              >
+                {isSearchingFriend ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    <span>Locating Manager...</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap size={18} className="fill-current" />
+                    <span>Send Invite</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Recent Trades / Activity could go here */}
-        <div className="p-8 rounded-3xl border border-zinc-900 border-dashed flex flex-col items-center justify-center text-center opacity-30">
-          <Zap size={32} className="text-zinc-800 mb-4" />
-          <p className="text-[10px] font-black uppercase tracking-widest">More Social Features Coming Soon</p>
+        {/* Footer info */}
+        <div className="flex items-center justify-center gap-8 py-4 opacity-30 italic">
+          <div className="flex items-center gap-2">
+            <Shield size={12} className="text-zinc-500" />
+            <span className="text-[8px] font-black uppercase tracking-widest">End-to-End Secure</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Zap size={12} className="text-zinc-500" />
+            <span className="text-[8px] font-black uppercase tracking-widest">Instant Swap</span>
+          </div>
         </div>
       </div>
     </div>

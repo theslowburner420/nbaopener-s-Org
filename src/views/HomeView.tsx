@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Zap, Trophy, Sparkles, Star, RefreshCw } from 'lucide-react';
+import { Zap, Trophy, Sparkles, Star, RefreshCw, Building, User as UserIcon } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 
 const HomeView: React.FC = () => {
@@ -136,6 +136,50 @@ const HomeView: React.FC = () => {
           {/* Mobile Button Only */}
           <button className="sm:hidden relative w-10 h-10 bg-white text-black rounded-full flex items-center justify-center shadow-lg active:scale-90">
              <Star size={16} fill="currentColor" />
+          </button>
+        </motion.div>
+  
+        {/* Bloque D: Franchise Mode (NEW EXPANSION) */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="relative group cursor-pointer overflow-hidden rounded-3xl border border-zinc-900 bg-zinc-950 flex items-center justify-between p-6 sm:p-8 min-h-[160px] shrink-0"
+          onClick={() => setCurrentView('career')}
+        >
+          {/* Background Image/Glow - Emerald/Forest for Franchise */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,_rgba(16,185,129,0.15)_0%,_transparent_70%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,_rgba(5,150,105,0.1)_0%,_transparent_70%)]" />
+          
+          <div className="relative flex items-center gap-6 sm:gap-10">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-600 rounded-3xl flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.3)] group-hover:scale-110 transition-transform duration-500">
+              <Building size={32} sm:size={40} className="text-white" />
+            </div>
+            
+            <div className="space-y-1">
+              <h2 className="text-3xl sm:text-4xl font-black italic uppercase tracking-tighter text-white leading-none">
+                Franchise<br/>Mode
+              </h2>
+              <p className="text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] text-emerald-400">
+                Front Office RPG
+              </p>
+            </div>
+          </div>
+
+          <div className="relative hidden sm:flex flex-col items-center gap-3">
+             <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map(i => (
+                  <Star key={i} size={14} className="text-emerald-500" fill="currentColor" />
+                ))}
+             </div>
+            <button className="px-6 py-2.5 bg-emerald-600 text-white rounded-full font-black uppercase text-[10px] tracking-widest hover:bg-emerald-500 hover:scale-105 transition-all shadow-lg active:scale-95">
+              Enter Office
+            </button>
+          </div>
+
+          {/* Mobile Button Only */}
+          <button className="sm:hidden relative w-10 h-10 bg-white text-black rounded-full flex items-center justify-center shadow-lg active:scale-90">
+             <Zap size={16} fill="currentColor" />
           </button>
         </motion.div>
 

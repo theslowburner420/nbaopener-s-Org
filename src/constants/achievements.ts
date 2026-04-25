@@ -474,5 +474,88 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: (state) => state.unlockedAchievements.includes('clutch_time'),
     getProgress: (state) => ({ current: state.unlockedAchievements.includes('clutch_time') ? 1 : 0, total: 1 }),
     rewardCoins: 3000
-  }
+  },
+  // --- NEW HOOPSDRAFT SPECIFIC (TEAM & RARITY) ---
+  {
+    id: 'draft_same_team_5',
+    category: 'drafting',
+    title: 'Franchise Loyalty',
+    description: 'Draft 5 starters from the same NBA team.',
+    icon: Users,
+    level: 'gold',
+    requirement: (state) => state.unlockedAchievements.includes('draft_same_team_5'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('draft_same_team_5') ? 1 : 0, total: 1 }),
+    rewardCoins: 20000,
+    rewardPacks: [{ id: 'mvp-pack', type: 'mvp', name: 'Finals MVP Pack' }]
+  },
+  {
+    id: 'draft_all_legend',
+    category: 'drafting',
+    title: 'The Olympus',
+    description: 'Draft a starting lineup consisting entirely of Legends.',
+    icon: Crown,
+    level: 'diamond',
+    requirement: (state) => state.unlockedAchievements.includes('draft_all_legend'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('draft_all_legend') ? 1 : 0, total: 1 }),
+    rewardCoins: 100000,
+    rewardPacks: [{ id: 'hof-pack', type: 'hof', name: 'HOF Pack' }]
+  },
+  {
+    id: 'draft_all_allstar',
+    category: 'drafting',
+    title: 'All-Star Quintet',
+    description: 'Draft a starting lineup consisting of All-Star rarity or better.',
+    icon: Star,
+    level: 'gold',
+    requirement: (state) => state.unlockedAchievements.includes('draft_all_allstar'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('draft_all_allstar') ? 1 : 0, total: 1 }),
+    rewardCoins: 15000,
+    rewardPacks: [{ id: 'allstar-pack', type: 'allstar', name: 'All-Star Pack' }]
+  },
+  {
+    id: 'draft_rookie_trio',
+    category: 'drafting',
+    title: 'Future is Now',
+    description: 'Draft 3 or more Rookie rarity cards in a single session.',
+    icon: Zap,
+    level: 'silver',
+    requirement: (state) => state.unlockedAchievements.includes('draft_rookie_trio'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('draft_rookie_trio') ? 1 : 0, total: 1 }),
+    rewardCoins: 7500
+  },
+  {
+    id: 'draft_position_pure',
+    category: 'drafting',
+    title: 'Tactical Balance',
+    description: 'Draft a starting lineup with 5 different positions (PG, SG, SF, PF, C).',
+    icon: Target,
+    level: 'silver',
+    requirement: (state) => state.unlockedAchievements.includes( 'draft_position_pure'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('draft_position_pure') ? 1 : 0, total: 1 }),
+    rewardCoins: 5000
+  },
+  {
+    id: 'draft_no_bench',
+    category: 'drafting',
+    title: 'Elite Excellence',
+    description: 'Draft a full team (12 players) with zero Bench rarity cards.',
+    icon: Gem,
+    level: 'diamond',
+    requirement: (state) => state.unlockedAchievements.includes('draft_no_bench'),
+    getProgress: (state) => ({ current: state.unlockedAchievements.includes('draft_no_bench') ? 1 : 0, total: 1 }),
+    rewardCoins: 50000,
+    rewardPacks: [{ id: 'hof-pack', type: 'hof', name: 'HOF Pack' }]
+  },
+  // --- DYNAMIC TEAM DRAFT ACHIEVEMENTS ---
+  ...TEAMS.map(team => ({
+    id: `draft_team_${team.toLowerCase().replace(/ /g, '_')}_5`,
+    category: 'drafting' as const,
+    title: `${team} Quintet`,
+    description: `Draft a full starting 5 of ${team} players in a single draft.`,
+    icon: Users,
+    level: 'gold' as const,
+    requirement: (state: any) => state.unlockedAchievements.includes(`draft_team_${team.toLowerCase().replace(/ /g, '_')}_5`),
+    getProgress: (state: any) => ({ current: state.unlockedAchievements.includes(`draft_team_${team.toLowerCase().replace(/ /g, '_')}_5`) ? 1 : 0, total: 1 }),
+    rewardCoins: 15000
+  }))
 ];

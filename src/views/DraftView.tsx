@@ -27,6 +27,8 @@ import CardDetailModal from '../components/CardDetailModal';
 import CardItem from '../components/CardItem';
 import StaticAd from '../components/StaticAd';
 
+import DraftAchievementsModal from '../components/DraftAchievementsModal';
+
 type DraftPhase = 'entry' | 'captain' | 'starters' | 'bench' | 'review' | 'summary' | 'tournament_selection' | 'bracket';
 
 interface DraftSlot {
@@ -496,7 +498,7 @@ const MatchChatbox = memo<{
               </span>
               <span className={`text-[8px] font-bold ${event.text.startsWith('INTERACTIVE:') ? 'text-black/60' : 'text-zinc-600'}`}>Q{event.quarter}</span>
             </div>
-            <p className={`text-sm font-bold ${event.text.startsWith('INTERACTIVE:') ? 'text-black' : 'text-white'}`}>{event.text.replace('INTERACTIVE: ', '')}</p>
+            <p className={`text-sm font-bold ${event.text?.startsWith('INTERACTIVE:') ? 'text-black' : 'text-white'}`}>{event.text?.replace('INTERACTIVE: ', '') || ''}</p>
           </motion.div>
         ))}
       </AnimatePresence>
@@ -703,7 +705,7 @@ const LiveMatchSimulation = memo<{
           const randomPlayer = userStarters[Math.floor(Math.random() * userStarters.length)];
           setActiveInteractiveEvent({
             ...randomEvent,
-            description: randomEvent.description.replace('{player}', randomPlayer.name)
+            description: randomEvent.description.replace('{player}', randomPlayer?.name || 'Someone')
           });
           return;
         }
@@ -870,26 +872,30 @@ const LiveMatchSimulation = memo<{
             }
             r -= (p.stats.points || 10);
           }
-          text = eventTemplates[Math.floor(Math.random() * eventTemplates.length)].replace("{player}", selectedPlayer);
-          if (Math.random() > 0.7) text = `${commentaryPhrases[Math.floor(Math.random() * commentaryPhrases.length)]} ${text}`;
+          const selectedTpl = eventTemplates[Math.floor(Math.random() * eventTemplates.length)];
+          text = (selectedTpl || "").replace("{player}", selectedPlayer || "Player");
+          if (Math.random() > 0.7) text = `${commentaryPhrases[Math.floor(Math.random() * commentaryPhrases.length)] || ""} ${text}`;
         } else {
-          text = oppTemplates[Math.floor(Math.random() * oppTemplates.length)].replace("{opp}", oppName);
+          const selectedTpl = oppTemplates[Math.floor(Math.random() * oppTemplates.length)];
+          text = (selectedTpl || "").replace("{opp}", oppName || "Opponent");
         }
       } else {
         if (scoringTeam === 'OPP') {
-          text = oppTemplates[Math.floor(Math.random() * oppTemplates.length)].replace("{opp}", oppName);
+          const selectedTpl = oppTemplates[Math.floor(Math.random() * oppTemplates.length)];
+          text = (selectedTpl || "").replace("{opp}", oppName || "Opponent");
         } else {
           let r = Math.random() * totalPtsWeight;
-          let selectedPlayer = userStarters[0].name;
+          let selectedPlayer = userStarters[0]?.name || "Player";
           for (const p of userStarters) {
-            if (r < (p.stats.points || 10)) {
+            if (r < (p.stats?.points || 10)) {
               selectedPlayer = p.name;
               break;
             }
-            r -= (p.stats.points || 10);
+            r -= (p.stats?.points || 10);
           }
-          text = eventTemplates[Math.floor(Math.random() * eventTemplates.length)].replace("{player}", selectedPlayer);
-          if (Math.random() > 0.7) text = `${commentaryPhrases[Math.floor(Math.random() * commentaryPhrases.length)]} ${text}`;
+          const selectedTpl = eventTemplates[Math.floor(Math.random() * eventTemplates.length)];
+          text = (selectedTpl || "").replace("{player}", selectedPlayer || "Player");
+          if (Math.random() > 0.7) text = `${commentaryPhrases[Math.floor(Math.random() * commentaryPhrases.length)] || ""} ${text}`;
         }
       }
 
@@ -1143,6 +1149,7 @@ const DraftView: React.FC = () => {
   const [swapSource, setSwapSource] = useState<string | null>(null);
   const [isBenchVisibleMobile, setIsBenchVisibleMobile] = useState(false);
   const [shouldAutoStartCaptain, setShouldAutoStartCaptain] = useState(false);
+  const [isDraftAchievementsOpen, setIsDraftAchievementsOpen] = useState(false);
 
   // Tournament State
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(() => {
@@ -1392,9 +1399,61 @@ const DraftView: React.FC = () => {
       } else if (allStartersFilled && allBenchFilled) {
         setPhase('review');
         
-        // Trigger achievements background
+        // --- ACHIEVEMENT DETECTION LOGIC ---
+        const starterCards = updatedStarters.map(s => s.card!);
+        const totalCards = [...starterCards, ...updatedBench.map(b => b.card!)];
+
+        // 1. Basic completion
         unlockAchievement('trust_the_process', false).then(u => u && notify(u));
+        
+        // 2. High OVR Team
         if (teamOVR >= 92) unlockAchievement('superteam', false).then(u => u && notify(u));
+        
+        // 3. Franchise Loyalty (5 starters same team)
+        const teamCounts = starterCards.reduce((acc, c) => {
+          acc[c.team] = (acc[c.team] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        
+        Object.keys(teamCounts).forEach((team) => {
+          const count = teamCounts[team];
+          if (count >= 5) {
+            unlockAchievement('draft_same_team_5', false).then(u => u && notify(u));
+            // Specific team achievement ID
+            const teamId = `draft_team_${team.toLowerCase().replace(/ /g, '_')}_5`;
+            unlockAchievement(teamId, false).then(u => u && notify(u));
+          }
+        });
+
+        // 4. The Olympus (All Legends in Starters)
+        if (starterCards.every(c => c.rarity === 'legend')) {
+          unlockAchievement('draft_all_legend', false).then(u => u && notify(u));
+        }
+
+        // 5. All-Star Quintet (All Starters are All-Star or better)
+        const eliteRarities = ['allstar', 'franchise', 'legend', 'coach', 'dpoy', 'roty', 'record'];
+        if (starterCards.every(c => eliteRarities.includes(c.rarity))) {
+          unlockAchievement('draft_all_allstar', false).then(u => u && notify(u));
+        }
+
+        // 6. Future is Now (3+ Rookies in draft)
+        if (totalCards.filter(c => c.rarity === 'rookie').length >= 3) {
+          unlockAchievement('draft_rookie_trio', false).then(u => u && notify(u));
+        }
+
+        // 7. Tactical Balance (5 different positions in PG, SG, SF, PF, C)
+        const uniquePositions = new Set(starterCards.map(c => {
+          // Normalize position string if needed, assuming they are like "PG", "SG" etc.
+          return c.position.split('/')[0].trim().toUpperCase();
+        }));
+        if (uniquePositions.size >= 5) {
+          unlockAchievement('draft_position_pure', false).then(u => u && notify(u));
+        }
+
+        // 8. Elite Excellence (No bench rarity in all 12)
+        if (totalCards.every(c => c.rarity !== 'bench')) {
+          unlockAchievement('draft_no_bench', false).then(u => u && notify(u));
+        }
       }
     }
   };
@@ -1726,6 +1785,14 @@ const DraftView: React.FC = () => {
         >
           <Play size={18} />
           <span>{isPremium ? 'Free Entry (Premium)' : 'Watch Ad to Enter'}</span>
+        </button>
+
+        <button 
+          onClick={() => setIsDraftAchievementsOpen(true)}
+          className="group relative bg-zinc-900/50 text-amber-500 border border-amber-500/20 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:bg-amber-500/10 transition-all active:scale-95 shadow-lg mt-2"
+        >
+          <Trophy size={14} />
+          <span>Draft Achievements</span>
         </button>
       </div>
 
@@ -2500,6 +2567,11 @@ const DraftView: React.FC = () => {
         onClaim={() => claimRewards('draft')}
         onClaimHome={() => claimRewards('home')}
         isSaving={isSaving}
+      />
+
+      <DraftAchievementsModal 
+        isOpen={isDraftAchievementsOpen}
+        onClose={() => setIsDraftAchievementsOpen(false)}
       />
 
       <AnimatePresence>

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { GameState, ViewType, Card, User } from '../types';
+import { GameState, ViewType, Card, User, FranchiseState, CareerMatch as SeasonMatch } from '../types';
 import { ACHIEVEMENTS } from '../constants/achievements';
 import { supabase } from '../lib/supabase';
 
@@ -19,6 +19,8 @@ interface GameContextType extends GameState {
   removePackFromInventory: (packId: string, sync?: boolean) => Promise<void>;
   setPremium: (status: boolean, sync?: boolean) => Promise<void>;
   resetGame: (sync?: boolean) => Promise<void>;
+  startFranchise: (team: string, initialRoster?: string[]) => Promise<void>;
+  updateFranchise: (updates: Partial<FranchiseState>) => Promise<void>;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   updateGameState: (updates: Partial<GameState>) => void;
@@ -53,6 +55,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       claimedDays: initialGuestState?.claimedDays ?? [],
       inventoryPacks: initialGuestState?.inventoryPacks ?? [],
       isPremium: initialGuestState?.isPremium ?? false,
+      franchise: initialGuestState?.franchise ?? undefined,
     };
   });
 
@@ -91,6 +94,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         claimedDays: state.claimedDays,
         inventoryPacks: state.inventoryPacks,
         isPremium: state.isPremium,
+        franchise: state.franchise,
       };
       localStorage.setItem('GUEST_PROGRESS', JSON.stringify(guestData));
     } else {
@@ -133,6 +137,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         claimed_achievements: Array.isArray(newState.claimedAchievements) ? newState.claimedAchievements : [],
         inventory_packs: Array.isArray(newState.inventoryPacks) ? newState.inventoryPacks : [],
         ads_disabled: !!newState.isPremium,
+        franchise_state: newState.franchise ? JSON.stringify(newState.franchise) : null,
         updated_at: new Date().toISOString(),
       };
 
@@ -312,6 +317,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         claimedAchievements: Array.from(new Set([...currentLiveState.claimedAchievements, ...(guestData?.claimedAchievements || [])])),
         inventoryPacks: currentLiveState.inventoryPacks.length > 0 ? currentLiveState.inventoryPacks : (guestData?.inventoryPacks || []),
         isPremium: currentLiveState.isPremium || guestData?.isPremium || false,
+        franchise: currentLiveState.franchise || guestData?.franchise || backupData?.franchise,
       };
 
       // 1. Fetch Cloud Data
@@ -361,6 +367,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           claimed_achievements: Array.isArray(cloudProfile.claimed_achievements) ? cloudProfile.claimed_achievements : [],
           inventory_packs: Array.isArray(cloudProfile.inventory_packs) ? cloudProfile.inventory_packs : [],
           ads_disabled: !!cloudProfile.ads_disabled,
+          franchise: cloudProfile.franchise_state ? JSON.parse(cloudProfile.franchise_state) : localProgress.franchise,
         };
 
         const mergeArrays = (a: any[], b: any[]) => Array.from(new Set([...(a || []), ...(b || [])]));
@@ -382,6 +389,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           claimedAchievements: isInitialSyncDoneRef.current ? pc.claimed_achievements : mergeArrays(pc.claimed_achievements, localProgress.claimedAchievements),
           inventoryPacks: isInitialSyncDoneRef.current ? pc.inventory_packs : (pc.inventory_packs.length > localProgress.inventoryPacks.length ? pc.inventory_packs : localProgress.inventoryPacks),
           isPremium: pc.ads_disabled || localProgress.isPremium,
+          franchise: isInitialSyncDoneRef.current ? pc.franchise : (pc.franchise || localProgress.franchise),
         };
       }
 
@@ -428,6 +436,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
               collection: migratedCollection,
               inventoryPacks: updated.inventory_packs || prev.inventoryPacks,
               isPremium: updated.ads_disabled !== undefined ? !!updated.ads_disabled : prev.isPremium,
+              franchise: updated.franchise_state ? JSON.parse(updated.franchise_state) : prev.franchise,
             }));
             
             // Sync the ref too to prevent immediate bounce-back save
@@ -512,8 +521,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     claimedAchievements: state.claimedAchievements,
     inventoryPacks: state.inventoryPacks,
     isPremium: state.isPremium,
+    franchise: state.franchise,
     user: state.user?.id
-  }), [state.coins, state.collection, state.customCards, state.unlockedAchievements, state.claimedAchievements, state.inventoryPacks, state.isPremium, state.user?.id]);
+  }), [state.coins, state.collection, state.customCards, state.unlockedAchievements, state.claimedAchievements, state.inventoryPacks, state.isPremium, state.franchise, state.user?.id]);
 
   // Periodic Save (Debounced) - Silent Background Auto-Save
   useEffect(() => {
@@ -791,6 +801,53 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [forceSyncToSupabase]);
 
+  const startFranchise = useCallback(async (team: string, initialRoster: string[] = [], fullInitialState?: Partial<FranchiseState>) => {
+    const freshFranchise: FranchiseState = {
+      isActive: true,
+      team,
+      level: 1,
+      xp: 0,
+      budget: 1000000,
+      season: 2025,
+      wins: 0,
+      losses: 0,
+      schedule: [],
+      upgrades: {
+        coaching: 1,
+        scouting: 1,
+        training: 1,
+        facilities: 1,
+      },
+      roster: initialRoster,
+      contracts: [],
+      currentDate: '2025-10-22',
+      marketPhase: 'regular_season',
+      playerSeasonStats: [],
+      lineup: {
+        PG: null,
+        SG: null,
+        SF: null,
+        PF: null,
+        C: null
+      },
+      currentMatchIndex: 0,
+      gameLogs: [],
+      activeEvents: [],
+      milestones: [],
+      salaryCap: 140.5, // 140.5M default
+      payroll: 0,
+      conferenceStandings: [],
+      ...fullInitialState
+    };
+    await updateGameStateAsync({ franchise: freshFranchise });
+  }, [updateGameStateAsync]);
+
+  const updateFranchise = useCallback(async (updates: Partial<FranchiseState>) => {
+    if (!stateRef.current.franchise) return;
+    const newFranchise = { ...stateRef.current.franchise, ...updates };
+    await updateGameStateAsync({ franchise: newFranchise });
+  }, [updateGameStateAsync]);
+
   const forceSync = useCallback(async () => {
     if (stateRef.current.user) {
       lastSyncedStateRef.current = '';
@@ -835,8 +892,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     showWelcomeGift,
     setShowWelcomeGift,
     login,
-    logout
-  }), [state, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, forceSync, isSaving, isBackgroundSaving, login, logout]);
+    logout,
+    startFranchise,
+    updateFranchise
+  }), [state, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, forceSync, isSaving, isBackgroundSaving, login, logout, startFranchise, updateFranchise]);
 
   return (
     <GameContext.Provider value={contextValue}>
