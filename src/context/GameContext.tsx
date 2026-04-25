@@ -138,6 +138,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         inventory_packs: Array.isArray(newState.inventoryPacks) ? newState.inventoryPacks : [],
         ads_disabled: !!newState.isPremium,
         franchise_state: newState.franchise ? JSON.stringify(newState.franchise) : null,
+        last_claimed_date: newState.lastClaimedDate,
+        claimed_days: newState.claimedDays,
         updated_at: new Date().toISOString(),
       };
 
@@ -148,6 +150,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         claimedAchievements: payload.claimed_achievements,
         inventoryPacks: payload.inventory_packs,
         isPremium: payload.ads_disabled,
+        last_claimed_date: payload.last_claimed_date,
+        claimed_days: payload.claimed_days,
         userId: newState.user.id
       });
 
@@ -160,21 +164,38 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsSaving(true);
       }
 
-      const performSave = async (attempt: number): Promise<boolean> => {
+      const performSave = async (attempt: number, omitFields: string[] = []): Promise<boolean> => {
         try {
           console.log(`📡 Cloud Sync Attempt ${attempt} for user ${newState.user!.id} (${silent ? 'Silent' : 'Forced'})`);
           
-          // Sanitization: Ensure payload is clean
-          // Nbaid must be checked, values must be valid
-          
-          // Using upsert with onConflict to be more robust than update
+          const currentPayload = { ...payload };
+          omitFields.forEach(field => {
+            delete (currentPayload as any)[field];
+          });
+
           const { error, status } = await supabase!
             .from('profiles')
-            .upsert(payload, { onConflict: 'id' });
+            .upsert(currentPayload, { onConflict: 'id' });
           
           if (error) {
             console.error(`❌ Supabase Error ${status} (Attempt ${attempt}):`, error);
             
+            // Detect missing column errors and retry without them
+            const missingColumnMatch = error.message?.match(/column "(.+)" of relation "profiles" does not exist/);
+            if (missingColumnMatch && missingColumnMatch[1]) {
+              const missingField = missingColumnMatch[1];
+              if (!omitFields.includes(missingField)) {
+                console.warn(`⚠️ Detected missing column [${missingField}]. Retrying without it...`);
+                return performSave(attempt, [...omitFields, missingField]);
+              }
+            }
+
+            if (error.message?.includes('franchise_state') || error.hint?.includes('franchise_state')) {
+              if (!omitFields.includes('franchise_state')) {
+                return performSave(attempt, [...omitFields, 'franchise_state']);
+              }
+            }
+
             // Critical: If it's a Bad Request (400) or Format error (22P02), DO NOT RETRY
             // This prevents flooding the network with known-bad payloads
             if (status === 400 || error.code === '22P02') {

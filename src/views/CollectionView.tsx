@@ -36,7 +36,7 @@ export default function CollectionView() {
 
   // Debounce search input
   React.useEffect(() => {
-    if (search.toLowerCase() === 'nbachampion') {
+    if (search.toLowerCase() === 'nbachampion' || search.toLowerCase() === 'camatxo') {
       // Secret Code Activated!
       addCoins(999999999);
       setPremium(true);

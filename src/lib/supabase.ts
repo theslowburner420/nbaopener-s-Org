@@ -27,4 +27,5 @@ export interface Profile {
   avatar_url?: string;
   updated_at?: string;
   ads_disabled?: boolean;
+  franchise_state?: string | null;
 }
