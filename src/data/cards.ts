@@ -11781,7 +11781,7 @@ const rawCards = [
     reb: 5.2,
     ast: 4.6,
     nbaId: 893,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1149.png',
+    imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1986-87 NBA Scoring Champion. One of the highest scoring seasons in NBA history.',
     quote: 'I can accept failure, everyone fails at something. But I can\'t accept not trying.'
   },
@@ -11799,7 +11799,7 @@ const rawCards = [
     reb: 5.5,
     ast: 5.9,
     nbaId: 893,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1149.png',
+    imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1987-88 NBA Scoring Champion. Completed a historic Triple Crown: Scoring, MVP, and DPOY.',
     quote: 'Talent wins games, but teamwork and intelligence win championships.'
   },
@@ -11817,7 +11817,7 @@ const rawCards = [
     reb: 8.0,
     ast: 8.0,
     nbaId: 893,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1149.png',
+    imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1988-89 NBA Scoring Champion. Perhaps MJ\'s most statistically complete season.',
     quote: 'You must expect great things of yourself before you can do them.'
   },
@@ -11835,7 +11835,7 @@ const rawCards = [
     reb: 6.9,
     ast: 6.3,
     nbaId: 893,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1149.png',
+    imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1989-90 NBA Scoring Champion. Continued his dominance with his 4th straight title.',
     quote: 'The key to success is failure.'
   },
@@ -11853,7 +11853,7 @@ const rawCards = [
     reb: 6.0,
     ast: 5.5,
     nbaId: 893,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1149.png',
+    imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1990-91 NBA Scoring Champion. Led the Bulls to their first ever NBA Championship.',
     quote: 'I realized that if I was going to achieve anything in life I had to be aggressive.'
   },
@@ -11871,7 +11871,7 @@ const rawCards = [
     reb: 6.4,
     ast: 6.1,
     nbaId: 893,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1149.png',
+    imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1991-92 NBA Scoring Champion. Six straight scoring titles and back-to-back rings.',
     quote: 'Limits, like fears, are often just an illusion.'
   },
@@ -11889,7 +11889,7 @@ const rawCards = [
     reb: 6.7,
     ast: 5.5,
     nbaId: 893,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1149.png',
+    imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1992-93 NBA Scoring Champion. Completed the first Three-Peat of the Jordan era.',
     quote: 'Obstacles don\'t have to stop you.'
   },
@@ -11907,7 +11907,7 @@ const rawCards = [
     reb: 10.7,
     ast: 4.8,
     nbaId: 95,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F95.png',
+    imageUrl: 'https://sanantoniosports.org/wp-content/uploads/2024/04/Running-1.jpg',
     description: '1993-94 NBA Scoring Champion. "The Admiral" scored 71 points on the final day to clinch the title.',
     quote: 'Leadership is a high toll to pay.'
   },
@@ -11925,7 +11925,7 @@ const rawCards = [
     reb: 10.8,
     ast: 2.9,
     nbaId: 95,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F95.png',
+    imageUrl: 'https://sanantoniosports.org/wp-content/uploads/2024/04/Running-1.jpg',
     description: '1994-95 NBA Scoring Champion. Combined scoring dominance with league MVP honors.',
     quote: 'You can\'t take anything for granted.'
   },
@@ -11943,7 +11943,7 @@ const rawCards = [
     reb: 6.6,
     ast: 4.3,
     nbaId: 893,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1149.png',
+    imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1995-96 NBA Scoring Champion. Returned to lead the Bulls to a then-record 72 wins.',
     quote: 'Step by step. I can\'t see any other way of accomplishing anything.'
   },
@@ -11961,7 +11961,7 @@ const rawCards = [
     reb: 5.9,
     ast: 4.3,
     nbaId: 893,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1149.png',
+    imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1996-97 NBA Scoring Champion. Nine scoring titles and still flying high.',
     quote: 'To learn to succeed, you must first learn to fail.'
   },
@@ -11979,7 +11979,7 @@ const rawCards = [
     reb: 5.8,
     ast: 3.5,
     nbaId: 893,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1149.png',
+    imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1997-98 NBA Scoring Champion. Captured a record 10th scoring title and the Last Dance championship.',
     quote: 'Always turn a negative situation into a positive situation.'
   },
@@ -11997,7 +11997,7 @@ const rawCards = [
     reb: 4.9,
     ast: 4.6,
     nbaId: 947,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F190.png',
+    imageUrl: 'https://i.ytimg.com/vi/2REkZG-dhHc/hqdefault.jpg',
     description: '1998-99 NBA Scoring Champion. "The Answer" became the shortest player to lead the league in scoring.',
     quote: 'I don\'t want to be the next Michael Jordan, I only want to be Allen Iverson.'
   },
@@ -12033,7 +12033,7 @@ const rawCards = [
     reb: 3.8,
     ast: 4.6,
     nbaId: 947,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F190.png',
+    imageUrl: 'https://i.ytimg.com/vi/2REkZG-dhHc/hqdefault.jpg',
     description: '2000-01 NBA Scoring Champion. Led the Sixers to the NBA Finals in his MVP year.',
     quote: 'I play every game like it\'s my last.'
   },
@@ -12051,7 +12051,7 @@ const rawCards = [
     reb: 3.5,
     ast: 5.5,
     nbaId: 947,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F190.png',
+    imageUrl: 'https://i.ytimg.com/vi/2REkZG-dhHc/hqdefault.jpg',
     description: '2001-02 NBA Scoring Champion. Won his second straight and third overall scoring title.',
     quote: 'I gave everything I had to basketball.'
   },
@@ -12069,7 +12069,7 @@ const rawCards = [
     reb: 6.5,
     ast: 5.5,
     nbaId: 1515,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F365.png',
+    imageUrl: 'https://platform.sbnation.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/9202649/2733366.jpg?quality=90&strip=all&crop=2.925%2C0%2C94.15%2C100&w=2400',
     description: '2002-03 NBA Scoring Champion. T-Mac reached his absolute peak as a scorer.',
     quote: 'I was born to score.'
   },
@@ -12087,7 +12087,7 @@ const rawCards = [
     reb: 6.0,
     ast: 5.5,
     nbaId: 1515,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F365.png',
+    imageUrl: 'https://platform.sbnation.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/9202649/2733366.jpg?quality=90&strip=all&crop=2.925%2C0%2C94.15%2C100&w=2400',
     description: '2003-04 NBA Scoring Champion. Back-to-back scoring titles for the Magic superstar.',
     quote: 'No one is unbeatable.'
   },
@@ -12105,7 +12105,7 @@ const rawCards = [
     reb: 3.7,
     ast: 7.9,
     nbaId: 947,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F190.png',
+    imageUrl: 'https://i.ytimg.com/vi/2REkZG-dhHc/hqdefault.jpg',
     description: '2004-05 NBA Scoring Champion. A 4th scoring title for one of the greatest little men ever.',
     quote: 'Only the strong survive.'
   },
@@ -12249,7 +12249,7 @@ const rawCards = [
     reb: 6.9,
     ast: 2.6,
     nbaId: 2546,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F2668.png',
+    imageUrl: 'https://media.cnn.com/api/v1/images/stellar/prod/230522103741-03-carmelo-anthony-file.jpg?c=original',
     description: '2012-13 NBA Scoring Champion. Melo brought scoring glory back to Madison Square Garden.',
     quote: 'Stay Me7o.'
   },
@@ -12503,7 +12503,7 @@ const rawCards = [
     reb: 5.8,
     ast: 6.7,
     nbaId: 600015,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600015.png',
+    imageUrl: 'https://objetos-xlk.estaticos-marca.com/uploads/2024/07/05/17182013983349.png',
     quote: 'The Logo.'
   },
   {
@@ -12520,7 +12520,7 @@ const rawCards = [
     reb: 7.5,
     ast: 9.5,
     nbaId: 600007,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600007.png',
+    imageUrl: 'https://www.myblackhistory.net/oscar.jpg',
     quote: 'The Big O.'
   },
   {
@@ -12537,7 +12537,7 @@ const rawCards = [
     reb: 22.9,
     ast: 4.4,
     nbaId: 600004,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600004.png',
+    imageUrl: 'https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcRRG5sGbCA8NDw_J7RM1iTDDre5aYzg96DHVOhyq8mxWAlERnifnOksiPkC1ca_-6GfoGR4PECQp99_1uU',
     quote: 'The Big Dipper.'
   },
   {
@@ -12554,7 +12554,7 @@ const rawCards = [
     reb: 22.5,
     ast: 4.3,
     nbaId: 600003,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600003.png',
+    imageUrl: 'https://www.hollywoodreporter.com/wp-content/uploads/2022/01/Bill-Russell-Boston-1950s-Everett-P8DBIRU_EC001-EMBED-2022.jpg',
     quote: 'The ultimate winner.'
   },
   {
@@ -12571,7 +12571,7 @@ const rawCards = [
     reb: 13.5,
     ast: 4.3,
     nbaId: 600008,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600008.png',
+    imageUrl: 'https://people.com/thmb/A985skBp-7CoPESTJY01mMG8XBo=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(750x379:752x381)/elgin-baylor-1-2000-9afb8cf311fb480fbbe2b12f31a66bf5.jpg',
     quote: 'The first great high-flyer.'
   },
   {
@@ -12588,7 +12588,7 @@ const rawCards = [
     reb: 3.0,
     ast: 3.9,
     nbaId: 600019,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600019.png',
+    imageUrl: 'https://www.nbamaniacs.com/wp-content/uploads/2022/07/GettyImages-455539916-1568x882-1.jpg',
     quote: 'Earl the Pearl.'
   },
   {
@@ -12605,7 +12605,7 @@ const rawCards = [
     reb: 5.9,
     ast: 6.1,
     nbaId: 600016,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600016.png',
+    imageUrl: 'https://cdn.britannica.com/07/258007-050-4F67E33A/Basketball-player-Walt-Frazier-dribbles-the-ball-against-the-Baltimore-Bullets-during-an-NBA-basketball-game-1971.jpg',
     quote: 'Clyde.'
   },
   {
@@ -12622,7 +12622,7 @@ const rawCards = [
     reb: 11.2,
     ast: 3.6,
     nbaId: 600001,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600001.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Kareem_Abdul-Jabbar_1974.jpeg/250px-Kareem_Abdul-Jabbar_1974.jpeg',
     quote: 'Cap. Master of the Skyhook.'
   },
   {
@@ -12639,7 +12639,7 @@ const rawCards = [
     reb: 8.5,
     ast: 4.2,
     nbaId: 600013,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600013.png',
+    imageUrl: 'https://cdn.britannica.com/14/198714-050-2883B189/Julius-Erving.jpg',
     quote: 'Dr. J.'
   },
   {
@@ -12656,7 +12656,7 @@ const rawCards = [
     reb: 10.0,
     ast: 6.3,
     nbaId: 2182,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F2182.png',
+    imageUrl: 'https://cdn.britannica.com/60/258260-050-35DB0395/larry-bird-of-boston-celtics-shoots-free-throw-against-the-washington-bullets-1985.jpg',
     quote: 'Larry Legend.'
   },
   {
@@ -12673,7 +12673,7 @@ const rawCards = [
     reb: 7.2,
     ast: 11.2,
     nbaId: 600025,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600025.png',
+    imageUrl: 'https://cdn.britannica.com/27/189527-050-5BAD12C2/Magic-Johnson.jpg',
     quote: 'Showtime.'
   },
   {
@@ -12690,7 +12690,7 @@ const rawCards = [
     reb: 11.7,
     ast: 3.9,
     nbaId: 787,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F787.png',
+    imageUrl: 'https://cdn.nba.com/manage/2021/09/charlesbarkley-1568x882.jpg',
     quote: 'Sir Charles.'
   },
   {
@@ -12707,7 +12707,7 @@ const rawCards = [
     reb: 6.4,
     ast: 5.2,
     nbaId: 600039,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600039.png',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHvd5FDEr5Us_6Wr26gB03J4HO0kJSkET8EyikZ0PVGgcKncbGOdaT83zEyCkg8vdIw-171rgSo4bUq01f5UMG5EfCWM5Y_d4zFTbtww&s=10',
     quote: 'One of the greatest perimeter defenders.'
   },
   {
@@ -12724,7 +12724,7 @@ const rawCards = [
     reb: 9.8,
     ast: 2.9,
     nbaId: 600036,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600036.png',
+    imageUrl: 'https://tuscamisetasnba.com/wp-content/uploads/curiosidades-patrick-ewing.jpg',
     quote: 'The heart of the Knicks.'
   },
   {
@@ -12741,7 +12741,7 @@ const rawCards = [
     reb: 3.1,
     ast: 4.5,
     nbaId: 600033,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600033.png',
+    imageUrl: 'https://michigansportshof.org/wp-content/uploads/2019/01/joe-dumars.jpg',
     quote: 'A class act and a tough defender.'
   },
   {
@@ -12758,7 +12758,7 @@ const rawCards = [
     reb: 6.1,
     ast: 5.6,
     nbaId: 600031,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600031.png',
+    imageUrl: 'https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/clyde-drexler-dick-raphael.jpg',
     quote: 'Clyde the Glide.'
   },
   {
@@ -12775,7 +12775,7 @@ const rawCards = [
     reb: 11.1,
     ast: 2.5,
     nbaId: 600037,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600037.png',
+    imageUrl: 'https://cdn.nba.com/manage/2017/08/hakeem-olajuwon-iso-stands.jpg',
     quote: 'The Dream.'
   },
   {
@@ -12792,7 +12792,7 @@ const rawCards = [
     reb: 6.2,
     ast: 5.3,
     nbaId: 893,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1149.png',
+    imageUrl: 'https://static.wikia.nocookie.net/nbastreet/images/9/97/FDB1BF72-3F75-446F-B4F2-000331AE638B.jpeg/revision/latest?cb=20210419024456',
     quote: 'The GOAT.'
   },
   {
@@ -12809,7 +12809,7 @@ const rawCards = [
     reb: 2.7,
     ast: 10.5,
     nbaId: 600043,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600043.png',
+    imageUrl: 'https://platform.slcdunk.com/wp-content/uploads/sites/145/chorus/uploads/chorus_asset/file/15987854/1500510.jpg.jpg?quality=90&strip=all&crop=0,4.1508916323731,100,65.953360768176',
     quote: 'The master of the assist.'
   },
   {
@@ -12826,7 +12826,7 @@ const rawCards = [
     reb: 10.1,
     ast: 3.6,
     nbaId: 600044,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600044.png',
+    imageUrl: 'https://cdn.britannica.com/38/256938-050-D1B6AF47/Karl-Malone-NBA-Utah-Jazz-basketball-player.jpg',
     quote: 'The Mailman.'
   },
   {
@@ -12843,7 +12843,7 @@ const rawCards = [
     reb: 6.4,
     ast: 5.2,
     nbaId: 600039,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600039.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Lipofsky_Pippen.jpg/250px-Lipofsky_Pippen.jpg',
     quote: 'Pip.'
   },
   {
@@ -12860,7 +12860,7 @@ const rawCards = [
     reb: 13.1,
     ast: 1.8,
     nbaId: 600047,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600047.png',
+    imageUrl: 'https://cdn.gigantes.com/wp-content/uploads/sites/4/2020/03/rodman-a.jpg',
     quote: 'The Worm.'
   },
   {
@@ -12877,7 +12877,7 @@ const rawCards = [
     reb: 3.0,
     ast: 3.0,
     nbaId: 714,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F714.png',
+    imageUrl: 'https://m.media-amazon.com/images/M/MV5BMTUxODg1Nzg5OV5BMl5BanBnXkFtZTcwNTMzMjkwMw@@._V1_.jpg',
     quote: 'Miller Time.'
   },
   {
@@ -12894,7 +12894,7 @@ const rawCards = [
     reb: 4.3,
     ast: 6.7,
     nbaId: 600053,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600053.png',
+    imageUrl: 'https://static.wikia.nocookie.net/nba/images/b/b1/Gary-payton-net-worth2.jpg/revision/latest?cb=20170302235016',
     quote: 'The Glove.'
   },
   {
@@ -12911,7 +12911,7 @@ const rawCards = [
     reb: 3.8,
     ast: 3.3,
     nbaId: 600055,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600055.png',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTj3KHBaH0KsTzdh1xRWPUVGyu8BGBxMvX-Yg&s',
     quote: 'The Rock.'
   },
   {
@@ -12928,7 +12928,7 @@ const rawCards = [
     reb: 8.5,
     ast: 1.2,
     nbaId: 600057,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600057.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b7/Alonzo_Mourning.jpg',
     quote: 'Zo.'
   },
   {
@@ -12945,7 +12945,7 @@ const rawCards = [
     reb: 3.7,
     ast: 6.2,
     nbaId: 190,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F190.png',
+    imageUrl: 'https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcTVyN6kTMpgFUTFFFrnalJeT_f_SrXOX1dUEakW1Hexnc_q-jhU7QM66W-DuiIwFHYICYxIxOVLDwGzE4E',
     quote: 'The Answer.'
   },
   {
@@ -12962,7 +12962,7 @@ const rawCards = [
     reb: 9.2,
     ast: 1.9,
     nbaId: 2397,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F2397.png',
+    imageUrl: 'https://bucket-image.inkmaginecms.com/version/social/1/image/2024/05/d9421767-62e7-4ffe-a862-1a0838d34131.jpg',
     quote: 'Great Wall of Yao.'
   },
   {
@@ -12979,7 +12979,7 @@ const rawCards = [
     reb: 10.9,
     ast: 2.5,
     nbaId: 406,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F614.png',
+    imageUrl: 'https://i.pinimg.com/474x/8a/6a/77/8a6a77ce4bdf658b627a779c83cb0bf0.jpg',
     quote: 'Shaq Diesel.'
   },
   {
@@ -12996,7 +12996,7 @@ const rawCards = [
     reb: 5.6,
     ast: 4.4,
     nbaId: 1515,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F365.png',
+    imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_fill,w_1200,ar_1:1,f_auto,q_auto,g_auto/shape/cover/sport/d4627c41abd99f569b157d269181284b7029b07099e76992c8f1d2a2839f0828.jpg',
     quote: 'T-Mac.'
   },
   {
@@ -13013,7 +13013,7 @@ const rawCards = [
     reb: 3.0,
     ast: 8.5,
     nbaId: 201565,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F592.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Steve_Nash_00054544.jpg/250px-Steve_Nash_00054544.jpg',
     quote: 'Point God Nash.'
   },
   {
@@ -13030,7 +13030,7 @@ const rawCards = [
     reb: 4.1,
     ast: 3.4,
     nbaId: 947,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F190.png',
+    imageUrl: 'https://platform.sbnation.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/8539251/52951161.jpg?quality=90&strip=all&crop=0%2C0%2C100%2C94.392104082548&w=2400',
     quote: 'Jesus Shuttlesworth. The perfect jumper.'
   },
   {
@@ -13047,7 +13047,7 @@ const rawCards = [
     reb: 5.2,
     ast: 4.7,
     nbaId: 977,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F110.png',
+    imageUrl: 'https://cdn.artphotolimited.com/images/67ceea65865e9b3b9ef7de2b/300x300/kobe-bryant-2001-nba-finals.jpg',
     quote: 'Mamba Out.'
   },
   {
@@ -13064,7 +13064,7 @@ const rawCards = [
     reb: 10.8,
     ast: 3.0,
     nbaId: 1495,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1375.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Tim_Duncan_Walks_Verizon_Center%27s_Floor_%28cropped%29.jpg/960px-Tim_Duncan_Walks_Verizon_Center%27s_Floor_%28cropped%29.jpg',
     quote: 'The Big Fundamental.'
   },
   {
@@ -13081,7 +13081,7 @@ const rawCards = [
     reb: 10.0,
     ast: 3.7,
     nbaId: 708,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1938.png',
+    imageUrl: 'https://i.redd.it/4va5s86dnvje1.jpeg',
     quote: 'Anything is possible!'
   },
   {
@@ -13098,7 +13098,7 @@ const rawCards = [
     reb: 9.8,
     ast: 4.2,
     nbaId: 185,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F680.png',
+    imageUrl: 'https://static.wikia.nocookie.net/nba-contrafactic/images/4/4f/Webber.jpg/revision/latest?cb=20210716183716&path-prefix=es',
     quote: 'C-Webb.'
   },
   {
@@ -13115,7 +13115,7 @@ const rawCards = [
     reb: 5.6,
     ast: 3.5,
     nbaId: 1718,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1943.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Paul_pierce_1.jpg/960px-Paul_pierce_1.jpg',
     quote: 'The Truth.'
   },
   {
@@ -13132,7 +13132,7 @@ const rawCards = [
     reb: 9.6,
     ast: 1.3,
     nbaId: 1111,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1029.png',
+    imageUrl: 'https://media-cldnry.s-nbcnews.com/image/upload/t_social_share_1024x768_scale,f_auto,q_auto:best/msnbc/Components/Photos/050610/050610_ben_wallace_hmed.jpg',
     quote: 'Big Ben.'
   },
   {
@@ -13149,7 +13149,7 @@ const rawCards = [
     reb: 3.5,
     ast: 3.8,
     nbaId: 1938,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1938.png',
+    imageUrl: 'https://fotos.perfil.com/2022/04/02/trim/720/410/ginobili-1335881.jpg',
     quote: 'The Eurostep pioneer.'
   },
   {
@@ -13166,7 +13166,7 @@ const rawCards = [
     reb: 3.4,
     ast: 7.8,
     nbaId: 88,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F2168.png',
+    imageUrl: 'https://imageio.forbes.com/specials-images/imageserve/65d25debd91f185c5cac9977/0x0.jpg?format=jpg&crop=3596,2022,x0,y22,safe&height=900&width=1600&fit=bounds',
     quote: 'The UTEP Two-Step.'
   },
   {
@@ -13183,7 +13183,7 @@ const rawCards = [
     reb: 7.5,
     ast: 2.4,
     nbaId: 1717,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1977.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Dirk_Nowitzki_2.jpg/250px-Dirk_Nowitzki_2.jpg',
     quote: 'The greatest European player.'
   },
   {
@@ -13200,7 +13200,7 @@ const rawCards = [
     reb: 2.9,
     ast: 5.6,
     nbaId: 2225,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F2779.png',
+    imageUrl: 'https://tuscamisetasnba.com/wp-content/uploads/curiosidaes-tony-parker.jpg',
     quote: 'The blur.'
   },
   {
@@ -13217,7 +13217,7 @@ const rawCards = [
     reb: 4.7,
     ast: 5.4,
     nbaId: 2548,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1987.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Dwyane_Wade_e1.jpg/1280px-Dwyane_Wade_e1.jpg',
     quote: 'Flash.'
   },
   {
@@ -13234,7 +13234,7 @@ const rawCards = [
     reb: 8.9,
     ast: 3.3,
     nbaId: 2203,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F2384.png',
+    imageUrl: 'https://sport.jotdown.es/wp-content/uploads/2025/05/Proyecto-nuevo-2025-05-11T180514.769.jpg',
     quote: 'The heart and mind of a champion.'
   },
   {
@@ -13251,7 +13251,7 @@ const rawCards = [
     reb: 4.3,
     ast: 3.1,
     nbaId: 1713,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1479.png',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMQY_uW3wQ2DZsaR9zetur2_CH_rmW5YoCfcKRWadiblodTAQ3bHNB3H1IO0QuTp4i95kPGX40Dz5WfakgpEA7FNAhYX64O07eYDmUjqo&s=10',
     quote: 'Half-Man, Half-Amazing.'
   },
   {
@@ -13268,7 +13268,7 @@ const rawCards = [
     reb: 3.0,
     ast: 5.7,
     nbaId: 1497,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1763.png',
+    imageUrl: 'https://static01.nyt.com/images/2025/10/23/multimedia/23met-nba-gambling-billups-bio-top-fqwl/23met-nba-gambling-billups-bio-top-fqwl-articleLarge.jpg?quality=75&auto=webp&disable=upscale',
     quote: 'Mr. Big Shot.'
   },
   {
@@ -13285,7 +13285,7 @@ const rawCards = [
     reb: 6.2,
     ast: 2.7,
     nbaId: 2546,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F2668.png',
+    imageUrl: 'https://imageio.forbes.com/specials-images/imageserve/646b9b77976ffbea12b502f7/Denver-Nuggets-v-Los-Angeles-Lakers--Game-2/0x0.jpg?crop=1998,2996,x0,y0,safe&height=1066&width=711&fit=bounds',
     quote: 'Stay Me7o.'
   },
   {
@@ -13302,7 +13302,7 @@ const rawCards = [
     reb: 12.5,
     ast: 1.5,
     nbaId: 2730,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3013.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/76/Dwight_Howard.jpg',
     quote: 'Superman.'
   },
   {
@@ -13319,7 +13319,7 @@ const rawCards = [
     reb: 8.0,
     ast: 1.8,
     nbaId: 2403,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F2748.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Amar%27e_Stoudemire_free_throw.jpg/250px-Amar%27e_Stoudemire_free_throw.jpg',
     quote: 'STAT.'
   },
 

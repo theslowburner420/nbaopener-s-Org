@@ -107,6 +107,19 @@ export default function PacksView() {
     }, {} as Record<string, { total: number, owned: number, percent: number }>);
   }, [collection]);
 
+  const groupedInventory = useMemo(() => {
+    const groups: Record<string, any> = {};
+    inventoryPacks.forEach(pack => {
+      const type = pack.type;
+      if (!groups[type]) {
+        groups[type] = { ...pack, count: pack.count || 1 };
+      } else {
+        groups[type].count += (pack.count || 1);
+      }
+    });
+    return Object.values(groups);
+  }, [inventoryPacks]);
+
   const handleBuy = async (pack: Pack) => {
     if (coins < pack.price) {
       notifyError(`Need ${pack.price - coins} more coins!`);
@@ -273,7 +286,7 @@ export default function PacksView() {
               exit={{ opacity: 0, x: -20 }}
               className="h-full overflow-y-auto px-4 sm:px-6 pb-20 custom-scrollbar"
             >
-              {inventoryPacks.length === 0 ? (
+              {groupedInventory.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-64 text-zinc-600">
                   <Package size={48} strokeWidth={1} className="mb-4 opacity-20" />
                   <p className="text-xs font-black uppercase tracking-widest">No packs in inventory</p>
@@ -281,11 +294,11 @@ export default function PacksView() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-3 sm:gap-4 mt-4">
-                  {inventoryPacks.map((pack) => {
+                  {groupedInventory.map((pack) => {
                     const packInfo = PACKS.find(p => p.id === pack.type) || { color: 'from-zinc-700 to-zinc-900', icon: <Package size={24} /> };
                     return (
                       <motion.div
-                        key={pack.id}
+                        key={`${pack.type}-${pack.id}`}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4 group relative overflow-hidden"

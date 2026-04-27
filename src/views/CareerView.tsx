@@ -1360,86 +1360,67 @@ const CareerView: React.FC = () => {
       </AnimatePresence>
 
       {/* Top Bar HUD */}
-      <div className="px-6 sm:px-8 pt-8 sm:pt-12 pb-6 sm:pb-8 bg-zinc-950/90 backdrop-blur-3xl border-b border-zinc-900 sticky top-0 z-[100]">
-        <div className="flex items-center justify-between mb-6 sm:mb-8">
-           <div className="flex items-center gap-3 sm:gap-6">
+      <div className="px-4 sm:px-8 pt-4 sm:pt-12 pb-4 sm:pb-8 bg-zinc-950/90 backdrop-blur-3xl border-b border-zinc-900 sticky top-0 z-[100]">
+        <div className="flex items-center justify-between mb-4 sm:mb-8">
+           <div className="flex items-center gap-2 sm:gap-6">
               <button 
                 onClick={handleBack}
-                className="p-3 bg-zinc-900 border border-zinc-800 rounded-2xl hover:bg-zinc-800 transition-colors"
+                className="p-2 sm:p-3 bg-zinc-900 border border-zinc-800 rounded-xl sm:rounded-2xl hover:bg-zinc-800 transition-colors"
               >
-                <ChevronLeft size={20} />
+                <ChevronLeft size={18} />
               </button>
-              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-zinc-900 border border-zinc-800 rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 flex items-center justify-center shadow-2xl">
+              <div className="w-10 h-10 sm:w-16 sm:h-16 bg-zinc-900 border border-zinc-800 rounded-xl sm:rounded-3xl p-1 sm:p-2 flex items-center justify-center shadow-2xl">
                  <img src={getTeamLogo(franchise.team || 'LAL')} alt="Team" className="w-full h-full object-contain" />
               </div>
               <div className="flex flex-col">
-                 <h2 className="text-xl sm:text-3xl font-black uppercase italic tracking-tighter leading-none" style={{ color: primaryColor }}>{teamData?.name}</h2>
-                 <div className="flex items-center gap-2 mt-1">
-                    <p className="text-[8px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-                      {franchise.wins}W - {franchise.losses}L · {franchise.currentDate}
+                 <h2 className="text-sm sm:text-3xl font-black uppercase italic tracking-tighter leading-none" style={{ color: primaryColor }}>{teamData?.name}</h2>
+                 <div className="flex items-center gap-1.5 mt-0.5 sm:mt-1">
+                    <p className="text-[7px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-tight sm:tracking-widest">
+                      {franchise.wins}W - {franchise.losses}L
                     </p>
-                    <span className={`px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-tighter ${streak.endsWith('W') ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}`}>
+                    <span className={`px-1.5 py-0.5 rounded-full text-[6px] sm:text-[7px] font-black uppercase tracking-tighter ${streak.endsWith('W') ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}`}>
                        {streak}
                     </span>
                  </div>
               </div>
            </div>
  
-           <div className="hidden sm:flex items-center gap-4">
-              {nextGame && (
-                 <div className="flex flex-col items-end pr-4 border-r border-zinc-800">
-                    <span className="text-[9px] font-black uppercase text-zinc-600 tracking-widest">Next Game</span>
-                    <div className="flex items-center gap-3">
-                       <img src={getTeamLogo(nextGame.opponentAbbr)} className="w-6 h-6 object-contain" />
-                       <p className="text-sm font-black italic uppercase">{nextGame.opponentAbbr}</p>
-                    </div>
-                 </div>
-              )}
-              <div className="flex flex-col items-end">
-                 <span className="text-[9px] font-black uppercase text-zinc-600 tracking-widest">Avg Energy</span>
-                 <div className="flex items-center gap-2">
-                    <div className="w-16 h-1.5 bg-zinc-900 rounded-full overflow-hidden">
-                       <div className={`h-full transition-all ${avgEnergy < 40 ? 'bg-red-500' : avgEnergy < 75 ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{ width: `${avgEnergy}%` }} />
-                    </div>
-                    <p className="text-xl font-black italic text-white">{avgEnergy}%</p>
-                 </div>
+           <div className="flex items-center gap-3 sm:gap-4">
+              <div className="hidden xs:flex flex-col items-end">
+                 <span className="text-[7px] sm:text-[9px] font-black uppercase text-zinc-600 tracking-tighter sm:tracking-widest">Budget</span>
+                 <p className="text-xs sm:text-xl font-black italic text-amber-500">${(franchise.budget / 1000).toFixed(0)}K</p>
               </div>
-              <div className="h-10 w-px bg-zinc-800" />
+              <div className="h-6 sm:h-10 w-px bg-zinc-800 hidden xs:block" />
               <div className="flex flex-col items-end">
-                 <span className="text-[9px] font-black uppercase text-zinc-600 tracking-widest">Budget</span>
-                 <p className="text-xl font-black italic text-amber-500">${(franchise.budget / 1000).toFixed(0)}K</p>
-              </div>
-              <div className="h-10 w-px bg-zinc-800" />
-              <div className="flex flex-col items-end">
-                 <span className="text-[9px] font-black uppercase text-zinc-600 tracking-widest">OVR</span>
-                 <p className="text-xl font-black italic text-emerald-500">{teamOVR}</p>
+                 <span className="text-[7px] sm:text-[9px] font-black uppercase text-zinc-600 tracking-tighter sm:tracking-widest">OVR</span>
+                 <p className="text-xs sm:text-xl font-black italic text-emerald-500">{teamOVR}</p>
               </div>
            </div>
 
         </div>
 
-        <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-6 px-6 pb-2">
+        <div className="flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1 sm:pb-2">
             {[
-              { id: 'hub', label: 'Hub', icon: LayoutDashboard },
-              { id: 'lineup', label: 'Lineup', icon: Users },
-              { id: 'market', label: 'Trades', icon: ShoppingCart },
-              { id: 'league', label: 'League', icon: Monitor },
-              { id: 'standings', label: 'Rank', icon: BarChart3 },
-              { id: 'mgmt', label: 'Org', icon: Building },
-              { id: 'settings', label: 'Settings', icon: SettingsIcon },
+              { id: 'hub', label: 'Hub', mobile: 'H', icon: LayoutDashboard },
+              { id: 'lineup', label: 'Roster', mobile: 'R', icon: Users },
+              { id: 'market', label: 'Market', mobile: 'M', icon: ShoppingCart },
+              { id: 'league', label: 'League', mobile: 'L', icon: Monitor },
+              { id: 'standings', label: 'Rank', mobile: 'S', icon: BarChart3 },
+              { id: 'mgmt', label: 'Org', mobile: 'O', icon: Building },
+              { id: 'settings', label: 'Set', mobile: '⚙️', icon: SettingsIcon },
             ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as FranchiseTab)}
-                className={`flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-2xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${
                   activeTab === tab.id 
-                    ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
+                    ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.1)]' 
                     : 'bg-zinc-900/50 text-zinc-500 border-zinc-800 hover:border-zinc-700'
                 }`}
               >
-                <tab.icon size={14} />
+                <tab.icon size={12} className="sm:w-[14px]" />
                 <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.label.charAt(0)}</span>
+                <span className="sm:hidden">{tab.mobile}</span>
               </button>
             ))}
         </div>
@@ -1469,80 +1450,79 @@ const CareerView: React.FC = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="max-w-7xl mx-auto space-y-8"
+            className="max-w-7xl mx-auto space-y-4 sm:space-y-8"
           >
             {activeTab === 'hub' && (
-              <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
                   {/* Next Game - Main Feature */}
-                  <div className="md:col-span-4 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-6 sm:p-10 relative overflow-hidden group shadow-2xl">
+                  <div className="md:col-span-4 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-10 relative overflow-hidden group shadow-2xl">
                      <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
                      <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 blur-[80px] rounded-full translate-y-1/2 -translate-x-1/2" />
                      
-                     <div className="relative z-10 space-y-8 sm:space-y-12">
+                     <div className="relative z-10 space-y-6 sm:space-y-12">
                         <div className="flex items-center justify-between">
-                           <div className="flex items-center gap-3">
-                              <Calendar size={18} className="text-zinc-600" />
-                              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Next Assignment</span>
+                           <div className="flex items-center gap-2 sm:gap-3">
+                              <Calendar size={14} className="text-zinc-600 sm:w-[18px]" />
+                              <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-zinc-500">Next Assignment</span>
                            </div>
-                           <div className="px-4 py-1.5 bg-zinc-950 border border-zinc-800 rounded-full text-[8px] font-black uppercase tracking-widest text-zinc-400">
-                              Week {Math.floor((franchise.wins + franchise.losses) / 3) + 1} · Game {franchise.wins + franchise.losses + 1}/82
+                           <div className="px-2.5 sm:px-4 py-1 sm:py-1.5 bg-zinc-950 border border-zinc-800 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-zinc-400">
+                              Game {franchise.wins + franchise.losses + 1}/82
                            </div>
                         </div>
 
-                        <div className="flex items-center justify-around gap-4">
-                           <div className="text-center space-y-4 flex-1">
+                        <div className="flex items-center justify-around gap-2 sm:gap-4">
+                           <div className="text-center space-y-3 sm:space-y-4 flex-1">
                               <div className="relative group/logo">
                                  <div className="absolute inset-0 bg-white/5 blur-2xl rounded-full scale-0 group-hover/logo:scale-110 transition-transform duration-500" />
-                                 <div className="w-20 h-20 sm:w-28 sm:h-28 bg-zinc-800/50 backdrop-blur-md rounded-3xl flex items-center justify-center p-4 sm:p-6 shadow-2xl border border-white/5 group-hover:scale-105 transition-transform relative z-10">
+                                 <div className="w-16 h-16 sm:w-28 sm:h-28 bg-zinc-800/50 backdrop-blur-md rounded-2xl sm:rounded-3xl flex items-center justify-center p-3 sm:p-6 shadow-2xl border border-white/5 group-hover:scale-105 transition-transform relative z-10">
                                     <img src={getTeamLogo(franchise.team || 'LAL')} alt="Logo" className="w-full h-full object-contain" />
                                  </div>
                               </div>
-                              <p className="text-xs font-black uppercase italic tracking-[0.1em] text-zinc-400">{teamData?.name || 'Your Team'}</p>
+                              <p className="text-[10px] sm:text-xs font-black uppercase italic tracking-[0.05em] text-zinc-400 truncate">{teamData?.name || 'Your Team'}</p>
                            </div>
 
-                           <div className="flex flex-col items-center gap-3 shrink-0">
-                              <div className="w-12 h-12 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center">
-                                 <span className="text-xl font-black italic text-zinc-700">VS</span>
+                           <div className="flex flex-col items-center gap-1.5 sm:gap-3 shrink-0">
+                              <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center">
+                                 <span className="text-xs sm:text-xl font-black italic text-zinc-700">VS</span>
                               </div>
-                              <div className="px-3 py-1 bg-zinc-950 border border-zinc-800 rounded-lg text-[7px] font-bold text-zinc-600 uppercase tracking-widest">Primetime</div>
                            </div>
 
-                           <div className="text-center space-y-4 flex-1">
+                           <div className="text-center space-y-3 sm:space-y-4 flex-1">
                               <div className="relative group/logo">
                                  <div className="absolute inset-0 bg-white/5 blur-2xl rounded-full scale-0 group-hover/logo:scale-110 transition-transform duration-500" />
-                                 <div className="w-20 h-20 sm:w-28 sm:h-28 bg-zinc-800/50 backdrop-blur-md rounded-3xl flex items-center justify-center p-4 sm:p-6 shadow-2xl border border-white/10 group-hover:scale-105 transition-transform relative z-10">
+                                 <div className="w-16 h-16 sm:w-28 sm:h-28 bg-zinc-800/50 backdrop-blur-md rounded-2xl sm:rounded-3xl flex items-center justify-center p-3 sm:p-6 shadow-2xl border border-white/10 group-hover:scale-105 transition-transform relative z-10">
                                     <img src={getTeamLogo(nextGame?.opponentAbbr || 'BOS')} alt="Opponent" className="w-full h-full object-contain" />
                                  </div>
                               </div>
-                              <p className="text-xs font-black uppercase italic tracking-[0.1em] text-zinc-400">{nextGame?.opponentTeam || 'TBD'}</p>
+                              <p className="text-[10px] sm:text-xs font-black uppercase italic tracking-[0.05em] text-zinc-400 truncate">{nextGame?.opponentTeam || 'TBD'}</p>
                            </div>
                         </div>
 
                         <button 
                           onClick={simulateMatch}
                           disabled={isSimulating}
-                          className="w-full py-5 bg-white text-black rounded-2xl font-black uppercase tracking-[0.4em] text-[10px] shadow-[0_20px_40px_rgba(0,0,0,0.4)] hover:bg-emerald-400 transition-all flex items-center justify-center gap-3 disabled:opacity-50 active:scale-95 group/btn overflow-hidden relative"
+                          className="w-full py-4 sm:py-5 bg-white text-black rounded-xl sm:rounded-2xl font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] text-[9px] sm:text-[10px] shadow-[0_15px_30px_rgba(0,0,0,0.3)] hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 group/btn active:scale-95"
                         >
-                           <div className="relative z-10 flex items-center gap-3">
-                              {isSimulating ? <RefreshCw className="animate-spin" size={18} /> : <Zap fill="currentColor" size={18} />}
-                              {isSimulating ? 'Analyzing Data...' : 'Advance Schedule'}
+                           <div className="relative z-10 flex items-center gap-2">
+                              {isSimulating ? <RefreshCw className="animate-spin" size={16} /> : <Zap fill="currentColor" size={16} />}
+                              {isSimulating ? 'Analyzing...' : 'Advance Schedule'}
                            </div>
                         </button>
                      </div>
                   </div>
 
                  {/* Team Health Indicators */}
-                 <div className="md:col-span-2 lg:col-span-2 space-y-6">
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-[2rem] p-6 space-y-6 shadow-xl relative overflow-hidden">
+                 <div className="md:col-span-2 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-4 sm:gap-6">
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-6 space-y-4 sm:space-y-6 shadow-xl relative overflow-hidden">
                        <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 blur-3xl opacity-50" />
                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                             <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
-                                <Heart size={14} style={{ color: primaryColor }} />
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                             <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
+                                <Heart size={10} style={{ color: primaryColor }} className="sm:w-[14px]" />
                              </div>
-                             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Chemistry</span>
+                             <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-500">Chem</span>
                           </div>
-                          <span className="text-xl font-black italic text-white">{franchise.chemistry || 60}%</span>
+                          <span className="text-sm sm:text-xl font-black italic text-white">{franchise.chemistry || 60}%</span>
                        </div>
                        <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
                           <motion.div 
@@ -1554,13 +1534,13 @@ const CareerView: React.FC = () => {
                        </div>
                        
                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                             <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                                <Users size={14} className="text-blue-500" />
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                             <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                <Users size={10} className="text-blue-500 sm:w-[14px]" />
                              </div>
-                             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Fan Support</span>
+                             <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-500">Fans</span>
                           </div>
-                          <span className="text-xl font-black italic text-white">{franchise.fanSupport || 50}%</span>
+                          <span className="text-sm sm:text-xl font-black italic text-white">{franchise.fanSupport || 50}%</span>
                        </div>
                        <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
                           <motion.div 
@@ -1571,9 +1551,9 @@ const CareerView: React.FC = () => {
                        </div>
 
                        <div className="pt-2 border-t border-zinc-800">
-                          <div className="flex items-center justify-between text-[8px] font-black uppercase tracking-widest mb-3 text-zinc-600">
-                             <span>Organization LVL {franchise.level || 1}</span>
-                             <span>{franchise.xp}/{ (franchise.level || 1) * 2500 } XP</span>
+                          <div className="flex items-center justify-between text-[7px] sm:text-[8px] font-black uppercase tracking-widest mb-2 text-zinc-600">
+                             <span>Lvl {franchise.level || 1}</span>
+                             <span>{franchise.xp} XP</span>
                           </div>
                           <div className="h-1 w-full bg-zinc-800 rounded-full">
                              <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(franchise.xp / ((franchise.level || 1) * 2500)) * 100}%` }} />
@@ -1581,20 +1561,20 @@ const CareerView: React.FC = () => {
                        </div>
                     </div>
 
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-[2rem] p-6 flex flex-col justify-between aspect-square shadow-xl group">
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-xl group">
                        <div className="flex items-center justify-between">
-                          <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center text-black shadow-[0_10px_20px_rgba(245,158,11,0.3)] transition-transform group-hover:scale-110">
-                             <DollarSign size={24} />
+                          <div className="w-8 h-8 sm:w-12 sm:h-12 bg-amber-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-black shadow-[0_5px_15px_rgba(245,158,11,0.2)]">
+                             <DollarSign size={16} className="sm:w-[24px]" />
                           </div>
-                          <div className="flex items-center gap-2">
-                             <TrendingUp size={14} className="text-emerald-500" />
-                             <span className="text-[8px] font-black text-emerald-500 uppercase">+12%</span>
+                          <div className="hidden sm:flex items-center gap-1.5 sm:gap-2">
+                             <TrendingUp size={12} className="text-emerald-500 sm:w-[14px]" />
+                             <span className="text-[7px] sm:text-[8px] font-black text-emerald-500 uppercase">+12%</span>
                           </div>
                        </div>
-                       <div>
-                          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1">Available Budget</p>
-                          <h4 className="text-4xl font-black italic tracking-tighter text-white">${(franchise.budget / 1000).toFixed(0)}K</h4>
-                          <div className="mt-4 flex gap-1">
+                       <div className="mt-4 lg:mt-0">
+                          <p className="text-[7px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-0.5 sm:mb-1">Budget</p>
+                          <h4 className="text-xl sm:text-4xl font-black italic tracking-tighter text-white">${(franchise.budget / 1000).toFixed(0)}K</h4>
+                          <div className="mt-2 sm:mt-4 flex gap-0.5 sm:gap-1">
                              {[1,2,3,4,5].map(i => <div key={i} className="h-0.5 flex-1 bg-emerald-500/20" />)}
                           </div>
                        </div>

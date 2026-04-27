@@ -37,6 +37,19 @@ interface GameContextType extends GameState {
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
+const normalizePacks = (packs: any[]) => {
+  const groups: Record<string, any> = {};
+  (packs || []).forEach(pack => {
+    const type = pack.type;
+    if (!groups[type]) {
+      groups[type] = { ...pack, id: type, count: Number(pack.count) || 1 };
+    } else {
+      groups[type].count += (Number(pack.count) || 1);
+    }
+  });
+  return Object.values(groups);
+};
+
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<GameState>(() => {
     // Try to load guest progress if it exists
@@ -53,7 +66,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       claimedAchievements: initialGuestState?.claimedAchievements ?? [],
       lastClaimedDate: initialGuestState?.lastClaimedDate ?? null,
       claimedDays: initialGuestState?.claimedDays ?? [],
-      inventoryPacks: initialGuestState?.inventoryPacks ?? [],
+      inventoryPacks: normalizePacks(initialGuestState?.inventoryPacks ?? []),
       isPremium: initialGuestState?.isPremium ?? false,
       franchise: initialGuestState?.franchise ?? undefined,
     };
@@ -408,7 +421,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           })(),
           unlockedAchievements: isInitialSyncDoneRef.current ? pc.unlocked_achievements : mergeArrays(pc.unlocked_achievements, localProgress.unlockedAchievements),
           claimedAchievements: isInitialSyncDoneRef.current ? pc.claimed_achievements : mergeArrays(pc.claimed_achievements, localProgress.claimedAchievements),
-          inventoryPacks: isInitialSyncDoneRef.current ? pc.inventory_packs : (pc.inventory_packs.length > localProgress.inventoryPacks.length ? pc.inventory_packs : localProgress.inventoryPacks),
+          inventoryPacks: normalizePacks(isInitialSyncDoneRef.current ? pc.inventory_packs : (pc.inventory_packs.length > localProgress.inventoryPacks.length ? pc.inventory_packs : localProgress.inventoryPacks)),
           isPremium: pc.ads_disabled || localProgress.isPremium,
           franchise: isInitialSyncDoneRef.current ? pc.franchise : (pc.franchise || localProgress.franchise),
         };
@@ -606,6 +619,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const updateGameStateAsync = useCallback(async (updates: Partial<GameState>) => {
+    // Normalize inventory packs if present in updates
+    if (updates.inventoryPacks) {
+      updates.inventoryPacks = normalizePacks(updates.inventoryPacks);
+    }
+    
     const newState = { ...stateRef.current, ...updates };
     
     if (newState.user) {

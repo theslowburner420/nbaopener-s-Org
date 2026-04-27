@@ -8,49 +8,49 @@ export type PackType = 'random' | 'rookie' | 'allstar' | 'mvp' | 'hof' | 'legend
 
 export const DROP_RATES: Record<PackType, { rarity: Rarity; rate: number }[]> = {
   random: [
-    { rarity: 'bench', rate: 70 },
-    { rarity: 'starter', rate: 18 },
-    { rarity: 'allstar', rate: 5 },
-    { rarity: 'franchise', rate: 1.5 },
-    { rarity: 'legend', rate: 0.5 },
-    { rarity: 'roty', rate: 0.5 },
-    { rarity: 'coach', rate: 5 },
+    { rarity: 'bench', rate: 78 },
+    { rarity: 'starter', rate: 16 },
+    { rarity: 'allstar', rate: 3 },
+    { rarity: 'franchise', rate: 0.2 },
+    { rarity: 'legend', rate: 0.05 },
+    { rarity: 'roty', rate: 0.1 },
+    { rarity: 'draft2026', rate: 0.1 },
+    { rarity: 'rising_star', rate: 0.3 },
+    { rarity: 'coach', rate: 2.25 },
   ],
   rookie: [
-    { rarity: 'bench', rate: 55 },
+    { rarity: 'bench', rate: 65 },
     { rarity: 'starter', rate: 25 },
-    { rarity: 'allstar', rate: 10 },
-    { rarity: 'franchise', rate: 4 },
-    { rarity: 'legend', rate: 1 },
+    { rarity: 'rookie', rate: 6 },
     { rarity: 'roty', rate: 1 },
-    { rarity: 'coach', rate: 5 },
+    { rarity: 'draft2026', rate: 1 },
+    { rarity: 'coach', rate: 2 },
   ],
   allstar: [
-    { rarity: 'bench', rate: 35 },
-    { rarity: 'starter', rate: 35 },
-    { rarity: 'allstar', rate: 15 },
-    { rarity: 'franchise', rate: 8 },
-    { rarity: 'legend', rate: 2 },
-    { rarity: 'roty', rate: 2 },
-    { rarity: 'coach', rate: 5 },
+    { rarity: 'bench', rate: 45 },
+    { rarity: 'starter', rate: 38 },
+    { rarity: 'allstar', rate: 12 },
+    { rarity: 'franchise', rate: 2 },
+    { rarity: 'allnba_1st', rate: 1 },
+    { rarity: 'scoring_champ', rate: 1 },
+    { rarity: 'coach', rate: 1 },
   ],
   mvp: [
-    { rarity: 'bench', rate: 15 },
-    { rarity: 'starter', rate: 40 },
+    { rarity: 'starter', rate: 55 },
     { rarity: 'allstar', rate: 25 },
-    { rarity: 'franchise', rate: 12 },
+    { rarity: 'franchise', rate: 10 },
     { rarity: 'legend', rate: 3 },
-    { rarity: 'roty', rate: 3 },
-    { rarity: 'coach', rate: 5 },
+    { rarity: 'dpoy', rate: 3 },
+    { rarity: 'record', rate: 2 },
+    { rarity: 'coach', rate: 2 },
   ],
   hof: [
-    { rarity: 'bench', rate: 5 },
-    { rarity: 'starter', rate: 10 },
-    { rarity: 'allstar', rate: 40 },
-    { rarity: 'franchise', rate: 30 },
+    { rarity: 'allstar', rate: 50 },
+    { rarity: 'franchise', rate: 25 },
     { rarity: 'legend', rate: 10 },
-    { rarity: 'roty', rate: 10 },
-    { rarity: 'coach', rate: 5 },
+    { rarity: 'hof', rate: 7.5 },
+    { rarity: 'record', rate: 5 },
+    { rarity: 'coach', rate: 2.5 },
   ],
   legendary_mvp: [
     { rarity: 'legend', rate: 100 },
@@ -349,7 +349,10 @@ export function useEngine() {
       let pool = ALL_CARDS.filter(c => {
         if (seenIds.has(c.id)) return false;
         if (draftedNames.has(c.name)) return false; // Prevent duplicate players by name
-        if (c.rarity === 'coach') return false;
+        
+        // STRICT PLAYER-ONLY FILTER
+        if (c.rarity === 'coach' || c.rarity === 'logo' || c.rarity === 'arena') return false;
+        if (['Coach', 'Logo', 'Arena', 'Coach of the Year'].includes(c.category)) return false;
         if (['Duo', 'Dynasty', 'Big Three'].includes(c.category)) return false; 
         
         if (isCaptain) {
@@ -376,12 +379,12 @@ export function useEngine() {
         return selectedRarities.includes(c.rarity);
       });
 
-      // Fallback if pool is empty
       if (pool.length === 0) {
         pool = ALL_CARDS.filter(c => {
           if (seenIds.has(c.id)) return false;
           if (draftedNames.has(c.name)) return false; // Still exclude by name in fallback
-          if (c.rarity === 'coach') return false;
+          if (c.rarity === 'coach' || c.rarity === 'logo' || c.rarity === 'arena') return false;
+          if (['Coach', 'Logo', 'Arena', 'Coach of the Year'].includes(c.category)) return false;
           if (['Duo', 'Dynasty', 'Big Three'].includes(c.category)) return false;
           if (isCaptain) return (c.stats?.ovr || 0) >= 90; // Slightly lower threshold if empty
           if (position && c.position !== position) return false;
@@ -391,7 +394,7 @@ export function useEngine() {
 
       // Final fallback: allow duplicates if absolutely necessary (shouldn't happen with large pool)
       if (pool.length === 0) {
-        pool = ALL_CARDS.filter(c => !seenIds.has(c.id) && c.rarity !== 'coach');
+        pool = ALL_CARDS.filter(c => !seenIds.has(c.id) && c.rarity !== 'coach' && c.rarity !== 'logo' && c.rarity !== 'arena' && !['Coach', 'Logo', 'Arena'].includes(c.category));
       }
 
       const selectedCard = pool[Math.floor(Math.random() * pool.length)];

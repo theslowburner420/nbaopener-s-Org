@@ -424,37 +424,37 @@ const MatchScoreboard = memo<{
   isUserT2: boolean;
 }>(({ t1Name, t2Name, t1Ovr, t2Ovr, s1, s2, quarter, isUserT1, isUserT2 }) => {
   return (
-    <div className="relative z-10 bg-zinc-900/50 border-b border-zinc-800 p-6 md:p-10">
-      <div className="max-w-4xl mx-auto flex flex-col items-center gap-8">
-        <div className="flex items-center justify-between w-full">
+    <div className="relative z-10 bg-zinc-900/50 border-b border-zinc-800 p-4 md:p-10">
+      <div className="max-w-4xl mx-auto flex flex-col items-center gap-4 md:gap-8">
+        <div className="flex items-center justify-between w-full gap-2">
           {/* Team 1 */}
-          <div className="flex flex-col items-center gap-3 w-1/3">
-            <div className={`w-16 h-16 md:w-24 md:h-24 rounded-3xl flex items-center justify-center text-3xl font-black ${isUserT1 ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-400'}`}>
+          <div className="flex flex-col items-center gap-2 md:gap-3 w-[28%] md:w-1/3">
+            <div className={`w-12 h-12 sm:w-16 sm:h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl flex items-center justify-center text-xl sm:text-2xl md:text-4xl font-black shrink-0 ${isUserT1 ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-400'}`}>
               {t1Name[0]}
             </div>
-            <p className="text-sm md:text-lg font-black uppercase italic text-white truncate w-full text-center">{t1Name}</p>
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">OVR: {t1Ovr}</p>
+            <p className="text-[10px] sm:text-xs md:text-lg font-black uppercase italic text-white truncate w-full text-center leading-tight">{t1Name}</p>
+            <p className="text-[8px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">OVR {t1Ovr}</p>
           </div>
 
           {/* Score Display */}
-          <div className="flex flex-col items-center gap-2">
-            <div className="bg-black px-8 py-4 rounded-3xl border-2 border-zinc-800 shadow-2xl flex items-center gap-6">
-              <span className="text-5xl md:text-7xl font-black italic text-white tabular-nums">{s1}</span>
-              <span className="text-2xl font-black text-zinc-800">-</span>
-              <span className="text-5xl md:text-7xl font-black italic text-white tabular-nums">{s2}</span>
+          <div className="flex flex-col items-center gap-1.5 md:gap-2 flex-1">
+            <div className="bg-black px-4 sm:px-6 md:px-10 py-3 sm:py-4 md:py-6 rounded-2xl md:rounded-[2.5rem] border-2 border-zinc-800 shadow-2xl flex items-center gap-3 sm:gap-6 md:gap-10">
+              <span className="text-3xl sm:text-4xl md:text-8xl font-black italic text-white tabular-nums leading-none tracking-tighter">{s1}</span>
+              <span className="text-lg sm:text-xl md:text-3xl font-black text-zinc-800">:</span>
+              <span className="text-3xl sm:text-4xl md:text-8xl font-black italic text-white tabular-nums leading-none tracking-tighter">{s2}</span>
             </div>
-            <div className="px-4 py-1 bg-amber-500 text-black rounded-full text-[10px] font-black uppercase tracking-widest">
-              Q{quarter}
+            <div className="px-3 py-1 bg-amber-500 text-black rounded-full text-[8px] sm:text-[10px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(245,158,11,0.3)]">
+              Period {quarter}
             </div>
           </div>
 
           {/* Team 2 */}
-          <div className="flex flex-col items-center gap-3 w-1/3">
-            <div className={`w-16 h-16 md:w-24 md:h-24 rounded-3xl flex items-center justify-center text-3xl font-black ${isUserT2 ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-400'}`}>
+          <div className="flex flex-col items-center gap-2 md:gap-3 w-[28%] md:w-1/3">
+            <div className={`w-12 h-12 sm:w-16 sm:h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl flex items-center justify-center text-xl sm:text-2xl md:text-4xl font-black shrink-0 ${isUserT2 ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-400'}`}>
               {t2Name[0]}
             </div>
-            <p className="text-sm md:text-lg font-black uppercase italic text-white truncate w-full text-center">{t2Name}</p>
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">OVR: {t2Ovr}</p>
+            <p className="text-[10px] sm:text-xs md:text-lg font-black uppercase italic text-white truncate w-full text-center leading-tight">{t2Name}</p>
+            <p className="text-[8px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">OVR {t2Ovr}</p>
           </div>
         </div>
       </div>
@@ -766,22 +766,32 @@ const LiveMatchSimulation = memo<{
       const newTriggers = interactiveTriggers.filter(t => t !== matchSimulationData.idx);
       setInteractiveTriggers(newTriggers);
 
+      const nextS1Final = match.team1 === 'USER' ? matchSimulationData.s1Final + addedPoints : matchSimulationData.s1Final;
+      const nextS2Final = match.team2 === 'USER' ? matchSimulationData.s2Final + addedPoints : matchSimulationData.s2Final;
+      const nextWinner = nextS1Final > nextS2Final ? match.team1 : (nextS1Final < nextS2Final ? match.team2 : matchSimulationData.winner);
+
       startSimulation(
         matchSimulationData.idx + 1, 
         matchSimulationData.events, 
         matchSimulationData.matchId, 
-        match.team1 === 'USER' ? matchSimulationData.s1Final + addedPoints : matchSimulationData.s1Final,
-        match.team2 === 'USER' ? matchSimulationData.s2Final + addedPoints : matchSimulationData.s2Final, 
-        matchSimulationData.winner,
+        nextS1Final,
+        nextS2Final, 
+        nextWinner,
         newTriggers
       );
     }, 2000);
   }, [activeInteractiveEvent, matchSimulationData, match, interactiveTriggers, startSimulation]);
 
   useEffect(() => {
-    // Generate match events once
-    const s1Final = Math.floor(Math.random() * 40) + (t1Ovr - 20);
-    const s2Final = Math.floor(Math.random() * 40) + (t2Ovr - 20);
+    // Improved Realistic Scoring Logic
+    const ovrDiff = t1Ovr - t2Ovr;
+    const benchDiff = (t1BenchOvr - t2BenchOvr) / 2; // Bench has less weight but still matters
+    const baseScore = 98 + Math.floor(Math.random() * 15);
+    
+    // Final scores based on OVR difference + Bench contribution + some controlled variance
+    const s1Final = Math.round(baseScore + (ovrDiff * 1.4) + (benchDiff * 0.4) + (Math.random() * 8 - 4));
+    const s2Final = Math.round(baseScore - (ovrDiff * 1.4) - (benchDiff * 0.4) + (Math.random() * 8 - 4));
+    
     const oppName = match.team1 === 'USER' ? (match.team2 as GhostTeam).name : (match.team1 as GhostTeam).name;
     const userStarters = starters.map(s => s.card).filter(Boolean) as Card[];
     const totalPtsWeight = userStarters.reduce((acc, p) => acc + (p.stats?.points || 10), 0);
@@ -831,8 +841,12 @@ const LiveMatchSimulation = memo<{
     let currentS1 = 0;
     let currentS2 = 0;
 
-    for (let i = 0; i < 40; i++) {
-      const quarter = Math.floor(i / 10) + 1;
+    const totalEvents = Math.min(60, Math.ceil((s1Final + s2Final) / 2.8));
+    for (let i = 0; i < totalEvents; i++) {
+      const quarter = Math.min(4, Math.floor((i / totalEvents) * 4) + 1);
+      const isFourthQuarter = quarter === 4;
+      const clutchFactor = isFourthQuarter ? 1.2 : 1; // More scoring in 4th? Or more impact?
+      
       const s1Remaining = s1Final - currentS1;
       const s2Remaining = s2Final - currentS2;
       
@@ -1105,6 +1119,7 @@ const LiveMatchSimulation = memo<{
 });
 
 const DraftView: React.FC = () => {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const { 
     coins, 
     spendCoins, 
@@ -1748,19 +1763,19 @@ const DraftView: React.FC = () => {
   };
 
   const renderEntry = () => (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-8 relative">
+    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6 sm:space-y-8 relative overflow-y-auto w-full">
       {isWatchingAd && (
-        <div className="absolute inset-0 z-[100] bg-black flex flex-col items-center justify-center space-y-6">
+        <div className="absolute inset-0 z-[100] bg-black flex flex-col items-center justify-center space-y-6 md:space-y-8">
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-white font-black uppercase tracking-widest text-sm">Watching Ad...</p>
-          <div className="mt-8 scale-75 md:scale-90">
+          <div className="mt-8 scale-75 md:scale-90 px-4">
              <StaticAd position="footer" />
           </div>
         </div>
       )}
 
-      <div className="w-24 h-24 bg-blue-600 rounded-3xl flex items-center justify-center shadow-[0_0_50px_rgba(59,130,246,0.4)]">
-        <Trophy size={48} className="text-white" />
+      <div className="w-20 h-20 sm:w-24 sm:h-24 bg-blue-600 rounded-3xl flex items-center justify-center shadow-[0_0_50px_rgba(59,130,246,0.4)] shrink-0">
+        <Trophy size={isMobile ? 40 : 48} className="text-white" />
       </div>
       
       <div className="space-y-1">
@@ -1869,7 +1884,7 @@ const DraftView: React.FC = () => {
                 {/* Row 1: PG, SG, SF */}
                 <div className="flex justify-center gap-2 md:gap-4 h-[44%]">
                   {[starters[0], starters[1], starters[2]].map(slot => (
-                    <div key={slot.id} className="w-[30%] max-w-[85px] h-full flex items-center">
+                    <div key={slot.id} className="w-[30%] max-w-[100px] h-full flex items-center">
                       <Slot 
                         slot={slot} 
                         onClick={() => handleSlotClick(slot)} 
@@ -1881,7 +1896,7 @@ const DraftView: React.FC = () => {
                 {/* Row 2: PF, C */}
                 <div className="flex justify-center gap-4 md:gap-8 h-[44%]">
                   {[starters[3], starters[4]].map(slot => (
-                    <div key={slot.id} className="w-[35%] max-w-[95px] h-full flex items-center">
+                    <div key={slot.id} className="w-[35%] max-w-[110px] h-full flex items-center">
                       <Slot 
                         slot={slot} 
                         onClick={() => handleSlotClick(slot)} 
@@ -2072,20 +2087,20 @@ const DraftView: React.FC = () => {
           </p>
         </div>
 
-        <div className="w-full h-full max-w-6xl mx-auto flex flex-col items-center justify-center gap-1 sm:gap-6">
-          <div className="flex flex-row flex-nowrap items-center justify-center gap-2 md:gap-6 w-full px-4">
+        <div className="w-full flex-1 md:flex-none flex flex-col items-center justify-center gap-1 sm:gap-6 overflow-y-auto px-1 sm:px-4">
+          <div className="grid grid-cols-2 sm:flex sm:flex-row sm:flex-nowrap gap-3 md:gap-6 w-full max-w-4xl justify-items-center">
             {currentOptions.map((card, idx) => (
               <motion.div
                 key={card.id + idx}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className="w-[18%] lg:w-44 xl:w-48 aspect-[2.5/3.5] shrink-0"
+                className="w-full sm:w-44 xl:w-48 aspect-[2.5/3.5] shrink-0"
               >
                 <CardItem 
                   card={card} 
                   isOwned={true} 
-                  mode="mini" 
+                  mode={isMobile ? "large" : "mini"} 
                   onClick={() => handleSelectCard(card)}
                 />
               </motion.div>
