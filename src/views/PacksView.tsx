@@ -110,9 +110,10 @@ export default function PacksView() {
   const groupedInventory = useMemo(() => {
     const groups: Record<string, any> = {};
     inventoryPacks.forEach(pack => {
-      const type = pack.type;
+      // Use lowercase for case-insensitive grouping
+      const type = pack.type?.toLowerCase() || 'random';
       if (!groups[type]) {
-        groups[type] = { ...pack, count: pack.count || 1 };
+        groups[type] = { ...pack, type, count: pack.count || 1 };
       } else {
         groups[type].count += (pack.count || 1);
       }

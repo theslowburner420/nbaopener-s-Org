@@ -48,11 +48,15 @@ import {
   Heart,
   Flame,
   ArrowUpRight,
+  CreditCard,
+  Check,
+  LayoutGrid,
   Monitor,
   Settings as SettingsIcon,
   HelpCircle,
   LogOut,
   Maximize2,
+  Coins,
   X,
   ChevronLeft,
   Plus
@@ -765,6 +769,37 @@ const TEAM_NEWS = [
   "Ticket sales surging as {team} climbs the standings.",
 ];
 
+const PositionSlot: React.FC<{ pos: string; cardId: string | null | undefined; energy: number; onSelect: () => void }> = ({ pos, cardId, energy, onSelect }) => {
+  const card = cardId ? ALL_CARDS.find(c => c.id === cardId) : null;
+  return (
+    <div className="flex flex-col items-center gap-1.5 sm:gap-3 group/slot">
+       <div className="flex flex-col items-center">
+          <span className="text-[8px] sm:text-[10px] font-black text-zinc-600 uppercase tracking-tighter group-hover/slot:text-white transition-colors">{pos}</span>
+          {card && (
+             <div className="flex items-center gap-1">
+                <Zap size={8} className={energy < 50 ? 'text-red-500' : 'text-emerald-500'} fill="currentColor" />
+                <span className={`text-[6px] sm:text-[8px] font-black ${energy < 50 ? 'text-red-500' : 'text-zinc-500'}`}>{Math.round(energy)}%</span>
+             </div>
+          )}
+       </div>
+       <div 
+         onClick={onSelect}
+         className={`w-20 sm:w-32 aspect-[2.5/3.5] rounded-xl sm:rounded-2xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all ${
+           card ? 'border-transparent ring-0 hover:ring-2 hover:ring-white/20' : 'border-zinc-800 bg-zinc-950/40 hover:border-zinc-700 hover:bg-zinc-900'
+         }`}
+       >
+          {card ? (
+            <div className="w-full h-full transform group-hover/slot:scale-105 transition-transform duration-300">
+               <CardItem card={card} isOwned={true} mode="mini" />
+            </div>
+          ) : (
+            <Plus className="text-zinc-800 group-hover/slot:text-zinc-600 transition-colors" size={20} strokeWidth={3} />
+          )}
+       </div>
+    </div>
+  );
+};
+
 const CareerView: React.FC = () => {
   const { franchise, startFranchise, updateFranchise, updateGameStateAsync, addCoins, collection, setCurrentView } = useGame();
   
@@ -884,65 +919,57 @@ const CareerView: React.FC = () => {
   }, [franchise?.isActive, franchise?.conferenceStandings, updateFranchise, franchise?.team]);
 
   // 2. Calculations
-  const teamOVR = useMemo(() => {
-    if (!franchise?.lineup) return 0;
-    
-    // Starters OVR
+  const activeStarters = useMemo(() => {
+    if (!franchise?.lineup) return [] as Card[];
     const starterIds = Object.values(franchise.lineup).filter(Boolean) as string[];
-    const starters = starterIds.map(id => ALL_CARDS.find(c => c.id === id)).filter(Boolean) as Card[];
+    return starterIds.map(id => ALL_CARDS.find(c => c.id === id)).filter(Boolean) as Card[];
+  }, [franchise?.lineup]);
+
+  const teamOVR = useMemo(() => {
+    if (activeStarters.length === 0) return 60;
     
-    if (starters.length === 0) return 60;
-    
-    const sOVR = starters.reduce((acc, c) => acc + c.stats.ovr, 0) / starters.length;
+    const sOVR = activeStarters.reduce((acc, c) => acc + c.stats.ovr, 0) / activeStarters.length;
     
     // Bench OVR (from roster excluding starters)
+    const starterIds = activeStarters.map(c => c.id);
     const benchIds = franchise.roster.filter(id => !starterIds.includes(id));
     const bench = benchIds.map(id => ALL_CARDS.find(c => c.id === id)).filter(Boolean) as Card[];
     const bOVR = bench.length > 0 
       ? bench.reduce((acc, c) => acc + c.stats.ovr, 0) / bench.length 
       : sOVR - 10;
 
-    const base = sOVR * 0.7 + bOVR * 0.3;
+    const base = sOVR * 0.75 + bOVR * 0.25;
     
     // Synergy Bonuses
     let synergyBonus = 0;
     
     // 1. Same Team Trio
     const teamCounts: Record<string, number> = {};
-    starters.forEach(c => {
+    activeStarters.forEach(c => {
        teamCounts[c.teamAbbr] = (teamCounts[c.teamAbbr] || 0) + 1;
     });
     const hasTrio = Object.values(teamCounts).some(count => count >= 3);
     if (hasTrio) synergyBonus += 3;
 
     // 2. Inside-Out (PG Ast > 85, C Blk > 80)
-    const pg = starters.find(c => normalizePosition(c.position) === 'PG');
-    const center = starters.find(c => normalizePosition(c.position) === 'C');
+    const pg = activeStarters.find(c => normalizePosition(c.position) === 'PG');
+    const center = activeStarters.find(c => normalizePosition(c.position) === 'C');
     if (pg && center && pg.stats.assists >= 85 && center.stats.rebounds >= 80) {
        synergyBonus += 5;
     }
 
     // 3. Star Power
-    const hasStar = starters.some(c => c.rarity === 'franchise');
+    const hasStar = activeStarters.some(c => c.rarity === 'franchise');
     if (hasStar) synergyBonus += 2;
     
     // Upgrades
-    const coachingBonus = (franchise.upgrades.coaching - 1) * 0.8;
-    const trainingBonus = (franchise.upgrades.training - 1) * 0.5;
+    const coachingBonus = ((franchise.upgrades?.coaching || 1) - 1) * 0.8;
+    const trainingBonus = ((franchise.upgrades?.training || 1) - 1) * 0.5;
     
     return Math.round(base + coachingBonus + trainingBonus + synergyBonus);
-  }, [franchise?.lineup, franchise?.roster, franchise?.upgrades]);
+  }, [activeStarters, franchise?.roster, franchise?.upgrades]);
 
-  const payroll = useMemo(() => {
-    return franchise?.roster.reduce((total, id) => {
-      const card = ALL_CARDS.find(c => c.id === id);
-      if (!card) return total;
-      // Simple mock salary based on OVR
-      return total + (card.stats.ovr - 60) * 0.5 + 2; 
-    }, 0) || 0;
-  }, [franchise?.roster]);
-
-  const starters = useMemo(() => {
+  const startersList = useMemo(() => {
     const ids = Object.values(franchise?.lineup || {}).filter(Boolean) as string[];
     return ids.map(id => ALL_CARDS.find(c => c.id === id)).filter(Boolean) as Card[];
   }, [franchise?.lineup]);
@@ -1360,67 +1387,91 @@ const CareerView: React.FC = () => {
       </AnimatePresence>
 
       {/* Top Bar HUD */}
-      <div className="px-4 sm:px-8 pt-4 sm:pt-12 pb-4 sm:pb-8 bg-zinc-950/90 backdrop-blur-3xl border-b border-zinc-900 sticky top-0 z-[100]">
-        <div className="flex items-center justify-between mb-4 sm:mb-8">
-           <div className="flex items-center gap-2 sm:gap-6">
-              <button 
-                onClick={handleBack}
-                className="p-2 sm:p-3 bg-zinc-900 border border-zinc-800 rounded-xl sm:rounded-2xl hover:bg-zinc-800 transition-colors"
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <div className="w-10 h-10 sm:w-16 sm:h-16 bg-zinc-900 border border-zinc-800 rounded-xl sm:rounded-3xl p-1 sm:p-2 flex items-center justify-center shadow-2xl">
-                 <img src={getTeamLogo(franchise.team || 'LAL')} alt="Team" className="w-full h-full object-contain" />
+      <div className="sticky top-0 z-[100] bg-zinc-950/80 backdrop-blur-2xl border-b border-zinc-900 px-4 sm:px-8 py-3 sm:py-6">
+        <div className="flex items-center justify-between gap-4">
+           <div className="flex items-center gap-3 sm:gap-5">
+              <div className="relative group cursor-pointer" onClick={handleBack}>
+                <div className="w-10 h-10 sm:w-16 sm:h-16 bg-zinc-900 border border-zinc-800 rounded-xl sm:rounded-3xl flex items-center justify-center p-2 sm:p-3 shadow-2xl relative z-10 overflow-hidden transform transition-all active:scale-90 group-hover:border-zinc-500">
+                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-30" />
+                   <img src={getTeamLogo(franchise.team)} className="w-full h-full object-contain relative z-20 transition-transform group-hover:scale-110" alt="Logo" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-8 sm:h-8 bg-zinc-100 rounded-lg sm:rounded-xl flex items-center justify-center text-black font-black text-[8px] sm:text-sm shadow-xl border-2 border-zinc-950 z-20">
+                   {teamOVR}
+                </div>
               </div>
               <div className="flex flex-col">
-                 <h2 className="text-sm sm:text-3xl font-black uppercase italic tracking-tighter leading-none" style={{ color: primaryColor }}>{teamData?.name}</h2>
-                 <div className="flex items-center gap-1.5 mt-0.5 sm:mt-1">
-                    <p className="text-[7px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-tight sm:tracking-widest">
-                      {franchise.wins}W - {franchise.losses}L
-                    </p>
-                    <span className={`px-1.5 py-0.5 rounded-full text-[6px] sm:text-[7px] font-black uppercase tracking-tighter ${streak.endsWith('W') ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}`}>
-                       {streak}
-                    </span>
+                 <h1 className="text-sm sm:text-3xl font-black italic uppercase tracking-tighter text-white leading-none mb-1 group">{teamData?.name}</h1>
+                 <div className="flex items-center gap-1.5 sm:gap-3">
+                    <span className="text-[7px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 italic">{teamData?.city} Franchise</span>
+                    <div className="w-0.5 h-0.5 rounded-full bg-zinc-800" />
+                    <div className="flex items-center gap-1 bg-zinc-900/50 px-1.5 py-0.5 rounded border border-zinc-800/50">
+                       <div className={`w-1 h-1 rounded-full ${streak.endsWith('W') ? 'bg-emerald-500 shadow-[0_0_5px_#10b981]' : 'bg-red-500 shadow-[0_0_5px_#ef4444]'}`} />
+                       <span className={`text-[6px] sm:text-[9px] font-black uppercase tracking-tighter ${streak.endsWith('W') ? 'text-emerald-500/80' : 'text-red-500/80'}`}>
+                          {streak}
+                       </span>
+                    </div>
                  </div>
               </div>
            </div>
- 
-           <div className="flex items-center gap-3 sm:gap-4">
-              <div className="hidden xs:flex flex-col items-end">
-                 <span className="text-[7px] sm:text-[9px] font-black uppercase text-zinc-600 tracking-tighter sm:tracking-widest">Budget</span>
-                 <p className="text-xs sm:text-xl font-black italic text-amber-500">${(franchise.budget / 1000).toFixed(0)}K</p>
-              </div>
-              <div className="h-6 sm:h-10 w-px bg-zinc-800 hidden xs:block" />
-              <div className="flex flex-col items-end">
-                 <span className="text-[7px] sm:text-[9px] font-black uppercase text-zinc-600 tracking-tighter sm:tracking-widest">OVR</span>
-                 <p className="text-xs sm:text-xl font-black italic text-emerald-500">{teamOVR}</p>
-              </div>
+
+           <div className="hidden lg:flex items-center gap-4 flex-1 justify-center px-10">
+              {[
+                { label: 'RECORD', value: `${franchise.wins}-${franchise.losses}`, sub: 'SEASON' },
+                { label: 'STAFF LVL', value: franchise.level || 1, sub: 'REP' },
+                { label: 'CAP ROOM', value: `$${Math.max(0, (SALARY_CAP - teamPayroll)/1000000).toFixed(1)}M`, sub: 'STABILITY' },
+                { label: 'ROSTER', value: `${franchise.roster.length}/15`, sub: 'SLOTS' }
+              ].map((item, idx) => (
+                <div key={idx} className="flex flex-col items-center px-6 border-r border-zinc-900 last:border-none group">
+                   <span className="text-[6px] font-black text-zinc-700 uppercase tracking-[0.4em] mb-0.5 group-hover:text-zinc-500 transition-colors">{item.label}</span>
+                   <span className="text-sm font-black italic tracking-tighter text-zinc-300 tabular-nums group-hover:text-white transition-colors">{item.value}</span>
+                </div>
+              ))}
            </div>
 
+           <div className="flex items-center gap-3 sm:gap-6">
+              <div className="flex flex-col items-end">
+                 <div className="flex items-center gap-1.5 sm:gap-2">
+                    <div className="relative">
+                       <Coins size={14} className="text-amber-500 sm:w-5 sm:h-5 relative z-10" />
+                       <div className="absolute inset-0 bg-amber-500/20 blur-lg rounded-full" />
+                    </div>
+                    <span className="text-base sm:text-3xl font-black italic tracking-tighter text-white tabular-nums drop-shadow-[0_0_20px_rgba(245,158,11,0.25)]">
+                       {franchise.budget.toLocaleString()}
+                    </span>
+                 </div>
+                 <span className="text-[6px] sm:text-[9px] font-black uppercase tracking-[0.3em] text-zinc-700 italic">Financial Balance</span>
+              </div>
+              <button 
+                onClick={() => setCurrentView('home')}
+                className="w-10 h-10 sm:w-16 sm:h-16 bg-zinc-900 border border-zinc-800 rounded-xl sm:rounded-3xl flex items-center justify-center text-zinc-600 hover:text-white transition-all hover:bg-zinc-800 hover:border-zinc-600 group shrink-0"
+              >
+                <LogOut size={16} className="sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform" />
+              </button>
+           </div>
         </div>
 
-        <div className="flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1 sm:pb-2">
+        <div className="flex gap-1.5 sm:gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 mt-6">
             {[
-              { id: 'hub', label: 'Hub', mobile: 'H', icon: LayoutDashboard },
-              { id: 'lineup', label: 'Roster', mobile: 'R', icon: Users },
-              { id: 'market', label: 'Market', mobile: 'M', icon: ShoppingCart },
-              { id: 'league', label: 'League', mobile: 'L', icon: Monitor },
-              { id: 'standings', label: 'Rank', mobile: 'S', icon: BarChart3 },
-              { id: 'mgmt', label: 'Org', mobile: 'O', icon: Building },
-              { id: 'settings', label: 'Set', mobile: '⚙️', icon: SettingsIcon },
+              { id: 'hub', label: 'Dashboard', icon: LayoutDashboard },
+              { id: 'lineup', label: 'Tactics', icon: Activity },
+              { id: 'market', label: 'Market', icon: TrendingUp },
+              { id: 'league', label: 'Recap', icon: Monitor },
+              { id: 'standings', label: 'Rankings', icon: BarChart3 },
+              { id: 'mgmt', label: 'Ops', icon: Building },
+              { id: 'settings', label: 'Admin', icon: SettingsIcon },
             ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as FranchiseTab)}
-                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-2xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${
+                className={`flex items-center gap-1.5 sm:gap-3 px-4 sm:px-8 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl text-[8px] sm:text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap border relative group overflow-hidden ${
                   activeTab === tab.id 
-                    ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.1)]' 
-                    : 'bg-zinc-900/50 text-zinc-500 border-zinc-800 hover:border-zinc-700'
+                    ? 'bg-zinc-100 text-black border-zinc-100 shadow-[0_15px_40px_rgba(255,255,255,0.1)]' 
+                    : 'bg-zinc-900/40 text-zinc-600 border-zinc-800 hover:border-zinc-500 hover:text-zinc-300'
                 }`}
               >
-                <tab.icon size={12} className="sm:w-[14px]" />
-                <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.mobile}</span>
+                {activeTab === tab.id && <div className="absolute inset-x-0 bottom-0 h-1 bg-black/10" />}
+                <tab.icon size={12} className={`sm:w-[16px] transition-transform group-hover:scale-110 ${activeTab === tab.id ? 'text-black' : 'text-zinc-600 group-hover:text-white'}`} />
+                <span>{tab.label}</span>
               </button>
             ))}
         </div>
@@ -1455,127 +1506,197 @@ const CareerView: React.FC = () => {
             {activeTab === 'hub' && (
               <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
                   {/* Next Game - Main Feature */}
-                  <div className="md:col-span-4 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-10 relative overflow-hidden group shadow-2xl">
-                     <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
-                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 blur-[80px] rounded-full translate-y-1/2 -translate-x-1/2" />
+                  <div className="md:col-span-4 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-[3rem] sm:rounded-[5rem] p-6 sm:p-16 relative overflow-hidden group shadow-2xl">
+                     <div className="absolute top-0 right-0 w-[50rem] h-[50rem] bg-emerald-500/[0.03] blur-[150px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                     <div className="absolute bottom-0 left-0 w-[40rem] h-[40rem] bg-blue-500/[0.03] blur-[150px] rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none" />
                      
-                     <div className="relative z-10 space-y-6 sm:space-y-12">
+                     <div className="relative z-10 space-y-10 sm:space-y-24">
                         <div className="flex items-center justify-between">
-                           <div className="flex items-center gap-2 sm:gap-3">
-                              <Calendar size={14} className="text-zinc-600 sm:w-[18px]" />
-                              <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-zinc-500">Next Assignment</span>
+                           <div className="flex items-center gap-4 sm:gap-6">
+                              <div className="w-12 h-12 sm:w-20 sm:h-20 bg-zinc-950 border border-zinc-800/50 rounded-2xl sm:rounded-[2rem] flex items-center justify-center text-zinc-700 shadow-inner group-hover:border-emerald-500/20 transition-all">
+                                 <Calendar size={24} className="sm:w-8 sm:h-8" />
+                              </div>
+                              <div className="flex flex-col">
+                                 <div className="flex items-center gap-2 mb-1">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.5em] text-zinc-600">Season Command</span>
+                                 </div>
+                                 <h2 className="text-lg sm:text-4xl font-black italic uppercase tracking-tighter text-white">Session {franchise.wins + franchise.losses + 1} / 82</h2>
+                              </div>
                            </div>
-                           <div className="px-2.5 sm:px-4 py-1 sm:py-1.5 bg-zinc-950 border border-zinc-800 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-zinc-400">
-                              Game {franchise.wins + franchise.losses + 1}/82
+                           <div className="flex -space-x-2 sm:-space-x-4">
+                             {[...(franchise.schedule || [])].filter(m => m.played).slice(-5).map((m, i) => (
+                               <div key={i} className={`w-8 h-8 sm:w-14 sm:h-14 rounded-2xl border-4 border-zinc-950 flex items-center justify-center text-[10px] sm:text-sm font-black italic shadow-2xl transition-transform hover:scale-110 hover:z-20 ${m.result === 'W' ? 'bg-zinc-100 text-black' : 'bg-red-600 text-white'}`}>
+                                 {m.result}
+                               </div>
+                             ))}
+                             {[...Array(Math.max(0, 5 - (franchise.schedule || []).filter(m => m.played).length))].map((_, i) => (
+                               <div key={i} className="w-8 h-8 sm:w-14 sm:h-14 rounded-2xl border-4 border-zinc-950 bg-zinc-800 flex items-center justify-center text-[10px] sm:text-sm font-black text-zinc-600">
+                                 -
+                               </div>
+                             ))}
                            </div>
                         </div>
 
-                        <div className="flex items-center justify-around gap-2 sm:gap-4">
-                           <div className="text-center space-y-3 sm:space-y-4 flex-1">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-12 sm:gap-16">
+                           <div className="flex-1 flex flex-col items-center sm:items-start gap-6 sm:gap-10 w-full">
                               <div className="relative group/logo">
-                                 <div className="absolute inset-0 bg-white/5 blur-2xl rounded-full scale-0 group-hover/logo:scale-110 transition-transform duration-500" />
-                                 <div className="w-16 h-16 sm:w-28 sm:h-28 bg-zinc-800/50 backdrop-blur-md rounded-2xl sm:rounded-3xl flex items-center justify-center p-3 sm:p-6 shadow-2xl border border-white/5 group-hover:scale-105 transition-transform relative z-10">
-                                    <img src={getTeamLogo(franchise.team || 'LAL')} alt="Logo" className="w-full h-full object-contain" />
+                                 <div className="absolute inset-0 bg-white/5 blur-3xl rounded-full opacity-0 group-hover/logo:opacity-100 transition-opacity" />
+                                 <div className="w-32 h-32 sm:w-64 sm:h-64 bg-zinc-950 border border-zinc-800 rounded-[3rem] sm:rounded-[5rem] flex items-center justify-center p-8 sm:p-16 shadow-inner relative z-10 transition-all group-hover/logo:scale-105 group-hover/logo:border-white/10 group-hover/logo:shadow-[0_0_50px_rgba(255,255,255,0.05)]">
+                                    <img src={getTeamLogo(franchise.team || 'LAL')} alt="Logo" className="w-full h-full object-contain filter drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]" />
                                  </div>
                               </div>
-                              <p className="text-[10px] sm:text-xs font-black uppercase italic tracking-[0.05em] text-zinc-400 truncate">{teamData?.name || 'Your Team'}</p>
-                           </div>
-
-                           <div className="flex flex-col items-center gap-1.5 sm:gap-3 shrink-0">
-                              <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center">
-                                 <span className="text-xs sm:text-xl font-black italic text-zinc-700">VS</span>
+                              <div className="text-center sm:text-left space-y-2">
+                                 <div className="text-[10px] sm:text-sm font-black uppercase tracking-[0.4em] text-zinc-700 italic group-hover:text-zinc-500 transition-colors uppercase">{teamData?.city}</div>
+                                 <h3 className="text-2xl sm:text-6xl font-black italic uppercase tracking-tighter text-white drop-shadow-2xl">{teamData?.name}</h3>
                               </div>
                            </div>
 
-                           <div className="text-center space-y-3 sm:space-y-4 flex-1">
+                           <div className="flex flex-col items-center gap-4 sm:gap-8 shrink-0 px-10 relative">
+                              <div className="absolute inset-0 bg-emerald-500/5 blur-[50px] animate-pulse" />
+                              <div className="w-16 h-16 sm:w-28 sm:h-28 rounded-full bg-zinc-950 border-2 border-zinc-800 flex items-center justify-center shadow-inner relative z-10 group-hover:border-zinc-500 transition-colors">
+                                 <span className="text-xl sm:text-5xl font-black italic text-zinc-600 group-hover:text-white transition-colors">VS</span>
+                              </div>
+                              <div className="flex flex-col items-center gap-1">
+                                 <span className="text-[7px] sm:text-[10px] font-black uppercase tracking-[0.5em] text-zinc-700">Arena</span>
+                                 <span className="text-[8px] sm:text-[12px] font-black text-white italic tracking-widest">{nextGame?.location === 'home' ? 'CRYPTO.COM' : 'AWAY VENUE'}</span>
+                              </div>
+                           </div>
+
+                           <div className="flex-1 flex flex-col items-center sm:items-end gap-6 sm:gap-10 w-full">
                               <div className="relative group/logo">
-                                 <div className="absolute inset-0 bg-white/5 blur-2xl rounded-full scale-0 group-hover/logo:scale-110 transition-transform duration-500" />
-                                 <div className="w-16 h-16 sm:w-28 sm:h-28 bg-zinc-800/50 backdrop-blur-md rounded-2xl sm:rounded-3xl flex items-center justify-center p-3 sm:p-6 shadow-2xl border border-white/10 group-hover:scale-105 transition-transform relative z-10">
-                                    <img src={getTeamLogo(nextGame?.opponentAbbr || 'BOS')} alt="Opponent" className="w-full h-full object-contain" />
+                                 <div className="absolute inset-0 bg-white/5 blur-3xl rounded-full opacity-0 group-hover/logo:opacity-100 transition-opacity" />
+                                 <div className="w-32 h-32 sm:w-64 sm:h-64 bg-zinc-950 border border-zinc-800 rounded-[3rem] sm:rounded-[5rem] flex items-center justify-center p-8 sm:p-16 shadow-inner relative z-10 transition-all group-hover/logo:scale-105 group-hover/logo:border-white/10">
+                                    <img src={getTeamLogo(nextGame?.opponentAbbr || 'BOS')} alt="Opponent" className="w-full h-full object-contain filter grayscale opacity-40 group-hover/logo:grayscale-0 group-hover/logo:opacity-100 transition-all" />
+                                 </div>
+                                 <div className="absolute -top-4 -right-4 bg-zinc-800 border border-zinc-700 px-5 py-2 rounded-2xl text-[10px] sm:text-sm font-black italic text-zinc-400 z-20 shadow-2xl">
+                                   OVR {nextGame?.opponentOVR || 75}
                                  </div>
                               </div>
-                              <p className="text-[10px] sm:text-xs font-black uppercase italic tracking-[0.05em] text-zinc-400 truncate">{nextGame?.opponentTeam || 'TBD'}</p>
+                              <div className="text-center sm:text-right space-y-2">
+                                 <div className="text-[10px] sm:text-sm font-black uppercase tracking-[0.4em] text-zinc-700 italic">{opponentData?.city || 'TBD'}</div>
+                                 <h3 className="text-2xl sm:text-6xl font-black italic uppercase tracking-tighter text-zinc-400 group-hover:text-white transition-all">{nextGame?.opponentTeam || 'Opponent'}</h3>
+                              </div>
                            </div>
                         </div>
 
-                        <button 
-                          onClick={simulateMatch}
-                          disabled={isSimulating}
-                          className="w-full py-4 sm:py-5 bg-white text-black rounded-xl sm:rounded-2xl font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] text-[9px] sm:text-[10px] shadow-[0_15px_30px_rgba(0,0,0,0.3)] hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 group/btn active:scale-95"
-                        >
-                           <div className="relative z-10 flex items-center gap-2">
-                              {isSimulating ? <RefreshCw className="animate-spin" size={16} /> : <Zap fill="currentColor" size={16} />}
-                              {isSimulating ? 'Analyzing...' : 'Advance Schedule'}
-                           </div>
-                        </button>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-10 pt-10">
+                           <button 
+                             onClick={simulateMatch}
+                             disabled={isSimulating}
+                             className="group/sim py-6 sm:py-10 bg-white text-black rounded-[2.5rem] sm:rounded-[4rem] font-black uppercase tracking-[0.6em] text-[10px] sm:text-sm shadow-2xl hover:bg-emerald-400 transition-all flex items-center justify-center gap-6 active:scale-95 active:translate-y-1 relative overflow-hidden"
+                           >
+                              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-white/50 to-emerald-500/0 -translate-x-full group-hover/sim:animate-shimmer" />
+                              {isSimulating ? <RefreshCw className="animate-spin" size={24} /> : <Play fill="currentColor" size={24} className="group-hover/sim:scale-125 transition-transform" />}
+                              {isSimulating ? 'EXECUTING SIM...' : 'BEGIN SIMULATION'}
+                           </button>
+                           <button className="py-6 sm:py-10 bg-black/40 border-2 border-zinc-800 text-zinc-500 rounded-[2.5rem] sm:rounded-[4rem] font-black uppercase tracking-[0.6em] text-[10px] sm:text-sm hover:border-zinc-100 hover:text-white transition-all active:scale-95 hover:bg-zinc-900 group">
+                              <span className="flex items-center justify-center gap-4 group-hover:scale-105 transition-transform">
+                                <Activity size={20} />
+                                EDIT TACTICAL LOADOUT
+                              </span>
+                           </button>
+                        </div>
                      </div>
                   </div>
 
-                 {/* Team Health Indicators */}
-                 <div className="md:col-span-2 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-4 sm:gap-6">
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-6 space-y-4 sm:space-y-6 shadow-xl relative overflow-hidden">
-                       <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 blur-3xl opacity-50" />
-                       <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5 sm:gap-2">
-                             <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
-                                <Heart size={10} style={{ color: primaryColor }} className="sm:w-[14px]" />
-                             </div>
-                             <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-500">Chem</span>
-                          </div>
-                          <span className="text-sm sm:text-xl font-black italic text-white">{franchise.chemistry || 60}%</span>
-                       </div>
-                       <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
-                          <motion.div 
-                            initial={{ width: 0 }} 
-                            animate={{ width: `${franchise.chemistry || 60}%` }} 
-                            style={{ backgroundColor: primaryColor }}
-                            className="h-full shadow-[0_0_10px_rgba(239,68,68,0.5)]" 
-                          />
-                       </div>
+                 {/* Team Status Indicators - Sidebar */}
+                 <div className="md:col-span-2 lg:col-span-2 space-y-6 sm:space-y-10">
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-8 sm:p-10 space-y-10 shadow-2xl relative overflow-hidden group">
+                       <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/[0.02] blur-[80px] pointer-events-none" />
                        
-                       <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5 sm:gap-2">
-                             <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                                <Users size={10} className="text-blue-500 sm:w-[14px]" />
-                             </div>
-                             <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-500">Fans</span>
-                          </div>
-                          <span className="text-sm sm:text-xl font-black italic text-white">{franchise.fanSupport || 50}%</span>
-                       </div>
-                       <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
-                          <motion.div 
-                            initial={{ width: 0 }} 
-                            animate={{ width: `${franchise.fanSupport || 50}%` }} 
-                            className="h-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" 
-                          />
+                       <div className="space-y-1.5">
+                          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 italic">Core Vitality</h3>
+                          <div className="h-0.5 w-12 bg-emerald-500" />
                        </div>
 
-                       <div className="pt-2 border-t border-zinc-800">
-                          <div className="flex items-center justify-between text-[7px] sm:text-[8px] font-black uppercase tracking-widest mb-2 text-zinc-600">
-                             <span>Lvl {franchise.level || 1}</span>
-                             <span>{franchise.xp} XP</span>
+                       <div className="space-y-10">
+                          <div className="space-y-4">
+                             <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                   <div className="w-10 h-10 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center text-red-500 shadow-inner group-hover:scale-110 transition-transform">
+                                      <Heart size={18} fill="currentColor" />
+                                   </div>
+                                   <div className="flex flex-col">
+                                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Chemistry</span>
+                                      <span className="text-[8px] font-bold text-zinc-600 uppercase">Locker Room Pulse</span>
+                                   </div>
+                                </div>
+                                <span className={`text-2xl font-black italic tabular-nums ${franchise.chemistry > 75 ? 'text-emerald-500' : 'text-white'}`}>{franchise.chemistry || 60}%</span>
+                             </div>
+                             <div className="h-2 w-full bg-zinc-950 rounded-full overflow-hidden p-0.5 border border-zinc-800">
+                                <motion.div 
+                                  initial={{ width: 0 }} 
+                                  animate={{ width: `${franchise.chemistry || 60}%` }} 
+                                  className="h-full bg-gradient-to-r from-red-500 to-emerald-500 rounded-full shadow-[0_0_15px_rgba(239,68,68,0.3)]" 
+                                />
+                             </div>
                           </div>
-                          <div className="h-1 w-full bg-zinc-800 rounded-full">
-                             <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(franchise.xp / ((franchise.level || 1) * 2500)) * 100}%` }} />
+                          
+                          <div className="space-y-4">
+                             <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                   <div className="w-10 h-10 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center text-blue-500 shadow-inner group-hover:scale-110 transition-transform delay-75">
+                                      <Users size={18} />
+                                   </div>
+                                   <div className="flex flex-col">
+                                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Fan Support</span>
+                                      <span className="text-[8px] font-bold text-zinc-600 uppercase">Market Sentiment</span>
+                                   </div>
+                                </div>
+                                <span className="text-2xl font-black italic text-white tabular-nums">{franchise.fanSupport || 50}%</span>
+                             </div>
+                             <div className="h-2 w-full bg-zinc-950 rounded-full overflow-hidden p-0.5 border border-zinc-800">
+                                <motion.div 
+                                  initial={{ width: 0 }} 
+                                  animate={{ width: `${franchise.fanSupport || 50}%` }} 
+                                  className="h-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]" 
+                                />
+                             </div>
+                          </div>
+
+                          <div className="pt-6 border-t border-zinc-800/50">
+                             <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2">
+                                   <span className="bg-zinc-950 px-3 py-1 rounded-lg border border-zinc-800 text-[10px] font-black italic text-white">REPUTATION LEVEL {franchise.level || 1}</span>
+                                </div>
+                                <span className="text-[10px] font-black text-zinc-600 tabular-nums italic">{franchise.xp.toLocaleString()} / {((franchise.level || 1) * 2500).toLocaleString()} XP</span>
+                             </div>
+                             <div className="h-1.5 w-full bg-zinc-950 rounded-full overflow-hidden border border-zinc-800">
+                                <motion.div 
+                                  className="h-full bg-emerald-500" 
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${(franchise.xp / ((franchise.level || 1) * 2500)) * 100}%` }}
+                                />
+                             </div>
+                             <p className="mt-3 text-[7px] font-black uppercase tracking-[0.4em] text-zinc-700 text-center">Executive experience accumulates via match results</p>
                           </div>
                        </div>
                     </div>
 
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-xl group">
-                       <div className="flex items-center justify-between">
-                          <div className="w-8 h-8 sm:w-12 sm:h-12 bg-amber-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-black shadow-[0_5px_15px_rgba(245,158,11,0.2)]">
-                             <DollarSign size={16} className="sm:w-[24px]" />
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-8 sm:p-10 flex flex-col justify-between shadow-2xl relative overflow-hidden group">
+                       <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/[0.02] blur-[80px] pointer-events-none" />
+                       <div className="flex items-center justify-between relative z-10">
+                          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-zinc-950 rounded-2xl sm:rounded-3xl flex items-center justify-center text-amber-500 shadow-inner group-hover:scale-110 transition-transform">
+                             <DollarSign size={24} className="sm:w-8 sm:h-8" />
                           </div>
-                          <div className="hidden sm:flex items-center gap-1.5 sm:gap-2">
-                             <TrendingUp size={12} className="text-emerald-500 sm:w-[14px]" />
-                             <span className="text-[7px] sm:text-[8px] font-black text-emerald-500 uppercase">+12%</span>
+                          <div className="flex flex-col items-end">
+                             <div className="flex items-center gap-2">
+                                <TrendingUp size={14} className="text-emerald-500" />
+                                <span className="text-[10px] font-black text-emerald-500 uppercase italic">Revenue Growth: High</span>
+                             </div>
                           </div>
                        </div>
-                       <div className="mt-4 lg:mt-0">
-                          <p className="text-[7px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-0.5 sm:mb-1">Budget</p>
-                          <h4 className="text-xl sm:text-4xl font-black italic tracking-tighter text-white">${(franchise.budget / 1000).toFixed(0)}K</h4>
-                          <div className="mt-2 sm:mt-4 flex gap-0.5 sm:gap-1">
-                             {[1,2,3,4,5].map(i => <div key={i} className="h-0.5 flex-1 bg-emerald-500/20" />)}
+                       <div className="mt-10 relative z-10">
+                          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-2 italic">Operation Capital</p>
+                          <div className="flex items-baseline gap-2">
+                             <h4 className="text-3xl sm:text-5xl font-black italic tracking-tighter text-white tabular-nums">${(franchise.budget / 1000).toFixed(0)}K</h4>
+                             <span className="text-xs font-black text-zinc-700 uppercase italic tracking-widest">USD Credits</span>
+                          </div>
+                          <div className="mt-8 flex gap-1.5">
+                             {[1,2,3,4,5,6,7,8,9,10].map(i => (
+                               <div key={i} className={`h-1 flex-1 rounded-full transition-colors duration-500 ${i <= (franchise.budget / 100000) * 10 ? 'bg-emerald-500/30 shadow-[0_0_8px_#10b981]' : 'bg-zinc-800'}`} />
+                             ))}
                           </div>
                        </div>
                     </div>
@@ -1656,137 +1777,188 @@ const CareerView: React.FC = () => {
                           ))}
                        </div>
                     </div>
-                 </div>
-              </div>
-            )}
-
-            {activeTab === 'lineup' && (
-              <div className="space-y-8 pb-32">
-                 <div className="flex border-b border-zinc-900 mb-8 sticky top-[240px] bg-zinc-950 z-[70] pt-4">
-                    {(['court', 'bench', 'depth', 'chemistry'] as const).map(tab => (
-                       <button 
-                         key={tab}
-                         onClick={() => setLineupSubTab(tab)}
-                         className={`px-8 py-4 text-xs font-black uppercase tracking-[0.2em] transition-all relative ${lineupSubTab === tab ? 'text-white' : 'text-zinc-600'}`}
-                       >
-                         {tab.replace('_', ' ')}
-                         {lineupSubTab === tab && <motion.div layoutId="lineupSubTab" className="absolute bottom-0 left-0 right-0 h-1 bg-white" />}
-                       </button>
-                    ))}
+                     {activeTab === 'lineup' && (
+              <div className="space-y-12 pb-32">
+                 <div className="flex border-b border-zinc-900 mb-12 sticky top-[180px] bg-zinc-950 z-[70] pt-6 items-center justify-between">
+                    <div className="flex gap-2 sm:gap-6">
+                      {(['court', 'bench', 'depth', 'chemistry'] as const).map(tab => (
+                          <button 
+                            key={tab}
+                            onClick={() => setLineupSubTab(tab)}
+                            className={`px-8 sm:px-12 py-5 text-[10px] sm:text-xs font-black uppercase tracking-[0.4em] transition-all relative group/tab ${lineupSubTab === tab ? 'text-white' : 'text-zinc-700'}`}
+                          >
+                            <span className="relative z-10">{tab.replace('_', ' ')}</span>
+                            {lineupSubTab === tab && (
+                              <>
+                                <motion.div layoutId="lineupSubTab" className="absolute bottom-0 left-0 right-0 h-1 bg-white shadow-[0_0_15px_rgba(255,255,255,0.5)] z-20" />
+                                <div className="absolute inset-0 bg-white/[0.03] rounded-t-2xl z-0" />
+                              </>
+                            )}
+                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-1 bg-zinc-800 transition-all group-hover/tab:w-full z-10" />
+                          </button>
+                      ))}
+                    </div>
+                    <div className="hidden lg:flex items-center gap-10 px-8">
+                       <div className="flex flex-col items-end border-r border-zinc-900 pr-10">
+                          <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest mb-1 italic">Rotation Strength</span>
+                          <span className="text-2xl font-black italic text-emerald-500 tabular-nums">{teamOVR} OVR</span>
+                       </div>
+                       <div className="flex flex-col items-end">
+                          <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest mb-1 italic">Salary Efficiency</span>
+                          <span className={`text-2xl font-black italic tabular-nums ${teamPayroll > SALARY_CAP ? 'text-red-500' : 'text-amber-500'}`}>
+                             {Math.round((teamPayroll/SALARY_CAP)*100)}%
+                          </span>
+                       </div>
+                    </div>
                  </div>
 
                  {lineupSubTab === 'court' && (
-                    <div className="space-y-12">
-                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                          <div className="bg-zinc-900 border border-zinc-800 rounded-[2rem] p-6 flex items-center justify-between shadow-xl">
-                             <div className="flex items-center gap-4">
-                                <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 font-black italic text-2xl border border-emerald-500/20">
-                                   {teamOVR}
+                    <div className="space-y-16 pb-32 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-10">
+                           <div className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
+                              <div className="absolute inset-0 bg-emerald-500/[0.01] pointer-events-none" />
+                              <div className="flex items-center justify-between relative z-10">
+                                 <div className="flex items-center gap-6">
+                                    <div className="w-14 h-14 bg-zinc-950 border border-zinc-800 text-emerald-500 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                                       <Target size={28} />
+                                    </div>
+                                    <div className="flex flex-col">
+                                       <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 italic">Offensive Skill</h3>
+                                       <p className="text-3xl font-black italic text-white tabular-nums tracking-tighter">{teamOVR}</p>
+                                    </div>
+                                 </div>
+                                 <div className="flex flex-col items-end gap-1 text-emerald-500">
+                                    <TrendingUp size={16} />
+                                    <span className="text-[10px] font-black italic">+2.5%</span>
+                                 </div>
+                              </div>
+                           </div>
+
+                           <div className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group lg:col-span-2">
+                              <div className="absolute inset-0 bg-amber-500/[0.01] pointer-events-none" />
+                              <div className="flex items-center gap-8 relative z-10">
+                                 <div className="w-14 h-14 bg-zinc-950 border border-zinc-800 text-amber-500 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                                    <CreditCard size={28} />
+                                 </div>
+                                 <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-3">
+                                       <div className="flex flex-col">
+                                          <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 italic">Financial Cap Hub</h3>
+                                          <span className="text-[8px] font-bold text-zinc-700 uppercase tracking-widest mt-1">Season Budget Utilization</span>
+                                       </div>
+                                       <div className="text-right">
+                                          <span className={`text-[11px] font-black italic px-4 py-1.5 rounded-xl border ${teamPayroll > SALARY_CAP ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
+                                             ${Math.max(0, (SALARY_CAP - teamPayroll)/1000000).toFixed(2)}M Credits Remaining
+                                          </span>
+                                       </div>
+                                    </div>
+                                    <div className="h-3 w-full bg-zinc-950 rounded-full overflow-hidden p-1 border border-zinc-800 shadow-inner">
+                                       <motion.div 
+                                         initial={{ width: 0 }} 
+                                         animate={{ width: `${Math.min(100, (teamPayroll/SALARY_CAP)*100)}%` }} 
+                                         className={`h-full rounded-full transition-all duration-1000 ${teamPayroll > SALARY_CAP ? 'bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.4)]' : 'bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.4)]'}`} 
+                                       />
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+
+                           <div className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
+                              <div className="absolute inset-0 bg-blue-500/[0.01] pointer-events-none" />
+                              <div className="flex items-center justify-between relative z-10 h-full">
+                                 <div className="flex items-center gap-6">
+                                    <div className="w-14 h-14 bg-zinc-950 border border-zinc-800 text-blue-500 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                                       <Users size={28} />
+                                    </div>
+                                    <div className="flex flex-col">
+                                       <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 italic">Roster Unit</h3>
+                                       <p className="text-3xl font-black italic text-white tabular-nums tracking-tighter">{franchise.roster.length} / 15</p>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+
+                        {/* Tactical Court View */}
+                        <div className="relative w-full aspect-[4/5] md:aspect-[16/9] bg-zinc-950 rounded-[4rem] sm:rounded-[6rem] border-4 border-zinc-900 shadow-[0_40px_100px_rgba(0,0,0,0.6)] p-6 sm:p-24 overflow-hidden group">
+                           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.03),transparent)] pointer-events-none" />
+                           <div className="absolute inset-x-12 inset-y-16 sm:inset-x-24 sm:inset-y-40 z-0 opacity-[0.05] pointer-events-none transition-opacity group-hover:opacity-[0.1] duration-1000">
+                               <svg width="100%" height="100%" viewBox="0 0 1000 600" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                 <path d="M500 0V600M0 300H1000M0 2H998V598H2V2ZM500 400C555.228 400 600 355.228 600 300C600 244.772 555.228 200 500 200C444.772 200 400 244.772 400 300C400 355.228 444.772 400 500 400Z" stroke="white" strokeWidth="6" strokeLinecap="round"/>
+                                 <path d="M0 150H200V450H0M1000 150H800V450H1000" stroke="white" strokeWidth="6" strokeLinecap="round"/>
+                                 <path d="M0 60C180 60 320 160 320 300C320 440 180 540 0 540M1000 60C820 60 680 160 680 300C680 440 820 540 1000 540" stroke="white" strokeWidth="6" strokeLinecap="round"/>
+                                 <circle cx="500" cy="300" r="10" fill="white" className="animate-pulse" />
+                               </svg>
+                           </div>
+
+                           <div className="relative z-10 w-full h-full">
+                             <div className="absolute left-[5%] top-1/2 -translate-y-1/2">
+                                <PositionSlot pos="PG" cardId={franchise.lineup?.PG} energy={franchise.playerEnergy?.[franchise.lineup?.PG || ''] || 100} onSelect={() => setShowPicker({ pos: 'PG' })} />
+                             </div>
+                             <div className="absolute left-[20%] sm:left-[24%] top-[5%] sm:top-[12%]">
+                                <PositionSlot pos="SG" cardId={franchise.lineup?.SG} energy={franchise.playerEnergy?.[franchise.lineup?.SG || ''] || 100} onSelect={() => setShowPicker({ pos: 'SG' })} />
+                             </div>
+                             <div className="absolute left-[20%] sm:left-[24%] bottom-[5%] sm:bottom-[12%]">
+                                <PositionSlot pos="PF" cardId={franchise.lineup?.PF} energy={franchise.playerEnergy?.[franchise.lineup?.PF || ''] || 100} onSelect={() => setShowPicker({ pos: 'PF' })} />
+                             </div>
+                             <div className="absolute left-[45%] top-1/2 -translate-y-1/2 scale-[0.8] sm:scale-110">
+                                <PositionSlot pos="C" cardId={franchise.lineup?.C} energy={franchise.playerEnergy?.[franchise.lineup?.C || ''] || 100} onSelect={() => setShowPicker({ pos: 'C' })} />
+                             </div>
+                             <div className="absolute left-[72%] sm:left-[68%] top-1/2 -translate-y-1/2">
+                                <PositionSlot pos="SF" cardId={franchise.lineup?.SF} energy={franchise.playerEnergy?.[franchise.lineup?.SF || ''] || 100} onSelect={() => setShowPicker({ pos: 'SF' })} />
+                             </div>
+
+                             <div className="absolute right-0 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-12 pointer-events-none pr-10">
+                                <div className="text-right space-y-2 opacity-20 group-hover:opacity-100 transition-all duration-700 translate-x-10 group-hover:translate-x-0">
+                                   <div className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-700 italic">Offensive Logic</div>
+                                   <p className="text-xl font-black italic text-emerald-500 uppercase tracking-tighter shadow-sm">Triangle Flow</p>
                                 </div>
-                                <div>
-                                   <h3 className="text-xl font-black uppercase italic tracking-tighter">Team OVR</h3>
-                                   <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Calculated from Starters + Bonuses</p>
+                                <div className="text-right space-y-2 opacity-20 group-hover:opacity-100 transition-all duration-700 translate-x-14 group-hover:translate-x-0 delay-75">
+                                   <div className="text-[8px] font-black uppercase tracking-[0.4em] text-zinc-600">DEFENSIVE ANCHOR</div>
+                                   <p className="text-sm font-black italic text-zinc-400 uppercase tracking-tighter">ELITE RIM PROTECT</p>
+                                </div>
+                                <div className="text-right space-y-1.5 translate-x-12 group-hover:translate-x-0 transition-transform delay-150">
+                                   <div className="text-[8px] font-black uppercase tracking-[0.4em] text-zinc-600">TEMPO ADAPT</div>
+                                   <p className="text-sm font-black italic text-zinc-500 uppercase tracking-tighter">UP-TEMPO RELIANCE</p>
                                 </div>
                              </div>
-                             <div className="text-right">
-                                <p className="text-[10px] font-black uppercase text-zinc-600 mb-1">Rotation Depth</p>
-                                <p className="text-xl font-black italic">{franchise.roster.length}/15</p>
-                             </div>
-                          </div>
-
-                          <div className="bg-zinc-900 border border-zinc-800 rounded-[2rem] p-6 space-y-4 shadow-xl">
-                             <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                   <DollarSign size={18} className="text-amber-500" />
-                                   <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Salary Payroll</span>
-                                </div>
-                                <span className={`text-sm font-black italic ${teamPayroll > SALARY_CAP ? 'text-red-500' : 'text-zinc-400'}`}>
-                                   ${(teamPayroll / 1000000).toFixed(1)}M / ${(SALARY_CAP / 1000000).toFixed(0)}M
-                                </span>
-                             </div>
-                             <div className="h-2 w-full bg-zinc-950 rounded-full overflow-hidden border border-zinc-800">
-                                <motion.div 
-                                  initial={{ width: 0 }}
-                                  animate={{ width: `${Math.min(100, (teamPayroll / SALARY_CAP) * 100)}%` }}
-                                  className={`h-full transition-all duration-1000 ${teamPayroll > SALARY_CAP ? 'bg-red-500' : 'bg-amber-500'}`}
-                                />
-                             </div>
-                          </div>
-                       </div>
-
-                       <div className="relative aspect-[4/5] sm:aspect-[3/2] bg-zinc-900 border border-zinc-800 rounded-[3rem] overflow-hidden p-4 sm:p-12 shadow-2xl">
-                          <div className="absolute inset-0 opacity-10 pointer-events-none">
-                             <div className="absolute inset-x-0 top-0 h-1/2 border-b border-zinc-800/10" />
-                          </div>
-                          
-                          {/* Court Markings */}
-                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] aspect-square border border-zinc-800/20 rounded-full pointer-events-none" />
-                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-32 border-x border-t border-zinc-800/30 bg-black/10 rounded-t-3xl pointer-events-none" />
-
-                          <div className="relative z-10 grid grid-cols-5 gap-2 sm:gap-4 h-full items-center">
-                             {(['PG', 'SG', 'SF', 'PF', 'C'] as const).map(pos => {
-                                const cardId = franchise.lineup?.[pos];
-                                const card = cardId ? ALL_CARDS.find(c => c.id === cardId) : null;
-                                const energy = cardId ? (franchise.playerEnergy?.[cardId] ?? 100) : 100;
-                                
-                                const posStyles: Record<string, string> = {
-                                  PG: 'translate-y-4 sm:translate-y-12',
-                                  SG: '-translate-y-4 sm:-translate-y-8',
-                                  SF: '-translate-y-4 sm:-translate-y-8',
-                                  PF: 'translate-y-4 sm:translate-y-12',
-                                  C: 'scale-110 -translate-y-8 sm:-translate-y-20'
-                                };
-
-                                return (
-                                  <div key={pos} className={`flex flex-col items-center gap-1 sm:gap-3 transition-transform ${posStyles[pos]}`}>
-                                     <div className="flex flex-col items-center">
-                                        <span className="text-[8px] sm:text-[10px] font-black text-zinc-500 uppercase tracking-tighter">{pos}</span>
-                                        {card && (
-                                           <div className="flex items-center gap-1">
-                                              <Zap size={8} className={energy < 50 ? 'text-red-500' : 'text-emerald-500'} fill="currentColor" />
-                                              <span className={`text-[6px] sm:text-[8px] font-black ${energy < 50 ? 'text-red-500' : 'text-zinc-500'}`}>{Math.round(energy)}%</span>
-                                           </div>
-                                        )}
-                                     </div>
-                                     <div 
-                                       onClick={() => setShowPicker({ pos })}
-                                       className={`w-full max-w-[120px] aspect-[4/6] rounded-xl sm:rounded-3xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all ${
-                                         card ? 'border-transparent' : 'border-zinc-800 bg-zinc-950/40 hover:border-zinc-700'
-                                       }`}
-                                     >
-                                        {card ? (
-                                          <div className="scale-75 sm:scale-100 hover:scale-105 transition-transform">
-                                             <CardItem card={card} isOwned={true} mode="mini" />
-                                          </div>
-                                        ) : (
-                                          <Plus className="text-zinc-800" size={24} strokeWidth={3} />
-                                        )}
-                                     </div>
-                                  </div>
-                                );
-                             })}
-                          </div>
-                       </div>
+                           </div>
+                        </div>
                     </div>
                  )}
 
                  {lineupSubTab === 'bench' && (
-                    <div className="space-y-8">
-                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
+                       <div className="flex items-center justify-between px-2">
+                          <div className="space-y-1">
+                             <h3 className="text-xs font-black uppercase tracking-[0.3em] text-zinc-400 italic">Roster Reserves</h3>
+                             <p className="text-[8px] font-bold text-zinc-700 uppercase tracking-widest">Select targets to replace active starters</p>
+                          </div>
+                          <div className="flex items-center gap-4">
+                             <div className="px-5 py-2 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center gap-3">
+                                <Users size={14} className="text-zinc-600" />
+                                <span className="text-[10px] font-black italic text-zinc-400 uppercase">{franchise.roster.filter(id => !Object.values(franchise.lineup || {}).includes(id)).length} Units Available</span>
+                             </div>
+                          </div>
+                       </div>
+
+                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 sm:gap-12">
                           {franchise.roster.filter(id => !Object.values(franchise.lineup || {}).includes(id)).map(id => {
                              const card = ALL_CARDS.find(c => c.id === id);
                              if (!card) return null;
                              const energy = franchise.playerEnergy?.[id] ?? 100;
                              
                              return (
-                               <div key={id} className="relative group">
-                                  <CardItem card={card} isOwned={true} mode="mini" />
-                                  <div className="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center p-4 rounded-[1.5rem] transition-all space-y-4">
-                                     <div className="text-center">
-                                        <p className="text-[10px] font-black text-zinc-500 uppercase mb-1">Energy</p>
-                                        <div className="flex items-center gap-2">
-                                           <Zap size={14} className={energy < 50 ? 'text-red-500' : 'text-emerald-500'} fill="currentColor" />
-                                           <span className="text-xl font-black italic">{Math.round(energy)}%</span>
+                               <div key={id} className="relative group perspective-1000">
+                                  <div className="transition-all duration-500 group-hover:rotate-y-12 group-hover:scale-105">
+                                    <CardItem card={card} isOwned={true} mode="mini" />
+                                  </div>
+                                  <div className="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center p-6 rounded-[2rem] transition-all duration-300 space-y-6 backdrop-blur-sm border border-white/10 z-20">
+                                     <div className="text-center group/energy">
+                                        <p className="text-[10px] font-black text-zinc-600 uppercase mb-2 tracking-widest">Health Battery</p>
+                                        <div className="flex items-center gap-3 justify-center">
+                                           <Zap size={18} className={`${energy < 50 ? 'text-red-500 animate-pulse' : 'text-emerald-500'}`} fill="currentColor" />
+                                           <span className="text-2xl font-black italic text-white tabular-nums">{Math.round(energy)}%</span>
                                         </div>
                                      </div>
                                      <button 
@@ -1794,10 +1966,16 @@ const CareerView: React.FC = () => {
                                           const pos = normalizePosition(card.position);
                                           updateFranchise({ lineup: { ...franchise.lineup, [pos]: id } });
                                        }}
-                                       className="w-full py-3 bg-white text-black text-[10px] font-black uppercase rounded-xl hover:bg-emerald-400 transition-colors"
+                                       className="w-full py-4 bg-white text-black text-[10px] font-black uppercase rounded-2xl hover:bg-emerald-400 transition-all active:scale-95 shadow-[0_10px_30px_rgba(255,255,255,0.1)]"
                                      >
-                                        Insert in Lineup
+                                        ACTIVATE IN LINEUP
                                      </button>
+                                  </div>
+                                  <div className="mt-4 flex items-center justify-between px-2">
+                                     <span className="text-[8px] font-black text-zinc-700 uppercase italic tracking-widest">{card.position} Unit</span>
+                                     <div className="w-8 h-1 bg-zinc-900 rounded-full overflow-hidden">
+                                        <div className={`h-full ${energy < 50 ? 'bg-red-500' : 'bg-emerald-500'}`} style={{ width: `${energy}%` }} />
+                                     </div>
                                   </div>
                                </div>
                              );
@@ -1807,58 +1985,75 @@ const CareerView: React.FC = () => {
                  )}
 
                  {lineupSubTab === 'chemistry' && (
-                    <div className="space-y-8">
-                       <div className="bg-zinc-900 border border-zinc-800 rounded-[3rem] p-10 space-y-10">
-                          <div className="text-center space-y-2">
-                             <h3 className="text-3xl font-black uppercase italic tracking-tighter">Team Symmetries</h3>
-                             <p className="text-zinc-500 text-xs font-black uppercase tracking-[0.3em]">Active Synergy Bonuses</p>
+                    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
+                       <div className="bg-zinc-950 border-2 border-zinc-900 rounded-[3.5rem] p-10 sm:p-16 space-y-16 relative overflow-hidden">
+                          <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-emerald-500/[0.02] blur-[150px] pointer-events-none" />
+                          <div className="absolute bottom-0 left-0 w-[40rem] h-[40rem] bg-blue-500/[0.02] blur-[150px] pointer-events-none" />
+                          
+                          <div className="relative z-10 text-center space-y-4">
+                             <div className="flex items-center justify-center gap-3 mb-2">
+                                <div className="h-[2px] w-12 bg-gradient-to-r from-transparent to-emerald-500" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-emerald-500/60">Tactical Synchronization</span>
+                                <div className="h-[2px] w-12 bg-gradient-to-l from-transparent to-emerald-500" />
+                             </div>
+                             <h3 className="text-4xl sm:text-6xl font-black uppercase italic tracking-tighter text-white">Squad Symmetries</h3>
+                             <p className="text-zinc-600 text-[10px] sm:text-xs font-black uppercase tracking-[0.4em] max-w-xl mx-auto">Active synergy algorithms derived from current rotation composition</p>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8">
                              {/* Synergy 1: Trio */}
-                             <div className={`p-8 rounded-[2.5rem] border transition-all ${
-                               Object.values(starters.reduce((acc, c) => { acc[c.teamAbbr] = (acc[c.teamAbbr] || 0) + 1; return acc; }, {} as any)).some((v: any) => v >= 3)
-                               ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-black/20 border-zinc-800 grayscale opacity-40'
+                             <div className={`p-10 rounded-[2.5rem] border-2 transition-all duration-500 relative group overflow-hidden ${
+                               Object.values(activeStarters.reduce((acc, c) => { acc[c.teamAbbr] = (acc[c.teamAbbr] || 0) + 1; return acc; }, {} as any)).some((v: any) => v >= 3)
+                               ? 'bg-emerald-500/[0.08] border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.1)]' : 'bg-white/[0.02] border-zinc-800 grayscale opacity-40'
                              }`}>
-                                <div className="flex items-center gap-6">
-                                   <div className="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center shadow-2xl">
-                                      <Users size={32} className="text-emerald-400" />
+                                <div className="flex flex-col items-center text-center gap-6">
+                                   <div className="w-20 h-20 bg-zinc-950 border border-zinc-800 rounded-[1.5rem] flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                                      <Users size={36} className="text-emerald-500" />
                                    </div>
-                                   <div>
-                                      <h4 className="text-xl font-black uppercase italic tracking-tight">Active Trio</h4>
-                                      <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-1">+3 OVR Group Bonus</p>
+                                   <div className="space-y-2">
+                                      <h4 className="text-2xl font-black uppercase italic tracking-tight text-white">Active Trio</h4>
+                                      <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">+3 OVR Composition Bonus</p>
+                                   </div>
+                                   <div className="h-1 w-20 bg-zinc-900 rounded-full overflow-hidden">
+                                      <div className={`h-full bg-emerald-500 transition-all duration-1000 ${Object.values(activeStarters.reduce((acc, c) => { acc[c.teamAbbr] = (acc[c.teamAbbr] || 0) + 1; return acc; }, {} as any)).some((v: any) => v >= 3) ? 'w-full' : 'w-0'}`} />
                                    </div>
                                 </div>
                              </div>
 
                              {/* Synergy 2: Inside-Out */}
-                             <div className={`p-8 rounded-[2.5rem] border transition-all ${
-                               (starters.find(c => normalizePosition(c.position) === 'PG')?.stats.assists >= 85 && starters.find(c => normalizePosition(c.position) === 'C')?.stats.rebounds >= 80)
-                               ? 'bg-amber-500/10 border-amber-500/20' : 'bg-black/20 border-zinc-800 grayscale opacity-40'
+                             <div className={`p-10 rounded-[2.5rem] border-2 transition-all duration-500 relative group overflow-hidden ${
+                               (activeStarters.find(c => normalizePosition(c.position) === 'PG')?.stats.assists >= 85 && activeStarters.find(c => normalizePosition(c.position) === 'C')?.stats.rebounds >= 80)
+                               ? 'bg-amber-500/[0.08] border-amber-500/30 shadow-[0_0_50px_rgba(245,158,11,0.1)]' : 'bg-white/[0.02] border-zinc-800 grayscale opacity-40'
                              }`}>
-                                <div className="flex items-center gap-6">
-                                   <div className="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center shadow-2xl">
-                                      <Zap size={32} className="text-amber-400" />
+                                <div className="flex flex-col items-center text-center gap-6">
+                                   <div className="w-20 h-20 bg-zinc-950 border border-zinc-800 rounded-[1.5rem] flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                                      <Zap size={36} className="text-amber-500" />
                                    </div>
-                                   <div>
-                                      <h4 className="text-xl font-black uppercase italic tracking-tight">Inside-Out Play</h4>
-                                      <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-1">+5 OVR Offensive Flow</p>
+                                   <div className="space-y-2">
+                                      <h4 className="text-2xl font-black uppercase italic tracking-tight text-white">Inside-Out Play</h4>
+                                      <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">+5 OVR Logic Efficiency</p>
+                                   </div>
+                                   <div className="h-1 w-20 bg-zinc-900 rounded-full overflow-hidden">
+                                      <div className={`h-full bg-amber-500 transition-all duration-1000 ${(activeStarters.find(c => normalizePosition(c.position) === 'PG')?.stats.assists >= 85 && activeStarters.find(c => normalizePosition(c.position) === 'C')?.stats.rebounds >= 80) ? 'w-full' : 'w-0'}`} />
                                    </div>
                                 </div>
                              </div>
 
                              {/* Synergy 3: Star Power */}
-                             <div className={`p-8 rounded-[2.5rem] border transition-all ${
-                               starters.some(c => c.rarity === 'franchise')
-                               ? 'bg-purple-500/10 border-purple-500/20' : 'bg-black/20 border-zinc-800 grayscale opacity-40'
+                             <div className={`p-10 rounded-[2.5rem] border-2 transition-all duration-500 relative group overflow-hidden ${
+                               activeStarters.some(c => c.rarity === 'franchise')
+                               ? 'bg-purple-500/[0.08] border-purple-500/30 shadow-[0_0_50px_rgba(168,85,247,0.1)]' : 'bg-white/[0.02] border-zinc-800 grayscale opacity-40'
                              }`}>
-                                <div className="flex items-center gap-6">
-                                   <div className="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center shadow-2xl">
-                                      <Star size={32} className="text-purple-400" />
+                                <div className="flex flex-col items-center text-center gap-6">
+                                   <div className="w-20 h-20 bg-zinc-950 border border-zinc-800 rounded-[1.5rem] flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                                      <Star size={36} className="text-purple-500" />
                                    </div>
-                                   <div>
-                                      <h4 className="text-xl font-black uppercase italic tracking-tight">Star Power</h4>
-                                      <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-1">+2 OVR Momentum Boost</p>
+                                   <div className="space-y-2">
+                                      <h4 className="text-2xl font-black uppercase italic tracking-tight text-white">Star Power</h4>
+                                      <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">+2 OVR Momentum Factor</p>
+                                   </div>
+                                   <div className="h-1 w-20 bg-zinc-900 rounded-full overflow-hidden">
+                                      <div className={`h-full bg-purple-500 transition-all duration-1000 ${activeStarters.some(c => c.rarity === 'franchise') ? 'w-full' : 'w-0'}`} />
                                    </div>
                                 </div>
                              </div>
@@ -1870,43 +2065,83 @@ const CareerView: React.FC = () => {
             )}
 
             {activeTab === 'market' && (
-              <div className="space-y-8 pb-32">
-                <div className="flex border-b border-zinc-900 mb-8 sticky top-[240px] bg-zinc-950 z-[70] pt-4">
-                    {(['waivers', 'trades', 'free_agency'] as const).map(tab => (
-                       <button 
-                         key={tab}
-                         onClick={() => setMarketSubTab(tab)}
-                         className={`px-8 py-4 text-xs font-black uppercase tracking-[0.2em] transition-all relative ${marketSubTab === tab ? 'text-white' : 'text-zinc-600'}`}
-                       >
-                         {tab.replace('_', ' ')}
-                         {marketSubTab === tab && <motion.div layoutId="marketSubTab" className="absolute bottom-0 left-0 right-0 h-1 bg-white" />}
-                       </button>
-                    ))}
+              <div className="space-y-12 pb-32">
+                 <div className="flex border-b border-zinc-900 mb-12 sticky top-[240px] bg-zinc-950/90 backdrop-blur-3xl z-[70] pt-6 pr-10 items-center justify-between">
+                    <div className="flex gap-2">
+                        {(['waivers', 'trades', 'free_agency'] as const).map(tab => (
+                           <button 
+                             key={tab}
+                             onClick={() => setMarketSubTab(tab)}
+                             className={`px-12 py-6 text-[11px] font-black uppercase tracking-[0.5em] transition-all relative group/tab ${marketSubTab === tab ? 'text-white' : 'text-zinc-700 hover:text-zinc-500'}`}
+                           >
+                             <span className="relative z-10">{tab.replace('_', ' ')}</span>
+                             {marketSubTab === tab && (
+                               <>
+                                 <motion.div 
+                                   layoutId="marketSubTab" 
+                                   className="absolute bottom-0 left-0 right-0 h-1 bg-white shadow-[0_0_20px_rgba(255,255,255,0.6)] z-20" 
+                                 />
+                                 <div className="absolute inset-0 bg-white/[0.03] rounded-t-3xl z-0" />
+                               </>
+                             )}
+                             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-1 bg-zinc-800 transition-all group-hover/tab:w-full z-10" />
+                           </button>
+                        ))}
+                    </div>
+                    <div className="hidden lg:flex items-center gap-10">
+                       <div className="flex flex-col items-end">
+                          <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest italic mb-1">Market Volatility</span>
+                          <div className="flex items-center gap-2 text-emerald-500">
+                             <TrendingUp size={14} />
+                             <span className="text-lg font-black italic">LOW</span>
+                          </div>
+                       </div>
+                    </div>
                  </div>
 
-                {marketSubTab === 'waivers' && (
-                    <div className="space-y-8">
-                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-zinc-900/50 p-8 rounded-[3rem] border border-zinc-800">
-                          <div className="space-y-2">
-                             <h3 className="text-2xl font-black uppercase italic tracking-tighter">Waiver Wire</h3>
-                             <p className="text-zinc-500 text-xs font-black uppercase tracking-widest leading-relaxed">
-                                Players released by other teams or G-League prospects.<br/>
-                                <span className="text-emerald-500">Refresh every 7 games played.</span>
-                             </p>
-                          </div>
-                          <div className="flex items-center gap-4">
-                             <div className="bg-black/40 px-6 py-3 rounded-2xl border border-zinc-800">
-                                <p className="text-[8px] font-black text-zinc-500 uppercase mb-1">Session Index</p>
-                                <p className="text-xl font-black italic">{Math.floor((franchise.wins + franchise.losses) / 7) + 1}</p>
+                 {marketSubTab === 'waivers' && (
+                    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10 bg-zinc-900 border border-zinc-800 p-10 rounded-[3rem] shadow-[0_30px_80px_rgba(0,0,0,0.5)] relative overflow-hidden group">
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.05),transparent)] pointer-events-none" />
+                          <div className="relative z-10 space-y-6">
+                             <div className="flex items-center gap-4">
+                                <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_15px_#10b981] animate-pulse" />
+                                <div className="space-y-1">
+                                   <h3 className="text-4xl font-black uppercase italic tracking-tighter text-white">Waiver Central</h3>
+                                   <div className="h-0.5 w-24 bg-emerald-500/50" />
+                                </div>
                              </div>
-                             <div className="bg-black/40 px-6 py-3 rounded-2xl border border-zinc-800">
-                                <p className="text-[8px] font-black text-zinc-500 uppercase mb-1">Cap Space</p>
-                                <p className="text-xl font-black italic text-amber-500">${((SALARY_CAP - teamPayroll)/1000000).toFixed(1)}M</p>
+                             <div className="space-y-3">
+                                <p className="text-zinc-500 text-xs font-black uppercase tracking-[0.3em] leading-relaxed max-w-xl">
+                                   Strategic asset acquisition protocol. Monitoring international pool & domestic veteran releases.
+                                </p>
+                                <div className="flex items-center gap-3 py-2 px-4 bg-zinc-950/50 border border-zinc-800 rounded-xl w-fit">
+                                   <RefreshCw size={14} className="text-emerald-500 animate-spin-slow" />
+                                   <span className="text-[10px] font-black text-emerald-500 uppercase italic tracking-widest">
+                                      Database Sync: {7 - ((franchise.wins + franchise.losses) % 7)} matches remaining
+                                   </span>
+                                </div>
+                             </div>
+                          </div>
+                          <div className="relative z-10 flex flex-wrap items-center gap-6">
+                             <div className="bg-zinc-950 border-2 border-zinc-900 px-10 py-7 rounded-[2rem] shadow-inner group/stat hover:border-amber-500/30 transition-colors">
+                                <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-2 italic">Operation Capital</p>
+                                <div className="flex items-baseline gap-2">
+                                   <p className="text-3xl font-black italic text-amber-500 tabular-nums">${((SALARY_CAP - teamPayroll)/1000000).toFixed(2)}M</p>
+                                   <span className="text-[9px] font-bold text-zinc-700 uppercase">Credits</span>
+                                </div>
+                             </div>
+                             <div className="bg-zinc-950 border-2 border-zinc-900 px-10 py-7 rounded-[2rem] shadow-inner group/stat hover:border-blue-500/30 transition-colors">
+                                <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-2 italic">Roster Capacity</p>
+                                <div className="flex items-baseline gap-2">
+                                   <p className="text-3xl font-black italic text-zinc-300 tabular-nums">{franchise.roster.length}</p>
+                                   <span className="text-lg font-black text-zinc-700">/ 15</span>
+                                </div>
                              </div>
                           </div>
                        </div>
 
-                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-10 sm:gap-14">
                           {(franchise.waiverPool || ALL_CARDS.filter(c => c.stats.ovr >= 70 && c.stats.ovr <= 78 && !franchise.roster.includes(c.id)).slice(0, 10).map(c => c.id)).map(id => {
                              const card = ALL_CARDS.find(c => c.id === id);
                              if (!card) return null;
@@ -1914,12 +2149,17 @@ const CareerView: React.FC = () => {
                              const canAfford = teamPayroll + salary <= SALARY_CAP;
 
                              return (
-                               <div key={id} className="relative group">
-                                  <CardItem card={card} isOwned={true} mode="mini" />
-                                  <div className="absolute inset-0 bg-black/95 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center p-4 rounded-[1.5rem] transition-all gap-4">
-                                     <div className="text-center">
-                                        <p className="text-[8px] font-black text-zinc-500 uppercase">Min Salary</p>
-                                        <p className="text-sm font-black italic">${salary.toFixed(1)}M</p>
+                               <div key={id} className="relative group perspective-1000">
+                                  <div className="transition-all duration-700 group-hover:rotate-y-12 group-hover:scale-105 group-hover:-translate-y-4">
+                                     <CardItem card={card} isOwned={true} mode="mini" />
+                                  </div>
+                                  <div className="absolute inset-x-2 -bottom-2 bg-zinc-950 border-2 border-zinc-800 rounded-[2.5rem] p-6 opacity-0 group-hover:opacity-100 transition-all duration-500 shadow-3xl z-30 translate-y-10 group-hover:translate-y-0 backdrop-blur-2xl bg-opacity-95">
+                                     <div className="flex flex-col gap-4 mb-6">
+                                        <div className="flex items-center justify-between">
+                                           <span className="text-[9px] font-black text-zinc-600 uppercase italic">Annual Commitment</span>
+                                           <span className="text-sm font-black italic text-white shadow-sm">${salary.toFixed(2)}M</span>
+                                        </div>
+                                        <div className="h-0.5 w-full bg-zinc-900 rounded-full" />
                                      </div>
                                      <button 
                                        disabled={!canAfford || franchise.roster.length >= 15}
@@ -1938,10 +2178,13 @@ const CareerView: React.FC = () => {
                                           });
                                           setNews(prev => [`${teamData?.name} claimed ${card.name} off waivers.`, ...prev].slice(0, 5));
                                        }}
-                                       className="w-full py-3 bg-white text-black text-[9px] font-black uppercase rounded-lg hover:bg-emerald-400 disabled:opacity-30"
+                                       className="w-full py-4 bg-white text-black text-[10px] font-black uppercase rounded-2xl hover:bg-emerald-400 hover:shadow-[0_10px_30px_rgba(16,185,129,0.3)] transition-all active:scale-95 disabled:opacity-30 disabled:hover:bg-white disabled:hover:shadow-none"
                                      >
-                                        Claim Player
+                                        Initiate Claim
                                      </button>
+                                  </div>
+                                  <div className="absolute top-2 left-2 bg-emerald-500/20 text-emerald-500 px-3 py-1 rounded-lg text-[8px] font-black uppercase italic backdrop-blur-md border border-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                                     WAIVER TARGET
                                   </div>
                                </div>
                              );
@@ -1950,128 +2193,232 @@ const CareerView: React.FC = () => {
                     </div>
                  )}
 
-                {marketSubTab === 'trades' && (
-                    <div className="space-y-8">
-                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                          <div className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-8 space-y-6">
-                             <div className="flex items-center justify-between">
-                                <h3 className="text-xl font-black uppercase italic tracking-tighter">{franchise.team} Assets</h3>
-                                <span className={`text-[10px] font-black uppercase ${tradeUserPlayer ? 'text-emerald-500' : 'text-zinc-500'}`}>
-                                   {tradeUserPlayer ? 'Asset Ready' : 'Select Player'}
-                                </span>
+                 {marketSubTab === 'trades' && (
+                    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                          {/* User Assets */}
+                          <div className="bg-zinc-900 border border-zinc-800 rounded-[3.5rem] p-10 space-y-10 relative overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.5)] group/assets">
+                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.02),transparent)] pointer-events-none" />
+                             <div className="flex items-center justify-between relative z-10">
+                                <div className="space-y-2">
+                                   <h3 className="text-3xl font-black uppercase italic tracking-tighter text-white">Your Assets</h3>
+                                   <div className="flex items-center gap-3">
+                                      <div className="h-0.5 w-12 bg-white/20" />
+                                      <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 italic">Front Office Inventory</p>
+                                   </div>
+                                </div>
+                                <div className={`w-4 h-4 rounded-full transition-all duration-500 scale-110 ${tradeUserPlayer ? 'bg-emerald-500 shadow-[0_0_20px_#10b981]' : 'bg-zinc-800'}`} />
                              </div>
-                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 h-[400px] overflow-y-auto pr-2 no-scrollbar">
+                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 h-[550px] overflow-y-auto pr-6 no-scrollbar relative z-10 scroll-smooth pb-10">
                                 {franchise.roster.map(id => {
                                    const card = ALL_CARDS.find(c => c.id === id);
                                    if (!card) return null;
                                    return (
-                                      <div key={id} onClick={() => setTradeUserPlayer(id)} className={`cursor-pointer transition-all relative ${tradeUserPlayer === id ? 'scale-105 ring-2 ring-emerald-500 rounded-[1.5rem]' : 'opacity-40 grayscale hover:opacity-100'}`}>
+                                      <div 
+                                        key={id} 
+                                        onClick={() => setTradeUserPlayer(id)} 
+                                        className={`cursor-pointer transition-all duration-500 relative rounded-[2.5rem] p-1.5 ${tradeUserPlayer === id ? 'bg-white shadow-[0_20px_60px_rgba(255,255,255,0.2)] scale-105 z-20' : 'opacity-30 grayscale hover:opacity-100 hover:scale-[1.02] hover:grayscale-0'}`}
+                                      >
                                          <CardItem card={card} isOwned={true} mode="mini" />
+                                         {tradeUserPlayer === id && (
+                                            <div className="absolute -top-3 -right-3 bg-emerald-500 text-black p-2 rounded-2xl shadow-xl z-30 animate-in zoom-in-50 duration-300">
+                                               <Check size={18} strokeWidth={4} />
+                                            </div>
+                                         )}
                                       </div>
                                    );
                                 })}
                              </div>
                           </div>
 
-                          <div className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-8 space-y-6">
-                             <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                   <h3 className="text-xl font-black uppercase italic tracking-tighter text-zinc-400">Target Team</h3>
-                                   <div className="flex gap-2 overflow-x-auto no-scrollbar max-w-[200px]">
-                                      {NBA_TEAMS.filter(t => t.id !== franchise.team).slice(0, 5).map(t => (
-                                         <button key={t.id} onClick={() => setTradeTargetTeam(t.id)} className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-[10px] border ${tradeTargetTeam === t.id ? 'bg-white text-black border-white' : 'bg-black border-zinc-800 text-zinc-500'}`}>{t.id.slice(0, 2)}</button>
+                          {/* Target Team Assets */}
+                          <div className="bg-zinc-900 border border-zinc-800 rounded-[3.5rem] p-10 space-y-10 relative overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.5)] group/negotiation">
+                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.02),transparent)] pointer-events-none" />
+                             <div className="space-y-8 relative z-10">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                                   <div className="space-y-2">
+                                      <h3 className="text-3xl font-black uppercase italic tracking-tighter text-zinc-400">Rival Assets</h3>
+                                      <div className="flex items-center gap-3">
+                                         <div className="h-0.5 w-12 bg-zinc-800" />
+                                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-700 italic">Negotiation Target</p>
+                                      </div>
+                                   </div>
+                                   <div className="flex gap-3 overflow-x-auto no-scrollbar max-w-full sm:max-w-[280px] py-3 px-1">
+                                      {NBA_TEAMS.filter(t => t.id !== franchise.team).map(t => (
+                                         <button 
+                                           key={t.id} 
+                                           onClick={() => setTradeTargetTeam(t.id)} 
+                                           className={`w-14 h-14 rounded-2xl flex items-center justify-center p-3 shrink-0 transition-all border-2 relative overflow-hidden group/team ${tradeTargetTeam === t.id ? 'bg-white border-white scale-110 shadow-2xl z-20' : 'bg-black/40 border-zinc-900 grayscale hover:grayscale-0 hover:border-zinc-700'}`}
+                                         >
+                                            <img src={getTeamLogo(t.id)} alt={t.id} className="w-full h-full object-contain relative z-10" />
+                                            {tradeTargetTeam === t.id && (
+                                              <div className="absolute inset-0 bg-white shadow-inner pointer-events-none" />
+                                            )}
+                                         </button>
                                       ))}
                                    </div>
                                 </div>
                              </div>
 
                              {tradeTargetTeam ? (
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 h-[400px] overflow-y-auto pr-2 no-scrollbar">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 h-[550px] overflow-y-auto pr-6 no-scrollbar relative z-10 scroll-smooth pb-10">
                                    {(franchise.leagueRosters?.[tradeTargetTeam] || []).map(id => {
                                       const card = ALL_CARDS.find(c => c.id === id);
                                       if (!card) return null;
                                       return (
-                                         <div key={id} onClick={() => setTradeTargetPlayer(id)} className={`cursor-pointer transition-all relative ${tradeTargetPlayer === id ? 'scale-105 ring-2 ring-amber-500 rounded-[1.5rem]' : 'opacity-40 grayscale hover:opacity-100'}`}>
+                                         <div 
+                                           key={id} 
+                                           onClick={() => setTradeTargetPlayer(id)} 
+                                           className={`cursor-pointer transition-all duration-500 relative rounded-[2.5rem] p-1.5 ${tradeTargetPlayer === id ? 'bg-amber-500 shadow-[0_20px_60px_rgba(245,158,11,0.3)] scale-105 z-20' : 'opacity-30 grayscale hover:opacity-100 hover:scale-[1.02] hover:grayscale-0'}`}
+                                         >
                                             <CardItem card={card} isOwned={true} mode="mini" />
+                                            {tradeTargetPlayer === id && (
+                                              <div className="absolute -top-3 -right-3 bg-white text-black p-2 rounded-2xl shadow-xl z-30 animate-in zoom-in-50 duration-300">
+                                                 <Check size={18} strokeWidth={4} className="text-amber-600" />
+                                              </div>
+                                            )}
                                          </div>
                                       );
                                    })}
                                 </div>
                              ) : (
-                                <div className="h-[400px] flex flex-col items-center justify-center text-center opacity-20 space-y-4">
-                                   <RefreshCw size={40} className="animate-spin-slow" />
-                                   <p className="text-[10px] font-black uppercase tracking-widest leading-relaxed">Select rival organization<br/>to initialize trade terminal</p>
+                                <div className="h-[550px] flex flex-col items-center justify-center text-center space-y-10 bg-black/40 border-2 border-zinc-900 rounded-[3rem] relative overflow-hidden">
+                                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02),transparent)]" />
+                                   <div className="w-24 h-24 bg-zinc-950 border border-zinc-800 rounded-[2rem] flex items-center justify-center text-zinc-800 shadow-inner group-hover/negotiation:scale-110 transition-transform duration-1000">
+                                      <RefreshCw size={48} className="animate-spin-slow opacity-20" />
+                                   </div>
+                                   <div className="space-y-4 relative z-10 px-10">
+                                      <p className="text-[11px] font-black uppercase tracking-[0.5em] leading-relaxed text-zinc-700">Initialize Secure Line</p>
+                                      <p className="text-[9px] font-bold text-zinc-800 uppercase tracking-widest">Connect to remote front office to access roster database</p>
+                                   </div>
                                 </div>
                              )}
                           </div>
                        </div>
 
-                       <div className="flex justify-center pt-8">
+                       <div className="flex flex-col items-center gap-8 pt-16">
                           <button 
                             disabled={!tradeUserPlayer || !tradeTargetPlayer}
                             onClick={handleTradeProposal}
-                            className="bg-white text-black px-16 py-6 rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-20"
+                            className={`px-32 py-8 rounded-[3rem] font-black uppercase tracking-[0.6em] text-xs transition-all active:scale-95 shadow-[0_40px_100px_rgba(0,0,0,0.5)] ${tradeUserPlayer && tradeTargetPlayer ? 'bg-white text-black hover:bg-emerald-400 hover:shadow-[0_20px_60px_rgba(16,185,129,0.3)]' : 'bg-zinc-900 text-zinc-700 border border-zinc-800 opacity-50'}`}
                           >
-                             Propound Trade Agreement
+                             {tradeUserPlayer && tradeTargetPlayer ? 'EXECUTE TRADE PROTOCOL' : 'AWAITING COMPLIANCE'}
                           </button>
+                          <AnimatePresence>
+                            {tradeUserPlayer && tradeTargetPlayer && (
+                              <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                className="flex flex-col items-center gap-3"
+                              >
+                                <div className="flex items-center gap-4 text-emerald-500">
+                                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                                   <p className="text-[10px] font-black uppercase tracking-[0.4em] italic">Negotiation Algorithm Analyzing Leverage...</p>
+                                </div>
+                                <div className="h-[2px] w-48 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                        </div>
                     </div>
                  )}
 
                  {marketSubTab === 'free_agency' && (
-                    <div className="space-y-8">
-                       <div className="flex items-center gap-4 bg-zinc-900 border border-zinc-800 p-4 rounded-[1.5rem]">
-                          <Search size={20} className="text-zinc-600 ml-2" />
-                          <input 
-                            value={marketSearch}
-                            onChange={(e) => setMarketSearch(e.target.value)}
-                            placeholder="Search veteran free agents..." 
-                            className="bg-transparent border-none outline-none text-xs font-black uppercase tracking-widest text-white flex-1" 
-                          />
+                    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+                       <div className="flex flex-col md:flex-row items-center gap-10 bg-zinc-900 border border-zinc-800 p-10 rounded-[3rem] shadow-[0_30px_80px_rgba(0,0,0,0.5)] relative overflow-hidden group">
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.03),transparent)] pointer-events-none" />
+                          <div className="w-20 h-20 bg-zinc-950 border border-zinc-800 rounded-[1.5rem] flex items-center justify-center text-zinc-500 shadow-inner shrink-0 relative z-10 group-focus-within:text-blue-500 transition-colors">
+                             <Search size={32} />
+                          </div>
+                          <div className="flex-1 w-full relative z-10">
+                             <div className="space-y-2 mb-4">
+                                <h3 className="text-xs font-black uppercase tracking-[0.4em] text-zinc-600 italic">Database Scanner</h3>
+                                <p className="text-[10px] font-bold text-zinc-700 uppercase tracking-widest">Global veteran scouting network active</p>
+                             </div>
+                             <input 
+                               value={marketSearch}
+                               onChange={(e) => setMarketSearch(e.target.value)}
+                               placeholder="FILTER BY PLAYER NAME, POSITION, OR RATING..." 
+                               className="bg-transparent border-none outline-none text-xl sm:text-3xl font-black uppercase tracking-[0.1em] text-white w-full placeholder:text-zinc-800 italic" 
+                             />
+                          </div>
+                          <div className="shrink-0 flex items-center gap-6 relative z-10">
+                             <div className="bg-zinc-950 px-10 py-7 rounded-[2rem] border-2 border-zinc-900 text-center shadow-inner">
+                                <p className="text-[10px] font-black text-zinc-600 uppercase mb-2 italic tracking-widest">Cap Reserve</p>
+                                <div className="flex items-baseline gap-2">
+                                   <p className="text-3xl font-black italic text-amber-500 tabular-nums">${((SALARY_CAP - teamPayroll)/1000000).toFixed(2)}M</p>
+                                   <span className="text-[9px] font-bold text-zinc-700 uppercase">Credits</span>
+                                </div>
+                             </div>
+                          </div>
                        </div>
-                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+
+                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8">
                           {ALL_CARDS.filter(c => !franchise.roster.includes(c.id))
-                            .filter(c => c.name.toLowerCase().includes(marketSearch.toLowerCase()))
-                            .slice(0, 18).map(card => {
-                             const salary = (card.stats.ovr - 60) * 0.5 + 2;
-                             const signFee = Math.floor(card.stats.ovr * 1500);
-                             const teamPay = franchise.roster.reduce((t, id) => t + (ALL_CARDS.find(c => c.id === id)?.stats.ovr ? (ALL_CARDS.find(c => c.id === id)!.stats.ovr - 60) * 0.5 + 2 : 0), 0);
-                             const canAfford = franchise.budget >= signFee && (teamPay + salary <= SALARY_CAP);
-                             
-                             return (
-                               <div key={card.id} className="relative group">
-                                  <CardItem card={card} isOwned={true} mode="mini" />
-                                  <div className="absolute inset-0 bg-black/95 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center p-4 rounded-[1.5rem] transition-all gap-3 text-center">
-                                     <div>
-                                        <p className="text-[8px] font-black text-zinc-500 uppercase">Annual Salary</p>
-                                        <p className="text-xs font-black italic">${salary.toFixed(1)}M</p>
-                                     </div>
-                                     <button 
-                                       disabled={!canAfford}
-                                       onClick={() => {
-                                          const newContract: PlayerContract = {
-                                            cardId: card.id,
-                                            yearsLeft: 2,
-                                            salary: salary,
-                                            type: card.stats.ovr > 85 ? 'max' : 'mid-level',
-                                            canExtend: false,
-                                            canTrade: true
-                                          };
-                                          updateFranchise({
-                                             budget: franchise.budget - signFee,
-                                             roster: [...franchise.roster, card.id],
-                                             contracts: [...(franchise.contracts || []), newContract]
-                                          });
-                                          setNews(prev => [`${teamData?.name} signed ${card.name} from Free Agency.`, ...prev].slice(0, 5));
-                                       }}
-                                       className="w-full py-3 bg-white text-black text-[9px] font-black uppercase rounded-lg"
-                                     >
-                                        Sign Veteran
-                                     </button>
-                                  </div>
+                             .filter(c => c.name.toLowerCase().includes(marketSearch.toLowerCase()))
+                             .slice(0, 18).map(card => {
+                              const salary = (card.stats.ovr - 60) * 0.5 + 2;
+                              const signFee = Math.floor(card.stats.ovr * 1500);
+                              const teamPay = franchise.roster.reduce((t, id) => t + (ALL_CARDS.find(c => c.id === id)?.stats.ovr ? (ALL_CARDS.find(c => c.id === id)!.stats.ovr - 60) * 0.5 + 2 : 0), 0);
+                              const canAfford = franchise.budget >= signFee && (teamPay + salary <= SALARY_CAP);
+                              
+                              return (
+                                <div key={card.id} className="relative group perspective-1000">
+                                   <div className="transition-all duration-700 group-hover:rotate-y-12 group-hover:scale-105 group-hover:-translate-y-4">
+                                      <CardItem card={card} isOwned={true} mode="mini" />
+                                   </div>
+                                   <div className="absolute inset-x-2 -bottom-2 bg-zinc-950 border-2 border-zinc-800 rounded-[2.5rem] p-6 opacity-0 group-hover:opacity-100 transition-all duration-500 shadow-3xl z-30 translate-y-10 group-hover:translate-y-0 backdrop-blur-2xl bg-opacity-95">
+                                      <div className="space-y-6 mb-6">
+                                         <div className="flex flex-col gap-3">
+                                            <div className="flex items-center justify-between">
+                                               <span className="text-[10px] font-black text-zinc-600 uppercase italic">Annual Hit</span>
+                                               <span className="text-sm font-black italic text-white">${salary.toFixed(2)}M</span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                               <span className="text-[10px] font-black text-zinc-600 uppercase italic">Agency Fee</span>
+                                               <div className="flex items-baseline gap-1 text-emerald-500">
+                                                  <DollarSign size={10} strokeWidth={4} />
+                                                  <span className="text-sm font-black italic tabular-nums">{(signFee / 1000).toFixed(1)}K</span>
+                                               </div>
+                                            </div>
+                                         </div>
+                                         <div className="h-0.5 w-full bg-zinc-900 rounded-full" />
+                                      </div>
+                                      <button 
+                                        disabled={!canAfford || franchise.roster.length >= 15}
+                                        onClick={() => {
+                                           const newContract: PlayerContract = {
+                                             cardId: card.id,
+                                             yearsLeft: 2,
+                                             salary: salary,
+                                             type: card.stats.ovr > 85 ? 'max' : 'mid-level',
+                                             canExtend: false,
+                                             canTrade: true
+                                           };
+                                           updateFranchise({
+                                              budget: franchise.budget - signFee,
+                                              roster: [...franchise.roster, card.id],
+                                              contracts: [...(franchise.contracts || []), newContract]
+                                           });
+                                           setNews(prev => [`AGENT: ${card.name} has signed with ${teamData?.name}.`, ...prev].slice(0, 5));
+                                        }}
+                                        className="w-full py-4 bg-white text-black text-[10px] font-black uppercase rounded-2xl hover:bg-emerald-400 hover:shadow-[0_10px_30px_rgba(16,185,129,0.3)] transition-all active:scale-95 disabled:opacity-30 disabled:hover:bg-white transition-all font-black"
+                                      >
+                                         Negotiate Terms
+                                      </button>
+                                   </div>
+                                </div>
+                              );
+                           })}
+                          {ALL_CARDS.filter(c => !franchise.roster.includes(c.id)).length === 0 && (
+                            <div className="col-span-full py-20 text-center space-y-4">
+                               <div className="w-20 h-20 bg-zinc-900 border border-zinc-800 rounded-3xl flex items-center justify-center mx-auto text-zinc-700 shadow-inner">
+                                  <Users size={40} />
                                </div>
-                             );
-                          })}
+                               <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-800">No active candidates identified in search</p>
+                            </div>
+                          )}
                        </div>
                     </div>
                  )}
@@ -2079,30 +2426,43 @@ const CareerView: React.FC = () => {
             )}
 
             {activeTab === 'standings' && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 pb-32">
                 {/* East Conference */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-black italic uppercase text-blue-500 border-l-4 border-blue-500 pl-4">Eastern Conference</h3>
-                  <div className="bg-zinc-900/40 border border-zinc-800 rounded-[2.5rem] overflow-hidden">
-                    <div className="grid grid-cols-10 p-5 border-b border-zinc-800 bg-black/60 text-[9px] font-black uppercase text-zinc-500 tracking-widest">
-                       <div className="col-span-1">#</div>
-                       <div className="col-span-4">Team</div>
+                <div className="space-y-8">
+                  <div className="flex items-center gap-4">
+                     <div className="w-1.5 h-12 bg-blue-500 rounded-full" />
+                     <div>
+                        <h3 className="text-2xl font-black italic uppercase tracking-tighter text-white">Eastern Conference</h3>
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">Atlantic, Central & Southeast divisions</p>
+                     </div>
+                  </div>
+                  
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] overflow-hidden shadow-2xl relative">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[100px] pointer-events-none" />
+                    <div className="grid grid-cols-10 p-6 border-b border-zinc-800 bg-black/40 text-[9px] font-black uppercase text-zinc-500 tracking-widest italic">
+                       <div className="col-span-1">RK</div>
+                       <div className="col-span-4">FRANCHISE</div>
                        <div className="col-span-1 text-center">W</div>
                        <div className="col-span-1 text-center">L</div>
                        <div className="col-span-1 text-center">GB</div>
                        <div className="col-span-2 text-right">PCT</div>
                     </div>
-                    <div className="divide-y divide-zinc-800/20">
+                    <div className="divide-y divide-zinc-800/40">
                       {franchise.conferenceStandings?.filter(s => s.conference === 'East').sort((a,b) => b.pct - a.pct).map((s, idx) => (
-                        <div key={s.teamId} className={`grid grid-cols-10 p-4 items-center ${s.teamId === franchise.team ? 'bg-emerald-500/10 border-l-[4px] border-emerald-500' : ''}`}>
-                           <div className="col-span-1 text-[10px] font-black text-zinc-600 italic">{idx + 1}</div>
-                           <div className="col-span-4 flex items-center gap-3">
-                              <span className="text-[10px] font-black uppercase italic truncate">{s.teamName}</span>
+                        <div key={s.teamId} className={`grid grid-cols-10 p-5 items-center transition-colors group hover:bg-zinc-800/20 ${s.teamId === franchise.team ? 'bg-emerald-500/10 border-l-4 border-emerald-500' : ''}`}>
+                           <div className="col-span-1 text-[11px] font-black text-zinc-700 italic group-hover:text-white transition-colors">{idx + 1}</div>
+                           <div className="col-span-4 flex items-center gap-4">
+                              <div className="w-8 h-8 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center p-1.5 shrink-0 shadow-lg">
+                                 <img src={getTeamLogo(s.teamId)} alt="Logo" className="w-full h-full object-contain" />
+                              </div>
+                              <span className="text-[11px] font-black uppercase italic tracking-tight text-zinc-300 truncate">{s.teamName}</span>
                            </div>
-                           <div className="col-span-1 text-center text-xs font-black">{s.wins}</div>
-                           <div className="col-span-1 text-center text-xs font-bold text-zinc-600">{s.losses}</div>
-                           <div className="col-span-1 text-center text-[10px] font-bold text-zinc-500">{(idx === 0 ? '-' : (franchise.conferenceStandings?.filter(cs => cs.conference === 'East')[0].wins - s.wins))}</div>
-                           <div className="col-span-2 text-right text-[10px] font-bold text-zinc-500">.{Math.round(s.pct * 1000).toString().padStart(3, '0')}</div>
+                           <div className="col-span-1 text-center text-[12px] font-black text-white">{s.wins}</div>
+                           <div className="col-span-1 text-center text-[12px] font-bold text-zinc-600">{s.losses}</div>
+                           <div className="col-span-1 text-center text-[10px] font-black text-emerald-500/60 group-hover:text-emerald-500">
+                             {idx === 0 ? '--' : (franchise.conferenceStandings?.filter(cs => cs.conference === 'East')[0].wins - s.wins)}
+                           </div>
+                           <div className="col-span-2 text-right text-[11px] font-black text-zinc-400 tabular-nums italic">.{Math.round(s.pct * 1000).toString().padStart(3, '0')}</div>
                         </div>
                       ))}
                     </div>
@@ -2110,28 +2470,41 @@ const CareerView: React.FC = () => {
                 </div>
 
                 {/* West Conference */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-black italic uppercase text-red-500 border-l-4 border-red-500 pl-4">Western Conference</h3>
-                  <div className="bg-zinc-900/40 border border-zinc-800 rounded-[2.5rem] overflow-hidden">
-                    <div className="grid grid-cols-10 p-5 border-b border-zinc-800 bg-black/60 text-[9px] font-black uppercase text-zinc-500 tracking-widest">
-                       <div className="col-span-1">#</div>
-                       <div className="col-span-4">Team</div>
+                <div className="space-y-8">
+                  <div className="flex items-center gap-4">
+                     <div className="w-1.5 h-12 bg-red-500 rounded-full" />
+                     <div>
+                        <h3 className="text-2xl font-black italic uppercase tracking-tighter text-white">Western Conference</h3>
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">Northwest, Pacific & Southwest divisions</p>
+                     </div>
+                  </div>
+
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] overflow-hidden shadow-2xl relative">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 blur-[100px] pointer-events-none" />
+                    <div className="grid grid-cols-10 p-6 border-b border-zinc-800 bg-black/40 text-[9px] font-black uppercase text-zinc-500 tracking-widest italic">
+                       <div className="col-span-1">RK</div>
+                       <div className="col-span-4">FRANCHISE</div>
                        <div className="col-span-1 text-center">W</div>
                        <div className="col-span-1 text-center">L</div>
                        <div className="col-span-1 text-center">GB</div>
                        <div className="col-span-2 text-right">PCT</div>
                     </div>
-                    <div className="divide-y divide-zinc-800/20">
+                    <div className="divide-y divide-zinc-800/40">
                       {franchise.conferenceStandings?.filter(s => s.conference === 'West').sort((a,b) => b.pct - a.pct).map((s, idx) => (
-                        <div key={s.teamId} className={`grid grid-cols-10 p-4 items-center ${s.teamId === franchise.team ? 'bg-emerald-500/10 border-l-[4px] border-emerald-500' : ''}`}>
-                           <div className="col-span-1 text-[10px] font-black text-zinc-600 italic">{idx + 1}</div>
-                           <div className="col-span-4 flex items-center gap-3">
-                              <span className="text-[10px] font-black uppercase italic truncate">{s.teamName}</span>
+                        <div key={s.teamId} className={`grid grid-cols-10 p-5 items-center transition-colors group hover:bg-zinc-800/20 ${s.teamId === franchise.team ? 'bg-emerald-500/10 border-l-4 border-emerald-500' : ''}`}>
+                           <div className="col-span-1 text-[11px] font-black text-zinc-700 italic group-hover:text-white transition-colors">{idx + 1}</div>
+                           <div className="col-span-4 flex items-center gap-4">
+                              <div className="w-8 h-8 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center p-1.5 shrink-0 shadow-lg">
+                                 <img src={getTeamLogo(s.teamId)} alt="Logo" className="w-full h-full object-contain" />
+                              </div>
+                              <span className="text-[11px] font-black uppercase italic tracking-tight text-zinc-300 truncate">{s.teamName}</span>
                            </div>
-                           <div className="col-span-1 text-center text-xs font-black">{s.wins}</div>
-                           <div className="col-span-1 text-center text-xs font-bold text-zinc-600">{s.losses}</div>
-                           <div className="col-span-1 text-center text-[10px] font-bold text-zinc-500">{(idx === 0 ? '-' : (franchise.conferenceStandings?.filter(cs => cs.conference === 'West')[0].wins - s.wins))}</div>
-                           <div className="col-span-2 text-right text-[10px] font-bold text-zinc-500">.{Math.round(s.pct * 1000).toString().padStart(3, '0')}</div>
+                           <div className="col-span-1 text-center text-[12px] font-black text-white">{s.wins}</div>
+                           <div className="col-span-1 text-center text-[12px] font-bold text-zinc-600">{s.losses}</div>
+                           <div className="col-span-1 text-center text-[10px] font-black text-emerald-500/60 group-hover:text-emerald-500">
+                             {idx === 0 ? '--' : (franchise.conferenceStandings?.filter(cs => cs.conference === 'West')[0].wins - s.wins)}
+                           </div>
+                           <div className="col-span-2 text-right text-[11px] font-black text-zinc-400 tabular-nums italic">.{Math.round(s.pct * 1000).toString().padStart(3, '0')}</div>
                         </div>
                       ))}
                     </div>
@@ -2141,159 +2514,269 @@ const CareerView: React.FC = () => {
             )}
 
             {activeTab === 'stats' && (
-              <div className="space-y-8">
-                 <h2 className="text-2xl font-black uppercase italic tracking-tighter">Season Leaders</h2>
-                 <div className="bg-zinc-900/40 border border-zinc-800 rounded-[3rem] overflow-hidden">
-                    <div className="grid grid-cols-12 p-6 border-b border-zinc-800 bg-black/60 text-[9px] font-black uppercase text-zinc-500 tracking-widest italic">
-                       <div className="col-span-5">Player / Team</div>
-                       <div className="col-span-1 text-center">GP</div>
-                       <div className="col-span-2 text-center">PPG</div>
-                       <div className="col-span-2 text-center">RPG</div>
-                       <div className="col-span-2 text-center">APG</div>
+              <div className="space-y-12 pb-32 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                  <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-zinc-900 pb-8">
+                     <div className="space-y-2">
+                        <h2 className="text-4xl font-black uppercase italic tracking-tighter text-white">Season Analytics</h2>
+                        <p className="text-xs font-bold text-zinc-500 uppercase tracking-[0.3em]">Player Performance Metrics</p>
+                     </div>
+                     <div className="flex items-center gap-4 bg-zinc-900 border border-zinc-800 px-6 py-3 rounded-2xl shadow-xl">
+                        <BarChart3 size={18} className="text-blue-500" />
+                        <span className="text-[10px] font-black uppercase text-zinc-400">Live Metric Simulation</span>
+                     </div>
+                  </div>
+
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-[3rem] overflow-hidden shadow-2xl relative">
+                     <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/5 blur-[150px] pointer-events-none" />
+                     
+                     <div className="grid grid-cols-12 p-8 border-b border-zinc-800 bg-black/60 text-[9px] font-black uppercase text-zinc-600 tracking-[0.2em] italic relative z-10">
+                        <div className="col-span-1">RK</div>
+                        <div className="col-span-5">Player Entity</div>
+                        <div className="col-span-1 text-center">GP</div>
+                        <div className="col-span-1 text-center">TEAM</div>
+                        <div className="col-span-2 text-center text-white">PPG</div>
+                        <div className="col-span-1 text-center">RPG</div>
+                        <div className="col-span-1 text-center">APG</div>
+                     </div>
+
+                     <div className="divide-y divide-zinc-800/20 max-h-[700px] overflow-y-auto no-scrollbar relative z-10">
+                        {(franchise.playerSeasonStats || []).sort((a,b) => b.avgPts - a.avgPts).map((stat, idx) => (
+                          <div key={stat.cardId} className="grid grid-cols-12 p-6 items-center hover:bg-zinc-800/40 transition-all group">
+                             <div className="col-span-1">
+                                <span className={`text-[12px] font-black italic ${idx < 3 ? 'text-white' : 'text-zinc-700'} group-hover:text-white transition-colors`}>
+                                   {(idx + 1).toString().padStart(2, '0')}
+                                </span>
+                             </div>
+                             <div className="col-span-5 flex items-center gap-5">
+                                <div className="w-10 h-10 bg-zinc-950 rounded-xl flex items-center justify-center p-1 border border-zinc-800 shadow-inner group-hover:scale-110 transition-transform">
+                                   <img src={getTeamLogo(ALL_CARDS.find(c => c.id === stat.cardId)?.team || '')} className="w-full h-full object-contain opacity-40 group-hover:opacity-100 transition-opacity" />
+                                </div>
+                                <div className="space-y-0.5">
+                                   <p className="text-sm font-black uppercase tracking-tight italic text-zinc-300 group-hover:text-white transition-colors underline-offset-4 group-hover:underline decoration-zinc-700">{stat.playerName}</p>
+                                   <div className="flex items-center gap-2">
+                                      <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">{normalizePosition(ALL_CARDS.find(c => c.id === stat.cardId)?.position || '')}</span>
+                                      <div className="w-1 h-1 rounded-full bg-zinc-800" />
+                                      <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Efficiency: {((stat.avgPts + stat.avgReb + stat.avgAst) / 3).toFixed(1)}</span>
+                                   </div>
+                                </div>
+                             </div>
+                             <div className="col-span-1 text-center tabular-nums text-xs font-bold text-zinc-600">{stat.gamesPlayed}</div>
+                             <div className="col-span-1 text-center">
+                                <span className="bg-zinc-950 px-3 py-1 rounded-lg border border-zinc-800 text-[10px] font-black italic text-zinc-500 group-hover:text-zinc-200 transition-colors uppercase">{stat.teamAbbr}</span>
+                             </div>
+                             <div className="col-span-2 text-center">
+                                <span className="text-xl font-black italic text-white tabular-nums group-hover:scale-110 inline-block transition-transform">{stat.avgPts.toFixed(1)}</span>
+                             </div>
+                             <div className="col-span-1 text-center tabular-nums text-xs font-black text-zinc-400 group-hover:text-zinc-200 transition-colors">{stat.avgReb.toFixed(1)}</div>
+                             <div className="col-span-1 text-center tabular-nums text-xs font-black text-zinc-400 group-hover:text-zinc-200 transition-colors">{stat.avgAst.toFixed(1)}</div>
+                          </div>
+                        ))}
+                        {(!franchise.playerSeasonStats || franchise.playerSeasonStats.length === 0) && (
+                          <div className="py-48 text-center space-y-6">
+                             <div className="w-20 h-20 bg-zinc-950 rounded-[2rem] flex items-center justify-center mx-auto text-zinc-800 border border-zinc-900 shadow-inner">
+                                <BarChart3 size={40} />
+                             </div>
+                             <div className="space-y-2">
+                                <p className="text-zinc-600 font-black uppercase tracking-[0.4em] text-[10px]">No statistical data accumulated.</p>
+                                <p className="text-zinc-800 text-[8px] font-bold uppercase tracking-widest leading-relaxed">Play games to populate centralized performance database</p>
+                             </div>
+                          </div>
+                        )}
+                     </div>
+                  </div>
+              </div>
+            )}
+
+            {activeTab === 'mgmt' && (
+              <div className="space-y-12 pb-32">
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                    {[
+                       { id: 'coaching', label: 'Tactical Analytics', icon: Target, val: franchise.upgrades.coaching, color: 'text-orange-500', bg: 'bg-orange-500/10', desc: 'Optimize playbook and offensive execution flow.' },
+                       { id: 'scouting', label: 'Global Intel', icon: Search, val: franchise.upgrades.scouting, color: 'text-blue-500', bg: 'bg-blue-500/10', desc: 'Expand recruitment database and prospect depth.' },
+                       { id: 'training', label: 'Performance Lab', icon: Activity, val: franchise.upgrades.training, color: 'text-purple-500', bg: 'bg-purple-500/10', desc: 'Maximize genetic potential and injury recovery.' },
+                       { id: 'facilities', label: 'Fan Experience', icon: Building, val: franchise.upgrades.facilities, color: 'text-emerald-500', bg: 'bg-emerald-500/10', desc: 'Modernize stadium to driving revenue and loyalty.' },
+                     ].map(u => (
+                       <div key={u.id} className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-8 space-y-8 flex flex-col group transition-all hover:bg-zinc-900/80 shadow-2xl relative overflow-hidden">
+                          <div className={`absolute top-0 right-0 w-24 h-24 ${u.bg} blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity`} />
+                          
+                          <div className="flex items-center justify-between relative z-10">
+                             <div className={`w-14 h-14 rounded-2xl ${u.bg} flex items-center justify-center ${u.color} shadow-inner`}>
+                                <u.icon size={28} />
+                             </div>
+                             <div className="text-right">
+                                <span className="text-[9px] font-black uppercase text-zinc-600 italic tracking-[0.2em]">Rank</span>
+                                <p className="text-2xl font-black italic text-zinc-400">0{u.val}</p>
+                             </div>
+                          </div>
+
+                          <div className="space-y-2 relative z-10">
+                             <h4 className="text-lg font-black uppercase italic tracking-tighter text-white">{u.label}</h4>
+                             <p className="text-[10px] font-bold text-zinc-500 leading-relaxed min-h-[3rem] line-clamp-2">{u.desc}</p>
+                          </div>
+
+                          <div className="space-y-5 relative z-10 mt-auto">
+                             <div className="flex gap-1.5 h-1.5">
+                                {[...Array(10)].map((_, i) => (
+                                  <div key={i} className={`flex-1 rounded-full transition-all duration-500 ${i < u.val ? (i === u.val - 1 ? 'bg-zinc-100 shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'bg-zinc-700') : 'bg-zinc-950 shadow-inner'}`} />
+                                ))}
+                             </div>
+                             <button 
+                               onClick={() => {
+                                  const cost = u.val * 100000;
+                                  if (franchise.budget >= cost && u.val < 10) {
+                                     updateFranchise({
+                                        budget: franchise.budget - cost,
+                                        upgrades: { ...franchise.upgrades, [u.id]: u.val + 1 }
+                                     });
+                                  }
+                               }}
+                               disabled={franchise.budget < u.val * 100000 || u.val >= 10}
+                               className="w-full py-5 bg-white text-black rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all disabled:opacity-10 hover:bg-zinc-200 shadow-xl group-hover:scale-[1.02] active:scale-95"
+                             >
+                                Upgrade · ${(u.val * 100).toFixed(0)}K
+                             </button>
+                          </div>
+                       </div>
+                     ))}
+                 </div>
+
+                 {/* Action Cards Grid */}
+                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12">
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-[3rem] p-10 flex flex-col sm:flex-row gap-10 items-center shadow-2xl relative overflow-hidden group">
+                       <div className="absolute inset-0 bg-red-500/5 blur-[100px] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                       <div className="w-32 h-32 rounded-[2.5rem] bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0 shadow-2xl relative z-10 group-hover:scale-105 transition-transform">
+                          <Zap size={56} className="text-red-500" fill="currentColor" />
+                       </div>
+                       <div className="space-y-6 relative z-10 flex-1">
+                          <div className="space-y-2">
+                             <div className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                                <h4 className="text-2xl font-black uppercase italic tracking-tighter text-white">Advanced Cryo-Recovery</h4>
+                             </div>
+                             <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest italic">Emergency Medical Protocol</p>
+                          </div>
+                          <p className="text-xs text-zinc-500 leading-relaxed">Instantly restore 30% energy across entire active roster. Vital for post-intensity recovery cycles.</p>
+                          <button 
+                             onClick={() => {
+                                const cost = 50000;
+                                if (franchise.budget >= cost) {
+                                   const newEnergy = { ...(franchise.playerEnergy || {}) };
+                                   franchise.roster.forEach(id => {
+                                      newEnergy[id] = Math.min(100, (newEnergy[id] ?? 100) + 30);
+                                   });
+                                   updateFranchise({ budget: franchise.budget - cost, playerEnergy: newEnergy });
+                                }
+                             }}
+                             disabled={franchise.budget < 50000}
+                             className="px-10 py-5 bg-red-500 hover:bg-red-400 text-white rounded-2xl font-black uppercase tracking-[0.4em] text-[10px] shadow-[0_15px_40px_rgba(239,68,68,0.2)] transition-all active:scale-95 disabled:opacity-20 flex items-center gap-3"
+                          >
+                             Execute Process · $50K
+                          </button>
+                       </div>
                     </div>
-                    <div className="divide-y divide-zinc-800/20 max-h-[600px] overflow-y-auto no-scrollbar">
-                       {(franchise.playerSeasonStats || []).sort((a,b) => b.avgPts - a.avgPts).map((stat, idx) => (
-                         <div key={stat.cardId} className="grid grid-cols-12 p-5 items-center hover:bg-zinc-800/30 transition-all">
-                            <div className="col-span-5 flex items-center gap-4">
-                               <span className="text-[10px] font-black text-zinc-700 italic">{idx + 1}</span>
-                               <div>
-                                  <p className="text-xs font-black uppercase tracking-tight italic">{stat.playerName}</p>
-                                  <p className="text-[9px] font-bold text-zinc-600 uppercase">{stat.teamAbbr}</p>
-                               </div>
-                            </div>
-                            <div className="col-span-1 text-center text-xs font-bold">{stat.gamesPlayed}</div>
-                            <div className="col-span-2 text-center text-xs font-black text-white">{stat.avgPts.toFixed(1)}</div>
-                            <div className="col-span-2 text-center text-xs font-black text-zinc-400">{stat.avgReb.toFixed(1)}</div>
-                            <div className="col-span-2 text-center text-xs font-black text-zinc-400">{stat.avgAst.toFixed(1)}</div>
-                         </div>
-                       ))}
-                       {(!franchise.playerSeasonStats || franchise.playerSeasonStats.length === 0) && (
-                         <div className="py-32 text-center">
-                            <p className="text-zinc-600 font-black uppercase tracking-widest text-[10px]">No stats recorded yet. Play a game to start simulation.</p>
-                         </div>
-                       )}
+
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-[3rem] p-10 flex flex-col sm:flex-row gap-10 items-center shadow-2xl relative overflow-hidden group">
+                       <div className="absolute inset-0 bg-amber-500/5 blur-[100px] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                       <div className="w-32 h-32 rounded-[2.5rem] bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0 shadow-2xl relative z-10 group-hover:scale-105 transition-transform">
+                          <Users size={56} className="text-amber-500" />
+                       </div>
+                       <div className="space-y-6 relative z-10 flex-1">
+                          <div className="space-y-2">
+                             <div className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                                <h4 className="text-2xl font-black uppercase italic tracking-tighter text-white">Press Conference</h4>
+                             </div>
+                             <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest italic">Strategic PR Management</p>
+                          </div>
+                          <p className="text-xs text-zinc-500 leading-relaxed">Host a media event to handle fan expectations and boost morale. Increases Fan Support by 15%.</p>
+                          <button 
+                             onClick={() => {
+                                const cost = 25000;
+                                if (franchise.budget >= cost) {
+                                   updateFranchise({ 
+                                      budget: franchise.budget - cost, 
+                                      fanSupport: Math.min(100, (franchise.fanSupport || 50) + 15) 
+                                   });
+                                }
+                             }}
+                             disabled={franchise.budget < 25000}
+                             className="px-10 py-5 bg-amber-500 hover:bg-amber-400 text-black rounded-2xl font-black uppercase tracking-[0.4em] text-[10px] shadow-[0_15px_40px_rgba(245,158,11,0.2)] transition-all active:scale-95 disabled:opacity-20 flex items-center gap-3"
+                          >
+                             Schedule Meet · $25K
+                          </button>
+                       </div>
                     </div>
                  </div>
               </div>
             )}
 
-            {activeTab === 'mgmt' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                 {[
-                    { id: 'coaching', label: 'Offensive Strategies', icon: Target, val: franchise.upgrades.coaching, color: 'text-orange-500', desc: 'Boost team offensive flow and playbook complexity.' },
-                    { id: 'scouting', label: 'Global Scouting Network', icon: Search, val: franchise.upgrades.scouting, color: 'text-blue-500', desc: 'Improve free agent identification and talent reports.' },
-                    { id: 'training', label: 'Performance Center', icon: Activity, val: franchise.upgrades.training, color: 'text-purple-500', desc: 'Accelerate player progression and recovery.' },
-                    { id: 'facilities', label: 'Modern Arena Facilities', icon: Building, val: franchise.upgrades.facilities, color: 'text-emerald-500', desc: 'Increases revenue per home game and fan loyalty.' },
-                  ].map(u => (
-                    <div key={u.id} className="p-8 bg-zinc-900/40 border border-zinc-800 rounded-[3rem] space-y-6 hover:border-zinc-600 transition-all">
-                       <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                             <div className={`w-14 h-14 rounded-2xl bg-black/40 flex items-center justify-center ${u.color}`}><u.icon size={28} /></div>
-                             <div>
-                                <h4 className="text-lg font-black uppercase italic tracking-tight">{u.label}</h4>
-                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Upgrade Organization</p>
-                             </div>
-                          </div>
-                          <div className="text-right">
-                             <span className="text-[10px] font-black uppercase text-zinc-500">Level</span>
-                             <p className="text-xl font-black italic">{u.val}</p>
-                          </div>
-                       </div>
-                       <p className="text-xs text-zinc-500 leading-relaxed">{u.desc}</p>
-                       <div className="space-y-4">
-                          <div className="flex gap-1.5">
-                             {[...Array(10)].map((_, i) => (
-                               <div key={i} className={`flex-1 h-2 rounded-full ${i < u.val ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-zinc-800'}`} />
-                             ))}
-                          </div>
-                          <button 
-                            onClick={() => {
-                               const cost = u.val * 100000;
-                               if (franchise.budget >= cost && u.val < 10) {
-                                  updateFranchise({
-                                     budget: franchise.budget - cost,
-                                     upgrades: { ...franchise.upgrades, [u.id]: u.val + 1 }
-                                  });
-                               }
-                            }}
-                            disabled={franchise.budget < u.val * 100000 || u.val >= 10}
-                            className="w-full py-4 bg-zinc-800/50 hover:bg-zinc-700 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all disabled:opacity-30 border border-zinc-700/50"
-                          >
-                             Enhance — ${(u.val * 100).toFixed(0)}K
-                          </button>
-                       </div>
-                    </div>
-                  ))}
-                  
-                  {/* Action Card: Recovery */}
-                  <div className="p-8 bg-black border border-zinc-700 rounded-[3rem] space-y-6 relative overflow-hidden group">
-                     <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 blur-[50px] rounded-full translate-x-1/2 -translate-y-1/2" />
-                     <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-red-500 flex items-center justify-center text-black shadow-[0_0_20px_rgba(239,68,68,0.3)]"><Zap size={28} fill="currentColor" /></div>
-                        <div>
-                           <h4 className="text-lg font-black uppercase italic tracking-tight">Cryotherapy Session</h4>
-                           <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Team-wide Recovery</p>
-                        </div>
-                     </div>
-                     <p className="text-xs text-zinc-500 leading-relaxed">Restore 30% energy for all players in the roster. Essential for back-to-back matchups.</p>
-                     <button 
-                        onClick={() => {
-                           const cost = 50000;
-                           if (franchise.budget >= cost) {
-                              const newEnergy = { ...(franchise.playerEnergy || {}) };
-                              franchise.roster.forEach(id => {
-                                 newEnergy[id] = Math.min(100, (newEnergy[id] ?? 100) + 30);
-                              });
-                              updateFranchise({ budget: franchise.budget - cost, playerEnergy: newEnergy });
-                           }
-                        }}
-                        disabled={franchise.budget < 50000}
-                        className="w-full py-5 bg-red-500 hover:bg-red-400 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl active:scale-95 transition-all disabled:opacity-30"
-                     >
-                        Execute Session — $50K
-                     </button>
-                  </div>
-              </div>
-            )}
-
             {activeTab === 'league' && (
-               <div className="space-y-8">
-                  <div className="flex items-center justify-between">
-                     <h2 className="text-3xl font-black uppercase italic tracking-tighter">League Scoreboard</h2>
-                     <span className="text-xs font-black text-zinc-500 uppercase tracking-widest">{franchise.currentDate} Session</span>
+               <div className="space-y-12 pb-32">
+                  <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-zinc-900 pb-8">
+                     <div className="space-y-2">
+                        <h2 className="text-4xl font-black uppercase italic tracking-tighter text-white">Daily Recap</h2>
+                        <p className="text-xs font-bold text-zinc-500 uppercase tracking-[0.3em]">Session: {franchise.currentDate}</p>
+                     </div>
+                     <div className="flex items-center gap-4 bg-zinc-900 border border-zinc-800 px-6 py-3 rounded-2xl">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-[10px] font-black uppercase text-zinc-400">Live Archives Sync</span>
+                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                      {(() => {
                         const yesterday = new Date(new Date(franchise.currentDate || '2025-10-22').getTime() - 86400000).toISOString().split('T')[0];
                         const results = franchise.leagueHistory?.[yesterday] || [];
                         
-                        if (results.length === 0) return <div className="col-span-full py-20 text-center text-zinc-700">No games played yesterday.</div>;
+                        if (results.length === 0) return (
+                          <div className="col-span-full py-40 text-center space-y-4">
+                             <div className="w-20 h-20 bg-zinc-950 rounded-3xl flex items-center justify-center mx-auto text-zinc-800 border border-zinc-900">
+                                <Activity size={40} />
+                             </div>
+                             <p className="text-zinc-700 font-black uppercase tracking-[0.4em] text-[10px]">No historical data found for previous cycle.</p>
+                          </div>
+                        );
 
                         return results.map((game, i) => (
-                           <div key={i} className="p-6 bg-zinc-900 border border-zinc-800 rounded-3xl space-y-6 hover:border-zinc-700 transition-all">
-                              <div className="flex items-center justify-between">
-                                 <div className="flex items-center gap-3">
-                                    <img src={getTeamLogo(game.away)} className="w-10 h-10 object-contain" />
-                                    <div>
-                                       <p className="text-[10px] font-black text-zinc-600 uppercase">Away</p>
-                                       <p className="text-lg font-black italic">{game.away}</p>
+                           <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] overflow-hidden group hover:border-zinc-500 transition-all shadow-2xl relative">
+                              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+                              
+                              <div className="p-8 space-y-8 relative z-10">
+                                 <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                       <div className="w-14 h-14 bg-zinc-950 rounded-2xl p-2 flex items-center justify-center border border-zinc-800 shadow-inner group-hover:scale-105 transition-transform">
+                                          <img src={getTeamLogo(game.away)} className="w-full h-full object-contain" />
+                                       </div>
+                                       <div>
+                                          <p className="text-[8px] font-black text-zinc-600 uppercase tracking-widest italic">Visitor</p>
+                                          <p className="text-xl font-black italic text-white leading-tight">{game.away.split(' ').pop()}</p>
+                                       </div>
                                     </div>
+                                    <div className={`text-4xl font-black italic tracking-tighter ${game.awayScore > game.homeScore ? 'text-white' : 'text-zinc-700'}`}>{game.awayScore}</div>
                                  </div>
-                                 <div className={`text-3xl font-black italic ${game.awayScore > game.homeScore ? 'text-white' : 'text-zinc-700'}`}>{game.awayScore}</div>
-                              </div>
-                              <div className="h-px w-full bg-zinc-800/50 relative">
-                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-zinc-900 px-2 text-[8px] font-black text-zinc-800 italic uppercase">Final</div>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                 <div className="flex items-center gap-3">
-                                    <img src={getTeamLogo(game.home)} className="w-10 h-10 object-contain" />
-                                    <div>
-                                       <p className="text-[10px] font-black text-zinc-600 uppercase">Home</p>
-                                       <p className="text-lg font-black italic">{game.home}</p>
+
+                                 <div className="flex items-center gap-4 px-2">
+                                    <div className="flex-1 h-px bg-zinc-800" />
+                                    <div className="text-[9px] font-black text-zinc-700 uppercase tracking-[0.4em] italic">Final</div>
+                                    <div className="flex-1 h-px bg-zinc-800" />
+                                 </div>
+
+                                 <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                       <div className="w-14 h-14 bg-zinc-950 rounded-2xl p-2 flex items-center justify-center border border-zinc-800 shadow-inner group-hover:scale-105 transition-transform">
+                                          <img src={getTeamLogo(game.home)} className="w-full h-full object-contain" />
+                                       </div>
+                                       <div>
+                                          <p className="text-[8px] font-black text-zinc-600 uppercase tracking-widest italic">Home</p>
+                                          <p className="text-xl font-black italic text-white leading-tight">{game.home.split(' ').pop()}</p>
+                                       </div>
                                     </div>
+                                    <div className={`text-4xl font-black italic tracking-tighter ${game.homeScore > game.awayScore ? 'text-white' : 'text-zinc-700'}`}>{game.homeScore}</div>
                                  </div>
-                                 <div className={`text-3xl font-black italic ${game.homeScore > game.awayScore ? 'text-white' : 'text-zinc-700'}`}>{game.homeScore}</div>
+                              </div>
+                              
+                              <div className="bg-zinc-950 border-t border-zinc-800 p-4 flex items-center justify-center">
+                                 <span className="text-[7px] font-black text-zinc-600 uppercase tracking-[0.5em]">Game Archives Reference: {i+1}</span>
                               </div>
                            </div>
                         ));

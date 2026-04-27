@@ -41,10 +41,17 @@ const normalizePacks = (packs: any[]) => {
   const groups: Record<string, any> = {};
   (packs || []).forEach(pack => {
     const type = pack.type;
-    if (!groups[type]) {
-      groups[type] = { ...pack, id: type, count: Number(pack.count) || 1 };
+    // Normalize type to lowercase to avoid "allstar" vs "AllStar" issues
+    const normalizedType = type?.toLowerCase() || 'random';
+    if (!groups[normalizedType]) {
+      groups[normalizedType] = { 
+        ...pack, 
+        type: normalizedType,
+        id: normalizedType, 
+        count: Number(pack.count) || 1 
+      };
     } else {
-      groups[type].count += (Number(pack.count) || 1);
+      groups[normalizedType].count += (Number(pack.count) || 1);
     }
   });
   return Object.values(groups);

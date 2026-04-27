@@ -60,6 +60,15 @@ export default function OpenView() {
           className="relative w-[65vw] max-w-[280px] aspect-[2.5/3.5] bg-zinc-900 rounded-3xl border-4 border-zinc-800 shadow-[0_30px_60px_rgba(0,0,0,0.8)] flex flex-col items-center justify-center overflow-hidden group cursor-pointer"
           onClick={handleOpenFreePack}
         >
+          {/* Neon Free Tag */}
+          <div className="absolute top-4 right-4 z-20 -rotate-12 group-hover:scale-110 transition-transform duration-500">
+            <div className="bg-black px-3 py-1 rounded-sm border-2 border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.8),inset_0_0_8px_rgba(34,197,94,0.8)] animate-pulse">
+              <span className="text-sm font-black italic uppercase tracking-widest text-green-400 drop-shadow-[0_0_5px_rgba(34,197,94,1)]">
+                FREE
+              </span>
+            </div>
+          </div>
+
           {/* Pack Design Elements */}
           <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-amber-500/10 to-transparent" />
           <div className="absolute inset-0 bg-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />

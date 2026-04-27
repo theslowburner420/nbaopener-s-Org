@@ -41,6 +41,7 @@ interface DraftSlot {
 interface GhostTeam {
   name: string;
   ovr: number;
+  benchOvr: number;
 }
 
 interface BracketMatch {
@@ -654,9 +655,10 @@ const LiveMatchSimulation = memo<{
   match: BracketMatch;
   starters: DraftSlot[];
   teamOVR: number;
+  benchOVR: number;
   onFinish: (matchId: string, s1: number, s2: number, winner: any) => void;
   onClose: () => void;
-}>(({ match, starters, teamOVR, onFinish, onClose }) => {
+}>(({ match, starters, teamOVR, benchOVR, onFinish, onClose }) => {
   const [liveScore, setLiveScore] = useState({ s1: 0, s2: 0 });
   const [liveQuarter, setLiveQuarter] = useState(1);
   const [liveEvents, setLiveEvents] = useState<MatchEvent[]>([]);
@@ -678,6 +680,8 @@ const LiveMatchSimulation = memo<{
   const t2Name = match.team2 === 'USER' ? 'Your Team' : (match.team2 as GhostTeam).name;
   const t1Ovr = match.team1 === 'USER' ? teamOVR : (match.team1 as GhostTeam).ovr;
   const t2Ovr = match.team2 === 'USER' ? teamOVR : (match.team2 as GhostTeam).ovr;
+  const t1BenchOvr = match.team1 === 'USER' ? benchOVR : (match.team1 as GhostTeam).benchOvr;
+  const t2BenchOvr = match.team2 === 'USER' ? benchOVR : (match.team2 as GhostTeam).benchOvr;
 
   const startSimulation = useCallback((
     startIdx: number, 
@@ -783,14 +787,27 @@ const LiveMatchSimulation = memo<{
   }, [activeInteractiveEvent, matchSimulationData, match, interactiveTriggers, startSimulation]);
 
   useEffect(() => {
+    // Definitive simulation parameters
+    const t1Ovr = match.team1 === 'USER' ? teamOVR : (match.team1 as GhostTeam).ovr;
+    const t2Ovr = match.team2 === 'USER' ? teamOVR : (match.team2 as GhostTeam).ovr;
+    const t1BenchOvr = match.team1 === 'USER' ? benchOVR : (match.team1 as GhostTeam).benchOvr;
+    const t2BenchOvr = match.team2 === 'USER' ? benchOVR : (match.team2 as GhostTeam).benchOvr;
+
     // Improved Realistic Scoring Logic
     const ovrDiff = t1Ovr - t2Ovr;
     const benchDiff = (t1BenchOvr - t2BenchOvr) / 2; // Bench has less weight but still matters
     const baseScore = 98 + Math.floor(Math.random() * 15);
     
     // Final scores based on OVR difference + Bench contribution + some controlled variance
-    const s1Final = Math.round(baseScore + (ovrDiff * 1.4) + (benchDiff * 0.4) + (Math.random() * 8 - 4));
-    const s2Final = Math.round(baseScore - (ovrDiff * 1.4) - (benchDiff * 0.4) + (Math.random() * 8 - 4));
+    // We add a "Momentum" factor to vary results
+    const momentum = Math.random() * 12 - 6;
+    let s1Final = Math.max(76, Math.round(baseScore + (ovrDiff * 1.8) + (benchDiff * 0.5) + momentum + (Math.random() * 8 - 4)));
+    let s2Final = Math.max(76, Math.round(baseScore - (ovrDiff * 1.8) - (benchDiff * 0.5) - momentum + (Math.random() * 8 - 4)));
+    
+    // Logic for Overtime if tied
+    if (s1Final === s2Final) {
+      if (Math.random() > 0.5) s1Final += 2; else s2Final += 2;
+    }
     
     const oppName = match.team1 === 'USER' ? (match.team2 as GhostTeam).name : (match.team1 as GhostTeam).name;
     const userStarters = starters.map(s => s.card).filter(Boolean) as Card[];
@@ -917,10 +934,10 @@ const LiveMatchSimulation = memo<{
     }
 
     const winnerFinal = s1Final > s2Final ? match.team1 : (s1Final < s2Final ? match.team2 : (Math.random() > 0.5 ? match.team1 : match.team2));
-    const numTriggers = 2 + Math.floor(Math.random() * 2);
+    const numTriggers = 3 + Math.floor(Math.random() * 3); // More triggers for interactiveness
     const triggers: number[] = [];
     while (triggers.length < numTriggers) {
-      const idx = Math.floor(Math.random() * (newEvents.length - 10)) + 5;
+      const idx = Math.floor(Math.random() * (newEvents.length - 15)) + 10;
       if (!triggers.includes(idx)) triggers.push(idx);
     }
     setInteractiveTriggers(triggers);
@@ -1229,11 +1246,11 @@ const DraftView: React.FC = () => {
     }
   }, [phase, activeMatchId, bracket, currentRound]);
 
-  const teamOVR = useMemo(() => {
+  const { teamOVR, benchOVR } = useMemo(() => {
     const starterPlayers = starters.map(s => s.card).filter(Boolean) as Card[];
     const benchPlayers = bench.map(s => s.card).filter(Boolean) as Card[];
     
-    if (starterPlayers.length === 0 && benchPlayers.length === 0) return 0;
+    if (starterPlayers.length === 0 && benchPlayers.length === 0) return { teamOVR: 0, benchOVR: 0 };
     
     const startersAvg = starterPlayers.length > 0
       ? starterPlayers.reduce((acc, p) => acc + (p.stats?.ovr || 0), 0) / starterPlayers.length
@@ -1244,7 +1261,8 @@ const DraftView: React.FC = () => {
       : 0;
     
     // Balanced OVR: 70% Starters, 30% Bench
-    return Math.round((startersAvg * 0.7) + (benchAvg * 0.3));
+    const teamOVR = Math.round((startersAvg * 0.7) + (benchAvg * 0.3));
+    return { teamOVR, benchOVR: Math.round(benchAvg) };
   }, [starters, bench]);
 
   useEffect(() => {
@@ -1549,7 +1567,8 @@ const DraftView: React.FC = () => {
   const generateGhostTeam = (tournament: Tournament): GhostTeam => {
     const name = tournament.opponentPool[Math.floor(Math.random() * tournament.opponentPool.length)];
     const ovr = Math.floor(Math.random() * (tournament.maxOpponentOvr - tournament.minOpponentOvr + 1)) + tournament.minOpponentOvr;
-    return { name, ovr };
+    const benchOvr = Math.max(70, ovr - (Math.floor(Math.random() * 8) + 2)); // Bench is usually lower
+    return { name, ovr, benchOvr };
   };
 
   const handleSelectTournament = (tournament: Tournament) => {
@@ -1729,13 +1748,18 @@ const DraftView: React.FC = () => {
       if (m.winner) return m.winner;
       const t1Ovr = m.team1 === 'USER' ? teamOVR : (m.team1 as GhostTeam).ovr;
       const t2Ovr = m.team2 === 'USER' ? teamOVR : (m.team2 as GhostTeam).ovr;
+      const t1b = m.team1 === 'USER' ? benchOVR : (m.team1 as GhostTeam).benchOvr;
+      const t2b = m.team2 === 'USER' ? benchOVR : (m.team2 as GhostTeam).benchOvr;
+      
+      const ovrDiff = t1Ovr - t2Ovr;
+      const benchDiff = (t1b - t2b) / 2;
       
       // Realistic NBA scoring for ghost matches too
-      const baseScore = 105 + (Math.random() * 20 - 10);
-      const t1Score = Math.round(baseScore + (t1Ovr - 85) + (Math.random() * 10 - 5));
-      const t2Score = Math.round(baseScore + (t2Ovr - 85) + (Math.random() * 10 - 5));
+      const baseScore = 102 + (Math.random() * 10 - 5);
+      const t1Score = Math.round(baseScore + (ovrDiff * 1.5) + (benchDiff * 0.4) + (Math.random() * 8 - 4));
+      const t2Score = Math.round(baseScore - (ovrDiff * 1.5) - (benchDiff * 0.4) + (Math.random() * 8 - 4));
       
-      return t1Score > t2Score ? m.team1 : m.team2;
+      return t1Score > t2Score ? m.team1 : (t1Score < t2Score ? m.team2 : (Math.random() > 0.5 ? m.team1 : m.team2));
     };
 
     if (currentRound === 'QF') {
@@ -2595,6 +2619,7 @@ const DraftView: React.FC = () => {
             match={bracket.find(m => m.id === activeMatchId)!}
             starters={starters}
             teamOVR={teamOVR}
+            benchOVR={benchOVR}
             onFinish={handleFinishMatch}
             onClose={() => setIsLiveMatchActive(false)}
           />
