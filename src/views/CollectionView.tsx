@@ -515,7 +515,7 @@ export default function CollectionView() {
       {/* Grid View */}
       <div className="flex-1 overflow-y-auto no-scrollbar" onScroll={handleScroll}>
         <div className="collection-grid">
-          {filteredCards.slice(0, visibleCount).map(renderGridItem)}
+          {(filteredCards || []).slice(0, visibleCount).map(renderGridItem)}
         </div>
         
         {/* Load More Indicator */}

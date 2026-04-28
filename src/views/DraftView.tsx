@@ -469,7 +469,7 @@ const MatchChatbox = memo<{
   // Performance: Limit visible history to prevent DOM bloat during high speed simulation
   // Also slice from the beginning to show the newest at the top if desired, 
   // but looking at the code it seems they are prepended.
-  const visibleEvents = useMemo(() => events.slice(0, 30), [events]);
+  const visibleEvents = useMemo(() => (events || []).slice(0, 30), [events]);
 
   return (
     <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col gap-4 overflow-y-auto pr-4 scrollbar-hide flex-col-reverse">

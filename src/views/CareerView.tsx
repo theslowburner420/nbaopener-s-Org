@@ -48,6 +48,8 @@ import {
   Heart,
   Flame,
   ArrowUpRight,
+  History,
+  Play,
   CreditCard,
   Check,
   LayoutGrid,
@@ -59,7 +61,8 @@ import {
   Coins,
   X,
   ChevronLeft,
-  Plus
+  Plus,
+  Play
 } from 'lucide-react';
 import { getTeamLogo } from '../data/nbaTeams';
 import CardItem from '../components/CardItem';
@@ -77,10 +80,10 @@ const normalizePosition = (pos: string): 'PG' | 'SG' | 'SF' | 'PF' | 'C' => {
   return 'SF';
 };
 
-const simulateBoxScore = (lineup: Record<string, string | null>, roster: string[], isUser: boolean, playerEnergy: Record<string, number> = {}): BoxScorePlayer[] => {
+const simulateBoxScore = (lineup: Record<string, string | null>, roster: string[] = [], isUser: boolean, playerEnergy: Record<string, number> = {}): BoxScorePlayer[] => {
   const boxScore: BoxScorePlayer[] = [];
-  const starterIds = Object.values(lineup).filter(Boolean) as string[];
-  const benchIds = roster.filter(id => !starterIds.includes(id)).slice(0, 5); // Take top 5 bench
+  const starterIds = Object.values(lineup || {}).filter(Boolean) as string[];
+  const benchIds = (roster || []).filter(id => !starterIds.includes(id)).slice(0, 5); // Take top 5 bench
   
   const allPlayers = [...starterIds, ...benchIds];
   
@@ -188,355 +191,323 @@ const ResetCareerModal: React.FC<{ show: boolean; onConfirm: () => void; onCance
 
 const MatchSimulationOverlay: React.FC<{ 
   show: boolean; 
-  team1: any; 
-  team2: any; 
-  team1OVR: number;
-  team2OVR: number;
+  userTeam: any; 
+  oppTeam: any; 
+  userLineup: Card[];
+  oppLineup: Card[];
+  userOVR: number;
+  oppOVR: number;
   onFinish: (result: any) => void;
-}> = ({ show, team1, team2, team1OVR, team2OVR, onFinish }) => {
-  const [phase, setPhase] = useState<'pre' | 'sim' | 'final'>('pre');
+}> = ({ show, userTeam, oppTeam, userLineup, oppLineup, userOVR, oppOVR, onFinish }) => {
+  const [phase, setPhase] = useState<'pregame' | 'live' | 'result'>('pregame');
+  const [countdown, setCountdown] = useState(3);
   const [currentQuarter, setCurrentQuarter] = useState(1);
-  const [timer, setTimer] = useState("12:00");
-  const [scores, setScores] = useState({ s1: 0, s2: 0 });
-  const [feed, setFeed] = useState<string[]>([]);
-  const [ballPos, setBallPos] = useState({ x: 50, y: 50 });
+  const [timerInQuarter, setTimerInQuarter] = useState(720);
+  const [scores, setScores] = useState({ user: 0, opp: 0 });
+  const [feed, setFeed] = useState<{text: string, type?: 'highlight' | 'score' | 'quarter', emoji: string}[]>([]);
   const [isClutch, setIsClutch] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [quarterEnding, setQuarterEnding] = useState(false);
+  const [showResultTab, setShowResultTab] = useState<'summary' | 'boxscore'>('summary');
+
+  const TICK_MS = 1000;
+  const winProb = (userOVR / (userOVR + oppOVR)) * 100;
 
   useEffect(() => {
     if (!show) {
-      setPhase('pre');
+      setPhase('pregame');
+      setCountdown(3);
       setCurrentQuarter(1);
-      setTimer("12:00");
-      setScores({ s1: 0, s2: 0 });
+      setTimerInQuarter(720);
+      setScores({ user: 0, opp: 0 });
       setFeed([]);
       setIsClutch(false);
+      setShowResultTab('summary');
       return;
     }
 
-    // Phase 1: Pre-match (5 seconds)
-    const preTimer = setTimeout(() => {
-      setPhase('sim');
-    }, 5000);
+    const cdInterval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(cdInterval);
+          setTimeout(() => setPhase('live'), 1000);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-    return () => clearTimeout(preTimer);
+    return () => clearInterval(cdInterval);
   }, [show]);
 
   useEffect(() => {
-    if (phase !== 'sim' || !show) return;
-
-    let q = currentQuarter;
-    let s1 = scores.s1;
-    let s2 = scores.s2;
-    let totalSeconds = 12 * 60;
-    let currentSeconds = totalSeconds;
-    
-    // Total sim time per quarter = 10s
-    // Update every 200ms
-    const updateRate = 200;
-    const tickSeconds = (totalSeconds / (10000 / updateRate));
+    if (phase !== 'live' || !show || quarterEnding) return;
 
     const interval = setInterval(() => {
-      currentSeconds -= tickSeconds;
-      if (currentSeconds <= 0) {
-        if (q < 4) {
-          q++;
-          currentSeconds = totalSeconds;
-          setCurrentQuarter(q);
-          setFeed(prev => [`📊 End of Q${q-1} — ${team1.id} ${s1}, ${team2.id} ${s2}`, ...prev]);
-        } else {
-          clearInterval(interval);
-          setPhase('final');
-          return;
-        }
-      }
-
-      // Update timer display
-      const displayMins = Math.floor(currentSeconds / 60);
-      const displaySecs = Math.floor(currentSeconds % 60);
-      setTimer(`${displayMins}:${displaySecs.toString().padStart(2, '0')}`);
-      setProgress(((totalSeconds - currentSeconds) / totalSeconds) * 100);
-
-      // Clutch check (Q4, last 2 mins, diff <= 5)
-      if (q === 4 && (currentSeconds / 60) <= 2 && Math.abs(s1 - s2) <= 5) {
-        setIsClutch(true);
-      } else {
-        setIsClutch(false);
-      }
-
-      // Live play chance
-      if (Math.random() > 0.75) {
-        const ovrRatio = team1OVR / team2OVR;
-        const pts1 = Math.random() < (0.45 * ovrRatio) ? (Math.random() > 0.7 ? 3 : 2) : 0;
-        const pts2 = Math.random() < (0.45 / ovrRatio) ? (Math.random() > 0.7 ? 3 : 2) : 0;
+      setTimerInQuarter(prev => {
+        const next = Math.max(0, prev - (45 + Math.floor(Math.random() * 30)));
         
-        s1 += pts1;
-        s2 += pts2;
-        setScores({ s1, s2 });
-
-        // Ball movement
-        setBallPos({
-          x: 20 + Math.random() * 60,
-          y: 20 + Math.random() * 60
-        });
-
-        if (pts1 > 0 || pts2 > 0) {
-          const names = ["LeBron", "Curry", "Luka", "Giannis", "Joker", "KD", "Embiid", "Tatum", "Edwards", "Shai"];
-          const name = names[Math.floor(Math.random() * names.length)];
-          const teamId = pts1 > 0 ? team1.id : team2.id;
+        if (next === 0) {
+          setQuarterEnding(true);
+          setFeed(prevFeed => [
+            { text: `QUARTER ${currentQuarter} OVER`, emoji: '🔔', type: 'quarter' },
+            ...prevFeed
+          ]);
           
-          let action = "";
-          if (pts1 === 3 || pts2 === 3) {
-            action = `🔥 ${name} BURIES the three!`;
-          } else {
-            const randomAction = [
-              `🏀 ${name} with the floater`,
-              `💥 ${name} THROWS IT DOWN — and-one!`,
-              `🎯 ${name} hits the pull-up mid-range`,
-              `🏆 ${name} with the and-one layup`
-            ][Math.floor(Math.random() * 4)];
-            action = randomAction;
-          }
-
-          setFeed(prev => [`${action} — ${team1.id} ${s1}, ${team2.id} ${s2}`, ...prev]);
-        } else {
-            // Defensive or pass play
-            const name = ["LeBron", "Curry", "Luka", "Giannis"][Math.floor(Math.random() * 4)];
-            const defPlays = [
-              `🛡️ ${name} with the BLOCK — ball stays here!`,
-              `✋ ${name} steals it — fast break!`,
-              `👁️ ${name} thread the needle for an open miss`,
-              `📐 ${name} draws the charge!`
-            ];
-            if (Math.random() > 0.8) {
-               setFeed(prev => [defPlays[Math.floor(Math.random() * defPlays.length)], ...prev]);
+          setTimeout(() => {
+            if (currentQuarter < 4) {
+              setCurrentQuarter(prevQ => prevQ + 1);
+              setTimerInQuarter(720);
+              setQuarterEnding(false);
+            } else {
+              setPhase('result');
             }
+          }, 1500);
+          
+          return 0;
         }
-      }
 
-    }, updateRate);
+        generatePlay();
+        return next;
+      });
+    }, TICK_MS);
 
     return () => clearInterval(interval);
-  }, [phase, show, team1, team2, team1OVR, team2OVR]);
+  }, [phase, show, currentQuarter, quarterEnding, isClutch, scores]);
+
+  const generatePlay = () => {
+    const timeRemaining = timerInQuarter;
+    const diff = Math.abs(scores.user - scores.opp);
+    const isClutchTime = currentQuarter === 4 && diff <= 5 && timeRemaining < 120;
+    if (isClutchTime !== isClutch) setIsClutch(isClutchTime);
+
+    const userAttacking = Math.random() < (userOVR / (userOVR + oppOVR));
+    const attackingTeam = userAttacking ? userTeam : oppTeam;
+    const lineup = userAttacking ? userLineup : oppLineup;
+    const player = lineup[Math.floor(Math.random() * lineup.length)];
+
+    let playText = "";
+    let scoreChange = 0;
+    let emoji = "🏀";
+    let type: any = undefined;
+
+    const roll = Math.random();
+    if (roll < 0.2) {
+      playText = `${player.name} misses the shot.`;
+      emoji = "⭕";
+    } else if (roll < 0.35) {
+      playText = `${player.name} with a huge block!`;
+      emoji = "🚫";
+      type = 'highlight';
+    } else {
+      scoreChange = Math.random() > 0.3 ? 2 : 3;
+      playText = `${player.name} score for ${attackingTeam.id}!`;
+      emoji = scoreChange === 3 ? "🎯" : "⛹️";
+      type = 'score';
+    }
+
+    if (scoreChange > 0) {
+      if (userAttacking) setScores(prev => ({ ...prev, user: prev.user + scoreChange }));
+      else setScores(prev => ({ ...prev, opp: prev.opp + scoreChange }));
+    }
+    
+    setFeed(prev => [{ text: playText, type, emoji }, ...prev].slice(0, 50));
+  };
 
   if (!show) return null;
 
   return (
     <motion.div 
-      initial={{ opacity: 0 }} 
-      animate={{ 
-        opacity: 1,
-        backgroundColor: isClutch ? "rgba(70, 0, 0, 0.95)" : "rgba(0, 0, 0, 1)"
-      }}
-      className={`fixed inset-0 z-[10000] flex flex-col items-center justify-center overflow-hidden transition-colors duration-1000`}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+      className="fixed inset-0 z-[10000] bg-zinc-950 flex flex-col font-sans"
     >
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] scale-150" />
-      </div>
-
       <AnimatePresence mode="wait">
-        {phase === 'pre' && (
+        {phase === 'pregame' && (
           <motion.div 
-            key="pre"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.1 }}
-            className="flex flex-col items-center gap-12 z-10 w-full max-w-4xl p-8"
+            key="pregame"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="flex-1 flex flex-col items-center justify-center p-8 gap-12 text-center"
           >
-            <div className="flex items-center justify-between w-full">
-              <motion.div 
-                initial={{ x: -100, opacity: 0 }} 
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-center space-y-6"
-              >
-                <div className="w-40 h-40 bg-zinc-900 border border-zinc-800 rounded-[3rem] p-8 shadow-2xl flex items-center justify-center">
-                  <img src={getTeamLogo(team1.id)} className="w-full h-full object-contain" />
-                </div>
-                <h3 className="text-3xl font-black uppercase italic tracking-tighter text-white">{team1.name}</h3>
-                <div className="text-zinc-500 font-black text-xl">OVR {team1OVR}</div>
-              </motion.div>
-
-              <div className="text-center relative">
-                <motion.div 
-                  initial={{ scale: 0 }} 
-                  animate={{ scale: 1 }} 
-                  transition={{ type: 'spring', damping: 10, delay: 0.8 }}
-                  className="text-6xl font-black italic text-zinc-800"
-                >
-                  VS
-                </motion.div>
-                <div className="mt-8">
-                  <p className="text-[10px] font-black tracking-[0.5em] text-zinc-500 uppercase">Win Probability</p>
-                  <div className="w-64 h-2 bg-zinc-900 rounded-full mt-4 overflow-hidden border border-zinc-800">
-                    <motion.div 
-                      initial={{ width: "50%" }}
-                      animate={{ width: `${(team1OVR / (team1OVR + team2OVR)) * 100}%` }}
-                      transition={{ duration: 2, delay: 1 }}
-                      className="h-full bg-emerald-500"
-                    />
+            <div className="flex items-center justify-between w-full max-w-sm">
+               <div className="space-y-4">
+                  <div className="w-20 h-20 bg-zinc-900 rounded-3xl p-4 border border-zinc-800 mx-auto">
+                    <img src={getTeamLogo(userTeam.id)} className="w-full h-full object-contain" />
                   </div>
-                </div>
-              </div>
-
-              <motion.div 
-                initial={{ x: 100, opacity: 0 }} 
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-center space-y-6"
-              >
-                <div className="w-40 h-40 bg-zinc-900 border border-zinc-800 rounded-[3rem] p-8 shadow-2xl flex items-center justify-center">
-                  <img src={getTeamLogo(team2.id)} className="w-full h-full object-contain" />
-                </div>
-                <h3 className="text-3xl font-black uppercase italic tracking-tighter text-white">{team2.name}</h3>
-                <div className="text-zinc-500 font-black text-xl">OVR {team2OVR}</div>
-              </motion.div>
-            </div>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 50 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ delay: 1.5 }}
-              className="grid grid-cols-2 gap-12 w-full bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 p-8 rounded-[3rem]"
-            >
-              <div className="space-y-4">
-                 <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Starters — {team1.id}</p>
-                 <div className="space-y-2">
-                    {["Luka Doncic", "Kyrie Irving", "Klay Thompson", "PJ Washington", "Dereck Lively"].map((p, i) => (
-                      <div key={i} className="flex justify-between items-center text-sm font-bold italic text-zinc-300">
-                        <span>{p}</span>
-                        <span className="text-zinc-600">OVR {85 + i}</span>
-                      </div>
-                    ))}
-                 </div>
-              </div>
-              <div className="space-y-4 text-right">
-                 <p className="text-[10px] font-black text-red-500 uppercase tracking-widest">Starters — {team2.id}</p>
-                 <div className="space-y-2">
-                    {["Jayson Tatum", "Jaylen Brown", "Derrick White", "Jrue Holiday", "KP"].map((p, i) => (
-                      <div key={i} className="flex justify-between items-center text-sm font-bold italic text-zinc-300 flex-row-reverse">
-                        <span>{p}</span>
-                        <span className="text-zinc-600">OVR {86 + i}</span>
-                      </div>
-                    ))}
-                 </div>
-              </div>
-            </motion.div>
-
-            <motion.div 
-              animate={{ opacity: [1, 0.5, 1] }} 
-              transition={{ repeat: Infinity, duration: 1 }}
-              className="text-4xl font-black italic text-white"
-            >
-              TIP OFF IN 3...
-            </motion.div>
-          </motion.div>
-        )}
-
-        {phase === 'sim' && (
-          <motion.div 
-            key="sim"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="flex flex-col w-full h-full p-6 md:p-12 gap-8 z-10"
-          >
-            {/* Header: Scoreboard */}
-            <div className="flex items-center justify-center gap-12">
-               <div className="flex items-center gap-6">
-                  <img src={getTeamLogo(team1.id)} className="w-16 h-16 object-contain" />
-                  <span className="text-7xl font-black italic text-white tabular-nums drop-shadow-2xl">{scores.s1}</span>
+                  <div className="text-xl font-black text-white italic uppercase">{userTeam.id}</div>
                </div>
-               <div className="bg-zinc-900 border border-zinc-800 px-8 py-4 rounded-3xl text-center shadow-2xl">
-                  <div className="text-emerald-500 text-xs font-black uppercase tracking-widest mb-1">Q{currentQuarter}</div>
-                  <div className="text-3xl font-black italic text-white tabular-nums">{timer}</div>
-               </div>
-               <div className="flex items-center gap-6">
-                  <span className="text-7xl font-black italic text-white tabular-nums drop-shadow-2xl">{scores.s2}</span>
-                  <img src={getTeamLogo(team2.id)} className="w-16 h-16 object-contain" />
+               <div className="text-2xl font-black text-zinc-800 italic">VS</div>
+               <div className="space-y-4">
+                  <div className="w-20 h-20 bg-zinc-900 rounded-3xl p-4 border border-zinc-800 mx-auto">
+                    <img src={getTeamLogo(oppTeam.id)} className="w-full h-full object-contain" />
+                  </div>
+                  <div className="text-xl font-black text-zinc-500 italic uppercase">{oppTeam.id}</div>
                </div>
             </div>
 
-            {/* Central: Court SVG */}
-            <div className="flex-1 relative bg-zinc-900 border border-zinc-800 rounded-[3rem] overflow-hidden group shadow-2xl shadow-emerald-500/5">
-                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-0.5 bg-zinc-800/30" />
-                <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 bg-zinc-800/30" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 border border-zinc-800/30 rounded-full" />
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-32 border-x border-b border-zinc-800/30 rounded-b-3xl" />
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-80 h-32 border-x border-t border-zinc-800/30 rounded-t-3xl" />
+            <div className="w-full max-w-xs h-1 bg-zinc-900 rounded-full overflow-hidden">
+               <motion.div initial={{ width: "50%" }} animate={{ width: `${winProb}%` }} className="h-full bg-emerald-500" />
+            </div>
 
-                {/* Animated Ball */}
-                <motion.div 
-                  animate={{ x: `${ballPos.x}%`, y: `${ballPos.y}%` }}
-                  transition={{ type: 'spring', damping: 15 }}
-                  className="absolute w-4 h-4 bg-amber-500 rounded-full shadow-[0_0_20px_rgba(245,158,11,0.8)] z-20"
-                />
-
-                {/* Clutch Overlay */}
-                {isClutch && (
+            <AnimatePresence>
+               {countdown > 0 && (
                   <motion.div 
-                    initial={{ opacity: 0 }} animate={{ opacity: [0.1, 0.3, 0.1] }} transition={{ repeat: Infinity, duration: 2 }}
-                    className="absolute inset-0 bg-red-600/20 pointer-events-none"
-                  />
-                )}
+                    key={countdown}
+                    initial={{ scale: 2, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }}
+                    className="text-8xl font-black italic text-white"
+                  >
+                    {countdown}
+                  </motion.div>
+               )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+
+        {phase === 'live' && (
+          <motion.div 
+            key="live"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="flex-1 flex flex-col overflow-hidden"
+          >
+            {/* Display Header */}
+            <div className={`pt-12 pb-8 px-8 space-y-4 transition-colors duration-700 ${isClutch ? 'bg-red-950/20' : 'bg-gradient-to-b from-zinc-900/50 to-transparent'}`}>
+               <div className="flex items-center justify-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
+                  <span className={isClutch ? 'text-red-500 animate-pulse' : ''}>{isClutch ? '🔥 Clutch Time' : `Quarter ${currentQuarter}`}</span>
+                  <span>|</span>
+                  <span className="tabular-nums">{Math.floor(timerInQuarter/60)}:{Math.round(timerInQuarter%60).toString().padStart(2, '0')}</span>
+               </div>
+               
+               <div className="flex items-center justify-between max-w-xs mx-auto">
+                  <div className="flex flex-col items-center gap-2">
+                     <span className="text-8xl font-black italic text-white tabular-nums drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">{scores.user}</span>
+                     <span className="text-xs font-black text-zinc-600 uppercase">{userTeam.id}</span>
+                  </div>
+                  <div className="text-4xl font-black text-zinc-900 italic self-center mt-[-10px]">VS</div>
+                  <div className="flex flex-col items-center gap-2">
+                     <span className="text-8xl font-black italic text-zinc-500 tabular-nums">{scores.opp}</span>
+                     <span className="text-xs font-black text-zinc-600 uppercase">{oppTeam.id}</span>
+                  </div>
+               </div>
             </div>
 
-            {/* Footer: Live Feed */}
-            <div className="h-48 bg-zinc-950/80 backdrop-blur-md rounded-[2.5rem] border border-zinc-800 p-6 overflow-hidden flex flex-col relative">
-                <div className="absolute top-0 inset-x-0 h-8 bg-gradient-to-b from-zinc-950 to-transparent z-10" />
-                <div className="flex-1 overflow-y-auto space-y-3 pt-4 no-scrollbar">
-                   <AnimatePresence mode="popLayout">
-                      {feed.map((line, idx) => (
-                        <motion.div 
-                          key={idx}
-                          initial={{ opacity: 0, x: -20, scale: 0.95 }}
-                          animate={{ opacity: 1, x: 0, scale: 1 }}
-                          className={`p-3 rounded-xl font-bold italic text-sm ${line.includes('End of Q') ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'text-zinc-300'}`}
-                        >
-                          {line}
-                        </motion.div>
-                      ))}
-                   </AnimatePresence>
-                </div>
+            {/* Play Feed */}
+            <div className="flex-1 bg-zinc-950 px-6 pt-6 overflow-hidden flex flex-col">
+               <div className="flex-1 overflow-y-auto space-y-3 no-scrollbar flex flex-col-reverse">
+                  <AnimatePresence mode="popLayout">
+                    {feed.map((play, idx) => (
+                      <motion.div 
+                        key={idx}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`flex gap-3 items-center text-sm font-bold ${
+                           play.type === 'quarter' ? 'justify-center py-4 text-emerald-500 border-y border-zinc-900' :
+                           play.type === 'score' ? 'text-white' : 'text-zinc-500'
+                        }`}
+                      >
+                         <span className="text-lg opacity-80">{play.emoji}</span>
+                         <span className={play.type === 'highlight' ? 'text-amber-500 font-black italic' : ''}>
+                           {play.text}
+                         </span>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  <div className="h-8 bg-gradient-to-t from-zinc-950 to-transparent sticky bottom-0" />
+               </div>
             </div>
           </motion.div>
         )}
 
-        {phase === 'final' && (
+        {phase === 'result' && (
           <motion.div 
-            key="final"
-            initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center gap-12 z-10"
+            key="result"
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            className="flex-1 flex flex-col bg-zinc-950"
           >
-            <motion.div 
-              initial={{ opacity: 0, y: -50 }} 
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center"
-            >
-              <div className="text-xl font-black uppercase tracking-[0.6em] text-zinc-500 mb-4">MATCH FINISHED</div>
-              <h2 className="text-9xl font-black italic text-white uppercase tracking-tighter drop-shadow-2xl">FINAL</h2>
-            </motion.div>
+             <div className="pt-16 pb-8 text-center space-y-2">
+                <motion.div 
+                   initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                   className={`text-9xl font-black italic tracking-tighter ${scores.user > scores.opp ? 'text-emerald-500' : 'text-red-500'}`}
+                >
+                   {scores.user > scores.opp ? 'W' : 'L'}
+                </motion.div>
+                <div className="text-2xl font-black text-white italic tabular-nums">
+                   {scores.user} - {scores.opp}
+                </div>
+             </div>
 
-            <div className="flex items-center gap-16">
-              <div className="text-center space-y-4">
-                 <img src={getTeamLogo(team1.id)} className="w-24 h-24 object-contain mx-auto" />
-                 <div className="text-8xl font-black italic text-white">{scores.s1}</div>
-              </div>
-              <div className="text-4xl font-black text-zinc-800 italic">VS</div>
-              <div className="text-center space-y-4">
-                 <img src={getTeamLogo(team2.id)} className="w-24 h-24 object-contain mx-auto" />
-                 <div className="text-8xl font-black italic text-white">{scores.s2}</div>
-              </div>
-            </div>
+             <div className="flex-1 flex flex-col">
+                <div className="px-6 flex gap-1 border-b border-zinc-900">
+                   {['summary', 'boxscore'].map((tab) => (
+                      <button 
+                         key={tab}
+                         onClick={() => setShowResultTab(tab as any)}
+                         className={`px-6 py-4 text-[10px] font-black uppercase tracking-widest relative transition-colors ${showResultTab === tab ? 'text-white' : 'text-zinc-600'}`}
+                      >
+                         {tab}
+                         {showResultTab === tab && <motion.div layoutId="resTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-white shadow-[0_0_10px_white]" />}
+                      </button>
+                   ))}
+                </div>
 
-            <motion.button 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              transition={{ delay: 1 }}
-              onClick={() => onFinish({ s1: scores.s1, s2: scores.s2 })}
-              className="bg-white text-black px-12 py-6 rounded-full font-black uppercase tracking-[0.2em] text-sm hover:scale-110 transition-all hover:bg-emerald-500"
-            >
-              VIEW FULL BOX SCORE
-            </motion.button>
+                <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                   {showResultTab === 'summary' && (
+                      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2">
+                         <div className="bg-zinc-900 p-6 rounded-[2rem] space-y-4">
+                            <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Post-Game Thoughts</h4>
+                            <p className="text-zinc-300 font-bold italic leading-relaxed text-sm">
+                               {scores.user > scores.opp ? 
+                               "Total team effort in the clutch. The rotations were crisp and the perimeter defense held firm when it mattered most." : 
+                               "Tough night at the office. We couldn't close out the defensive boards and left too many easy points on the table."}
+                            </p>
+                         </div>
+                         <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-zinc-900 p-5 rounded-3xl text-center space-y-1">
+                               <p className="text-[8px] font-black text-zinc-500 uppercase">XP Gained</p>
+                               <p className="text-xl font-black text-emerald-500">+{scores.user > scores.opp ? 120 : 45}</p>
+                            </div>
+                            <div className="bg-zinc-900 p-5 rounded-3xl text-center space-y-1">
+                               <p className="text-[8px] font-black text-zinc-500 uppercase">Credits</p>
+                               <p className="text-xl font-black text-amber-500">+${scores.user > scores.opp ? '2.5' : '1.0'}K</p>
+                            </div>
+                         </div>
+                      </div>
+                   )}
+                   {showResultTab === 'boxscore' && (
+                      <div className="animate-in fade-in slide-in-from-bottom-2 h-full overflow-x-auto">
+                         <table className="w-full text-left">
+                            <thead className="border-b border-zinc-900">
+                               <tr className="text-[8px] font-black text-zinc-600 uppercase">
+                                  <th className="py-2 pr-4">Player</th>
+                                  <th className="py-2 px-2">PTS</th>
+                                  <th className="py-2 px-2">REB</th>
+                                  <th className="py-2 px-2">AST</th>
+                               </tr>
+                            </thead>
+                            <tbody>
+                               {userLineup.map((p, i) => (
+                                  <tr key={i} className="border-b border-zinc-900/50">
+                                     <td className="py-3 pr-4">
+                                        <div className="text-xs font-black text-white italic uppercase">{p.name.split(' ').pop()}</div>
+                                        <div className="text-[8px] font-bold text-zinc-600 uppercase">{p.position}</div>
+                                     </td>
+                                     <td className="py-3 px-2 text-sm font-black text-zinc-400">{(scores.user / 6).toFixed(0)}</td>
+                                     <td className="py-3 px-2 text-sm font-bold text-zinc-600">{(Math.random() * 8).toFixed(0)}</td>
+                                     <td className="py-3 px-2 text-sm font-bold text-zinc-600">{(Math.random() * 5).toFixed(0)}</td>
+                                  </tr>
+                               ))}
+                            </tbody>
+                         </table>
+                      </div>
+                   )}
+                </div>
+                
+                <div className="p-6">
+                   <button 
+                      onClick={() => onFinish({ s1: scores.user, s2: scores.opp })}
+                      className="w-full bg-white text-black py-5 rounded-3xl font-black uppercase tracking-widest text-xs shadow-2xl active:scale-95 transition-transform"
+                   >
+                      Back to Hub
+                   </button>
+                </div>
+             </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -768,32 +739,57 @@ const TEAM_NEWS = [
   "League executives monitoring {team}'s aggressive market moves.",
   "Ticket sales surging as {team} climbs the standings.",
 ];
-
 const PositionSlot: React.FC<{ pos: string; cardId: string | null | undefined; energy: number; onSelect: () => void }> = ({ pos, cardId, energy, onSelect }) => {
   const card = cardId ? ALL_CARDS.find(c => c.id === cardId) : null;
+  
   return (
-    <div className="flex flex-col items-center gap-1.5 sm:gap-3 group/slot">
-       <div className="flex flex-col items-center">
-          <span className="text-[8px] sm:text-[10px] font-black text-zinc-600 uppercase tracking-tighter group-hover/slot:text-white transition-colors">{pos}</span>
-          {card && (
-             <div className="flex items-center gap-1">
-                <Zap size={8} className={energy < 50 ? 'text-red-500' : 'text-emerald-500'} fill="currentColor" />
-                <span className={`text-[6px] sm:text-[8px] font-black ${energy < 50 ? 'text-red-500' : 'text-zinc-500'}`}>{Math.round(energy)}%</span>
-             </div>
-          )}
-       </div>
-       <div 
-         onClick={onSelect}
-         className={`w-20 sm:w-32 aspect-[2.5/3.5] rounded-xl sm:rounded-2xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all ${
-           card ? 'border-transparent ring-0 hover:ring-2 hover:ring-white/20' : 'border-zinc-800 bg-zinc-950/40 hover:border-zinc-700 hover:bg-zinc-900'
-         }`}
-       >
+    <div onClick={onSelect} className="relative group cursor-pointer h-full">
+       <div className={`h-full w-full min-h-[160px] sm:min-h-[200px] rounded-[2rem] sm:rounded-[2.5rem] border-2 transition-all duration-500 overflow-hidden flex flex-col items-center justify-center relative ${
+          cardId ? 'bg-zinc-950 border-white/10 group-hover:border-white group-hover:shadow-[0_20px_50px_rgba(255,255,255,0.1)]' : 'bg-black/40 border-dashed border-zinc-800 hover:border-zinc-700'
+       }`}>
           {card ? (
-            <div className="w-full h-full transform group-hover/slot:scale-105 transition-transform duration-300">
-               <CardItem card={card} isOwned={true} mode="mini" />
-            </div>
+             <>
+                <div className="absolute inset-x-0 bottom-0 top-[20%] bg-gradient-to-t from-white/[0.03] to-transparent pointer-events-none" />
+                <motion.img 
+                   initial={{ scale: 1.1, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                   src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} 
+                   className="w-[120%] h-[120%] object-contain object-bottom mb-4 relative z-10 transition-transform group-hover:scale-110 duration-700"
+                />
+                <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
+                   <div className={`px-4 py-2 rounded-2xl text-[10px] font-black italic border shadow-2xl ${
+                      card.rarity === 'franchise' ? 'bg-purple-600 border-purple-400 text-white' :
+                      card.rarity === 'allstar' ? 'bg-amber-500 border-amber-300 text-black' :
+                      card.rarity === 'starter' ? 'bg-blue-600 border-blue-400 text-white' :
+                      'bg-zinc-800 border-zinc-700 text-zinc-400'
+                   }`}>
+                      {card.stats.ovr} OVR
+                   </div>
+                </div>
+                <div className="absolute bottom-6 inset-x-4 z-20 space-y-2">
+                   <div className="flex items-center justify-between gap-3">
+                      <div className="flex flex-col">
+                         <span className="text-[10px] font-black italic text-white uppercase truncate">{card.name.split(' ').pop()}</span>
+                         <span className="text-[7px] font-bold text-zinc-500 uppercase tracking-widest">{pos}</span>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                         <div className="w-12 h-1 bg-zinc-900 rounded-full overflow-hidden">
+                            <div className={`h-full ${energy < 50 ? 'bg-red-500' : 'bg-emerald-500'}`} style={{ width: `${energy}%` }} />
+                         </div>
+                         <span className="text-[6px] font-black text-zinc-600">FITNESS</span>
+                      </div>
+                   </div>
+                </div>
+             </>
           ) : (
-            <Plus className="text-zinc-800 group-hover/slot:text-zinc-600 transition-colors" size={20} strokeWidth={3} />
+             <div className="flex flex-col items-center gap-4 group-hover:scale-110 transition-transform duration-500">
+                <div className="w-12 h-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-zinc-700 border border-zinc-800">
+                   <Plus size={24} />
+                </div>
+                <div className="text-center">
+                   <span className="text-xs font-black italic text-zinc-600 uppercase tracking-tighter">{pos}</span>
+                   <p className="text-[7px] font-black text-zinc-800 uppercase tracking-widest">Assign Slot</p>
+                </div>
+             </div>
           )}
        </div>
     </div>
@@ -803,20 +799,103 @@ const PositionSlot: React.FC<{ pos: string; cardId: string | null | undefined; e
 const CareerView: React.FC = () => {
   const { franchise, startFranchise, updateFranchise, updateGameStateAsync, addCoins, collection, setCurrentView } = useGame();
   
-  const teamData = useMemo(() => 
-    franchise ? NBA_TEAMS.find(t => t.id === franchise.team) : null,
-    [franchise]
-  );
+  // 1. Calculations (Moved up to avoid hosting issues)
+  const nextGame = useMemo(() => {
+    return franchise?.schedule?.find(m => !m.played);
+  }, [franchise?.schedule]);
 
-  const nextGame = useMemo(() => 
-    franchise?.schedule?.find(m => !m.played),
-    [franchise?.schedule]
-  );
+  const teamData = useMemo(() => {
+    return franchise ? NBA_TEAMS.find(t => t.id === franchise.team) : null;
+  }, [franchise?.team]);
 
-  const opponentData = useMemo(() => 
-    nextGame ? NBA_TEAMS.find(t => t.id === nextGame.opponentAbbr) : null,
-    [nextGame]
-  );
+  const nextOpponent = useMemo(() => {
+    if (!nextGame) return NBA_TEAMS[0];
+    return NBA_TEAMS.find(t => t.id === nextGame.opponentAbbr) || NBA_TEAMS[0];
+  }, [nextGame]);
+
+  const opponentData = useMemo(() => {
+    if (!nextOpponent) return null;
+    return NBA_TEAMS.find(t => t.id === nextOpponent.id);
+  }, [nextOpponent]);
+
+  const activeStarters = useMemo(() => {
+    if (!franchise?.lineup) return [] as Card[];
+    const starterIds = Object.values(franchise.lineup).filter(Boolean) as string[];
+    return starterIds.map(id => ALL_CARDS.find(c => c.id === id)).filter(Boolean) as Card[];
+  }, [franchise?.lineup]);
+
+  const teamOVR = useMemo(() => {
+    if (activeStarters.length === 0) return 60;
+    
+    const sOVR = activeStarters.reduce((acc, c) => acc + c.stats.ovr, 0) / activeStarters.length;
+    
+    // Bench OVR (from roster excluding starters)
+    const starterIds = activeStarters.map(c => c.id);
+    const benchIds = (franchise?.roster || []).filter(id => !starterIds.includes(id));
+    const bench = benchIds.map(id => ALL_CARDS.find(c => c.id === id)).filter(Boolean) as Card[];
+    const bOVR = bench.length > 0 
+      ? bench.reduce((acc, c) => acc + c.stats.ovr, 0) / bench.length 
+      : sOVR - 10;
+
+    const base = sOVR * 0.75 + bOVR * 0.25;
+    
+    // Synergy Bonuses
+    let synergyBonus = 0;
+    
+    // 1. Same Team Trio
+    const teamCounts: Record<string, number> = {};
+    activeStarters.forEach(c => {
+       teamCounts[c.teamAbbr] = (teamCounts[c.teamAbbr] || 0) + 1;
+    });
+    const hasTrio = Object.values(teamCounts).some(count => count >= 3);
+    if (hasTrio) synergyBonus += 3;
+
+    // 2. Inside-Out (PG Ast > 85, C Blk > 80)
+    const pg = activeStarters.find(c => normalizePosition(c.position) === 'PG');
+    const center = activeStarters.find(c => normalizePosition(c.position) === 'C');
+    if (pg && center && pg.stats.assists >= 85 && center.stats.rebounds >= 80) {
+       synergyBonus += 5;
+    }
+
+    // 3. Star Power
+    const hasStar = activeStarters.some(c => c.rarity === 'franchise');
+    if (hasStar) synergyBonus += 2;
+    
+    // Upgrades
+    const coachingBonus = ((franchise?.upgrades?.coaching || 1) - 1) * 0.8;
+    const trainingBonus = ((franchise?.upgrades?.training || 1) - 1) * 0.5;
+    
+    return Math.round(base + coachingBonus + trainingBonus + synergyBonus);
+  }, [activeStarters, franchise?.roster, franchise?.upgrades]);
+
+  const teamPayroll = useMemo(() => {
+    if (!franchise?.roster) return 0;
+    const cards = franchise.roster.map(id => ALL_CARDS.find(c => c.id === id)).filter(Boolean) as Card[];
+    return cards.reduce((acc, c) => acc + getPlayerSalary(c), 0);
+  }, [franchise?.roster]);
+
+  const streak = useMemo(() => {
+    const played = (franchise?.schedule || []).filter(m => m.played);
+    if (played.length === 0) return '-';
+    let count = 0;
+    const lastResult = played[played.length - 1].result;
+    for (let i = played.length - 1; i >= 0; i--) {
+       if (played[i].result === lastResult) count++;
+       else break;
+    }
+    return `${count}${lastResult}`;
+  }, [franchise?.schedule]);
+
+  const avgEnergy = useMemo(() => {
+    const values = Object.values(franchise?.playerEnergy || {}) as number[];
+    if (values.length === 0) return 100;
+    return Math.round(values.reduce((a, b) => a + b, 0) / (values.length || 1));
+  }, [franchise?.playerEnergy, franchise?.roster?.length]);
+
+  const startersList = useMemo(() => {
+    const ids = Object.values(franchise?.lineup || {}).filter(Boolean) as string[];
+    return ids.map(id => ALL_CARDS.find(c => c.id === id)).filter(Boolean) as Card[];
+  }, [franchise?.lineup]);
 
   const primaryColor = teamData?.primaryColor || '#10b981';
   const secondaryColor = teamData?.secondaryColor || '#ffffff';
@@ -838,43 +917,147 @@ const CareerView: React.FC = () => {
   const [marketSearch, setMarketSearch] = useState('');
   const [news, setNews] = useState<string[]>([]);
 
+  const handleTradeProposal = () => {
+    if (!franchise || !tradeUserPlayer || !tradeTargetPlayer || !tradeTargetTeam) return;
+    
+    const player1 = ALL_CARDS.find(c => c.id === tradeUserPlayer);
+    const player2 = ALL_CARDS.find(c => c.id === tradeTargetPlayer);
+    if (!player1 || !player2) return;
+    
+    // value logic
+    const v1 = Math.pow(player1.stats.ovr, 2);
+    const v2 = Math.pow(player2.stats.ovr, 2);
+    const success = v1 >= v2 * 1.15; // CPU greediness factor
+    
+    if (success) {
+      const rosters = { ...(franchise.leagueRosters || {}) };
+      const userRoster = [...franchise.roster].filter(id => id !== tradeUserPlayer);
+      const targetRoster = [...(rosters[tradeTargetTeam] || [])].filter(id => id !== tradeTargetPlayer);
+      
+      userRoster.push(tradeTargetPlayer);
+      targetRoster.push(tradeUserPlayer);
+      rosters[tradeTargetTeam] = targetRoster;
+      
+      const contracts = [...(franchise.contracts || [])].filter(c => c.cardId !== tradeUserPlayer);
+      contracts.push({
+        cardId: tradeTargetPlayer,
+        yearsLeft: 1 + Math.floor(Math.random() * 2),
+        salary: (player2.stats.ovr - 65) * 0.4 + 5,
+        type: player2.stats.ovr > 85 ? 'max' : 'veteran',
+        canExtend: true,
+        canTrade: true
+      });
+
+      const newLineup = { ...franchise.lineup };
+      (Object.keys(newLineup) as (keyof typeof newLineup)[]).forEach(key => {
+        if (newLineup[key] === tradeUserPlayer) {
+          newLineup[key] = tradeTargetPlayer;
+        }
+      });
+
+      updateFranchise({ 
+        roster: userRoster, 
+        leagueRosters: rosters,
+        contracts,
+        lineup: newLineup as any,
+        chemistry: Math.max(0, (franchise.chemistry || 60) - 10)
+      });
+      
+      setTradeMessage(`TRADE APPROVED! Obtained ${player2.name}`);
+      setNews(prev => [`TRADE: ${teamData?.name} acquired ${player2.name} from ${tradeTargetTeam}.`, ...prev].slice(0, 5));
+      setTradeUserPlayer(null);
+      setTradeTargetPlayer(null);
+    } else {
+      setTradeMessage(`OFFER REJECTED: The ${tradeTargetTeam} front office needs more value.`);
+    }
+    setTimeout(() => setTradeMessage(null), 3000);
+  };
+
+  const handleExtendContract = (cardId: string) => {
+    if (!franchise) return;
+    const contractIdx = franchise.contracts.findIndex(c => c.cardId === cardId);
+    if (contractIdx === -1) return;
+    
+    const existing = franchise.contracts[contractIdx];
+    if (!existing.canExtend) return;
+
+    const newContracts = [...franchise.contracts];
+    newContracts[contractIdx] = {
+      ...existing,
+      yearsLeft: existing.yearsLeft + 3,
+      salary: existing.salary * 1.1, // 10% raise
+      canExtend: false
+    };
+
+    updateFranchise({ contracts: newContracts });
+    setNews(prev => [`CONTRACT: ${ALL_CARDS.find(c => c.id === cardId)?.name} signed a 3-year extension.`, ...prev].slice(0, 5));
+  };
+
+  const handleReleasePlayer = (cardId: string) => {
+    if (!franchise) return;
+    const contract = franchise.contracts.find(c => c.cardId === cardId);
+    if (!contract) return;
+
+    // Release penalty: 30% of remaining salary as dead cap/instant cost
+    const penalty = contract.salary * 0.3 * 1000000;
+    
+    const newRoster = franchise.roster.filter(id => id !== cardId);
+    const newContracts = franchise.contracts.filter(c => c.cardId !== cardId);
+    const newLineup = { ...franchise.lineup };
+    Object.keys(newLineup).forEach(pos => {
+      if (newLineup[pos] === cardId) newLineup[pos] = null;
+    });
+
+    updateFranchise({
+      roster: newRoster,
+      contracts: newContracts,
+      lineup: newLineup,
+      budget: franchise.budget - penalty
+    });
+    
+    setNews(prev => [`WAIVED: ${ALL_CARDS.find(c => c.id === cardId)?.name} has been released.`, ...prev].slice(0, 5));
+  };
+
   const handleBack = () => {
     setCurrentView('home');
   };
 
   const handleRetire = async () => {
-    // Hard reset the franchise state in the global context
+    // Reset the franchise state as requested
     setIsSimulating(true);
-    await updateGameStateAsync({ franchise: undefined });
+    const resetFranchise: any = {
+      isActive: false,
+      team: null,
+      level: 1,
+      xp: 0,
+      budget: 5000000,
+      season: 1,
+      wins: 0,
+      losses: 0,
+      schedule: [],
+      upgrades: { coaching: 1, scouting: 1, training: 1, facilities: 1 },
+      roster: [],
+      leagueRosters: {},
+      contracts: [],
+      currentDate: '2025-10-22',
+      marketPhase: 'regular_season',
+      playerSeasonStats: [],
+      lineup: { PG: null, SG: null, SF: null, PF: null, C: null },
+      currentMatchIndex: 0,
+      gameLogs: [],
+      activeEvents: [],
+      milestones: [],
+      salaryCap: 140588000,
+      payroll: 0,
+      conferenceStandings: [],
+      waiverPool: [],
+      gamesSinceWaiverRefresh: 0
+    };
+    await updateGameStateAsync({ franchise: resetFranchise });
     setIsSimulating(false);
-    window.location.reload(); // Force reload to ensure clean state
+    setActiveTab('hub');
+    setSelectedTeam(null);
   };
-
-  const teamPayroll = useMemo(() => {
-    if (!franchise) return 0;
-    return franchise.roster.reduce((total, id) => {
-      const card = ALL_CARDS.find(c => c.id === id);
-      return total + (card ? getPlayerSalary(card) : 0);
-    }, 0);
-  }, [franchise]);
-
-  const streak = useMemo(() => {
-    const list = [...(franchise?.schedule || [])].filter(m => m.played).reverse();
-    if (list.length === 0) return '0-0';
-    const firstResult = list[0].result;
-    let count = 0;
-    for (const m of list) {
-       if (m.result === firstResult) count++;
-       else break;
-    }
-    return `${count}${firstResult}`;
-  }, [franchise?.schedule]);
-
-  const avgEnergy = useMemo(() => {
-    const values = Object.values(franchise?.playerEnergy || {}) as number[];
-    if (values.length === 0) return 100;
-    return Math.round(values.reduce((a, b) => a + b, 0) / (values.length || 1));
-  }, [franchise?.playerEnergy, franchise?.roster?.length]);
 
   // 1. Initialization
   useEffect(() => {
@@ -918,62 +1101,6 @@ const CareerView: React.FC = () => {
     }
   }, [franchise?.isActive, franchise?.conferenceStandings, updateFranchise, franchise?.team]);
 
-  // 2. Calculations
-  const activeStarters = useMemo(() => {
-    if (!franchise?.lineup) return [] as Card[];
-    const starterIds = Object.values(franchise.lineup).filter(Boolean) as string[];
-    return starterIds.map(id => ALL_CARDS.find(c => c.id === id)).filter(Boolean) as Card[];
-  }, [franchise?.lineup]);
-
-  const teamOVR = useMemo(() => {
-    if (activeStarters.length === 0) return 60;
-    
-    const sOVR = activeStarters.reduce((acc, c) => acc + c.stats.ovr, 0) / activeStarters.length;
-    
-    // Bench OVR (from roster excluding starters)
-    const starterIds = activeStarters.map(c => c.id);
-    const benchIds = franchise.roster.filter(id => !starterIds.includes(id));
-    const bench = benchIds.map(id => ALL_CARDS.find(c => c.id === id)).filter(Boolean) as Card[];
-    const bOVR = bench.length > 0 
-      ? bench.reduce((acc, c) => acc + c.stats.ovr, 0) / bench.length 
-      : sOVR - 10;
-
-    const base = sOVR * 0.75 + bOVR * 0.25;
-    
-    // Synergy Bonuses
-    let synergyBonus = 0;
-    
-    // 1. Same Team Trio
-    const teamCounts: Record<string, number> = {};
-    activeStarters.forEach(c => {
-       teamCounts[c.teamAbbr] = (teamCounts[c.teamAbbr] || 0) + 1;
-    });
-    const hasTrio = Object.values(teamCounts).some(count => count >= 3);
-    if (hasTrio) synergyBonus += 3;
-
-    // 2. Inside-Out (PG Ast > 85, C Blk > 80)
-    const pg = activeStarters.find(c => normalizePosition(c.position) === 'PG');
-    const center = activeStarters.find(c => normalizePosition(c.position) === 'C');
-    if (pg && center && pg.stats.assists >= 85 && center.stats.rebounds >= 80) {
-       synergyBonus += 5;
-    }
-
-    // 3. Star Power
-    const hasStar = activeStarters.some(c => c.rarity === 'franchise');
-    if (hasStar) synergyBonus += 2;
-    
-    // Upgrades
-    const coachingBonus = ((franchise.upgrades?.coaching || 1) - 1) * 0.8;
-    const trainingBonus = ((franchise.upgrades?.training || 1) - 1) * 0.5;
-    
-    return Math.round(base + coachingBonus + trainingBonus + synergyBonus);
-  }, [activeStarters, franchise?.roster, franchise?.upgrades]);
-
-  const startersList = useMemo(() => {
-    const ids = Object.values(franchise?.lineup || {}).filter(Boolean) as string[];
-    return ids.map(id => ALL_CARDS.find(c => c.id === id)).filter(Boolean) as Card[];
-  }, [franchise?.lineup]);
-
   // 3. Simulation Engine
   const simulateMatch = async () => {
     if (!franchise || isSimulating) return;
@@ -997,12 +1124,12 @@ const CareerView: React.FC = () => {
     const isWin = userScore > oppScore;
 
     // 1. Simulate Player Stats for this game
-    const userLineup = franchise.lineup;
-    const userRoster = franchise.roster;
+    const userLineup = franchise.lineup || {};
+    const userRoster = franchise.roster || [];
     
     // Calculate Energy and Momentum factors
     const energyValues = Object.values(franchise.playerEnergy || {}) as number[];
-    const avgEnergyValue = energyValues.reduce((a, b) => a + b, 0) / (franchise.roster.length || 1) || 100;
+    const avgEnergyValue = energyValues.reduce((a, b) => a + b, 0) / ((franchise.roster || []).length || 1) || 100;
     const energyFactor = 0.85 + (avgEnergyValue / 100) * 0.3; // 0.85 to 1.15
     
     const last5 = (franchise.schedule || []).filter(m => m.played).slice(-5);
@@ -1233,49 +1360,14 @@ const CareerView: React.FC = () => {
     setNews(prev => [msg, ...prev].slice(0, 50));
   };
 
-  const handleTradeProposal = () => {
-    if (!tradeUserPlayer || !tradeTargetPlayer || !tradeTargetTeam) return;
-    
-    const userCard = ALL_CARDS.find(c => c.id === tradeUserPlayer);
-    const targetCard = ALL_CARDS.find(c => c.id === tradeTargetPlayer);
-    
-    if (!userCard || !targetCard) return;
-    
-    const userValue = userCard.stats.ovr;
-    const targetValue = targetCard.stats.ovr;
-    
-    if (userValue >= targetValue - 1) {
-       const newRoster = franchise.roster.filter(id => id !== tradeUserPlayer);
-       newRoster.push(tradeTargetPlayer);
-       
-       const newLeagueRosters = { ...(franchise.leagueRosters || {}) };
-       const targetRoster = [...(newLeagueRosters[tradeTargetTeam] || [])].filter(id => id !== tradeTargetPlayer);
-       targetRoster.push(tradeUserPlayer);
-       newLeagueRosters[tradeTargetTeam] = targetRoster;
-       
-       const newLineup = { ...franchise.lineup };
-       (Object.keys(newLineup) as (keyof typeof newLineup)[]).forEach(key => {
-          if (newLineup[key] === tradeUserPlayer) {
-             newLineup[key] = tradeTargetPlayer;
-          }
-       });
-       
-       updateFranchise({ 
-          roster: newRoster, 
-          lineup: newLineup as any,
-          leagueRosters: newLeagueRosters,
-          chemistry: Math.max(0, (franchise.chemistry || 60) - 10)
-       });
-       
-       addNews(`TRADE ALERT: ${teamData?.name} acquired ${targetCard.name} from ${tradeTargetTeam}!`);
-       setTradeMessage(`OFFER ACCEPTED: The ${tradeTargetTeam} have accepted the trade! ${targetCard.name} joined your team.`);
-       setTradeUserPlayer(null);
-       setTradeTargetPlayer(null);
-    } else {
-       setTradeMessage(`REJECTED: The ${tradeTargetTeam} turned down the offer. They want more value for ${targetCard.name}.`);
-    }
-  };
 
+   const handlePlayNextGame = () => {
+    if (!franchise || isSimulating) return;
+    const nextMatch = franchise.schedule?.find(m => !m.played);
+    if (!nextMatch) return;
+    setShowSimOverlay(true);
+  };
+   
   // 4. Render Helpers
   const handleStartFranchise = (teamId: string) => {
     const teamDef = NBA_TEAMS.find(t => t.id === teamId);
@@ -1371,10 +1463,25 @@ const CareerView: React.FC = () => {
          {showSimOverlay && teamData && opponentData && nextGame && (
            <MatchSimulationOverlay 
              show={showSimOverlay} 
-             team1={teamData} 
-             team2={opponentData} 
-             team1OVR={teamOVR}
-             team2OVR={nextGame.opponentOVR || 75}
+             userTeam={teamData} 
+             oppTeam={opponentData} 
+             userLineup={startersList}
+             oppLineup={(() => {
+               const rosters = franchise.leagueRosters || {};
+               const oppRoster = rosters[opponentData.id] || [];
+               const oppCards = oppRoster.map(id => ALL_CARDS.find(c => c.id === id)).filter(Boolean) as Card[];
+               if (oppCards.length >= 5) {
+                  return oppCards.sort((a,b) => b.stats.ovr - a.stats.ovr).slice(0, 5);
+               }
+               // Mock if no roster
+               return Array(5).fill(null).map((_, i) => ({
+                 name: `Player ${i+1}`,
+                 position: ['PG','SG','SF','PF','C'][i],
+                 stats: { ovr: (nextGame.opponentOVR || 75) + i - 2, points: 15, rebounds: 5, assists: 5 }
+               } as any));
+             })()}
+             userOVR={teamOVR}
+             oppOVR={nextGame.opponentOVR || 75}
              onFinish={handleFinishSim} 
            />
          )}
@@ -1384,411 +1491,218 @@ const CareerView: React.FC = () => {
              onClose={() => setShowRecap(null)} 
            />
          )}
-      </AnimatePresence>
+       </AnimatePresence>
 
-      {/* Top Bar HUD */}
-      <div className="sticky top-0 z-[100] bg-zinc-950/80 backdrop-blur-2xl border-b border-zinc-900 px-4 sm:px-8 py-3 sm:py-6">
-        <div className="flex items-center justify-between gap-4">
-           <div className="flex items-center gap-3 sm:gap-5">
-              <div className="relative group cursor-pointer" onClick={handleBack}>
-                <div className="w-10 h-10 sm:w-16 sm:h-16 bg-zinc-900 border border-zinc-800 rounded-xl sm:rounded-3xl flex items-center justify-center p-2 sm:p-3 shadow-2xl relative z-10 overflow-hidden transform transition-all active:scale-90 group-hover:border-zinc-500">
-                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-30" />
-                   <img src={getTeamLogo(franchise.team)} className="w-full h-full object-contain relative z-20 transition-transform group-hover:scale-110" alt="Logo" />
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-8 sm:h-8 bg-zinc-100 rounded-lg sm:rounded-xl flex items-center justify-center text-black font-black text-[8px] sm:text-sm shadow-xl border-2 border-zinc-950 z-20">
-                   {teamOVR}
-                </div>
-              </div>
-              <div className="flex flex-col">
-                 <h1 className="text-sm sm:text-3xl font-black italic uppercase tracking-tighter text-white leading-none mb-1 group">{teamData?.name}</h1>
-                 <div className="flex items-center gap-1.5 sm:gap-3">
-                    <span className="text-[7px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 italic">{teamData?.city} Franchise</span>
-                    <div className="w-0.5 h-0.5 rounded-full bg-zinc-800" />
-                    <div className="flex items-center gap-1 bg-zinc-900/50 px-1.5 py-0.5 rounded border border-zinc-800/50">
-                       <div className={`w-1 h-1 rounded-full ${streak.endsWith('W') ? 'bg-emerald-500 shadow-[0_0_5px_#10b981]' : 'bg-red-500 shadow-[0_0_5px_#ef4444]'}`} />
-                       <span className={`text-[6px] sm:text-[9px] font-black uppercase tracking-tighter ${streak.endsWith('W') ? 'text-emerald-500/80' : 'text-red-500/80'}`}>
-                          {streak}
-                       </span>
-                    </div>
+       {/* Header - Sticky Mobile Header */}
+      <header 
+        className="sticky top-0 z-[100] px-6 py-8 flex flex-col gap-4 relative overflow-hidden"
+        style={{ 
+          background: `linear-gradient(to bottom, #10b98188, #09090b)` 
+        }}
+      >
+         <div className="absolute inset-0 bg-zinc-950/20 backdrop-blur-3xl" />
+         
+         <div className="flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-4">
+               <div 
+                 onClick={handleBack}
+                 className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center p-2 border border-white/10 active:scale-90 transition-transform cursor-pointer"
+               >
+                  <img src={getTeamLogo(franchise.team)} className="w-full h-full object-contain" />
+               </div>
+               <div>
+                  <h1 className="text-2xl font-black italic uppercase tracking-tighter text-white leading-none">
+                     {NBA_TEAMS.find(t => t.id === franchise.team)?.name || 'Franchise'}
+                  </h1>
+                  <div className="flex items-center gap-2 mt-1">
+                     <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{franchise.wins}-{franchise.losses}</span>
+                     <div className="w-1 h-1 rounded-full bg-zinc-800" />
+                     <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">RANK {(franchise.conferenceStandings?.findIndex(s => s.isUser) ?? 0) + 1}</span>
+                  </div>
+               </div>
+            </div>
+
+            <div 
+              onClick={() => setActiveTab('settings')}
+              className="w-12 h-12 bg-zinc-900 rounded-2xl flex items-center justify-center text-zinc-500 hover:text-white border border-zinc-800 active:rotate-90 transition-all cursor-pointer"
+            >
+               <SettingsIcon size={20} />
+            </div>
+         </div>
+
+         {/* Quick Stats Ticker/Bar */}
+         <div className="flex gap-4 overflow-x-auto no-scrollbar relative z-10 pt-2">
+            <div className="flex items-center gap-2 px-4 py-2 bg-zinc-900/50 rounded-xl border border-zinc-900 shrink-0">
+               <Coins size={12} className="text-amber-500" />
+               <span className="text-xs font-black tabular-nums text-white">{(franchise.budget / 1000).toFixed(0)}K</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-zinc-900/50 rounded-xl border border-zinc-900 shrink-0">
+               <Star size={12} className="text-emerald-500" />
+               <span className="text-xs font-black text-white">{teamOVR} OVR</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-zinc-900/50 rounded-xl border border-zinc-900 shrink-0">
+               <Users size={12} className="text-blue-500" />
+               <span className="text-xs font-black text-white">{franchise.roster.length}/15</span>
+            </div>
+         </div>
+         
+         {/* News Ticker HUD */}
+         <div className="mt-2 -mx-6 px-6 py-2 bg-black/40 border-t border-zinc-900/50 overflow-hidden relative z-10">
+            <div className="flex items-center gap-6 animate-marquee whitespace-nowrap">
+               {news.length > 0 ? [...news, ...news].map((item, i) => (
+                 <div key={i} className="flex items-center gap-3">
+                    <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{item}</span>
                  </div>
-              </div>
-           </div>
-
-           <div className="hidden lg:flex items-center gap-4 flex-1 justify-center px-10">
-              {[
-                { label: 'RECORD', value: `${franchise.wins}-${franchise.losses}`, sub: 'SEASON' },
-                { label: 'STAFF LVL', value: franchise.level || 1, sub: 'REP' },
-                { label: 'CAP ROOM', value: `$${Math.max(0, (SALARY_CAP - teamPayroll)/1000000).toFixed(1)}M`, sub: 'STABILITY' },
-                { label: 'ROSTER', value: `${franchise.roster.length}/15`, sub: 'SLOTS' }
-              ].map((item, idx) => (
-                <div key={idx} className="flex flex-col items-center px-6 border-r border-zinc-900 last:border-none group">
-                   <span className="text-[6px] font-black text-zinc-700 uppercase tracking-[0.4em] mb-0.5 group-hover:text-zinc-500 transition-colors">{item.label}</span>
-                   <span className="text-sm font-black italic tracking-tighter text-zinc-300 tabular-nums group-hover:text-white transition-colors">{item.value}</span>
-                </div>
-              ))}
-           </div>
-
-           <div className="flex items-center gap-3 sm:gap-6">
-              <div className="flex flex-col items-end">
-                 <div className="flex items-center gap-1.5 sm:gap-2">
-                    <div className="relative">
-                       <Coins size={14} className="text-amber-500 sm:w-5 sm:h-5 relative z-10" />
-                       <div className="absolute inset-0 bg-amber-500/20 blur-lg rounded-full" />
-                    </div>
-                    <span className="text-base sm:text-3xl font-black italic tracking-tighter text-white tabular-nums drop-shadow-[0_0_20px_rgba(245,158,11,0.25)]">
-                       {franchise.budget.toLocaleString()}
-                    </span>
+               )) : (
+                 <div className="flex items-center gap-3">
+                    <div className="w-1 h-1 rounded-full bg-zinc-600" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600 italic">No league updates at this time. Season prep is underway...</span>
                  </div>
-                 <span className="text-[6px] sm:text-[9px] font-black uppercase tracking-[0.3em] text-zinc-700 italic">Financial Balance</span>
-              </div>
-              <button 
-                onClick={() => setCurrentView('home')}
-                className="w-10 h-10 sm:w-16 sm:h-16 bg-zinc-900 border border-zinc-800 rounded-xl sm:rounded-3xl flex items-center justify-center text-zinc-600 hover:text-white transition-all hover:bg-zinc-800 hover:border-zinc-600 group shrink-0"
-              >
-                <LogOut size={16} className="sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform" />
-              </button>
-           </div>
-        </div>
+               )}
+            </div>
+         </div>
+      </header>
 
-        <div className="flex gap-1.5 sm:gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 mt-6">
-            {[
-              { id: 'hub', label: 'Dashboard', icon: LayoutDashboard },
-              { id: 'lineup', label: 'Tactics', icon: Activity },
-              { id: 'market', label: 'Market', icon: TrendingUp },
-              { id: 'league', label: 'Recap', icon: Monitor },
-              { id: 'standings', label: 'Rankings', icon: BarChart3 },
-              { id: 'mgmt', label: 'Ops', icon: Building },
-              { id: 'settings', label: 'Admin', icon: SettingsIcon },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as FranchiseTab)}
-                className={`flex items-center gap-1.5 sm:gap-3 px-4 sm:px-8 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl text-[8px] sm:text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap border relative group overflow-hidden ${
-                  activeTab === tab.id 
-                    ? 'bg-zinc-100 text-black border-zinc-100 shadow-[0_15px_40px_rgba(255,255,255,0.1)]' 
-                    : 'bg-zinc-900/40 text-zinc-600 border-zinc-800 hover:border-zinc-500 hover:text-zinc-300'
-                }`}
-              >
-                {activeTab === tab.id && <div className="absolute inset-x-0 bottom-0 h-1 bg-black/10" />}
-                <tab.icon size={12} className={`sm:w-[16px] transition-transform group-hover:scale-110 ${activeTab === tab.id ? 'text-black' : 'text-zinc-600 group-hover:text-white'}`} />
-                <span>{tab.label}</span>
-              </button>
-            ))}
-        </div>
-
-        {/* News Ticker HUD */}
-        <div className="mt-4 -mx-6 px-6 py-2 bg-black/40 border-t border-zinc-900 overflow-hidden">
-           <div className="flex items-center gap-6 animate-marquee whitespace-nowrap">
-              {news.length > 0 ? [...news, ...news].map((item, i) => (
-                <div key={i} className="flex items-center gap-3">
-                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
-                   <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{item}</span>
-                </div>
-              )) : (
-                <div className="flex items-center gap-3">
-                   <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
-                   <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Season preparation in progress... Morning practice starting shortly...</span>
-                </div>
-              )}
-           </div>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto no-scrollbar p-6">
+      <div className="flex-1 overflow-y-auto no-scrollbar p-3 sm:p-8">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="max-w-7xl mx-auto space-y-4 sm:space-y-8"
+            className="max-w-7xl mx-auto space-y-4"
           >
-            {activeTab === 'hub' && (
-              <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
-                  {/* Next Game - Main Feature */}
-                  <div className="md:col-span-4 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-[3rem] sm:rounded-[5rem] p-6 sm:p-16 relative overflow-hidden group shadow-2xl">
-                     <div className="absolute top-0 right-0 w-[50rem] h-[50rem] bg-emerald-500/[0.03] blur-[150px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                     <div className="absolute bottom-0 left-0 w-[40rem] h-[40rem] bg-blue-500/[0.03] blur-[150px] rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none" />
-                     
-                     <div className="relative z-10 space-y-10 sm:space-y-24">
-                        <div className="flex items-center justify-between">
-                           <div className="flex items-center gap-4 sm:gap-6">
-                              <div className="w-12 h-12 sm:w-20 sm:h-20 bg-zinc-950 border border-zinc-800/50 rounded-2xl sm:rounded-[2rem] flex items-center justify-center text-zinc-700 shadow-inner group-hover:border-emerald-500/20 transition-all">
-                                 <Calendar size={24} className="sm:w-8 sm:h-8" />
-                              </div>
-                              <div className="flex flex-col">
-                                 <div className="flex items-center gap-2 mb-1">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.5em] text-zinc-600">Season Command</span>
-                                 </div>
-                                 <h2 className="text-lg sm:text-4xl font-black italic uppercase tracking-tighter text-white">Session {franchise.wins + franchise.losses + 1} / 82</h2>
-                              </div>
-                           </div>
-                           <div className="flex -space-x-2 sm:-space-x-4">
-                             {[...(franchise.schedule || [])].filter(m => m.played).slice(-5).map((m, i) => (
-                               <div key={i} className={`w-8 h-8 sm:w-14 sm:h-14 rounded-2xl border-4 border-zinc-950 flex items-center justify-center text-[10px] sm:text-sm font-black italic shadow-2xl transition-transform hover:scale-110 hover:z-20 ${m.result === 'W' ? 'bg-zinc-100 text-black' : 'bg-red-600 text-white'}`}>
-                                 {m.result}
-                               </div>
-                             ))}
-                             {[...Array(Math.max(0, 5 - (franchise.schedule || []).filter(m => m.played).length))].map((_, i) => (
-                               <div key={i} className="w-8 h-8 sm:w-14 sm:h-14 rounded-2xl border-4 border-zinc-950 bg-zinc-800 flex items-center justify-center text-[10px] sm:text-sm font-black text-zinc-600">
-                                 -
-                               </div>
-                             ))}
-                           </div>
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row items-center justify-between gap-12 sm:gap-16">
-                           <div className="flex-1 flex flex-col items-center sm:items-start gap-6 sm:gap-10 w-full">
-                              <div className="relative group/logo">
-                                 <div className="absolute inset-0 bg-white/5 blur-3xl rounded-full opacity-0 group-hover/logo:opacity-100 transition-opacity" />
-                                 <div className="w-32 h-32 sm:w-64 sm:h-64 bg-zinc-950 border border-zinc-800 rounded-[3rem] sm:rounded-[5rem] flex items-center justify-center p-8 sm:p-16 shadow-inner relative z-10 transition-all group-hover/logo:scale-105 group-hover/logo:border-white/10 group-hover/logo:shadow-[0_0_50px_rgba(255,255,255,0.05)]">
-                                    <img src={getTeamLogo(franchise.team || 'LAL')} alt="Logo" className="w-full h-full object-contain filter drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]" />
-                                 </div>
-                              </div>
-                              <div className="text-center sm:text-left space-y-2">
-                                 <div className="text-[10px] sm:text-sm font-black uppercase tracking-[0.4em] text-zinc-700 italic group-hover:text-zinc-500 transition-colors uppercase">{teamData?.city}</div>
-                                 <h3 className="text-2xl sm:text-6xl font-black italic uppercase tracking-tighter text-white drop-shadow-2xl">{teamData?.name}</h3>
-                              </div>
-                           </div>
-
-                           <div className="flex flex-col items-center gap-4 sm:gap-8 shrink-0 px-10 relative">
-                              <div className="absolute inset-0 bg-emerald-500/5 blur-[50px] animate-pulse" />
-                              <div className="w-16 h-16 sm:w-28 sm:h-28 rounded-full bg-zinc-950 border-2 border-zinc-800 flex items-center justify-center shadow-inner relative z-10 group-hover:border-zinc-500 transition-colors">
-                                 <span className="text-xl sm:text-5xl font-black italic text-zinc-600 group-hover:text-white transition-colors">VS</span>
-                              </div>
-                              <div className="flex flex-col items-center gap-1">
-                                 <span className="text-[7px] sm:text-[10px] font-black uppercase tracking-[0.5em] text-zinc-700">Arena</span>
-                                 <span className="text-[8px] sm:text-[12px] font-black text-white italic tracking-widest">{nextGame?.location === 'home' ? 'CRYPTO.COM' : 'AWAY VENUE'}</span>
-                              </div>
-                           </div>
-
-                           <div className="flex-1 flex flex-col items-center sm:items-end gap-6 sm:gap-10 w-full">
-                              <div className="relative group/logo">
-                                 <div className="absolute inset-0 bg-white/5 blur-3xl rounded-full opacity-0 group-hover/logo:opacity-100 transition-opacity" />
-                                 <div className="w-32 h-32 sm:w-64 sm:h-64 bg-zinc-950 border border-zinc-800 rounded-[3rem] sm:rounded-[5rem] flex items-center justify-center p-8 sm:p-16 shadow-inner relative z-10 transition-all group-hover/logo:scale-105 group-hover/logo:border-white/10">
-                                    <img src={getTeamLogo(nextGame?.opponentAbbr || 'BOS')} alt="Opponent" className="w-full h-full object-contain filter grayscale opacity-40 group-hover/logo:grayscale-0 group-hover/logo:opacity-100 transition-all" />
-                                 </div>
-                                 <div className="absolute -top-4 -right-4 bg-zinc-800 border border-zinc-700 px-5 py-2 rounded-2xl text-[10px] sm:text-sm font-black italic text-zinc-400 z-20 shadow-2xl">
-                                   OVR {nextGame?.opponentOVR || 75}
-                                 </div>
-                              </div>
-                              <div className="text-center sm:text-right space-y-2">
-                                 <div className="text-[10px] sm:text-sm font-black uppercase tracking-[0.4em] text-zinc-700 italic">{opponentData?.city || 'TBD'}</div>
-                                 <h3 className="text-2xl sm:text-6xl font-black italic uppercase tracking-tighter text-zinc-400 group-hover:text-white transition-all">{nextGame?.opponentTeam || 'Opponent'}</h3>
-                              </div>
-                           </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-10 pt-10">
-                           <button 
-                             onClick={simulateMatch}
-                             disabled={isSimulating}
-                             className="group/sim py-6 sm:py-10 bg-white text-black rounded-[2.5rem] sm:rounded-[4rem] font-black uppercase tracking-[0.6em] text-[10px] sm:text-sm shadow-2xl hover:bg-emerald-400 transition-all flex items-center justify-center gap-6 active:scale-95 active:translate-y-1 relative overflow-hidden"
-                           >
-                              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-white/50 to-emerald-500/0 -translate-x-full group-hover/sim:animate-shimmer" />
-                              {isSimulating ? <RefreshCw className="animate-spin" size={24} /> : <Play fill="currentColor" size={24} className="group-hover/sim:scale-125 transition-transform" />}
-                              {isSimulating ? 'EXECUTING SIM...' : 'BEGIN SIMULATION'}
-                           </button>
-                           <button className="py-6 sm:py-10 bg-black/40 border-2 border-zinc-800 text-zinc-500 rounded-[2.5rem] sm:rounded-[4rem] font-black uppercase tracking-[0.6em] text-[10px] sm:text-sm hover:border-zinc-100 hover:text-white transition-all active:scale-95 hover:bg-zinc-900 group">
-                              <span className="flex items-center justify-center gap-4 group-hover:scale-105 transition-transform">
-                                <Activity size={20} />
-                                EDIT TACTICAL LOADOUT
-                              </span>
-                           </button>
-                        </div>
-                     </div>
-                  </div>
-
-                 {/* Team Status Indicators - Sidebar */}
-                 <div className="md:col-span-2 lg:col-span-2 space-y-6 sm:space-y-10">
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-8 sm:p-10 space-y-10 shadow-2xl relative overflow-hidden group">
-                       <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/[0.02] blur-[80px] pointer-events-none" />
+            {activeTab === 'hub' && nextOpponent && (
+              <div className="space-y-6 pb-40 px-6">
+                 {/* Next Game Card */}
+                 <div className="pt-6">
+                    <div className="bg-zinc-900 rounded-[2.5rem] border border-zinc-800 p-8 space-y-8 relative overflow-hidden group shadow-2xl">
+                       <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full -mr-32 -mt-32 blur-3xl" />
                        
-                       <div className="space-y-1.5">
-                          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 italic">Core Vitality</h3>
-                          <div className="h-0.5 w-12 bg-emerald-500" />
-                       </div>
-
-                       <div className="space-y-10">
-                          <div className="space-y-4">
-                             <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                   <div className="w-10 h-10 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center text-red-500 shadow-inner group-hover:scale-110 transition-transform">
-                                      <Heart size={18} fill="currentColor" />
-                                   </div>
-                                   <div className="flex flex-col">
-                                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Chemistry</span>
-                                      <span className="text-[8px] font-bold text-zinc-600 uppercase">Locker Room Pulse</span>
-                                   </div>
-                                </div>
-                                <span className={`text-2xl font-black italic tabular-nums ${franchise.chemistry > 75 ? 'text-emerald-500' : 'text-white'}`}>{franchise.chemistry || 60}%</span>
-                             </div>
-                             <div className="h-2 w-full bg-zinc-950 rounded-full overflow-hidden p-0.5 border border-zinc-800">
-                                <motion.div 
-                                  initial={{ width: 0 }} 
-                                  animate={{ width: `${franchise.chemistry || 60}%` }} 
-                                  className="h-full bg-gradient-to-r from-red-500 to-emerald-500 rounded-full shadow-[0_0_15px_rgba(239,68,68,0.3)]" 
-                                />
-                             </div>
-                          </div>
-                          
-                          <div className="space-y-4">
-                             <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                   <div className="w-10 h-10 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center text-blue-500 shadow-inner group-hover:scale-110 transition-transform delay-75">
-                                      <Users size={18} />
-                                   </div>
-                                   <div className="flex flex-col">
-                                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Fan Support</span>
-                                      <span className="text-[8px] font-bold text-zinc-600 uppercase">Market Sentiment</span>
-                                   </div>
-                                </div>
-                                <span className="text-2xl font-black italic text-white tabular-nums">{franchise.fanSupport || 50}%</span>
-                             </div>
-                             <div className="h-2 w-full bg-zinc-950 rounded-full overflow-hidden p-0.5 border border-zinc-800">
-                                <motion.div 
-                                  initial={{ width: 0 }} 
-                                  animate={{ width: `${franchise.fanSupport || 50}%` }} 
-                                  className="h-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]" 
-                                />
-                             </div>
-                          </div>
-
-                          <div className="pt-6 border-t border-zinc-800/50">
-                             <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-2">
-                                   <span className="bg-zinc-950 px-3 py-1 rounded-lg border border-zinc-800 text-[10px] font-black italic text-white">REPUTATION LEVEL {franchise.level || 1}</span>
-                                </div>
-                                <span className="text-[10px] font-black text-zinc-600 tabular-nums italic">{franchise.xp.toLocaleString()} / {((franchise.level || 1) * 2500).toLocaleString()} XP</span>
-                             </div>
-                             <div className="h-1.5 w-full bg-zinc-950 rounded-full overflow-hidden border border-zinc-800">
-                                <motion.div 
-                                  className="h-full bg-emerald-500" 
-                                  initial={{ width: 0 }}
-                                  animate={{ width: `${(franchise.xp / ((franchise.level || 1) * 2500)) * 100}%` }}
-                                />
-                             </div>
-                             <p className="mt-3 text-[7px] font-black uppercase tracking-[0.4em] text-zinc-700 text-center">Executive experience accumulates via match results</p>
-                          </div>
-                       </div>
-                    </div>
-
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-8 sm:p-10 flex flex-col justify-between shadow-2xl relative overflow-hidden group">
-                       <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/[0.02] blur-[80px] pointer-events-none" />
                        <div className="flex items-center justify-between relative z-10">
-                          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-zinc-950 rounded-2xl sm:rounded-3xl flex items-center justify-center text-amber-500 shadow-inner group-hover:scale-110 transition-transform">
-                             <DollarSign size={24} className="sm:w-8 sm:h-8" />
+                          <span className="px-4 py-1.5 bg-emerald-500 text-black text-[10px] font-black uppercase tracking-widest rounded-full">Next Match</span>
+                       </div>
+
+                       <div className="flex items-center gap-6 relative z-10">
+                          <div className="w-20 h-20 bg-zinc-950 rounded-3xl p-4 border border-zinc-800 shadow-inner">
+                             <img src={getTeamLogo(nextOpponent.id)} className="w-full h-full object-contain" />
                           </div>
-                          <div className="flex flex-col items-end">
-                             <div className="flex items-center gap-2">
-                                <TrendingUp size={14} className="text-emerald-500" />
-                                <span className="text-[10px] font-black text-emerald-500 uppercase italic">Revenue Growth: High</span>
+                          <div>
+                             <h3 className="text-4xl font-black italic text-white uppercase tracking-tighter leading-none">{nextOpponent.name}</h3>
+                             <div className="flex items-center gap-3 mt-2">
+                                <span className="text-emerald-500 font-black text-xs uppercase tracking-widest">OVR {getCPUTeamOVR(nextOpponent.id, ALL_CARDS)}</span>
+                                <span className="text-zinc-600 font-black text-[10px] uppercase tracking-widest">CHANCE {Math.round((teamOVR / (teamOVR + getCPUTeamOVR(nextOpponent.id, ALL_CARDS))) * 100)}%</span>
                              </div>
                           </div>
                        </div>
-                       <div className="mt-10 relative z-10">
-                          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-2 italic">Operation Capital</p>
-                          <div className="flex items-baseline gap-2">
-                             <h4 className="text-3xl sm:text-5xl font-black italic tracking-tighter text-white tabular-nums">${(franchise.budget / 1000).toFixed(0)}K</h4>
-                             <span className="text-xs font-black text-zinc-700 uppercase italic tracking-widest">USD Credits</span>
-                          </div>
-                          <div className="mt-8 flex gap-1.5">
-                             {[1,2,3,4,5,6,7,8,9,10].map(i => (
-                               <div key={i} className={`h-1 flex-1 rounded-full transition-colors duration-500 ${i <= (franchise.budget / 100000) * 10 ? 'bg-emerald-500/30 shadow-[0_0_8px_#10b981]' : 'bg-zinc-800'}`} />
-                             ))}
-                          </div>
-                       </div>
+
+                       <button 
+                          onClick={handlePlayNextGame}
+                          className="w-full h-20 bg-emerald-500 hover:bg-white text-black rounded-[2rem] flex items-center justify-center gap-4 transition-all shadow-[0_20px_40px_rgba(16,185,129,0.2)] active:scale-95 relative z-10"
+                       >
+                          <Play fill="currentColor" size={24} />
+                          <span className="text-sm font-black uppercase tracking-[0.3em] italic">Start Game</span>
+                       </button>
                     </div>
                  </div>
 
-                 {/* News Feed */}
-                 <div className="md:col-span-3 lg:col-span-3 bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-8 overflow-hidden flex flex-col shadow-xl">
-                    <div className="flex items-center justify-between mb-8">
-                       <h3 className="text-xs font-black uppercase tracking-[0.3em] text-zinc-400 flex items-center gap-3">
-                          <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]" />
-                          League Feed
-                       </h3>
-                       <button className="text-[10px] font-black uppercase tracking-widest text-zinc-600 hover:text-zinc-400 transition-colors">Clear All</button>
+                 {/* Stats Cards */}
+                 <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { label: 'Payroll', val: `$${(teamPayroll/1000000).toFixed(1)}M`, color: 'text-amber-500' },
+                      { label: 'Energy', val: `${avgEnergy}%`, color: 'text-emerald-500' },
+                      { label: 'Chem', val: `${franchise.chemistry}%`, color: 'text-blue-500' }
+                    ].map((item, i) => (
+                      <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 text-center space-y-1">
+                         <p className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">{item.label}</p>
+                         <p className={`text-xl font-black italic tabular-nums ${item.color}`}>{item.val}</p>
+                      </div>
+                    ))}
+                 </div>
+
+                 {/* Quick Actions Grid */}
+                 <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { id: 'lineup', label: 'Roster', icon: Users, color: 'bg-indigo-500' },
+                      { id: 'market', label: 'Market', icon: ShoppingCart, color: 'bg-emerald-500' },
+                      { id: 'standings', label: 'League', icon: BarChart3, color: 'bg-blue-500' },
+                      { id: 'settings', label: 'Settings', icon: SettingsIcon, color: 'bg-zinc-600' }
+                    ].map((action) => (
+                      <button 
+                         key={action.id}
+                         onClick={() => setActiveTab(action.id as FranchiseTab)}
+                         className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 flex flex-col items-start gap-4 hover:border-white/20 transition-all active:scale-95 shadow-xl relative overflow-hidden"
+                      >
+                         <div className={`w-10 h-10 ${action.color} rounded-xl flex items-center justify-center text-black shadow-lg relative z-10`}>
+                            <action.icon size={18} strokeWidth={3} />
+                         </div>
+                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-200 relative z-10">{action.label}</span>
+                      </button>
+                    ))}
+                 </div>
+
+                 {/* Recent Results */}
+                 <div className="space-y-4">
+                    <div className="flex items-center justify-between px-1">
+                       <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest italic">Recent Results</h4>
+                       <History size={14} className="text-zinc-800" />
                     </div>
-                    <div className="flex-1 space-y-4 overflow-y-auto no-scrollbar pr-2">
-                       {news.length > 0 ? news.map((item, i) => (
-                         <div key={i} className="group p-5 bg-black/40 border border-white/5 rounded-3xl space-y-3 hover:bg-black/60 hover:border-zinc-700 transition-all duration-300">
-                            <div className="flex items-center justify-between">
-                               <div className="flex items-center gap-2">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                  <span className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-500">Verified Broadcast</span>
-                               </div>
-                               <span className="text-[8px] font-bold text-zinc-600 uppercase">2m ago</span>
-                            </div>
-                            <p className="text-[11px] font-bold text-zinc-300 leading-relaxed tracking-wide group-hover:text-white transition-colors">{item}</p>
-                         </div>
-                       )) : (
-                         <div className="h-full flex flex-col items-center justify-center text-zinc-700 space-y-4 py-10 opacity-30">
-                            <Newspaper size={48} strokeWidth={1} />
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em]">Monitoring league chatter...</p>
-                         </div>
+                    <div className="space-y-2">
+                       {franchise.schedule?.filter(m => m.played).slice(-5).reverse().map((game, i) => (
+                          <div key={i} className="bg-zinc-900/50 border border-zinc-900 rounded-2xl p-4 flex items-center justify-between">
+                             <div className="flex items-center gap-4">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs ${game.result === 'W' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
+                                   {game.result}
+                                </div>
+                                <div>
+                                   <p className="text-[10px] font-black uppercase text-zinc-500">{game.isHome ? 'Vs' : 'At'} {game.opponentAbbr}</p>
+                                   <p className="text-sm font-black italic text-white tabular-nums">{game.score}</p>
+                                </div>
+                             </div>
+                             <div className="text-right">
+                                <p className="text-[10px] font-bold text-zinc-600">GAME {game.gameNumber}</p>
+                             </div>
+                          </div>
+                       ))}
+                       {(!franchise.schedule || franchise.schedule.filter(m => m.played).length === 0) && (
+                          <div className="py-12 bg-zinc-950 border border-zinc-900 rounded-3xl flex flex-col items-center justify-center text-zinc-800 gap-2">
+                             <Target size={24} strokeWidth={1} />
+                             <span className="text-[10px] font-black uppercase tracking-[0.2em]">No Games Played</span>
+                          </div>
                        )}
                     </div>
                  </div>
 
-                 {/* Record & Last 5 */}
-                 <div className="md:col-span-3 lg:col-span-3 bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-8 space-y-8 shadow-xl relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
-                    <div className="flex items-center justify-between">
-                       <div className="space-y-1">
-                          <h3 className="text-xs font-black uppercase tracking-[0.3em] text-zinc-400">Season Progress</h3>
-                          <p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">Western Conference</p>
-                       </div>
-                       <div className="text-right">
-                          <span className="text-2xl font-black italic tracking-tighter text-white">{franchise.wins} - {franchise.losses}</span>
-                       </div>
+                 {/* News */}
+                 <div className="space-y-4">
+                    <div className="flex items-center justify-between px-1">
+                       <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest italic">League News</h4>
+                       <Newspaper size={14} className="text-zinc-800" />
                     </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                       <div className="p-6 bg-zinc-950 border border-zinc-800 rounded-3xl text-center group hover:bg-zinc-900 transition-colors">
-                          <p className="text-[9px] font-black text-zinc-600 uppercase mb-3 italic tracking-widest">Standing</p>
-                          <div className="text-4xl font-black italic text-white flex items-center justify-center gap-1 group-hover:scale-110 transition-transform">
-                             <span className="text-emerald-500 font-black">#</span>
-                             { (franchise.conferenceStandings?.findIndex(s => s.teamId === franchise.team) ?? 0) + 1 }
+                    <div className="space-y-3">
+                       {news.slice(0, 3).map((item, i) => (
+                          <div key={i} className="bg-zinc-900/30 border border-zinc-900 rounded-2xl p-4 flex gap-4 items-start italic group hover:bg-zinc-900/50 transition-colors">
+                             <div className="mt-1.5 w-1 h-1 rounded-full bg-zinc-800 group-hover:bg-emerald-500 transition-colors" />
+                             <p className="text-[11px] font-medium text-zinc-400 group-hover:text-white transition-colors leading-relaxed">{item}</p>
                           </div>
-                       </div>
-                       <div className="p-6 bg-zinc-950 border border-zinc-800 rounded-3xl text-center group hover:bg-zinc-900 transition-colors">
-                          <p className="text-[9px] font-black text-zinc-600 uppercase mb-3 italic tracking-widest">Winning Ratio</p>
-                          <div className="text-3xl font-black italic text-zinc-400 group-hover:text-emerald-400 transition-colors">
-                             {franchise.wins + franchise.losses > 0 ? (franchise.wins / (franchise.wins + franchise.losses)).toFixed(3).replace('0.', '.') : '.000'}
-                          </div>
-                       </div>
+                       ))}
                     </div>
-
-                    <div className="space-y-4">
-                       <div className="flex items-center justify-between">
-                          <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-500 italic">Recent Form</h4>
-                          <span className="text-[8px] font-black text-zinc-700 uppercase">Legacy Status</span>
-                       </div>
-                       <div className="flex gap-3">
-                          {franchise.schedule.filter(m => m.played).slice(-5).map((m, idx) => (
-                            <div key={idx} className={`flex-1 h-12 rounded-2xl flex items-center justify-center text-sm font-black italic transition-all hover:scale-110 ${m.result === 'W' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
-                               {m.result}
-                            </div>
-                          ))}
-                          {[...Array(Math.max(0, 5 - franchise.schedule.filter(m => m.played).length))].map((_, i) => (
-                            <div key={i} className="flex-1 h-12 rounded-2xl bg-zinc-950 border border-zinc-800 text-zinc-800 flex items-center justify-center text-[10px] font-black italic">—</div>
-                          ))}
-                       </div>
-                    </div>
-                     {activeTab === 'lineup' && (
+                 </div>
+              </div>
+            )}
+            {activeTab === 'lineup' && (
               <div className="space-y-12 pb-32">
                  <div className="flex border-b border-zinc-900 mb-12 sticky top-[180px] bg-zinc-950 z-[70] pt-6 items-center justify-between">
                     <div className="flex gap-2 sm:gap-6">
-                      {(['court', 'bench', 'depth', 'chemistry'] as const).map(tab => (
+                      {(['court', 'bench', 'depth', 'chemistry', 'contracts'] as const).map(tab => (
                           <button 
                             key={tab}
-                            onClick={() => setLineupSubTab(tab)}
+                            onClick={() => setLineupSubTab(tab as any)}
                             className={`px-8 sm:px-12 py-5 text-[10px] sm:text-xs font-black uppercase tracking-[0.4em] transition-all relative group/tab ${lineupSubTab === tab ? 'text-white' : 'text-zinc-700'}`}
                           >
                             <span className="relative z-10">{tab.replace('_', ' ')}</span>
-                            {lineupSubTab === tab && (
+                            {lineupSubTab === (tab as any) && (
                               <>
                                 <motion.div layoutId="lineupSubTab" className="absolute bottom-0 left-0 right-0 h-1 bg-white shadow-[0_0_15px_rgba(255,255,255,0.5)] z-20" />
                                 <div className="absolute inset-0 bg-white/[0.03] rounded-t-2xl z-0" />
@@ -1880,7 +1794,7 @@ const CareerView: React.FC = () => {
                         </div>
 
                         {/* Tactical Court View */}
-                        <div className="relative w-full aspect-[4/5] md:aspect-[16/9] bg-zinc-950 rounded-[4rem] sm:rounded-[6rem] border-4 border-zinc-900 shadow-[0_40px_100px_rgba(0,0,0,0.6)] p-6 sm:p-24 overflow-hidden group">
+                        <div className="relative w-full aspect-[3.5/5] sm:aspect-[16/9] bg-zinc-950 rounded-3xl sm:rounded-[6rem] border-2 sm:border-4 border-zinc-900 shadow-2xl p-3 sm:p-24 overflow-hidden group">
                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.03),transparent)] pointer-events-none" />
                            <div className="absolute inset-x-12 inset-y-16 sm:inset-x-24 sm:inset-y-40 z-0 opacity-[0.05] pointer-events-none transition-opacity group-hover:opacity-[0.1] duration-1000">
                                <svg width="100%" height="100%" viewBox="0 0 1000 600" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2061,6 +1975,93 @@ const CareerView: React.FC = () => {
                        </div>
                     </div>
                  )}
+
+                 {lineupSubTab === 'contracts' && (
+                    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
+                        <div className="bg-zinc-900 border border-zinc-800 rounded-[3rem] p-10 space-y-10 shadow-2xl">
+                           <div className="flex items-center justify-between border-b border-zinc-800 pb-8">
+                              <div className="space-y-1">
+                                 <h3 className="text-2xl font-black italic uppercase tracking-tighter text-white">Payroll Matrix</h3>
+                                 <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Active Player Commitments & Cap Status</p>
+                              </div>
+                              <div className="text-right">
+                                 <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Cap Space</p>
+                                 <p className={`text-3xl font-black italic tabular-nums ${teamPayroll > SALARY_CAP ? 'text-red-500' : 'text-emerald-500'}`}>
+                                    ${((SALARY_CAP - teamPayroll)/1000000).toFixed(2)}M
+                                 </p>
+                              </div>
+                           </div>
+
+                           <div className="overflow-x-auto">
+                              <table className="w-full text-left">
+                                 <thead>
+                                    <tr className="text-[9px] font-black uppercase text-zinc-600 tracking-widest border-b border-zinc-800">
+                                       <th className="py-6 px-4">Player</th>
+                                       <th className="py-6 px-4">Years</th>
+                                       <th className="py-6 px-4">Salary</th>
+                                       <th className="py-6 px-4">Type</th>
+                                       <th className="py-6 px-4 text-right">Actions</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody className="divide-y divide-zinc-800/50">
+                                    {franchise.roster.map(id => {
+                                       const card = ALL_CARDS.find(c => c.id === id);
+                                       const contract = (franchise.contracts || []).find(c => c.cardId === id);
+                                       if (!card || !contract) return null;
+                                       return (
+                                          <tr key={id} className="group hover:bg-white/[0.02]">
+                                             <td className="py-6 px-4">
+                                                <div className="flex items-center gap-4">
+                                                   <div className={`w-8 h-8 rounded-lg bg-zinc-950 flex items-center justify-center p-1 border ${
+                                                      card.rarity === 'franchise' ? 'border-purple-500/50' : 
+                                                      card.rarity === 'allstar' ? 'border-amber-500/50' : 'border-zinc-800'
+                                                   }`}>
+                                                      <img src={getTeamLogo(card.teamAbbr)} className="w-full h-full object-contain" />
+                                                   </div>
+                                                   <div>
+                                                      <p className="text-sm font-black italic uppercase text-zinc-200">{card.name}</p>
+                                                      <p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">OVR {card.stats.ovr} · {card.position}</p>
+                                                   </div>
+                                                </div>
+                                             </td>
+                                             <td className="py-6 px-4">
+                                                <span className={`text-xs font-black italic ${contract.yearsLeft === 1 ? 'text-red-500' : 'text-zinc-400'}`}>
+                                                   {contract.yearsLeft} YRS
+                                                </span>
+                                             </td>
+                                             <td className="py-6 px-4 text-sm font-black italic text-white/80 tabular-nums">${contract.salary.toFixed(2)}M</td>
+                                             <td className="py-6 px-4">
+                                                <span className="text-[9px] font-black uppercase px-3 py-1 rounded-lg border border-zinc-800 text-zinc-500">
+                                                   {contract.type}
+                                                </span>
+                                             </td>
+                                             <td className="py-6 px-4">
+                                                <div className="flex items-center justify-end gap-2">
+                                                   {contract.canExtend && (
+                                                      <button 
+                                                        onClick={() => handleExtendContract(id)}
+                                                        className="px-4 py-2 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-black rounded-lg text-[9px] font-black uppercase transition-all"
+                                                      >
+                                                         Extend
+                                                      </button>
+                                                   )}
+                                                   <button 
+                                                      onClick={() => handleReleasePlayer(id)}
+                                                      className="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg text-[9px] font-black uppercase transition-all"
+                                                   >
+                                                      Waive
+                                                   </button>
+                                                </div>
+                                             </td>
+                                          </tr>
+                                       );
+                                    })}
+                                 </tbody>
+                              </table>
+                           </div>
+                        </div>
+                    </div>
+                 )}
               </div>
             )}
 
@@ -2124,12 +2125,19 @@ const CareerView: React.FC = () => {
                              </div>
                           </div>
                           <div className="relative z-10 flex flex-wrap items-center gap-6">
-                             <div className="bg-zinc-950 border-2 border-zinc-900 px-10 py-7 rounded-[2rem] shadow-inner group/stat hover:border-amber-500/30 transition-colors">
+                             <div className="bg-zinc-950 border-2 border-zinc-900 px-10 py-7 rounded-[2rem] shadow-inner group/stat hover:border-amber-500/30 transition-colors relative">
                                 <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-2 italic">Operation Capital</p>
                                 <div className="flex items-baseline gap-2">
-                                   <p className="text-3xl font-black italic text-amber-500 tabular-nums">${((SALARY_CAP - teamPayroll)/1000000).toFixed(2)}M</p>
+                                   <p className="text-3xl font-black italic text-amber-500 tabular-nums">${(franchise.budget/1000).toFixed(0)}K</p>
                                    <span className="text-[9px] font-bold text-zinc-700 uppercase">Credits</span>
                                 </div>
+                                {tradeMessage && (
+                                   <div className="absolute -top-12 left-0 right-0 animate-in fade-in slide-in-from-bottom-2 z-[100]">
+                                      <div className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border shadow-2xl ${tradeMessage.includes('APPROVED') || tradeMessage.includes('ACCEPTED') ? 'bg-emerald-500 text-black border-emerald-400' : 'bg-red-500 text-white border-red-400'}`}>
+                                         {tradeMessage}
+                                      </div>
+                                   </div>
+                                )}
                              </div>
                              <div className="bg-zinc-950 border-2 border-zinc-900 px-10 py-7 rounded-[2rem] shadow-inner group/stat hover:border-blue-500/30 transition-colors">
                                 <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-2 italic">Roster Capacity</p>
@@ -2142,7 +2150,7 @@ const CareerView: React.FC = () => {
                        </div>
 
                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-10 sm:gap-14">
-                          {(franchise.waiverPool || ALL_CARDS.filter(c => c.stats.ovr >= 70 && c.stats.ovr <= 78 && !franchise.roster.includes(c.id)).slice(0, 10).map(c => c.id)).map(id => {
+                          {(franchise.waiverPool || ALL_CARDS.filter(c => c.stats.ovr >= 70 && c.stats.ovr <= 78 && !(franchise.roster || []).includes(c.id)).slice(0, 10).map(c => c.id)).map(id => {
                              const card = ALL_CARDS.find(c => c.id === id);
                              if (!card) return null;
                              const salary = (card.stats.ovr - 65) * 0.4 + 1.5;
@@ -2210,7 +2218,7 @@ const CareerView: React.FC = () => {
                                 <div className={`w-4 h-4 rounded-full transition-all duration-500 scale-110 ${tradeUserPlayer ? 'bg-emerald-500 shadow-[0_0_20px_#10b981]' : 'bg-zinc-800'}`} />
                              </div>
                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 h-[550px] overflow-y-auto pr-6 no-scrollbar relative z-10 scroll-smooth pb-10">
-                                {franchise.roster.map(id => {
+                                {(franchise.roster || []).map(id => {
                                    const card = ALL_CARDS.find(c => c.id === id);
                                    if (!card) return null;
                                    return (
@@ -2355,12 +2363,12 @@ const CareerView: React.FC = () => {
                        </div>
 
                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8">
-                          {ALL_CARDS.filter(c => !franchise.roster.includes(c.id))
+                          {ALL_CARDS.filter(c => !(franchise.roster || []).includes(c.id))
                              .filter(c => c.name.toLowerCase().includes(marketSearch.toLowerCase()))
                              .slice(0, 18).map(card => {
                               const salary = (card.stats.ovr - 60) * 0.5 + 2;
                               const signFee = Math.floor(card.stats.ovr * 1500);
-                              const teamPay = franchise.roster.reduce((t, id) => t + (ALL_CARDS.find(c => c.id === id)?.stats.ovr ? (ALL_CARDS.find(c => c.id === id)!.stats.ovr - 60) * 0.5 + 2 : 0), 0);
+                              const teamPay = (franchise.roster || []).reduce((t, id) => t + (ALL_CARDS.find(c => c.id === id)?.stats.ovr ? (ALL_CARDS.find(c => c.id === id)!.stats.ovr - 60) * 0.5 + 2 : 0), 0);
                               const canAfford = franchise.budget >= signFee && (teamPay + salary <= SALARY_CAP);
                               
                               return (
@@ -2843,7 +2851,7 @@ const CareerView: React.FC = () => {
                    <button onClick={() => setShowPicker(null)} className="p-3 bg-zinc-900 rounded-full hover:bg-zinc-800"><Zap size={20} /></button>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 overflow-y-auto max-h-[70vh] no-scrollbar">
-                   {franchise.roster.map(id => {
+                   {(franchise.roster || []).map(id => {
                       const card = ALL_CARDS.find(c => c.id === id);
                       if (!card) return null;
                       const energy = franchise.playerEnergy?.[id] ?? 100;
@@ -2859,7 +2867,7 @@ const CareerView: React.FC = () => {
                         </div>
                       );
                    })}
-                   {franchise.roster.length === 0 && <p className="col-span-full text-center py-20 text-zinc-600 font-black uppercase">No players in roster. Sign some from the market!</p>}
+                   {(franchise.roster || []).length === 0 && <p className="col-span-full text-center py-20 text-zinc-600 font-black uppercase">No players in roster. Sign some from the market!</p>}
                 </div>
              </div>
           </motion.div>
@@ -3019,7 +3027,7 @@ const CareerView: React.FC = () => {
                     <div className="space-y-4">
                        <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Top Performers</h4>
                        <div className="space-y-2">
-                          {showRecap.stats.slice(0, 3).map((p: any, i: number) => (
+                          {(showRecap.stats || showRecap.boxScore || []).slice(0, 3).map((p: any, i: number) => (
                             <div key={i} className="flex items-center justify-between text-xs py-2 border-b border-zinc-800/50">
                                <span className="font-bold text-zinc-400">{p.name}</span>
                                <span className="font-black italic text-zinc-200">{p.pts} PTS · {p.reb} REB · {p.ast} AST</span>
