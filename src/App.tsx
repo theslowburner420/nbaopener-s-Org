@@ -237,8 +237,8 @@ function AppContent() {
         </div>
       )}
       
-      {/* Main Content Area - This grows to fill space and its children handle scrolling */}
-      <main className={`flex-1 relative bg-black overflow-hidden ${(currentView === 'draft' || currentView === 'open') ? 'pt-0 pb-0' : (isPremium ? 'pt-14 pb-16' : 'pt-[116px] pb-16')}`}>
+      {/* Content Area - Natural Scroll */}
+      <main className={`flex-1 relative bg-black ${(currentView === 'draft' || currentView === 'open') ? 'pt-0 pb-0' : (isPremium ? 'pt-14 pb-16' : 'pt-[116px] pb-16')}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={currentView}
@@ -246,7 +246,7 @@ function AppContent() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="h-full w-full overflow-hidden"
+            className="w-full"
           >
             {renderView()}
           </motion.div>

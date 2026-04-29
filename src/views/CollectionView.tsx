@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useGame } from '../context/GameContext';
 import { ALL_CARDS } from '../data/cards';
+import { NBA_TEAMS } from '../data/nbaTeams';
 import { motion, AnimatePresence } from 'motion/react';
 import { Card, Rarity } from '../types';
 import { Search, LayoutGrid, Filter, X, ChevronDown, Trophy } from 'lucide-react';
@@ -95,8 +96,8 @@ export default function CollectionView() {
   const progressPercent = Math.round((collectedCount / totalCards) * 100);
 
   const teams = useMemo(() => {
-    const uniqueTeams = Array.from(new Set(ALL_CARDS.map(c => c.team))).sort();
-    return ['All', ...uniqueTeams];
+    const list = NBA_TEAMS.map(t => t.name).sort();
+    return ['All', ...list];
   }, []);
 
   const series = useMemo(() => {
