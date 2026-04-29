@@ -18,36 +18,91 @@ export const tradeEngine = {
 
     if (!fromTeam || !toTeam) return { accepted: false, reason: 'Invalid teams' };
 
-    // Player Value Calculation
-    const getPlayerVal = (ids: string[]) => ids.reduce((sum, id) => {
-      const card = ALL_CARDS.find(c => c.id === id);
-      return sum + (card?.stats.ovr || 0);
+    // Player Value Calculation: OVR * years_contract * age_factor
+    const getPlayerVal = (ids: string[], team: TeamObject) => ids.reduce((sum, id) => {
+      const card = ALL_CARDS.find(c => c.id === id) || state.customCards?.find(c => c.id === id);
+      const contract = team.contracts[id];
+      const progress = state.playerProgress[id] || { age: 25 };
+      
+      if (!card || !contract) return sum;
+
+      // Age factor: 20 -> 1.5, 25 -> 1.2, 30 -> 1.0, 35 -> 0.8
+      let ageFactor = 1.0;
+      if (progress.age <= 22) ageFactor = 1.5;
+      else if (progress.age <= 26) ageFactor = 1.3;
+      else if (progress.age <= 30) ageFactor = 1.1;
+      else if (progress.age <= 34) ageFactor = 0.9;
+      else ageFactor = 0.7;
+
+      const baseVal = card.stats.ovr * contract.yearsRemaining * ageFactor;
+      return sum + baseVal;
     }, 0);
 
     // Pick Value Calculation
-    const getPickVal = (teamChoices: any[], pickIds: string[] = []) => {
+    const getPickVal = (team: TeamObject, pickIds: string[] = []) => {
+      const winPct = team.wins / Math.max(1, team.wins + team.losses);
+      const isRebuilding = winPct < 0.4;
+      
       return pickIds.reduce((sum, id) => {
-         const pick = teamChoices.find(p => p.id === id);
+         const pick = team.draftPicks.find(p => p.id === id);
          if (!pick) return sum;
-         return sum + (pick.round === 1 ? 75 : 65);
+         
+         let val = pick.round === 1 ? 150 : 60;
+         if (isRebuilding) val *= 1.5; // Rebuilding teams value picks 50% more
+         
+         return sum + val;
       }, 0);
     };
 
-    const offeredVal = getPlayerVal(offer.offeredPlayerIds) + getPickVal(fromTeam.draftPicks, offer.offeredPickIds);
-    const requestedVal = getPlayerVal(offer.requestedPlayerIds) + getPickVal(toTeam.draftPicks, offer.requestedPickIds);
+    const offeredVal = getPlayerVal(offer.offeredPlayerIds, fromTeam) + getPickVal(fromTeam, offer.offeredPickIds);
+    const requestedVal = getPlayerVal(offer.requestedPlayerIds, toTeam) + getPickVal(toTeam, offer.requestedPickIds);
 
     if (offeredVal === 0 && requestedVal === 0) return { accepted: false, reason: 'Empty trade' };
 
-    // CPU logic: Accept if offered >= requested - 5 (slightly lenient)
-    const threshold = requestedVal * 0.95; 
+    const deficit = (requestedVal - offeredVal) / Math.max(1, requestedVal);
 
-    if (offeredVal >= threshold) {
-      return { accepted: true, reason: 'Trade accepted by front office' };
+    // AI DECISION LOGIC
+    if (deficit <= 0) {
+      return { accepted: true, reason: 'The front office likes this deal. Trade accepted!' };
+    }
+
+    if (deficit < 0.10) {
+      // Small deficit: Check positional needs
+      const targetPos = ALL_CARDS.find(c => c.id === offer.requestedPlayerIds[0])?.position.charAt(0);
+      const hasReplacement = toTeam.roster.some(id => 
+        !offer.requestedPlayerIds.includes(id) && 
+        (ALL_CARDS.find(c => c.id === id)?.position.includes(targetPos || ''))
+      );
+
+      if (hasReplacement || Math.random() > 0.5) {
+        return { accepted: true, reason: 'It was a tough call, but we accept. Trade accepted!' };
+      }
+      return { accepted: false, reason: `The ${toTeam.name} feel they can't afford to lose this positional depth right now.` };
+    }
+
+    if (deficit >= 0.10 && deficit <= 0.25) {
+       // Moderate deficit: Counteroffer (In a real app we'd return a counter-offer object, 
+       // here we just return a message suggesting one)
+       const bestBench = toTeam.roster
+          .filter(id => !offer.requestedPlayerIds.includes(id))
+          .map(id => ({ id, ovr: ALL_CARDS.find(c => c.id === id)?.stats.ovr || 0 }))
+          .sort((a, b) => b.ovr - a.ovr)[0];
+
+       return { 
+         accepted: false, 
+         reason: `COUNTER-OFFER: The ${toTeam.name} are interested but want more. Try adding a draft pick or a young prospect to even the value.` 
+       };
+    }
+
+    // Heavy deficit
+    const topRequested = ALL_CARDS.find(c => c.id === offer.requestedPlayerIds[0]);
+    if (topRequested && topRequested.stats.ovr > 90) {
+        return { accepted: false, reason: `Refused: The ${toTeam.name} value ${topRequested.name} too highly for this offer.` };
     }
 
     return { 
       accepted: false, 
-      reason: `The ${toTeam.name} values their assets higher (${Math.round(requestedVal)} points vs ${Math.round(offeredVal)} offered).` 
+      reason: `Proposal Rejected: The value difference is too great for the ${toTeam.name} to consider (${Math.round(requestedVal)} vs ${Math.round(offeredVal)} points).` 
     };
   },
 

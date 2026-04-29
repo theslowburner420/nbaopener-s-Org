@@ -122,6 +122,7 @@ export interface FranchiseState {
     age: number;
     potential: number;
     form: number;
+    ovr?: number;
   }>;
   stats: {
     seasonal: Record<string, PlayerStats>;
@@ -136,4 +137,6 @@ export interface FranchiseState {
     lastOfferYears: number;
     status: "Active" | "Rejected" | "Accepted";
   }>;
+  customCards?: any[]; 
+  draftPool?: any[]; 
 }

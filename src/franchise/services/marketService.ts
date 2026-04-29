@@ -42,16 +42,24 @@ export const marketService = {
     return { success: true, reason: 'Signed successfully' };
   },
 
-  draftPlayer(state: FranchiseState, cardId: string): { success: boolean; reason: string } {
+  draftPlayer(state: FranchiseState, player: any): { success: boolean; reason: string } {
     const userTeam = state.teams[state.userTeamId];
     if (userTeam.roster.length >= 15) return { success: false, reason: 'Roster is full' };
 
-    const card = ALL_CARDS.find(c => c.id === cardId);
+    // Process Draft: Player can be an ID or a full object
+    const cardId = typeof player === 'string' ? player : player.id;
+    const card = typeof player === 'object' ? player : (ALL_CARDS.find(c => c.id === cardId) || state.customCards?.find(c => c.id === cardId));
+    
     if (!card) return { success: false, reason: 'Card not found' };
 
     const salary = 5000000; // Fixed rookie salary $5M
 
-    // Process Draft
+    // If it's a new card object, add to customCards
+    if (typeof player === 'object' && !state.customCards?.find(c => c.id === player.id)) {
+      if (!state.customCards) state.customCards = [];
+      state.customCards.push(player);
+    }
+
     userTeam.roster.push(cardId);
     userTeam.payroll += salary;
     userTeam.contracts[cardId] = {
@@ -62,6 +70,15 @@ export const marketService = {
       noTradeClause: false,
       injuryStatus: 'Healthy'
     };
+
+    // Add to playerProgress
+    if (!state.playerProgress[cardId]) {
+      state.playerProgress[cardId] = {
+        age: 19,
+        potential: Math.min(99, card.stats.ovr + Math.floor(Math.random() * 12)),
+        form: 1.0
+      };
+    }
 
     return { success: true, reason: 'Drafted successfully' };
   },
@@ -88,19 +105,22 @@ export const marketService = {
     return { success: true, reason: 'Released successfully' };
   },
 
-  calculateExtensionCost(cardId: string): number {
-    const card = ALL_CARDS.find(c => c.id === cardId);
+  calculateExtensionCost(state: FranchiseState, cardId: string): number {
+    const card = ALL_CARDS.find(c => c.id === cardId) || state.customCards?.find(c => c.id === cardId);
+    const progress = state.playerProgress[cardId];
     if (!card) return 5000000;
-    if (card.stats.ovr >= 95) return 55000000;
-    if (card.stats.ovr >= 90) return 45000000;
-    if (card.stats.ovr >= 85) return 30000000;
-    if (card.stats.ovr >= 80) return 15000000;
-    if (card.stats.ovr >= 75) return 8000000;
+    
+    const ovr = (progress as any)?.ovr || card.stats.ovr;
+    if (ovr >= 95) return 55000000;
+    if (ovr >= 90) return 45000000;
+    if (ovr >= 85) return 30000000;
+    if (ovr >= 80) return 15000000;
+    if (ovr >= 75) return 8000000;
     return 3000000;
   },
 
   negotiateContract(state: FranchiseState, cardId: string, offerSalary: number, offerYears: number): { success: boolean; message: string; status: "Active" | "Accepted" | "Rejected"; counterOffer?: number } {
-    const demand = this.calculateExtensionCost(cardId);
+    const demand = this.calculateExtensionCost(state, cardId);
     let neg = state.negotiations[cardId];
     
     if (!neg) {
@@ -152,7 +172,7 @@ export const marketService = {
     if (!contract) return { success: false, reason: 'No contract' };
     if (contract.yearsRemaining > 1) return { success: false, reason: 'Extensions only for last year' };
 
-    const cost = salary || this.calculateExtensionCost(cardId);
+    const cost = salary || this.calculateExtensionCost(state, cardId);
     contract.yearsRemaining += years;
     
     userTeam.payroll -= contract.salary;

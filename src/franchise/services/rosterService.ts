@@ -8,8 +8,90 @@ import {
   TeamLineup
 } from '../types';
 import { scheduleService } from './scheduleService';
+import { FIRST_NAMES, LAST_NAMES } from '../../data/names';
 
 const VALID_RARITIES = ['bench', 'starter', 'allstar', 'franchise'];
+
+export function generateDraftPool(year: number, count: number): Card[] {
+  const pool: Card[] = [];
+  for (let i = 0; i < count; i++) {
+    const firstName = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
+    const lastName = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
+    const name = `${firstName} ${lastName}`;
+    
+    // Position weighted: Guards are more common
+    const randPos = Math.random();
+    let position = 'G';
+    if (randPos > 0.85) position = 'C';
+    else if (randPos > 0.6) position = 'F';
+    else if (randPos > 0.3) position = 'G-F';
+    else position = 'G';
+
+    // OVR depends on pick potentially, but here we just generate a range for the pool
+    // In DraftView we will sort them or assign them
+    const ovr = Math.floor(Math.random() * 15) + 68; // 68 to 82
+
+    const newCard: Card = {
+      id: `draft_${year}_${i}`,
+      number: Math.floor(Math.random() * 99),
+      name,
+      team: '',
+      teamAbbr: 'DRFT',
+      teamColor: '#6366F1',
+      position,
+      rarity: ovr >= 80 ? 'allstar' : ovr >= 75 ? 'starter' : 'bench',
+      category: 'Draft 2026',
+      subtitle: `${year} Draft Prospect`,
+      isHistorical: false,
+      pts: 0,
+      reb: 0,
+      ast: 0,
+      nbaId: 0, // Generated players don't have NBA IDs for headshots
+      stats: {
+        points: (ovr * 0.2) + (Math.random() * 5),
+        rebounds: (ovr * 0.1) + (Math.random() * 3),
+        assists: (ovr * 0.1) + (Math.random() * 3),
+        ovr
+      },
+      description: `A promising young ${position} from the ${year} draft class.`,
+      quote: "I'm just here to work hard and help the team win.",
+      imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/0.png', // Default silhouette
+      teamLogoUrl: 'https://cdn.nba.com/logos/nba/stats/main.svg'
+    };
+    pool.push(newCard);
+  }
+  return pool;
+}
+
+export function applyProgression(state: FranchiseState) {
+  // Update ALL players in the league
+  const allCardIds = new Set<string>();
+  Object.values(state.teams).forEach(t => t.roster.forEach(id => allCardIds.add(id)));
+  state.freeAgentPool.forEach(id => allCardIds.add(id));
+
+  allCardIds.forEach(id => {
+    const card = ALL_CARDS.find(c => c.id === id) || state.customCards?.find(c => c.id === id);
+    const progress = state.playerProgress[id];
+    
+    if (card && progress) {
+      const currentOvr = progress.ovr || card.stats.ovr;
+      let delta = 0;
+
+      if (currentOvr < 75) {
+        delta = Math.floor(Math.random() * 3) + 1;
+      } else if (currentOvr <= 85) {
+        delta = Math.floor(Math.random() * 4) - 1;
+      } else {
+        delta = Math.floor(Math.random() * 3) - 2;
+      }
+
+      const newOvr = Math.min(99, Math.max(60, currentOvr + delta));
+      
+      progress.ovr = newOvr;
+      progress.age += 1;
+    }
+  });
+}
 
 export function getInitialSalary(card: Card): number {
   const ovr = card.stats.ovr;
@@ -154,8 +236,74 @@ export function buildAllTeamRosters(): { teams: Record<string, TeamObject>, free
   });
 
   const freeAgents = availableBase.map(c => c.id);
-
   return { teams, freeAgents };
+}
+
+export function advanceSeason(state: FranchiseState): FranchiseState {
+  const newState = { ...state };
+  newState.season += 1;
+  newState.week = 1;
+  newState.phase = 'Regular';
+  
+  // Apply Progression
+  applyProgression(newState);
+
+  // Update Contracts
+  Object.values(newState.teams).forEach(team => {
+    let newPayroll = 0;
+    const expiredIds: string[] = [];
+    
+    Object.keys(team.contracts).forEach(playerId => {
+      const contract = team.contracts[playerId];
+      contract.yearsRemaining -= 1;
+      
+      if (contract.yearsRemaining <= 0) {
+        expiredIds.push(playerId);
+      } else {
+        newPayroll += contract.salary;
+      }
+    });
+
+    // Move expired to Free Agency
+    expiredIds.forEach(id => {
+      team.roster = team.roster.filter(rid => rid !== id);
+      delete team.contracts[id];
+      newState.freeAgentPool.push(id);
+      
+      // Clean lineup
+      (['PG', 'SG', 'SF', 'PF', 'C'] as const).forEach(pos => {
+        if (team.lineup[pos] === id) team.lineup[pos] = null;
+      });
+      team.lineup.bench = team.lineup.bench.filter(rid => rid !== id);
+    });
+
+    team.payroll = newPayroll;
+    team.wins = 0;
+    team.losses = 0;
+  });
+
+  // Archive Season Stats??
+  // The user says: "individual stats of previous season are archived in leagueHistory"
+  // leagueHistory is in FranchiseState (v2.0 uses stats.seasonal and stats.career)
+  // I will move seasonal to career total if not already there, then clear seasonal.
+  Object.entries(newState.stats.seasonal).forEach(([pid, s]) => {
+     if (!newState.stats.career[pid]) {
+        newState.stats.career[pid] = { ...s };
+     } else {
+        const c = newState.stats.career[pid];
+        c.points += s.points;
+        c.rebounds += s.rebounds;
+        c.assists += s.assists;
+        c.gamesPlayed += s.gamesPlayed;
+        // Pct and other averages would need more complex math but this is the core
+     }
+  });
+  newState.stats.seasonal = {};
+
+  // Regenerate Schedule
+  newState.schedule = scheduleService.generateSchedule(newState.teams);
+  
+  return newState;
 }
 
 export function initializeFranchiseState(userTeamId: string): FranchiseState {

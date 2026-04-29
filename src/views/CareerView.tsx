@@ -27,6 +27,7 @@ import { FranchisePhase, TeamObject, FranchiseMatch, PlayoffSeries } from '../fr
 import { marketService } from '../franchise/services/marketService';
 import { tradeEngine } from '../franchise/services/tradeEngine';
 import { playoffService } from '../franchise/services/playoffService';
+import { generateDraftPool, advanceSeason } from '../franchise/services/rosterService';
 import CardItem from '../components/CardItem';
 import { X as CloseIcon, AlertTriangle, Sparkles } from 'lucide-react';
 
@@ -82,6 +83,19 @@ const CareerView: React.FC = () => {
     } else {
       alert(result.reason);
     }
+  };
+
+  const findCard = (id: string | null) => {
+    if (!id) return null;
+    const baseCard = ALL_CARDS.find(c => c.id === id) || state?.customCards?.find(c => c.id === id);
+    if (!baseCard) return null;
+    
+    // Apply progression overrides if any
+    const progress = state?.playerProgress[id];
+    if (progress?.ovr) {
+      return { ...baseCard, stats: { ...baseCard.stats, ovr: progress.ovr } };
+    }
+    return baseCard;
   };
 
   const handleUpdateLineup = (playerId: string) => {
@@ -949,7 +963,7 @@ const CareerView: React.FC = () => {
                      if (!card || !contract) return null;
                      const isExpiring = contract.yearsRemaining === 1;
                      const neg = state.negotiations?.[id];
-                     const demand = marketService.calculateExtensionCost(id);
+                     const demand = marketService.calculateExtensionCost(state, id);
 
                      return (
                         <div key={id} className="p-6 space-y-4 hover:bg-white/5 transition-colors group">
@@ -1107,56 +1121,81 @@ const CareerView: React.FC = () => {
             <motion.div 
               key="lineup"
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-              className="max-w-4xl mx-auto space-y-6 pb-20"
+              className="max-w-6xl mx-auto space-y-12 pb-20 px-4"
             >
-               <div className="bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden">
-                  <div className="p-4 border-b border-white/5 flex items-center justify-between">
-                     <h3 className="text-sm font-black uppercase italic text-white">Depth Chart</h3>
-                     <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Starting 5 + Bench</span>
+               {/* STARTING 5 GRID */}
+               <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                     <h3 className="text-2xl font-black uppercase italic text-white tracking-tighter">Starting Lineup</h3>
+                     <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest border border-white/10 px-3 py-1 rounded-full bg-white/5">Tap slot to change</span>
                   </div>
-                  <div className="divide-y divide-white/5">
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                      {(['PG', 'SG', 'SF', 'PF', 'C'] as const).map(pos => {
-                        const id = userTeam.lineup[pos];
-                        const card = ALL_CARDS.find(c => c.id === id);
+                        const card = findCard(userTeam.lineup[pos]);
                         return (
-                           <div key={pos} onClick={() => setLineupModalPos(pos)} className="flex items-center justify-between h-[56px] px-4 hover:bg-white/5 cursor-pointer transition-colors group">
-                              <div className="flex items-center gap-4">
-                                 <div className="w-8 text-[10px] font-black text-zinc-600 uppercase">{pos}</div>
+                           <div key={pos} className="space-y-4">
+                              <div className="text-center">
+                                 <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest bg-zinc-900 px-3 py-1 rounded-md border border-white/5">{pos}</span>
+                              </div>
+                              <div 
+                                 onClick={() => setLineupModalPos(pos)}
+                                 className="relative aspect-[2.5/3.5] group cursor-pointer"
+                              >
                                  {card ? (
-                                    <div className="flex items-center gap-3">
-                                       <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-8 h-8 rounded-full bg-zinc-800 object-contain" />
-                                       <span className="text-[13px] font-bold text-white uppercase italic">{card.name}</span>
+                                    <div className="transition-transform group-hover:scale-[1.02]">
+                                      <CardItem card={card} isOwned={true} mode="mini" />
                                     </div>
                                  ) : (
-                                    <span className="text-[11px] font-black text-zinc-700 uppercase italic">Empty Slot</span>
+                                    <div className="w-full h-full border-2 border-dashed border-white/5 bg-white/5 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all group-hover:bg-white/10 group-hover:border-white/10 aspect-[2.5/3.5]">
+                                       <Plus className="text-zinc-700" size={32} />
+                                       <span className="text-[10px] font-black text-zinc-700 uppercase italic text-center">Empty<br/>{pos}</span>
+                                    </div>
                                  )}
                               </div>
-                              <div className="flex items-center gap-4">
-                                 {card && <span className="text-sm font-black text-amber-500 italic">{card.stats.ovr}</span>}
-                                 <Plus className="text-zinc-700 group-hover:text-amber-500" size={16} />
-                              </div>
                            </div>
                         );
                      })}
+                  </div>
+               </div>
+
+               {/* BENCH HORIZONTAL */}
+               <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                     <h3 className="text-2xl font-black uppercase italic text-white tracking-tighter">Bench</h3>
+                     <button 
+                        onClick={() => setLineupModalPos('bench')}
+                        className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-xl text-[10px] font-black text-zinc-400 uppercase tracking-widest transition-all"
+                     >
+                        <Plus size={14} /> Add to Bench
+                     </button>
+                  </div>
+                  
+                  <div className="flex gap-4 overflow-x-auto pb-6 no-scrollbar -mx-4 px-4">
                      {userTeam.lineup.bench.map((id, index) => {
-                        const card = ALL_CARDS.find(c => c.id === id);
+                        const card = findCard(id);
                         if (!card) return null;
                         return (
-                           <div key={id} onClick={() => setLineupModalPos('bench')} className="flex items-center justify-between h-[56px] px-4 hover:bg-white/5 cursor-pointer transition-colors group">
-                              <div className="flex items-center gap-4">
-                                 <div className="w-8 text-[10px] font-black text-zinc-600 uppercase">BN</div>
-                                 <div className="flex items-center gap-3">
-                                    <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-8 h-8 rounded-full bg-zinc-800 object-contain" />
-                                    <span className="text-[13px] font-bold text-white uppercase italic">{card.name}</span>
-                                 </div>
-                              </div>
-                              <div className="flex items-center gap-4">
-                                 <span className="text-sm font-black text-amber-500 italic">{card.stats.ovr}</span>
-                                 <Plus className="text-zinc-700 group-hover:text-amber-500" size={16} />
-                              </div>
+                           <div 
+                              key={id} 
+                              className="w-[140px] shrink-0 transition-transform hover:scale-105 cursor-pointer"
+                              onClick={() => {
+                                 if (confirm(`Remove ${card.name} from bench?`)) {
+                                    userTeam.lineup.bench = userTeam.lineup.bench.filter(bid => bid !== id);
+                                    setState({ ...state });
+                                 }
+                              }}
+                           >
+                              <CardItem card={card} isOwned={true} mode="mini" />
                            </div>
                         );
                      })}
+                     {userTeam.lineup.bench.length === 0 && (
+                        <div className="w-full py-12 flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-3xl opacity-50">
+                           <Users className="text-zinc-700 mb-2" size={32} />
+                           <p className="text-xs font-black text-zinc-700 uppercase italic">No players on bench</p>
+                        </div>
+                     )}
                   </div>
                </div>
 
@@ -1167,84 +1206,70 @@ const CareerView: React.FC = () => {
                     <motion.div 
                       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                       onClick={() => setLineupModalPos(null)}
-                      className="absolute inset-0 bg-black/90 backdrop-blur-sm" 
+                      className="absolute inset-0 bg-black/95 backdrop-blur-md" 
                     />
                     <motion.div 
                       initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
-                      className="relative w-full max-w-4xl bg-zinc-900 border border-white/10 rounded-[3rem] p-8 md:p-12 space-y-8 max-h-[80vh] overflow-hidden flex flex-col"
+                      className="relative w-full max-w-6xl bg-zinc-900 border border-white/10 rounded-[3rem] p-8 md:p-12 space-y-12 max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
                     >
                       <div className="flex items-center justify-between shrink-0">
-                        <div className="space-y-1">
-                          <h3 className="text-3xl font-black uppercase italic tracking-tighter">Select Player</h3>
-                          <p className="text-zinc-500 text-xs font-black uppercase tracking-widest italic">{lineupModalPos} Position Slot</p>
+                        <div className="space-y-2">
+                          <h3 className="text-5xl font-black uppercase italic tracking-tighter leading-none">Select Player</h3>
+                          <p className="text-amber-500 text-sm font-black uppercase tracking-widest italic flex items-center gap-2">
+                             <Sparkles size={16} /> Assigning to {lineupModalPos}
+                          </p>
                         </div>
-                        <button onClick={() => setLineupModalPos(null)} className="p-3 bg-white/5 rounded-full hover:bg-white/10 transition-colors">
-                          <CloseIcon size={24} />
+                        <button onClick={() => setLineupModalPos(null)} className="p-4 bg-white/5 rounded-full hover:bg-white/10 transition-colors">
+                          <Plus size={32} className="rotate-45" />
                         </button>
                       </div>
 
-                      <div className="flex-1 overflow-y-auto pr-4 space-y-4">
-                        {userTeam.roster.map(id => {
-                          const card = ALL_CARDS.find(c => c.id === id);
-                          if (!card) return null;
-                          const isAssigned = Object.values(userTeam.lineup).flat().includes(id);
-                          return (
-                            <div 
-                              key={id}
-                              onClick={() => handleUpdateLineup(id)}
-                              className={`group flex items-center justify-between p-6 rounded-3xl cursor-pointer transition-all ${isAssigned ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-black/40 border border-white/5 hover:bg-white/5'}`}
-                            >
-                              <div className="flex items-center gap-6">
-                                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-zinc-800">
-                                   <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-full h-full object-contain" />
-                                </div>
-                                <div>
-                                  <h4 className="text-lg font-black text-white italic uppercase tracking-tighter">{card.name}</h4>
-                                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{card.position} • {card.rarity.toUpperCase()}</p>
-                                </div>
-                              </div>
-                              <div className="text-right flex items-center gap-8">
-                                <div>
-                                  <p className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">OVR</p>
-                                  <p className="text-2xl font-black text-amber-500 italic">{card.stats.ovr}</p>
-                                </div>
-                                <ArrowRight className="text-zinc-800 group-hover:text-white group-hover:translate-x-2 transition-all" size={24} />
-                              </div>
-                            </div>
-                          );
-                        })}
+                      <div className="flex-1 overflow-y-auto pr-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                           {userTeam.roster.map(id => {
+                              const card = findCard(id);
+                              if (!card) return null;
+                              
+                              const isPositionMatch = lineupModalPos !== 'bench' && card.position.includes(lineupModalPos.charAt(0));
+                              const isAssigned = Object.values(userTeam.lineup).flat().includes(id);
+
+                              return (
+                                 <motion.div 
+                                    key={id}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="relative group h-full flex flex-col"
+                                    onClick={() => {
+                                       handleUpdateLineup(id);
+                                       setLineupModalPos(null);
+                                    }}
+                                 >
+                                    <div className={`h-full transition-all duration-300 ${isAssigned ? 'opacity-40 grayscale blur-[2px]' : 'group-hover:drop-shadow-[0_0_15px_rgba(245,158,11,0.3)]'}`}>
+                                       <CardItem card={card} isOwned={true} mode="mini" />
+                                    </div>
+                                    
+                                    {isAssigned && (
+                                       <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
+                                          <div className="bg-black/80 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-xl text-center">
+                                             <p className="text-[10px] font-black text-white uppercase italic">Already Assigned</p>
+                                          </div>
+                                       </div>
+                                    )}
+
+                                    {!isAssigned && isPositionMatch && (
+                                       <div className="absolute -top-2 -right-2 z-[60] bg-green-500 text-white text-[8px] font-black px-2 py-1 rounded-md shadow-lg border border-white/20">
+                                          IDEAL
+                                       </div>
+                                    )}
+                                 </motion.div>
+                              );
+                           })}
+                        </div>
                       </div>
                     </motion.div>
                   </div>
                 )}
               </AnimatePresence>
-
-               <div className="bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden">
-                  <div className="p-4 border-b border-white/5">
-                     <h3 className="text-sm font-black uppercase italic text-white">Full Roster</h3>
-                  </div>
-                  <div className="divide-y divide-white/5">
-                     {userTeam.roster.map(id => {
-                        const card = ALL_CARDS.find(c => c.id === id);
-                        if (!card) return null;
-                        const isStarter = Object.values(userTeam.lineup).includes(id);
-                        return (
-                           <div key={id} className="flex items-center justify-between h-[48px] px-4 hover:bg-white/5 transition-colors group">
-                              <div className="flex items-center gap-4">
-                                 <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-8 h-8 rounded-full bg-zinc-800 object-contain" />
-                                 <div className="flex flex-col">
-                                    <span className="text-[12px] font-bold text-white uppercase italic">{card.name}</span>
-                                    <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">{card.position} {isStarter && '• STARTER'}</span>
-                                 </div>
-                              </div>
-                              <div className="flex items-center gap-4">
-                                 <span className="text-[12px] font-black text-amber-500 italic">{card.stats.ovr}</span>
-                              </div>
-                           </div>
-                        );
-                     })}
-                  </div>
-               </div>
             </motion.div>
           )}
 
@@ -1337,6 +1362,17 @@ const CareerView: React.FC = () => {
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
               className="max-w-7xl mx-auto space-y-12 pb-20"
             >
+               {/* Initialization logic for draft pool */}
+               {(() => {
+                 if (state.phase === 'Draft' && !state.draftPool) {
+                    const pool = generateDraftPool(state.season, 50);
+                    // Sort pool by OVR to simulate "prospect rankings"
+                    pool.sort((a, b) => b.stats.ovr - a.stats.ovr);
+                    state.draftPool = pool;
+                 }
+                 return null;
+               })()}
+
                <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <h2 className="text-4xl font-black uppercase italic tracking-tighter text-white">NBA Draft {state.season}</h2>
@@ -1355,32 +1391,36 @@ const CareerView: React.FC = () => {
                        <Sparkles size={40} />
                     </div>
                     <div className="space-y-3">
-                      <h3 className="text-2xl md:text-3xl font-black uppercase italic tracking-tighter text-white">Draft picks Available</h3>
-                      <p className="text-zinc-500 text-[10px] md:text-sm max-w-md mx-auto leading-relaxed font-medium">
-                        The draft pool has been generated. You have your first pick!
-                        Selecting a player will add them to your roster for the upcoming season.
+                      <h3 className="text-2xl md:text-3xl font-black uppercase italic tracking-tighter text-white">Your Selection</h3>
+                      <p className="text-zinc-500 text-[10px] md:text-sm max-w-2xl mx-auto leading-relaxed font-bold italic uppercase tracking-widest">
+                        Based on your lottery position, here are the top prospects available for your pick.
                       </p>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto pt-8">
-                       {ALL_CARDS.slice(Math.floor(Math.random() * 50), 53).slice(0, 3).map((card) => (
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl mx-auto pt-8">
+                       {(state.draftPool || []).slice(0, 8).map((card) => (
                          <div key={card.id} className="bg-black/40 border border-white/5 rounded-3xl p-6 space-y-6 group hover:border-amber-500/50 transition-all flex flex-col items-center">
                             <div className="w-full aspect-[2/3] relative">
-                               <CardItem card={card} isOwned={false} mode="standard" />
+                               <CardItem card={card} isOwned={true} mode="mini" />
+                            </div>
+                            <div className="text-center">
+                               <p className="text-[10px] font-black text-amber-500 uppercase italic">Projected OVR</p>
+                               <p className="text-3xl font-black text-white italic">{card.stats.ovr}</p>
                             </div>
                             <button 
                               onClick={() => {
-                                 const res = marketService.draftPlayer(state, card.id);
-                                 if (res.success) {
-                                    // Move to next season / regular phase
-                                    // Generate new schedule for new season
-                                    const newState = { ...state, phase: 'Regular' as const, week: 1 };
-                                    // In a full implementation we'd call scheduleService.generateSchedule(newState) here
-                                    setState(newState);
-                                    stateService.save(newState);
-                                    setActiveTab('hub');
-                                 } else {
-                                    alert(res.reason);
+                                 if (confirm(`Draft ${card.name}? This will complete your draft and advance to the next season.`)) {
+                                    const res = marketService.draftPlayer(state, card);
+                                    if (res.success) {
+                                       // Advance Season
+                                       const newState = advanceSeason(state);
+                                       setState(newState);
+                                       stateService.save(newState);
+                                       setActiveTab('hub');
+                                       alert(`${card.name} drafted! Welcome to the next season.`);
+                                    } else {
+                                       alert(res.reason);
+                                    }
                                  }
                               }}
                               className="w-full py-4 bg-white text-black rounded-2xl font-black uppercase tracking-widest text-[10px] group-hover:bg-amber-500 transition-all shadow-xl active:scale-95"
@@ -1390,6 +1430,12 @@ const CareerView: React.FC = () => {
                          </div>
                        ))}
                     </div>
+
+                    {(!state.draftPool || state.draftPool.length === 0) && (
+                        <div className="py-20">
+                            <p className="text-zinc-600 font-black uppercase italic tracking-widest">Draft Pool is being prepared...</p>
+                        </div>
+                    )}
                   </div>
                </div>
             </motion.div>

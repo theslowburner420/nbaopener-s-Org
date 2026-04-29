@@ -71,6 +71,12 @@ export const gameService = {
 
     // Simulate other series
     playoffService.simulateNextPlayoffStep(state);
+    
+    // Check if Finals are over to move to Draft
+    if (state.championId || state.playoffSeries.find(s => s.round === 4)?.winnerId) {
+       state.phase = 'Draft';
+    }
+
     stateService.save(state);
 
     return { result, match: { id: 'playoff', homeTeamId: activeSeries.team1Id, awayTeamId: activeSeries.team2Id, played: true, gameNumber: 0 } as FranchiseMatch };
@@ -108,6 +114,11 @@ export const gameService = {
     } else {
       // Advance playoffs if user is not in any series or already finished
       playoffService.simulateNextPlayoffStep(newState);
+
+      // Transition to Draft phase if champion is decided
+      if (newState.championId || newState.playoffSeries.find(s => s.round === 4)?.winnerId) {
+         newState.phase = 'Draft';
+      }
     }
 
     stateService.save(newState);
