@@ -55,7 +55,7 @@ export const gameService = {
     state.schedule[matchIndex].winner = result.winnerId;
     state.schedule[matchIndex].boxScore = result.boxScore;
 
-    // Actualizar Récords de Equipos
+    // Update Team Records
     const homeTeamId = state.schedule[matchIndex].homeTeamId;
     const awayTeamId = state.schedule[matchIndex].awayTeamId;
 
@@ -67,7 +67,7 @@ export const gameService = {
       state.teams[homeTeamId].losses += 1;
     }
 
-    // Acumular Estadísticas (Sistema E)
+    // Accumulate Statistics
     this.trackStats(state, result.boxScore.home);
     this.trackStats(state, result.boxScore.away);
   },
@@ -76,7 +76,7 @@ export const gameService = {
     playerEntries.forEach(entry => {
       if (!state.stats.seasonal[entry.playerId]) {
         state.stats.seasonal[entry.playerId] = {
-          points: 0, rebounds: 0, assists: 0, gamesPlayed: 0, fgPct: 0
+          points: 0, rebounds: 0, assists: 0, steals: 0, blocks: 0, plusMinus: 0, gamesPlayed: 0, fgPct: 0
         };
       }
       
@@ -84,6 +84,9 @@ export const gameService = {
       pStats.points += entry.points;
       pStats.rebounds += entry.rebounds;
       pStats.assists += entry.assists;
+      pStats.steals += (entry.steals || 0);
+      pStats.blocks += (entry.blocks || 0);
+      pStats.plusMinus += (entry.plusMinus || 0);
       pStats.gamesPlayed += 1;
     });
   }

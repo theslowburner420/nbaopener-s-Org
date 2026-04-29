@@ -7,9 +7,9 @@ const HomeView: React.FC = () => {
   const { setCurrentView } = useGame();
 
   return (
-    <div className="h-full w-full flex flex-col bg-black overflow-hidden relative">
-      {/* Container with no-scroll intent */}
-      <div className="flex-1 flex flex-col gap-1 md:gap-3 p-1 md:p-3 w-full h-full overflow-hidden pb-14 md:pb-6">
+    <div className="min-h-full w-full flex flex-col bg-black relative">
+      {/* Container that allows content to expand */}
+      <div className="flex-1 flex flex-col gap-1 md:gap-3 p-1 md:p-3 w-full pb-14 md:pb-6">
         
         <div className="grid grid-cols-2 gap-2 h-auto md:h-[50%] shrink-1">
           {/* Bloque A: Pack Opener */}

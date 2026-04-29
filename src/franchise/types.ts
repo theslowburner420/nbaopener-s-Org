@@ -48,8 +48,33 @@ export interface PlayerStats {
   points: number;
   rebounds: number;
   assists: number;
+  steals: number;
+  blocks: number;
+  plusMinus: number;
   gamesPlayed: number;
   fgPct: number;
+}
+
+export interface BoxScoreEntry {
+    playerId: string;
+    name: string;
+    points: number;
+    rebounds: number;
+    assists: number;
+    steals: number;
+    blocks: number;
+    plusMinus: number;
+    minutes: number;
+}
+
+export interface MatchResult {
+    winnerId: string;
+    score: { home: number; away: number };
+    periods: { home: number[]; away: number[] };
+    boxScore: {
+        home: BoxScoreEntry[];
+        away: BoxScoreEntry[];
+    };
 }
 
 export interface FranchiseMatch {
@@ -59,8 +84,12 @@ export interface FranchiseMatch {
   gameNumber: number;
   played: boolean;
   score?: { home: number; away: number };
+  periods?: { home: number[]; away: number[] };
   winner?: string;
-  boxScore?: any;
+  boxScore?: {
+    home: BoxScoreEntry[];
+    away: BoxScoreEntry[];
+  };
 }
 
 export interface FranchiseState {

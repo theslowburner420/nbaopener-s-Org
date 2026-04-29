@@ -133,7 +133,7 @@ const ProfileView: React.FC = () => {
   };
 
   return (
-    <div className="h-full w-full overflow-y-auto px-4 py-6 scrollbar-hide">
+    <div className="min-h-full w-full px-4 py-6 scrollbar-hide">
       <div className="max-w-md mx-auto space-y-8 pb-20">
         {/* Profile Header */}
         <div className="text-center space-y-4">

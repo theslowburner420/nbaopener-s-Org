@@ -229,21 +229,6 @@ const rawCards = [
     quote: 'Rookie sharpshooter with a bright future.'
   },
   {
-    id: 'lal-011',
-    name: 'Gabe Vincent',
-    team: 'Atlanta Hawks',
-    teamAbbr: 'ATL',
-    position: 'G',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 4.7,
-    reb: 0.9,
-    ast: 1.4,
-    nbaId: 1629216,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629216.png',
-    quote: 'Steady guard, makes the right play.'
-  },
-  {
     id: 'lal-012',
     name: 'Bronny James',
     team: 'Los Angeles Lakers',
@@ -9654,21 +9639,6 @@ const rawCards = [
     nbaId: 1630699,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630699.png',
     quote: 'A versatile wing with potential still being unlocked.'
-  },
-  {
-    id: 'phi-010',
-    name: 'Jared McCain',
-    team: 'Philadelphia 76ers',
-    teamAbbr: 'PHI',
-    position: 'G',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 6.6,
-    reb: 2.0,
-    ast: 1.7,
-    nbaId: 1642263,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642263.png',
-    quote: 'A young shooter with a quick release and bright future.'
   },
   {
     id: 'phi-011',

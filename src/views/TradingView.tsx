@@ -44,7 +44,7 @@ const TradingView: React.FC = () => {
   }
 
   return (
-    <div className="h-full w-full bg-black flex flex-col relative">
+    <div className="min-h-full w-full bg-black flex flex-col relative">
       <AnimatePresence mode="wait">
         {currentState === 'lobby' || currentState === 'matching' ? (
           <motion.div
@@ -52,7 +52,7 @@ const TradingView: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="h-full w-full"
+            className="min-h-full w-full"
           >
             <TradingLobby 
               onJoinedRoom={(id) => {
@@ -69,7 +69,7 @@ const TradingView: React.FC = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            className="h-full w-full"
+            className="min-h-full w-full"
           >
             {roomId && (
               <TradingRoom 

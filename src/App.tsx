@@ -210,7 +210,7 @@ function AppContent() {
   }
 
   return (
-    <div className="h-[100dvh] w-full bg-black text-white flex flex-col overflow-hidden font-sans selection:bg-amber-500 selection:text-black">
+    <div className="h-[100dvh] w-full bg-black text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black">
       {/* Offline Warning */}
       <AnimatePresence>
         {isOffline && (
@@ -226,9 +226,9 @@ function AppContent() {
         )}
       </AnimatePresence>
 
-      {/* Header Area - Fixed at top to prevent layout shifts */}
+      {/* Header Area */}
       {!(currentView === 'draft' || currentView === 'open') && (
-        <div className="fixed top-0 left-0 right-0 z-[5000] flex flex-col bg-black">
+        <div className="z-[5000] flex flex-col bg-black shrink-0">
           {/* Top Ad Area */}
           <StaticAd position="header" />
           
@@ -238,7 +238,7 @@ function AppContent() {
       )}
       
       {/* Content Area - Natural Scroll */}
-      <main className={`flex-1 relative bg-black ${(currentView === 'draft' || currentView === 'open') ? 'pt-0 pb-0' : (isPremium ? 'pt-14 pb-16' : 'pt-[116px] pb-16')}`}>
+      <main className="flex-1 relative bg-black overflow-y-auto overflow-x-hidden custom-scrollbar">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentView}
@@ -254,8 +254,8 @@ function AppContent() {
       </main>
 
       {/* Global Navigation Bar */}
-      {!(currentView === 'draft' || currentView === 'open') && (
-        <div className="fixed bottom-0 left-0 right-0 z-[4000] flex flex-col bg-black">
+      {!(currentView === 'draft' || currentView === 'open' || currentView === 'career') && (
+        <div className="z-[4000] flex flex-col bg-black shrink-0">
           {/* Global Navigation Bar */}
           <nav className="h-16 bg-zinc-950 border-t border-zinc-900 flex items-center justify-around px-2 pb-safe shrink-0">
             {/* Collection */}

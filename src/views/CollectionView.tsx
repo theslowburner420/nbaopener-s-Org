@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useGame } from '../context/GameContext';
 import { ALL_CARDS } from '../data/cards';
 import { NBA_TEAMS } from '../data/nbaTeams';
@@ -29,6 +29,22 @@ export default function CollectionView() {
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [easterEggType, setEasterEggType] = useState<'unlock' | 'reset'>('unlock');
   const [viewMode, setViewMode] = useState<'roster' | 'duplicates'>('roster');
+  const loaderRef = useRef<HTMLDivElement>(null);
+
+  // Infinite Scroll using IntersectionObserver
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setVisibleCount(prev => prev + 24);
+      }
+    }, { threshold: 0.1 });
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   // Reset pagination when filters change
   React.useEffect(() => {
@@ -155,20 +171,11 @@ export default function CollectionView() {
     setSearch('');
   };
 
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.currentTarget;
-    if (target.scrollHeight - target.scrollTop - target.clientHeight < 200) {
-      if (visibleCount < filteredCards.length) {
-        setVisibleCount(prev => prev + 24);
-      }
-    }
-  }, [visibleCount, filteredCards.length]);
-
   const isDynastyHunter = unlockedAchievements.includes('dynasty-hunter');
   const isVintageCollector = unlockedAchievements.includes('vintage-collector');
 
   return (
-    <div className={`flex flex-col h-full bg-black text-white overflow-hidden transition-all duration-1000 ${isDynastyHunter ? 'animate-golden-aura' : ''}`}>
+    <div className={`flex flex-col min-h-full bg-black text-white transition-all duration-1000 ${isDynastyHunter ? 'animate-golden-aura' : ''}`}>
       {/* Header */}
       <header className={`collection-header sticky top-0 z-30 backdrop-blur-xl px-4 pt-3 pb-2 border-b border-zinc-800/50 transition-colors duration-1000 ${isDynastyHunter ? 'bg-amber-950/20' : 'bg-black/60'}`}>
         <div className="flex justify-between items-end mb-3">
@@ -514,14 +521,14 @@ export default function CollectionView() {
       </header>
 
       {/* Grid View */}
-      <div className="flex-1 overflow-y-auto no-scrollbar" onScroll={handleScroll}>
+      <div className="flex-1 px-4">
         <div className="collection-grid">
           {(filteredCards || []).slice(0, visibleCount).map(renderGridItem)}
         </div>
         
         {/* Load More Indicator */}
         {visibleCount < filteredCards.length && (
-          <div className="flex justify-center py-8">
+          <div ref={loaderRef} className="flex justify-center py-8">
             <div className="w-8 h-8 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
           </div>
         )}

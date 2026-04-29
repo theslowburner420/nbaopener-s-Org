@@ -115,7 +115,7 @@ const CareerView: React.FC = () => {
   // TEAM SELECTION SCREEN
   if (!state) {
     return (
-      <div className="flex-1 bg-black text-white p-6 md:p-12 overflow-y-auto">
+      <div className="flex-1 bg-black text-white p-6 md:p-12">
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="space-y-4">
             <h1 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter">Franchise Mode</h1>
@@ -182,7 +182,7 @@ const CareerView: React.FC = () => {
   );
 
   return (
-    <div className="bg-black flex flex-col relative w-full">
+    <div className="bg-black flex flex-col relative w-full min-h-full">
       {/* HEADER */}
       <div className="bg-zinc-950 border-b border-white/5 px-6 py-6 md:px-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-6">
@@ -215,7 +215,7 @@ const CareerView: React.FC = () => {
               className="flex items-center gap-3 bg-amber-500 text-black px-8 py-4 rounded-2xl font-black uppercase italic tracking-tighter text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(245,158,11,0.2)]"
              >
                <Play size={16} fill="currentColor" />
-               Jugar Partido
+               Play Game
              </button>
            ) : (
              <button 
@@ -223,7 +223,7 @@ const CareerView: React.FC = () => {
               className="flex items-center gap-3 bg-white text-black px-8 py-4 rounded-2xl font-black uppercase italic tracking-tighter text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(255,255,255,0.1)]"
              >
                <TrendingUp size={16} />
-               Avanzar Semana {Math.floor(state.week / 4) + 1}
+               Advance Week {Math.floor(state.week / 4) + 1}
              </button>
            )}
            <button 
@@ -267,12 +267,12 @@ const CareerView: React.FC = () => {
             >
               {/* TOP FEATURE: NEXT MATCH */}
               {nextUserGame && (
-                <div className="bg-gradient-to-br from-zinc-900 to-black border border-white/5 rounded-[3rem] p-10 flex flex-col md:flex-row items-center justify-between gap-12 relative overflow-hidden group">
+                <div className="bg-gradient-to-br from-zinc-900 to-black border border-white/5 rounded-3xl md:rounded-[3rem] p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
-                  <div className="space-y-6 relative z-10 text-center md:text-left">
+                  <div className="space-y-4 md:space-y-6 relative z-10 text-center md:text-left w-full md:w-auto">
                     <div className="space-y-1">
                       <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.4em]">Next Appointment</p>
-                      <h3 className="text-5xl font-black italic uppercase tracking-tighter text-white">Gameday</h3>
+                      <h3 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-white">Gameday</h3>
                     </div>
                     <div className="flex items-center gap-4 justify-center md:justify-start">
                       <div className="px-4 py-2 bg-white/5 rounded-xl border border-white/5 text-[10px] font-black uppercase tracking-widest text-zinc-400">
@@ -284,25 +284,25 @@ const CareerView: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-12 relative z-10">
-                     <div className="text-center space-y-3">
-                        <div className="w-24 h-24 bg-zinc-950 rounded-[2rem] p-5 border border-white/5 shadow-2xl group-hover:scale-110 transition-all duration-500">
+                  <div className="flex items-center gap-6 md:gap-12 relative z-10">
+                     <div className="text-center space-y-2 md:space-y-3">
+                        <div className="w-16 h-16 md:w-24 md:h-24 bg-zinc-950 rounded-2xl md:rounded-[2rem] p-3 md:p-5 border border-white/5 shadow-2xl group-hover:scale-110 transition-all duration-500">
                           <img src={getTeamLogo(state.userTeamId)} className="w-full h-full object-contain" />
                         </div>
-                        <p className="text-xs font-black text-white italic whitespace-nowrap">{state.teams[state.userTeamId].abbreviation}</p>
+                        <p className="text-[10px] md:text-xs font-black text-white italic whitespace-nowrap">{state.teams[state.userTeamId].abbreviation}</p>
                      </div>
-                     <div className="text-3xl font-black italic text-zinc-800">VS</div>
-                     <div className="text-center space-y-3">
-                        <div className="w-24 h-24 bg-zinc-950 rounded-[2rem] p-5 border border-white/5 shadow-2xl group-hover:scale-110 transition-all duration-500">
+                     <div className="text-xl md:text-3xl font-black italic text-zinc-800">VS</div>
+                     <div className="text-center space-y-2 md:space-y-3">
+                        <div className="w-16 h-16 md:w-24 md:h-24 bg-zinc-950 rounded-2xl md:rounded-[2rem] p-3 md:p-5 border border-white/5 shadow-2xl group-hover:scale-110 transition-all duration-500">
                           <img src={getTeamLogo(nextUserGame.homeTeamId === state.userTeamId ? nextUserGame.awayTeamId : nextUserGame.homeTeamId)} className="w-full h-full object-contain" />
                         </div>
-                        <p className="text-xs font-black text-white italic whitespace-nowrap">{state.teams[nextUserGame.homeTeamId === state.userTeamId ? nextUserGame.awayTeamId : nextUserGame.homeTeamId].abbreviation}</p>
+                        <p className="text-[10px] md:text-xs font-black text-white italic whitespace-nowrap">{state.teams[nextUserGame.homeTeamId === state.userTeamId ? nextUserGame.awayTeamId : nextUserGame.homeTeamId].abbreviation}</p>
                      </div>
                   </div>
 
                   <button 
                     onClick={simulateGame}
-                    className="relative z-10 w-full md:w-auto h-20 px-12 bg-white text-black rounded-[2rem] font-black uppercase italic tracking-tighter text-xl hover:bg-amber-500 transition-all active:scale-95 shadow-2xl"
+                    className="relative z-10 w-full md:w-auto h-16 md:h-20 px-8 md:px-12 bg-white text-black rounded-2xl md:rounded-[2rem] font-black uppercase italic tracking-tighter text-lg md:text-xl hover:bg-amber-500 transition-all active:scale-95 shadow-2xl"
                   >
                     Play Match
                   </button>
@@ -314,9 +314,8 @@ const CareerView: React.FC = () => {
                 <div className="lg:col-span-2 space-y-6">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xl font-black uppercase italic tracking-tighter">Upcoming Schedule</h3>
-                    <button className="text-[8px] font-black uppercase tracking-widest text-zinc-500 hover:text-white">Full View</button>
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-3 md:space-y-4">
                     {state.schedule
                       .filter(m => (m.homeTeamId === state.userTeamId || m.awayTeamId === state.userTeamId) && !m.played)
                       .slice(0, 5)
@@ -326,25 +325,25 @@ const CareerView: React.FC = () => {
                         const opponent = NBA_TEAMS.find(t => t.id === opponentId);
                         
                         return (
-                          <div key={match.id} className="bg-zinc-900/50 border border-white/5 rounded-3xl p-6 flex items-center justify-between group hover:bg-zinc-900 transition-all">
-                            <div className="flex items-center gap-6">
-                              <div className="text-center w-12">
+                          <div key={match.id} className="bg-zinc-900/50 border border-white/5 rounded-3xl p-4 md:p-6 flex items-center justify-between group hover:bg-zinc-900 transition-all">
+                            <div className="flex items-center gap-3 md:gap-6">
+                              <div className="text-center w-8 md:w-12">
                                 <p className="text-[8px] font-black text-zinc-600 uppercase">WK</p>
-                                <p className="text-lg font-black text-white italic">{match.gameNumber}</p>
+                                <p className="text-sm md:text-lg font-black text-white italic">{match.gameNumber}</p>
                               </div>
                               <div className="w-px h-8 bg-zinc-800" />
-                              <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-zinc-900 rounded-2xl p-2 border border-white/10">
+                              <div className="flex items-center gap-3 md:gap-4">
+                                <div className="w-10 h-10 md:w-12 md:h-12 bg-zinc-900 rounded-2xl p-2 border border-white/10">
                                   <img src={getTeamLogo(opponentId)} className="w-full h-full object-contain" />
                                 </div>
-                                <div>
+                                <div className="max-w-[120px] md:max-w-none">
                                   <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">{isHome ? 'VS' : '@'} OPPONENT</p>
-                                  <p className="text-sm font-black text-white uppercase italic">{opponent?.name || opponentId}</p>
+                                  <p className="text-xs md:text-sm font-black text-white uppercase italic truncate">{opponent?.name || opponentId}</p>
                                 </div>
                               </div>
                             </div>
-                            <button className="w-10 h-10 bg-zinc-800 rounded-2xl flex items-center justify-center text-zinc-500 group-hover:bg-white group-hover:text-black transition-all">
-                              <ChevronRight size={18} />
+                            <button className="md:px-6 py-2 border border-white/5 rounded-xl text-[8px] font-black text-zinc-600 uppercase tracking-widest group-hover:border-amber-500/50 group-hover:text-amber-500 transition-all hidden md:block">
+                              Details
                             </button>
                           </div>
                         );
@@ -410,8 +409,8 @@ const CareerView: React.FC = () => {
                     <div className="space-y-3">
                       <h3 className="text-3xl font-black uppercase italic tracking-tighter">Market Locked</h3>
                       <p className="text-zinc-500 text-sm max-w-md mx-auto leading-relaxed font-medium">
-                        El mercado de agentes libres se abre al finalizar tu primera temporada. 
-                        Completa los 82 partidos para desbloquear el Draft y la Free Agency.
+                        The free agent market opens after finishing your first season. 
+                        Complete all 82 games to unlock the Draft and Free Agency.
                       </p>
                     </div>
                   </div>
@@ -570,37 +569,40 @@ const CareerView: React.FC = () => {
                          {conf}ern Conference
                          <Trophy className="text-zinc-800" size={24} />
                        </h3>
-                       <div className="bg-zinc-900 border border-white/5 rounded-[2.5rem] overflow-hidden">
-                          <table className="w-full text-left">
-                             <thead className="bg-white/5 border-b border-white/5">
-                                <tr className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">
-                                   <th className="px-6 py-4">TEAM</th>
-                                   <th className="px-6 py-4 text-center">W-L</th>
-                                   <th className="px-6 py-4 text-center">PCT</th>
-                                </tr>
-                             </thead>
-                             <tbody>
-                                {(Object.values(state.teams) as TeamObject[])
-                                  .filter(t => t.conference === conf)
-                                  .sort((a, b) => b.wins - a.wins || a.losses - b.losses)
-                                  .map((team, i) => (
-                                    <tr key={team.teamId} className={`border-b border-white/5 hover:bg-white/5 transition-colors ${team.isHuman ? 'bg-amber-500/5' : ''}`}>
-                                       <td className="px-6 py-4">
-                                          <div className="flex items-center gap-4">
-                                             <span className="text-[10px] font-black text-zinc-700 w-4">{i + 1}</span>
-                                             <img src={getTeamLogo(team.teamId)} className="w-6 h-6 object-contain" />
-                                             <span className="text-xs font-black text-white italic uppercase">{team.name}</span>
-                                          </div>
-                                       </td>
-                                       <td className="px-6 py-4 text-center text-xs font-black text-zinc-400">{team.wins} - {team.losses}</td>
-                                       <td className="px-6 py-4 text-center text-xs font-bold text-zinc-600">
-                                          {(team.wins / (team.wins + team.losses || 1)).toFixed(3)}
-                                       </td>
-                                    </tr>
-                                  ))}
-                             </tbody>
-                          </table>
-                       </div>
+                        <div className="bg-zinc-900 border border-white/5 rounded-3xl md:rounded-[2.5rem] overflow-hidden">
+                           <table className="w-full text-left">
+                              <thead className="bg-white/5 border-b border-white/5">
+                                 <tr className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">
+                                    <th className="px-4 md:px-6 py-4">TEAM</th>
+                                    <th className="px-4 md:px-6 py-4 text-center">W-L</th>
+                                    <th className="px-4 md:px-6 py-4 text-center">PCT</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 {(Object.values(state.teams) as TeamObject[])
+                                   .filter(t => t.conference === conf)
+                                   .sort((a, b) => b.wins - a.wins || a.losses - b.losses)
+                                   .map((team, i) => (
+                                     <tr key={team.teamId} className={`border-b border-white/5 hover:bg-white/5 transition-colors ${team.isHuman ? 'bg-amber-500/5' : ''}`}>
+                                        <td className="px-4 md:px-6 py-4">
+                                           <div className="flex items-center gap-2 md:gap-4">
+                                              <span className="text-[10px] font-black text-zinc-700 w-4">{i + 1}</span>
+                                              <img src={getTeamLogo(team.teamId)} className="w-6 h-6 object-contain" />
+                                              <span className="text-xs font-black text-white italic uppercase truncate max-w-[80px] md:max-w-none">
+                                                <span className="hidden md:inline">{team.name}</span>
+                                                <span className="md:hidden">{team.abbreviation}</span>
+                                              </span>
+                                           </div>
+                                        </td>
+                                        <td className="px-4 md:px-6 py-4 text-center text-xs font-black text-zinc-400 whitespace-nowrap">{team.wins} - {team.losses}</td>
+                                        <td className="px-4 md:px-6 py-4 text-center text-xs font-bold text-zinc-600">
+                                           {(team.wins / (team.wins + team.losses || 1)).toFixed(3)}
+                                        </td>
+                                     </tr>
+                                   ))}
+                              </tbody>
+                           </table>
+                        </div>
                     </div>
                   ))}
                </div>
@@ -613,59 +615,59 @@ const CareerView: React.FC = () => {
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
               className="max-w-7xl mx-auto space-y-12 pb-20"
             >
-              <div className="flex flex-col lg:flex-row gap-12">
-                {/* STARTING FIVE */}
-                <div className="flex-1 space-y-8">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-2xl font-black uppercase italic tracking-tighter">Starting Five</h3>
-                    <div className="px-4 py-2 bg-amber-500 rounded-xl text-[10px] font-black text-black uppercase tracking-widest">
-                      Team OVR: {Math.round(Object.values(userTeam.lineup).filter(v => typeof v === 'string').reduce((acc, id) => acc + (ALL_CARDS.find(c => c.id === id)?.stats.ovr || 70), 0) / 5)}
+               <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+                  {/* STARTING FIVE */}
+                  <div className="flex-1 space-y-6 md:space-y-8">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-white">Starting Five</h3>
+                      <div className="px-3 py-1.5 md:px-4 md:py-2 bg-amber-500 rounded-xl text-[8px] md:text-[10px] font-black text-black uppercase tracking-widest">
+                        OVR: {Math.round(Object.values(userTeam.lineup).filter(v => typeof v === 'string').reduce((acc, id) => acc + (ALL_CARDS.find(c => c.id === id)?.stats.ovr || 70), 0) / 5)}
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+                      {(['PG', 'SG', 'SF', 'PF', 'C'] as const).map((pos) => {
+                        const cardId = userTeam.lineup[pos];
+                        const card = ALL_CARDS.find(c => c.id === cardId);
+                        return (
+                          <div key={pos} className="space-y-2 md:space-y-3">
+                            <p className="text-center text-[8px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest">{pos}</p>
+                            <div 
+                              onClick={() => setLineupModalPos(pos)}
+                              className="aspect-[2/3] cursor-pointer hover:scale-105 active:scale-95 transition-all"
+                            >
+                              {card ? (
+                                <CardItem card={card} isOwned={true} mode="mini" />
+                              ) : (
+                                <div className="w-full h-full bg-zinc-900 rounded-xl border-2 border-dashed border-white/10 flex items-center justify-center">
+                                  <Plus className="text-zinc-800" size={24} />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    {(['PG', 'SG', 'SF', 'PF', 'C'] as const).map((pos) => {
-                      const cardId = userTeam.lineup[pos];
-                      const card = ALL_CARDS.find(c => c.id === cardId);
-                      return (
-                        <div key={pos} className="space-y-3">
-                          <p className="text-center text-[10px] font-black text-zinc-600 uppercase tracking-widest">{pos}</p>
-                          <div 
-                            onClick={() => setLineupModalPos(pos)}
-                            className="aspect-[2/3] cursor-pointer hover:scale-105 transition-all"
-                          >
-                            {card ? (
-                              <CardItem card={card} isOwned={true} mode="mini" />
-                            ) : (
-                              <div className="w-full h-full bg-zinc-900 rounded-xl border-2 border-dashed border-white/10 flex items-center justify-center">
-                                <Plus className="text-zinc-800" size={24} />
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+
+                  {/* BENCH & RESERVES */}
+                  <div className="w-full lg:w-96 space-y-6">
+                     <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">Bench</h3>
+                     <div className="grid grid-cols-3 gap-2 md:gap-3">
+                       {userTeam.lineup.bench.map((id, i) => {
+                         const card = ALL_CARDS.find(c => c.id === id);
+                         if (!card) return null;
+                         return (
+                           <div key={id} className="space-y-2">
+                             <div onClick={() => setLineupModalPos('bench')} className="cursor-pointer hover:scale-105 transition-all">
+                                <CardItem card={card} isOwned={true} mode="mini" />
+                             </div>
+                           </div>
+                         );
+                       })}
+                     </div>
                   </div>
                 </div>
-
-                {/* BENCH & RESERVES */}
-                <div className="w-full lg:w-96 space-y-6">
-                   <h3 className="text-xl font-black uppercase italic tracking-tighter">Bench</h3>
-                   <div className="grid grid-cols-3 gap-3">
-                     {userTeam.lineup.bench.map((id, i) => {
-                       const card = ALL_CARDS.find(c => c.id === id);
-                       if (!card) return null;
-                       return (
-                         <div key={id} className="space-y-2">
-                           <div onClick={() => setLineupModalPos('bench')} className="cursor-pointer hover:scale-105 transition-all">
-                              <CardItem card={card} isOwned={true} mode="mini" />
-                           </div>
-                         </div>
-                       );
-                     })}
-                   </div>
-                </div>
-              </div>
 
               {/* MODAL / SELECTOR */}
               <AnimatePresence>
@@ -784,21 +786,22 @@ const CareerView: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-zinc-900 border border-white/5 rounded-[2.5rem] overflow-hidden">
-                <table className="w-full text-left">
+              <div className="bg-zinc-900 border border-white/5 rounded-3xl md:rounded-[2.5rem] overflow-hidden">
+                <div className="overflow-x-auto">
+                <table className="w-full text-left min-w-[600px] md:min-w-0">
                   <thead className="bg-white/5 border-b border-white/5">
                     <tr className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">
-                      <th className="px-8 py-6">Player</th>
-                      <th className="px-8 py-6">Team</th>
-                      <th className="px-8 py-6 text-center">GP</th>
-                      <th className="px-8 py-6 text-center">PPG</th>
-                      <th className="px-8 py-6 text-center">RPG</th>
-                      <th className="px-8 py-6 text-center">APG</th>
+                      <th className="px-6 md:px-8 py-5 md:py-6">Player</th>
+                      <th className="px-4 md:px-8 py-5 md:py-6">Team</th>
+                      <th className="px-4 md:px-8 py-5 md:py-6 text-center">GP</th>
+                      <th className="px-4 md:px-8 py-5 md:py-6 text-center">PPG</th>
+                      <th className="px-4 md:px-8 py-5 md:py-6 text-center">RPG</th>
+                      <th className="px-4 md:px-8 py-5 md:py-6 text-center">APG</th>
                     </tr>
                   </thead>
                   <tbody>
                     {(Object.entries(state.stats.seasonal) as [string, any][])
-                      .sort(([, a], [, b]) => (b.points / b.gamesPlayed) - (a.points / a.gamesPlayed))
+                      .sort(([, a], [, b]) => (b.points / (b.gamesPlayed || 1)) - (a.points / (a.gamesPlayed || 1)))
                       .slice(0, 20)
                       .map(([playerId, stats]) => {
                         const card = ALL_CARDS.find(c => c.id === playerId);
@@ -808,18 +811,18 @@ const CareerView: React.FC = () => {
                         if (!card) return null;
                         return (
                           <tr key={playerId} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                            <td className="px-8 py-4">
-                               <div className="flex items-center gap-4">
-                                  <div className="w-10 h-10 bg-zinc-800 rounded-xl overflow-hidden p-1">
+                            <td className="px-6 md:px-8 py-4">
+                               <div className="flex items-center gap-3 md:gap-4">
+                                  <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-800 rounded-xl overflow-hidden p-1 shrink-0">
                                     <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-full h-full object-contain" />
                                   </div>
-                                  <div>
-                                    <p className="text-xs font-black text-white italic uppercase">{card.name}</p>
+                                  <div className="truncate max-w-[100px] md:max-w-none">
+                                    <p className="text-xs font-black text-white italic uppercase truncate">{card.name}</p>
                                     <p className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">{card.position}</p>
                                   </div>
                                </div>
                             </td>
-                            <td className="px-8 py-4">
+                            <td className="px-4 md:px-8 py-4">
                               {team ? (
                                 <div className="flex items-center gap-2">
                                   <img src={getTeamLogo(team.teamId)} className="w-5 h-5 object-contain" />
@@ -827,15 +830,16 @@ const CareerView: React.FC = () => {
                                 </div>
                               ) : <span className="text-[10px] font-bold text-zinc-600">FA</span>}
                             </td>
-                            <td className="px-8 py-4 text-center text-xs font-black text-zinc-400">{stats.gamesPlayed}</td>
-                            <td className="px-8 py-4 text-center text-sm font-black text-white italic">{(stats.points / stats.gamesPlayed).toFixed(1)}</td>
-                            <td className="px-8 py-4 text-center text-sm font-black text-zinc-400">{(stats.rebounds / stats.gamesPlayed).toFixed(1)}</td>
-                            <td className="px-8 py-4 text-center text-sm font-black text-zinc-400">{(stats.assists / stats.gamesPlayed).toFixed(1)}</td>
+                            <td className="px-4 md:px-8 py-4 text-center text-xs font-black text-zinc-400">{stats.gamesPlayed}</td>
+                            <td className="px-4 md:px-8 py-4 text-center text-sm font-black text-white italic">{(stats.points / (stats.gamesPlayed || 1)).toFixed(1)}</td>
+                            <td className="px-4 md:px-8 py-4 text-center text-sm font-black text-zinc-400">{(stats.rebounds / (stats.gamesPlayed || 1)).toFixed(1)}</td>
+                            <td className="px-4 md:px-8 py-4 text-center text-sm font-black text-zinc-400">{(stats.assists / (stats.gamesPlayed || 1)).toFixed(1)}</td>
                           </tr>
                         );
                       })}
                   </tbody>
                 </table>
+                </div>
               </div>
             </motion.div>
           )}
@@ -846,94 +850,157 @@ const CareerView: React.FC = () => {
           {lastGameResult && (
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-6"
+              className="fixed inset-0 z-[10000] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 md:p-6"
             >
               <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none" />
               
               <motion.div
                 initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
-                className="w-full max-w-2xl bg-zinc-950 border border-white/10 rounded-[3rem] p-10 overflow-hidden relative shadow-[0_0_100px_rgba(0,0,0,0.5)]"
+                className="w-full max-w-4xl bg-zinc-950 border border-white/10 rounded-[2rem] md:rounded-[3rem] overflow-hidden relative flex flex-col max-h-[90dvh] shadow-2xl"
               >
-                <button 
-                  onClick={() => setLastGameResult(null)}
-                  className="absolute top-10 right-10 text-zinc-500 hover:text-white transition-colors"
-                >
-                  <CloseIcon size={24} />
-                </button>
-
-                <div className="space-y-12">
-                  <div className="text-center space-y-3">
+                {/* Header */}
+                <div className="p-6 md:p-10 border-b border-white/5 flex items-center justify-between shrink-0 bg-black/40">
+                  <div className="space-y-1">
                     <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.6em] animate-pulse">Session Terminated</p>
-                    <h2 className="text-5xl font-black italic uppercase tracking-tighter text-white">Match Decided</h2>
+                    <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-white">Match Decided</h2>
                   </div>
+                  <button 
+                    onClick={() => setLastGameResult(null)}
+                    className="p-3 bg-white/5 rounded-full text-zinc-500 hover:text-white transition-colors"
+                  >
+                    <CloseIcon size={24} />
+                  </button>
+                </div>
 
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-10 space-y-12">
+                  
                   {/* Score Board */}
-                  <div className="flex items-center justify-between gap-8 bg-zinc-900/50 p-10 rounded-[2.5rem] border border-white/5 relative group">
-                    <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-[2.5rem]" />
-                    
-                    <div className="flex-1 text-center space-y-6 relative z-10">
-                      <div className="w-24 h-24 mx-auto bg-black rounded-3xl p-4 border border-white/5 shadow-2xl">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-8 bg-zinc-900/50 p-6 md:p-10 rounded-[2rem] border border-white/5 relative group">
+                    <div className="flex-1 text-center space-y-4 md:space-y-6 relative z-10 w-full">
+                      <div className="w-20 h-20 md:w-24 md:h-24 mx-auto bg-black rounded-3xl p-4 border border-white/5 shadow-2xl">
                         <img src={getTeamLogo(lastGameResult.match.homeTeamId)} className="w-full h-full object-contain" />
                       </div>
                       <div className="space-y-1">
-                        <p className="text-sm font-black text-zinc-500 uppercase tracking-widest">{state.teams[lastGameResult.match.homeTeamId].abbreviation}</p>
-                        <p className="text-xl font-black uppercase italic tracking-tighter text-white truncate px-2">{state.teams[lastGameResult.match.homeTeamId].name}</p>
+                        <p className="text-[10px] md:text-sm font-black text-zinc-500 uppercase tracking-widest">{state.teams[lastGameResult.match.homeTeamId].abbreviation}</p>
+                        <p className="text-lg md:text-xl font-black uppercase italic tracking-tighter text-white truncate px-2">{state.teams[lastGameResult.match.homeTeamId].name}</p>
                       </div>
-                      <p className={`text-7xl font-black italic ${lastGameResult.result.score.home > lastGameResult.result.score.away ? 'text-white' : 'text-zinc-600'}`}>
+                      <p className={`text-5xl md:text-7xl font-black italic ${lastGameResult.result.score.home > lastGameResult.result.score.away ? 'text-white' : 'text-zinc-600'}`}>
                         {lastGameResult.result.score.home}
                       </p>
                     </div>
 
-                    <div className="text-2xl font-black italic text-zinc-800 rotate-12">VS</div>
+                    <div className="text-2xl font-black italic text-zinc-800 rotate-0 md:rotate-12 shrink-0">VS</div>
 
-                    <div className="flex-1 text-center space-y-6 relative z-10">
-                      <div className="w-24 h-24 mx-auto bg-black rounded-3xl p-4 border border-white/5 shadow-2xl">
+                    <div className="flex-1 text-center space-y-4 md:space-y-6 relative z-10 w-full">
+                      <div className="w-20 h-20 md:w-24 md:h-24 mx-auto bg-black rounded-3xl p-4 border border-white/5 shadow-2xl">
                         <img src={getTeamLogo(lastGameResult.match.awayTeamId)} className="w-full h-full object-contain" />
                       </div>
                       <div className="space-y-1">
-                        <p className="text-sm font-black text-zinc-500 uppercase tracking-widest">{state.teams[lastGameResult.match.awayTeamId].abbreviation}</p>
-                        <p className="text-xl font-black uppercase italic tracking-tighter text-white truncate px-2">{state.teams[lastGameResult.match.awayTeamId].name}</p>
+                        <p className="text-[10px] md:text-sm font-black text-zinc-500 uppercase tracking-widest">{state.teams[lastGameResult.match.awayTeamId].abbreviation}</p>
+                        <p className="text-lg md:text-xl font-black uppercase italic tracking-tighter text-white truncate px-2">{state.teams[lastGameResult.match.awayTeamId].name}</p>
                       </div>
-                      <p className={`text-7xl font-black italic ${lastGameResult.result.score.away > lastGameResult.result.score.home ? 'text-white' : 'text-zinc-600'}`}>
+                      <p className={`text-5xl md:text-7xl font-black italic ${lastGameResult.result.score.away > lastGameResult.result.score.home ? 'text-white' : 'text-zinc-600'}`}>
                         {lastGameResult.result.score.away}
                       </p>
                     </div>
                   </div>
 
-                  {/* TOP TIERS */}
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 italic">Critical Data Points</h4>
+                  {/* Period Scores */}
+                  {lastGameResult.result.periods && (
+                    <div className="space-y-4">
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 italic">Quarter Breakdown</h4>
+                      <div className="bg-white/5 rounded-2xl md:rounded-3xl border border-white/5 overflow-x-auto">
+                        <table className="w-full text-center text-xs font-black uppercase italic min-w-[300px]">
+                          <thead>
+                            <tr className="border-b border-white/5 text-zinc-500">
+                              <th className="py-4 px-4 text-left">Team</th>
+                              {lastGameResult.result.periods.home.map((_, i) => (
+                                <th key={i} className="py-4 px-2">Q{i + 1}</th>
+                              ))}
+                              <th className="py-4 px-4 text-white">Total</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="border-b border-white/5">
+                              <td className="py-4 px-4 text-left text-zinc-400">{state.teams[lastGameResult.match.homeTeamId].abbreviation}</td>
+                              {lastGameResult.result.periods.home.map((val: number, i: number) => (
+                                <td key={i} className="py-4 px-2 text-zinc-500">{val}</td>
+                              ))}
+                              <td className="py-4 px-4 text-xl">{lastGameResult.result.score.home}</td>
+                            </tr>
+                            <tr>
+                              <td className="py-4 px-4 text-left text-zinc-400">{state.teams[lastGameResult.match.awayTeamId].abbreviation}</td>
+                              {lastGameResult.result.periods.away.map((val: number, i: number) => (
+                                <td key={i} className="py-4 px-2 text-zinc-500">{val}</td>
+                              ))}
+                              <td className="py-4 px-4 text-xl">{lastGameResult.result.score.away}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {[lastGameResult.result.boxScore.home[0], lastGameResult.result.boxScore.away[0]].map((p, i) => {
-                        const card = ALL_CARDS.find(c => c.id === p.playerId);
-                        return (
-                          <div key={i} className="bg-white/5 p-5 rounded-3xl flex items-center gap-5 border border-white/5 hover:border-amber-500/20 transition-all group">
-                             <div className="w-14 h-14 bg-zinc-900 rounded-2xl overflow-hidden p-1 group-hover:scale-105 transition-all">
-                               <img src={card?.imageUrl} className="w-full h-full object-cover" />
-                             </div>
-                             <div className="flex-1">
-                                <p className="text-xs font-black text-white uppercase italic truncate">{card?.name}</p>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <span className="text-[10px] font-black text-amber-500">{p.points} <span className="text-[7px] text-zinc-600">PTS</span></span>
-                                  <span className="w-1 h-1 bg-zinc-800 rounded-full" />
-                                  <span className="text-[10px] font-black text-zinc-400">{p.rebounds} <span className="text-[7px] text-zinc-600">REB</span></span>
-                                  <span className="w-1 h-1 bg-zinc-800 rounded-full" />
-                                  <span className="text-[10px] font-black text-zinc-400">{p.assists} <span className="text-[7px] text-zinc-600">AST</span></span>
-                                </div>
-                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                  )}
 
+                  {/* Complete Box Scores */}
+                  {['home', 'away'].map((side) => (
+                    <div key={side} className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <img src={getTeamLogo(lastGameResult.match[side === 'home' ? 'homeTeamId' : 'awayTeamId'])} className="w-6 h-6 object-contain" />
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 italic">
+                          {state.teams[lastGameResult.match[side === 'home' ? 'homeTeamId' : 'awayTeamId']].name} Box Score
+                        </h4>
+                      </div>
+                      <div className="bg-zinc-900/30 rounded-3xl border border-white/5 overflow-x-auto no-scrollbar">
+                        <table className="w-full text-left min-w-[500px]">
+                          <thead className="bg-white/5 border-b border-white/5">
+                            <tr className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">
+                              <th className="px-6 py-4">Player</th>
+                              <th className="px-4 py-4 text-center">MIN</th>
+                              <th className="px-4 py-4 text-center text-white">PTS</th>
+                              <th className="px-4 py-4 text-center">REB</th>
+                              <th className="px-4 py-4 text-center">AST</th>
+                              <th className="px-4 py-4 text-center">STL</th>
+                              <th className="px-4 py-4 text-center">BLK</th>
+                              <th className="px-4 py-4 text-center">+/-</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(lastGameResult.result.boxScore[side as keyof typeof lastGameResult.result.boxScore] as any[]).map((p, i) => {
+                               const card = ALL_CARDS.find(c => c.id === p.playerId);
+                               return (
+                                <tr key={i} className="border-b border-zinc-900/50 hover:bg-white/5 transition-colors">
+                                  <td className="px-6 py-3 shrink-0">
+                                    <div className="flex items-center gap-3">
+                                      <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card?.nbaId}.png`} className="w-8 h-8 rounded-lg bg-black p-0.5 object-contain" />
+                                      <p className="text-[10px] font-black text-white italic truncate max-w-[120px]">{card?.name}</p>
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-3 text-center text-[10px] font-black text-zinc-600">{p.minutes}</td>
+                                  <td className="px-4 py-3 text-center text-xs font-black text-amber-500 italic">{p.points}</td>
+                                  <td className="px-4 py-3 text-center text-[10px] font-black text-zinc-400">{p.rebounds}</td>
+                                  <td className="px-4 py-3 text-center text-[10px] font-black text-zinc-400">{p.assists}</td>
+                                  <td className="px-4 py-3 text-center text-[10px] font-black text-zinc-500">{p.steals || 0}</td>
+                                  <td className="px-4 py-3 text-center text-[10px] font-black text-zinc-500">{p.blocks || 0}</td>
+                                  <td className={`px-4 py-3 text-center text-[10px] font-black ${p.plusMinus > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                    {p.plusMinus > 0 ? `+${p.plusMinus}` : p.plusMinus}
+                                  </td>
+                                </tr>
+                               );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-6 md:p-10 border-t border-white/5 bg-black/40 shrink-0">
                   <button 
                     onClick={() => setLastGameResult(null)}
-                    className="w-full py-6 bg-white text-black rounded-3xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-amber-400 transition-all shadow-[0_20px_50px_rgba(255,255,255,0.1)] active:scale-95"
+                    className="w-full py-6 bg-white text-black rounded-3xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-amber-400 transition-all shadow-2xl active:scale-95"
                   >
-                    Confirm & Proceed
+                    Close & Return to Hub
                   </button>
                 </div>
               </motion.div>

@@ -142,7 +142,7 @@ export default function PacksView() {
   };
 
   return (
-    <div className="h-full w-full flex flex-col bg-black overflow-hidden">
+    <div className="min-h-full w-full flex flex-col bg-black">
       {/* Header with Coins */}
       <header className="px-6 pt-4 pb-2 flex flex-col gap-3 shrink-0">
         <div className="flex justify-between items-center">
@@ -181,7 +181,7 @@ export default function PacksView() {
       </header>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar pb-safe">
+      <div className="flex-1 pb-safe px-6">
         <AnimatePresence mode="wait">
           {activeTab === 'shop' ? (
             <motion.div

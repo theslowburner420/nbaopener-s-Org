@@ -144,7 +144,7 @@ export default function ShopView() {
       "components": "buttons",
       "intent": "capture"
     }}>
-      <div className="h-full w-full flex flex-col bg-black overflow-hidden relative">
+      <div className="min-h-full w-full flex flex-col bg-black relative">
         {/* Background Ambience */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(245,158,11,0.05)_0%,transparent_70%)] pointer-events-none" />
 
@@ -162,7 +162,7 @@ export default function ShopView() {
         </header>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 space-y-6 sm:space-y-8 no-scrollbar pb-32 z-10">
+        <div className="flex-1 px-4 sm:px-6 py-4 sm:py-6 space-y-6 sm:space-y-8 no-scrollbar pb-32 z-10">
           
           {/* Ads Free Option */}
           {!isPremium ? (

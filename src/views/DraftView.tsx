@@ -1787,7 +1787,7 @@ const DraftView: React.FC = () => {
   };
 
   const renderEntry = () => (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6 sm:space-y-8 relative overflow-y-auto w-full">
+    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6 sm:space-y-8 relative w-full min-h-full">
       {isWatchingAd && (
         <div className="absolute inset-0 z-[100] bg-black flex flex-col items-center justify-center space-y-6 md:space-y-8">
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -2083,7 +2083,7 @@ const DraftView: React.FC = () => {
   );
 
   const renderSelection = () => (
-    <div className="fixed inset-0 z-[8000] flex flex-col items-center justify-center p-2 md:p-8 h-[100dvh]">
+    <div className="fixed inset-0 z-[8000] flex flex-col items-center justify-start p-2 md:p-8 overflow-y-auto">
       {/* Backdrop for the modal */}
       <motion.div 
         initial={{ opacity: 0 }}

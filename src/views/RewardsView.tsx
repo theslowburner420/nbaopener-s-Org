@@ -50,7 +50,7 @@ export default function RewardsView() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-black text-white">
+    <div className="flex flex-col min-h-full bg-black text-white">
       <header className="px-6 pt-8 pb-4 flex justify-between items-end shrink-0">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -86,7 +86,7 @@ export default function RewardsView() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-8 no-scrollbar pb-24">
+      <div className="flex-1 px-6 py-4 space-y-8 no-scrollbar pb-24">
         {/* Daily Rewards Section */}
         <section>
           <div className="flex items-center justify-between mb-4">

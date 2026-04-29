@@ -33,7 +33,7 @@ export default function OpenView() {
   };
 
   return (
-    <div className="h-[100dvh] w-full flex flex-col items-center justify-center bg-black relative overflow-hidden">
+    <div className="min-h-full w-full flex flex-col items-center justify-center bg-black relative">
       {/* Back Button */}
       <button 
         onClick={() => setCurrentView('home')}
