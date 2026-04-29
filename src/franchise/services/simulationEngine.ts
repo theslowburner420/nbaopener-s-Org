@@ -84,10 +84,15 @@ export const simulationEngine = {
 
   generateBoxScore(team: TeamObject, totalPoints: number, state: FranchiseState, teamPlusMinus: number): BoxScoreEntry[] {
     const entries: BoxScoreEntry[] = [];
+    const seenIds = new Set<string>();
     const players = [
         ...[team.lineup.PG, team.lineup.SG, team.lineup.SF, team.lineup.PF, team.lineup.C].map(id => ({ id, role: 'starter' })),
         ...team.lineup.bench.map(id => ({ id, role: 'bench' }))
-    ].filter(p => p.id !== null);
+    ].filter(p => {
+        if (!p.id || seenIds.has(p.id)) return false;
+        seenIds.add(p.id);
+        return true;
+    });
 
     const rawScores = players.map(p => {
        const card = ALL_CARDS.find(c => c.id === p.id);

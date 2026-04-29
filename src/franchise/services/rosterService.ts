@@ -77,8 +77,12 @@ export function buildAllTeamRosters(): { teams: Record<string, TeamObject>, free
       lineup: { PG: null, SG: null, SF: null, PF: null, C: null, bench: [] },
       contracts: {},
       draftPicks: [
-        { originalOwnerId: teamDef.id, year: 2026, round: 1, isProtected: false },
-        { originalOwnerId: teamDef.id, year: 2026, round: 2, isProtected: false },
+        { id: `pk-${teamDef.id}-2026-1`, originalOwnerId: teamDef.id, year: 2026, round: 1, isProtected: false },
+        { id: `pk-${teamDef.id}-2026-2`, originalOwnerId: teamDef.id, year: 2026, round: 2, isProtected: false },
+        { id: `pk-${teamDef.id}-2027-1`, originalOwnerId: teamDef.id, year: 2027, round: 1, isProtected: false },
+        { id: `pk-${teamDef.id}-2027-2`, originalOwnerId: teamDef.id, year: 2027, round: 2, isProtected: false },
+        { id: `pk-${teamDef.id}-2028-1`, originalOwnerId: teamDef.id, year: 2028, round: 1, isProtected: false },
+        { id: `pk-${teamDef.id}-2028-2`, originalOwnerId: teamDef.id, year: 2028, round: 2, isProtected: false },
       ],
       wins: 0,
       losses: 0,
@@ -179,6 +183,7 @@ export function initializeFranchiseState(userTeamId: string): FranchiseState {
     teams,
     freeAgentPool: freeAgents,
     schedule,
+    playoffSeries: [],
     playerProgress,
     stats: {
       seasonal: {},
@@ -186,6 +191,7 @@ export function initializeFranchiseState(userTeamId: string): FranchiseState {
     },
     draftHistory: [],
     tradeHistory: [],
-    awards: {}
+    awards: {},
+    negotiations: {}
   };
 }

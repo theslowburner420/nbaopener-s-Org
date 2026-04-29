@@ -6,6 +6,8 @@ export interface TradeOffer {
   toTeamId: string;
   offeredPlayerIds: string[];
   requestedPlayerIds: string[];
+  offeredPickIds?: string[];
+  requestedPickIds?: string[];
 }
 
 export const tradeEngine = {
@@ -16,19 +18,25 @@ export const tradeEngine = {
 
     if (!fromTeam || !toTeam) return { accepted: false, reason: 'Invalid teams' };
 
-    // Basic count checks
-    if (offer.offeredPlayerIds.length === 0 || offer.requestedPlayerIds.length === 0) {
-      return { accepted: false, reason: 'Must include players in both sides' };
-    }
-
-    // Role/Value Calculation
-    const getVal = (ids: string[]) => ids.reduce((sum, id) => {
+    // Player Value Calculation
+    const getPlayerVal = (ids: string[]) => ids.reduce((sum, id) => {
       const card = ALL_CARDS.find(c => c.id === id);
       return sum + (card?.stats.ovr || 0);
     }, 0);
 
-    const offeredVal = getVal(offer.offeredPlayerIds);
-    const requestedVal = getVal(offer.requestedPlayerIds);
+    // Pick Value Calculation
+    const getPickVal = (teamChoices: any[], pickIds: string[] = []) => {
+      return pickIds.reduce((sum, id) => {
+         const pick = teamChoices.find(p => p.id === id);
+         if (!pick) return sum;
+         return sum + (pick.round === 1 ? 75 : 65);
+      }, 0);
+    };
+
+    const offeredVal = getPlayerVal(offer.offeredPlayerIds) + getPickVal(fromTeam.draftPicks, offer.offeredPickIds);
+    const requestedVal = getPlayerVal(offer.requestedPlayerIds) + getPickVal(toTeam.draftPicks, offer.requestedPickIds);
+
+    if (offeredVal === 0 && requestedVal === 0) return { accepted: false, reason: 'Empty trade' };
 
     // CPU logic: Accept if offered >= requested - 5 (slightly lenient)
     const threshold = requestedVal * 0.95; 
@@ -39,7 +47,7 @@ export const tradeEngine = {
 
     return { 
       accepted: false, 
-      reason: `The ${toTeam.name} values their players higher (${Math.round(requestedVal)} OVR vs ${Math.round(offeredVal)} offered).` 
+      reason: `The ${toTeam.name} values their assets higher (${Math.round(requestedVal)} points vs ${Math.round(offeredVal)} offered).` 
     };
   },
 
@@ -90,6 +98,27 @@ export const tradeEngine = {
 
     teamA.roster.push(...offer.requestedPlayerIds);
     teamB.roster.push(...offer.offeredPlayerIds);
+
+    // Swap Picks
+    if (offer.offeredPickIds) {
+      offer.offeredPickIds.forEach(id => {
+        const pickIdx = teamA.draftPicks.findIndex(p => p.id === id);
+        if (pickIdx !== -1) {
+          const [pick] = teamA.draftPicks.splice(pickIdx, 1);
+          teamB.draftPicks.push(pick);
+        }
+      });
+    }
+
+    if (offer.requestedPickIds) {
+      offer.requestedPickIds.forEach(id => {
+        const pickIdx = teamB.draftPicks.findIndex(p => p.id === id);
+        if (pickIdx !== -1) {
+          const [pick] = teamB.draftPicks.splice(pickIdx, 1);
+          teamA.draftPicks.push(pick);
+        }
+      });
+    }
 
     // Update Contracts
     offer.offeredPlayerIds.forEach(id => {

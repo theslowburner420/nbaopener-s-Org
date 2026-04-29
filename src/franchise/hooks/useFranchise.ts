@@ -11,6 +11,13 @@ export function useFranchise() {
   useEffect(() => {
     const savedState = stateService.load();
     if (savedState) {
+      // Data Migration / Healing
+      if (!savedState.negotiations) savedState.negotiations = {};
+      if (!savedState.stats) savedState.stats = { seasonal: {}, career: {} };
+      if (!savedState.draftHistory) savedState.draftHistory = [];
+      if (!savedState.tradeHistory) savedState.tradeHistory = [];
+      if (!savedState.awards) savedState.awards = {};
+      
       setState(savedState);
     }
     setIsLoading(false);

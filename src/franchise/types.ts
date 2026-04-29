@@ -12,6 +12,7 @@ export interface ContractObject {
 }
 
 export interface DraftPickObject {
+  id: string;
   originalOwnerId: string;
   year: number;
   round: number;
@@ -92,6 +93,20 @@ export interface FranchiseMatch {
   };
 }
 
+export interface PlayoffSeries {
+  id: string;
+  team1Id: string;
+  team2Id: string;
+  wins1: number;
+  wins2: number;
+  winnerId?: string;
+  matches: FranchiseMatch[];
+  round: number; // 0 for Play-In, 1 for R1, 2 for Semis, 3 for Finals
+  conference: 'East' | 'West' | 'Finals';
+  seed1?: number;
+  seed2?: number;
+}
+
 export interface FranchiseState {
   version: "2.0";
   season: number;
@@ -101,6 +116,8 @@ export interface FranchiseState {
   teams: Record<string, TeamObject>;
   freeAgentPool: string[];
   schedule: FranchiseMatch[];
+  playoffSeries: PlayoffSeries[];
+  championId?: string;
   playerProgress: Record<string, {
     age: number;
     potential: number;
@@ -113,4 +130,10 @@ export interface FranchiseState {
   draftHistory: any[];
   tradeHistory: any[];
   awards: Record<number, any>;
+  negotiations: Record<string, {
+    rounds: number;
+    lastOfferSalary: number;
+    lastOfferYears: number;
+    status: "Active" | "Rejected" | "Accepted";
+  }>;
 }
