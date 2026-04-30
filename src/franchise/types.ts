@@ -1,6 +1,6 @@
 import { Rarity } from '../types';
 
-export type FranchisePhase = "Preseason" | "Regular" | "PlayIn" | "Playoffs" | "Draft" | "FreeAgency";
+export type FranchisePhase = "Preseason" | "Regular" | "Awards" | "PlayIn" | "Playoffs" | "Draft" | "FreeAgency";
 
 export interface ContractObject {
   playerId: string;
@@ -130,13 +130,48 @@ export interface FranchiseState {
   };
   draftHistory: any[];
   tradeHistory: any[];
-  awards: Record<number, any>;
+  awards: Record<number, {
+    championId?: string;
+    mvp?: string;
+    dpoy?: string;
+    roy?: string;
+    mip?: string;
+    allNba: string[];
+  }>;
+  trophyCase: {
+    type: 'CHAMP' | 'MVP' | 'DPOY' | 'ROY' | 'RECORD';
+    season: number;
+    playerId?: string;
+    label?: string;
+  }[];
+  seasonHighs: Record<string, {
+    points: { value: number; rival: string; date: string };
+    rebounds: { value: number; rival: string; date: string };
+    assists: { value: number; rival: string; date: string };
+    steals: { value: number; rival: string; date: string };
+    blocks: { value: number; rival: string; date: string };
+  }>;
+  teamHistory: {
+    season: number;
+    record: string;
+    ppg: number;
+    champion: string;
+    awards: string[];
+  }[];
   negotiations: Record<string, {
     rounds: number;
     lastOfferSalary: number;
     lastOfferYears: number;
     status: "Active" | "Rejected" | "Accepted";
   }>;
+  notifications: {
+    id: string;
+    type: 'TRADE' | 'NEWS' | 'INJURY';
+    message: string;
+    week: number;
+    season: number;
+    read: boolean;
+  }[];
   customCards?: any[]; 
   draftPool?: any[]; 
 }

@@ -41,9 +41,7 @@ export const gameService = {
 
     // End of Season check
     if (state.week >= 82 && state.phase === 'Regular') {
-      state.phase = 'PlayIn';
-      state.playoffSeries = playoffService.generatePlayIn(state);
-      playoffService.simulateNextPlayoffStep(state);
+      state.phase = 'Awards';
     }
 
     stateService.save(state);
@@ -88,7 +86,17 @@ export const gameService = {
     
     if (state.phase === 'Regular') {
       // 1. Process CPU-to-CPU Trades
-      tradeEngine.processWeeklyCPUTrades(newState);
+      const tradeLogs = tradeEngine.processWeeklyCPUTrades(newState);
+      tradeLogs.forEach(log => {
+        newState.notifications.unshift({
+          id: `notif_${Date.now()}_${Math.random()}`,
+          type: 'TRADE',
+          message: log,
+          week: newState.week,
+          season: newState.season,
+          read: false
+        });
+      });
 
       // 2. Simulate all remaining unplayed matches for the current "cycle" (4 games)
       const currentRoundMatches = newState.schedule.filter(m => 
@@ -106,12 +114,9 @@ export const gameService = {
 
       // Check for End of Season
       if (newState.week >= 82) {
-        newState.phase = 'PlayIn';
-        newState.playoffSeries = playoffService.generatePlayIn(newState);
-        // Auto-simulate play-in games that don't involve user
-        playoffService.simulateNextPlayoffStep(newState);
+        newState.phase = 'Awards';
       }
-    } else {
+    } else if (newState.phase !== 'Awards' && newState.phase !== 'Draft') {
       // Advance playoffs if user is not in any series or already finished
       playoffService.simulateNextPlayoffStep(newState);
 
@@ -129,14 +134,15 @@ export const gameService = {
     const matchIndex = state.schedule.findIndex(m => m.id === matchId);
     if (matchIndex === -1) return;
 
-    state.schedule[matchIndex].played = true;
-    state.schedule[matchIndex].score = result.score;
-    state.schedule[matchIndex].winner = result.winnerId;
-    state.schedule[matchIndex].boxScore = result.boxScore;
+    const match = state.schedule[matchIndex];
+    match.played = true;
+    match.score = result.score;
+    match.winner = result.winnerId;
+    match.boxScore = result.boxScore;
 
     // Update Team Records
-    const homeTeamId = state.schedule[matchIndex].homeTeamId;
-    const awayTeamId = state.schedule[matchIndex].awayTeamId;
+    const homeTeamId = match.homeTeamId;
+    const awayTeamId = match.awayTeamId;
 
     if (result.winnerId === homeTeamId) {
       state.teams[homeTeamId].wins += 1;
@@ -146,16 +152,20 @@ export const gameService = {
       state.teams[homeTeamId].losses += 1;
     }
 
-    // Accumulate Statistics
-    this.trackStats(state, result.boxScore.home);
-    this.trackStats(state, result.boxScore.away);
+    // Accumulate Statistics and Highs
+    const rivalOfHome = state.teams[awayTeamId].abbreviation;
+    const rivalOfAway = state.teams[homeTeamId].abbreviation;
+    const date = `G${match.gameNumber}`;
+
+    this.trackStats(state, result.boxScore.home, rivalOfHome, date);
+    this.trackStats(state, result.boxScore.away, rivalOfAway, date);
   },
 
-  trackStats(state: FranchiseState, playerEntries: any[]): void {
+  trackStats(state: FranchiseState, playerEntries: any[], rival: string, date: string): void {
     playerEntries.forEach(entry => {
       if (!state.stats.seasonal[entry.playerId]) {
         state.stats.seasonal[entry.playerId] = {
-          points: 0, rebounds: 0, assists: 0, steals: 0, blocks: 0, plusMinus: 0, gamesPlayed: 0, fgPct: 0
+          points: 0, rebounds: 0, assists: 0, steals: 0, blocks: 0, plusMinus: 0, gamesPlayed: 0, fgPct: 45
         };
       }
       
@@ -167,6 +177,24 @@ export const gameService = {
       pStats.blocks += (entry.blocks || 0);
       pStats.plusMinus += (entry.plusMinus || 0);
       pStats.gamesPlayed += 1;
+
+      // Track Highs for user players (or all, but user players are priority)
+      // Actually tracking for all is safer for Awards logic
+      if (!state.seasonHighs[entry.playerId]) {
+        state.seasonHighs[entry.playerId] = {
+          points: { value: 0, rival: '', date: '' },
+          rebounds: { value: 0, rival: '', date: '' },
+          assists: { value: 0, rival: '', date: '' },
+          steals: { value: 0, rival: '', date: '' },
+          blocks: { value: 0, rival: '', date: '' }
+        };
+      }
+      const highs = state.seasonHighs[entry.playerId];
+      if (entry.points >= highs.points.value) highs.points = { value: entry.points, rival, date };
+      if (entry.rebounds >= highs.rebounds.value) highs.rebounds = { value: entry.rebounds, rival, date };
+      if (entry.assists >= highs.assists.value) highs.assists = { value: entry.assists, rival, date };
+      if (entry.steals >= highs.steals.value) highs.steals = { value: entry.steals, rival, date };
+      if (entry.blocks >= highs.blocks.value) highs.blocks = { value: entry.blocks, rival, date };
     });
   }
 };

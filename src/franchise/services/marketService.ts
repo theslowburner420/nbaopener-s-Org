@@ -119,10 +119,12 @@ export const marketService = {
     return 3000000;
   },
 
-  negotiateContract(state: FranchiseState, cardId: string, offerSalary: number, offerYears: number): { success: boolean; message: string; status: "Active" | "Accepted" | "Rejected"; counterOffer?: number } {
+  negotiateContract(state: FranchiseState, cardId: string, offerSalary: number, offerYears: number): { success: boolean; message: string; status: "Active" | "Accepted" | "Rejected"; counterOffer?: { salary: number; years: number } } {
+    const card = ALL_CARDS.find(c => c.id === cardId) || state.customCards?.find(c => c.id === cardId);
     const demand = this.calculateExtensionCost(state, cardId);
-    let neg = state.negotiations[cardId];
+    const ovr = state.playerProgress[cardId]?.ovr || card?.stats.ovr || 70;
     
+    let neg = state.negotiations[cardId];
     if (!neg) {
       neg = { rounds: 0, lastOfferSalary: 0, lastOfferYears: 0, status: "Active" };
       state.negotiations[cardId] = neg;
@@ -138,31 +140,40 @@ export const marketService = {
 
     const diffPercent = (demand - offerSalary) / demand;
 
-    // Condition: If salary offered is 20% inferior to demand, reject directly
-    if (diffPercent > 0.20) {
-      neg.status = "Rejected";
-      return { success: false, message: "Offer too low. The player and his agent have left the table.", status: "Rejected" };
+    // Constraint: OVR > 85 needs at least 3 years
+    if (ovr > 85 && offerYears < 3) {
+      if (neg.rounds >= 3) { neg.status = "Rejected"; return { success: false, message: "I told you, I need long-term security. Negotiation failed.", status: "Rejected" }; }
+      return { success: false, message: "I'm looking for at least 3 years of security. Try again.", status: "Active", counterOffer: { salary: demand, years: 3 } };
     }
 
-    // Condition: If is within 10%, accept
-    if (diffPercent <= 0.10) {
+    // Deficit Logic
+    if (diffPercent > 0.20) {
+      neg.status = "Rejected";
+      const msg = ovr > 90 ? "I'm looking for a max deal. This offer is insulting." : "I need more than that. I'm hitting free agency.";
+      return { success: false, message: msg, status: "Rejected" };
+    }
+
+    if (diffPercent <= 0.05) {
       neg.status = "Accepted";
       this.extendContract(state, cardId, offerYears, offerSalary);
       return { success: true, message: "Deal reached! Extension signed.", status: "Accepted" };
     }
 
-    // Condition: Between 10-20% hace contraoferta intermedia
+    // Counteroffer (5-20%)
     if (neg.rounds >= 3) {
       neg.status = "Rejected";
-      return { success: false, message: "Maximum rounds reached. Negotiation failed.", status: "Rejected" };
+      return { success: false, message: "We're too far apart. See you in free agency.", status: "Rejected" };
     }
 
-    const counterSalary = Math.round((demand + offerSalary) / 2);
+    // Make a counter-offer: slightly higher salary or more years
+    const counterSalary = Math.round(demand * (1 - (diffPercent / 2)));
+    const counterYears = ovr > 80 ? Math.max(offerYears, 3) : offerYears;
+
     return { 
       success: false, 
-      message: `The player is interested but wants more. He makes a counter-offer.`, 
+      message: `I'm interested, but you'll need to do better. How about this?`, 
       status: "Active",
-      counterOffer: counterSalary
+      counterOffer: { salary: counterSalary, years: counterYears }
     };
   },
 
@@ -194,11 +205,29 @@ export const marketService = {
     });
 
     // 2. Sort teams by wins (worst record first)
-    const teamsByRecord = Object.values(state.teams).sort((a, b) => a.wins - b.wins);
+    const sortedTeams = Object.values(state.teams).sort((a, b) => a.wins - b.wins);
     
-    // 3. Map the picks to the sorted teams based on originalOwnerId
-    // If a pick's originalOwner was the worst team, it goes first.
-    return teamsByRecord.map(t => {
+    // 3. For Round 1, simulate a "Lottery" for the bottom 14 teams
+    if (round === 1) {
+       const lotteryTeams = [...sortedTeams.slice(0, 14)];
+       const remainingTeams = sortedTeams.slice(14);
+       
+       // Simple lottery shuffle: give slight edge to worse teams but shuffle top 4
+       // We'll just randomly swap some positions in the top 14
+       for (let i = 0; i < 4; i++) {
+         const j = Math.floor(Math.random() * lotteryTeams.length);
+         [lotteryTeams[i], lotteryTeams[j]] = [lotteryTeams[j], lotteryTeams[i]];
+       }
+       
+       const lotteryOrder = [...lotteryTeams, ...remainingTeams];
+       return lotteryOrder.map(t => {
+          const p = allPicks.find(ap => ap.pick.originalOwnerId === t.teamId);
+          return { teamId: p?.ownerId || t.teamId, pick: p?.pick };
+       });
+    }
+    
+    // 4. Round 2 or no lottery
+    return sortedTeams.map(t => {
       const p = allPicks.find(ap => ap.pick.originalOwnerId === t.teamId);
       return { teamId: p?.ownerId || t.teamId, pick: p?.pick };
     });

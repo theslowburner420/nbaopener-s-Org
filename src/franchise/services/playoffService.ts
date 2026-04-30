@@ -245,17 +245,20 @@ export const playoffService = {
     if (finals?.winnerId) {
       state.championId = finals.winnerId;
       
-      // Award Trophy if it doesn't exist for this season
-      const hasAward = Object.values(state.awards).some((a: any) => a.season === state.season && a.teamId === finals.winnerId && a.type === 'CHAMP');
-      
-      if (!hasAward) {
-        const awardId = Date.now();
-        state.awards[awardId] = {
-          type: 'CHAMP',
-          season: state.season,
-          teamId: finals.winnerId,
-          label: `${state.season} NBA Champions - ${state.teams[finals.winnerId].name}`
-        };
+      if (!state.awards[state.season]) {
+        state.awards[state.season] = { allNba: [] };
+      }
+      state.awards[state.season].championId = finals.winnerId;
+
+      if (finals.winnerId === state.userTeamId) {
+        const hasTrophy = state.trophyCase.some(t => t.type === 'CHAMP' && t.season === state.season);
+        if (!hasTrophy) {
+          state.trophyCase.push({
+            type: 'CHAMP',
+            season: state.season,
+            label: `${state.season} WORLD CHAMPIONS`
+          });
+        }
       }
     }
   }

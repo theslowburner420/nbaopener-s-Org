@@ -19,17 +19,34 @@ export function generateDraftPool(year: number, count: number): Card[] {
     const lastName = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
     const name = `${firstName} ${lastName}`;
     
-    // Position weighted: Guards are more common
-    const randPos = Math.random();
-    let position = 'G';
-    if (randPos > 0.85) position = 'C';
-    else if (randPos > 0.6) position = 'F';
-    else if (randPos > 0.3) position = 'G-F';
-    else position = 'G';
+    // Position weighted: Balanced distribution
+    const positions = ['PG', 'SG', 'SF', 'PF', 'C'];
+    const position = positions[Math.floor(Math.random() * positions.length)];
 
-    // OVR depends on pick potentially, but here we just generate a range for the pool
-    // In DraftView we will sort them or assign them
     const ovr = Math.floor(Math.random() * 15) + 68; // 68 to 82
+
+    // Stats coherent with position and OVR
+    const getStats = (pos: string, ovr: number) => {
+      let p = 0, r = 0, a = 0;
+      if (pos === 'PG') {
+        p = ovr * 0.22; a = ovr * 0.14; r = ovr * 0.05;
+      } else if (pos === 'SG') {
+        p = ovr * 0.24; a = ovr * 0.08; r = ovr * 0.06;
+      } else if (pos === 'SF') {
+        p = ovr * 0.20; a = ovr * 0.07; r = ovr * 0.09;
+      } else if (pos === 'PF') {
+        p = ovr * 0.18; a = ovr * 0.05; r = ovr * 0.12;
+      } else { // C
+        p = ovr * 0.16; a = ovr * 0.04; r = ovr * 0.15;
+      }
+      return { 
+        points: Math.max(0.1, Number(p.toFixed(1))), 
+        rebounds: Math.max(0.1, Number(r.toFixed(1))), 
+        assists: Math.max(0.1, Number(a.toFixed(1))) 
+      };
+    };
+
+    const s = getStats(position, ovr);
 
     const newCard: Card = {
       id: `draft_${year}_${i}`,
@@ -48,9 +65,9 @@ export function generateDraftPool(year: number, count: number): Card[] {
       ast: 0,
       nbaId: 0, // Generated players don't have NBA IDs for headshots
       stats: {
-        points: (ovr * 0.2) + (Math.random() * 5),
-        rebounds: (ovr * 0.1) + (Math.random() * 3),
-        assists: (ovr * 0.1) + (Math.random() * 3),
+        points: s.points,
+        rebounds: s.rebounds,
+        assists: s.assists,
         ovr
       },
       description: `A promising young ${position} from the ${year} draft class.`,
@@ -75,14 +92,26 @@ export function applyProgression(state: FranchiseState) {
     
     if (card && progress) {
       const currentOvr = progress.ovr || card.stats.ovr;
+      const potential = progress.potential;
+      const age = progress.age;
       let delta = 0;
 
-      if (currentOvr < 75) {
-        delta = Math.floor(Math.random() * 3) + 1;
-      } else if (currentOvr <= 85) {
-        delta = Math.floor(Math.random() * 4) - 1;
+      if (age < 24) {
+        // High growth for young potential stars
+        if (potential > currentOvr) {
+          delta = Math.floor(Math.random() * 4) + 1; // +1 to +4
+        } else {
+          delta = Math.floor(Math.random() * 3) - 1; // -1 to +1
+        }
+      } else if (age < 30) {
+        // Prime years: stable or small growth
+        delta = Math.floor(Math.random() * 3) - 1; // -1 to +1
+      } else if (age >= 30 && age < 34) {
+        // Slight decline starting
+        delta = Math.floor(Math.random() * 3) - 2; // -2 to 0
       } else {
-        delta = Math.floor(Math.random() * 3) - 2;
+        // Veterans decline
+        delta = Math.floor(Math.random() * 3) - 3; // -3 to -1
       }
 
       const newOvr = Math.min(99, Math.max(60, currentOvr + delta));
@@ -241,9 +270,40 @@ export function buildAllTeamRosters(): { teams: Record<string, TeamObject>, free
 
 export function advanceSeason(state: FranchiseState): FranchiseState {
   const newState = { ...state };
+  
+  // Archive History before incrementing season
+  const userTeam = state.teams[state.userTeamId];
+  const userStats = state.stats.seasonal;
+  const teamSeasonalStats = Object.keys(userStats)
+    .filter(id => userTeam.roster.includes(id))
+    .map(id => userStats[id]);
+  
+  const totalPoints = teamSeasonalStats.reduce((acc, s) => acc + s.points, 0);
+  const totalGames = userTeam.wins + userTeam.losses;
+  const ppgResult = totalGames > 0 ? totalPoints / totalGames : 0;
+
+  newState.teamHistory.push({
+    season: state.season,
+    record: `${userTeam.wins}-${userTeam.losses}`,
+    ppg: parseFloat(ppgResult.toFixed(1)),
+    awards: state.trophyCase.filter(t => t.season === state.season).map(t => t.type),
+    champion: state.championId ? state.teams[state.championId].name : 'N/A'
+  });
+
   newState.season += 1;
   newState.week = 1;
   newState.phase = 'Regular';
+  newState.championId = undefined; // Reset champion
+
+  // Reset Regular Season Wins/Losses
+  Object.values(newState.teams).forEach(team => {
+    team.wins = 0;
+    team.losses = 0;
+  });
+
+  // Reset Seasonal Stats
+  newState.stats.seasonal = {};
+  newState.seasonHighs = {}; // Reset season highs for new season
   
   // Apply Progression
   applyProgression(newState);
@@ -340,6 +400,10 @@ export function initializeFranchiseState(userTeamId: string): FranchiseState {
     draftHistory: [],
     tradeHistory: [],
     awards: {},
-    negotiations: {}
+    trophyCase: [],
+    seasonHighs: {},
+    teamHistory: [],
+    negotiations: {},
+    notifications: []
   };
 }

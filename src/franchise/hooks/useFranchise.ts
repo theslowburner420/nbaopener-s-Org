@@ -13,10 +13,21 @@ export function useFranchise() {
     if (savedState) {
       // Data Migration / Healing
       if (!savedState.negotiations) savedState.negotiations = {};
-      if (!savedState.stats) savedState.stats = { seasonal: {}, career: {} };
+      if (!savedState.stats) {
+        savedState.stats = { seasonal: {}, career: {} };
+      } else {
+        if (!savedState.stats.seasonal) savedState.stats.seasonal = {};
+        if (!savedState.stats.career) savedState.stats.career = {};
+      }
       if (!savedState.draftHistory) savedState.draftHistory = [];
       if (!savedState.tradeHistory) savedState.tradeHistory = [];
       if (!savedState.awards) savedState.awards = {};
+      if (!savedState.trophyCase) savedState.trophyCase = [];
+      if (!savedState.playoffSeries) savedState.playoffSeries = [];
+      if (!savedState.teamHistory) savedState.teamHistory = [];
+      if (!savedState.seasonHighs) savedState.seasonHighs = {};
+      if (!savedState.freeAgentPool) savedState.freeAgentPool = [];
+      if (!savedState.notifications) savedState.notifications = [];
       
       setState(savedState);
     }

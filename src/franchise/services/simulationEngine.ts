@@ -99,55 +99,67 @@ export const simulationEngine = {
         return true;
     });
 
-    const rawScores = players.map(p => {
-       const card = this.findCard(p.id!, state);
-       if (!card) return 0;
+    const getDistributionFactor = () => {
+      const r = Math.random();
+      if (r < 0.60) return 0.75 + Math.random() * 0.50; // 75-125%
+      if (r < 0.85) return Math.random() > 0.5 ? (0.50 + Math.random() * 0.25) : (1.25 + Math.random() * 0.35); // 50-75 or 125-160
+      if (r < 0.95) return Math.random() > 0.5 ? (0.30 + Math.random() * 0.20) : (1.60 + Math.random() * 0.40); // 30-50 or 160-200
+      return 2.0 + Math.random() * 0.50; // 200-250% (Historic)
+    };
+
+    // 1. Assign Minutes
+    const playerData = players.map(p => {
+      const card = this.findCard(p.id!, state);
+      const mins = p.role === 'starter' ? 28 + Math.floor(Math.random() * 11) : 10 + Math.floor(Math.random() * 13);
+      return { id: p.id!, role: p.role, card, mins };
+    });
+
+    // 2. Calculate Raw Points for Normalization (to match team score)
+    const rawScores = playerData.map(p => {
+       if (!p.card) return 0;
+       const progress = state.playerProgress[p.id!] || { form: 1.0, ovr: p.card.stats.ovr };
+       const currentOvr = progress.ovr || p.card.stats.ovr;
+       const ovrMod = currentOvr / p.card.stats.ovr;
        
-       const progress = state.playerProgress[p.id!] || { form: 1.0, ovr: card.stats.ovr };
-       const currentOvr = progress.ovr || card.stats.ovr;
-       const ovrMod = currentOvr / card.stats.ovr;
-       
-       const roleMod = p.role === 'starter' ? 1.0 : 0.45;
-       const variance = 0.2;
-       const randomFactor = 1 + (Math.random() * variance * 2 - variance);
-       return card.stats.points * roleMod * randomFactor * ovrMod;
+       // Base per minute (assuming 34 min base)
+       const basePPG = p.card.stats.points;
+       const raw = (basePPG / 34) * p.mins * getDistributionFactor() * ovrMod * progress.form;
+       return raw;
     });
 
     const currentTotalRaw = rawScores.reduce((a, b) => a + b, 0);
     const normalizationFactor = totalPoints / (currentTotalRaw || 1);
 
-    players.forEach((p, idx) => {
-        const card = this.findCard(p.id!, state);
-        if (!card) return;
-
-        const roleMod = p.role === 'starter' ? 1.0 : 0.45;
-        const progress = state.playerProgress[card.id] || { form: 1.0, ovr: card.stats.ovr };
-        const currentOvr = progress.ovr || card.stats.ovr;
-        const ovrMod = currentOvr / card.stats.ovr;
+    playerData.forEach((p, idx) => {
+        if (!p.card) return;
+        const progress = state.playerProgress[p.card.id] || { form: 1.0, ovr: p.card.stats.ovr };
+        const currentOvr = progress.ovr || p.card.stats.ovr;
+        const ovrMod = currentOvr / p.card.stats.ovr;
         
         let pts = Math.round(rawScores[idx] * normalizationFactor);
-
-        const variance = 0.25;
-        const rnd = () => (1 + (Math.random() * variance * 2 - variance));
-
-        // Simplified stat generation
-        const reb = Math.max(0, Math.round((card.stats.rebounds * roleMod * progress.form * rnd() * ovrMod) / 3));
-        const ast = Math.max(0, Math.round((card.stats.assists * roleMod * progress.form * rnd() * ovrMod) / 4));
-        const stl = Math.random() > (0.6 / progress.form) ? Math.floor(Math.random() * 3) + (p.role === 'starter' ? 1 : 0) : 0;
-        const blk = Math.random() > (0.7 / progress.form) ? Math.floor(Math.random() * 3) + (card.position === 'C' ? 1 : 0) : 0;
         
-        const individualPM = Math.round((teamPlusMinus * roleMod) + (Math.random() * 10 - 5));
+        // Distribution for REB and AST independently
+        const rebFactor = getDistributionFactor();
+        const astFactor = getDistributionFactor();
+
+        const reb = Math.max(0, Math.round((p.card.stats.rebounds / 34) * p.mins * rebFactor * ovrMod));
+        const ast = Math.max(0, Math.round((p.card.stats.assists / 34) * p.mins * astFactor * ovrMod));
+        
+        const stl = Math.random() > (0.6 / progress.form) ? Math.floor(Math.random() * 3) + (p.role === 'starter' ? 1 : 0) : 0;
+        const blk = Math.random() > (0.7 / progress.form) ? Math.floor(Math.random() * 3) + (p.card.position === 'C' ? 1 : 0) : 0;
+        
+        const individualPM = Math.round((teamPlusMinus * (p.mins / 48)) + (Math.random() * 10 - 5));
 
         entries.push({
-            playerId: card.id,
-            name: card.name,
+            playerId: p.card.id,
+            name: p.card.name,
             points: pts,
             rebounds: reb,
             assists: ast,
             steals: stl,
             blocks: blk,
             plusMinus: individualPM,
-            minutes: p.role === 'starter' ? 28 + Math.floor(Math.random() * 10) : 8 + Math.floor(Math.random() * 12)
+            minutes: p.mins
         });
     });
 
