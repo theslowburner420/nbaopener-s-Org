@@ -53,7 +53,10 @@ const CareerView: React.FC = () => {
   const findCard = React.useCallback((id: string | null) => {
     if (!id) return null;
     const baseCard = allCardsMap.get(id);
-    if (!baseCard) return null;
+    if (!baseCard) {
+      // Fallback to ALL_CARDS array if map lookup fails for some reason
+      return ALL_CARDS.find(c => c.id === id) || null;
+    }
     
     // Apply progression overrides if any
     const progress = state?.playerProgress[id];
@@ -337,6 +340,35 @@ const CareerView: React.FC = () => {
     setState({ ...state });
   }, [state, lineupModalPos, setState]);
 
+  const simulateGame = React.useCallback(() => {
+    if (!state) return;
+    const res = gameService.simulateNextUserGame(state);
+    if (res) {
+      setLastGameResult(res);
+      setState({ ...state });
+    }
+  }, [state, setState]);
+
+  // OPTIMIZATION: Memoized League Leaders
+  const leagueLeaders = useMemo(() => {
+    if (!state?.stats?.seasonal) return [];
+    return (['Points', 'Rebounds', 'Assists'] as const).map((cat) => {
+      const sorted = (Object.entries(state.stats!.seasonal) as [string, any][])
+        .sort(([, a], [, b]) => {
+          const valA = cat === 'Points' ? a.points : cat === 'Rebounds' ? a.rebounds : a.assists;
+          const valB = cat === 'Points' ? b.points : cat === 'Rebounds' ? b.rebounds : b.assists;
+          return (valB / (b.gamesPlayed || 1)) - (valA / (a.gamesPlayed || 1));
+        });
+      
+      const leader = sorted[0];
+      if (!leader) return null;
+      const [playerId, stats] = leader;
+      const card = findCard(playerId);
+      const value = (cat === 'Points' ? stats.points : cat === 'Rebounds' ? stats.rebounds : stats.assists) / (stats.gamesPlayed || 1);
+      return { cat, card, value, playerId };
+    }).filter(Boolean);
+  }, [state?.stats?.seasonal, findCard]);
+
   if (isLoading) {
     return (
       <div className="flex-1 bg-black flex items-center justify-center">
@@ -394,36 +426,23 @@ const CareerView: React.FC = () => {
   }
 
 
-  const simulateGame = React.useCallback(() => {
-    if (!state) return;
-    const res = gameService.simulateNextUserGame(state);
-    if (res) {
-      setLastGameResult(res);
-      setState({ ...state });
+  if (!state || (state.userTeamId && !state.teams[state.userTeamId])) {
+    if (state && state.userTeamId && !state.teams[state.userTeamId]) {
+      return (
+        <div className="flex-1 bg-black flex items-center justify-center p-12 text-center">
+          <div className="space-y-6">
+            <AlertTriangle className="text-amber-500 mx-auto" size={64} />
+            <div className="space-y-2">
+              <h2 className="text-2xl font-black uppercase italic text-white">Data Error</h2>
+              <p className="text-zinc-500 text-sm max-w-xs font-medium">Your save file is incompatible.</p>
+            </div>
+            <button onClick={resetFranchise} className="px-8 py-3 bg-white text-black rounded-xl font-black uppercase tracking-widest text-[10px]">Reset</button>
+          </div>
+        </div>
+      );
     }
-  }, [state, setState]);
-
-  // OPTIMIZATION: Memoized League Leaders
-  const leagueLeaders = useMemo(() => {
-    if (!state?.stats?.seasonal) return [];
-    return (['Points', 'Rebounds', 'Assists'] as const).map((cat) => {
-      const sorted = (Object.entries(state.stats!.seasonal) as [string, any][])
-        .sort(([, a], [, b]) => {
-          const valA = cat === 'Points' ? a.points : cat === 'Rebounds' ? a.rebounds : a.assists;
-          const valB = cat === 'Points' ? b.points : cat === 'Rebounds' ? b.rebounds : b.assists;
-          return (valB / (b.gamesPlayed || 1)) - (valA / (a.gamesPlayed || 1));
-        });
-      
-      const leader = sorted[0];
-      if (!leader) return null;
-      const [playerId, stats] = leader;
-      const card = findCard(playerId);
-      const value = (cat === 'Points' ? stats.points : cat === 'Rebounds' ? stats.rebounds : stats.assists) / (stats.gamesPlayed || 1);
-      return { cat, card, value, playerId };
-    }).filter(Boolean);
-  }, [state?.stats?.seasonal, findCard]);
-
-  if (!state) return null;
+    return null;
+  }
 
   const PlayoffSeriesCard: React.FC<{ series: PlayoffSeries; teams: Record<string, TeamObject> }> = ({ series, teams }) => {
     const t1 = teams[series.team1Id];
@@ -670,14 +689,14 @@ const CareerView: React.FC = () => {
   return (
     <div className="bg-black flex flex-col relative w-full min-h-full">
       {/* COMPACT HEADER */}
-      <div className="bg-zinc-950 border-b border-white/5 px-4 h-[56px] md:h-auto md:px-12 md:py-6 flex items-center justify-between gap-4 md:gap-6 sticky top-0 z-50">
-        <div className="flex items-center gap-3 md:gap-6 h-full overflow-hidden">
-          <div className="w-8 h-8 md:w-16 md:h-16 bg-zinc-900 rounded-lg md:rounded-[1.5rem] p-1.5 md:p-3 border border-white/5 shadow-2xl shrink-0">
+      <div className="bg-zinc-950 border-b border-white/5 px-3 h-[48px] md:h-auto md:px-12 md:py-6 flex items-center justify-between gap-3 md:gap-6 sticky top-0 z-50">
+        <div className="flex items-center gap-2 md:gap-6 h-full overflow-hidden">
+          <div className="w-7 h-7 md:w-16 md:h-16 bg-zinc-900 rounded-lg md:rounded-[1.5rem] p-1 md:p-3 border border-white/5 shadow-2xl shrink-0">
             <img src={getTeamLogo(userTeam.teamId)} className="w-full h-full object-contain" />
           </div>
           <div className="flex flex-col md:block overflow-hidden">
-            <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-              <h2 className="text-[10px] md:text-2xl font-black uppercase italic tracking-tighter text-white truncate">
+            <div className="flex items-center gap-1.5 md:gap-3 flex-wrap">
+              <h2 className="text-[9px] md:text-2xl font-black uppercase italic tracking-tighter text-white truncate">
                 <span className="md:hidden">{userTeam.abbreviation} • {userTeam.wins}-{userTeam.losses} • {state.season}</span>
                 <span className="hidden md:inline">{userTeam.name}</span>
               </h2>
@@ -1013,8 +1032,8 @@ const CareerView: React.FC = () => {
       </AnimatePresence>
 
       {/* NAVIGATION */}
-      <div className="bg-zinc-950 border-b border-white/5 sticky top-[56px] md:top-0 z-40 overflow-x-auto no-scrollbar touch-pan-x">
-        <div className="flex px-4 md:px-12 gap-1 md:gap-2 py-2">
+      <div className="bg-zinc-950 border-b border-white/5 sticky top-[56px] md:top-0 z-40 overflow-x-auto no-scrollbar touch-pan-x hide-scrollbar scroll-smooth">
+        <div className="flex px-3 md:px-12 gap-0.5 md:gap-2 py-1 md:py-2 min-w-max">
           {[
             { id: 'hub', label: 'HUB', icon: LayoutDashboard },
             { id: 'lineup', label: 'ROSTER', icon: Users },
@@ -1028,12 +1047,17 @@ const CareerView: React.FC = () => {
             <button
               key={tab.id}
               id={`nav-tab-${tab.id}`}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 md:gap-3 px-4 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl transition-all whitespace-nowrap shrink-0 ${activeTab === tab.id ? 'bg-white/5 text-amber-500' : 'text-zinc-600 hover:text-zinc-400'}`}
+              onClick={() => {
+                setActiveTab(tab.id as any);
+                // Scroll into view on mobile
+                const el = document.getElementById(`nav-tab-${tab.id}`);
+                el?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+              }}
+              className={`flex items-center gap-1.5 md:gap-3 px-3 md:px-6 py-2.5 md:py-4 rounded-lg md:rounded-2xl transition-all whitespace-nowrap shrink-0 ${activeTab === tab.id ? 'bg-white/5 text-amber-500' : 'text-zinc-600 hover:text-zinc-400'}`}
             >
-              <tab.icon size={14} />
-              <span className="text-[9px] md:text-xs font-black uppercase tracking-widest">{tab.label}</span>
-              {activeTab === tab.id && <motion.div layoutId="nav-pill" className="w-1 h-1 bg-amber-500 rounded-full" />}
+              <tab.icon size={12} className="md:w-[14px] md:h-[14px]" />
+              <span className="text-[8px] md:text-xs font-black uppercase tracking-widest">{tab.label}</span>
+              {activeTab === tab.id && <motion.div layoutId="nav-pill" className="w-0.5 h-0.5 bg-amber-500 rounded-full" />}
             </button>
           ))}
         </div>
@@ -1070,54 +1094,54 @@ const CareerView: React.FC = () => {
                 <>
                   {/* TOP FEATURE: NEXT MATCH */}
                   {nextUserGame && (
-                <div className="bg-gradient-to-br from-zinc-900 to-black border border-white/5 rounded-3xl md:rounded-[3rem] p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
-                  <div className="space-y-4 md:space-y-6 relative z-10 text-center md:text-left w-full md:w-auto">
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.4em]">Next Appointment</p>
-                      <h3 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-white">Gameday</h3>
-                    </div>
-                    <div className="flex items-center gap-4 justify-center md:justify-start">
-                      <div className="px-4 py-2 bg-white/5 rounded-xl border border-white/5 text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                        Match {nextUserGame.gameNumber}
-                      </div>
-                      <div className="px-4 py-2 bg-white/5 rounded-xl border border-white/5 text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                        {nextUserGame.homeTeamId === state.userTeamId ? 'Home' : 'Away'}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-6 md:gap-12 relative z-10">
-                     <div className="text-center space-y-2 md:space-y-3">
-                        <div className="w-16 h-16 md:w-24 md:h-24 bg-zinc-950 rounded-2xl md:rounded-[2rem] p-3 md:p-5 border border-white/5 shadow-2xl group-hover:scale-110 transition-all duration-500">
-                          <img src={getTeamLogo(state.userTeamId)} className="w-full h-full object-contain" />
+                    <div className="bg-gradient-to-br from-zinc-900 to-black border border-white/5 rounded-2xl md:rounded-[3rem] p-4 md:p-10 flex flex-col md:flex-row items-center justify-between gap-5 md:gap-12 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
+                      <div className="space-y-2 md:space-y-6 relative z-10 text-center md:text-left w-full md:w-auto">
+                        <div className="space-y-0.5 md:space-y-1">
+                          <p className="text-[7px] md:text-[10px] font-black text-amber-500 uppercase tracking-[0.4em]">Next Appointment</p>
+                          <h3 className="text-xl md:text-5xl font-black italic uppercase tracking-tighter text-white leading-none">Gameday</h3>
                         </div>
-                        <p className="text-[10px] md:text-xs font-black text-white italic whitespace-nowrap">{state.teams[state.userTeamId].abbreviation}</p>
-                     </div>
-                     <div className="text-xl md:text-3xl font-black italic text-zinc-800">VS</div>
-                     <div className="text-center space-y-2 md:space-y-3">
-                        <div className="w-16 h-16 md:w-24 md:h-24 bg-zinc-950 rounded-2xl md:rounded-[2rem] p-3 md:p-5 border border-white/5 shadow-2xl group-hover:scale-110 transition-all duration-500">
-                          <img src={getTeamLogo(nextUserGame.homeTeamId === state.userTeamId ? nextUserGame.awayTeamId : nextUserGame.homeTeamId)} className="w-full h-full object-contain" />
+                        <div className="flex items-center gap-2 md:gap-4 justify-center md:justify-start">
+                          <div className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/5 text-[7px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                            Match {nextUserGame.gameNumber}
+                          </div>
+                          <div className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/5 text-[7px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                            {nextUserGame.homeTeamId === state.userTeamId ? 'Home' : 'Away'}
+                          </div>
                         </div>
-                        <p className="text-[10px] md:text-xs font-black text-white italic whitespace-nowrap">{state.teams[nextUserGame.homeTeamId === state.userTeamId ? nextUserGame.awayTeamId : nextUserGame.homeTeamId].abbreviation}</p>
-                     </div>
-                  </div>
-
-                  <button 
-                    onClick={simulateGame}
-                    className="relative z-10 w-full md:w-auto h-16 md:h-20 px-8 md:px-12 bg-white text-black rounded-2xl md:rounded-[2rem] font-black uppercase italic tracking-tighter text-lg md:text-xl hover:bg-amber-500 transition-all active:scale-95 shadow-2xl"
-                  >
-                    Play Match
-                  </button>
-                </div>
-              )}
+                      </div>
+    
+                      <div className="flex items-center gap-4 md:gap-12 relative z-10">
+                         <div className="text-center space-y-1.5 md:space-y-3">
+                            <div className="w-12 h-12 md:w-24 md:h-24 bg-zinc-950 rounded-xl md:rounded-[2rem] p-2 md:p-5 border border-white/5 shadow-2xl group-hover:scale-110 transition-all duration-500">
+                              <img src={getTeamLogo(state.userTeamId)} className="w-full h-full object-contain" />
+                            </div>
+                            <p className="text-[8px] md:text-xs font-black text-white italic whitespace-nowrap">{state.teams[state.userTeamId].abbreviation}</p>
+                         </div>
+                         <div className="text-sm md:text-3xl font-black italic text-zinc-800">VS</div>
+                         <div className="text-center space-y-1.5 md:space-y-3">
+                            <div className="w-12 h-12 md:w-24 md:h-24 bg-zinc-950 rounded-xl md:rounded-[2rem] p-2 md:p-5 border border-white/5 shadow-2xl group-hover:scale-110 transition-all duration-500">
+                              <img src={getTeamLogo(nextUserGame.homeTeamId === state.userTeamId ? nextUserGame.awayTeamId : nextUserGame.homeTeamId)} className="w-full h-full object-contain" />
+                            </div>
+                            <p className="text-[8px] md:text-xs font-black text-white italic whitespace-nowrap">{state.teams[nextUserGame.homeTeamId === state.userTeamId ? nextUserGame.awayTeamId : nextUserGame.homeTeamId].abbreviation}</p>
+                         </div>
+                      </div>
+    
+                      <button 
+                        onClick={simulateGame}
+                        className="relative z-10 w-full md:w-auto h-12 md:h-20 px-6 md:px-12 bg-white text-black rounded-xl md:rounded-[2rem] font-black uppercase italic tracking-tighter text-xs md:text-xl hover:bg-amber-500 transition-all active:scale-95 shadow-2xl"
+                      >
+                        Play Match
+                      </button>
+                    </div>
+                  )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div className="md:col-span-1 lg:col-span-2 space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-black uppercase italic tracking-tighter">Upcoming Schedule</h3>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg md:text-xl font-black uppercase italic tracking-tighter">Schedule</h3>
                   </div>
-                  <div className="space-y-3 md:space-y-4">
+                  <div className="space-y-2 md:space-y-4">
                     {state.schedule
                       .filter(m => (m.homeTeamId === state.userTeamId || m.awayTeamId === state.userTeamId) && !m.played)
                       .slice(0, 5)
@@ -1127,20 +1151,20 @@ const CareerView: React.FC = () => {
                         const opponent = NBA_TEAMS.find(t => t.id === opponentId);
                         
                         return (
-                          <div key={match.id} className="bg-zinc-900/50 border border-white/5 rounded-3xl p-4 md:p-6 flex items-center justify-between group hover:bg-zinc-900 transition-all">
+                          <div key={match.id} className="bg-zinc-900/50 border border-white/5 rounded-2xl p-3 md:p-6 flex items-center justify-between group hover:bg-zinc-900 transition-all">
                             <div className="flex items-center gap-3 md:gap-6">
-                              <div className="text-center w-8 md:w-12">
-                                <p className="text-[8px] font-black text-zinc-600 uppercase">WK</p>
-                                <p className="text-sm md:text-lg font-black text-white italic">{match.gameNumber}</p>
+                              <div className="text-center w-6 md:w-12">
+                                <p className="text-[6px] md:text-[8px] font-black text-zinc-600 uppercase">WK</p>
+                                <p className="text-xs md:text-lg font-black text-white italic leading-tight">{match.gameNumber}</p>
                               </div>
-                              <div className="w-px h-8 bg-zinc-800" />
-                              <div className="flex items-center gap-3 md:gap-4">
-                                <div className="w-10 h-10 md:w-12 md:h-12 bg-zinc-900 rounded-2xl p-2 border border-white/10">
+                              <div className="w-px h-6 md:h-8 bg-zinc-800" />
+                              <div className="flex items-center gap-2.5 md:gap-4">
+                                <div className="w-8 h-8 md:w-12 md:h-12 bg-zinc-900 rounded-xl p-1.5 border border-white/10">
                                   <img src={getTeamLogo(opponentId)} className="w-full h-full object-contain" />
                                 </div>
-                                <div className="max-w-[120px] md:max-w-none">
-                                  <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">{isHome ? 'VS' : '@'} OPPONENT</p>
-                                  <p className="text-xs md:text-sm font-black text-white uppercase italic truncate">{opponent?.name || opponentId}</p>
+                                <div className="max-w-[100px] md:max-w-none">
+                                  <p className="text-[6px] md:text-[8px] font-black text-zinc-500 uppercase tracking-widest leading-none">{isHome ? 'VS' : '@'} OPPONENT</p>
+                                  <p className="text-[10px] md:text-sm font-black text-white uppercase italic truncate">{opponent?.name || opponentId}</p>
                                 </div>
                               </div>
                             </div>
@@ -1156,40 +1180,40 @@ const CareerView: React.FC = () => {
                 {/* SIDEBAR HUB */}
                 <div className="space-y-8">
                    {/* News/Notifications Feed */}
-                   {(state.notifications || []).length > 0 && (
-                     <div className="bg-zinc-900 rounded-[2.5rem] p-8 border border-white/5 space-y-6">
-                        <div className="flex items-center justify-between">
-                           <h3 className="text-xs font-black uppercase tracking-[0.4em] text-zinc-600 italic">League News</h3>
-                           <button onClick={() => { state.notifications = []; setState({...state}); }} className="text-[8px] font-bold text-zinc-700 hover:text-zinc-500 uppercase tracking-widest">Clear All</button>
-                        </div>
-                        <div className="space-y-4 max-h-[300px] overflow-y-auto no-scrollbar pr-2">
-                           {(state.notifications || []).slice(0, 5).map((n) => (
-                              <div key={n.id} className="bg-black/40 p-4 rounded-2xl border border-white/5 space-y-2 relative group">
-                                 {!n.read && <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-amber-500 rounded-full" />}
-                                 <div className="flex items-center gap-2">
-                                    <span className="text-[7px] font-black bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded uppercase">{n.type}</span>
-                                    <span className="text-[7px] font-bold text-zinc-600 uppercase">Week {n.week}</span>
+                    {(state.notifications || []).length > 0 && (
+                      <div className="bg-zinc-900 rounded-[1.5rem] md:rounded-[2.5rem] p-5 md:p-8 border border-white/5 space-y-4 md:space-y-6">
+                         <div className="flex items-center justify-between">
+                            <h3 className="text-[9px] md:text-xs font-black uppercase tracking-[0.4em] text-zinc-600 italic">League News</h3>
+                            <button onClick={() => { state.notifications = []; setState({...state}); }} className="text-[7px] md:text-[8px] font-bold text-zinc-700 hover:text-zinc-500 uppercase tracking-widest">Clear All</button>
+                         </div>
+                         <div className="space-y-2 md:space-y-4 max-h-[250px] md:max-h-[300px] overflow-y-auto no-scrollbar pr-1 md:pr-2">
+                            {(state.notifications || []).slice(0, 5).map((n) => (
+                               <div key={n.id} className="bg-black/40 p-3 md:p-4 rounded-xl md:rounded-2xl border border-white/5 space-y-1.5 md:space-y-2 relative group">
+                                  {!n.read && <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)]" />}
+                                  <div className="flex items-center gap-2">
+                                     <span className="text-[6px] md:text-[7px] font-black bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded uppercase tracking-tighter">{n.type}</span>
+                                     <span className="text-[6px] md:text-[7px] font-bold text-zinc-600 uppercase">Week {n.week}</span>
+                                  </div>
+                                  <p className="text-[8px] md:text-[10px] font-medium text-zinc-400 leading-tight md:leading-relaxed">{n.message}</p>
+                               </div>
+                            ))}
+                         </div>
+                      </div>
+                    )}
+
+                    <div className="bg-zinc-900 rounded-[1.5rem] md:rounded-[2.5rem] p-5 md:p-8 border border-white/5 space-y-4 md:space-y-6">
+                       <h3 className="text-[9px] md:text-xs font-black uppercase tracking-[0.4em] text-zinc-600 italic text-center">Leaders</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:gap-3">
+                           {leagueLeaders.map((leader: any) => (
+                              <div key={leader.cat} className="flex items-center justify-between bg-black/40 p-3 md:p-4 rounded-xl md:rounded-2xl border border-white/5">
+                                 <div>
+                                   <p className="text-[7px] md:text-[8px] font-black text-zinc-600 uppercase tracking-widest">{leader.cat}</p>
+                                   <p className="text-[10px] md:text-xs font-black text-white italic uppercase truncate max-w-[80px] md:max-w-[100px]">{leader.card?.name.split(' ').pop() || 'N/A'}</p>
                                  </div>
-                                 <p className="text-[10px] font-medium text-zinc-300 leading-relaxed">{n.message}</p>
+                                 <p className="text-sm md:text-lg font-black text-amber-500 italic tabular-nums">{leader.value.toFixed(1)}</p>
                               </div>
                            ))}
                         </div>
-                     </div>
-                   )}
-
-                   <div className="bg-zinc-900 rounded-[2.5rem] p-8 border border-white/5 space-y-6">
-                      <h3 className="text-xs font-black uppercase tracking-[0.4em] text-zinc-600 italic text-center">League Leaders</h3>
-                       <div className="grid grid-cols-2 md:grid-cols-1 gap-3">
-                          {leagueLeaders.map((leader: any) => (
-                             <div key={leader.cat} className="flex items-center justify-between bg-black/40 p-4 rounded-2xl border border-white/5">
-                                <div>
-                                  <p className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">{leader.cat}</p>
-                                  <p className="text-xs font-black text-white italic uppercase truncate max-w-[100px]">{leader.card?.name.split(' ').pop() || 'N/A'}</p>
-                                </div>
-                                <p className="text-lg font-black text-amber-500 italic">{leader.value.toFixed(1)}</p>
-                             </div>
-                          ))}
-                       </div>
                       <button 
                         onClick={() => setActiveTab('hub')} // Or just stay here
                         className="w-full py-4 text-[9px] font-black uppercase tracking-widest text-zinc-600 hover:text-white transition-colors"
@@ -1205,53 +1229,49 @@ const CareerView: React.FC = () => {
             )}
           </motion.div>
         )}
-
-          {activeTab === 'market' && (
+                   {activeTab === 'market' && (
             <motion.div 
               key="market"
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-              className="max-w-7xl mx-auto space-y-12 pb-20"
+              className="max-w-7xl mx-auto space-y-6 md:space-y-12 pb-20 px-3"
             >
-              <div className="flex items-center justify-between">
-                 <div className="space-y-1">
-                   <h2 className="text-4xl font-black uppercase italic tracking-tighter">Free Agency</h2>
-                   <p className="text-zinc-500 text-sm font-medium">Browse available cards to strengthen your roster.</p>
-                 </div>
-                 <div className="bg-zinc-900 border border-white/5 px-6 py-4 rounded-2xl flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="text-[8px] font-black text-zinc-500 uppercase">Available Pool</p>
-                      <p className="text-sm font-black text-white italic">{state.freeAgentPool.length} PLAYERS</p>
-                    </div>
-                 </div>
-              </div>
+                  <div className="bg-zinc-900 border border-white/5 p-4 rounded-xl flex items-center justify-between mb-4">
+                     <div className="text-left">
+                        <p className="text-[6px] font-black text-zinc-500 uppercase">Season</p>
+                        <p className="text-[9px] font-black text-white italic">{state.season}</p>
+                     </div>
+                     <div className="text-right">
+                        <p className="text-[6px] font-black text-zinc-500 uppercase">Pool Size</p>
+                        <p className="text-[9px] font-black text-white italic">{state.freeAgentPool.length}</p>
+                     </div>
+                  </div>
 
               {state.season === 2025 ? (
-                <div className="bg-zinc-900 border border-white/5 rounded-[3rem] p-12 text-center space-y-8 relative overflow-hidden">
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 bg-amber-500/10 blur-[80px] rounded-full" />
-                  <div className="relative z-10 space-y-6">
-                    <div className="w-20 h-20 bg-amber-500/10 border border-amber-500/20 rounded-3xl flex items-center justify-center text-amber-500 mx-auto">
-                       <AlertTriangle size={40} />
+                <div className="bg-zinc-900 border border-white/5 rounded-2xl md:rounded-[3rem] p-6 md:p-12 text-center space-y-4 md:space-y-8 relative overflow-hidden">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 bg-amber-500/5 blur-[80px] rounded-full" />
+                  <div className="relative z-10 space-y-4 md:space-y-6">
+                    <div className="w-12 h-12 md:w-20 md:h-20 bg-amber-500/5 border border-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 mx-auto">
+                       <AlertTriangle size={24} className="md:w-10 md:h-10" />
                     </div>
-                    <div className="space-y-3">
-                      <h3 className="text-3xl font-black uppercase italic tracking-tighter">Market Locked</h3>
-                      <p className="text-zinc-500 text-sm max-w-md mx-auto leading-relaxed font-medium">
-                        The free agent market opens after finishing your first season. 
-                        Complete all 82 games to unlock the Draft and Free Agency.
+                    <div className="space-y-2">
+                      <h3 className="text-lg md:text-3xl font-black uppercase italic tracking-tighter">Locked</h3>
+                      <p className="text-zinc-600 text-[8px] md:text-sm max-w-[200px] md:max-w-md mx-auto leading-tight font-black uppercase tracking-tighter">
+                        Complete first season to unlock
                       </p>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-6">
                   {state.freeAgentPool.slice(0, 30).map((id) => {
                     const card = findCard(id);
                     if (!card) return null;
                     return (
-                      <motion.div key={id} className="space-y-4">
+                      <motion.div key={id} className="space-y-2">
                         <CardItem card={card} isOwned={true} mode="mini" />
                         <button 
                           onClick={() => handleSignPlayer(id)}
-                          className="w-full py-3 bg-white/5 border border-white/5 rounded-xl text-[8px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all"
+                          className="w-full py-2.5 bg-white/5 border border-white/5 rounded-lg text-[7px] md:text-[8px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all"
                         >
                           Sign Player
                         </button>
@@ -1262,17 +1282,16 @@ const CareerView: React.FC = () => {
               )}
             </motion.div>
           )}
-
-          {activeTab === 'trades' && (
+            {activeTab === 'trades' && (
              <motion.div 
               key="trades"
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-              className="max-w-6xl mx-auto space-y-6 pb-24"
+              className="max-w-6xl mx-auto space-y-4 md:space-y-6 pb-24 px-3"
             >
                <div className="flex items-center justify-between mb-2">
-                  <div className="space-y-1">
-                    <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">Trade Negotiations</h3>
-                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Select players to swap</p>
+                  <div className="space-y-0.5">
+                    <h3 className="text-lg md:text-xl font-black uppercase italic tracking-tighter text-white">Negotiate</h3>
+                    <p className="text-[7px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest">Select Swap Targets</p>
                   </div>
                   <select 
                     value={tradeTargetTeamId || ""}
@@ -1280,7 +1299,7 @@ const CareerView: React.FC = () => {
                       setTradeTargetTeamId(e.target.value);
                       setCpuRequestedIds([]);
                     }}
-                    className="bg-zinc-900 text-[11px] font-black uppercase tracking-widest text-white border border-white/10 px-4 py-2 rounded-xl outline-none"
+                    className="bg-zinc-900 text-[9px] md:text-[11px] font-black uppercase tracking-widest text-white border border-white/10 px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl outline-none"
                   >
                     <option value="">Select Team</option>
                     {NBA_TEAMS.filter(t => t.id !== state.userTeamId).map(t => (
@@ -1289,9 +1308,9 @@ const CareerView: React.FC = () => {
                   </select>
                </div>
 
-               <div className="grid grid-cols-2 gap-4">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-8">
                   {/* USER SIDE */}
-                  <div className="bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden flex flex-col h-[500px]">
+                  <div className="bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden flex flex-col h-[400px] md:h-[500px]">
                      <div className="p-3 border-b border-white/5 bg-white/2 flex items-center justify-between">
                         <span className="text-[10px] font-black text-white italic">YOUR ASSETS</span>
                         <span className="text-[9px] font-bold text-zinc-500 uppercase">{userOfferedIds.length + userOfferedPickIds.length} Selected</span>
@@ -1332,7 +1351,7 @@ const CareerView: React.FC = () => {
                   </div>
 
                   {/* RIVAL SIDE */}
-                  <div className="bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden flex flex-col h-[500px]">
+                  <div className="bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden flex flex-col h-[400px] md:h-[500px]">
                      <div className="p-3 border-b border-white/5 bg-white/2 flex items-center justify-between">
                         <span className="text-[10px] font-black text-white italic">RIVAL ASSETS</span>
                         <span className="text-[9px] font-bold text-zinc-500 uppercase">{cpuRequestedIds.length + cpuRequestedPickIds.length} Selected</span>
@@ -1490,7 +1509,7 @@ const CareerView: React.FC = () => {
                     <h3 className="text-[12px] font-black uppercase italic text-white tracking-widest">Roster Contracts & Negotiations</h3>
                   </div>
                   {userTeam.roster.map(id => {
-                     const card = ALL_CARDS.find(c => c.id === id);
+                     const card = findCard(id);
                      const contract = userTeam.contracts[id];
                      if (!card || !contract) return null;
                      const isExpiring = contract.yearsRemaining === 1;
@@ -1598,31 +1617,29 @@ const CareerView: React.FC = () => {
                </div>
             </motion.div>
           )}
-
-
-          {activeTab === 'league' && (
+                    {activeTab === 'league' && (
              <motion.div 
               key="league"
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-              className="max-w-4xl mx-auto space-y-12"
+              className="max-w-4xl mx-auto space-y-6 md:space-y-12 px-3 pb-20"
             >
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                   {/* CONFERENCE STANDINGS */}
                   {['East', 'West'].map(conf => (
-                    <div key={conf} className="space-y-4">
-                       <h3 className="text-sm font-black uppercase italic text-white flex items-center justify-between">
-                         <span>{conf}ern Conference</span>
-                         <span className="text-[10px] text-zinc-500">Regular Season</span>
+                    <div key={conf} className="space-y-2 md:space-y-4">
+                       <h3 className="text-[9px] md:text-sm font-black uppercase italic text-zinc-500 flex items-center justify-between px-1">
+                         <span className="text-white">{conf}ern</span>
+                         <span className="text-[7px] md:text-[10px] tracking-widest">Regular Season</span>
                        </h3>
-                        <div className="bg-zinc-900 border border-white/5 rounded-2xl overflow-x-auto no-scrollbar touch-pan-x">
-                            <table className="w-full text-left border-collapse min-w-[320px]">
-                               <thead className="bg-white/5 border-b border-white/5 font-mono">
-                                  <tr className="text-[10px] font-black text-zinc-500 uppercase">
-                                     <th className="px-4 py-3 sticky left-0 bg-zinc-900 z-10 border-r border-white/5 shadow-[2px_0_10px_rgba(0,0,0,0.5)]">TEAM</th>
-                                     <th className="px-2 py-3 text-center">W</th>
-                                     <th className="px-2 py-3 text-center">L</th>
-                                     <th className="px-2 py-3 text-center">PCT</th>
-                                     <th className="px-3 py-3 text-center">GB</th>
+                        <div className="bg-zinc-900 border border-white/5 rounded-xl md:rounded-2xl overflow-x-auto no-scrollbar touch-pan-x">
+                            <table className="w-full text-left border-collapse min-w-[300px] md:min-w-[320px]">
+                               <thead className="bg-white/5 border-b border-white/5">
+                                  <tr className="text-[7px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest">
+                                     <th className="px-3 md:px-4 py-2 md:py-3 sticky left-0 bg-zinc-900 z-10 border-r border-white/5">TEAM</th>
+                                     <th className="px-1 md:px-2 py-2 md:py-3 text-center">W</th>
+                                     <th className="px-1 md:px-2 py-2 md:py-3 text-center">L</th>
+                                     <th className="px-1 md:px-2 py-2 md:py-3 text-center">PCT</th>
+                                     <th className="px-2 md:px-3 py-2 md:py-3 text-center">GB</th>
                                   </tr>
                                </thead>
                                <tbody>
@@ -1633,19 +1650,19 @@ const CareerView: React.FC = () => {
                                        const topWins = (Object.values(state.teams) as TeamObject[]).filter(t => t.conference === conf).sort((a,b)=>b.wins-a.wins)[0].wins;
                                        const gb = i === 0 ? '-' : (topWins - team.wins);
                                        return (
-                                         <tr key={team.teamId} className={`h-[40px] border-b border-white/5 hover:bg-white/5 transition-colors ${team.isHuman ? 'bg-amber-500/5 text-amber-500 font-black italic' : ''}`}>
-                                            <td className="px-4 py-1 sticky left-0 bg-zinc-900 z-10 border-r border-white/5 shadow-[2px_0_10px_rgba(0,0,0,0.3)]">
-                                               <div className="flex items-center gap-3">
-                                                  <span className="text-[10px] font-bold text-zinc-600 w-3">{i+1}</span>
-                                                  <img src={getTeamLogo(team.teamId)} className="w-5 h-5 object-contain" />
-                                                  <span className="text-[12px] font-bold uppercase italic truncate max-w-[80px]">{team.abbreviation}</span>
+                                         <tr key={team.teamId} className={`h-[32px] md:h-[40px] border-b border-white/5 hover:bg-white/10 transition-colors ${team.isHuman ? 'bg-amber-500/5 text-amber-500' : ''}`}>
+                                            <td className="px-3 md:px-4 py-0.5 sticky left-0 bg-zinc-900 z-10 border-r border-white/5">
+                                               <div className="flex items-center gap-2 md:gap-3">
+                                                  <span className="text-[8px] font-black text-zinc-700 w-3 leading-none">{i+1}</span>
+                                                  <img src={getTeamLogo(team.teamId)} className="w-4 h-4 md:w-5 md:h-5 object-contain" />
+                                                  <span className="text-[9px] md:text-[12px] font-black uppercase italic truncate max-w-[60px] md:max-w-[80px] leading-none">{team.abbreviation}</span>
                                                </div>
                                             </td>
-                                            <td className="px-2 py-1 text-center text-[12px] font-black">{team.wins}</td>
-                                            <td className="px-2 py-1 text-center text-[12px] font-bold opacity-60">{team.losses}</td>
-                                            <td className="px-2 py-1 text-center text-[11px] font-mono opacity-50">.{(team.wins / Math.max(1, (team.wins+team.losses)) * 1000).toFixed(0).padStart(3, '0')}</td>
-                                            <td className="px-3 py-1 text-center text-[11px] font-bold opacity-30">{gb}</td>
-                                         </tr>
+                                            <td className="px-1 md:px-2 py-0.5 text-center text-[9px] md:text-[12px] font-black tabular-nums">{team.wins}</td>
+                                            <td className="px-1 md:px-2 py-0.5 text-center text-[9px] md:text-[12px] font-black tabular-nums opacity-40">{team.losses}</td>
+                                            <td className="px-1 md:px-2 py-0.5 text-center text-[8px] md:text-[11px] font-mono opacity-30 tabular-nums">.{(team.wins / Math.max(1, (team.wins+team.losses)) * 1000).toFixed(0).padStart(3, '0')}</td>
+                                            <td className="px-2 md:px-3 py-0.5 text-center text-[8px] md:text-[11px] font-black opacity-20 tabular-nums">{gb}</td>
+                                          </tr>
                                        );
                                     })}
                                </tbody>
@@ -1669,32 +1686,26 @@ const CareerView: React.FC = () => {
 
 
 
-
-
-
-
-
-
-          {activeTab === 'lineup' && (
+           {activeTab === 'lineup' && (
             <motion.div 
               key="lineup"
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-              className="max-w-6xl mx-auto space-y-12 pb-20 px-4"
+              className="max-w-6xl mx-auto space-y-8 md:space-y-12 pb-20 px-3 md:px-4"
             >
                {/* STARTING 5 GRID */}
-               <div className="space-y-6">
+               <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                     <h3 className="text-2xl font-black uppercase italic text-white tracking-tighter">Starting Lineup</h3>
-                     <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest border border-white/10 px-3 py-1 rounded-full bg-white/5">Tap slot to change</span>
+                     <h3 className="text-lg md:text-2xl font-black uppercase italic text-white tracking-tighter leading-none">Starting 5</h3>
+                     <span className="text-[7px] md:text-[10px] font-bold text-zinc-500 uppercase tracking-widest border border-white/10 px-2 py-0.5 rounded-full bg-white/5">Tap to Edit</span>
                   </div>
                   
-                  <div className="grid grid-cols-5 gap-2 md:gap-4">
+                  <div className="grid grid-cols-5 gap-1.5 md:gap-4">
                      {(['PG', 'SG', 'SF', 'PF', 'C'] as const).map(pos => {
                         const card = findCard(userTeam.lineup[pos]);
                         return (
-                           <div key={pos} className="space-y-4">
+                           <div key={pos} className="space-y-2 md:space-y-4">
                               <div className="text-center">
-                                 <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest bg-zinc-900 px-3 py-1 rounded-md border border-white/5">{pos}</span>
+                                 <span className="text-[7px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest bg-zinc-900 px-2 py-0.5 md:px-3 md:py-1 rounded-md border border-white/5">{pos}</span>
                               </div>
                               <div 
                                  onClick={() => setLineupModalPos(pos)}
@@ -1705,9 +1716,9 @@ const CareerView: React.FC = () => {
                                       <CardItem card={card} isOwned={true} mode="mini" />
                                     </div>
                                  ) : (
-                                    <div className="w-full h-full border-2 border-dashed border-white/5 bg-white/5 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all group-hover:bg-white/10 group-hover:border-white/10 aspect-[2.5/3.5]">
-                                       <Plus className="text-zinc-700" size={32} />
-                                       <span className="text-[10px] font-black text-zinc-700 uppercase italic text-center">Empty<br/>{pos}</span>
+                                    <div className="w-full h-full border border-dashed border-white/10 bg-white/5 rounded-xl md:rounded-2xl flex flex-col items-center justify-center gap-1.5 md:gap-3 transition-all group-hover:bg-white/10 group-hover:border-white/20 aspect-[2.5/3.5]">
+                                       <Plus className="text-zinc-700" size={16} />
+                                       <span className="text-[7px] md:text-[10px] font-black text-zinc-800 uppercase italic text-center">Empty</span>
                                     </div>
                                  )}
                               </div>
@@ -1718,25 +1729,25 @@ const CareerView: React.FC = () => {
                </div>
 
                {/* BENCH HORIZONTAL */}
-               <div className="space-y-6">
+               <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                     <h3 className="text-2xl font-black uppercase italic text-white tracking-tighter">Bench</h3>
+                     <h3 className="text-lg md:text-2xl font-black uppercase italic text-white tracking-tighter leading-none">Bench</h3>
                      <button 
                         onClick={() => setLineupModalPos('bench')}
-                        className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-xl text-[10px] font-black text-zinc-400 uppercase tracking-widest transition-all"
+                        className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-lg md:rounded-xl text-[7px] md:text-[10px] font-black text-zinc-400 uppercase tracking-widest transition-all"
                      >
-                        <Plus size={14} /> Add to Bench
+                        <Plus size={10} /> Add
                      </button>
                   </div>
                   
-                  <div className="flex gap-4 overflow-x-auto pb-6 no-scrollbar -mx-4 px-4">
+                  <div className="flex gap-2 md:gap-4 overflow-x-auto pb-4 no-scrollbar -mx-3 px-3">
                      {userTeam.lineup.bench.map((id, index) => {
                         const card = findCard(id);
                         if (!card) return null;
                         return (
                            <div 
                               key={id} 
-                              className="w-[140px] shrink-0 transition-transform hover:scale-105 cursor-pointer"
+                              className="w-[100px] md:w-[140px] shrink-0 transition-transform hover:scale-105 cursor-pointer"
                               onClick={() => {
                                  if (confirm(`Remove ${card.name} from bench?`)) {
                                     userTeam.lineup.bench = userTeam.lineup.bench.filter(bid => bid !== id);
@@ -1749,9 +1760,9 @@ const CareerView: React.FC = () => {
                         );
                      })}
                      {userTeam.lineup.bench.length === 0 && (
-                        <div className="w-full py-12 flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-3xl opacity-50">
-                           <Users className="text-zinc-700 mb-2" size={32} />
-                           <p className="text-xs font-black text-zinc-700 uppercase italic">No players on bench</p>
+                        <div className="w-full py-8 flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl opacity-40">
+                           <Users className="text-zinc-700 mb-1" size={24} />
+                           <p className="text-[8px] font-black text-zinc-800 uppercase italic">Bench Empty</p>
                         </div>
                      )}
                   </div>
@@ -1768,26 +1779,26 @@ const CareerView: React.FC = () => {
                     />
                     <motion.div 
                       initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
-                      className="relative w-full max-w-6xl bg-zinc-900 border border-white/10 rounded-[3rem] p-8 md:p-12 space-y-12 max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
+                      className="relative w-full max-w-6xl bg-zinc-900 border border-white/10 rounded-2xl md:rounded-[3rem] p-5 md:p-12 space-y-6 md:space-y-12 max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
                     >
                       <div className="flex items-center justify-between shrink-0">
-                        <div className="space-y-2">
-                          <h3 className="text-5xl font-black uppercase italic tracking-tighter leading-none">Select Player</h3>
-                          <p className="text-amber-500 text-sm font-black uppercase tracking-widest italic flex items-center gap-2">
-                             <Sparkles size={16} /> Assigning to {lineupModalPos}
+                        <div className="space-y-1 md:space-y-2">
+                          <h3 className="text-xl md:text-5xl font-black uppercase italic tracking-tighter leading-none">Select Player</h3>
+                          <p className="text-amber-500 text-[8px] md:text-sm font-black uppercase tracking-widest italic flex items-center gap-1.5 md:gap-2">
+                             <Sparkles size={10} className="md:w-4 md:h-4" /> Assigning to {lineupModalPos}
                           </p>
                         </div>
-                        <button onClick={() => setLineupModalPos(null)} className="p-4 bg-white/5 rounded-full hover:bg-white/10 transition-colors">
-                          <Plus size={32} className="rotate-45" />
+                        <button onClick={() => setLineupModalPos(null)} className="p-2 md:p-4 bg-white/5 rounded-full hover:bg-white/10 transition-colors">
+                          <Plus size={20} className="md:w-8 md:h-8 rotate-45" />
                         </button>
                       </div>
 
-                      <div className="flex-1 overflow-y-auto pr-4">
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                      <div className="flex-1 overflow-y-auto pr-2 md:pr-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6">
                            {userTeam.roster.map(id => {
                               const card = findCard(id);
                               if (!card) return null;
-                                                       const isPositionMatch = lineupModalPos !== 'bench' && card.position.includes(lineupModalPos.charAt(0));
+                              const isPositionMatch = lineupModalPos !== 'bench' && card.position.includes(lineupModalPos.charAt(0));
                               // FIXED: Only assigned if strictly in the current slot OR on bench (if editing bench)
                               const isAssigned = lineupModalPos !== 'bench' 
                                 ? (userTeam.lineup[lineupModalPos as keyof TeamObject['lineup']] === id)
@@ -1808,21 +1819,21 @@ const CareerView: React.FC = () => {
                                        setLineupModalPos(null);
                                     }}
                                  >
-                                    <div className={`h-full transition-all duration-300 ${isAssigned ? 'opacity-40 grayscale blur-[2px]' : 'group-hover:drop-shadow-[0_0_15px_rgba(245,158,11,0.3)]'}`}>
+                                    <div className={`h-full transition-all duration-300 ${isAssigned ? 'opacity-20 grayscale border border-white/5 rounded-xl' : 'group-hover:drop-shadow-[0_0_15px_rgba(245,158,11,0.2)]'}`}>
                                        <CardItem card={card} isOwned={true} mode="mini" />
                                     </div>
                                     
                                     {isAssigned && (
-                                       <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
-                                          <div className="bg-black/80 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-xl text-center">
-                                             <p className="text-[10px] font-black text-white uppercase italic">Active in Slot</p>
+                                       <div className="absolute inset-0 z-50 flex items-center justify-center p-2">
+                                          <div className="bg-black/60 backdrop-blur-sm border border-white/5 px-2 py-1 rounded-lg text-center">
+                                             <p className="text-[6px] md:text-[10px] font-black text-white uppercase italic">Active</p>
                                           </div>
                                        </div>
                                     )}
 
                                     {!isAssigned && isPositionMatch && (
-                                       <div className="absolute -top-2 -right-2 z-[60] bg-green-500 text-white text-[8px] font-black px-2 py-1 rounded-md shadow-lg border border-white/20">
-                                          IDEAL
+                                       <div className="absolute -top-1.5 -right-1.5 z-[60] bg-green-500 text-white text-[6px] md:text-[8px] font-black px-1.5 py-0.5 rounded shadow-lg border border-white/10">
+                                          FIT
                                        </div>
                                     )}
                                  </motion.div>
@@ -1841,10 +1852,10 @@ const CareerView: React.FC = () => {
             <motion.div 
               key="stats"
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-              className="max-w-7xl mx-auto space-y-8"
+              className="max-w-7xl mx-auto space-y-6 px-3"
             >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <h2 className="text-4xl font-black uppercase italic tracking-tighter">Statistics</h2>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <h2 className="text-xl md:text-4xl font-black uppercase italic tracking-tighter">Stats</h2>
                 <div className="flex bg-zinc-900 border border-white/5 rounded-2xl p-1 shrink-0">
                    {(['League', 'Highs', 'Team'] as const).map(sub => (
                      <button 
@@ -1871,63 +1882,63 @@ const CareerView: React.FC = () => {
                       </button>
                     ))}
                   </div>
-                  <div className="bg-zinc-900 border border-white/5 rounded-3xl overflow-hidden">
-                    <div className="overflow-x-auto max-h-[600px] overflow-y-auto custom-scrollbar">
-                      <table className="w-full text-left min-w-[600px]">
-                        <thead className="bg-white/5 border-b border-white/5 sticky top-0 z-10 backdrop-blur-md">
-                          <tr className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">
-                            <th className="px-8 py-6">Player</th>
-                            <th className="px-8 py-6">Team</th>
-                            <th className="px-8 py-6 text-center">GP</th>
-                            <th className={`px-8 py-6 text-center ${activeStatsCat === 'Points' ? 'text-amber-500' : ''}`}>PPG</th>
-                            <th className={`px-8 py-6 text-center ${activeStatsCat === 'Rebounds' ? 'text-amber-500' : ''}`}>RPG</th>
-                            <th className={`px-8 py-6 text-center ${activeStatsCat === 'Assists' ? 'text-amber-500' : ''}`}>APG</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {(Object.entries(state.stats?.seasonal || {}) as [string, any][])
-                            .sort(([, a], [, b]) => {
-                              const valA = activeStatsCat === 'Points' ? a.points : activeStatsCat === 'Rebounds' ? a.rebounds : a.assists;
-                              const valB = activeStatsCat === 'Points' ? b.points : activeStatsCat === 'Rebounds' ? b.rebounds : b.assists;
-                              return (valB / (b.gamesPlayed || 1)) - (valA / (a.gamesPlayed || 1));
-                            })
-                            .slice(0, 50)
-                            .map(([playerId, stats]) => {
-                              const card = findCard(playerId);
-                              const team = (Object.values(state.teams) as TeamObject[]).find(t => t.roster.includes(playerId));
-                              if (!card) return null;
-                              return (
-                                <tr key={playerId} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                  <td className="px-8 py-4">
-                                    <div className="flex items-center gap-4">
-                                      <div className="w-10 h-10 bg-zinc-800 rounded-xl overflow-hidden p-1">
-                                        <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-full h-full object-contain" />
-                                      </div>
-                                      <div>
-                                        <p className="text-xs font-black text-white italic uppercase">{card.name}</p>
-                                        <p className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">{card.position}</p>
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-8 py-4">
-                                    {team && (
-                                      <div className="flex items-center gap-2">
-                                        <img src={getTeamLogo(team.teamId)} className="w-5 h-5 object-contain" />
-                                        <span className="text-[10px] font-bold text-zinc-400 uppercase">{team.abbreviation}</span>
-                                      </div>
-                                    )}
-                                  </td>
-                                  <td className="px-8 py-4 text-center text-xs font-black text-zinc-400">{stats.gamesPlayed}</td>
-                                  <td className={`px-8 py-4 text-center text-sm font-black italic ${activeStatsCat === 'Points' ? 'text-white' : 'text-zinc-400'}`}>{(stats.points / (stats.gamesPlayed || 1)).toFixed(1)}</td>
-                                  <td className={`px-8 py-4 text-center text-sm font-black italic ${activeStatsCat === 'Rebounds' ? 'text-white' : 'text-zinc-400'}`}>{(stats.rebounds / (stats.gamesPlayed || 1)).toFixed(1)}</td>
-                                  <td className={`px-8 py-4 text-center text-sm font-black italic ${activeStatsCat === 'Assists' ? 'text-white' : 'text-zinc-400'}`}>{(stats.assists / (stats.gamesPlayed || 1)).toFixed(1)}</td>
-                                </tr>
-                              );
-                            })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+              <div className="bg-zinc-900 border border-white/5 rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl">
+                <div className="overflow-x-auto max-h-[500px] md:max-h-[600px] overflow-y-auto no-scrollbar md:custom-scrollbar">
+                  <table className="w-full text-left min-w-[320px] md:min-w-[600px]">
+                    <thead className="bg-white/5 border-b border-white/5 sticky top-0 z-10 backdrop-blur-md">
+                      <tr className="text-[7px] md:text-[8px] font-black text-zinc-500 uppercase tracking-widest">
+                        <th className="px-3 md:px-8 py-3 md:py-6">Player</th>
+                        <th className="px-3 md:px-8 py-3 md:py-6 hidden md:table-cell">Team</th>
+                        <th className="px-3 md:px-8 py-3 md:py-6 text-center tabular-nums">GP</th>
+                        <th className={`px-3 md:px-8 py-3 md:py-6 text-center tabular-nums ${activeStatsCat === 'Points' ? 'text-amber-500' : ''}`}>PPG</th>
+                        <th className={`px-2 md:px-8 py-3 md:py-6 text-center tabular-nums ${activeStatsCat === 'Rebounds' ? 'text-amber-500' : ''}`}>RPG</th>
+                        <th className={`px-2 md:px-8 py-3 md:py-6 text-center tabular-nums ${activeStatsCat === 'Assists' ? 'text-amber-500' : ''}`}>APG</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {(Object.entries(state.stats?.seasonal || {}) as [string, any][])
+                        .sort(([, a], [, b]) => {
+                          const valA = activeStatsCat === 'Points' ? a.points : activeStatsCat === 'Rebounds' ? a.rebounds : a.assists;
+                          const valB = activeStatsCat === 'Points' ? b.points : activeStatsCat === 'Rebounds' ? b.rebounds : b.assists;
+                          return (valB / (b.gamesPlayed || 1)) - (valA / (a.gamesPlayed || 1));
+                        })
+                        .slice(0, 50)
+                        .map(([playerId, stats]) => {
+                          const card = findCard(playerId);
+                          const team = (Object.values(state.teams) as TeamObject[]).find(t => t.roster.includes(playerId));
+                          if (!card) return null;
+                          return (
+                            <tr key={playerId} className="hover:bg-white/5 transition-colors group">
+                              <td className="px-3 md:px-8 py-2 md:py-4">
+                                <div className="flex items-center gap-2 md:gap-4">
+                                  <div className="w-7 h-7 md:w-10 md:h-10 bg-zinc-800 rounded-lg md:rounded-xl overflow-hidden p-0.5 md:p-1 border border-white/5">
+                                    <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-full h-full object-contain" />
+                                  </div>
+                                  <div className="max-w-[70px] md:max-w-none">
+                                    <p className="text-[9px] md:text-xs font-black text-white italic uppercase truncate leading-tight">{card.name.split(' ').pop()}</p>
+                                    <p className="text-[6px] md:text-[8px] font-black text-zinc-600 uppercase tracking-widest">{card.position}</p>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-3 md:px-8 py-2 md:py-4 hidden md:table-cell">
+                                {team && (
+                                  <div className="flex items-center gap-2">
+                                    <img src={getTeamLogo(team.teamId)} className="w-5 h-5 object-contain" />
+                                    <span className="text-[10px] font-bold text-zinc-400 uppercase">{team.abbreviation}</span>
+                                  </div>
+                                )}
+                              </td>
+                              <td className="px-3 md:px-8 py-2 md:py-4 text-center text-[9px] md:text-xs font-black text-zinc-500 tabular-nums">{stats.gamesPlayed}</td>
+                              <td className={`px-3 md:px-8 py-2 md:py-4 text-center text-[10px] md:text-sm font-black italic tabular-nums ${activeStatsCat === 'Points' ? 'text-white' : 'text-zinc-500'}`}>{(stats.points / (stats.gamesPlayed || 1)).toFixed(1)}</td>
+                              <td className={`px-2 md:px-8 py-2 md:py-4 text-center text-[10px] md:text-sm font-black italic tabular-nums ${activeStatsCat === 'Rebounds' ? 'text-white' : 'text-zinc-500'}`}>{(stats.rebounds / (stats.gamesPlayed || 1)).toFixed(1)}</td>
+                              <td className={`px-2 md:px-8 py-2 md:py-4 text-center text-[10px] md:text-sm font-black italic tabular-nums ${activeStatsCat === 'Assists' ? 'text-white' : 'text-zinc-500'}`}>{(stats.assists / (stats.gamesPlayed || 1)).toFixed(1)}</td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
                 </div>
               )}
 
@@ -2509,7 +2520,7 @@ const CareerView: React.FC = () => {
                           </thead>
                           <tbody>
                             {(lastGameResult.result.boxScore[side as keyof typeof lastGameResult.result.boxScore] as any[]).map((p) => {
-                               const card = ALL_CARDS.find(c => c.id === p.playerId);
+                               const card = findCard(p.playerId);
                                // FG% mock or calculated if fields available (assuming pts/shots relationship or simple mock)
                                const fgp = card ? (40 + (card.stats.ovr / 5) + (Math.random() * 5)).toFixed(1) : "45.0";
                                return (
