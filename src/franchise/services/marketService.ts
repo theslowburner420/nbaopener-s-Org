@@ -42,9 +42,10 @@ export const marketService = {
     return { success: true, reason: 'Signed successfully' };
   },
 
-  draftPlayer(state: FranchiseState, player: any): { success: boolean; reason: string } {
-    const userTeam = state.teams[state.userTeamId];
-    if (userTeam.roster.length >= 15) return { success: false, reason: 'Roster is full' };
+  draftPlayer(state: FranchiseState, player: any, teamId?: string): { success: boolean; reason: string } {
+    const targetTeamId = teamId || state.userTeamId;
+    const team = state.teams[targetTeamId];
+    if (team.roster.length >= 15) return { success: false, reason: 'Roster is full' };
 
     // Process Draft: Player can be an ID or a full object
     const cardId = typeof player === 'string' ? player : player.id;
@@ -52,7 +53,7 @@ export const marketService = {
     
     if (!card) return { success: false, reason: 'Card not found' };
 
-    const salary = 5000000; // Fixed rookie salary $5M
+    const salary = 1500000; // Fixed rookie salary $1.5M as requested
 
     // If it's a new card object, add to customCards
     if (typeof player === 'object' && !state.customCards?.find(c => c.id === player.id)) {
@@ -60,15 +61,17 @@ export const marketService = {
       state.customCards.push(player);
     }
 
-    userTeam.roster.push(cardId);
-    userTeam.payroll += salary;
-    userTeam.contracts[cardId] = {
+    team.roster.push(cardId);
+    team.payroll += salary;
+    team.contracts[cardId] = {
       playerId: cardId,
       salary,
       yearsRemaining: 4,
       type: 'Rookie',
       noTradeClause: false,
-      injuryStatus: 'Healthy'
+      injuryStatus: 'Healthy',
+      canExtend: true,
+      canTrade: true
     };
 
     // Add to playerProgress
@@ -76,7 +79,8 @@ export const marketService = {
       state.playerProgress[cardId] = {
         age: 19,
         potential: Math.min(99, card.stats.ovr + Math.floor(Math.random() * 12)),
-        form: 1.0
+        form: 1.0,
+        ovr: card.stats.ovr
       };
     }
 

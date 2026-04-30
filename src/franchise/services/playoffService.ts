@@ -1,5 +1,6 @@
 import { FranchiseMatch, FranchiseState, PlayoffSeries, TeamObject } from '../types';
 import { simulationEngine } from './simulationEngine';
+import { ALL_CARDS } from '../../data/cards';
 
 export const playoffService = {
   generatePlayIn(state: FranchiseState): PlayoffSeries[] {
@@ -108,37 +109,80 @@ export const playoffService = {
   },
 
   simulateNextPlayoffStep(state: FranchiseState) {
-    // Find active series that user is NOT part of, or advance user's series if it's CPU vs CPU
+    // Find active series that user is NOT part of
     state.playoffSeries.forEach(series => {
       if (series.winnerId) return;
 
       const isUserInvolved = series.team1Id === state.userTeamId || series.team2Id === state.userTeamId;
       
-      // CPU vs CPU series: simulate one game at a time until someone wins 4 (or 1 for playin)
+      // Auto-simulate CPU vs CPU series
       if (!isUserInvolved) {
-        const targetWins = series.round === 0 ? 1 : 4;
-        while (series.wins1 < targetWins && series.wins2 < targetWins) {
-            this.simulateSeriesGame(state, series);
-        }
+        this.simulateSeriesUntilFinished(state, series);
       }
     });
 
-    // Check if round is complete to advance
     this.checkAndAdvanceRound(state);
     this.checkChampion(state);
+  },
+
+  simulateSeriesUntilFinished(state: FranchiseState, series: PlayoffSeries) {
+    const targetWins = series.round === 0 ? 1 : 4;
+    while (series.wins1 < targetWins && series.wins2 < targetWins) {
+      this.simulateSeriesGame(state, series);
+    }
   },
 
   simulateSeriesGame(state: FranchiseState, series: PlayoffSeries) {
     const t1 = state.teams[series.team1Id];
     const t2 = state.teams[series.team2Id];
-    const result = simulationEngine.simulateMatch(t1, t2, state);
     
-    if (result.winnerId === t1.teamId) series.wins1++;
-    else series.wins2++;
+    // Higher OVR has 55-65% probability of winning each game according to the OVR difference.
+    const ovr1 = this.calculateTeamOvr(t1, state);
+    const ovr2 = this.calculateTeamOvr(t2, state);
+    
+    const diff = ovr1 - ovr2;
+    // Win prob = 50% + (diff * 2.5%), max 70%, min 30%
+    let winProb1 = 0.5 + (diff * 0.025);
+    winProb1 = Math.max(0.3, Math.min(0.7, winProb1));
+    
+    if (Math.random() < winProb1) {
+      series.wins1++;
+    } else {
+      series.wins2++;
+    }
 
     const targetWins = series.round === 0 ? 1 : 4;
     if (series.wins1 === targetWins) series.winnerId = series.team1Id;
     if (series.wins2 === targetWins) series.winnerId = series.team2Id;
+  },
+
+  calculateTeamOvr(team: TeamObject, state: FranchiseState): number {
+    const starters = [
+      team.lineup.PG, team.lineup.SG, team.lineup.SF, team.lineup.PF, team.lineup.C
+    ].map(id => {
+      if (!id) return 60;
+      const card = ALL_CARDS.find(c => c.id === id) || state.customCards?.find(c => c.id === id);
+      if (!card) return 60;
+      const progress = state.playerProgress[card.id];
+      return progress?.ovr || card.stats.ovr;
+    });
+
+    return starters.reduce((a, b) => a + b, 0) / starters.length;
+  },
+
+  simulateNextRoundOnly(state: FranchiseState) {
+    const currentRound = Math.min(...state.playoffSeries.filter(s => !s.winnerId).map(s => s.round));
+    const activeSeries = state.playoffSeries.filter(s => s.round === currentRound && !s.winnerId);
+    
+    activeSeries.forEach(series => {
+      const isUserInvolved = series.team1Id === state.userTeamId || series.team2Id === state.userTeamId;
+      if (!isUserInvolved) {
+        this.simulateSeriesUntilFinished(state, series);
+      }
+    });
+
+    this.checkAndAdvanceRound(state);
+    this.checkChampion(state);
   },
 
   checkAndAdvanceRound(state: FranchiseState) {
@@ -207,15 +251,20 @@ export const playoffService = {
         const confWinners = winners.filter(s => s.conference === conf);
         for (let i = 0; i < confWinners.length; i += 2) {
            if (confWinners[i+1]) {
+              const w1 = confWinners[i];
+              const w2 = confWinners[i+1];
+              
               state.playoffSeries.push({
                 id: `round${nextRound}-${conf}-${i}`,
-                team1Id: confWinners[i].winnerId!,
-                team2Id: confWinners[i+1].winnerId!,
+                team1Id: w1.winnerId!,
+                team2Id: w2.winnerId!,
                 wins1: 0,
                 wins2: 0,
                 matches: [],
                 round: nextRound,
-                conference: conf
+                conference: conf,
+                seed1: w1.winnerId === w1.team1Id ? w1.seed1 : w1.seed2,
+                seed2: w2.winnerId === w2.team1Id ? w2.seed1 : w2.seed2
               });
            }
         }
@@ -223,19 +272,21 @@ export const playoffService = {
   },
 
   generateFinals(state: FranchiseState) {
-     const eastChamp = state.playoffSeries.find(s => s.round === 3 && s.conference === 'East')?.winnerId;
-     const westChamp = state.playoffSeries.find(s => s.round === 3 && s.conference === 'West')?.winnerId;
+     const eastSeries = state.playoffSeries.find(s => s.round === 3 && s.conference === 'East');
+     const westSeries = state.playoffSeries.find(s => s.round === 3 && s.conference === 'West');
 
-     if (eastChamp && westChamp) {
+     if (eastSeries?.winnerId && westSeries?.winnerId) {
         state.playoffSeries.push({
           id: `finals`,
-          team1Id: eastChamp,
-          team2Id: westChamp,
+          team1Id: eastSeries.winnerId,
+          team2Id: westSeries.winnerId,
           wins1: 0,
           wins2: 0,
           matches: [],
           round: 4,
-          conference: 'Finals'
+          conference: 'Finals',
+          seed1: eastSeries.winnerId === eastSeries.team1Id ? eastSeries.seed1 : eastSeries.seed2,
+          seed2: westSeries.winnerId === westSeries.team1Id ? westSeries.seed1 : westSeries.seed2
         });
      }
   },

@@ -9,6 +9,8 @@ export interface ContractObject {
   type: "Max" | "MidLevel" | "Veteran" | "Rookie" | "TwoWay";
   noTradeClause: boolean;
   injuryStatus: "Healthy" | "Day-to-Day" | "Out" | "Season-Ending";
+  canExtend?: boolean;
+  canTrade?: boolean;
 }
 
 export interface DraftPickObject {

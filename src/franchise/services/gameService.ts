@@ -1,8 +1,10 @@
-import { FranchiseMatch, FranchiseState, TeamObject } from '../types';
+import { FranchiseMatch, FranchiseState, TeamObject, ContractObject } from '../types';
 import { simulationEngine } from './simulationEngine';
 import { stateService } from './stateService';
 import { tradeEngine } from './tradeEngine';
 import { playoffService } from './playoffService';
+import { ALL_CARDS } from '../../data/cards';
+import { getInitialSalary } from './rosterService';
 
 export const gameService = {
   // Simulates the next available game for the user
@@ -159,6 +161,73 @@ export const gameService = {
 
     this.trackStats(state, result.boxScore.home, rivalOfHome, date);
     this.trackStats(state, result.boxScore.away, rivalOfAway, date);
+
+    // CPU Contract Renewal & Reduction Logic
+    this.handleCpuContracts(state, homeTeamId);
+    this.handleCpuContracts(state, awayTeamId);
+  },
+
+  handleCpuContracts(state: FranchiseState, teamId: string): void {
+    const team = state.teams[teamId];
+    if (!team || team.isHuman) return;
+
+    const totalGames = team.wins + team.losses;
+    const isMidSeason = totalGames === 41;
+    const expiredIds: string[] = [];
+
+    // Recorrer el roster del equipo
+    team.roster.forEach(playerId => {
+      let contract = team.contracts[playerId];
+
+      // 1. Reducir yearsRemaining si es mitad de temporada (41 partidos)
+      if (isMidSeason && contract && contract.yearsRemaining > 0) {
+        contract.yearsRemaining -= 1;
+      }
+
+      // 2. Lógica de Renovación si el contrato expiró o no existe
+      if (!contract || contract.yearsRemaining <= 0) {
+        const chance = Math.random();
+        if (chance <= 0.85) {
+          // Renovación Automática (85%)
+          const card = ALL_CARDS.find(c => c.id === playerId) || state.customCards?.find(c => c.id === playerId);
+          if (card) {
+            const salary = getInitialSalary(card);
+            team.contracts[playerId] = {
+              playerId,
+              salary,
+              yearsRemaining: Math.floor(Math.random() * 3) + 1,
+              type: card.rarity === 'franchise' ? 'Max' : card.rarity === 'starter' ? 'MidLevel' : 'Veteran',
+              noTradeClause: false,
+              injuryStatus: 'Healthy',
+              canExtend: true,
+              canTrade: true
+            };
+          }
+        } else {
+          // Entra en Free Agency (15%)
+          expiredIds.push(playerId);
+        }
+      }
+    });
+
+    // Procesar salidas a Free Agency
+    expiredIds.forEach(id => {
+      // Eliminar del roster
+      team.roster = team.roster.filter(rid => rid !== id);
+      delete team.contracts[id];
+      // Añadir al pool de FA
+      state.freeAgentPool.push(id);
+      
+      // Limpiar lineup
+      const positions = ['PG', 'SG', 'SF', 'PF', 'C'] as const;
+      positions.forEach(pos => {
+        if (team.lineup[pos] === id) team.lineup[pos] = null;
+      });
+      team.lineup.bench = team.lineup.bench.filter(rid => rid !== id);
+    });
+
+    // Actualizar payroll siempre
+    team.payroll = Object.values(team.contracts).reduce((total, c) => total + c.salary, 0);
   },
 
   trackStats(state: FranchiseState, playerEntries: any[], rival: string, date: string): void {
