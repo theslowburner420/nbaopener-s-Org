@@ -425,39 +425,41 @@ const MatchScoreboard = memo<{
   isUserT2: boolean;
 }>(({ t1Name, t2Name, t1Ovr, t2Ovr, s1, s2, quarter, isUserT1, isUserT2 }) => {
   return (
-    <div className="relative z-10 bg-zinc-900/50 border-b border-zinc-800 p-4 md:p-10">
-      <div className="max-w-4xl mx-auto flex flex-col items-center gap-4 md:gap-8">
-        <div className="flex items-center justify-between w-full gap-2">
+    <div className="relative z-[500] bg-zinc-900/80 backdrop-blur-md border-b border-zinc-800 p-2 md:p-10 shrink-0">
+      <div className="max-w-4xl mx-auto flex items-center justify-between gap-2">
           {/* Team 1 */}
-          <div className="flex flex-col items-center gap-2 md:gap-3 w-[28%] md:w-1/3">
-            <div className={`w-12 h-12 sm:w-16 sm:h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl flex items-center justify-center text-xl sm:text-2xl md:text-4xl font-black shrink-0 ${isUserT1 ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-400'}`}>
+          <div className="flex items-center gap-2 md:gap-3 flex-1">
+            <div className={`w-8 h-8 md:w-20 md:h-20 rounded-lg md:rounded-3xl flex items-center justify-center text-[10px] md:text-3xl font-black shrink-0 ${isUserT1 ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-500'}`}>
               {t1Name[0]}
             </div>
-            <p className="text-[10px] sm:text-xs md:text-lg font-black uppercase italic text-white truncate w-full text-center leading-tight">{t1Name}</p>
-            <p className="text-[8px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">OVR {t1Ovr}</p>
+            <div className="flex flex-col min-w-0">
+               <p className="text-[9px] md:text-lg font-black uppercase italic text-white truncate leading-tight">{t1Name}</p>
+               <p className="text-[6px] md:text-[10px] font-bold text-zinc-600 uppercase tracking-widest">{t1Ovr} OVR</p>
+            </div>
           </div>
 
           {/* Score Display */}
-          <div className="flex flex-col items-center gap-1.5 md:gap-2 flex-1">
-            <div className="bg-black px-4 sm:px-6 md:px-10 py-3 sm:py-4 md:py-6 rounded-2xl md:rounded-[2.5rem] border-2 border-zinc-800 shadow-2xl flex items-center gap-3 sm:gap-6 md:gap-10">
-              <span className="text-3xl sm:text-4xl md:text-8xl font-black italic text-white tabular-nums leading-none tracking-tighter">{s1}</span>
-              <span className="text-lg sm:text-xl md:text-3xl font-black text-zinc-800">:</span>
-              <span className="text-3xl sm:text-4xl md:text-8xl font-black italic text-white tabular-nums leading-none tracking-tighter">{s2}</span>
+          <div className="flex flex-col items-center gap-0.5 md:gap-2 px-2 md:px-8">
+            <div className="flex items-center gap-2 md:gap-6">
+              <span className={`text-xl md:text-7xl font-black italic tabular-nums leading-none ${s1 > s2 ? 'text-white' : 'text-zinc-700'}`}>{s1}</span>
+              <span className="text-[10px] md:text-2xl font-black text-zinc-900">:</span>
+              <span className={`text-xl md:text-7xl font-black italic tabular-nums leading-none ${s2 > s1 ? 'text-white' : 'text-zinc-700'}`}>{s2}</span>
             </div>
-            <div className="px-3 py-1 bg-amber-500 text-black rounded-full text-[8px] sm:text-[10px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(245,158,11,0.3)]">
-              Period {quarter}
+            <div className="bg-zinc-800/80 px-2.5 py-0.5 rounded-full border border-white/5">
+              <span className="text-[6px] md:text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] whitespace-nowrap">Period {quarter}</span>
             </div>
           </div>
 
           {/* Team 2 */}
-          <div className="flex flex-col items-center gap-2 md:gap-3 w-[28%] md:w-1/3">
-            <div className={`w-12 h-12 sm:w-16 sm:h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl flex items-center justify-center text-xl sm:text-2xl md:text-4xl font-black shrink-0 ${isUserT2 ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-400'}`}>
+          <div className="flex items-center flex-row-reverse gap-2 md:gap-3 flex-1">
+            <div className={`w-8 h-8 md:w-20 md:h-20 rounded-lg md:rounded-3xl flex items-center justify-center text-[10px] md:text-3xl font-black shrink-0 ${isUserT2 ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-500'}`}>
               {t2Name[0]}
             </div>
-            <p className="text-[10px] sm:text-xs md:text-lg font-black uppercase italic text-white truncate w-full text-center leading-tight">{t2Name}</p>
-            <p className="text-[8px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">OVR {t2Ovr}</p>
+            <div className="flex flex-col items-end min-w-0 text-right">
+               <p className="text-[9px] md:text-lg font-black uppercase italic text-white truncate leading-tight">{t2Name}</p>
+               <p className="text-[6px] md:text-[10px] font-bold text-zinc-600 uppercase tracking-widest">{t2Ovr} OVR</p>
+            </div>
           </div>
-        </div>
       </div>
     </div>
   );
@@ -466,40 +468,35 @@ const MatchScoreboard = memo<{
 const MatchChatbox = memo<{
   events: MatchEvent[];
 }>(({ events }) => {
-  // Performance: Limit visible history to prevent DOM bloat during high speed simulation
-  // Also slice from the beginning to show the newest at the top if desired, 
-  // but looking at the code it seems they are prepended.
   const visibleEvents = useMemo(() => (events || []).slice(0, 30), [events]);
 
   return (
-    <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col gap-4 overflow-y-auto pr-4 scrollbar-hide flex-col-reverse">
+    <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col gap-2 md:gap-4 overflow-y-auto pr-2 md:pr-4 scrollbar-hide flex-col-reverse">
       <AnimatePresence initial={false} mode="popLayout">
         {visibleEvents.map((event) => (
           <motion.div
             key={event.id}
-            initial={{ opacity: 0, y: 15, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className={`p-4 rounded-2xl border transition-colors ${
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className={`p-2 md:p-4 rounded-xl md:rounded-2xl border transition-colors ${
               event.text.startsWith('INTERACTIVE:')
                 ? 'bg-amber-500 text-black border-amber-400'
                 : event.team === 'USER' 
-                  ? 'bg-amber-500/10 border-amber-500/20 backdrop-blur-sm' 
+                  ? 'bg-zinc-900/30 border-amber-500/20 backdrop-blur-sm' 
                   : 'bg-zinc-900/50 border-zinc-800'
             }`}
           >
-            <div className="flex items-center justify-between mb-1">
-              <span className={`text-[8px] font-black uppercase tracking-widest ${
+            <div className="flex items-center justify-between mb-0.5">
+              <span className={`text-[6px] md:text-[8px] font-black uppercase tracking-widest ${
                 event.text.startsWith('INTERACTIVE:') ? 'text-black/60' : 
                 event.team === 'USER' ? 'text-amber-500' : 'text-zinc-500'
               }`}>
-                {event.text.startsWith('INTERACTIVE:') ? 'Event Outcome' : 
-                 event.team === 'USER' ? 'Your Team' : 'Opponent'}
+                {event.text.startsWith('INTERACTIVE:') ? 'Outcome' : 
+                 event.team === 'USER' ? 'Play' : 'Opp'}
               </span>
-              <span className={`text-[8px] font-bold ${event.text.startsWith('INTERACTIVE:') ? 'text-black/60' : 'text-zinc-600'}`}>Q{event.quarter}</span>
+              <span className={`text-[6px] md:text-[8px] font-bold ${event.text.startsWith('INTERACTIVE:') ? 'text-black/40' : 'text-zinc-700'}`}>Q{event.quarter} • {event.score1}-{event.score2}</span>
             </div>
-            <p className={`text-sm font-bold ${event.text?.startsWith('INTERACTIVE:') ? 'text-black' : 'text-white'}`}>{event.text?.replace('INTERACTIVE: ', '') || ''}</p>
+            <p className={`text-[10px] md:text-sm font-black italic tracking-tight leading-tight ${event.text?.startsWith('INTERACTIVE:') ? 'text-black' : 'text-white'}`}>{event.text?.replace('INTERACTIVE: ', '') || ''}</p>
           </motion.div>
         ))}
       </AnimatePresence>
@@ -2102,12 +2099,12 @@ const DraftView: React.FC = () => {
         animate={{ scale: 1, opacity: 1, y: 0 }}
         className="relative z-10 w-full flex flex-col items-center px-1"
       >
-        <div className="text-center mb-6 md:mb-12 shrink-0">
-          <h2 className="text-xl md:text-5xl font-black italic uppercase tracking-tighter text-white leading-none">
-            {currentOptions.length > 0 && starters.every(s => !s.card) && bench.every(b => !b.card) ? 'Choose Your Captain' : `Select Player`}
+        <div className="text-center mb-3 md:mb-12 shrink-0">
+          <h2 className="text-sm md:text-5xl font-black italic uppercase tracking-tighter text-white leading-none">
+            {currentOptions.length > 0 && starters.every(s => !s.card) && bench.every(b => !b.card) ? 'Captain Pick' : `Select Player`}
           </h2>
-          <p className="text-[9px] md:text-sm font-bold text-amber-500 uppercase tracking-[0.3em] mt-2">
-            {currentOptions.length > 0 && starters.every(s => !s.card) && bench.every(b => !b.card) ? 'Draft Leader' : 'Pick the best talent'}
+          <p className="text-[7px] md:text-sm font-bold text-amber-500 uppercase tracking-[0.3em] mt-1 italic">
+            {currentOptions.length > 0 && starters.every(s => !s.card) && bench.every(b => !b.card) ? 'The Franchise Leader' : 'Technical selection'}
           </p>
         </div>
 
@@ -2339,44 +2336,31 @@ const DraftView: React.FC = () => {
         </div>
 
         {/* Improved Header & Round Tracker */}
-        <div className="flex flex-col gap-6 shrink-0 z-50">
+        <div className="flex flex-col gap-3 md:gap-6 shrink-0 z-50">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center transform -rotate-3 shadow-2xl relative">
-                <div className="absolute inset-0 bg-amber-500/10 animate-pulse rounded-2xl" />
-                <Trophy size={28} className="text-amber-500 relative z-10" />
+            <div className="flex items-center gap-2 md:gap-4">
+              <div className="w-8 h-8 md:w-12 md:h-12 bg-zinc-900 border border-zinc-800 rounded-lg md:rounded-2xl flex items-center justify-center transform -rotate-3 shadow-2xl relative">
+                <Trophy size={18} className="text-amber-500 relative z-10 md:w-7 md:h-7" />
               </div>
               <div>
-                <h2 className="text-2xl md:text-5xl font-black italic uppercase text-white leading-none tracking-tighter drop-shadow-lg">{selectedTournament?.name}</h2>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[9px] font-black text-amber-500 uppercase tracking-[0.4em]">Bracket Challenge</span>
-                </div>
+                <h2 className="text-sm md:text-5xl font-black italic uppercase text-white leading-none tracking-tighter drop-shadow-lg">{selectedTournament?.name}</h2>
               </div>
             </div>
-
-            <button 
-              onClick={() => setPhase('tournament_selection')}
-              className="group flex items-center gap-3 px-6 py-3 bg-zinc-900/50 border border-zinc-800 rounded-2xl text-zinc-500 hover:text-white transition-all hover:bg-red-500/10 hover:border-red-500/50"
-            >
-              <span className="text-[9px] font-black uppercase tracking-widest hidden md:inline">Forfeit</span>
-              <X size={18} />
-            </button>
           </div>
 
-          {/* Round Progress Tracker */}
-          <div className="max-w-md w-full mx-auto flex items-center gap-2">
+          <div className="max-w-xs w-full mx-auto flex items-center gap-1.5 md:gap-2">
             {['QF', 'SF', 'F'].map((r, i) => (
               <React.Fragment key={r}>
-                <div className="flex flex-col items-center gap-1 flex-1">
-                  <div className={`w-full h-1 rounded-full transition-all duration-500 ${
-                    currentRound === r ? 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 
+                <div className="flex flex-col items-center gap-0.5 flex-1">
+                  <div className={`w-full h-0.5 md:h-1 rounded-full transition-all duration-500 ${
+                    currentRound === r ? 'bg-amber-500' : 
                     (['SF', 'F'].includes(currentRound) && r === 'QF') || (currentRound === 'F' && r === 'SF') ? 'bg-zinc-700' : 'bg-zinc-900'
                   }`} />
-                  <span className={`text-[8px] font-black uppercase tracking-widest ${currentRound === r ? 'text-amber-500' : 'text-zinc-600'}`}>
-                    {r === 'QF' ? 'Octavos' : r === 'SF' ? 'Semis' : 'Final'}
+                  <span className={`text-[6px] md:text-[8px] font-black uppercase tracking-widest ${currentRound === r ? 'text-amber-500' : 'text-zinc-700'}`}>
+                    {r === 'QF' ? 'OCT' : r === 'SF' ? 'SEM' : 'FIN'}
                   </span>
                 </div>
-                {i < 2 && <div className="w-4 h-px bg-zinc-800 mb-3" />}
+                {i < 2 && <div className="w-3 h-px bg-zinc-900 mb-2.5 md:mb-3" />}
               </React.Fragment>
             ))}
           </div>
@@ -2712,7 +2696,6 @@ const BracketConnector = memo<{
     </div>
   );
 });
-
 const BracketMatchCard = memo<{ 
   match: BracketMatch | null; 
   isUserMatch: boolean; 
@@ -2724,9 +2707,9 @@ const BracketMatchCard = memo<{
 }>(({ match, isUserMatch, onSimulate, isSimulating, teamOVR, isFinal, isActive }) => {
   if (!match) {
     return (
-      <div className={`w-52 md:w-60 h-28 bg-zinc-900/10 border border-zinc-800/30 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 opacity-20`}>
-        <div className="w-10 h-10 bg-zinc-800/20 rounded-full" />
-        <span className="text-[8px] font-black tracking-widest text-zinc-700">TBD</span>
+      <div className={`w-40 md:w-60 h-24 md:h-28 bg-zinc-900/10 border border-zinc-800/30 border-dashed rounded-xl md:rounded-2xl flex flex-col items-center justify-center gap-1.5 md:gap-2 opacity-20`}>
+        <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-800/20 rounded-full" />
+        <span className="text-[6px] md:text-[8px] font-black tracking-widest text-zinc-700 uppercase">Proximo Match</span>
       </div>
     );
   }
@@ -2743,19 +2726,19 @@ const BracketMatchCard = memo<{
       layout
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className={`relative ${isFinal ? 'w-72 md:w-80' : 'w-52 md:w-60'} transition-all duration-500 group z-10`}
+      className={`relative ${isFinal ? 'w-56 md:w-80' : 'w-40 md:w-60'} transition-all duration-500 group z-10`}
     >
       <div className={`
-        relative overflow-hidden rounded-2xl border transition-all duration-500
-        ${isFinished ? 'bg-zinc-950/40 border-zinc-900/50' : 
-          isActive ? 'bg-zinc-900 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.25)] ring-4 ring-amber-500/10' : 
-          'bg-zinc-900/90 border-zinc-800'}
-        ${isFinal ? 'scale-110 border-amber-500/40 shadow-[0_0_80px_rgba(245,158,11,0.2)]' : ''}
+        relative overflow-hidden rounded-xl md:rounded-2xl border transition-all duration-500
+        ${isFinished ? 'bg-zinc-950/40 border-zinc-900/50 shadow-inner' : 
+          isActive ? 'bg-zinc-900 border-amber-500/80 shadow-[0_0_30px_rgba(245,158,11,0.2)]' : 
+          'bg-zinc-900/90 border-zinc-800/80'}
+        ${isFinal ? 'scale-105 border-amber-500/40 shadow-[0_0_60px_rgba(245,158,11,0.15)] ring-1 ring-amber-500/20' : ''}
         ${isUserMatch && !isFinished ? 'bracket-glow-user' : ''}
       `}>
         {/* Progress indicator */}
         {!isFinished && isActive && (
-          <div className="absolute top-0 left-0 w-full h-1 bg-amber-500 overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-amber-500 overflow-hidden">
             <motion.div 
                animate={{ x: ['-100%', '100%'] }}
                transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
@@ -2766,36 +2749,36 @@ const BracketMatchCard = memo<{
 
         {/* Team 1 */}
         <div className={`
-          flex items-center justify-between px-4 py-4 border-b border-zinc-800/50 transition-all
+          flex items-center justify-between px-3 md:px-4 py-2.5 md:py-4 border-b border-zinc-800/30 transition-all
           ${isLoser(match.team1) ? 'opacity-30' : 'opacity-100'}
-          ${isWinner(match.team1) ? 'bg-amber-500/10' : ''}
+          ${isWinner(match.team1) ? 'bg-amber-500/5' : ''}
         `}>
-          <div className="flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-[11px] font-black shadow-lg
-              ${match.team1 === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-400'}
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className={`w-6 h-6 md:w-8 md:h-8 rounded-lg md:rounded-xl flex items-center justify-center text-[8px] md:text-[11px] font-black shadow-lg
+              ${match.team1 === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-500'}
             `}>
               {getTeamName(match.team1).substring(0, 2).toUpperCase()}
             </div>
             <div className="flex flex-col">
-              <span className={`text-[11px] font-black uppercase italic tracking-tight truncate max-w-[80px] md:max-w-[110px] 
-                ${isWinner(match.team1) ? 'text-amber-500' : 'text-white'}
+              <span className={`text-[8px] md:text-[11px] font-black uppercase italic tracking-tight truncate max-w-[60px] md:max-w-[110px] leading-none
+                ${isWinner(match.team1) ? 'text-amber-500' : 'text-zinc-200'}
               `}>
                 {getTeamName(match.team1)}
               </span>
-              {!isFinished && <span className="text-[7px] font-bold text-zinc-600 uppercase tracking-widest">{getTeamOvr(match.team1)} OVR</span>}
+              {!isFinished && <span className="text-[6px] md:text-[7px] font-bold text-zinc-600 uppercase tracking-widest mt-0.5">{getTeamOvr(match.team1)} OVR</span>}
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2">
             {isFinished ? (
-              <span className={`text-xl font-black italic tabular-nums ${isWinner(match.team1) ? 'text-white' : 'text-zinc-700'}`}>
+              <span className={`text-sm md:text-xl font-black italic tabular-nums ${isWinner(match.team1) ? 'text-white' : 'text-zinc-800'}`}>
                 {match.score1}
               </span>
             ) : (
-               <Shield size={12} className={match.team1 === 'USER' ? 'text-amber-500' : 'text-zinc-800'} />
+               <Shield size={10} className={match.team1 === 'USER' ? 'text-amber-500/50' : 'text-zinc-900'} />
             )}
             {isWinner(match.team1) && (
               <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
-                <Trophy size={14} className="text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                <Trophy size={11} className="text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
               </motion.div>
             )}
           </div>
@@ -2803,36 +2786,36 @@ const BracketMatchCard = memo<{
 
         {/* Team 2 */}
         <div className={`
-          flex items-center justify-between px-4 py-4 transition-all
+          flex items-center justify-between px-3 md:px-4 py-2.5 md:py-4 transition-all
           ${isLoser(match.team2) ? 'opacity-30' : 'opacity-100'}
-          ${isWinner(match.team2) ? 'bg-amber-500/10' : ''}
+          ${isWinner(match.team2) ? 'bg-amber-500/5' : ''}
         `}>
-          <div className="flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-[11px] font-black shadow-lg
-              ${match.team2 === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-400'}
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className={`w-6 h-6 md:w-8 md:h-8 rounded-lg md:rounded-xl flex items-center justify-center text-[8px] md:text-[11px] font-black shadow-lg
+              ${match.team2 === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-500'}
             `}>
               {getTeamName(match.team2).substring(0, 2).toUpperCase()}
             </div>
             <div className="flex flex-col">
-              <span className={`text-[11px] font-black uppercase italic tracking-tight truncate max-w-[80px] md:max-w-[110px] 
-                ${isWinner(match.team2) ? 'text-amber-500' : 'text-white'}
+              <span className={`text-[8px] md:text-[11px] font-black uppercase italic tracking-tight truncate max-w-[60px] md:max-w-[110px] leading-none
+                ${isWinner(match.team2) ? 'text-amber-500' : 'text-zinc-200'}
               `}>
                 {getTeamName(match.team2)}
               </span>
-              {!isFinished && <span className="text-[7px] font-bold text-zinc-600 uppercase tracking-widest">{getTeamOvr(match.team2)} OVR</span>}
+              {!isFinished && <span className="text-[6px] md:text-[7px] font-bold text-zinc-600 uppercase tracking-widest mt-0.5">{getTeamOvr(match.team2)} OVR</span>}
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2">
             {isFinished ? (
-              <span className={`text-xl font-black italic tabular-nums ${isWinner(match.team2) ? 'text-white' : 'text-zinc-700'}`}>
+              <span className={`text-sm md:text-xl font-black italic tabular-nums ${isWinner(match.team2) ? 'text-white' : 'text-zinc-800'}`}>
                 {match.score2}
               </span>
             ) : (
-              <Shield size={12} className={match.team2 === 'USER' ? 'text-amber-500' : 'text-zinc-800'} />
+              <Shield size={10} className={match.team2 === 'USER' ? 'text-amber-500/50' : 'text-zinc-900'} />
             )}
             {isWinner(match.team2) && (
               <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
-                 <Trophy size={14} className="text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                 <Trophy size={11} className="text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
               </motion.div>
             )}
           </div>
@@ -2842,9 +2825,9 @@ const BracketMatchCard = memo<{
         {isActive && !isSimulating && (
           <button 
             onClick={onSimulate}
-            className="absolute inset-0 bg-amber-500/0 hover:bg-amber-500/5 transition-colors flex items-center justify-center group/btn"
+            className="absolute inset-0 bg-transparent hover:bg-amber-500/5 transition-colors flex items-center justify-center group/btn active:bg-amber-500/10"
           >
-             <div className="bg-amber-500 text-black px-6 py-2 rounded-xl font-black uppercase italic text-[10px] tracking-widest opacity-0 group-hover/btn:opacity-100 transition-all transform translate-y-2 group-hover/btn:translate-y-0 shadow-2xl">
+             <div className="bg-amber-500 text-black px-4 md:px-6 py-1.5 md:py-2 rounded-lg md:rounded-xl font-black uppercase italic text-[8px] md:text-[10px] tracking-widest opacity-0 group-hover/btn:opacity-100 transition-all transform translate-y-1 md:translate-y-2 group-hover/btn:translate-y-0 shadow-2xl">
                Play Match
              </div>
           </button>

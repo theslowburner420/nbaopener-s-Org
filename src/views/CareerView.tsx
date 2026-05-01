@@ -16,7 +16,10 @@ import {
   DollarSign,
   TrendingUp,
   History,
-  ShoppingCart
+  ShoppingCart,
+  X,
+  Sparkles,
+  AlertTriangle
 } from 'lucide-react';
 import { NBA_TEAMS, getTeamLogo } from '../data/nbaTeams';
 import { ALL_CARDS } from '../data/cards';
@@ -29,7 +32,6 @@ import { tradeEngine } from '../franchise/services/tradeEngine';
 import { playoffService } from '../franchise/services/playoffService';
 import { generateDraftPool, advanceSeason } from '../franchise/services/rosterService';
 import CardItem from '../components/CardItem';
-import { X as CloseIcon, AlertTriangle, Sparkles } from 'lucide-react';
 
 import confetti from 'canvas-confetti';
 
@@ -39,6 +41,14 @@ const CareerView: React.FC = () => {
   const { state, isLoading, startNewFranchise, advanceWeek, resetFranchise, setState } = useFranchise();
 
   const [activeTab, setActiveTab] = useState<FranchiseTab>('hub');
+  const [activeNegotiation, setActiveNegotiation] = useState<{
+    playerId: string;
+    salary: number;
+    years: number;
+    message: string;
+    status: 'Active' | 'Accepted' | 'Rejected';
+    counterOffer?: { salary: number; years: number };
+  } | null>(null);
 
   // OPTIMIZATION: Memoized Card Lookup Map
   const allCardsMap = useMemo(() => {
@@ -260,16 +270,51 @@ const CareerView: React.FC = () => {
     }
   }, [state?.phase, activeTab, draftState.order.length, state?.teams]);
   
-  const handleSignPlayer = React.useCallback((cardId: string) => {
+  const handleNegotiationStart = React.useCallback((playerId: string) => {
     if (!state) return;
-    const result = marketService.signFreeAgent(state, cardId);
-    if (result.success) {
-      alert(result.reason);
-      setState({ ...state }); // Trigger re-render
-    } else {
-      alert(result.reason);
+    const demand = marketService.calculateMarketDemand(state, playerId);
+    
+    // Check if team already has 15 players if it's a new signing
+    const userTeam = state.teams[state.userTeamId];
+    if (!userTeam.roster.includes(playerId) && userTeam.roster.length >= 15) {
+      alert("Roster is full (15 players max)");
+      return;
     }
-  }, [state, setState]);
+
+    setActiveNegotiation({
+      playerId,
+      salary: demand.salary,
+      years: demand.years,
+      message: "I'm open to discussing a deal. What are you offering?",
+      status: 'Active'
+    });
+  }, [state, state?.userTeamId]);
+
+  const handleProposeOffer = React.useCallback((salary: number, years: number) => {
+    if (!state || !activeNegotiation) return;
+    
+    const result = marketService.negotiateContract(state, activeNegotiation.playerId, salary, years);
+    
+    setActiveNegotiation(prev => prev ? ({
+      ...prev,
+      salary,
+      years,
+      message: result.message,
+      status: result.status,
+      counterOffer: result.counterOffer
+    }) : null);
+
+    if (result.status === 'Accepted' || result.status === 'Rejected') {
+      // Small delay then close modal? Or let user see status.
+      // We'll let user click 'Done'
+    }
+    
+    setState({ ...state });
+  }, [state, activeNegotiation, setState]);
+
+  const handleSignPlayer = React.useCallback((cardId: string) => {
+    handleNegotiationStart(cardId);
+  }, [handleNegotiationStart]);
 
   const handleExecuteTrade = React.useCallback(() => {
     if (!state || !tradeTargetTeamId) return;
@@ -753,7 +798,162 @@ const CareerView: React.FC = () => {
         </div>
       </div>
 
-      {/* CHAMPION MODAL */}
+      {/* NEGOTIATION MODAL */}
+      <AnimatePresence>
+        {activeNegotiation && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-3xl flex items-center justify-center p-4"
+          >
+             <motion.div 
+               initial={{ scale: 0.9, opacity: 0, y: 30 }}
+               animate={{ scale: 1, opacity: 1, y: 0 }}
+               className="w-full max-w-2xl bg-zinc-900 border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl"
+             >
+                {(() => {
+                   const card = findCard(activeNegotiation.playerId);
+                   const neg = state.negotiations[activeNegotiation.playerId];
+                   const rounds = neg?.rounds || 0;
+                   if (!card) return null;
+
+                   return (
+                      <div className="flex flex-col h-full max-h-[90vh]">
+                         {/* Header */}
+                         <div className="p-6 md:p-8 bg-black/40 border-b border-white/5 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                               <div className="w-12 h-12 md:w-20 md:h-20 bg-zinc-800 rounded-2xl p-2 border border-white/5 relative group">
+                                  <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-full h-full object-contain" />
+                                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-white text-black text-[10px] font-black rounded-full flex items-center justify-center border-2 border-zinc-900">{card.stats.ovr}</div>
+                               </div>
+                               <div>
+                                  <h3 className="text-xl md:text-3xl font-black uppercase italic tracking-tighter text-white leading-none">{card.name}</h3>
+                                  <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em] mt-1">{card.position} • {state.playerProgress[card.id]?.age || 25} Years Old</p>
+                               </div>
+                            </div>
+                            <button onClick={() => setActiveNegotiation(null)} className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-500 hover:text-white transition-colors">
+                               <X size={20} />
+                            </button>
+                         </div>
+
+                         {/* Chat / Message Area */}
+                         <div className="flex-1 p-6 md:p-10 space-y-8 overflow-y-auto no-scrollbar">
+                            <div className="space-y-4">
+                               <div className="flex justify-start">
+                                  <div className="max-w-[80%] bg-zinc-800 p-4 rounded-2xl rounded-tl-none border border-white/5">
+                                     <p className="text-xs md:text-sm font-medium text-zinc-300 leading-relaxed italic">"{activeNegotiation.message}"</p>
+                                  </div>
+                               </div>
+                               
+                               {activeNegotiation.counterOffer && activeNegotiation.status === 'Active' && (
+                                  <div className="flex justify-start">
+                                     <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl flex flex-col gap-2">
+                                        <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Counter Offer</p>
+                                        <p className="text-sm font-black text-white italic">${(activeNegotiation.counterOffer.salary/1000000).toFixed(1)}M / {activeNegotiation.counterOffer.years} Years</p>
+                                     </div>
+                                  </div>
+                               )}
+                            </div>
+
+                            {activeNegotiation.status === 'Active' && (
+                               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                     {/* Salary Slider */}
+                                     <div className="space-y-4">
+                                        <div className="flex justify-between items-end">
+                                           <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Proposed Salary</label>
+                                           <span className="text-xl font-black italic text-white">${(activeNegotiation.salary/1000000).toFixed(1)}M</span>
+                                        </div>
+                                        <input 
+                                          type="range"
+                                          min={1000000}
+                                          max={60000000}
+                                          step={500000}
+                                          value={activeNegotiation.salary}
+                                          onChange={(e) => setActiveNegotiation({ ...activeNegotiation, salary: Number(e.target.value) })}
+                                          className="w-full accent-amber-500 bg-zinc-800 rounded-lg h-2"
+                                        />
+                                        <div className="flex justify-between text-[8px] font-bold text-zinc-700 uppercase">
+                                          <span>$1M</span>
+                                          <span>$60M</span>
+                                        </div>
+                                     </div>
+
+                                     {/* Years Selector */}
+                                     <div className="space-y-4">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Contract Duration</label>
+                                        <div className="flex gap-2">
+                                           {[1, 2, 3, 4].map(y => (
+                                              <button 
+                                                key={y}
+                                                onClick={() => setActiveNegotiation({ ...activeNegotiation, years: y })}
+                                                className={`flex-1 py-4 rounded-xl border text-sm font-black transition-all ${activeNegotiation.years === y ? 'bg-white text-black border-white shadow-xl' : 'bg-zinc-800 text-zinc-500 border-white/5 hover:border-white/20'}`}
+                                              >
+                                                 {y}Y
+                                              </button>
+                                           ))}
+                                        </div>
+                                     </div>
+                                  </div>
+                               </div>
+                            )}
+                         </div>
+
+                         {/* Footer */}
+                         <div className="p-6 md:p-8 bg-black/40 border-t border-white/5">
+                            {activeNegotiation.status === 'Active' ? (
+                               <div className="flex items-center justify-between gap-6">
+                                  <div className="flex flex-col">
+                                     <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Negotiation Rounds</span>
+                                     <div className="flex gap-1 mt-1">
+                                        {[1, 2, 3].map(r => (
+                                           <div key={r} className={`w-6 h-1 rounded-full ${r <= rounds ? 'bg-amber-500' : 'bg-zinc-800'}`} />
+                                        ))}
+                                     </div>
+                                  </div>
+                                  <button 
+                                    onClick={() => handleProposeOffer(activeNegotiation.salary, activeNegotiation.years)}
+                                    className="flex-1 max-w-xs py-5 bg-white text-black rounded-2xl font-black uppercase italic tracking-tighter hover:bg-amber-500 transition-all active:scale-95 shadow-2xl shadow-white/5"
+                                  >
+                                     Propose Offer
+                                  </button>
+                               </div>
+                            ) : (
+                               <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-4">
+                                     {activeNegotiation.status === 'Accepted' ? (
+                                        <div className="w-12 h-12 bg-green-500 text-black rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(34,197,94,0.4)]">
+                                           <Sparkles size={24} />
+                                        </div>
+                                     ) : (
+                                        <div className="w-12 h-12 bg-red-500 text-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.4)]">
+                                           <AlertTriangle size={24} />
+                                        </div>
+                                     )}
+                                     <div>
+                                        <h4 className={`text-xl font-black uppercase italic italic tracking-tighter ${activeNegotiation.status === 'Accepted' ? 'text-green-500' : 'text-red-500'}`}>
+                                           {activeNegotiation.status === 'Accepted' ? 'SIGNED' : 'Negotiation Failed'}
+                                        </h4>
+                                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none mt-1">
+                                           {activeNegotiation.status === 'Accepted' ? 'Welcome to the roster' : 'Try someone else'}
+                                        </p>
+                                     </div>
+                                  </div>
+                                  <button 
+                                    onClick={() => setActiveNegotiation(null)}
+                                    className="px-10 py-5 bg-zinc-800 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-zinc-700 transition-all"
+                                  >
+                                     Done
+                                  </button>
+                               </div>
+                            )}
+                         </div>
+                      </div>
+                   );
+                })()}
+             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <AnimatePresence>
         {state.phase === 'Awards' && (
           <motion.div 
@@ -1032,8 +1232,8 @@ const CareerView: React.FC = () => {
       </AnimatePresence>
 
       {/* NAVIGATION */}
-      <div className="bg-zinc-950 border-b border-white/5 sticky top-[56px] md:top-0 z-40 overflow-x-auto no-scrollbar touch-pan-x hide-scrollbar scroll-smooth">
-        <div className="flex px-3 md:px-12 gap-0.5 md:gap-2 py-1 md:py-2 min-w-max">
+      <div className="bg-zinc-950 border-b border-white/5 sticky top-[48px] md:top-0 z-40 overflow-x-auto no-scrollbar touch-pan-x hide-scrollbar scroll-smooth">
+        <div className="flex px-1 md:px-12 gap-0 md:gap-2 py-0.5 md:py-2 min-w-max">
           {[
             { id: 'hub', label: 'HUB', icon: LayoutDashboard },
             { id: 'lineup', label: 'ROSTER', icon: Users },
@@ -1053,10 +1253,10 @@ const CareerView: React.FC = () => {
                 const el = document.getElementById(`nav-tab-${tab.id}`);
                 el?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
               }}
-              className={`flex items-center gap-1.5 md:gap-3 px-3 md:px-6 py-2.5 md:py-4 rounded-lg md:rounded-2xl transition-all whitespace-nowrap shrink-0 ${activeTab === tab.id ? 'bg-white/5 text-amber-500' : 'text-zinc-600 hover:text-zinc-400'}`}
+              className={`flex items-center gap-1 md:gap-3 px-2 md:px-6 py-2 md:py-4 rounded-lg md:rounded-2xl transition-all whitespace-nowrap shrink-0 ${activeTab === tab.id ? 'bg-white/5 text-amber-500' : 'text-zinc-600 hover:text-zinc-400'}`}
             >
-              <tab.icon size={12} className="md:w-[14px] md:h-[14px]" />
-              <span className="text-[8px] md:text-xs font-black uppercase tracking-widest">{tab.label}</span>
+              <tab.icon size={10} className="md:w-[14px] md:h-[14px]" />
+              <span className="text-[7px] md:text-xs font-black uppercase tracking-widest leading-none">{tab.label}</span>
               {activeTab === tab.id && <motion.div layoutId="nav-pill" className="w-0.5 h-0.5 bg-amber-500 rounded-full" />}
             </button>
           ))}
@@ -1064,13 +1264,13 @@ const CareerView: React.FC = () => {
       </div>
 
       {/* CONTENT */}
-      <div className="p-4 md:p-12 relative overflow-y-auto overflow-x-hidden">
+      <div className="p-2 md:p-12 relative overflow-y-auto overflow-x-hidden">
         <AnimatePresence mode="wait">
           {activeTab === 'hub' && (
             <motion.div 
               key="hub"
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-              className="max-w-7xl mx-auto space-y-12 pb-20"
+              className="max-w-7xl mx-auto space-y-6 md:space-y-12 pb-20"
             >
               {state.phase === 'Draft' && (
                 <div className="bg-gradient-to-br from-amber-500/20 to-zinc-900 border border-amber-500/30 rounded-3xl p-8 text-center space-y-6">
@@ -1094,44 +1294,44 @@ const CareerView: React.FC = () => {
                 <>
                   {/* TOP FEATURE: NEXT MATCH */}
                   {nextUserGame && (
-                    <div className="bg-gradient-to-br from-zinc-900 to-black border border-white/5 rounded-2xl md:rounded-[3rem] p-4 md:p-10 flex flex-col md:flex-row items-center justify-between gap-5 md:gap-12 relative overflow-hidden group">
+                    <div className="bg-gradient-to-br from-zinc-900 to-black border border-white/5 rounded-xl md:rounded-[3rem] p-2 md:p-10 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-12 relative overflow-hidden group shadow-2xl">
                       <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
-                      <div className="space-y-2 md:space-y-6 relative z-10 text-center md:text-left w-full md:w-auto">
-                        <div className="space-y-0.5 md:space-y-1">
-                          <p className="text-[7px] md:text-[10px] font-black text-amber-500 uppercase tracking-[0.4em]">Next Appointment</p>
-                          <h3 className="text-xl md:text-5xl font-black italic uppercase tracking-tighter text-white leading-none">Gameday</h3>
+                      <div className="space-y-1 md:space-y-6 relative z-10 text-center md:text-left w-full md:w-auto">
+                        <div className="space-y-0 md:space-y-1">
+                          <p className="text-[5px] md:text-[10px] font-black text-amber-500 uppercase tracking-[0.4em]">Next Appointment</p>
+                          <h3 className="text-xs md:text-5xl font-black italic uppercase tracking-tighter text-white leading-none">Gameday</h3>
                         </div>
-                        <div className="flex items-center gap-2 md:gap-4 justify-center md:justify-start">
-                          <div className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/5 text-[7px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                            Match {nextUserGame.gameNumber}
+                        <div className="flex items-center gap-1 md:gap-4 justify-center md:justify-start">
+                          <div className="px-1.5 py-0.5 bg-white/5 rounded-md md:rounded-lg border border-white/5 text-[5px] md:text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                            M_{nextUserGame.gameNumber}
                           </div>
-                          <div className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/5 text-[7px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                          <div className="px-1.5 py-0.5 bg-white/5 rounded-md md:rounded-lg border border-white/5 text-[5px] md:text-[10px] font-black uppercase tracking-widest text-zinc-500">
                             {nextUserGame.homeTeamId === state.userTeamId ? 'Home' : 'Away'}
                           </div>
                         </div>
                       </div>
     
-                      <div className="flex items-center gap-4 md:gap-12 relative z-10">
-                         <div className="text-center space-y-1.5 md:space-y-3">
-                            <div className="w-12 h-12 md:w-24 md:h-24 bg-zinc-950 rounded-xl md:rounded-[2rem] p-2 md:p-5 border border-white/5 shadow-2xl group-hover:scale-110 transition-all duration-500">
+                      <div className="flex items-center gap-3 md:gap-12 relative z-10">
+                         <div className="text-center space-y-0.5 md:space-y-3">
+                            <div className="w-8 h-8 md:w-24 md:h-24 bg-zinc-950 rounded-lg md:rounded-[2rem] p-1 md:p-5 border border-white/5 shadow-2xl transition-all duration-500 group-hover:scale-105">
                               <img src={getTeamLogo(state.userTeamId)} className="w-full h-full object-contain" />
                             </div>
-                            <p className="text-[8px] md:text-xs font-black text-white italic whitespace-nowrap">{state.teams[state.userTeamId].abbreviation}</p>
+                            <p className="text-[6px] md:text-xs font-black text-white italic whitespace-nowrap tracking-tighter uppercase">{state.teams[state.userTeamId].abbreviation}</p>
                          </div>
-                         <div className="text-sm md:text-3xl font-black italic text-zinc-800">VS</div>
-                         <div className="text-center space-y-1.5 md:space-y-3">
-                            <div className="w-12 h-12 md:w-24 md:h-24 bg-zinc-950 rounded-xl md:rounded-[2rem] p-2 md:p-5 border border-white/5 shadow-2xl group-hover:scale-110 transition-all duration-500">
+                         <div className="text-[8px] md:text-3xl font-black italic text-zinc-900 uppercase">vs</div>
+                         <div className="text-center space-y-0.5 md:space-y-3">
+                            <div className="w-8 h-8 md:w-24 md:h-24 bg-zinc-950 rounded-lg md:rounded-[2rem] p-1 md:p-5 border border-white/5 shadow-2xl transition-all duration-500 group-hover:scale-105">
                               <img src={getTeamLogo(nextUserGame.homeTeamId === state.userTeamId ? nextUserGame.awayTeamId : nextUserGame.homeTeamId)} className="w-full h-full object-contain" />
                             </div>
-                            <p className="text-[8px] md:text-xs font-black text-white italic whitespace-nowrap">{state.teams[nextUserGame.homeTeamId === state.userTeamId ? nextUserGame.awayTeamId : nextUserGame.homeTeamId].abbreviation}</p>
+                            <p className="text-[6px] md:text-xs font-black text-white italic whitespace-nowrap tracking-tighter uppercase">{state.teams[nextUserGame.homeTeamId === state.userTeamId ? nextUserGame.awayTeamId : nextUserGame.homeTeamId].abbreviation}</p>
                          </div>
                       </div>
     
                       <button 
                         onClick={simulateGame}
-                        className="relative z-10 w-full md:w-auto h-12 md:h-20 px-6 md:px-12 bg-white text-black rounded-xl md:rounded-[2rem] font-black uppercase italic tracking-tighter text-xs md:text-xl hover:bg-amber-500 transition-all active:scale-95 shadow-2xl"
+                        className="relative z-10 w-full md:w-auto h-8 md:h-20 px-4 md:px-12 bg-white text-black rounded-lg md:rounded-[2rem] font-black uppercase italic tracking-tighter text-[8px] md:text-xl hover:bg-amber-500 transition-all active:scale-98 shadow-xl"
                       >
-                        Play Match
+                        Launch Simulation
                       </button>
                     </div>
                   )}
@@ -1141,7 +1341,7 @@ const CareerView: React.FC = () => {
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-lg md:text-xl font-black uppercase italic tracking-tighter">Schedule</h3>
                   </div>
-                  <div className="space-y-2 md:space-y-4">
+                  <div className="space-y-1 md:space-y-4">
                     {state.schedule
                       .filter(m => (m.homeTeamId === state.userTeamId || m.awayTeamId === state.userTeamId) && !m.played)
                       .slice(0, 5)
@@ -1151,26 +1351,27 @@ const CareerView: React.FC = () => {
                         const opponent = NBA_TEAMS.find(t => t.id === opponentId);
                         
                         return (
-                          <div key={match.id} className="bg-zinc-900/50 border border-white/5 rounded-2xl p-3 md:p-6 flex items-center justify-between group hover:bg-zinc-900 transition-all">
-                            <div className="flex items-center gap-3 md:gap-6">
+                          <div key={match.id} className="bg-zinc-900/50 border border-white/5 rounded-xl md:rounded-2xl p-1.5 md:p-6 flex items-center justify-between group hover:bg-zinc-900 transition-all transition-colors duration-300">
+                            <div className="flex items-center gap-1.5 md:gap-6">
                               <div className="text-center w-6 md:w-12">
-                                <p className="text-[6px] md:text-[8px] font-black text-zinc-600 uppercase">WK</p>
-                                <p className="text-xs md:text-lg font-black text-white italic leading-tight">{match.gameNumber}</p>
+                                <p className="text-[7px] md:text-[8px] font-black text-zinc-700 uppercase">WK</p>
+                                <p className="text-[9px] md:text-lg font-black text-white italic leading-tight">{match.gameNumber}</p>
                               </div>
                               <div className="w-px h-6 md:h-8 bg-zinc-800" />
-                              <div className="flex items-center gap-2.5 md:gap-4">
-                                <div className="w-8 h-8 md:w-12 md:h-12 bg-zinc-900 rounded-xl p-1.5 border border-white/10">
-                                  <img src={getTeamLogo(opponentId)} className="w-full h-full object-contain" />
+                              <div className="flex items-center gap-2 md:gap-4">
+                                <div className="w-6 h-6 md:w-12 md:h-12 bg-zinc-900 rounded-lg md:rounded-xl p-1 md:p-1.5 border border-white/10">
+                                   <img src={getTeamLogo(opponentId)} className="w-full h-full object-contain" />
                                 </div>
-                                <div className="max-w-[100px] md:max-w-none">
-                                  <p className="text-[6px] md:text-[8px] font-black text-zinc-500 uppercase tracking-widest leading-none">{isHome ? 'VS' : '@'} OPPONENT</p>
-                                  <p className="text-[10px] md:text-sm font-black text-white uppercase italic truncate">{opponent?.name || opponentId}</p>
+                                <div className="max-w-[80px] md:max-w-none">
+                                  <p className="text-[7px] md:text-[8px] font-black text-zinc-600 uppercase tracking-widest leading-none">{isHome ? 'VS' : '@'} OPP</p>
+                                  <p className="text-[9px] md:text-sm font-black text-white uppercase italic truncate tracking-tight">{opponent?.name || opponentId}</p>
                                 </div>
                               </div>
                             </div>
-                            <button className="md:px-6 py-2 border border-white/5 rounded-xl text-[8px] font-black text-zinc-600 uppercase tracking-widest group-hover:border-amber-500/50 group-hover:text-amber-500 transition-all hidden md:block">
-                              Details
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[7px] md:text-[10px] font-black text-zinc-800 italic uppercase">Unplayed</span>
+                              <ChevronRight size={10} className="text-zinc-800 md:hidden" />
+                            </div>
                           </div>
                         );
                       })}
@@ -1433,28 +1634,28 @@ const CareerView: React.FC = () => {
               className="max-w-4xl mx-auto space-y-8 pb-20 px-4 md:px-0"
             >
                {/* TROPHY CASE */}
-               <div className="bg-gradient-to-br from-zinc-900 to-black border border-amber-500/10 rounded-[2.5rem] p-8 md:p-12 space-y-8 relative overflow-hidden">
+               <div className="bg-gradient-to-br from-zinc-900 to-black border border-amber-500/10 rounded-[1.5rem] md:rounded-[2.5rem] p-4 md:p-12 space-y-4 md:space-y-8 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2" />
-                  <div className="flex flex-col md:flex-row items-center gap-4 relative z-10 text-center md:text-left">
-                     <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center text-black shadow-[0_0_30px_rgba(245,158,11,0.3)]">
-                        <Trophy size={24} />
+                  <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4 relative z-10 text-center md:text-left">
+                     <div className="w-10 h-10 md:w-12 md:h-12 bg-amber-500 rounded-xl md:rounded-2xl flex items-center justify-center text-black shadow-[0_0_30px_rgba(245,158,11,0.3)]">
+                        <Trophy size={20} className="md:w-6 md:h-6" />
                      </div>
-                     <div className="space-y-1">
-                        <h3 className="text-2xl font-black uppercase italic tracking-tighter text-white">Trophy Case</h3>
-                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Franchise Achievements</p>
+                     <div className="space-y-0.5 md:space-y-1">
+                        <h3 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-white">Trophy Case</h3>
+                        <p className="text-[8px] md:text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Franchise Achievements</p>
                      </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 relative z-10">
                      {[
                        { label: 'Championships', count: (state.trophyCase || []).filter(t => t.type === 'CHAMP').length, color: 'text-amber-500' },
                        { label: 'NBA MVP', count: (state.trophyCase || []).filter(t => t.type === 'MVP').length, color: 'text-white' },
                        { label: 'DPOY', count: (state.trophyCase || []).filter(t => t.type === 'DPOY').length, color: 'text-white' },
                        { label: 'Personal Record', count: (state.trophyCase || []).filter(t => t.type === 'RECORD').length, color: 'text-white' }
                      ].map((t) => (
-                       <div key={t.label} className="bg-black/40 border border-white/5 rounded-3xl p-6 text-center space-y-2 group hover:border-amber-500/30 transition-all">
-                          <p className={`text-3xl font-black italic transition-all group-hover:scale-110 ${t.color}`}>{t.count}</p>
-                          <p className="text-[9px] font-black uppercase text-zinc-600 tracking-widest leading-none">{t.label}</p>
+                       <div key={t.label} className="bg-black/40 border border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-6 text-center space-y-1 md:space-y-2 group hover:border-amber-500/30 transition-all">
+                          <p className={`text-2xl md:text-3xl font-black italic transition-all group-hover:scale-110 ${t.color}`}>{t.count}</p>
+                          <p className="text-[8px] md:text-[9px] font-black uppercase text-zinc-600 tracking-widest leading-none">{t.label}</p>
                        </div>
                      ))}
                   </div>
@@ -1468,12 +1669,12 @@ const CareerView: React.FC = () => {
 
                {/* FINANCE & ASSETS */}
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-zinc-900 border border-white/5 rounded-3xl p-8 space-y-6">
-                     <div className="space-y-1">
-                       <h3 className="text-lg font-black uppercase text-white tracking-widest italic">Salary Cap</h3>
-                       <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest tracking-[0.4em]">Season {state.season}</p>
+                  <div className="bg-zinc-900 border border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-8 space-y-4 md:space-y-6">
+                     <div className="space-y-0.5 md:space-y-1">
+                       <h3 className="text-base md:text-lg font-black uppercase text-white tracking-widest italic">Salary Cap</h3>
+                       <p className="text-[7px] md:text-[8px] font-bold text-zinc-500 uppercase tracking-widest tracking-[0.4em]">Season {state.season}</p>
                      </div>
-                     <div className="space-y-3">
+                     <div className="space-y-2 md:space-y-3">
                         <div className="flex justify-between text-[10px] font-black uppercase font-mono italic">
                            <span className="text-zinc-500">Payroll: ${(userTeam.payroll / 1000000).toFixed(1)}M</span>
                            <span className="text-amber-500">Soft Cap: $136.0M</span>
@@ -1488,10 +1689,10 @@ const CareerView: React.FC = () => {
                      </div>
                   </div>
 
-                  <div className="bg-zinc-900 border border-white/5 rounded-3xl p-8 space-y-6">
-                     <div className="space-y-1">
-                       <h3 className="text-lg font-black uppercase text-white tracking-widest italic">Future Picks</h3>
-                       <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest tracking-[0.4em]">Draft Control</p>
+                  <div className="bg-zinc-900 border border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-8 space-y-4 md:space-y-6">
+                     <div className="space-y-0.5 md:space-y-1">
+                       <h3 className="text-base md:text-lg font-black uppercase text-white tracking-widest italic">Future Picks</h3>
+                       <p className="text-[7px] md:text-[8px] font-bold text-zinc-500 uppercase tracking-widest tracking-[0.4em]">Draft Control</p>
                      </div>
                      <div className="flex flex-wrap gap-2">
                         {userTeam.draftPicks.slice(0, 6).map((p) => (
@@ -1504,9 +1705,9 @@ const CareerView: React.FC = () => {
                </div>
 
                {/* CONTRACTS */}
-               <div className="bg-zinc-900 border border-white/5 rounded-3xl overflow-hidden divide-y divide-white/5">
-                  <div className="p-6 bg-white/2">
-                    <h3 className="text-[12px] font-black uppercase italic text-white tracking-widest">Roster Contracts & Negotiations</h3>
+               <div className="bg-zinc-900 border border-white/5 rounded-2xl md:rounded-3xl overflow-hidden divide-y divide-white/5">
+                  <div className="p-4 md:p-6 bg-white/2">
+                    <h3 className="text-[10px] md:text-[12px] font-black uppercase italic text-white tracking-widest">Roster Contracts & Negotiations</h3>
                   </div>
                   {userTeam.roster.map(id => {
                      const card = findCard(id);
@@ -1514,21 +1715,20 @@ const CareerView: React.FC = () => {
                      if (!card || !contract) return null;
                      const isExpiring = contract.yearsRemaining === 1;
                      const neg = state.negotiations?.[id];
-                     const demand = marketService.calculateExtensionCost(state, id);
 
                      return (
-                        <div key={id} className="p-4 md:p-6 space-y-4 hover:bg-white/5 transition-colors group relative">
+                        <div key={id} className="p-3 md:p-6 space-y-3 md:space-y-4 hover:bg-white/5 transition-colors group relative">
                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3 md:gap-4">
-                               <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-black border border-white/5 object-contain" />
+                              <div className="flex items-center gap-2 md:gap-4">
+                               <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-black border border-white/5 object-contain" />
                                <div className="flex flex-col">
-                                  <span className="text-[12px] md:text-sm font-black text-white uppercase italic leading-none">{card.name}</span>
-                                  <span className="text-[9px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest mt-1">{card.position} • OVR {card.stats.ovr}</span>
+                                  <span className="text-[10px] md:text-sm font-black text-white uppercase italic leading-none">{card.name}</span>
+                                  <span className="text-[8px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest mt-0.5">{card.position} • OVR {card.stats.ovr}</span>
                                </div>
                               </div>
                               <div className="text-right">
-                                 <p className="text-[12px] md:text-sm font-black text-white italic leading-none">${(contract.salary/1000000).toFixed(1)}M</p>
-                                 <p className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest mt-1 ${isExpiring ? 'text-amber-500' : 'text-zinc-700'}`}>{contract.yearsRemaining}Y LEFT</p>
+                                 <p className="text-[10px] md:text-sm font-black text-white italic leading-none">${(contract.salary/1000000).toFixed(1)}M</p>
+                                 <p className={`text-[8px] md:text-[10px] font-black uppercase tracking-widest mt-0.5 ${isExpiring ? 'text-amber-500' : 'text-zinc-700'}`}>{contract.yearsRemaining}Y LEFT</p>
                               </div>
                            </div>
 
@@ -1546,57 +1746,13 @@ const CareerView: React.FC = () => {
                               </button>
                               {isExpiring && (!neg || neg.status === 'Active') && (
                                 <button 
-                                  onClick={() => {
-                                     const res = marketService.negotiateContract(state, id, demand, 3);
-                                     alert(res.message);
-                                     setState({...state});
-                                  }}
+                                  onClick={() => handleNegotiationStart(id)}
                                   className="flex-1 py-2 bg-amber-500 text-black rounded-lg font-black uppercase tracking-widest text-[8px] transition-all shadow-lg"
                                 >
-                                   Extend (3Y)
+                                   Negotiate Extension
                                 </button>
                               )}
                            </div>
-
-                           {isExpiring && (!neg || neg.status === 'Active') && (
-                             <div className="bg-black/60 border border-white/5 rounded-2xl p-4 md:p-6 space-y-5">
-                                <div className="flex items-center justify-between">
-                                  <div className="space-y-1">
-                                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Contract Demand</p>
-                                    <p className="text-lg font-black text-white italic">${(demand/1000000).toFixed(1)}M <span className="text-[10px] text-zinc-500 font-bold uppercase not-italic">/ 3 Years</span></p>
-                                  </div>
-                                  {neg && (
-                                    <div className="px-3 py-1 bg-amber-500/10 rounded-full border border-amber-500/20">
-                                      <p className="text-[10px] font-black text-amber-500 uppercase">Round {neg.rounds}/3</p>
-                                    </div>
-                                  )}
-                                </div>
-                                
-                                <div className="grid grid-cols-2 gap-3">
-                                   <button 
-                                     onClick={() => {
-                                       const res = marketService.negotiateContract(state, id, demand, 3);
-                                       alert(res.message);
-                                       setState({...state});
-                                     }}
-                                     className="py-4 bg-white text-black rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-amber-500 transition-all shadow-xl active:scale-95"
-                                   >
-                                      Accept Demand
-                                   </button>
-                                   <button 
-                                     onClick={() => {
-                                       const offer = Math.round(demand * 0.9);
-                                       const res = marketService.negotiateContract(state, id, offer, 3);
-                                       alert(res.message);
-                                       setState({...state});
-                                     }}
-                                     className="py-4 bg-zinc-900 text-white border border-white/10 rounded-xl font-black uppercase tracking-widest text-[10px] hover:border-white/30 transition-all active:scale-95"
-                                   >
-                                      Counter (-10%)
-                                   </button>
-                                </div>
-                             </div>
-                           )}
 
                            {neg?.status === 'Accepted' && (
                              <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-2xl flex items-center justify-center gap-3">
@@ -1693,19 +1849,19 @@ const CareerView: React.FC = () => {
               className="max-w-6xl mx-auto space-y-8 md:space-y-12 pb-20 px-3 md:px-4"
             >
                {/* STARTING 5 GRID */}
-               <div className="space-y-4">
+               <div className="space-y-3 md:space-y-4">
                   <div className="flex items-center justify-between">
-                     <h3 className="text-lg md:text-2xl font-black uppercase italic text-white tracking-tighter leading-none">Starting 5</h3>
-                     <span className="text-[7px] md:text-[10px] font-bold text-zinc-500 uppercase tracking-widest border border-white/10 px-2 py-0.5 rounded-full bg-white/5">Tap to Edit</span>
+                     <h3 className="text-base md:text-2xl font-black uppercase italic text-white tracking-tighter leading-none">Starting 5</h3>
+                     <span className="text-[6px] md:text-[10px] font-bold text-zinc-500 uppercase tracking-widest border border-white/10 px-1.5 py-0.5 rounded-full bg-white/5">Tap to Edit</span>
                   </div>
                   
-                  <div className="grid grid-cols-5 gap-1.5 md:gap-4">
+                  <div className="grid grid-cols-5 gap-1 md:gap-4">
                      {(['PG', 'SG', 'SF', 'PF', 'C'] as const).map(pos => {
                         const card = findCard(userTeam.lineup[pos]);
                         return (
-                           <div key={pos} className="space-y-2 md:space-y-4">
+                           <div key={pos} className="space-y-1.5 md:space-y-4">
                               <div className="text-center">
-                                 <span className="text-[7px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest bg-zinc-900 px-2 py-0.5 md:px-3 md:py-1 rounded-md border border-white/5">{pos}</span>
+                                 <span className="text-[6px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest bg-zinc-900 px-1.5 py-0.5 md:px-3 md:py-1 rounded-md border border-white/5">{pos}</span>
                               </div>
                               <div 
                                  onClick={() => setLineupModalPos(pos)}
@@ -1729,25 +1885,25 @@ const CareerView: React.FC = () => {
                </div>
 
                {/* BENCH HORIZONTAL */}
-               <div className="space-y-4">
+               <div className="space-y-3 md:space-y-4">
                   <div className="flex items-center justify-between">
-                     <h3 className="text-lg md:text-2xl font-black uppercase italic text-white tracking-tighter leading-none">Bench</h3>
+                     <h3 className="text-base md:text-2xl font-black uppercase italic text-white tracking-tighter leading-none">Bench</h3>
                      <button 
                         onClick={() => setLineupModalPos('bench')}
-                        className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-lg md:rounded-xl text-[7px] md:text-[10px] font-black text-zinc-400 uppercase tracking-widest transition-all"
+                        className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 px-2 py-1 rounded-lg md:rounded-xl text-[6px] md:text-[10px] font-black text-zinc-400 uppercase tracking-widest transition-all"
                      >
-                        <Plus size={10} /> Add
+                        <Plus size={8} /> Add
                      </button>
                   </div>
                   
-                  <div className="flex gap-2 md:gap-4 overflow-x-auto pb-4 no-scrollbar -mx-3 px-3">
+                  <div className="flex gap-1.5 md:gap-4 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2">
                      {userTeam.lineup.bench.map((id, index) => {
                         const card = findCard(id);
                         if (!card) return null;
                         return (
                            <div 
                               key={id} 
-                              className="w-[100px] md:w-[140px] shrink-0 transition-transform hover:scale-105 cursor-pointer"
+                              className="w-[85px] md:w-[140px] shrink-0 transition-transform hover:scale-105 cursor-pointer"
                               onClick={() => {
                                  if (confirm(`Remove ${card.name} from bench?`)) {
                                     userTeam.lineup.bench = userTeam.lineup.bench.filter(bid => bid !== id);
@@ -2353,7 +2509,7 @@ const CareerView: React.FC = () => {
                                     onClick={() => setViewingProspectId(null)}
                                     className="absolute top-8 right-8 p-4 bg-white/5 rounded-full text-zinc-500 hover:text-white transition-all z-20"
                                   >
-                                     <CloseIcon size={24} />
+                                     <X size={24} />
                                   </button>
 
                                   <div className="md:w-1/2 p-12 bg-gradient-to-br from-zinc-900 to-black flex items-center justify-center relative overflow-hidden">
@@ -2433,7 +2589,7 @@ const CareerView: React.FC = () => {
                     onClick={() => setLastGameResult(null)}
                     className="p-2 md:p-3 bg-white/5 rounded-full text-zinc-500 hover:text-white transition-colors"
                   >
-                    <CloseIcon size={24} />
+                    <X size={24} />
                   </button>
                 </div>
 
@@ -2444,48 +2600,46 @@ const CareerView: React.FC = () => {
                   <div className="bg-zinc-900/50 p-6 md:p-10 rounded-[2rem] border border-white/5 relative group">
                     <div className="flex items-center justify-between gap-4 md:gap-8 relative z-10">
                       {/* Away Team (Visitor) */}
-                      <div className="flex-1 flex flex-col items-center gap-2 md:gap-4 order-1">
-                        <div className="w-12 h-12 md:w-24 md:h-24 bg-black rounded-2xl md:rounded-3xl p-2 md:p-4 border border-white/5 shadow-2xl">
+                      <div className="flex-1 flex flex-col items-center gap-1.5 md:gap-4 order-1">
+                        <div className="w-10 h-10 md:w-24 md:h-24 bg-black rounded-xl md:rounded-3xl p-1.5 md:p-4 border border-white/5 shadow-2xl">
                           <img src={getTeamLogo(lastGameResult.match.awayTeamId)} className="w-full h-full object-contain" />
                         </div>
                         <div className="text-center">
-                          <p className="text-[10px] md:text-sm font-black text-zinc-500 uppercase tracking-widest">{state.teams[lastGameResult.match.awayTeamId].abbreviation}</p>
-                          <p className="hidden md:block text-xl font-black uppercase italic tracking-tighter text-white truncate px-2">{state.teams[lastGameResult.match.awayTeamId].name}</p>
+                          <p className="text-[9px] md:text-sm font-black text-zinc-600 uppercase tracking-widest leading-none">{state.teams[lastGameResult.match.awayTeamId].abbreviation}</p>
                         </div>
                       </div>
 
                       {/* Score Center */}
-                      <div className="flex items-center gap-2 md:gap-8 order-2 shrink-0">
-                        <p className={`text-3xl md:text-7xl font-black italic ${lastGameResult.result.score.away > lastGameResult.result.score.home ? 'text-white' : 'text-zinc-600'}`}>
+                      <div className="flex items-center gap-1.5 md:gap-8 order-2 shrink-0">
+                        <p className={`text-2xl md:text-7xl font-black italic tabular-nums ${lastGameResult.result.score.away > lastGameResult.result.score.home ? 'text-white' : 'text-zinc-700'}`}>
                           {lastGameResult.result.score.away}
                         </p>
-                        <div className="text-xs md:text-2xl font-black italic text-zinc-800 rotate-0 md:rotate-12 shrink-0">VS</div>
-                        <p className={`text-3xl md:text-7xl font-black italic ${lastGameResult.result.score.home > lastGameResult.result.score.away ? 'text-white' : 'text-zinc-600'}`}>
+                        <div className="text-[10px] md:text-2xl font-black italic text-zinc-900 shrink-0">VS</div>
+                        <p className={`text-2xl md:text-7xl font-black italic tabular-nums ${lastGameResult.result.score.home > lastGameResult.result.score.away ? 'text-white' : 'text-zinc-700'}`}>
                           {lastGameResult.result.score.home}
                         </p>
                       </div>
 
                       {/* Home Team (Local) */}
-                      <div className="flex-1 flex flex-col items-center gap-2 md:gap-4 order-3">
-                        <div className="w-12 h-12 md:w-24 md:h-24 bg-black rounded-2xl md:rounded-3xl p-2 md:p-4 border border-white/5 shadow-2xl">
+                      <div className="flex-1 flex flex-col items-center gap-1.5 md:gap-4 order-3">
+                        <div className="w-10 h-10 md:w-24 md:h-24 bg-black rounded-xl md:rounded-3xl p-1.5 md:p-4 border border-white/5 shadow-2xl">
                           <img src={getTeamLogo(lastGameResult.match.homeTeamId)} className="w-full h-full object-contain" />
                         </div>
                         <div className="text-center">
-                          <p className="text-[10px] md:text-sm font-black text-zinc-500 uppercase tracking-widest">{state.teams[lastGameResult.match.homeTeamId].abbreviation}</p>
-                          <p className="hidden md:block text-xl font-black uppercase italic tracking-tighter text-white truncate px-2">{state.teams[lastGameResult.match.homeTeamId].name}</p>
+                          <p className="text-[9px] md:text-sm font-black text-zinc-600 uppercase tracking-widest leading-none">{state.teams[lastGameResult.match.homeTeamId].abbreviation}</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Compact Quarters for Mobile */}
                     {lastGameResult.result.periods && (
-                      <div className="mt-6 md:hidden flex justify-center gap-2 overflow-x-auto no-scrollbar">
+                      <div className="mt-4 md:hidden flex justify-center gap-1 overflow-x-auto no-scrollbar">
                         {lastGameResult.result.periods.home.map((_, i) => (
-                          <div key={`period-compact-${i}`} className="flex flex-col items-center bg-black/40 border border-white/5 rounded-lg p-2 min-w-[50px]">
-                            <p className="text-[8px] font-black text-zinc-600 uppercase">Q{i+1}</p>
-                            <div className="flex gap-2 text-[10px] font-bold text-white italic">
+                          <div key={`period-compact-${i}`} className="flex flex-col items-center bg-black/40 border border-white/5 rounded-md p-1.5 min-w-[38px]">
+                            <p className="text-[6px] font-black text-zinc-700 uppercase">Q{i+1}</p>
+                            <div className="flex gap-1 text-[8px] font-black text-white italic tabular-nums">
                               <span>{lastGameResult.result.periods.away[i]}</span>
-                              <span className="text-zinc-700">-</span>
+                              <span className="text-zinc-800">-</span>
                               <span>{lastGameResult.result.periods.home[i]}</span>
                             </div>
                           </div>
@@ -2503,37 +2657,36 @@ const CareerView: React.FC = () => {
                           {state.teams[lastGameResult.match[side === 'home' ? 'homeTeamId' : 'awayTeamId']]?.name || 'Unknown Team'} Box Score
                         </h4>
                       </div>
-                      <div className="bg-zinc-900 border border-white/5 rounded-2xl overflow-x-auto no-scrollbar">
-                        <table className="w-full text-left min-w-[350px] border-collapse">
+                      <div className="bg-zinc-900 border border-white/5 rounded-xl md:rounded-2xl overflow-x-auto no-scrollbar">
+                        <table className="w-full text-left min-w-[320px] md:min-w-[350px] border-collapse">
                           <thead className="bg-white/5 border-b border-white/5">
-                            <tr className="text-[10px] font-black text-zinc-500 uppercase">
-                              <th className="px-3 py-2">PLAYER</th>
-                              <th className="px-2 py-2 text-center">MIN</th>
-                              <th className="px-2 py-2 text-center text-white">PTS</th>
-                              <th className="px-2 py-2 text-center">REB</th>
-                              <th className="px-2 py-2 text-center">AST</th>
-                              <th className="px-2 py-2 text-center">STL</th>
-                              <th className="px-2 py-2 text-center">BLK</th>
-                              <th className="px-2 py-2 text-center">FG%</th>
-                              <th className="px-2 py-2 text-center">+/-</th>
+                            <tr className="text-[7px] md:text-[10px] font-black text-zinc-600 uppercase tracking-[0.1em]">
+                              <th className="px-2 md:px-3 py-1.5 md:py-2">PLAYER</th>
+                              <th className="px-1 md:px-2 py-1.5 md:py-2 text-center">MIN</th>
+                              <th className="px-1 md:px-2 py-1.5 md:py-2 text-center text-white italic">PTS</th>
+                              <th className="px-1 md:px-2 py-1.5 md:py-2 text-center">REB</th>
+                              <th className="px-1 md:px-2 py-1.5 md:py-2 text-center">AST</th>
+                              <th className="hidden md:table-cell px-2 py-2 text-center">STL</th>
+                              <th className="hidden md:table-cell px-2 py-2 text-center">BLK</th>
+                              <th className="px-1 md:px-2 py-1.5 md:py-2 text-center font-mono">FG%</th>
+                              <th className="px-1 md:px-2 py-1.5 md:py-2 text-center">+/-</th>
                             </tr>
                           </thead>
-                          <tbody>
+                          <tbody className="divide-y divide-white/5">
                             {(lastGameResult.result.boxScore[side as keyof typeof lastGameResult.result.boxScore] as any[]).map((p) => {
                                const card = findCard(p.playerId);
-                               // FG% mock or calculated if fields available (assuming pts/shots relationship or simple mock)
                                const fgp = card ? (40 + (card.stats.ovr / 5) + (Math.random() * 5)).toFixed(1) : "45.0";
                                return (
-                                <tr key={p.playerId} className="border-b border-white/5 hover:bg-white/5 h-[36px]">
-                                  <td className="px-3 py-1 font-bold text-[12px] truncate max-w-[120px]">{p.name.split(' ').pop()}</td>
-                                  <td className="px-2 py-1 text-center text-[11px] text-zinc-500">{(p.minutes || 0).toFixed(0)}</td>
-                                  <td className="px-2 py-1 text-center text-[12px] font-black text-white">{p.points}</td>
-                                  <td className="px-2 py-1 text-center text-[11px] text-zinc-400">{p.rebounds}</td>
-                                  <td className="px-2 py-1 text-center text-[11px] text-zinc-400">{p.assists}</td>
-                                  <td className="px-2 py-1 text-center text-[11px] text-zinc-400">{p.steals || 0}</td>
-                                  <td className="px-2 py-1 text-center text-[11px] text-zinc-400">{p.blocks || 0}</td>
-                                  <td className="px-2 py-1 text-center text-[11px] text-zinc-600 font-mono">{fgp}%</td>
-                                  <td className={`px-2 py-1 text-center text-[11px] font-bold ${p.plusMinus > 0 ? 'text-green-500' : p.plusMinus < 0 ? 'text-red-500' : 'text-zinc-600'}`}>{p.plusMinus > 0 ? `+${p.plusMinus}` : p.plusMinus}</td>
+                                <tr key={p.playerId} className="hover:bg-white/5 transition-colors group h-[30px] md:h-[36px]">
+                                  <td className="px-2 md:px-3 py-1 font-black text-[9px] md:text-[12px] uppercase italic truncate max-w-[80px] md:max-w-[120px] leading-tight">{p.name.split(' ').pop()}</td>
+                                  <td className="px-1 md:px-2 py-1 text-center text-[8px] md:text-[11px] text-zinc-600 tabular-nums">{(p.minutes || 0).toFixed(0)}</td>
+                                  <td className="px-1 md:px-2 py-1 text-center text-[9px] md:text-[12px] font-black italic text-white tabular-nums">{p.points}</td>
+                                  <td className="px-1 md:px-2 py-1 text-center text-[8px] md:text-[11px] text-zinc-500 tabular-nums">{p.rebounds}</td>
+                                  <td className="px-1 md:px-2 py-1 text-center text-[8px] md:text-[11px] text-zinc-500 tabular-nums">{p.assists}</td>
+                                  <td className="hidden md:table-cell px-2 py-1 text-center text-[11px] text-zinc-500 tabular-nums">{p.steals || 0}</td>
+                                  <td className="hidden md:table-cell px-2 py-1 text-center text-[11px] text-zinc-500 tabular-nums">{p.blocks || 0}</td>
+                                  <td className="px-1 md:px-2 py-1 text-center text-[8px] md:text-[11px] text-zinc-700 font-mono tabular-nums">{fgp}%</td>
+                                  <td className={`px-1 md:px-2 py-1 text-center text-[8px] md:text-[11px] font-black tabular-nums ${p.plusMinus > 0 ? 'text-green-500/80' : p.plusMinus < 0 ? 'text-red-500/80' : 'text-zinc-800'}`}>{p.plusMinus > 0 ? `+${p.plusMinus}` : p.plusMinus}</td>
                                 </tr>
                                );
                             })}

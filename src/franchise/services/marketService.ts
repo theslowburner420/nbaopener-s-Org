@@ -109,24 +109,41 @@ export const marketService = {
     return { success: true, reason: 'Released successfully' };
   },
 
-  calculateExtensionCost(state: FranchiseState, cardId: string): number {
-    const card = ALL_CARDS.find(c => c.id === cardId) || state.customCards?.find(c => c.id === cardId);
+  calculateMarketDemand(state: FranchiseState, cardId: string): { salary: number; years: number } {
+    const card = ALL_CARDS.find(c => c.id === cardId) || state.customCards?.find(c => c.id === cardId) || state.draftPool?.find(c => c.id === cardId);
     const progress = state.playerProgress[cardId];
-    if (!card) return 5000000;
+    if (!card) return { salary: 5000000, years: 1 };
     
-    const ovr = (progress as any)?.ovr || card.stats.ovr;
-    if (ovr >= 95) return 55000000;
-    if (ovr >= 90) return 45000000;
-    if (ovr >= 85) return 30000000;
-    if (ovr >= 80) return 15000000;
-    if (ovr >= 75) return 8000000;
-    return 3000000;
+    const ovr = progress?.ovr || card.stats.ovr;
+    const age = progress?.age || 25;
+    const potential = progress?.potential || ovr;
+    
+    let baseSalary = 1000000;
+    if (ovr >= 95) baseSalary = 50000000;
+    else if (ovr >= 90) baseSalary = 40000000;
+    else if (ovr >= 85) baseSalary = 25000000;
+    else if (ovr >= 80) baseSalary = 12000000;
+    else if (ovr >= 75) baseSalary = 6000000;
+    else if (ovr >= 70) baseSalary = 2500000;
+
+    // Adjust for potential and age
+    if (age < 23 && potential > ovr + 5) baseSalary *= 1.2; // Young potential tax
+    if (age > 33) baseSalary *= 0.85; // Veteran discount
+
+    let preferredYears = 1;
+    if (ovr > 90) preferredYears = age > 32 ? 2 : 4;
+    else if (ovr > 80) preferredYears = age > 32 ? 1 : 3;
+    else preferredYears = age < 25 ? 2 : 1;
+
+    return { salary: Math.round(baseSalary), years: preferredYears };
   },
 
   negotiateContract(state: FranchiseState, cardId: string, offerSalary: number, offerYears: number): { success: boolean; message: string; status: "Active" | "Accepted" | "Rejected"; counterOffer?: { salary: number; years: number } } {
-    const card = ALL_CARDS.find(c => c.id === cardId) || state.customCards?.find(c => c.id === cardId);
-    const demand = this.calculateExtensionCost(state, cardId);
-    const ovr = state.playerProgress[cardId]?.ovr || card?.stats.ovr || 70;
+    const card = ALL_CARDS.find(c => c.id === cardId) || state.customCards?.find(c => c.id === cardId) || state.draftPool?.find(c => c.id === cardId);
+    const demand = this.calculateMarketDemand(state, cardId);
+    const progress = state.playerProgress[cardId];
+    const ovr = progress?.ovr || card?.stats.ovr || 70;
+    const age = progress?.age || 25;
     
     let neg = state.negotiations[cardId];
     if (!neg) {
@@ -142,43 +159,87 @@ export const marketService = {
     neg.lastOfferSalary = offerSalary;
     neg.lastOfferYears = offerYears;
 
-    const diffPercent = (demand - offerSalary) / demand;
+    const salaryDiff = (demand.salary - offerSalary) / demand.salary;
+    const yearsDiff = demand.years - offerYears;
 
-    // Constraint: OVR > 85 needs at least 3 years
-    if (ovr > 85 && offerYears < 3) {
-      if (neg.rounds >= 3) { neg.status = "Rejected"; return { success: false, message: "I told you, I need long-term security. Negotiation failed.", status: "Rejected" }; }
-      return { success: false, message: "I'm looking for at least 3 years of security. Try again.", status: "Active", counterOffer: { salary: demand, years: 3 } };
+    // Logic for different player profiles
+    // 1. Superstars (OVR 90+)
+    if (ovr >= 90) {
+      if (salaryDiff > 0.15) {
+        neg.status = "Rejected";
+        return { success: false, message: "I'm a franchise player. This offer is disrespectful. I'm testing the market.", status: "Rejected" };
+      }
+      if (yearsDiff > 1 && age < 30) {
+        return { success: false, message: "I want long-term commitment. Give me more years.", status: "Active", counterOffer: { salary: demand.salary, years: demand.years } };
+      }
     }
 
-    // Deficit Logic
-    if (diffPercent > 0.20) {
-      neg.status = "Rejected";
-      const msg = ovr > 90 ? "I'm looking for a max deal. This offer is insulting." : "I need more than that. I'm hitting free agency.";
-      return { success: false, message: msg, status: "Rejected" };
+    // 2. Veterans (Age 32+)
+    if (age >= 32 && offerYears > 2 && ovr < 85) {
+      return { success: false, message: "I'm looking for a short-term deal to stay flexible. Fewer years, please.", status: "Active", counterOffer: { salary: demand.salary, years: 1 } };
     }
 
-    if (diffPercent <= 0.05) {
+    // General acceptance criteria
+    if (salaryDiff <= 0.05 && Math.abs(yearsDiff) <= 1) {
       neg.status = "Accepted";
-      this.extendContract(state, cardId, offerYears, offerSalary);
-      return { success: true, message: "Deal reached! Extension signed.", status: "Accepted" };
+      // Determine if it's FA signing or extension
+      const userTeam = state.teams[state.userTeamId];
+      if (userTeam.roster.includes(cardId)) {
+        this.extendContract(state, cardId, offerYears, offerSalary);
+      } else {
+        // Handle FA Signing logic here or in the caller
+        this.completeFASigning(state, cardId, offerSalary, offerYears);
+      }
+      return { success: true, message: "We have a deal! I'm excited to get to work.", status: "Accepted" };
     }
 
-    // Counteroffer (5-20%)
+    // Check rounds limit
     if (neg.rounds >= 3) {
       neg.status = "Rejected";
-      return { success: false, message: "We're too far apart. See you in free agency.", status: "Rejected" };
+      return { success: false, message: "We've been through enough rounds. We're too far apart.", status: "Rejected" };
     }
 
-    // Make a counter-offer: slightly higher salary or more years
-    const counterSalary = Math.round(demand * (1 - (diffPercent / 2)));
-    const counterYears = ovr > 80 ? Math.max(offerYears, 3) : offerYears;
+    // Hard rejection for lowball
+    if (salaryDiff > 0.4) {
+      neg.status = "Rejected";
+      return { success: false, message: "This isn't even close. I'm walking away.", status: "Rejected" };
+    }
 
+    // Counter Offer
+    const counterSalary = Math.round(demand.salary * (1 - (salaryDiff * 0.4)));
+    const counterYears = demand.years;
+
+    let msg = "I'm interested, but you'll need to improve the terms. Here is my counter.";
+    if (salaryDiff > 0.2) msg = "That's quite low for a player of my caliber. Let's try something closer to this.";
+    
     return { 
       success: false, 
-      message: `I'm interested, but you'll need to do better. How about this?`, 
+      message: msg, 
       status: "Active",
       counterOffer: { salary: counterSalary, years: counterYears }
     };
+  },
+
+  completeFASigning(state: FranchiseState, cardId: string, salary: number, years: number): { success: boolean, reason: string } {
+    const userTeam = state.teams[state.userTeamId];
+    if (userTeam.roster.length >= 15) return { success: false, reason: 'Roster full' };
+
+    userTeam.roster.push(cardId);
+    userTeam.payroll += salary;
+    userTeam.contracts[cardId] = {
+      playerId: cardId,
+      salary,
+      yearsRemaining: years,
+      type: 'Veteran',
+      noTradeClause: false,
+      injuryStatus: 'Healthy'
+    };
+    state.freeAgentPool = state.freeAgentPool.filter(id => id !== cardId);
+    return { success: true, reason: 'Signed' };
+  },
+
+  calculateExtensionCost(state: FranchiseState, cardId: string): number {
+    return this.calculateMarketDemand(state, cardId).salary;
   },
 
   extendContract(state: FranchiseState, cardId: string, years: number, salary?: number): { success: boolean; reason: string } {

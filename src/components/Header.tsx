@@ -38,7 +38,7 @@ const Header: React.FC = React.memo(() => {
   }, [coins]);
 
   return (
-    <header className="h-14 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-900 flex items-center justify-between px-4 shrink-0 z-[5000] relative">
+    <header className="h-12 md:h-14 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-900 flex items-center justify-between px-2 md:px-4 shrink-0 z-[5000] relative">
       {/* Left side: Logo */}
       <div className="flex items-center gap-2">
         <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-[0_4px_12px_rgba(255,255,255,0.15)] border border-zinc-200 shrink-0">
