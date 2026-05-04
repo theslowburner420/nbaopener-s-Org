@@ -21,7 +21,8 @@ import {
   X,
   Sparkles,
   AlertTriangle,
-  Lock
+  Lock,
+  Star
 } from 'lucide-react';
 import { NBA_TEAMS, getTeamLogo } from '../data/nbaTeams';
 import { ALL_CARDS } from '../data/cards';
@@ -87,8 +88,10 @@ const CareerView: React.FC = () => {
   const playerTeamMap = useMemo(() => {
     const map = new Map<string, TeamObject>();
     if (!state?.teams) return map;
-    Object.values(state.teams).forEach(team => {
-      team.roster.forEach(pid => map.set(pid, team));
+    Object.values(state.teams).forEach((team: any) => {
+      if (team && team.roster) {
+        team.roster.forEach((pid: string) => map.set(pid, team));
+      }
     });
     return map;
   }, [state?.teams]);
@@ -425,7 +428,7 @@ const CareerView: React.FC = () => {
   }
 
   // TEAM SELECTION SCREEN
-  if (!state) {
+  if (!state || !state.userTeamId) {
     return (
       <div className="flex-1 bg-black text-white p-6 md:p-12 overflow-y-auto">
         <div className="max-w-7xl mx-auto space-y-8 md:space-y-12">
@@ -726,7 +729,20 @@ const CareerView: React.FC = () => {
     !m.played && (m.homeTeamId === state.userTeamId || m.awayTeamId === state.userTeamId)
   );
 
-  if (!userTeam) return null;
+  if (!userTeam) {
+    return (
+       <div className="flex-1 bg-black flex flex-col items-center justify-center p-12 text-center">
+          <div className="space-y-6">
+            <AlertTriangle className="text-amber-500 mx-auto" size={64} />
+            <div className="space-y-2">
+              <h2 className="text-2xl font-black uppercase italic text-white">Identity Error</h2>
+              <p className="text-zinc-500 text-sm max-w-xs font-medium">Your team profile could not be localized. Please try resetting your franchise.</p>
+            </div>
+            <button onClick={resetFranchise} className="px-8 py-3 bg-white text-black rounded-xl font-black uppercase tracking-widest text-[10px]">Back to Selection</button>
+          </div>
+       </div>
+    );
+  }
 
   const pendingUserGamesThisCycle = state.schedule.filter(m => 
     !m.played && (m.homeTeamId === state.userTeamId || m.awayTeamId === state.userTeamId) && m.gameNumber < state.week + 4

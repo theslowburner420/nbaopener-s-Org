@@ -6,6 +6,15 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
+@utility pt-safe { padding-top: env(safe-area-inset-top); }
+@utility pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+@utility pl-safe { padding-left: env(safe-area-inset-left); }
+@utility pr-safe { padding-right: env(safe-area-inset-right); }
+@utility mt-safe { margin-top: env(safe-area-inset-top); }
+@utility mb-safe { margin-bottom: env(safe-area-inset-bottom); }
+@utility ml-safe { margin-left: env(safe-area-inset-left); }
+@utility mr-safe { margin-right: env(safe-area-inset-right); }
+
 :root {
   color-scheme: dark;
 }

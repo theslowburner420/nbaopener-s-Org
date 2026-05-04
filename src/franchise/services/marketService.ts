@@ -119,7 +119,7 @@ export const marketService = {
 
   calculateMarketDemand(state: FranchiseState, cardId: string): { salary: number; years: number } {
     const card = ALL_CARDS.find(c => c.id === cardId) || state.customCards?.find(c => c.id === cardId) || state.draftPool?.find(c => c.id === cardId);
-    const progress = state.playerProgress[cardId];
+    const progress = state.playerProgress?.[cardId];
     if (!card) return { salary: 5000000, years: 1 };
     
     const ovr = progress?.ovr || card.stats.ovr;

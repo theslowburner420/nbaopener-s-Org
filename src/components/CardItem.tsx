@@ -63,7 +63,12 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
   const [isHovered, setIsHovered] = useState(false);
   const isMini = mode === 'mini';
   
+  if (!card && !showBack) return null;
+
   const { rarityClass, categoryClass, isDarkCard, isHolo, isFranchise, isLegend, isDPOY, isROTY, isXFactor, isVintage, isMoment, RarityColor } = useMemo(() => {
+    if (!card) {
+       return { rarityClass: '', categoryClass: '', isDarkCard: true, isHolo: false, isFranchise: false, isLegend: false, isDPOY: false, isROTY: false, isXFactor: false, isVintage: false, isMoment: false, RarityColor: '#94A3B8' };
+    }
     const rClass = getRarityClass(card.rarity);
     const rColor = RARITY_COLORS[card.rarity] || '#94A3B8';
     
