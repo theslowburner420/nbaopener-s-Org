@@ -12,6 +12,12 @@ interface CardItemProps {
   isFocused?: boolean;
   isNew?: boolean;
   quantity?: number;
+  dynamicOvr?: number;
+  dynamicStats?: {
+    points: number;
+    rebounds: number;
+    assists: number;
+  };
 }
 
 const getRarityClass = (rarity: Rarity) => {
@@ -59,9 +65,12 @@ const RARITY_COLORS: Record<Rarity, string> = {
   'allnba_1st': '#F59E0B',   // Gold/Amber
 };
 
-const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', onClick, showBack = false, isFocused = false, isNew = false, quantity = 0 }) => {
+const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', onClick, showBack = false, isFocused = false, isNew = false, quantity = 0, dynamicOvr, dynamicStats }) => {
   const [isHovered, setIsHovered] = useState(false);
   const isMini = mode === 'mini';
+  
+  const displayOvr = dynamicOvr !== undefined ? dynamicOvr : (card?.stats.ovr || 0);
+  const displayStats = dynamicStats || card?.stats;
   
   if (!card && !showBack) return null;
 
@@ -278,7 +287,7 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
             </span>
           </div>
           <div className="bg-black/80 backdrop-blur-sm rounded px-1 py-0.5 border border-white/20">
-            <span className="text-[9px] font-black text-white italic leading-none">{card.stats.ovr}</span>
+            <span className="text-[9px] font-black text-white italic leading-none">{displayOvr}</span>
           </div>
         </div>
       );
@@ -305,7 +314,7 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
             OVR
           </span>
           <span className={`text-xl md:text-2xl font-black leading-none drop-shadow-sm italic ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'}`}>
-            {card.stats.ovr}
+            {displayOvr}
           </span>
         </div>
       </div>
@@ -362,9 +371,9 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
 
   const renderStats = () => {
     const stats = [
-      { label: card.category === 'Coach' || card.category === 'Coach of the Year' || card.category === 'Logo' ? 'WINS' : card.category === 'Arena' ? 'CAP' : 'PTS', value: card.stats.points, color: 'bg-amber-400', borderColor: 'border-amber-600' },
-      { label: card.category === 'Coach' ? 'TITLES' : card.category === 'Coach of the Year' || card.category === 'Logo' ? 'LOSSES' : card.category === 'Arena' ? 'YEAR' : 'REB', value: card.stats.rebounds, color: 'bg-zinc-400', borderColor: 'border-zinc-600' },
-      { label: card.category === 'Coach' ? 'EXP' : card.category === 'Coach of the Year' || card.category === 'Logo' ? 'TITLES' : card.category === 'Arena' ? 'TYPE' : 'AST', value: card.stats.assists, color: 'bg-blue-400', borderColor: 'border-blue-600' },
+      { label: card.category === 'Coach' || card.category === 'Coach of the Year' || card.category === 'Logo' ? 'WINS' : card.category === 'Arena' ? 'CAP' : 'PTS', value: displayStats?.points || 0, color: 'bg-amber-400', borderColor: 'border-amber-600' },
+      { label: card.category === 'Coach' ? 'TITLES' : card.category === 'Coach of the Year' || card.category === 'Logo' ? 'LOSSES' : card.category === 'Arena' ? 'YEAR' : 'REB', value: displayStats?.rebounds || 0, color: 'bg-zinc-400', borderColor: 'border-zinc-600' },
+      { label: card.category === 'Coach' ? 'EXP' : card.category === 'Coach of the Year' || card.category === 'Logo' ? 'TITLES' : card.category === 'Arena' ? 'TYPE' : 'AST', value: displayStats?.assists || 0, color: 'bg-blue-400', borderColor: 'border-blue-600' },
     ];
 
     if (isMini) {

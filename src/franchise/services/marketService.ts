@@ -28,15 +28,18 @@ export const marketService = {
     }
 
     // Process Signing
-    userTeam.roster.push(cardId);
+    userTeam.roster = [...userTeam.roster, cardId];
     userTeam.payroll += salary;
-    userTeam.contracts[cardId] = {
-      playerId: cardId,
-      salary,
-      yearsRemaining: 1,
-      type: 'Veteran',
-      noTradeClause: false,
-      injuryStatus: 'Healthy'
+    userTeam.contracts = {
+      ...userTeam.contracts,
+      [cardId]: {
+        playerId: cardId,
+        salary,
+        yearsRemaining: 1,
+        type: 'Veteran',
+        noTradeClause: false,
+        injuryStatus: 'Healthy'
+      }
     };
 
     // Remove from pool
@@ -60,25 +63,31 @@ export const marketService = {
     
     if (!card) return { success: false, reason: 'Card not found' };
 
-    const salary = 1500000; // Fixed rookie salary $1.5M as requested
-
-    // If it's a new card object, add to customCards
-    if (typeof player === 'object' && !state.customCards?.find(c => c.id === player.id)) {
-      if (!state.customCards) state.customCards = [];
-      state.customCards.push(player);
+    // Remove from draftPool if exists
+    if (state.draftPool) {
+      state.draftPool = state.draftPool.filter(p => p.id !== cardId);
     }
 
-    team.roster.push(cardId);
+    const salary = 1500000; // Fixed rookie salary $1.5M as requested
+
+    if (typeof player === 'object' && !state.customCards?.find(c => c.id === player.id)) {
+      state.customCards = [...(state.customCards || []), player];
+    }
+
+    team.roster = [...team.roster, cardId];
     team.payroll += salary;
-    team.contracts[cardId] = {
-      playerId: cardId,
-      salary,
-      yearsRemaining: 4,
-      type: 'Rookie',
-      noTradeClause: false,
-      injuryStatus: 'Healthy',
-      canExtend: true,
-      canTrade: true
+    team.contracts = {
+      ...team.contracts,
+      [cardId]: {
+        playerId: cardId,
+        salary,
+        yearsRemaining: 4,
+        type: 'Rookie',
+        noTradeClause: false,
+        injuryStatus: 'Healthy',
+        canExtend: true,
+        canTrade: true
+      }
     };
 
     // Add to playerProgress
@@ -234,15 +243,18 @@ export const marketService = {
     const userTeam = state.teams[state.userTeamId];
     if (userTeam.roster.length >= 15) return { success: false, reason: 'Roster full' };
 
-    userTeam.roster.push(cardId);
+    userTeam.roster = [...userTeam.roster, cardId];
     userTeam.payroll += salary;
-    userTeam.contracts[cardId] = {
-      playerId: cardId,
-      salary,
-      yearsRemaining: years,
-      type: 'Veteran',
-      noTradeClause: false,
-      injuryStatus: 'Healthy'
+    userTeam.contracts = {
+      ...userTeam.contracts,
+      [cardId]: {
+        playerId: cardId,
+        salary,
+        yearsRemaining: years,
+        type: 'Veteran',
+        noTradeClause: false,
+        injuryStatus: 'Healthy'
+      }
     };
     state.freeAgentPool = state.freeAgentPool.filter(id => id !== cardId);
     return { success: true, reason: 'Signed' };

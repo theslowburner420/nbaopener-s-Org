@@ -78,11 +78,27 @@ const CareerView: React.FC = () => {
     
     // Apply progression overrides if any
     const progress = state?.playerProgress?.[id];
+    let card = { ...baseCard };
     if (progress?.ovr) {
-      return { ...baseCard, stats: { ...baseCard.stats, ovr: progress.ovr } };
+      card.stats = { ...card.stats, ovr: progress.ovr };
     }
-    return baseCard;
-  }, [allCardsLookupMap, state?.playerProgress]);
+
+    // Optionally include seasonal stats if they exist to be used in CardItem
+    const seasonal = state?.stats?.seasonal?.[id];
+    if (seasonal && seasonal.gamesPlayed > 0) {
+      card = {
+        ...card,
+        stats: {
+          ...card.stats,
+          points: Math.round((seasonal.points / seasonal.gamesPlayed) * 10) / 10,
+          rebounds: Math.round((seasonal.rebounds / seasonal.gamesPlayed) * 10) / 10,
+          assists: Math.round((seasonal.assists / seasonal.gamesPlayed) * 10) / 10
+        }
+      };
+    }
+
+    return card;
+  }, [allCardsLookupMap, state?.playerProgress, state?.stats?.seasonal]);
 
   // OPTIMIZATION: Memoized Player-to-Team Mapping
   const playerTeamMap = useMemo(() => {
@@ -176,11 +192,31 @@ const CareerView: React.FC = () => {
       return null;
     };
 
+    const finals = state.playoffSeries.find(s => s.round === 4);
+    let finalsMvp = null;
+    if (finals && finals.winnerId && finals.matches.length > 0) {
+      const champRoster = state.teams[finals.winnerId].roster;
+      const finalBoxScores = finals.matches.flatMap(m => 
+         m.winner === finals.winnerId ? (m.boxScore?.home || []) : (m.boxScore?.away || [])
+      ).filter(be => champRoster.includes(be.playerId));
+      
+      const performance: Record<string, number> = {};
+      finalBoxScores.forEach(be => {
+        performance[be.playerId] = (performance[be.playerId] || 0) + (be.points + be.rebounds + be.assists + be.steals + be.blocks);
+      });
+      
+      const fmvpId = Object.keys(performance).sort((a,b) => performance[b] - performance[a])[0];
+      if (fmvpId) {
+        finalsMvp = findCard(fmvpId);
+      }
+    }
+
     return {
       mvp: mvpCandidates[0],
       dpoy: dpoyCandidates[0],
       roy: royCandidates[0],
       mip: mipCandidates[0],
+      finalsMvp,
       allNba: [
         getBestForPos('PG'), 
         getBestForPos('SG'), 
@@ -195,7 +231,7 @@ const CareerView: React.FC = () => {
         mip: mipCandidates
       }
     };
-  }, [state?.stats?.seasonal, state?.teams, findCard, state?.season, state?.playerProgress]);
+  }, [state?.stats?.seasonal, state?.teams, findCard, state?.season, state?.playerProgress, state?.playoffSeries]);
 
   const [selectedConf, setSelectedConf] = useState<'East' | 'West'>('East');
   const [lineupModalPos, setLineupModalPos] = useState<string | null>(null);
@@ -1226,26 +1262,49 @@ const CareerView: React.FC = () => {
                         <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px]">Title Secured</p>
                       </div>
                    </div>
-                </div>
+                 </div>
 
-                <div className="pt-8">
+                 {(() => {
+                   const fmvp = seasonAwards?.finalsMvp;
+                   if (fmvp) {
+                      const fmvpCard = findCard(fmvp.id);
+                      if (fmvpCard) {
+                        return (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }}
+                            className="bg-zinc-900/50 p-6 md:p-8 rounded-[2rem] border border-amber-500/30 flex flex-col md:flex-row items-center gap-6 max-w-md mx-auto"
+                          >
+                             <div className="w-24 md:w-32 shrink-0">
+                                <CardItem card={fmvpCard} isOwned={true} mode="mini" />
+                             </div>
+                             <div className="text-center md:text-left space-y-2">
+                                <div className="flex items-center justify-center md:justify-start gap-2">
+                                   <Star className="text-amber-500" size={14} fill="currentColor" />
+                                   <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Finals MVP</span>
+                                </div>
+                                <h4 className="text-xl md:text-2xl font-black text-white italic uppercase tracking-tight">{fmvpCard.name}</h4>
+                                <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-[0.2em] leading-relaxed">
+                                   Led his team to glory with a historic finals performance.
+                                </p>
+                             </div>
+                          </motion.div>
+                        );
+                      }
+                   }
+                   return null;
+                 })()}
+
+                 <div className="pt-8">
                   <button 
                     onClick={() => {
-                        // Advance to off-season logic or Draft
-                        // For now we just reset championId and advance phase?
-                        // Or set phase to Draft
-                        const newState = { ...state, championId: undefined, phase: 'Draft' as const, season: state.season + 1, week: 0 };
-                        // We also need to clear schedule and playoffSeries for new season
-                        newState.schedule = []; 
-                        newState.playoffSeries = [];
-                        // In a real game we would generate new schedule here
-                        // But let's follow the user's "Offseason/Draft" instruction
+                        const newState = advanceSeason(state);
                         setState(newState);
                         stateService.save(newState);
+                        notifySuccess("Season advanced! Good luck in the Draft.");
                     }}
                     className="group relative px-12 py-5 bg-white text-black rounded-2xl font-black uppercase italic tracking-tight text-xl hover:bg-amber-500 transition-all active:scale-95 shadow-[0_20px_50px_rgba(255,255,255,0.2)]"
                   >
-                    Proceed to Draft
+                    Proceed to Draft Pool
                     <Sparkles className="absolute -top-2 -right-2 text-white group-hover:animate-spin" size={24} />
                   </button>
                 </div>
@@ -1299,7 +1358,7 @@ const CareerView: React.FC = () => {
       </AnimatePresence>
 
       {/* NAVIGATION - Improved for Mobile Vertical */}
-      <div className="bg-zinc-950/95 backdrop-blur-3xl border-t border-white/5 md:border-t-0 md:border-b landscape:border-b-0 landscape:border-r fixed bottom-0 left-0 right-0 md:sticky md:top-0 landscape:top-0 landscape:left-0 z-40 overflow-x-auto landscape:overflow-y-auto no-scrollbar touch-pan-x hide-scrollbar scroll-smooth landscape:h-screen landscape:w-20 lg:landscape:w-24 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+      <div className="bg-zinc-950/95 backdrop-blur-3xl border-t border-white/5 md:border-t-0 md:border-b landscape:border-b-0 landscape:border-r fixed bottom-0 left-0 right-0 md:sticky md:top-0 landscape:top-0 landscape:left-0 z-[6000] overflow-x-auto landscape:overflow-y-auto no-scrollbar touch-pan-x hide-scrollbar scroll-smooth landscape:h-screen landscape:w-20 lg:landscape:w-24 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
         <div className="flex px-4 md:px-12 landscape:px-2 gap-2 md:gap-2 landscape:gap-4 py-3 md:py-2 landscape:py-8 min-w-max md:min-w-0 h-full items-center landscape:flex-col landscape:justify-start">
           {[
             { id: 'hub', label: 'HUB', icon: LayoutDashboard },
@@ -1806,8 +1865,8 @@ const CareerView: React.FC = () => {
                   </div>
                </div>
 
-               {/* FIXED BOTTOM ACTION BAR */}
-               <div className="fixed bottom-0 left-0 right-0 h-24 bg-black/80 backdrop-blur-xl border-t border-white/10 z-[5000] flex items-center justify-center px-6">
+               {/* FIXED BOTTOM ACTION BAR - Adjusted for Nav visibility on Mobile Vertical */}
+               <div className="fixed bottom-[74px] md:bottom-0 landscape:bottom-0 left-0 right-0 h-24 bg-black/80 backdrop-blur-xl border-t border-white/10 z-[5000] flex items-center justify-center px-6">
                   <div className="max-w-4xl w-full flex items-center justify-between gap-6">
                      <div className="flex gap-4">
                         <div className="space-y-1">
@@ -2640,9 +2699,9 @@ const CareerView: React.FC = () => {
                                               <span className="px-1.5 py-0.5 bg-zinc-800 text-zinc-500 text-[6px] md:text-[8px] font-black rounded uppercase tracking-widest">{card.position}</span>
                                               <p className="text-[6px] md:text-[8px] font-black text-amber-500/50 uppercase tracking-[0.2em]">{card.stats.ovr >= 80 ? 'Elite' : 'Developing'}</p>
                                            </div>
-                                           <h4 className="text-sm md:text-xl font-black text-white italic uppercase truncate tracking-tight">{card.name}</h4>
+                                           <h4 className="text-xs md:text-xl font-black text-white italic uppercase truncate tracking-tight">{card.name}</h4>
                                            <div className="flex items-end gap-1">
-                                              <p className="text-2xl md:text-4xl font-black text-amber-500 italic leading-none">{card.stats.ovr}</p>
+                                              <p className="text-xl md:text-4xl font-black text-amber-500 italic leading-none">{card.stats.ovr}</p>
                                               <p className="text-[6px] md:text-[10px] font-black text-zinc-800 uppercase not-italic mb-0.5 md:mb-1">OVR</p>
                                            </div>
                                         </div>
@@ -2653,6 +2712,11 @@ const CareerView: React.FC = () => {
                                                  <img src={getTeamLogo(histEntry.teamId)} className="w-full h-full object-contain" />
                                               </div>
                                               Picked #{histEntry.pick}
+                                           </div>
+                                        )}
+                                        {isUserTurn && !isPicked && (
+                                           <div className="mt-2 md:mt-4 pt-2 md:pt-3 border-t border-amber-500/20">
+                                              <span className="text-[8px] md:text-[10px] font-black text-amber-500 uppercase italic">Your Pick is active</span>
                                            </div>
                                         )}
                                      </div>
@@ -2733,46 +2797,78 @@ const CareerView: React.FC = () => {
                       </div>
                    </div>
                 </div>
-
-                {/* USER PICK OVERLAY */}
+                      {/* USER PICK OVERLAY */}
                 <AnimatePresence>
-                   {!draftState.isPaused && draftState.pick <= 60 && draftState.order[(draftState.pick - 1) % 30] === state.userTeamId && (
+                   {!draftState.isPaused && draftState.pick <= 60 && draftState.order[(draftState.pick - 1) % 30] === state.userTeamId && draftState.timer <= 30 && (
                       <motion.div 
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[1000] bg-black/90 backdrop-blur-2xl flex items-center justify-center p-6"
+                        className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-4 md:p-12 overflow-y-auto"
                       >
                          <motion.div 
-                           initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }}
-                           className="bg-zinc-950 border border-amber-500/40 rounded-[4rem] p-12 md:p-20 text-center space-y-12 max-w-xl w-full relative overflow-hidden shadow-[0_0_150px_rgba(245,158,11,0.15)]"
+                           initial={{ scale: 0.9, y: 50 }} animate={{ scale: 1, y: 0 }}
+                           className="bg-zinc-950 border border-amber-500/40 rounded-[3rem] md:rounded-[5rem] p-8 md:p-16 text-center space-y-10 md:space-y-16 max-w-5xl w-full relative overflow-hidden shadow-[0_0_200px_rgba(245,158,11,0.2)] my-auto"
                          >
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 bg-amber-500/20 blur-[80px] rounded-full" />
-                            <div className="space-y-4 relative z-10">
-                               <h2 className="text-7xl md:text-9xl font-black italic uppercase tracking-tighter text-white leading-none">ON THE CLOCK</h2>
-                               <p className="text-amber-500 text-xs md:text-sm font-black uppercase tracking-[0.6em] italic">Your franchise future depends on this</p>
-                            </div>
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-amber-500/20 blur-[120px] rounded-full" />
                             
-                            <div className="relative flex items-center justify-center py-4 md:py-10">
-                               <svg className="w-32 h-32 md:w-64 md:h-64 -rotate-90">
-                                  <circle cx="50%" cy="50%" r="48%" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-zinc-900" />
-                                  <motion.circle 
-                                    cx="50%" cy="50%" r="48%" stroke="currentColor" strokeWidth="6" fill="transparent" 
-                                    className="text-amber-500" 
-                                    strokeDasharray="100 100"
-                                    animate={{ strokeDashoffset: [0, 100] }}
-                                    transition={{ duration: 30, ease: "linear" }}
-                                  />
-                               </svg>
-                               <div className="absolute inset-0 flex items-center justify-center">
-                                  <span className="text-4xl md:text-8xl font-black italic text-white tabular-nums">{draftState.timer}</span>
-                                </div>
+                            <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                               <div className="space-y-4 text-center md:text-left flex-1">
+                                  <h2 className="text-6xl md:text-8xl font-black italic uppercase tracking-tighter text-white leading-none">YOUR TURN</h2>
+                                  <p className="text-amber-500 text-[10px] md:text-xs font-black uppercase tracking-[0.6em] italic">Pick #{draftState.pick} • Make your choice</p>
+                               </div>
+
+                               <div className="relative flex items-center justify-center shrink-0">
+                                  <svg className="w-24 h-24 md:w-40 md:h-40 -rotate-90">
+                                     <circle cx="50%" cy="50%" r="46%" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-zinc-900" />
+                                     <motion.circle 
+                                       cx="50%" cy="50%" r="46%" stroke="currentColor" strokeWidth="4" fill="transparent" 
+                                       className="text-amber-500" 
+                                       strokeDasharray="100 100"
+                                       animate={{ strokeDashoffset: [0, 100] }}
+                                       transition={{ duration: 30, ease: "linear" }}
+                                     />
+                                  </svg>
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                     <span className="text-3xl md:text-6xl font-black italic text-white tabular-nums">{draftState.timer}</span>
+                                   </div>
+                               </div>
                             </div>
 
-                            <div className="pt-6 relative z-10">
+                            <div className="space-y-6 relative z-10 w-full">
+                               <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest text-center">Top Recommended Prospects</p>
+                               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                  {state.draftPool?.slice(0, 3).map((p) => (
+                                     <button 
+                                       key={`quick-pick-${p.id}`}
+                                       onClick={() => handleUserDraftChoice(p)}
+                                       className="group bg-zinc-900/50 border border-white/5 rounded-[2.5rem] p-6 hover:bg-amber-500 transition-all active:scale-95 text-left flex flex-col items-center gap-4 hover:border-transparent"
+                                     >
+                                        <div className="w-32">
+                                           <CardItem card={p} mode="mini" isOwned={false} />
+                                        </div>
+                                        <div className="text-center space-y-1">
+                                           <p className="text-xs font-black text-white italic group-hover:text-black uppercase truncate w-full">{p.name}</p>
+                                           <p className="text-[10px] font-bold text-zinc-500 group-hover:text-black/60 uppercase">{p.position} • {p.stats.ovr} OVR</p>
+                                        </div>
+                                     </button>
+                                  ))}
+                               </div>
+                            </div>
+                            
+                            <div className="pt-6 relative z-10 flex flex-col md:flex-row items-center justify-center gap-4">
                                <button 
-                                 onClick={() => setDraftState(prev => ({ ...prev, timer: 999 }))} // User chooses from list
-                                 className="px-12 py-5 bg-white text-black rounded-3xl font-black uppercase tracking-widest text-[10px] shadow-2xl hover:bg-amber-400"
+                                 onClick={() => setDraftState(prev => ({ ...prev, timer: 999 }))} // Closes overlay because of timer > 30 condition
+                                 className="w-full md:w-auto px-12 py-5 bg-white/5 text-zinc-400 border border-white/10 rounded-3xl font-black uppercase tracking-widest text-[10px] hover:bg-white hover:text-black transition-all"
                                >
-                                  Select from prospect list
+                                  Browse Full List
+                               </button>
+                               <button 
+                                 onClick={() => {
+                                    const best = [...(state.draftPool || [])].sort((a,b) => b.stats.ovr - a.stats.ovr)[0];
+                                    if (best) handleUserDraftChoice(best);
+                                 }}
+                                 className="w-full md:w-auto px-12 py-5 bg-amber-500 text-black rounded-3xl font-black uppercase tracking-widest text-[10px] shadow-2xl hover:bg-amber-400"
+                               >
+                                  Best Available
                                </button>
                             </div>
                          </motion.div>

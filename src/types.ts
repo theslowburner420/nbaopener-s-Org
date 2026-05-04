@@ -28,6 +28,7 @@ export interface Card {
     rebounds: number;
     assists: number;
     ovr: number;
+    potential?: number;
   };
   description: string;
   momentTitle?: string;

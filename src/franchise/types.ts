@@ -135,13 +135,14 @@ export interface FranchiseState {
   awards: Record<number, {
     championId?: string;
     mvp?: string;
+    finalsMvp?: string;
     dpoy?: string;
     roy?: string;
     mip?: string;
     allNba: string[];
   }>;
   trophyCase: {
-    type: 'CHAMP' | 'MVP' | 'DPOY' | 'ROY' | 'RECORD';
+    type: 'CHAMP' | 'MVP' | 'FMVP' | 'DPOY' | 'ROY' | 'RECORD';
     season: number;
     playerId?: string;
     label?: string;
