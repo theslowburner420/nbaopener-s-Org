@@ -161,7 +161,9 @@ export const playoffService = {
       team.lineup.PG, team.lineup.SG, team.lineup.SF, team.lineup.PF, team.lineup.C
     ].map(id => {
       if (!id) return 60;
-      const card = ALL_CARDS.find(c => c.id === id) || state.customCards?.find(c => c.id === id);
+      const card = ALL_CARDS.find(c => c.id === id) || 
+                   state.customCards?.find(c => c.id === id) || 
+                   state.draftPool?.find(c => c.id === id);
       if (!card) return 60;
       const progress = state.playerProgress[card.id];
       return progress?.ovr || card.stats.ovr;
@@ -254,8 +256,11 @@ export const playoffService = {
               const w1 = confWinners[i];
               const w2 = confWinners[i+1];
               
+              const seriesId = `round${nextRound}-${conf}-${i}`;
+              if (state.playoffSeries.some(s => s.id === seriesId)) continue;
+
               state.playoffSeries.push({
-                id: `round${nextRound}-${conf}-${i}`,
+                id: seriesId,
                 team1Id: w1.winnerId!,
                 team2Id: w2.winnerId!,
                 wins1: 0,
@@ -276,6 +281,8 @@ export const playoffService = {
      const westSeries = state.playoffSeries.find(s => s.round === 3 && s.conference === 'West');
 
      if (eastSeries?.winnerId && westSeries?.winnerId) {
+        if (state.playoffSeries.some(s => s.id === 'finals')) return;
+
         state.playoffSeries.push({
           id: `finals`,
           team1Id: eastSeries.winnerId,

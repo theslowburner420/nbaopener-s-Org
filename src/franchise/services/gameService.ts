@@ -179,17 +179,18 @@ export const gameService = {
     team.roster.forEach(playerId => {
       let contract = team.contracts[playerId];
 
+      // REMOVED MID-SEASON DECAY TO AVOID DOUBLE DECAY WITH ADVANCE SEASON
       // 1. Reducir yearsRemaining si es mitad de temporada (41 partidos)
-      if (isMidSeason && contract && contract.yearsRemaining > 0) {
-        contract.yearsRemaining -= 1;
-      }
+      // if (isMidSeason && contract && contract.yearsRemaining > 0) { ... }
 
       // 2. Lógica de Renovación si el contrato expiró o no existe
       if (!contract || contract.yearsRemaining <= 0) {
         const chance = Math.random();
         if (chance <= 0.85) {
           // Renovación Automática (85%)
-          const card = ALL_CARDS.find(c => c.id === playerId) || state.customCards?.find(c => c.id === playerId);
+          const card = ALL_CARDS.find(c => c.id === playerId) || 
+                       state.customCards?.find(c => c.id === playerId) ||
+                       state.draftPool?.find(c => c.id === playerId);
           if (card) {
             const salary = getInitialSalary(card);
             team.contracts[playerId] = {

@@ -92,7 +92,9 @@ export function applyProgression(state: FranchiseState) {
   state.freeAgentPool.forEach(id => allCardIds.add(id));
 
   allCardIds.forEach(id => {
-    const card = ALL_CARDS.find(c => c.id === id) || state.customCards?.find(c => c.id === id);
+    const card = ALL_CARDS.find(c => c.id === id) || 
+                 state.customCards?.find(c => c.id === id) || 
+                 state.draftPool?.find(c => c.id === id);
     const progress = state.playerProgress[id];
     
     if (card && progress) {
@@ -308,7 +310,37 @@ export function advanceSeason(state: FranchiseState): FranchiseState {
     team.losses = 0;
   });
 
-  // Reset Seasonal Stats
+  // CALCULATE LEAGUE AWARDS BEFORE CLEARING Seasonal Stats
+  const leagueStats = Object.keys(state.stats.seasonal).map(id => ({
+    id,
+    stats: state.stats.seasonal[id],
+    ppg: state.stats.seasonal[id].points / (state.stats.seasonal[id].gamesPlayed || 1),
+    rpg: state.stats.seasonal[id].rebounds / (state.stats.seasonal[id].gamesPlayed || 1),
+    apg: state.stats.seasonal[id].assists / (state.stats.seasonal[id].gamesPlayed || 1),
+    defVal: ((state.stats.seasonal[id].steals || 0) + (state.stats.seasonal[id].blocks || 0)) / (state.stats.seasonal[id].gamesPlayed || 1)
+  }));
+
+  // MVP Logic: Best PPG + RPG + APG
+  const mvpCand = [...leagueStats].sort((a,b) => (b.ppg + b.rpg + b.apg) - (a.ppg + a.rpg + a.apg))[0];
+  if (mvpCand) {
+    if (!newState.awards[state.season]) newState.awards[state.season] = { allNba: [] };
+    newState.awards[state.season].mvp = mvpCand.id;
+    if (userTeam && userTeam.roster.includes(mvpCand.id)) {
+      newState.trophyCase.push({ type: 'MVP', season: state.season, playerId: mvpCand.id, label: 'League MVP' });
+    }
+  }
+
+  // DPOY Logic: Steals + Blocks
+  const dpoyCand = [...leagueStats].sort((a,b) => b.defVal - a.defVal)[0];
+  if (dpoyCand) {
+    if (!newState.awards[state.season]) newState.awards[state.season] = { allNba: [] };
+    newState.awards[state.season].dpoy = dpoyCand.id;
+    if (userTeam && userTeam.roster.includes(dpoyCand.id)) {
+      newState.trophyCase.push({ type: 'DPOY', season: state.season, playerId: dpoyCand.id, label: 'Defensive Player of the Year' });
+    }
+  }
+
+  // RESET SEASONAL STATS AFTER CALCULATING AWARDS
   newState.stats.seasonal = {};
   newState.seasonHighs = {}; // Reset season highs for new season
   
@@ -353,7 +385,9 @@ export function advanceSeason(state: FranchiseState): FranchiseState {
             const chance = Math.random();
             if (chance <= 0.85) {
               // CPU Renew
-              const card = ALL_CARDS.find(c => c.id === playerId) || newState.customCards?.find(c => c.id === playerId);
+              const card = ALL_CARDS.find(c => c.id === playerId) || 
+                           newState.customCards?.find(c => c.id === playerId) ||
+                           newState.draftPool?.find(c => c.id === playerId);
               if (card) {
                 const salary = getInitialSalary(card);
                 team.contracts[playerId] = {

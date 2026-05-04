@@ -7,8 +7,11 @@ export const marketService = {
   SOFT_CAP: 136000000,
 
   signFreeAgent(state: FranchiseState, cardId: string): { success: boolean; reason: string } {
+    if (!state.freeAgentPool) state.freeAgentPool = [];
     const userTeam = state.teams[state.userTeamId];
-    const card = ALL_CARDS.find(c => c.id === cardId);
+    const card = ALL_CARDS.find(c => c.id === cardId) || 
+                 state.customCards?.find(c => c.id === cardId) || 
+                 state.draftPool?.find(c => c.id === cardId);
 
     if (!card) return { success: false, reason: 'Card not found' };
     if (!state.freeAgentPool.includes(cardId)) return { success: false, reason: 'Player is not a free agent' };
@@ -49,7 +52,11 @@ export const marketService = {
 
     // Process Draft: Player can be an ID or a full object
     const cardId = typeof player === 'string' ? player : player.id;
-    const card = typeof player === 'object' ? player : (ALL_CARDS.find(c => c.id === cardId) || state.customCards?.find(c => c.id === cardId));
+    const card = typeof player === 'object' ? player : (
+      ALL_CARDS.find(c => c.id === cardId) || 
+      state.customCards?.find(c => c.id === cardId) || 
+      state.draftPool?.find(c => c.id === cardId)
+    );
     
     if (!card) return { success: false, reason: 'Card not found' };
 
@@ -88,6 +95,7 @@ export const marketService = {
   },
 
   releasePlayer(state: FranchiseState, cardId: string): { success: boolean; reason: string } {
+    if (!state.freeAgentPool) state.freeAgentPool = [];
     const userTeam = state.teams[state.userTeamId];
     if (!userTeam.roster.includes(cardId)) return { success: false, reason: 'Player not in roster' };
     if (userTeam.roster.length <= 8) return { success: false, reason: 'Minimum roster size is 8' };
@@ -139,6 +147,7 @@ export const marketService = {
   },
 
   negotiateContract(state: FranchiseState, cardId: string, offerSalary: number, offerYears: number): { success: boolean; message: string; status: "Active" | "Accepted" | "Rejected"; counterOffer?: { salary: number; years: number } } {
+    if (!state.negotiations) state.negotiations = {};
     const card = ALL_CARDS.find(c => c.id === cardId) || state.customCards?.find(c => c.id === cardId) || state.draftPool?.find(c => c.id === cardId);
     const demand = this.calculateMarketDemand(state, cardId);
     const progress = state.playerProgress[cardId];
@@ -221,6 +230,7 @@ export const marketService = {
   },
 
   completeFASigning(state: FranchiseState, cardId: string, salary: number, years: number): { success: boolean, reason: string } {
+    if (!state.freeAgentPool) state.freeAgentPool = [];
     const userTeam = state.teams[state.userTeamId];
     if (userTeam.roster.length >= 15) return { success: false, reason: 'Roster full' };
 

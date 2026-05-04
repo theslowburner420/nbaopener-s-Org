@@ -23,8 +23,8 @@ export function getTeamLogo(teamId: string): string {
     'MIL': '1610612749', 'MIN': '1610612750', 'BKN': '1610612751', 'NYK': '1610612752',
     'ORL': '1610612753', 'IND': '1610612754', 'PHI': '1610612755', 'PHX': '1610612756',
     'POR': '1610612757', 'SAC': '1610612758', 'SAS': '1610612759', 'OKC': '1610612760',
-    'TOR': '1610612761', 'UTA': '1610612762', 'WAS': '1610612763', 'DET': '1610612765',
-    'CHA': '1610612766', 'MEM': '1610612763' // Memphis fix usually 1610612763 is used for both MEM/WAS in some APIs but let's be careful
+    'TOR': '1610612761', 'UTA': '1610612762', 'WAS': '1610612764', 'DET': '1610612765',
+    'CHA': '1610612766', 'MEM': '1610612763'
   };
   const nbaId = idMap[team?.id || 'LAL'] || '1610612747';
   return `https://cdn.nba.com/logos/nba/${nbaId}/primary/L/logo.svg`;

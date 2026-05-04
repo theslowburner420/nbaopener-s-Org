@@ -1,4 +1,4 @@
-import { Trophy, Star, Zap, Shield, Crown, Gem, Flame, Target, Users, Coins, Calendar, History, Package, Award, Globe, TrendingUp, Wallet, Gift, Map, Crosshair, Activity, Layers, Eye } from 'lucide-react';
+import { Trophy, Star, Zap, Shield, Crown, Gem, Flame, Target, Users, Coins, Calendar, History, Package, Award, Globe, TrendingUp, Wallet, Gift, Crosshair, Activity, Layers, Eye } from 'lucide-react';
 
 export interface Achievement {
   id: string;

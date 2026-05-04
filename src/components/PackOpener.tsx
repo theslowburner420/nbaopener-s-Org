@@ -225,17 +225,23 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
     // Preload images for all cards in the pack
     const preloadImages = async () => {
       const promises = cards.flatMap(card => {
-        const cardImg = new Image();
+        const cardImg = document.createElement('img');
         cardImg.src = card.imageUrl;
         
-        const logoImg = new Image();
+        const logoImg = document.createElement('img');
         if (card.teamLogoUrl) {
           logoImg.src = card.teamLogoUrl;
         }
         
         return [
-          new Promise(resolve => { cardImg.onload = resolve; cardImg.onerror = resolve; }),
-          card.teamLogoUrl ? new Promise(resolve => { logoImg.onload = resolve; logoImg.onerror = resolve; }) : Promise.resolve()
+          new Promise(resolve => { 
+            cardImg.onload = () => { cardImg.decode().finally(() => resolve(undefined)); }; 
+            cardImg.onerror = resolve; 
+          }),
+          card.teamLogoUrl ? new Promise(resolve => { 
+            logoImg.onload = () => { logoImg.decode().finally(() => resolve(undefined)); }; 
+            logoImg.onerror = resolve; 
+          }) : Promise.resolve()
         ];
       });
       

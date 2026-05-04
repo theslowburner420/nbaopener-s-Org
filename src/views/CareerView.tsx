@@ -1,3 +1,4 @@
+// Tactical re-parse trigger
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -19,7 +20,8 @@ import {
   ShoppingCart,
   X,
   Sparkles,
-  AlertTriangle
+  AlertTriangle,
+  Lock
 } from 'lucide-react';
 import { NBA_TEAMS, getTeamLogo } from '../data/nbaTeams';
 import { ALL_CARDS } from '../data/cards';
@@ -35,10 +37,18 @@ import CardItem from '../components/CardItem';
 
 import confetti from 'canvas-confetti';
 
+import { useNotification } from '../context/NotificationContext';
+
 type FranchiseTab = 'hub' | 'lineup' | 'market' | 'league' | 'stats' | 'trades' | 'settings' | 'draft' | 'office';
 
 const CareerView: React.FC = () => {
   const { state, isLoading, startNewFranchise, advanceWeek, resetFranchise, setState } = useFranchise();
+  const { notifyError, notifySuccess } = useNotification();
+
+  const userTeam = useMemo(() => {
+    if (!state || !state.userTeamId) return null;
+    return state.teams[state.userTeamId];
+  }, [state]);
 
   const [activeTab, setActiveTab] = useState<FranchiseTab>('hub');
   const [activeNegotiation, setActiveNegotiation] = useState<{
@@ -51,30 +61,37 @@ const CareerView: React.FC = () => {
   } | null>(null);
 
   // OPTIMIZATION: Memoized Card Lookup Map
-  const allCardsMap = useMemo(() => {
-    const map = new Map<string, any>();
-    ALL_CARDS.forEach(c => map.set(c.id, c));
-    state?.customCards?.forEach((c: any) => map.set(c.id, c));
-    state?.draftPool?.forEach((c: any) => map.set(c.id, c));
-    return map;
+  const allCardsLookupMap = useMemo(() => {
+    const internalMap = new Map<string, any>();
+    ALL_CARDS.forEach(c => internalMap.set(c.id, c));
+    state?.customCards?.forEach((c: any) => internalMap.set(c.id, c));
+    state?.draftPool?.forEach((c: any) => internalMap.set(c.id, c));
+    return internalMap;
   }, [state?.customCards, state?.draftPool]);
 
   // OPTIMIZATION: Memoized findCard
   const findCard = React.useCallback((id: string | null) => {
     if (!id) return null;
-    const baseCard = allCardsMap.get(id);
-    if (!baseCard) {
-      // Fallback to ALL_CARDS array if map lookup fails for some reason
-      return ALL_CARDS.find(c => c.id === id) || null;
-    }
+    const baseCard = allCardsLookupMap.get(id);
+    if (!baseCard) return null;
     
     // Apply progression overrides if any
-    const progress = state?.playerProgress[id];
+    const progress = state?.playerProgress?.[id];
     if (progress?.ovr) {
       return { ...baseCard, stats: { ...baseCard.stats, ovr: progress.ovr } };
     }
     return baseCard;
-  }, [allCardsMap, state?.playerProgress]);
+  }, [allCardsLookupMap, state?.playerProgress]);
+
+  // OPTIMIZATION: Memoized Player-to-Team Mapping
+  const playerTeamMap = useMemo(() => {
+    const map = new Map<string, TeamObject>();
+    if (!state?.teams) return map;
+    Object.values(state.teams).forEach(team => {
+      team.roster.forEach(pid => map.set(pid, team));
+    });
+    return map;
+  }, [state?.teams]);
 
   const [activeStatsCat, setActiveStatsCat] = useState<'Points' | 'Rebounds' | 'Assists'>('Points');
   const [statsSubTab, setStatsSubTab] = useState<'League' | 'Highs' | 'Team'>('League');
@@ -199,7 +216,7 @@ const CareerView: React.FC = () => {
     if (!state) return;
     const res = marketService.draftPlayer(state, card);
     if (!res.success) {
-      alert(res.reason);
+      notifyError(res.reason);
       return;
     }
     
@@ -271,13 +288,12 @@ const CareerView: React.FC = () => {
   }, [state?.phase, activeTab, draftState.order.length, state?.teams]);
   
   const handleNegotiationStart = React.useCallback((playerId: string) => {
-    if (!state) return;
+    if (!state || !userTeam) return;
     const demand = marketService.calculateMarketDemand(state, playerId);
     
     // Check if team already has 15 players if it's a new signing
-    const userTeam = state.teams[state.userTeamId];
     if (!userTeam.roster.includes(playerId) && userTeam.roster.length >= 15) {
-      alert("Roster is full (15 players max)");
+      notifyError("Roster is full (15 players max)");
       return;
     }
 
@@ -288,11 +304,12 @@ const CareerView: React.FC = () => {
       message: "I'm open to discussing a deal. What are you offering?",
       status: 'Active'
     });
-  }, [state, state?.userTeamId]);
+  }, [state, state?.userTeamId, userTeam]);
 
   const handleProposeOffer = React.useCallback((salary: number, years: number) => {
     if (!state || !activeNegotiation) return;
     
+    if (!state.negotiations) state.negotiations = {};
     const result = marketService.negotiateContract(state, activeNegotiation.playerId, salary, years);
     
     setActiveNegotiation(prev => prev ? ({
@@ -330,7 +347,7 @@ const CareerView: React.FC = () => {
     const result = tradeEngine.evaluateUserTrade(state, offer);
     if (result.accepted) {
       tradeEngine.executeTrade(state, offer);
-      alert("Trade Accepted!");
+      notifySuccess("Trade Accepted!");
       setUserOfferedIds([]);
       setCpuRequestedIds([]);
       setUserOfferedPickIds([]);
@@ -338,29 +355,12 @@ const CareerView: React.FC = () => {
       setTradeTargetTeamId(null);
       setState({ ...state });
     } else {
-      alert(result.reason);
+      notifyError(result.reason);
     }
   }, [state, setState, tradeTargetTeamId, userOfferedIds, cpuRequestedIds, userOfferedPickIds, cpuRequestedPickIds]);
 
-  const findCard_DEPRECATED = (id: string | null) => {
-    if (!id) return null;
-    const baseCard = ALL_CARDS.find(c => c.id === id) || 
-                     state?.customCards?.find((c: any) => c.id === id) || 
-                     state?.draftPool?.find((c: any) => c.id === id);
-    if (!baseCard) return null;
-    
-    // Apply progression overrides if any
-    const progress = state?.playerProgress[id];
-    if (progress?.ovr) {
-      return { ...baseCard, stats: { ...baseCard.stats, ovr: progress.ovr } };
-    }
-    return baseCard;
-  };
-
-
   const handleUpdateLineup = React.useCallback((playerId: string) => {
-    if (!state || !lineupModalPos) return;
-    const userTeam = state.teams[state.userTeamId];
+    if (!state || !lineupModalPos || !userTeam) return;
     
     // If player is already in another position, swap them or clear them
     const positions = ['PG', 'SG', 'SF', 'PF', 'C'] as const;
@@ -722,82 +722,18 @@ const CareerView: React.FC = () => {
     );
   };
 
-  const userTeam = state.teams[state.userTeamId];
   const nextUserGame = state.schedule.find(m => 
     !m.played && (m.homeTeamId === state.userTeamId || m.awayTeamId === state.userTeamId)
   );
+
+  if (!userTeam) return null;
 
   const pendingUserGamesThisCycle = state.schedule.filter(m => 
     !m.played && (m.homeTeamId === state.userTeamId || m.awayTeamId === state.userTeamId) && m.gameNumber < state.week + 4
   );
 
   return (
-    <div className="bg-black flex flex-col relative w-full min-h-full">
-      {/* COMPACT HEADER */}
-      <div className="bg-zinc-950 border-b border-white/5 px-3 h-[48px] md:h-auto md:px-12 md:py-6 flex items-center justify-between gap-3 md:gap-6 sticky top-0 z-50">
-        <div className="flex items-center gap-2 md:gap-6 h-full overflow-hidden">
-          <div className="w-7 h-7 md:w-16 md:h-16 bg-zinc-900 rounded-lg md:rounded-[1.5rem] p-1 md:p-3 border border-white/5 shadow-2xl shrink-0">
-            <img src={getTeamLogo(userTeam.teamId)} className="w-full h-full object-contain" />
-          </div>
-          <div className="flex flex-col md:block overflow-hidden">
-            <div className="flex items-center gap-1.5 md:gap-3 flex-wrap">
-              <h2 className="text-[9px] md:text-2xl font-black uppercase italic tracking-tighter text-white truncate">
-                <span className="md:hidden">{userTeam.abbreviation} • {userTeam.wins}-{userTeam.losses} • {state.season}</span>
-                <span className="hidden md:inline">{userTeam.name}</span>
-              </h2>
-              <div className="hidden md:flex items-center gap-1 text-[8px] md:text-sm font-black text-zinc-400">
-                <span>{userTeam.wins} - {userTeam.losses}</span>
-              </div>
-            </div>
-            <div className="hidden md:flex items-center gap-4 mt-1">
-              <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">{state.phase === 'Regular' ? 'Regular Season' : state.phase}</span>
-              <div className="w-px h-3 bg-zinc-800" />
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black text-amber-500">${(userTeam.payroll/1000000).toFixed(1)}M</span>
-                <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">Payroll</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 md:gap-3">
-           <button 
-             onClick={() => setShowExitConfirm(true)}
-             className="px-3 py-2 md:px-6 md:py-3 bg-zinc-900 border border-white/5 rounded-lg md:rounded-xl text-[8px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white transition-all"
-           >
-             Exit
-           </button>
-
-           <div className="hidden md:flex items-center gap-3">
-             {pendingUserGamesThisCycle.length > 0 ? (
-               <button 
-                onClick={simulateGame}
-                className="flex items-center gap-3 bg-amber-500 text-black px-8 py-4 rounded-2xl font-black uppercase italic tracking-tighter text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(245,158,11,0.2)]"
-               >
-                 <Play size={16} fill="currentColor" />
-                 Play Game
-               </button>
-             ) : (
-               <button 
-                onClick={advanceWeek}
-                className="flex items-center gap-3 bg-white text-black px-8 py-4 rounded-2xl font-black uppercase italic tracking-tighter text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(255,255,255,0.1)]"
-               >
-                 <TrendingUp size={16} />
-                 Advance
-               </button>
-             )}
-           </div>
-
-           <button 
-             onClick={resetFranchise}
-             className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-2xl bg-zinc-900 border border-white/5 flex items-center justify-center text-zinc-500 hover:text-white transition-colors"
-           >
-             <SettingsIcon size={14} className="md:hidden" />
-             <SettingsIcon size={20} className="hidden md:block" />
-           </button>
-        </div>
-      </div>
-
+    <div className="bg-black flex flex-col landscape:flex-row relative w-full min-h-screen">
       {/* NEGOTIATION MODAL */}
       <AnimatePresence>
         {activeNegotiation && (
@@ -812,7 +748,7 @@ const CareerView: React.FC = () => {
              >
                 {(() => {
                    const card = findCard(activeNegotiation.playerId);
-                   const neg = state.negotiations[activeNegotiation.playerId];
+                   const neg = state.negotiations?.[activeNegotiation.playerId];
                    const rounds = neg?.rounds || 0;
                    if (!card) return null;
 
@@ -960,21 +896,50 @@ const CareerView: React.FC = () => {
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-4 md:p-12 overflow-hidden"
+            className="fixed inset-0 z-[100] bg-zinc-950 flex flex-col items-center p-4 md:p-12 overflow-y-auto no-scrollbar"
           >
-             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
-             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-amber-500/20 to-transparent blur-[120px]" />
+             {/* CINEMATIC BACKDROP */}
+             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(245,158,11,0.1)_0%,transparent_70%)] pointer-events-none" />
+             <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] pointer-events-none" />
+             <div className="absolute bottom-0 left-0 right-0 h-[40dvh] bg-gradient-to-t from-black to-transparent pointer-events-none" />
              
-             <div className="relative z-10 w-full max-w-5xl space-y-12">
+             <div className="relative z-10 w-full max-w-6xl space-y-8 md:space-y-16 py-12 px-4 my-auto">
                 {(() => {
                    const awards = seasonAwards;
-                   if (!awards) return null;
+                   
+                   if (!awards) {
+                      return (
+                         <div className="text-center space-y-8">
+                            <motion.div 
+                              initial={{ scale: 0 }} animate={{ scale: 1 }}
+                              className="w-24 h-24 bg-zinc-900 rounded-3xl flex items-center justify-center text-zinc-700 mx-auto border border-white/5"
+                            >
+                               <Trophy size={48} />
+                            </motion.div>
+                            <div className="space-y-3">
+                               <p className="text-amber-500 text-[10px] md:text-sm font-black uppercase tracking-[0.4em] italic">Season Summary</p>
+                               <h2 className="text-4xl md:text-6xl text-white font-black italic uppercase italic tracking-tighter">Awards Postponed</h2>
+                               <p className="text-zinc-500 text-[10px] md:text-sm max-w-xs mx-auto uppercase font-black tracking-widest leading-relaxed">The committee has determined that no candidates met the scoring threshold this season.</p>
+                            </div>
+                            <button 
+                               onClick={() => {
+                                  state.phase = 'Playoffs';
+                                  state.playoffSeries = playoffService.generatePlayIn(state);
+                                  setState({ ...state });
+                               }}
+                               className="px-16 py-5 bg-white text-black rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-amber-500 transition-all shadow-2xl active:scale-95"
+                            >
+                               Start Playoffs
+                            </button>
+                         </div>
+                      );
+                   }
 
                    const awardData = [
-                      { title: 'Most Valuable Player', prize: 'The Maurice Podoloff Trophy', winner: awards.mvp, color: 'from-amber-600 to-amber-400' },
-                      { title: 'Defensive Player of the Year', prize: 'The Hakeem Olajuwon Trophy', winner: awards.dpoy, color: 'from-blue-600 to-cyan-400' },
-                      { title: 'Rookie of the Year', prize: 'The Wilt Chamberlain Trophy', winner: awards.roy, color: 'from-green-600 to-emerald-400' },
-                      { title: 'Most Improved Player', prize: 'The George Mikan Trophy', winner: awards.mip, color: 'from-purple-600 to-pink-400' }
+                      { title: 'Most Valuable Player', prize: 'The Maurice Podoloff Trophy', winner: awards.mvp, color: 'from-amber-600 to-amber-400', glow: 'rgba(245,158,11,0.2)' },
+                      { title: 'Defensive Player of the Year', prize: 'The Hakeem Olajuwon Trophy', winner: awards.dpoy, color: 'from-blue-600 to-cyan-400', glow: 'rgba(6,182,212,0.2)' },
+                      { title: 'Rookie of the Year', prize: 'The Wilt Chamberlain Trophy', winner: awards.roy, color: 'from-green-600 to-emerald-400', glow: 'rgba(16,185,129,0.2)' },
+                      { title: 'Most Improved Player', prize: 'The George Mikan Trophy', winner: awards.mip, color: 'from-purple-600 to-pink-400', glow: 'rgba(168,85,247,0.2)' }
                     ];
 
                    const currentAward = awardRevealStep < 4 ? awardData[awardRevealStep] : null;
@@ -983,115 +948,198 @@ const CareerView: React.FC = () => {
                       return (
                          <motion.div 
                            key={currentAward.title}
-                           initial={{ scale: 0.8, opacity: 0, y: 50 }}
-                           animate={{ scale: 1, opacity: 1, y: 0 }}
-                           className="space-y-12 text-center"
+                           initial={{ opacity: 0 }}
+                           animate={{ opacity: 1 }}
+                           exit={{ opacity: 0 }}
+                           className="flex flex-col items-center gap-8 md:gap-12"
                          >
-                            <div className="space-y-4">
-                               <motion.p 
-                                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
-                                 className="text-amber-500 text-[10px] md:text-sm font-black uppercase tracking-[0.5em] italic"
+                            <div className="space-y-4 md:space-y-6 text-center">
+                               <motion.div
+                                 initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
+                                 className="flex items-center justify-center gap-4 mb-2 md:mb-6"
                                >
-                                  Season {state.season} Awards Presentation
-                               </motion.p>
-                               <motion.h2 
-                                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-                                 className="text-5xl md:text-8xl font-black uppercase italic tracking-tighter text-white"
+                                  <div className="h-px w-8 md:w-20 bg-white/10" />
+                                  <p className="text-amber-500 text-[10px] md:text-sm font-black uppercase tracking-[0.5em] italic">
+                                     NBA {state.season} HONORS
+                                  </p>
+                                  <div className="h-px w-8 md:w-20 bg-white/10" />
+                                </motion.div>
+                               
+                               <div className="overflow-hidden">
+                                 <motion.h2 
+                                   initial={{ y: 200 }} animate={{ y: 0 }} transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+                                   className="text-4xl md:text-7xl lg:text-[7rem] font-black uppercase italic tracking-tighter text-white leading-[0.8] drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+                                 >
+                                    {currentAward.title}
+                                 </motion.h2>
+                               </div>
+                               
+                               <motion.div
+                                 initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.8 }}
+                                 className="flex items-center justify-center gap-3 text-zinc-500"
                                >
-                                  {currentAward.title}
-                               </motion.h2>
-                               <motion.p 
-                                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
-                                 className="text-zinc-500 text-sm md:text-lg font-bold italic uppercase tracking-widest"
-                               >
-                                  {currentAward.prize}
-                               </motion.p>
+                                  <div className="px-5 py-1.5 bg-white/5 border border-white/10 rounded-full flex items-center gap-3">
+                                    <Trophy size={14} className="text-amber-500" />
+                                    <p className="text-[10px] md:text-sm font-black italic uppercase tracking-[0.2em] leading-none">
+                                       {currentAward.prize}
+                                    </p>
+                                  </div>
+                                </motion.div>
                             </div>
 
-                            <div className="flex flex-col md:flex-row items-center justify-center gap-12">
-                               <div className="order-2 md:order-1 space-y-4 text-left hidden md:block">
-                                  <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-6">The Finalists</p>
-                                  {awards.finalists[currentAward.winner.id === awards.mvp.id ? 'mvp' : currentAward.winner.id === awards.dpoy.id ? 'dpoy' : currentAward.winner.id === awards.roy.id ? 'roy' : 'mip'].slice(0, 3).map((f: any, i: number) => (
-                                     <div key={f.id} className={`flex items-center gap-4 transition-all ${i === 0 ? 'scale-110' : 'opacity-40'}`}>
-                                        <div className="w-8 h-8 rounded-full bg-zinc-800 p-1">
-                                           <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${f.card.nbaId}.png`} className="w-full h-full object-contain" />
-                                        </div>
-                                        <div>
-                                           <p className="text-[10px] font-black text-white uppercase italic">{f.card.name}</p>
-                                           <p className="text-[8px] font-bold text-zinc-500 uppercase">{f.team?.abbreviation || 'FA'}</p>
-                                        </div>
-                                     </div>
-                                  ))}
-                               </div>
-
+                            <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-20 w-full py-8">
+                               {/* FINALISTS PANEL */}
                                <motion.div 
-                                 initial={{ rotateY: 90, opacity: 0 }}
-                                 animate={{ rotateY: 0, opacity: 1 }}
-                                 transition={{ duration: 0.8, delay: 1, type: 'spring' }}
-                                 className="order-1 md:order-2 w-64 md:w-80 relative"
-                                >
-                                  <div className={`absolute inset-0 bg-gradient-to-tr ${currentAward.color} blur-[60px] opacity-30 rounded-full scale-110`} />
-                                  <CardItem card={currentAward.winner.card} isOwned={true} mode="detail" />
+                                 initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.2 }}
+                                 className="hidden lg:block space-y-6 bg-zinc-900/50 border border-white/5 p-8 rounded-[2.5rem] backdrop-blur-3xl w-80 shrink-0"
+                               >
+                                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-8 italic">Finalists Council</p>
+                                  <div className="space-y-6">
+                                    {awards.finalists[currentAward.winner.id === awards.mvp.id ? 'mvp' : currentAward.winner.id === awards.dpoy.id ? 'dpoy' : currentAward.winner.id === awards.roy.id ? 'roy' : 'mip'].slice(0, 3).map((f: any) => (
+                                       <div key={f.id} className={`flex items-center gap-4 group transition-all duration-700 ${f.id === currentAward.winner.id ? 'opacity-100' : 'opacity-30'}`}>
+                                          <div className={`w-14 h-14 rounded-2xl bg-black p-1.5 border ${f.id === currentAward.winner.id ? 'border-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.2)]' : 'border-white/5'}`}>
+                                             <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${f.card.nbaId}.png`} className="w-full h-full object-contain" />
+                                          </div>
+                                          <div>
+                                             <p className={`text-xs font-black uppercase italic ${f.id === currentAward.winner.id ? 'text-amber-500' : 'text-zinc-500'}`}>{f.card.name.split(' ').pop()}</p>
+                                             <p className="text-[9px] font-bold text-zinc-700 uppercase tracking-widest">{f.team?.abbreviation || 'FA'}</p>
+                                          </div>
+                                          {f.id === currentAward.winner.id && <div className="ml-auto w-2 h-2 bg-amber-500 rounded-full animate-ping" />}
+                                       </div>
+                                    ))}
+                                  </div>
                                </motion.div>
 
-                               <div className="order-3 space-y-6 text-right hidden md:block">
-                                  <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-6">Season Stats</p>
-                                  <div className="space-y-4">
-                                     <div>
-                                        <p className="text-[24px] font-black text-white italic tracking-tighter leading-none">{currentAward.winner.avgPts.toFixed(1)}</p>
-                                        <p className="text-[8px] font-black text-zinc-500 uppercase">Points</p>
+                               {/* WINNER SPOTLIGHT */}
+                               <div className="flex flex-col items-center relative">
+                                 <motion.div 
+                                   initial={{ rotateY: 90, scale: 0.8, opacity: 0 }}
+                                   animate={{ rotateY: 0, scale: 1, opacity: 1 }}
+                                   transition={{ duration: 1.5, delay: 0.5, type: 'spring', bounce: 0.2 }}
+                                   className="w-64 md:w-80 lg:w-96 relative z-20"
+                                  >
+                                    <div className={`absolute inset-0 bg-gradient-to-tr ${currentAward.color} blur-[120px] opacity-30 rounded-full animate-pulse`} />
+                                    <div className="relative group perspective-1000">
+                                      <motion.div
+                                        animate={{ y: [0, -10, 0] }}
+                                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                      >
+                                        <CardItem card={currentAward.winner.card} isOwned={true} mode="detail" />
+                                      </motion.div>
+                                      
+                                      {/* WINNER BADGE */}
+                                      <motion.div 
+                                        initial={{ scale: 0, x: 20 }} animate={{ scale: 1, x: 0 }} transition={{ delay: 2.5 }}
+                                        className="absolute -top-6 -right-6 w-16 h-16 bg-amber-500 text-black rounded-2xl flex flex-col items-center justify-center shadow-2xl rotate-12"
+                                      >
+                                         <Star size={24} fill="black" />
+                                         <span className="text-[8px] font-black uppercase">Winner</span>
+                                      </motion.div>
+                                    </div>
+                                 </motion.div>
+                               </div>
+
+                               {/* STATS PANEL */}
+                               <motion.div 
+                                 initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.5 }}
+                                 className="space-y-6 bg-zinc-900/50 border border-white/5 p-8 rounded-[2.5rem] backdrop-blur-3xl w-full md:w-80 shrink-0"
+                               >
+                                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-8 italic">Official Season Stats</p>
+                                  <div className="grid grid-cols-2 md:grid-cols-1 gap-6">
+                                     <div className="space-y-1">
+                                        <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest leading-none">Scoring average</p>
+                                        <p className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-none">{currentAward.winner.avgPts.toFixed(1)}<span className="text-[10px] text-zinc-500 ml-1 not-italic font-bold">PTS</span></p>
                                      </div>
-                                     <div>
-                                        <p className="text-[24px] font-black text-white italic tracking-tighter leading-none">{currentAward.winner.avgReb.toFixed(1)}</p>
-                                        <p className="text-[8px] font-black text-zinc-500 uppercase">Rebounds</p>
+                                     <div className="space-y-1 border-t border-white/5 pt-6">
+                                        <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest leading-none">Board control</p>
+                                        <p className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-none">{currentAward.winner.avgReb.toFixed(1)}<span className="text-[10px] text-zinc-500 ml-1 not-italic font-bold">REB</span></p>
                                      </div>
-                                     <div>
-                                        <p className="text-[24px] font-black text-white italic tracking-tighter leading-none">{currentAward.winner.avgAst.toFixed(1)}</p>
-                                        <p className="text-[8px] font-black text-zinc-500 uppercase">Assists</p>
+                                     <div className="space-y-1 border-t border-white/5 pt-6 hidden md:block">
+                                        <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest leading-none">Vision & Playmaking</p>
+                                        <p className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-none">{currentAward.winner.avgAst.toFixed(1)}<span className="text-[10px] text-zinc-500 ml-1 not-italic font-bold">AST</span></p>
                                      </div>
                                   </div>
-                               </div>
+                               </motion.div>
                             </div>
 
-                            <motion.button 
-                              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }}
-                              onClick={() => setAwardRevealStep(prev => prev + 1)}
-                              className="group relative inline-flex items-center gap-4 bg-white text-black px-12 py-5 rounded-full text-sm font-black uppercase tracking-[0.2em] italic transition-transform active:scale-95"
-                            >
-                               <span>Next Award</span>
-                               <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
-                            </motion.button>
+                            {/* NAVIGATION CONTROLS */}
+                            <div className="flex flex-col md:flex-row items-center justify-center gap-6 mt-4 w-full">
+                               <motion.button 
+                                 initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 3 }}
+                                 onClick={() => {
+                                   if (awardRevealStep < 3) {
+                                      setAwardRevealStep(prev => prev + 1);
+                                      confetti({ particleCount: 50, spread: 40, colors: ['#f59e0b', '#ffffff'] });
+                                   } else {
+                                      setAwardRevealStep(4);
+                                   }
+                                 }}
+                                 className="group relative flex items-center justify-center gap-4 bg-white text-black px-12 py-5 rounded-[1.5rem] text-sm font-black uppercase tracking-[0.2em] italic transition-all hover:bg-amber-500 active:scale-95 shadow-2xl w-full md:w-auto"
+                               >
+                                  <span>{awardRevealStep === 3 ? 'Show All-NBA Team' : 'Next Presentation'}</span>
+                                  <ChevronRight size={20} className="group-hover:translate-x-2 transition-transform" />
+                               </motion.button>
+                               
+                               <motion.button 
+                                 initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} transition={{ delay: 4 }}
+                                 onClick={() => {
+                                    setAwardRevealStep(4);
+                                    notifySuccess("Ceremony skipped. Welcome to the Playoffs.");
+                                 }}
+                                 className="text-zinc-500 hover:text-white text-[10px] uppercase font-black tracking-widest px-8 py-4 transition-all"
+                               >
+                                  Skip Rest
+                                </motion.button>
+                            </div>
                          </motion.div>
-                      )
+                      );
                    }
 
                    return (
                       <motion.div 
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                        className="space-y-12 text-center"
+                        className="space-y-12 md:space-y-24 text-center py-12 md:py-24 my-auto"
                       >
-                         <div className="space-y-6">
-                            <div className="w-20 h-20 bg-amber-500 rounded-3xl flex items-center justify-center text-black mx-auto shadow-[0_0_40px_rgba(245,158,11,0.5)]">
-                               <Trophy size={40} />
+                         <div className="space-y-4 md:space-y-8">
+                            <motion.div 
+                              initial={{ scale: 0 }} animate={{ scale: 1 }}
+                              className="w-20 h-20 md:w-32 md:h-32 bg-amber-500 rounded-[2.5rem] flex items-center justify-center text-black mx-auto shadow-[0_0_80px_rgba(245,158,11,0.5)] relative"
+                            >
+                               <Trophy size={40} className="md:w-16 md:h-16 relative z-10" />
+                               <div className="absolute inset-0 bg-white rounded-[2.5rem] animate-ping opacity-20" />
+                            </motion.div>
+                            <div className="space-y-2">
+                               <p className="text-amber-500 text-[10px] md:text-lg font-black uppercase tracking-[0.6em] italic">NBA Elite Selection</p>
+                               <h2 className="text-4xl md:text-7xl lg:text-9xl font-black uppercase italic tracking-tighter text-white">All-NBA First Team</h2>
                             </div>
-                            <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-white">All-NBA First Team</h2>
                          </div>
 
-                         <div className="flex flex-wrap items-center justify-center gap-8">
+                         <div className="grid grid-cols-2 lg:grid-cols-5 items-center justify-center gap-4 lg:gap-8 px-4 max-w-7xl mx-auto">
                             {awards.allNba.map((id: string, i: number) => {
                                const card = findCard(id);
                                if (!card) return null;
                                return (
                                   <motion.div 
                                     key={id}
-                                    initial={{ opacity: 0, scale: 0.5, y: 30 }}
+                                    initial={{ opacity: 0, scale: 0.5, y: 50 }}
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    transition={{ delay: i * 0.2 }}
-                                    className="w-48"
+                                    transition={{ delay: i * 0.1, duration: 0.6 }}
+                                    className="w-full mix-blend-screen"
                                   >
-                                     <CardItem card={card} isOwned={true} mode="mini" />
+                                     <div className="transition-all duration-500 hover:scale-105 group/card">
+                                       <div className="relative">
+                                          <CardItem card={card} isOwned={true} mode="mini" />
+                                          <div className="absolute -bottom-2 -left-2 w-8 h-8 md:w-10 md:h-10 bg-amber-500 text-black rounded-lg flex items-center justify-center font-black text-xs md:text-sm italic shadow-lg transform -rotate-12 group-hover/card:rotate-0 transition-transform">
+                                             {i + 1}
+                                          </div>
+                                       </div>
+                                       <div className="mt-3 md:mt-5 text-center">
+                                          <p className="text-[10px] md:text-sm font-black text-white italic uppercase tracking-tighter leading-none">{card.name}</p>
+                                          <p className="text-[7px] md:text-[9px] font-black text-zinc-600 uppercase tracking-widest mt-1">{card.position} • {card.stats.ovr} OVR</p>
+                                       </div>
+                                     </div>
                                   </motion.div>
-                               )
+                               );
                             })}
                          </div>
 
@@ -1117,17 +1165,20 @@ const CareerView: React.FC = () => {
                              setState({ ...state });
                              setAwardRevealStep(0);
                            }}
-                           className="bg-amber-600 hover:bg-amber-500 text-white px-16 py-6 rounded-2xl text-xl font-black uppercase italic tracking-tighter shadow-2xl transition-all"
+                           className="group relative bg-amber-600 hover:bg-amber-500 text-white px-12 md:px-24 py-5 md:py-8 rounded-2xl md:rounded-[2.5rem] text-sm md:text-2xl font-black uppercase italic tracking-tighter shadow-[0_32px_64px_-16px_rgba(245,158,11,0.3)] transition-all overflow-hidden"
                          >
-                            Start Playoffs
+                            <span className="relative z-10">Commence Postseason Battle</span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-amber-400/0 via-white/20 to-amber-400/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                          </button>
                       </motion.div>
-                   )
+                   );
                 })()}
              </div>
           </motion.div>
         )}
+      </AnimatePresence>
 
+      <AnimatePresence>
         {state.championId && (
           <div className="fixed inset-0 z-[20000] flex items-center justify-center p-6 bg-black/95 backdrop-blur-xl">
              <motion.div 
@@ -1231,9 +1282,9 @@ const CareerView: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* NAVIGATION */}
-      <div className="bg-zinc-950 border-b border-white/5 sticky top-[48px] md:top-0 z-40 overflow-x-auto no-scrollbar touch-pan-x hide-scrollbar scroll-smooth">
-        <div className="flex px-1 md:px-12 gap-0 md:gap-2 py-0.5 md:py-2 min-w-max">
+      {/* NAVIGATION - Improved for Mobile Vertical */}
+      <div className="bg-zinc-950/95 backdrop-blur-3xl border-t border-white/5 md:border-t-0 md:border-b landscape:border-b-0 landscape:border-r fixed bottom-0 left-0 right-0 md:sticky md:top-0 landscape:top-0 landscape:left-0 z-40 overflow-x-auto landscape:overflow-y-auto no-scrollbar touch-pan-x hide-scrollbar scroll-smooth landscape:h-screen landscape:w-20 lg:landscape:w-24 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+        <div className="flex px-4 md:px-12 landscape:px-2 gap-2 md:gap-2 landscape:gap-4 py-3 md:py-2 landscape:py-8 min-w-max md:min-w-0 h-full items-center landscape:flex-col landscape:justify-start">
           {[
             { id: 'hub', label: 'HUB', icon: LayoutDashboard },
             { id: 'lineup', label: 'ROSTER', icon: Users },
@@ -1246,26 +1297,106 @@ const CareerView: React.FC = () => {
           ].map((tab) => (
             <button
               key={tab.id}
-              id={`nav-tab-${tab.id}`}
+               id={`nav-tab-${tab.id}`}
               onClick={() => {
                 setActiveTab(tab.id as any);
-                // Scroll into view on mobile
                 const el = document.getElementById(`nav-tab-${tab.id}`);
                 el?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
               }}
-              className={`flex items-center gap-1 md:gap-3 px-2 md:px-6 py-2 md:py-4 rounded-lg md:rounded-2xl transition-all whitespace-nowrap shrink-0 ${activeTab === tab.id ? 'bg-white/5 text-amber-500' : 'text-zinc-600 hover:text-zinc-400'}`}
+              className={`flex flex-col landscape:flex-row items-center gap-1.5 md:gap-3 px-4 md:px-6 landscape:px-0 landscape:w-14 landscape:h-14 landscape:justify-center py-2 md:py-4 rounded-xl md:rounded-2xl transition-all whitespace-nowrap shrink-0 relative ${
+                activeTab === tab.id 
+                  ? 'bg-white/10 text-white font-black' 
+                  : 'text-zinc-600 hover:text-zinc-400'
+              }`}
             >
-              <tab.icon size={10} className="md:w-[14px] md:h-[14px]" />
-              <span className="text-[7px] md:text-xs font-black uppercase tracking-widest leading-none">{tab.label}</span>
-              {activeTab === tab.id && <motion.div layoutId="nav-pill" className="w-0.5 h-0.5 bg-amber-500 rounded-full" />}
+              <tab.icon size={18} className="md:w-[14px] md:h-[14px] landscape:w-5 landscape:h-5" />
+              <span className="text-[8px] md:text-xs landscape:hidden font-black uppercase tracking-[0.1em] leading-none">{tab.label}</span>
+              {activeTab === tab.id && (
+                <motion.div 
+                  layoutId="active-nav-bg"
+                  className="absolute inset-x-1 md:inset-0 top-1 bottom-1 md:top-0 md:bottom-0 bg-white/5 rounded-[0.75rem] md:rounded-2xl border border-white/10" 
+                />
+              )}
             </button>
           ))}
         </div>
       </div>
 
-      {/* CONTENT */}
-      <div className="p-2 md:p-12 relative overflow-y-auto overflow-x-hidden">
-        <AnimatePresence mode="wait">
+      {/* MAIN CONTENT AREA */}
+      <div className="flex-1 flex flex-col relative overflow-hidden h-full">
+        {/* COMPACT HEADER (GLOBAL ACROSS TABS) */}
+        <div className="bg-zinc-950 border-b border-white/5 px-3 h-[48px] md:h-auto md:px-12 md:py-6 flex items-center justify-between gap-3 md:gap-6 sticky top-0 z-50">
+          <div className="flex items-center gap-2 md:gap-6 h-full overflow-hidden">
+            <div className="w-7 h-7 md:w-16 md:h-16 bg-zinc-900 rounded-lg md:rounded-[1.5rem] p-1 md:p-3 border border-white/5 shadow-2xl shrink-0">
+               <img src={getTeamLogo(userTeam.teamId)} className="w-full h-full object-contain" />
+            </div>
+            <div className="flex flex-col md:block overflow-hidden">
+               <div className="flex items-center gap-1.5 md:gap-3 flex-wrap">
+                  <h2 className="text-[9px] md:text-2xl font-black uppercase italic tracking-tighter text-white truncate">
+                     <span className="md:hidden">{userTeam.abbreviation} • {userTeam.wins}-{userTeam.losses}</span>
+                     <span className="hidden md:inline">{userTeam.name}</span>
+                  </h2>
+                  <div className="hidden md:flex items-center gap-1 text-[8px] md:text-sm font-black text-zinc-400">
+                     <span>{userTeam.wins} - {userTeam.losses}</span>
+                  </div>
+                  {state.phase === 'Regular' && (
+                     <div className={`px-2 py-0.5 rounded text-[7px] md:text-[10px] font-black uppercase tracking-tighter ${state.week > tradeEngine.TRADE_DEADLINE_WEEK ? 'bg-red-500/20 text-red-500' : 'bg-amber-500/20 text-amber-500'}`}>
+                        {state.week > tradeEngine.TRADE_DEADLINE_WEEK ? 'Deadline Passed' : `Week ${state.week}/18`}
+                     </div>
+                  )}
+               </div>
+               <div className="hidden md:flex items-center gap-4 mt-1">
+                  <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">{state.phase === 'Regular' ? 'Regular Season' : state.phase}</span>
+                  <div className="w-px h-3 bg-zinc-800" />
+                  <div className="flex items-center gap-2">
+                     <span className="text-xs font-black text-amber-500">${(userTeam.payroll/1e6).toFixed(1)}M</span>
+                     <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">Payroll</span>
+                  </div>
+               </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 md:gap-3">
+             <button 
+               onClick={() => setShowExitConfirm(true)}
+               className="px-3 py-2 md:px-6 md:py-3 bg-zinc-900 border border-white/5 rounded-lg md:rounded-xl text-[8px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white transition-all"
+             >
+               Exit
+             </button>
+
+             <div className="hidden md:flex items-center gap-3">
+               {pendingUserGamesThisCycle.length > 0 ? (
+                 <button 
+                   onClick={simulateGame}
+                   className="flex items-center gap-3 bg-amber-500 text-black px-8 py-4 rounded-2xl font-black uppercase italic tracking-tighter text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(245,158,11,0.2)]"
+                 >
+                   <Play size={16} fill="currentColor" />
+                   Play Game
+                 </button>
+               ) : (
+                 <button 
+                   onClick={advanceWeek}
+                   className="flex items-center gap-3 bg-white text-black px-8 py-4 rounded-2xl font-black uppercase italic tracking-tighter text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(255,255,255,0.1)]"
+                 >
+                   <TrendingUp size={16} />
+                   Advance
+                 </button>
+               )}
+             </div>
+
+             <button 
+               onClick={resetFranchise}
+               className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-2xl bg-zinc-900 border border-white/5 flex items-center justify-center text-zinc-500 hover:text-white transition-colors"
+             >
+               <SettingsIcon size={14} className="md:hidden" />
+               <SettingsIcon size={20} className="hidden md:block" />
+             </button>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto no-scrollbar scroll-smooth pb-28 md:pb-0">
+          <div className="p-2 md:p-12 landscape:px-8 landscape:py-6 relative overflow-x-hidden">
+            <AnimatePresence mode="wait">
           {activeTab === 'hub' && (
             <motion.div 
               key="hub"
@@ -1294,89 +1425,111 @@ const CareerView: React.FC = () => {
                 <>
                   {/* TOP FEATURE: NEXT MATCH */}
                   {nextUserGame && (
-                    <div className="bg-gradient-to-br from-zinc-900 to-black border border-white/5 rounded-xl md:rounded-[3rem] p-2 md:p-10 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-12 relative overflow-hidden group shadow-2xl">
-                      <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
-                      <div className="space-y-1 md:space-y-6 relative z-10 text-center md:text-left w-full md:w-auto">
-                        <div className="space-y-0 md:space-y-1">
-                          <p className="text-[5px] md:text-[10px] font-black text-amber-500 uppercase tracking-[0.4em]">Next Appointment</p>
-                          <h3 className="text-xs md:text-5xl font-black italic uppercase tracking-tighter text-white leading-none">Gameday</h3>
+                    <div className="bg-gradient-to-br from-zinc-900 to-black border border-white/10 rounded-3xl md:rounded-[3.5rem] p-4 md:p-12 flex flex-col items-center justify-between gap-6 md:gap-16 relative overflow-hidden group shadow-2xl">
+                      <div className="absolute top-0 right-0 w-64 h-64 md:w-80 md:h-80 bg-amber-500/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2 opacity-30" />
+                      
+                      <div className="space-y-4 md:space-y-8 relative z-10 text-center w-full">
+                        <div className="space-y-1 md:space-y-2">
+                          <p className="text-[7px] md:text-sm font-black text-amber-500 uppercase tracking-[0.5em] md:tracking-[0.8em]">Gamecenter</p>
+                          <h3 className="text-3xl md:text-7xl font-black italic uppercase tracking-tighter text-white leading-none truncate">Matchday {nextUserGame.gameNumber}</h3>
                         </div>
-                        <div className="flex items-center gap-1 md:gap-4 justify-center md:justify-start">
-                          <div className="px-1.5 py-0.5 bg-white/5 rounded-md md:rounded-lg border border-white/5 text-[5px] md:text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                            M_{nextUserGame.gameNumber}
+                        <div className="flex items-center justify-center gap-3">
+                          <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[7px] md:text-xs font-black uppercase tracking-widest text-zinc-400">
+                             Regular Season
                           </div>
-                          <div className="px-1.5 py-0.5 bg-white/5 rounded-md md:rounded-lg border border-white/5 text-[5px] md:text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                            {nextUserGame.homeTeamId === state.userTeamId ? 'Home' : 'Away'}
+                          <div className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[7px] md:text-xs font-black uppercase tracking-widest text-amber-500">
+                            {nextUserGame.homeTeamId === state.userTeamId ? 'Home Court' : 'On Road'}
                           </div>
                         </div>
                       </div>
     
-                      <div className="flex items-center gap-3 md:gap-12 relative z-10">
-                         <div className="text-center space-y-0.5 md:space-y-3">
-                            <div className="w-8 h-8 md:w-24 md:h-24 bg-zinc-950 rounded-lg md:rounded-[2rem] p-1 md:p-5 border border-white/5 shadow-2xl transition-all duration-500 group-hover:scale-105">
+                      <div className="flex items-center justify-center gap-4 md:gap-16 relative z-10 w-full">
+                         <div className="text-center space-y-2 md:space-y-6">
+                            <motion.div 
+                              whileHover={{ scale: 1.05 }}
+                              className="w-16 h-16 md:w-40 md:h-40 bg-zinc-950 rounded-2xl md:rounded-[3rem] p-3 md:p-8 border border-white/10 shadow-2xl transition-all"
+                            >
                               <img src={getTeamLogo(state.userTeamId)} className="w-full h-full object-contain" />
-                            </div>
-                            <p className="text-[6px] md:text-xs font-black text-white italic whitespace-nowrap tracking-tighter uppercase">{state.teams[state.userTeamId].abbreviation}</p>
+                            </motion.div>
+                            <p className="text-xs md:text-2xl font-black text-white italic tracking-tighter uppercase">{state.teams[state.userTeamId].abbreviation}</p>
                          </div>
-                         <div className="text-[8px] md:text-3xl font-black italic text-zinc-900 uppercase">vs</div>
-                         <div className="text-center space-y-0.5 md:space-y-3">
-                            <div className="w-8 h-8 md:w-24 md:h-24 bg-zinc-950 rounded-lg md:rounded-[2rem] p-1 md:p-5 border border-white/5 shadow-2xl transition-all duration-500 group-hover:scale-105">
+                         
+                         <div className="flex flex-col items-center gap-1 md:gap-4">
+                           <div className="text-xl md:text-6xl font-black italic text-zinc-800 uppercase tracking-tighter select-none">VS</div>
+                           <div className="h-px w-8 md:w-20 bg-white/10" />
+                         </div>
+
+                         <div className="text-center space-y-2 md:space-y-6">
+                            <motion.div 
+                              whileHover={{ scale: 1.05 }}
+                              className="w-16 h-16 md:w-40 md:h-40 bg-zinc-950 rounded-2xl md:rounded-[3rem] p-3 md:p-8 border border-white/10 shadow-2xl transition-all"
+                            >
                               <img src={getTeamLogo(nextUserGame.homeTeamId === state.userTeamId ? nextUserGame.awayTeamId : nextUserGame.homeTeamId)} className="w-full h-full object-contain" />
-                            </div>
-                            <p className="text-[6px] md:text-xs font-black text-white italic whitespace-nowrap tracking-tighter uppercase">{state.teams[nextUserGame.homeTeamId === state.userTeamId ? nextUserGame.awayTeamId : nextUserGame.homeTeamId].abbreviation}</p>
+                            </motion.div>
+                            <p className="text-xs md:text-2xl font-black text-white italic tracking-tighter uppercase">{state.teams[nextUserGame.homeTeamId === state.userTeamId ? nextUserGame.awayTeamId : nextUserGame.homeTeamId].abbreviation}</p>
                          </div>
                       </div>
-    
-                      <button 
-                        onClick={simulateGame}
-                        className="relative z-10 w-full md:w-auto h-8 md:h-20 px-4 md:px-12 bg-white text-black rounded-lg md:rounded-[2rem] font-black uppercase italic tracking-tighter text-[8px] md:text-xl hover:bg-amber-500 transition-all active:scale-98 shadow-xl"
-                      >
-                        Launch Simulation
-                      </button>
+
+                      <div className="relative z-10 w-full md:w-auto flex flex-col md:flex-row items-center gap-4 bg-black/40 backdrop-blur-xl p-4 md:p-8 rounded-3xl border border-white/5">
+                        <button 
+                          onClick={simulateGame}
+                          className="w-full md:w-auto h-14 md:h-20 px-12 md:px-20 bg-white text-black rounded-2xl md:rounded-[2.5rem] font-black uppercase italic tracking-tighter text-sm md:text-3xl hover:bg-amber-500 transition-all active:scale-95 shadow-2xl shadow-white/5 relative group/btn overflow-hidden"
+                        >
+                          <span className="relative z-10">Simulate</span>
+                          <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-white/10 to-amber-500/0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
+                        </button>
+                      </div>
                     </div>
                   )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div className="md:col-span-1 lg:col-span-2 space-y-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg md:text-xl font-black uppercase italic tracking-tighter">Schedule</h3>
-                  </div>
-                  <div className="space-y-1 md:space-y-4">
-                    {state.schedule
-                      .filter(m => (m.homeTeamId === state.userTeamId || m.awayTeamId === state.userTeamId) && !m.played)
-                      .slice(0, 5)
-                      .map((match, i) => {
-                        const isHome = match.homeTeamId === state.userTeamId;
-                        const opponentId = isHome ? match.awayTeamId : match.homeTeamId;
-                        const opponent = NBA_TEAMS.find(t => t.id === opponentId);
-                        
-                        return (
-                          <div key={match.id} className="bg-zinc-900/50 border border-white/5 rounded-xl md:rounded-2xl p-1.5 md:p-6 flex items-center justify-between group hover:bg-zinc-900 transition-all transition-colors duration-300">
-                            <div className="flex items-center gap-1.5 md:gap-6">
-                              <div className="text-center w-6 md:w-12">
-                                <p className="text-[7px] md:text-[8px] font-black text-zinc-700 uppercase">WK</p>
-                                <p className="text-[9px] md:text-lg font-black text-white italic leading-tight">{match.gameNumber}</p>
-                              </div>
-                              <div className="w-px h-6 md:h-8 bg-zinc-800" />
-                              <div className="flex items-center gap-2 md:gap-4">
-                                <div className="w-6 h-6 md:w-12 md:h-12 bg-zinc-900 rounded-lg md:rounded-xl p-1 md:p-1.5 border border-white/10">
-                                   <img src={getTeamLogo(opponentId)} className="w-full h-full object-contain" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="md:col-span-1 lg:col-span-2 space-y-4 md:space-y-6">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm md:text-xl font-black uppercase italic tracking-tighter text-zinc-500 flex items-center gap-2">
+                           <LayoutDashboard size={14} /> Next 5 Matches
+                        </h3>
+                      </div>
+                      <div className="space-y-2 md:space-y-4">
+                        {state.schedule
+                          .filter(m => (m.homeTeamId === state.userTeamId || m.awayTeamId === state.userTeamId) && !m.played)
+                          .slice(0, 5)
+                          .map((match, i) => {
+                            const isHome = match.homeTeamId === state.userTeamId;
+                            const opponentId = isHome ? match.awayTeamId : match.homeTeamId;
+                            const opponent = NBA_TEAMS.find(t => t.id === opponentId);
+                            
+                            return (
+                              <div key={match.id} className="bg-zinc-900/30 border border-white/5 rounded-xl md:rounded-[2rem] p-3 md:p-8 flex items-center justify-between group hover:bg-white/[0.03] hover:border-white/10 transition-all duration-300">
+                                <div className="flex items-center gap-3 md:gap-8">
+                                  <div className="text-center w-8 md:w-16">
+                                    <p className="text-[8px] md:text-[10px] font-black text-zinc-700 uppercase tracking-widest leading-none mb-1">WK</p>
+                                    <p className="text-base md:text-3xl font-black text-white italic leading-none">{match.gameNumber}</p>
+                                  </div>
+                                  <div className="w-px h-8 md:h-12 bg-white/5" />
+                                  <div className="flex items-center gap-3 md:gap-6">
+                                    <div className="w-8 h-8 md:w-16 md:h-16 bg-zinc-950 rounded-lg md:rounded-3xl p-1.5 md:p-3.5 border border-white/5 shadow-xl">
+                                       <img src={getTeamLogo(opponentId)} className="w-full h-full object-contain" />
+                                    </div>
+                                    <div className="space-y-0.5 md:space-y-1">
+                                      <p className="text-[8px] md:text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em]">{isHome ? 'HOSTING' : 'VISITING'}</p>
+                                      <p className="text-xs md:text-2xl font-black text-white uppercase italic tracking-tighter leading-none">{opponent?.name || opponentId}</p>
+                                    </div>
+                                  </div>
                                 </div>
-                                <div className="max-w-[80px] md:max-w-none">
-                                  <p className="text-[7px] md:text-[8px] font-black text-zinc-600 uppercase tracking-widest leading-none">{isHome ? 'VS' : '@'} OPP</p>
-                                  <p className="text-[9px] md:text-sm font-black text-white uppercase italic truncate tracking-tight">{opponent?.name || opponentId}</p>
+                                <div className="flex items-center gap-3">
+                                  <div className="hidden md:flex flex-col items-end">
+                                     <p className="text-[10px] font-black text-zinc-800 uppercase tracking-widest">Status</p>
+                                     <p className="text-xs font-black text-zinc-700 uppercase italic">Scheduled</p>
+                                  </div>
+                                  <div className="w-8 h-8 md:w-12 md:h-12 rounded-full border border-white/5 flex items-center justify-center text-zinc-800 group-hover:text-white group-hover:border-white/20 transition-all">
+                                    <ChevronRight size={14} className="md:w-6 md:h-6" />
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[7px] md:text-[10px] font-black text-zinc-800 italic uppercase">Unplayed</span>
-                              <ChevronRight size={10} className="text-zinc-800 md:hidden" />
-                            </div>
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
+                            );
+                          })}
+                      </div>
+                    </div>
 
                 {/* SIDEBAR HUB */}
                 <div className="space-y-8">
@@ -1443,44 +1596,67 @@ const CareerView: React.FC = () => {
                      </div>
                      <div className="text-right">
                         <p className="text-[6px] font-black text-zinc-500 uppercase">Pool Size</p>
-                        <p className="text-[9px] font-black text-white italic">{state.freeAgentPool.length}</p>
+                        <p className="text-[9px] font-black text-white italic">{(state.freeAgentPool || []).length}</p>
                      </div>
                   </div>
 
-              {state.season === 2025 ? (
-                <div className="bg-zinc-900 border border-white/5 rounded-2xl md:rounded-[3rem] p-6 md:p-12 text-center space-y-4 md:space-y-8 relative overflow-hidden">
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 bg-amber-500/5 blur-[80px] rounded-full" />
-                  <div className="relative z-10 space-y-4 md:space-y-6">
-                    <div className="w-12 h-12 md:w-20 md:h-20 bg-amber-500/5 border border-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 mx-auto">
-                       <AlertTriangle size={24} className="md:w-10 md:h-10" />
+                  {state.season === 2025 && state.week < 5 ? (
+                    <div className="bg-zinc-900 border border-white/5 rounded-2xl md:rounded-[3rem] p-6 md:p-20 text-center space-y-4 md:space-y-8 relative overflow-hidden">
+                       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 bg-zinc-500/5 blur-[80px] rounded-full" />
+                       <div className="relative z-10 space-y-4 md:space-y-6">
+                         <div className="w-12 h-12 md:w-20 md:h-20 bg-zinc-900 border border-white/10 rounded-2xl flex items-center justify-center text-zinc-500 mx-auto">
+                            <Lock size={24} className="md:w-10 md:h-10" />
+                         </div>
+                         <div className="space-y-2">
+                           <h3 className="text-lg md:text-3xl font-black uppercase italic tracking-tighter">Market Warming Up</h3>
+                           <p className="text-zinc-600 text-[8px] md:text-sm max-w-[200px] md:max-w-md mx-auto leading-tight font-black uppercase tracking-tighter">
+                             The free agency market opens fully after Week 5
+                           </p>
+                         </div>
+                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <h3 className="text-lg md:text-3xl font-black uppercase italic tracking-tighter">Locked</h3>
-                      <p className="text-zinc-600 text-[8px] md:text-sm max-w-[200px] md:max-w-md mx-auto leading-tight font-black uppercase tracking-tighter">
-                        Complete first season to unlock
-                      </p>
+                  ) : (
+                    <div className="space-y-4">
+                       <div className="flex items-center justify-between px-2">
+                          <h3 className="text-[10px] md:text-sm font-black uppercase italic text-zinc-500 tracking-[0.2em]">Available Talents</h3>
+                          <p className="text-[8px] md:text-[10px] font-black text-zinc-700 uppercase">Top 50 Prospects</p>
+                       </div>
+                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                         {(state.freeAgentPool || []).slice(0, 50).map((id) => {
+                           const card = findCard(id);
+                           if (!card) return null;
+                           const demand = marketService.calculateMarketDemand(state, id);
+                           return (
+                             <motion.div 
+                               key={id} 
+                               whileHover={{ scale: 1.01 }}
+                               className="bg-zinc-900/50 border border-white/5 rounded-2xl p-4 flex items-center justify-between group hover:bg-white/[0.03] transition-all"
+                             >
+                                <div className="flex items-center gap-4">
+                                   <div className="relative">
+                                      <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-12 h-12 md:w-16 md:h-16 rounded-xl bg-black object-contain border border-white/5" />
+                                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-md flex items-center justify-center text-[8px] font-black text-black italic shadow-lg">{card.stats.ovr}</div>
+                                   </div>
+                                   <div className="space-y-0.5">
+                                      <h4 className="text-sm font-black text-white uppercase italic truncate max-w-[100px]">{card.name.split(' ').pop()}</h4>
+                                      <div className="flex items-center gap-1.5">
+                                         <span className="text-[8px] font-black text-white bg-zinc-800 px-1.5 py-0.5 rounded uppercase tracking-tighter">{card.position}</span>
+                                         <span className="text-[10px] font-black text-amber-500 italic">${(demand.salary/1e6).toFixed(1)}M</span>
+                                      </div>
+                                   </div>
+                                </div>
+                                <button 
+                                  onClick={() => handleSignPlayer(id)}
+                                  className="px-4 py-2 bg-white text-black text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-amber-500 transition-colors shadow-lg active:scale-95"
+                                >
+                                  Sign
+                                </button>
+                             </motion.div>
+                           );
+                         })}
+                       </div>
                     </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-6">
-                  {state.freeAgentPool.slice(0, 30).map((id) => {
-                    const card = findCard(id);
-                    if (!card) return null;
-                    return (
-                      <motion.div key={id} className="space-y-2">
-                        <CardItem card={card} isOwned={true} mode="mini" />
-                        <button 
-                          onClick={() => handleSignPlayer(id)}
-                          className="w-full py-2.5 bg-white/5 border border-white/5 rounded-lg text-[7px] md:text-[8px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all"
-                        >
-                          Sign Player
-                        </button>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              )}
+                  )}
             </motion.div>
           )}
             {activeTab === 'trades' && (
@@ -1509,41 +1685,49 @@ const CareerView: React.FC = () => {
                   </select>
                </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-8">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-8 mb-32">
                   {/* USER SIDE */}
-                  <div className="bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden flex flex-col h-[400px] md:h-[500px]">
+                  <div className="bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden flex flex-col h-[350px] md:h-[500px]">
                      <div className="p-3 border-b border-white/5 bg-white/2 flex items-center justify-between">
-                        <span className="text-[10px] font-black text-white italic">YOUR ASSETS</span>
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase">{userOfferedIds.length + userOfferedPickIds.length} Selected</span>
+                        <span className="text-[10px] font-black text-white italic tracking-widest">YOUR ROSTER</span>
+                        <span className="text-[9px] font-bold text-zinc-500 uppercase">{userOfferedIds.length + userOfferedPickIds.length} ITEMS</span>
                      </div>
                      <div className="flex-1 overflow-y-auto divide-y divide-white/5 no-scrollbar">
                         {userTeam.roster.map(id => {
                            const card = findCard(id);
                            const isSelected = userOfferedIds.includes(id);
                            return (
-                              <div key={id} onClick={() => setUserOfferedIds(prev => isSelected ? prev.filter(x => x !== id) : [...prev, id])} className="p-3 flex items-center justify-between hover:bg-white/5 cursor-pointer">
-                                 <div className="flex items-center gap-2">
-                                    <input type="checkbox" checked={isSelected} readOnly className="accent-amber-500 w-3 h-3" />
-                                    <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card?.nbaId}.png`} className="w-8 h-8 rounded-full bg-zinc-800 object-contain" />
-                                    <span className="text-[11px] font-bold uppercase italic text-white truncate max-w-[80px]">{card?.name?.split(' ').pop() || 'Player'}</span>
+                              <div key={id} onClick={() => setUserOfferedIds(prev => isSelected ? prev.filter(x => x !== id) : [...prev, id])} className={`p-4 flex items-center justify-between hover:bg-white/5 cursor-pointer transition-colors ${isSelected ? 'bg-amber-500/10' : ''}`}>
+                                 <div className="flex items-center gap-3">
+                                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-amber-500 border-amber-500' : 'border-zinc-700'}`}>
+                                       {isSelected && <X size={12} className="text-black rotate-45" />}
+                                    </div>
+                                    <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card?.nbaId}.png`} className="w-10 h-10 rounded-full bg-zinc-800 object-contain" />
+                                    <div className="flex flex-col">
+                                       <span className="text-[11px] font-black uppercase italic text-white leading-none mb-1">{card?.name?.split(' ').pop()}</span>
+                                       <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">{card?.position} • ${(userTeam.contracts[id]?.salary / 1e6).toFixed(1)}M</span>
+                                    </div>
                                  </div>
-                                 <span className="text-[10px] font-black text-amber-500 italic">{card?.stats.ovr}</span>
+                                 <span className="text-xs font-black text-amber-500 italic tabular-nums">{card?.stats.ovr}</span>
                               </div>
                            );
                         })}
                      </div>
-                     <div className="p-3 bg-black/40 border-t border-white/5 max-h-[120px] overflow-y-auto no-scrollbar">
-                        <p className="text-[8px] font-black text-zinc-600 uppercase mb-2">Draft Picks</p>
-                        <div className="flex flex-wrap gap-1.5">
+                     <div className="p-4 bg-black/40 border-t border-white/5 max-h-[140px] overflow-y-auto no-scrollbar">
+                        <p className="text-[9px] font-black text-zinc-600 uppercase mb-3 flex items-center justify-between">
+                           Draft Capital
+                           <span className="text-amber-500">{userOfferedPickIds.length} selected</span>
+                        </p>
+                        <div className="flex flex-wrap gap-2">
                            {userTeam.draftPicks.map(pick => {
                               const isSelected = userOfferedPickIds.includes(pick.id);
                               return (
                                  <button 
                                    key={pick.id}
                                    onClick={() => setUserOfferedPickIds(prev => isSelected ? prev.filter(x => x !== pick.id) : [...prev, pick.id])}
-                                   className={`px-3 py-1 rounded-lg border text-[10px] font-black uppercase transition-all ${isSelected ? 'bg-amber-500 border-amber-500 text-black' : 'bg-zinc-800 border-white/10 text-zinc-500 hover:text-white'}`}
+                                   className={`px-3 py-2 rounded-xl border text-[10px] font-black uppercase transition-all ${isSelected ? 'bg-amber-500 border-amber-500 text-black' : 'bg-zinc-800 border-white/10 text-zinc-500 hover:text-white'}`}
                                  >
-                                    {pick.year} R{pick.round}
+                                    {pick.year.toString().slice(-2)} R{pick.round}
                                  </button>
                               );
                            })}
@@ -1552,45 +1736,51 @@ const CareerView: React.FC = () => {
                   </div>
 
                   {/* RIVAL SIDE */}
-                  <div className="bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden flex flex-col h-[400px] md:h-[500px]">
+                  <div className="bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden flex flex-col h-[350px] md:h-[500px]">
                      <div className="p-3 border-b border-white/5 bg-white/2 flex items-center justify-between">
-                        <span className="text-[10px] font-black text-white italic">RIVAL ASSETS</span>
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase">{cpuRequestedIds.length + cpuRequestedPickIds.length} Selected</span>
+                        <span className="text-[10px] font-black text-white italic tracking-widest">RECEIVING</span>
+                        <span className="text-[9px] font-bold text-zinc-500 uppercase">{cpuRequestedIds.length + cpuRequestedPickIds.length} ITEMS</span>
                      </div>
                      <div className="flex-1 overflow-y-auto divide-y divide-white/5 no-scrollbar">
                         {tradeTargetTeamId ? state.teams[tradeTargetTeamId].roster.map(id => {
                            const card = findCard(id);
                            const isSelected = cpuRequestedIds.includes(id);
+                           const contract = state.teams[tradeTargetTeamId!].contracts[id];
                            return (
-                              <div key={id} onClick={() => setCpuRequestedIds(prev => isSelected ? prev.filter(x => x !== id) : [...prev, id])} className="p-3 flex items-center justify-between hover:bg-white/5 cursor-pointer">
-                                 <div className="flex items-center gap-2">
-                                    <input type="checkbox" checked={isSelected} readOnly className="accent-amber-500 w-3 h-3" />
-                                    <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card?.nbaId}.png`} className="w-8 h-8 rounded-full bg-zinc-800 object-contain" />
-                                    <span className="text-[11px] font-bold uppercase italic text-white truncate max-w-[80px]">{card?.name?.split(' ').pop() || 'Player'}</span>
+                              <div key={id} onClick={() => setCpuRequestedIds(prev => isSelected ? prev.filter(x => x !== id) : [...prev, id])} className={`p-4 flex items-center justify-between hover:bg-white/5 cursor-pointer transition-colors ${isSelected ? 'bg-amber-500/10' : ''}`}>
+                                 <div className="flex items-center gap-3">
+                                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-white border-white' : 'border-zinc-700'}`}>
+                                       {isSelected && <X size={12} className="text-black rotate-45" />}
+                                    </div>
+                                    <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card?.nbaId}.png`} className="w-10 h-10 rounded-full bg-zinc-800 object-contain" />
+                                    <div className="flex flex-col">
+                                       <span className="text-[11px] font-black uppercase italic text-white leading-none mb-1">{card?.name?.split(' ').pop()}</span>
+                                       <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">{card?.position} • ${(contract?.salary / 1e6).toFixed(1)}M</span>
+                                    </div>
                                  </div>
-                                 <span className="text-[10px] font-black text-amber-500 italic">{card?.stats.ovr}</span>
+                                 <span className="text-xs font-black text-white italic tabular-nums">{card?.stats.ovr}</span>
                               </div>
                            );
                         }) : (
                            <div className="h-full flex items-center justify-center p-8 text-center bg-black/20">
-                              <p className="text-[9px] font-black text-zinc-700 uppercase leading-relaxed italic">Select a team above to view their assets.</p>
+                              <p className="text-[10px] font-black text-zinc-700 uppercase leading-relaxed italic tracking-widest max-w-[140px]">Select a target team from the menu above</p>
                            </div>
                         )}
                      </div>
 
                      {tradeTargetTeamId && (
-                       <div className="p-3 bg-black/40 border-t border-white/5 max-h-[120px] overflow-y-auto no-scrollbar">
-                          <p className="text-[8px] font-black text-zinc-600 uppercase mb-2">Draft Picks</p>
-                          <div className="flex flex-wrap gap-1.5">
+                       <div className="p-4 bg-black/40 border-t border-white/5 max-h-[140px] overflow-y-auto no-scrollbar">
+                          <p className="text-[9px] font-black text-zinc-600 uppercase mb-3">Target Draft Picks</p>
+                          <div className="flex flex-wrap gap-2">
                              {state.teams[tradeTargetTeamId].draftPicks.map(pick => {
                                 const isSelected = cpuRequestedPickIds.includes(pick.id);
                                 return (
                                    <button 
                                      key={pick.id}
                                      onClick={() => setCpuRequestedPickIds(prev => isSelected ? prev.filter(x => x !== pick.id) : [...prev, pick.id])}
-                                     className={`px-3 py-1 rounded-lg border text-[10px] font-black uppercase transition-all ${isSelected ? 'bg-amber-500 border-amber-500 text-black' : 'bg-zinc-800 border-white/10 text-zinc-500 hover:text-white'}`}
+                                     className={`px-3 py-2 rounded-xl border text-[10px] font-black uppercase transition-all ${isSelected ? 'bg-white border-white text-black' : 'bg-zinc-800 border-white/10 text-zinc-500 hover:text-white'}`}
                                    >
-                                      {pick.year} R{pick.round}
+                                      {pick.year.toString().slice(-2)} R{pick.round}
                                    </button>
                                 );
                              })}
@@ -1633,145 +1823,230 @@ const CareerView: React.FC = () => {
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
               className="max-w-4xl mx-auto space-y-8 pb-20 px-4 md:px-0"
             >
-               {/* TROPHY CASE */}
-               <div className="bg-gradient-to-br from-zinc-900 to-black border border-amber-500/10 rounded-[1.5rem] md:rounded-[2.5rem] p-4 md:p-12 space-y-4 md:space-y-8 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2" />
-                  <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4 relative z-10 text-center md:text-left">
-                     <div className="w-10 h-10 md:w-12 md:h-12 bg-amber-500 rounded-xl md:rounded-2xl flex items-center justify-center text-black shadow-[0_0_30px_rgba(245,158,11,0.3)]">
-                        <Trophy size={20} className="md:w-6 md:h-6" />
+               {/* TROPHY CASE OVERHAUL */}
+               <div className="space-y-8 relative">
+                  <div className="flex items-center justify-between px-2">
+                     <div className="space-y-1">
+                        <h3 className="text-3xl font-black italic uppercase tracking-tighter text-white">The Vault</h3>
+                        <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest leading-none">Your Franchise Legacy</p>
                      </div>
-                     <div className="space-y-0.5 md:space-y-1">
-                        <h3 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-white">Trophy Case</h3>
-                        <p className="text-[8px] md:text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Franchise Achievements</p>
-                     </div>
+                     <Trophy className="text-amber-500/20" size={48} />
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 relative z-10">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                      {[
-                       { label: 'Championships', count: (state.trophyCase || []).filter(t => t.type === 'CHAMP').length, color: 'text-amber-500' },
-                       { label: 'NBA MVP', count: (state.trophyCase || []).filter(t => t.type === 'MVP').length, color: 'text-white' },
-                       { label: 'DPOY', count: (state.trophyCase || []).filter(t => t.type === 'DPOY').length, color: 'text-white' },
-                       { label: 'Personal Record', count: (state.trophyCase || []).filter(t => t.type === 'RECORD').length, color: 'text-white' }
-                     ].map((t) => (
-                       <div key={t.label} className="bg-black/40 border border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-6 text-center space-y-1 md:space-y-2 group hover:border-amber-500/30 transition-all">
-                          <p className={`text-2xl md:text-3xl font-black italic transition-all group-hover:scale-110 ${t.color}`}>{t.count}</p>
-                          <p className="text-[8px] md:text-[9px] font-black uppercase text-zinc-600 tracking-widest leading-none">{t.label}</p>
-                       </div>
-                     ))}
+                       { type: 'CHAMP', label: 'Rings', icon: <Trophy size={20} />, color: 'bg-amber-500', glow: 'shadow-[0_0_30px_rgba(245,158,11,0.3)]' },
+                       { type: 'MVP', label: 'MVPs', icon: <Sparkles size={20} />, color: 'bg-white', glow: 'shadow-[0_0_30px_rgba(255,255,255,0.2)]' },
+                       { type: 'DPOY', label: 'Best Defense', icon: <Activity size={20} />, color: 'bg-zinc-700', glow: 'shadow-[0_0_30px_rgba(63,63,70,0.2)]' },
+                       { type: 'RECORD', label: 'High Scores', icon: <TrendingUp size={20} />, color: 'bg-zinc-900', glow: '' }
+                     ].map((t) => {
+                       const achievements = (state.trophyCase || []).filter(item => item.type === t.type);
+                       return (
+                        <div key={t.label} className="group relative bg-zinc-900/50 border border-white/5 rounded-[2.5rem] p-8 flex flex-col items-center justify-center gap-4 hover:bg-white/[0.03] transition-all overflow-hidden border-t-white/10">
+                           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-black mb-2 transition-transform group-hover:scale-110 group-hover:rotate-3 ${t.color} ${t.glow}`}>
+                              {t.icon}
+                           </div>
+                           <div className="text-center">
+                              <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">{t.label}</p>
+                              <p className="text-4xl font-black text-white italic tabular-nums leading-none">{achievements.length}</p>
+                           </div>
+                           {/* Decorative background number */}
+                           <span className="absolute -bottom-4 -right-4 text-8xl font-black italic opacity-[0.02] text-white pointer-events-none group-hover:opacity-[0.05] transition-opacity">{achievements.length}</span>
+                        </div>
+                       );
+                     })}
                   </div>
 
-                  {state.trophyCase.length === 0 && (
-                    <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl p-8 text-center">
-                       <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] leading-relaxed">No trophies yet. Every legacy starts with a single victory. Build your dynasty.</p>
+                  {state.trophyCase.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                       {state.trophyCase.slice().reverse().map((award, i) => {
+                          const player = award.playerId ? findCard(award.playerId) : null;
+                          return (
+                             <motion.div 
+                               initial={{ opacity: 0, x: -20 }}
+                               animate={{ opacity: 1, x: 0 }}
+                               transition={{ delay: i * 0.05 }}
+                               key={`${award.type}-${award.season}-${i}`}
+                               className="flex items-center gap-4 bg-zinc-900/30 border border-white/5 p-4 rounded-3xl hover:border-white/20 transition-all group"
+                             >
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${award.type === 'CHAMP' ? 'bg-amber-500 text-black' : 'bg-white/10 text-white'}`}>
+                                   <Trophy size={18} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                   <div className="flex items-center gap-2 mb-0.5">
+                                      <span className="text-[10px] font-black text-amber-500 italic uppercase">Season {award.season}</span>
+                                      <span className="text-[7px] font-black text-zinc-600 uppercase tracking-widest">• {award.type}</span>
+                                   </div>
+                                   <h4 className="text-sm font-black text-white uppercase italic truncate">
+                                      {award.type === 'CHAMP' ? 'World Champions' : player?.name || award.label || 'Major Award'}
+                                   </h4>
+                                   {award.type === 'CHAMP' && (
+                                       <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Finals Champions</p>
+                                   )}
+                                </div>
+                             </motion.div>
+                          );
+                       })}
+                    </div>
+                  ) : (
+                    <div className="bg-zinc-900 border border-dashed border-white/10 rounded-[3rem] p-16 text-center space-y-4">
+                       <Trophy className="text-zinc-800 mx-auto" size={64} />
+                       <div className="space-y-1">
+                          <p className="text-xl font-black text-zinc-700 uppercase italic tracking-tighter">Empty Vault</p>
+                          <p className="text-[9px] font-black text-zinc-800 uppercase tracking-[0.4em] max-w-[200px] mx-auto">Build your dynasty to claim your first trophy</p>
+                       </div>
                     </div>
                   )}
                </div>
 
-               {/* FINANCE & ASSETS */}
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-zinc-900 border border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-8 space-y-4 md:space-y-6">
-                     <div className="space-y-0.5 md:space-y-1">
-                       <h3 className="text-base md:text-lg font-black uppercase text-white tracking-widest italic">Salary Cap</h3>
-                       <p className="text-[7px] md:text-[8px] font-bold text-zinc-500 uppercase tracking-widest tracking-[0.4em]">Season {state.season}</p>
-                     </div>
-                     <div className="space-y-2 md:space-y-3">
-                        <div className="flex justify-between text-[10px] font-black uppercase font-mono italic">
-                           <span className="text-zinc-500">Payroll: ${(userTeam.payroll / 1000000).toFixed(1)}M</span>
-                           <span className="text-amber-500">Soft Cap: $136.0M</span>
+                {/* FINANCE & ASSETS */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+                   {/* Salary Cap Widget */}
+                   <div className="bg-zinc-900 border border-white/5 rounded-2xl md:rounded-3xl p-5 md:p-10 space-y-4 md:space-y-8 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2" />
+                      
+                      <div className="flex items-center justify-between relative z-10">
+                        <div className="space-y-1">
+                          <h3 className="text-xl md:text-3xl font-black uppercase italic tracking-tighter text-white">Salary Cap</h3>
+                          <p className="text-[10px] md:text-xs font-bold text-zinc-600 uppercase tracking-widest italic leading-none">Fiscal Management • Season {state.season}</p>
                         </div>
-                        <div className="h-2.5 bg-black rounded-full overflow-hidden border border-white/5 p-0.5">
-                           <motion.div 
-                             initial={{ width: 0 }}
-                             animate={{ width: `${Math.min((userTeam.payroll / 136000000) * 100, 100)}%` }}
-                             className={`h-full rounded-full ${userTeam.payroll > 136000000 ? 'bg-red-500' : 'bg-amber-500'}`}
-                           />
-                        </div>
-                     </div>
-                  </div>
+                        <Building size={24} className="text-zinc-800" />
+                      </div>
 
-                  <div className="bg-zinc-900 border border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-8 space-y-4 md:space-y-6">
-                     <div className="space-y-0.5 md:space-y-1">
-                       <h3 className="text-base md:text-lg font-black uppercase text-white tracking-widest italic">Future Picks</h3>
-                       <p className="text-[7px] md:text-[8px] font-bold text-zinc-500 uppercase tracking-widest tracking-[0.4em]">Draft Control</p>
-                     </div>
-                     <div className="flex flex-wrap gap-2">
-                        {userTeam.draftPicks.slice(0, 6).map((p) => (
-                           <div key={p.id} className="px-3 py-1.5 bg-black rounded-lg border border-white/5 text-[9px] font-bold text-zinc-400">
-                              {p.year} R{p.round} ({p.originalOwnerId})
+                      <div className="space-y-3 md:space-y-6 relative z-10">
+                         <div className="grid grid-cols-3 gap-2">
+                           <div className="space-y-0.5">
+                             <p className="text-[8px] font-black text-zinc-700 uppercase tracking-widest">Payroll</p>
+                             <p className="text-sm md:text-xl font-black text-white italic tracking-tighter leading-none">${(userTeam.payroll / 1000000).toFixed(1)}M</p>
                            </div>
-                        ))}
-                     </div>
-                  </div>
-               </div>
+                           <div className="space-y-0.5 border-x border-white/5 px-2">
+                             <p className="text-[8px] font-black text-zinc-700 uppercase tracking-widest">Cap Limit</p>
+                             <p className="text-sm md:text-xl font-black text-zinc-500 italic tracking-tighter leading-none">$136.0M</p>
+                           </div>
+                           <div className="space-y-0.5 text-right">
+                             <p className="text-[8px] font-black text-zinc-700 uppercase tracking-widest">Space</p>
+                             <p className={`text-sm md:text-xl font-black italic tracking-tighter leading-none ${userTeam.payroll > 136000000 ? 'text-red-500' : 'text-green-500'}`}>
+                               ${((136000000 - userTeam.payroll) / 1000000).toFixed(1)}M
+                             </p>
+                           </div>
+                         </div>
+                         
+                         <div className="space-y-2">
+                            <div className="h-1.5 md:h-3 bg-black rounded-full overflow-hidden border border-white/5 p-0.5 shadow-inner">
+                               <motion.div 
+                                 initial={{ width: 0 }}
+                                 animate={{ width: `${Math.min((userTeam.payroll / 136000000) * 100, 100)}%` }}
+                                 className={`h-full rounded-full transition-all duration-1000 ${userTeam.payroll > 136000000 ? 'bg-gradient-to-r from-red-600 to-red-400' : 'bg-gradient-to-r from-amber-600 to-amber-400'}`}
+                               />
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-[7px] md:text-[9px] font-black text-zinc-800 uppercase tracking-[0.2em]">Usage Percentage</span>
+                              <span className="text-[7px] md:text-[9px] font-black text-amber-500 uppercase tracking-[0.2em]">{((userTeam.payroll / 136000000) * 100).toFixed(1)}%</span>
+                            </div>
+                         </div>
+                      </div>
+                   </div>
 
-               {/* CONTRACTS */}
-               <div className="bg-zinc-900 border border-white/5 rounded-2xl md:rounded-3xl overflow-hidden divide-y divide-white/5">
-                  <div className="p-4 md:p-6 bg-white/2">
-                    <h3 className="text-[10px] md:text-[12px] font-black uppercase italic text-white tracking-widest">Roster Contracts & Negotiations</h3>
-                  </div>
-                  {userTeam.roster.map(id => {
-                     const card = findCard(id);
-                     const contract = userTeam.contracts[id];
-                     if (!card || !contract) return null;
-                     const isExpiring = contract.yearsRemaining === 1;
-                     const neg = state.negotiations?.[id];
+                   {/* Assets Widget */}
+                   <div className="bg-zinc-900 border border-white/5 rounded-2xl md:rounded-3xl p-5 md:p-10 space-y-4 md:space-y-8 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-zinc-500/5 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2" />
+                      
+                      <div className="flex items-center justify-between relative z-10">
+                        <div className="space-y-1">
+                          <h3 className="text-xl md:text-3xl font-black uppercase italic tracking-tighter text-white">Asset Control</h3>
+                          <p className="text-[10px] md:text-xs font-bold text-zinc-600 uppercase tracking-widest italic leading-none">Draft Capital • Trade Rights</p>
+                        </div>
+                        <History size={24} className="text-zinc-800" />
+                      </div>
 
-                     return (
-                        <div key={id} className="p-3 md:p-6 space-y-3 md:space-y-4 hover:bg-white/5 transition-colors group relative">
-                           <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 md:gap-4">
-                               <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-black border border-white/5 object-contain" />
-                               <div className="flex flex-col">
-                                  <span className="text-[10px] md:text-sm font-black text-white uppercase italic leading-none">{card.name}</span>
-                                  <span className="text-[8px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest mt-0.5">{card.position} • OVR {card.stats.ovr}</span>
+                      <div className="flex flex-wrap gap-2 md:gap-3 relative z-10">
+                         {userTeam.draftPicks.slice(0, 8).map((p) => (
+                            <div key={p.id} className="px-3 md:px-5 py-2 md:py-3 bg-black/40 border border-white/5 rounded-xl md:rounded-2xl flex flex-col items-start gap-0.5 hover:border-amber-500/30 transition-all cursor-default">
+                               <span className="text-[8px] md:text-[10px] font-black text-zinc-600 uppercase leading-none">{p.year} {p.round === 1 ? '1ST' : '2ND'}</span>
+                               <span className="text-[10px] md:text-sm font-black text-white italic tracking-tighter leading-none">{p.originalOwnerId}</span>
+                            </div>
+                         ))}
+                      </div>
+                   </div>
+                </div>
+
+                {/* CONTRACTS VIEW OVERHAUL */}
+                <div className="space-y-6 md:space-y-12">
+                   <div className="flex items-center justify-between px-2">
+                      <div className="space-y-1">
+                         <h3 className="text-xl md:text-3xl font-black uppercase italic tracking-tighter text-white">Payroll Registry</h3>
+                         <p className="text-[8px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest">Active Roster Agreements</p>
+                      </div>
+                   </div>
+                   
+                   <div className="grid grid-cols-1 gap-4">
+                      {userTeam.roster.sort((a,b) => (userTeam.contracts[b]?.salary || 0) - (userTeam.contracts[a]?.salary || 0)).map(id => {
+                         const card = findCard(id);
+                         const contract = userTeam.contracts[id];
+                         if (!card || !contract) return null;
+                         const isExpiring = contract.yearsRemaining === 1;
+                         const neg = state.negotiations?.[id];
+
+                         return (
+                            <div key={id} className="bg-zinc-900/40 border border-white/5 rounded-3xl p-4 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-white/[0.03] transition-all relative overflow-hidden group">
+                               {isExpiring && <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />}
+                               
+                               <div className="flex items-center gap-4 md:gap-8 flex-1">
+                                  <div className="relative shrink-0">
+                                     <div className="w-16 h-16 md:w-24 md:h-24 rounded-2xl bg-black border border-white/10 overflow-hidden shadow-2xl relative">
+                                        <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-full h-full object-contain" />
+                                     </div>
+                                     <div className="absolute -bottom-2 -right-2 w-8 h-8 md:w-10 md:h-10 bg-white rounded-xl flex items-center justify-center text-xs md:text-lg font-black text-black italic shadow-2xl border-4 border-zinc-900">{card.stats.ovr}</div>
+                                  </div>
+
+                                  <div className="space-y-1 md:space-y-2 flex-1 min-w-0">
+                                     <div className="flex items-center gap-2 flex-wrap">
+                                        <span className="text-[10px] font-black bg-zinc-800 text-zinc-500 px-2 py-0.5 rounded uppercase">{card.position}</span>
+                                        <span className={`text-[8px] md:text-[10px] font-black px-2 py-0.5 rounded border ${contract.type === 'Max' ? 'border-amber-500 text-amber-500 bg-amber-500/5' : 'border-zinc-700 text-zinc-600'} uppercase tracking-widest italic`}>{contract.type} Contract</span>
+                                     </div>
+                                     <h4 className="text-lg md:text-3xl font-black text-white uppercase italic tracking-tighter truncate leading-none group-hover:text-amber-500 transition-colors">{card.name}</h4>
+                                     <p className="text-[9px] md:text-sm font-bold text-zinc-600 uppercase tracking-widest truncate">{card.archetype}</p>
+                                  </div>
                                </div>
-                              </div>
-                              <div className="text-right">
-                                 <p className="text-[10px] md:text-sm font-black text-white italic leading-none">${(contract.salary/1000000).toFixed(1)}M</p>
-                                 <p className={`text-[8px] md:text-[10px] font-black uppercase tracking-widest mt-0.5 ${isExpiring ? 'text-amber-500' : 'text-zinc-700'}`}>{contract.yearsRemaining}Y LEFT</p>
-                              </div>
-                           </div>
 
-                           <div className="flex gap-2">
-                              <button 
-                                onClick={() => {
-                                   if (confirm(`Wave ${card.name}? This will free up roster space but you still pay the salary and the player becomes a Free Agent.`)) {
-                                      marketService.releasePlayer(state, id);
-                                      setState({...state});
-                                   }
-                                }}
-                                className="flex-1 py-2 bg-zinc-800 text-zinc-500 hover:text-white rounded-lg font-black uppercase tracking-widest text-[8px] transition-all"
-                              >
-                                 Cut Player
-                              </button>
-                              {isExpiring && (!neg || neg.status === 'Active') && (
-                                <button 
-                                  onClick={() => handleNegotiationStart(id)}
-                                  className="flex-1 py-2 bg-amber-500 text-black rounded-lg font-black uppercase tracking-widest text-[8px] transition-all shadow-lg"
-                                >
-                                   Negotiate Extension
-                                </button>
-                              )}
-                           </div>
+                               <div className="flex items-center justify-between md:flex-col md:items-end gap-2 md:gap-4 border-t md:border-t-0 border-white/5 pt-4 md:pt-0">
+                                  <div className="text-left md:text-right">
+                                     <p className="text-2xl md:text-3xl font-black text-white italic tracking-tighter leading-none">${(contract.salary/1e6).toFixed(1)}<span className="text-sm md:text-xl ml-0.5">M</span></p>
+                                     <div className="flex items-center gap-2 mt-1 justify-start md:justify-end">
+                                        <div className={`w-1.5 h-1.5 rounded-full ${isExpiring ? 'bg-amber-500 animate-pulse' : 'bg-green-500'}`} />
+                                        <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isExpiring ? 'text-amber-500' : 'text-zinc-600'}`}>Term: {contract.yearsRemaining}Y</p>
+                                     </div>
+                                  </div>
 
-                           {neg?.status === 'Accepted' && (
-                             <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-2xl flex items-center justify-center gap-3">
-                                <Sparkles size={14} className="text-green-500" />
-                                <p className="text-[10px] font-black text-green-500 uppercase tracking-widest">Extension Signed Successfully</p>
-                             </div>
-                           )}
-
-                           {neg?.status === 'Rejected' && (
-                             <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center gap-3">
-                                <AlertTriangle size={14} className="text-red-500" />
-                                <p className="text-[10px] font-black text-red-500 uppercase tracking-widest">Negotiations Collapsed</p>
-                             </div>
-                           )}
-                        </div>
-                     );
-                  })}
-               </div>
-            </motion.div>
+                                  <div className="flex gap-2">
+                                     <button 
+                                       onClick={() => {
+                                         if (confirm(`Terminate ${card.name}'s contract?`)) {
+                                           marketService.releasePlayer(state, id);
+                                           setState({...state});
+                                         }
+                                       }}
+                                       className="p-2 md:px-4 md:py-2 bg-zinc-800 hover:bg-red-500/20 text-zinc-600 hover:text-red-500 rounded-xl transition-all"
+                                       title="Terminate Contract"
+                                     >
+                                       <X size={16} />
+                                     </button>
+                                     {isExpiring && (
+                                       <button 
+                                         onClick={() => handleNegotiationStart(id)}
+                                         className="px-6 py-2 bg-amber-500 text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-amber-400 transition-all shadow-lg active:scale-95"
+                                       >
+                                         Renew
+                                       </button>
+                                     )}
+                                  </div>
+                               </div>
+                            </div>
+                         );
+                      })}
+                   </div>
+                </div>
+             </motion.div>
           )}
                     {activeTab === 'league' && (
              <motion.div 
@@ -1780,52 +2055,55 @@ const CareerView: React.FC = () => {
               className="max-w-4xl mx-auto space-y-6 md:space-y-12 px-3 pb-20"
             >
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-                  {/* CONFERENCE STANDINGS */}
-                  {['East', 'West'].map(conf => (
-                    <div key={conf} className="space-y-2 md:space-y-4">
-                       <h3 className="text-[9px] md:text-sm font-black uppercase italic text-zinc-500 flex items-center justify-between px-1">
-                         <span className="text-white">{conf}ern</span>
-                         <span className="text-[7px] md:text-[10px] tracking-widest">Regular Season</span>
-                       </h3>
-                        <div className="bg-zinc-900 border border-white/5 rounded-xl md:rounded-2xl overflow-x-auto no-scrollbar touch-pan-x">
-                            <table className="w-full text-left border-collapse min-w-[300px] md:min-w-[320px]">
-                               <thead className="bg-white/5 border-b border-white/5">
-                                  <tr className="text-[7px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest">
-                                     <th className="px-3 md:px-4 py-2 md:py-3 sticky left-0 bg-zinc-900 z-10 border-r border-white/5">TEAM</th>
-                                     <th className="px-1 md:px-2 py-2 md:py-3 text-center">W</th>
-                                     <th className="px-1 md:px-2 py-2 md:py-3 text-center">L</th>
-                                     <th className="px-1 md:px-2 py-2 md:py-3 text-center">PCT</th>
-                                     <th className="px-2 md:px-3 py-2 md:py-3 text-center">GB</th>
-                                  </tr>
-                               </thead>
-                               <tbody>
-                                  {(Object.values(state.teams) as TeamObject[])
-                                    .filter(t => t.conference === conf)
-                                    .sort((a, b) => b.wins - a.wins || a.losses - b.losses)
-                                    .map((team, i) => {
-                                       const topWins = (Object.values(state.teams) as TeamObject[]).filter(t => t.conference === conf).sort((a,b)=>b.wins-a.wins)[0].wins;
-                                       const gb = i === 0 ? '-' : (topWins - team.wins);
-                                       return (
-                                         <tr key={team.teamId} className={`h-[32px] md:h-[40px] border-b border-white/5 hover:bg-white/10 transition-colors ${team.isHuman ? 'bg-amber-500/5 text-amber-500' : ''}`}>
-                                            <td className="px-3 md:px-4 py-0.5 sticky left-0 bg-zinc-900 z-10 border-r border-white/5">
-                                               <div className="flex items-center gap-2 md:gap-3">
-                                                  <span className="text-[8px] font-black text-zinc-700 w-3 leading-none">{i+1}</span>
-                                                  <img src={getTeamLogo(team.teamId)} className="w-4 h-4 md:w-5 md:h-5 object-contain" />
-                                                  <span className="text-[9px] md:text-[12px] font-black uppercase italic truncate max-w-[60px] md:max-w-[80px] leading-none">{team.abbreviation}</span>
-                                               </div>
-                                            </td>
-                                            <td className="px-1 md:px-2 py-0.5 text-center text-[9px] md:text-[12px] font-black tabular-nums">{team.wins}</td>
-                                            <td className="px-1 md:px-2 py-0.5 text-center text-[9px] md:text-[12px] font-black tabular-nums opacity-40">{team.losses}</td>
-                                            <td className="px-1 md:px-2 py-0.5 text-center text-[8px] md:text-[11px] font-mono opacity-30 tabular-nums">.{(team.wins / Math.max(1, (team.wins+team.losses)) * 1000).toFixed(0).padStart(3, '0')}</td>
-                                            <td className="px-2 md:px-3 py-0.5 text-center text-[8px] md:text-[11px] font-black opacity-20 tabular-nums">{gb}</td>
-                                          </tr>
-                                       );
-                                    })}
-                               </tbody>
-                            </table>
+                    {/* CONFERENCE STANDINGS */}
+                    {['East', 'West'].map(conf => (
+                      <div key={conf} className="space-y-4 md:space-y-6">
+                         <div className="flex items-center justify-between border-b border-white/5 pb-2 px-1">
+                            <h3 className="text-xl md:text-3xl font-black uppercase italic text-white tracking-tighter">{conf}</h3>
+                            <span className="text-[9px] md:text-sm font-bold text-zinc-600 uppercase tracking-widest italic">Regular Season</span>
                          </div>
-                    </div>
-                  ))}
+                         <div className="bg-zinc-900 border border-white/5 rounded-2xl md:rounded-[2rem] overflow-hidden shadow-2xl">
+                             <table className="w-full text-left border-collapse">
+                                <thead className="bg-white/5 border-b border-white/5">
+                                   <tr className="text-[8px] md:text-xs font-black text-zinc-600 uppercase tracking-[0.2em]">
+                                      <th className="px-4 md:px-8 py-3 md:py-6">TEAM</th>
+                                      <th className="px-2 md:px-4 py-3 md:py-6 text-center">W</th>
+                                      <th className="px-2 md:px-4 py-3 md:py-6 text-center">L</th>
+                                      <th className="px-2 md:px-4 py-3 md:py-6 text-right tabular-nums">PCT</th>
+                                   </tr>
+                                </thead>
+                                <tbody>
+                                   {(Object.values(state.teams) as TeamObject[])
+                                     .filter(t => t.conference === conf)
+                                     .sort((a, b) => b.wins - a.wins || a.losses - b.losses)
+                                     .map((team, i) => {
+                                        return (
+                                          <tr key={team.teamId} className={`border-b border-white/5 last:border-0 hover:bg-white/[0.03] transition-colors ${team.isHuman ? 'bg-amber-500/5' : ''}`}>
+                                             <td className="px-4 md:px-8 py-2 md:py-5">
+                                                <div className="flex items-center gap-3 md:gap-6">
+                                                   <span className="text-[10px] md:text-sm font-black text-zinc-800 w-4 italic">{i+1}</span>
+                                                   <div className="w-6 h-6 md:w-10 md:h-10 bg-black/40 rounded-lg p-1 border border-white/5 flex items-center justify-center">
+                                                     <img src={getTeamLogo(team.teamId)} className="w-full h-full object-contain" />
+                                                   </div>
+                                                   <div className="flex flex-col">
+                                                      <span className={`text-[11px] md:text-xl font-black uppercase italic tracking-tighter ${team.isHuman ? 'text-amber-500' : 'text-white'}`}>{team.abbreviation}</span>
+                                                      <span className="text-[8px] md:text-[10px] font-bold text-zinc-600 uppercase tracking-widest hidden md:block">{team.name}</span>
+                                                   </div>
+                                                </div>
+                                             </td>
+                                             <td className="px-2 md:px-4 py-2 md:py-5 text-center text-sm md:text-2xl font-black text-white italic tabular-nums leading-none tracking-tighter">{team.wins}</td>
+                                             <td className="px-2 md:px-4 py-2 md:py-5 text-center text-sm md:text-2xl font-black text-zinc-700 italic tabular-nums leading-none tracking-tighter">{team.losses}</td>
+                                             <td className="px-2 md:px-4 py-2 md:py-5 text-right text-[10px] md:text-sm font-mono text-zinc-500 tabular-nums">
+                                               .{((team.wins / Math.max(1, (team.wins+team.losses))) * 1000).toFixed(0).padStart(3, '0')}
+                                             </td>
+                                          </tr>
+                                        );
+                                     })}
+                                </tbody>
+                             </table>
+                         </div>
+                      </div>
+                    ))}
                </div>
             </motion.div>
           )}
@@ -1848,41 +2126,46 @@ const CareerView: React.FC = () => {
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
               className="max-w-6xl mx-auto space-y-8 md:space-y-12 pb-20 px-3 md:px-4"
             >
-               {/* STARTING 5 GRID */}
-               <div className="space-y-3 md:space-y-4">
-                  <div className="flex items-center justify-between">
-                     <h3 className="text-base md:text-2xl font-black uppercase italic text-white tracking-tighter leading-none">Starting 5</h3>
-                     <span className="text-[6px] md:text-[10px] font-bold text-zinc-500 uppercase tracking-widest border border-white/10 px-1.5 py-0.5 rounded-full bg-white/5">Tap to Edit</span>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-1 md:gap-4">
-                     {(['PG', 'SG', 'SF', 'PF', 'C'] as const).map(pos => {
-                        const card = findCard(userTeam.lineup[pos]);
-                        return (
-                           <div key={pos} className="space-y-1.5 md:space-y-4">
-                              <div className="text-center">
-                                 <span className="text-[6px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest bg-zinc-900 px-1.5 py-0.5 md:px-3 md:py-1 rounded-md border border-white/5">{pos}</span>
-                              </div>
-                              <div 
-                                 onClick={() => setLineupModalPos(pos)}
-                                 className="relative aspect-[2.5/3.5] group cursor-pointer"
-                              >
-                                 {card ? (
-                                    <div className="transition-transform group-hover:scale-[1.02]">
-                                      <CardItem card={card} isOwned={true} mode="mini" />
-                                    </div>
-                                 ) : (
-                                    <div className="w-full h-full border border-dashed border-white/10 bg-white/5 rounded-xl md:rounded-2xl flex flex-col items-center justify-center gap-1.5 md:gap-3 transition-all group-hover:bg-white/10 group-hover:border-white/20 aspect-[2.5/3.5]">
-                                       <Plus className="text-zinc-700" size={16} />
-                                       <span className="text-[7px] md:text-[10px] font-black text-zinc-800 uppercase italic text-center">Empty</span>
-                                    </div>
-                                 )}
-                              </div>
-                           </div>
-                        );
-                     })}
-                  </div>
-               </div>
+                {/* STARTING 5 GRID */}
+                <div className="space-y-4 md:space-y-8">
+                   <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                      <div className="space-y-1">
+                        <h3 className="text-xl md:text-3xl font-black uppercase italic text-white tracking-tighter leading-none">First Unit</h3>
+                        <p className="text-[10px] md:text-sm font-bold text-zinc-500 uppercase tracking-widest italic">Starting Five Lineup</p>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-[9px] md:text-xs font-black text-amber-500 uppercase tracking-widest bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">Edit Mode</span>
+                      </div>
+                   </div>
+                   
+                   <div className="grid grid-cols-5 gap-2 md:gap-8">
+                      {(['PG', 'SG', 'SF', 'PF', 'C'] as const).map(pos => {
+                         const card = findCard(userTeam.lineup[pos]);
+                         return (
+                            <div key={pos} className="space-y-2 md:space-y-6 flex flex-col items-center">
+                               <div 
+                                  onClick={() => setLineupModalPos(pos)}
+                                  className="relative w-full aspect-[1/1.4] group cursor-pointer"
+                               >
+                                  {card ? (
+                                     <div className="transition-all duration-300 group-hover:scale-[1.05] group-hover:drop-shadow-[0_0_20px_rgba(245,158,11,0.3)] h-full">
+                                       <CardItem card={card} isOwned={true} mode="mini" />
+                                       <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 z-50">
+                                         <span className="text-[9px] md:text-xs font-black text-black bg-white px-2 py-0.5 rounded shadow-xl border border-zinc-200">{pos}</span>
+                                       </div>
+                                     </div>
+                                  ) : (
+                                     <div className="w-full h-full border border-dashed border-white/10 bg-white/[0.02] rounded-xl md:rounded-[2rem] flex flex-col items-center justify-center gap-1 md:gap-4 transition-all group-hover:bg-white/[0.05] group-hover:border-white/20 aspect-[1/1.4]">
+                                        <Plus className="text-zinc-700" size={16} />
+                                        <span className="text-[9px] md:text-[11px] font-black text-zinc-700 uppercase italic text-center leading-none">{pos}</span>
+                                     </div>
+                                  )}
+                               </div>
+                            </div>
+                         );
+                      })}
+                   </div>
+                </div>
 
                {/* BENCH HORIZONTAL */}
                <div className="space-y-3 md:space-y-4">
@@ -2061,7 +2344,7 @@ const CareerView: React.FC = () => {
                         .slice(0, 50)
                         .map(([playerId, stats]) => {
                           const card = findCard(playerId);
-                          const team = (Object.values(state.teams) as TeamObject[]).find(t => t.roster.includes(playerId));
+                          const team = playerTeamMap.get(playerId);
                           if (!card) return null;
                           return (
                             <tr key={playerId} className="hover:bg-white/5 transition-colors group">
@@ -2277,7 +2560,7 @@ const CareerView: React.FC = () => {
                               setState(newState);
                               stateService.save(newState);
                               setActiveTab('hub');
-                              alert("Draft completed! Welcome to the new season.");
+                              notifySuccess("Draft completed! Welcome to the new season.");
                            }}
                            className="px-12 py-5 bg-emerald-500 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl hover:bg-emerald-400 transition-all active:scale-95"
                          >
@@ -2297,19 +2580,18 @@ const CareerView: React.FC = () => {
                          </div>
                       )}
                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-24 px-2 md:px-0">
+                 </div>
+                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 pb-24 px-2 md:px-0">
                    {/* LEFT PANEL: PROSPECTS */}
-                   <div className="lg:col-span-8 space-y-6">
+                   <div className="lg:col-span-12 xl:col-span-8 space-y-4 md:space-y-6">
                       <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                         <h3 className="text-xl font-black italic uppercase tracking-tighter text-zinc-100 flex items-center gap-3">
+                         <h3 className="text-lg md:text-xl font-black italic uppercase tracking-tighter text-zinc-100 flex items-center gap-3">
                             <Users size={20} className="text-amber-500" />
                             Draft Pool
                          </h3>
                          <span className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em]">60 Total Prospects</span>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 h-[650px] overflow-y-auto no-scrollbar pr-2 overscroll-contain">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6 h-[50vh] xl:h-[650px] overflow-y-auto no-scrollbar pr-2 overscroll-contain">
                          {state.draftPool?.map((card) => {
                             const histEntry = draftState.history.find(h => h.player.id === card.id);
                             const isPicked = !!histEntry;
@@ -2323,7 +2605,7 @@ const CareerView: React.FC = () => {
                                  className={`relative transition-all duration-500 ${isPicked ? 'opacity-20 pointer-events-none' : 'hover:translate-x-1 cursor-pointer'}`}
                                  onClick={() => !isPicked && setViewingProspectId(card.id)}
                                >
-                                  <div className={`bg-zinc-900 border ${isUserTurn && !isPicked ? 'border-amber-500 bg-amber-500/10 shadow-[0_0_50px_rgba(245,158,11,0.1)]' : 'border-white/5'} rounded-[2.5rem] p-5 flex gap-5 relative overflow-hidden group`}>
+                                  <div className={`bg-zinc-900 border ${isUserTurn && !isPicked ? 'border-amber-500 bg-amber-500/10 shadow-[0_0_50px_rgba(245,158,11,0.1)]' : 'border-white/5'} rounded-2xl md:rounded-[2.5rem] p-3 md:p-5 flex gap-3 md:gap-5 relative overflow-hidden group`}>
                                      {isUserTurn && !isPicked && (
                                         <motion.div 
                                           animate={{ scale: [1, 1.1, 1], opacity: [1, 0.7, 1] }}
@@ -2333,25 +2615,25 @@ const CareerView: React.FC = () => {
                                            <Sparkles size={20} className="text-amber-400" />
                                         </motion.div>
                                      )}
-                                     <div className="w-28 shrink-0 shadow-2xl transition-all group-hover:scale-105">
+                                     <div className="w-20 md:w-28 shrink-0 shadow-2xl transition-all group-hover:scale-105">
                                         <CardItem card={card} mode="mini" isOwned={false} />
                                      </div>
-                                     <div className="flex-1 flex flex-col justify-between py-2">
-                                        <div className="space-y-1">
+                                     <div className="flex-1 flex flex-col justify-between py-1 md:py-2">
+                                        <div className="space-y-0.5 md:space-y-1">
                                            <div className="flex items-center gap-2">
-                                              <span className="px-2 py-0.5 bg-zinc-800 text-zinc-500 text-[8px] font-black rounded uppercase tracking-widest">{card.position}</span>
-                                              <p className="text-[8px] font-black text-amber-500/50 uppercase tracking-[0.2em]">{card.stats.ovr >= 80 ? 'Elite' : 'Developing'}</p>
+                                              <span className="px-1.5 py-0.5 bg-zinc-800 text-zinc-500 text-[6px] md:text-[8px] font-black rounded uppercase tracking-widest">{card.position}</span>
+                                              <p className="text-[6px] md:text-[8px] font-black text-amber-500/50 uppercase tracking-[0.2em]">{card.stats.ovr >= 80 ? 'Elite' : 'Developing'}</p>
                                            </div>
-                                           <h4 className="text-xl font-black text-white italic uppercase truncate tracking-tight">{card.name}</h4>
+                                           <h4 className="text-sm md:text-xl font-black text-white italic uppercase truncate tracking-tight">{card.name}</h4>
                                            <div className="flex items-end gap-1">
-                                              <p className="text-4xl font-black text-amber-500 italic leading-none">{card.stats.ovr}</p>
-                                              <p className="text-[10px] font-black text-zinc-800 uppercase not-italic mb-1">OVR</p>
+                                              <p className="text-2xl md:text-4xl font-black text-amber-500 italic leading-none">{card.stats.ovr}</p>
+                                              <p className="text-[6px] md:text-[10px] font-black text-zinc-800 uppercase not-italic mb-0.5 md:mb-1">OVR</p>
                                            </div>
                                         </div>
                                         
                                         {isPicked && (
-                                           <div className="flex items-center gap-2 text-[10px] font-black text-zinc-700 uppercase italic mt-4 border-t border-white/5 pt-3">
-                                              <div className="w-5 h-5 bg-black rounded-lg p-1 border border-white/5 grayscale">
+                                           <div className="flex items-center gap-1.5 md:gap-2 text-[8px] md:text-[10px] font-black text-zinc-700 uppercase italic mt-2 md:mt-4 border-t border-white/5 pt-2 md:pt-3">
+                                              <div className="w-4 h-4 md:w-5 md:h-5 bg-black rounded-md md:rounded-lg p-0.5 md:p-1 border border-white/5 grayscale">
                                                  <img src={getTeamLogo(histEntry.teamId)} className="w-full h-full object-contain" />
                                               </div>
                                               Picked #{histEntry.pick}
@@ -2366,22 +2648,20 @@ const CareerView: React.FC = () => {
                    </div>
 
                    {/* RIGHT PANEL: ORDER & LOGS */}
-                   <div className="lg:col-span-4 space-y-6">
-                      <div className="bg-zinc-950 border border-white/5 rounded-[2.5rem] overflow-hidden flex flex-col h-[700px] shadow-2xl">
-                         <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/2">
-                            <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] font-mono">Operations Board</h3>
+                   <div className="lg:col-span-12 xl:col-span-4 space-y-6">
+                      <div className="bg-zinc-950 border border-white/5 rounded-2xl md:rounded-[2.5rem] overflow-hidden flex flex-col h-[40vh] xl:h-[700px] shadow-2xl">
+                         <div className="p-4 md:p-8 border-b border-white/5 flex items-center justify-between bg-white/2">
+                            <h3 className="text-[8px] md:text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] font-mono">Operations Board</h3>
                             <div className="flex gap-1">
                                <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-                               <div className="w-1.5 h-1.5 bg-amber-500/40 rounded-full" />
-                               <div className="w-1.5 h-1.5 bg-amber-500/10 rounded-full" />
                             </div>
                          </div>
 
-                         <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8">
+                         <div className="flex-1 overflow-y-auto no-scrollbar p-4 md:p-6 space-y-6 md:space-y-8">
                             {/* CURRENT & NEXT PICKS */}
                             <div className="space-y-4">
                                <p className="text-[8px] font-black text-zinc-700 uppercase tracking-[0.4em] ml-2">Live Queue</p>
-                               <div className="space-y-3">
+                               <div className="grid grid-cols-2 xl:grid-cols-1 gap-2 md:gap-3">
                                   {Array.from({ length: 6 }).map((_, i) => {
                                      const pickNum = draftState.pick + i;
                                      if (pickNum > 60) return null;
@@ -2393,7 +2673,7 @@ const CareerView: React.FC = () => {
                                      const isUser = teamId === state.userTeamId;
 
                                      return (
-                                        <div key={`up-next-${pickNum}`} className={`p-4 rounded-3xl flex items-center justify-between border transition-all ${i === 0 ? 'bg-amber-500 border-transparent shadow-[0_0_40px_rgba(245,158,11,0.2)]' : isUser ? 'bg-amber-500/10 border-amber-500/20' : 'bg-black/40 border-white/5 opacity-40'}`}>
+                                        <div key={`up-next-${pickNum}`} className={`p-4 rounded-3xl flex items-center justify-between border transition-all ${i === 0 ? 'bg-amber-500 border-transparent shadow-[0_0_40px_rgba(245,158,11,0.2)]' : isUser ? 'bg-amber-500/10 border-amber-500/20' : 'bg-black/40 border-white/5 opacity-40'} ${i > 2 ? 'hidden xl:flex' : ''}`}>
                                            <div className="flex items-center gap-4">
                                               <span className={`w-8 text-[11px] font-black italic ${i === 0 ? 'text-black' : 'text-zinc-700'}`}>#{pickNum}</span>
                                               <div className={`w-8 h-8 rounded-xl p-1.5 border ${i === 0 ? 'bg-white border-black/10' : 'bg-zinc-900 border-white/5'}`}>
@@ -2455,11 +2735,11 @@ const CareerView: React.FC = () => {
                                <p className="text-amber-500 text-xs md:text-sm font-black uppercase tracking-[0.6em] italic">Your franchise future depends on this</p>
                             </div>
                             
-                            <div className="relative flex items-center justify-center py-10">
-                               <svg className="w-48 h-48 md:w-64 md:h-64 -rotate-90">
-                                  <circle cx="50%" cy="50%" r="48%" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-zinc-900" />
+                            <div className="relative flex items-center justify-center py-4 md:py-10">
+                               <svg className="w-32 h-32 md:w-64 md:h-64 -rotate-90">
+                                  <circle cx="50%" cy="50%" r="48%" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-zinc-900" />
                                   <motion.circle 
-                                    cx="50%" cy="50%" r="48%" stroke="currentColor" strokeWidth="8" fill="transparent" 
+                                    cx="50%" cy="50%" r="48%" stroke="currentColor" strokeWidth="6" fill="transparent" 
                                     className="text-amber-500" 
                                     strokeDasharray="100 100"
                                     animate={{ strokeDashoffset: [0, 100] }}
@@ -2467,7 +2747,7 @@ const CareerView: React.FC = () => {
                                   />
                                </svg>
                                <div className="absolute inset-0 flex items-center justify-center">
-                                  <span className="text-6xl md:text-8xl font-black italic text-white tabular-nums">{draftState.timer}</span>
+                                  <span className="text-4xl md:text-8xl font-black italic text-white tabular-nums">{draftState.timer}</span>
                                 </div>
                             </div>
 
@@ -2709,6 +2989,8 @@ const CareerView: React.FC = () => {
             </motion.div>
           )}
         </AnimatePresence>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -72,7 +72,7 @@ function AppContent() {
       const allCritical = [...uiAssets, ...criticalLogos, ...criticalPlayers];
 
       allCritical.forEach(url => {
-        const img = new Image();
+        const img = document.createElement('img');
         img.src = url;
       });
 
@@ -82,10 +82,10 @@ function AppContent() {
       for (let i = 0; i < remainingCards.length; i += batchSize) {
         setTimeout(() => {
           remainingCards.slice(i, i + batchSize).forEach(card => {
-            const img = new Image();
+            const img = document.createElement('img');
             img.src = card.imageUrl;
             if (card.teamLogoUrl) {
-              const logo = new Image();
+              const logo = document.createElement('img');
               logo.src = card.teamLogoUrl;
             }
           });

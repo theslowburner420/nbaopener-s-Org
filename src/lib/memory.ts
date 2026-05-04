@@ -1,3 +1,5 @@
+import { simulationEngine } from '../franchise/services/simulationEngine';
+
 /**
  * MemoryManager utility to handle cleanup of old processes and assets.
  */
@@ -6,14 +8,14 @@ export const MemoryManager = {
    * Clears image caches and releases object URLs if any were created.
    */
   cleanupAssets: () => {
-    // console.log('[MemoryManager] Cleaning up assets...');
+    // Clear simulation caches to free up memory
+    simulationEngine.clearCache();
+    console.log('[MemoryManager] Assets and service caches cleaned.');
   },
 
   optimizeMemory: () => {
-    // if (window.performance && (window.performance as any).memory) {
-    //   const memory = (window.performance as any).memory;
-    //   console.log(`[MemoryManager] Current heap: ${Math.round(memory.usedJSHeapSize / 1048576)}MB / ${Math.round(memory.jsHeapSizeLimit / 1048576)}MB`);
-    // }
+    // This can be used to trigger GC hints if browser allows or just clear caches
+    simulationEngine.clearCache();
   },
 
   /**

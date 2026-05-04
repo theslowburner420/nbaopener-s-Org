@@ -1282,7 +1282,7 @@ const DraftView: React.FC = () => {
         'https://i.postimg.cc/rz5Tvhqp/hoopslogo.jpg'
       ];
       urls.forEach(url => {
-        const img = new Image();
+        const img = document.createElement('img');
         img.src = url;
         img.decode().catch(() => {}); // Decode as well
       });
