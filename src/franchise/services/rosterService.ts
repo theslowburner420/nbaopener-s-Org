@@ -115,31 +115,49 @@ export function applyProgression(state: FranchiseState) {
       const age = progress.age;
       let delta = 0;
 
-      // Base Growth/Decline Factor
+      // 1. BASE AGE-BASED PROGRESSION
       if (age < 23) {
+        // High Potential Growth Years
         delta = Math.floor(Math.random() * 4) + 1; // +1 to +4
       } else if (age < 27) {
+        // Peak Growth Years
         delta = Math.floor(Math.random() * 3); // 0 to +2
       } else if (age < 31) {
+        // Athletic Peak / Maintenance
         delta = Math.floor(Math.random() * 3) - 1; // -1 to +1
       } else if (age < 35) {
+        // Slight Decline
         delta = Math.floor(Math.random() * 3) - 3; // -3 to -1
       } else {
+        // Steep Aging Decline
         delta = Math.floor(Math.random() * 4) - 5; // -5 to -2
       }
 
-      // Performance adjustment
+      // 2. PERFORMANCE ADJUSTMENT (In-Season impact)
       if (seasonalStats && seasonalStats.gamesPlayed > 20) {
-        const per = (seasonalStats.points + seasonalStats.rebounds + seasonalStats.assists) / seasonalStats.gamesPlayed;
-        if (per > 30) delta += 1;
-        if (per > 40) delta += 1;
-        if (per < 10 && age < 30) delta -= 1;
+        const ppg = seasonalStats.points / seasonalStats.gamesPlayed;
+        const rpg = seasonalStats.rebounds / seasonalStats.gamesPlayed;
+        const apg = seasonalStats.assists / seasonalStats.gamesPlayed;
+        const per = ppg + rpg + apg;
+
+        // Breakout Season Bonus
+        if (per > 35) delta += 1;
+        if (per > 48) delta += 1;
+        
+        // Poor Performance Decline (mostly for younger players who hit a wall or veterans failing)
+        if (per < 12) delta -= 1;
       }
 
-      // Potential cap logic
+      // 3. POTENTIAL CAP LOGIC
       if (currentOvr >= potential && delta > 0) {
-        delta = Math.random() > 0.8 ? 1 : 0; // Much harder to grow past potential
+        // Extremely rare to blow past potential
+        delta = Math.random() > 0.92 ? 1 : 0; 
       }
+
+      // 4. RANDOM OUTLIER EVENTS (Breakouts / Unexpected Slumps)
+      const luck = Math.random();
+      if (luck > 0.98 && age < 28) delta += 2; // Elite Jump
+      if (luck < 0.02 && age > 30) delta -= 2; // Sharp Injury/Wear decline
 
       const newOvr = Math.min(99, Math.max(60, currentOvr + delta));
       
@@ -387,7 +405,7 @@ export function advanceSeason(state: FranchiseState): FranchiseState {
   // 3. SEASON INCREMENT
   newState.season += 1;
   newState.week = 1;
-  newState.phase = 'Regular';
+  newState.phase = 'Draft';
   newState.championId = undefined;
 
   // 4. RESET RECORDS

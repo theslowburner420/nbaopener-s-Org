@@ -263,7 +263,8 @@ const CareerView: React.FC = () => {
       ...prev,
       history: [...prev.history, { teamId: state.userTeamId, player: card, pick: prev.pick }],
       pick: prev.pick + 1,
-      timer: 30
+      timer: 30,
+      isPaused: false // RESUME DRAFT
     }));
     setState({...state});
   }, [state, setState]);
@@ -991,12 +992,13 @@ const CareerView: React.FC = () => {
                       { title: 'Most Valuable Player', prize: 'The Maurice Podoloff Trophy', winner: awards.mvp, color: 'from-amber-600 to-amber-400', glow: 'rgba(245,158,11,0.2)' },
                       { title: 'Defensive Player of the Year', prize: 'The Hakeem Olajuwon Trophy', winner: awards.dpoy, color: 'from-blue-600 to-cyan-400', glow: 'rgba(6,182,212,0.2)' },
                       { title: 'Rookie of the Year', prize: 'The Wilt Chamberlain Trophy', winner: awards.roy, color: 'from-green-600 to-emerald-400', glow: 'rgba(16,185,129,0.2)' },
-                      { title: 'Most Improved Player', prize: 'The George Mikan Trophy', winner: awards.mip, color: 'from-purple-600 to-pink-400', glow: 'rgba(168,85,247,0.2)' }
+                      { title: 'Most Improved Player', prize: 'The George Mikan Trophy', winner: awards.mip, color: 'from-purple-600 to-pink-400', glow: 'rgba(168,85,247,0.2)' },
+                       ...(awards.finalsMvp ? [{ title: 'Finals MVP', prize: 'The Bill Russell Trophy', winner: { id: awards.finalsMvp.id, card: awards.finalsMvp }, color: 'from-amber-500 to-yellow-300', glow: 'rgba(251,191,36,0.3)' }] : [])
                     ];
 
-                   const currentAward = awardRevealStep < 4 ? awardData[awardRevealStep] : null;
+                   const currentAward = awardRevealStep < awardData.length ? awardData[awardRevealStep] : null;
 
-                   if (awardRevealStep < 4 && currentAward) {
+                   if (awardRevealStep < awardData.length && currentAward) {
                       return (
                          <motion.div 
                            key={currentAward.title}
@@ -1119,23 +1121,23 @@ const CareerView: React.FC = () => {
                                <motion.button 
                                  initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 3 }}
                                  onClick={() => {
-                                   if (awardRevealStep < 3) {
+                                   if (awardRevealStep < awardData.length - 1) {
                                       setAwardRevealStep(prev => prev + 1);
                                       confetti({ particleCount: 50, spread: 40, colors: ['#f59e0b', '#ffffff'] });
                                    } else {
-                                      setAwardRevealStep(4);
+                                      setAwardRevealStep(awardData.length);
                                    }
                                  }}
                                  className="group relative flex items-center justify-center gap-4 bg-white text-black px-12 py-5 rounded-[1.5rem] text-sm font-black uppercase tracking-[0.2em] italic transition-all hover:bg-amber-500 active:scale-95 shadow-2xl w-full md:w-auto"
                                >
-                                  <span>{awardRevealStep === 3 ? 'Show All-NBA Team' : 'Next Presentation'}</span>
+                                  <span>{awardRevealStep === awardData.length - 1 ? 'Show ALL-NBA First Team' : 'Next Presentation'}</span>
                                   <ChevronRight size={20} className="group-hover:translate-x-2 transition-transform" />
                                </motion.button>
                                
                                <motion.button 
                                  initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} transition={{ delay: 4 }}
                                  onClick={() => {
-                                    setAwardRevealStep(4);
+                                    setAwardRevealStep(awardData.length);
                                     notifySuccess("Ceremony skipped. Welcome to the Playoffs.");
                                  }}
                                  className="text-zinc-500 hover:text-white text-[10px] uppercase font-black tracking-widest px-8 py-4 transition-all"
@@ -1358,7 +1360,7 @@ const CareerView: React.FC = () => {
       </AnimatePresence>
 
       {/* NAVIGATION - Improved for Mobile Vertical */}
-      <div className="bg-zinc-950/95 backdrop-blur-3xl border-t border-white/5 md:border-t-0 md:border-b landscape:border-b-0 landscape:border-r fixed bottom-0 left-0 right-0 md:sticky md:top-0 landscape:top-0 landscape:left-0 z-[6000] overflow-x-auto landscape:overflow-y-auto no-scrollbar touch-pan-x hide-scrollbar scroll-smooth landscape:h-screen landscape:w-20 lg:landscape:w-24 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+      <div className="bg-zinc-950/95 backdrop-blur-3xl border-t border-white/5 md:border-t-0 md:border-b landscape:border-b-0 landscape:border-r fixed bottom-0 left-0 right-0 md:sticky md:top-0 landscape:top-0 landscape:left-0 z-[9999] overflow-x-auto landscape:overflow-y-auto no-scrollbar touch-pan-x hide-scrollbar scroll-smooth landscape:h-screen landscape:w-20 lg:landscape:w-24 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.8)]">
         <div className="flex px-4 md:px-12 landscape:px-2 gap-2 md:gap-2 landscape:gap-4 py-3 md:py-2 landscape:py-8 min-w-max md:min-w-0 h-full items-center landscape:flex-col landscape:justify-start">
           {[
             { id: 'hub', label: 'HUB', icon: LayoutDashboard },
@@ -2856,7 +2858,7 @@ const CareerView: React.FC = () => {
                             
                             <div className="pt-6 relative z-10 flex flex-col md:flex-row items-center justify-center gap-4">
                                <button 
-                                 onClick={() => setDraftState(prev => ({ ...prev, timer: 999 }))} // Closes overlay because of timer > 30 condition
+                                 onClick={() => { setDraftState(prev => ({ ...prev, timer: 999 })); setActiveTab('draft'); }} // Closes overlay because of timer > 30 condition
                                  className="w-full md:w-auto px-12 py-5 bg-white/5 text-zinc-400 border border-white/10 rounded-3xl font-black uppercase tracking-widest text-[10px] hover:bg-white hover:text-black transition-all"
                                >
                                   Browse Full List
