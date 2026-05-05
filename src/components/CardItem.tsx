@@ -6,7 +6,7 @@ import { Lock, Zap } from 'lucide-react';
 interface CardItemProps {
   card: Card;
   isOwned: boolean;
-  mode?: 'mini' | 'large';
+  mode?: 'mini' | 'large' | 'condensed';
   onClick?: (card: Card) => void;
   showBack?: boolean;
   isFocused?: boolean;
@@ -283,7 +283,7 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
               {isMoment && card.momentTitle ? card.momentTitle : card.name}
             </h3>
             <span className={`text-[6px] font-bold uppercase tracking-tighter truncate ${isDarkCard ? 'text-white/70 shadow-black' : 'text-zinc-700'}`}>
-              {isMoment ? card.name : card.subtitle}
+              {isMoment ? card.name : card.subtitle} • {card.age}Y
             </span>
           </div>
           <div className="bg-black/80 backdrop-blur-sm rounded px-1 py-0.5 border border-white/20">
@@ -532,6 +532,53 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
       {renderLockOverlay()}
     </div>
   );
+
+  if (mode === 'condensed') {
+    return (
+      <div 
+        onClick={() => (isOwned || showBack) && onClick?.(card)}
+        className={`flex items-center gap-3 bg-zinc-900/80 p-2 rounded-xl border border-white/5 h-20 transition-all active:scale-95 ${isOwned ? 'cursor-pointer hover:bg-white/5' : 'opacity-50'}`}
+      >
+         <div className="w-16 h-16 bg-zinc-800 rounded-lg overflow-hidden shrink-0 relative">
+            <img src={card.imageUrl} className="w-full h-full object-cover object-top" referrerPolicy="no-referrer" />
+            <div className="absolute top-0 right-0 bg-white text-black text-[8px] font-black px-1 rounded-bl-md shadow-lg">
+               {displayOvr}
+            </div>
+         </div>
+         <div className="flex-1 min-w-0 pr-2">
+            <div className="flex items-center justify-between mb-1">
+               <h4 className="text-[10px] md:text-sm font-black text-white uppercase italic truncate max-w-[120px]">{card.name}</h4>
+               <span className="text-[7px] font-black text-zinc-500 uppercase tracking-widest">{card.position}</span>
+            </div>
+            <div className="flex items-center gap-3">
+               <div className="flex flex-col">
+                  <span className="text-[6px] font-black text-zinc-600 uppercase">PTS</span>
+                  <span className="text-[10px] font-black text-amber-500 italic leading-none">{displayStats.points}</span>
+               </div>
+               <div className="w-px h-4 bg-white/5" />
+               <div className="flex flex-col">
+                  <span className="text-[6px] font-black text-zinc-600 uppercase">REB</span>
+                  <span className="text-[10px] font-black text-white italic leading-none">{displayStats.rebounds}</span>
+               </div>
+               <div className="w-px h-4 bg-white/5" />
+               <div className="flex flex-col">
+                  <span className="text-[6px] font-black text-zinc-600 uppercase">AST</span>
+                  <span className="text-[10px] font-black text-white italic leading-none">{displayStats.assists}</span>
+               </div>
+               {card.age && (
+                 <>
+                   <div className="w-px h-4 bg-white/5" />
+                   <div className="flex flex-col">
+                      <span className="text-[6px] font-black text-zinc-600 uppercase">AGE</span>
+                      <span className="text-[10px] font-black text-zinc-400 italic leading-none">{card.age}</span>
+                   </div>
+                 </>
+               )}
+            </div>
+         </div>
+      </div>
+    );
+  }
 
   if (isMini) {
     return (

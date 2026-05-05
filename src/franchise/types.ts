@@ -6,7 +6,9 @@ export interface ContractObject {
   playerId: string;
   salary: number;
   yearsRemaining: number;
-  type: "Max" | "MidLevel" | "Veteran" | "Rookie" | "TwoWay";
+  contractType: 'max' | 'supermax' | 'mid' | 'minimum' | 'rookie' | 'two-way';
+  seasonsWithTeam: number;
+  optionType: 'none' | 'team' | 'player';
   noTradeClause: boolean;
   injuryStatus: "Healthy" | "Day-to-Day" | "Out" | "Season-Ending";
   canExtend?: boolean;
@@ -132,6 +134,8 @@ export interface FranchiseState {
   };
   draftHistory: any[];
   tradeHistory: any[];
+  draftOrder?: any[];
+  draftOrder2?: any[];
   awards: Record<number, {
     championId?: string;
     mvp?: string;

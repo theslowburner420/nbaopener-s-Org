@@ -89,6 +89,7 @@ const rawCards = [
     pts: 33.4,
     reb: 8.3,
     ast: 8.6,
+    age: 26,
     nbaId: 1629029,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png',
     quote: 'The new face of Showtime. Unstoppable.'
@@ -104,6 +105,7 @@ const rawCards = [
     pts: 21.0,
     reb: 5.9,
     ast: 6.9,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
     quote: 'The King still reigns at 41. Timeless.'
@@ -119,6 +121,7 @@ const rawCards = [
     pts: 23.5,
     reb: 5.2,
     ast: 6.3,
+    age: 27,
     nbaId: 1630559,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630559.png',
     quote: 'Ice in his veins. The heart of this team.'
@@ -134,6 +137,7 @@ const rawCards = [
     pts: 12.4,
     reb: 8.3,
     ast: 0.9,
+    age: 27,
     nbaId: 1629028,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629028.png',
     quote: 'Dominant in the paint, unstoppable finisher.'
@@ -149,6 +153,7 @@ const rawCards = [
     pts: 11.1,
     reb: 3.8,
     ast: 0.9,
+    age: 27,
     nbaId: 1629060,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629060.png',
     quote: 'Physical and efficient from the wings.'
@@ -164,6 +169,7 @@ const rawCards = [
     pts: 9.5,
     reb: 2.6,
     ast: 2.8,
+    age: 31,
     nbaId: 203935,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203935.png',
     quote: 'Defensive heart. Leader on and off the court.'
@@ -179,6 +185,7 @@ const rawCards = [
     pts: 8.7,
     reb: 4.1,
     ast: 2.0,
+    age: 24,
     nbaId: 1631222,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631222.png',
     quote: 'Versatile forward ready to step up.'
@@ -194,6 +201,7 @@ const rawCards = [
     pts: 4.9,
     reb: 5.4,
     ast: 1.3,
+    age: 26,
     nbaId: 1629020,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629020.png',
     quote: 'Relentless energy and effort every night.'
@@ -209,6 +217,7 @@ const rawCards = [
     pts: 5.9,
     reb: 4.0,
     ast: 1.0,
+    age: 25,
     nbaId: 1629637,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629637.png',
     quote: 'Explosive rim-runner with elite athleticism.'
@@ -224,6 +233,7 @@ const rawCards = [
     pts: 5.5,
     reb: 1.8,
     ast: 0.5,
+    age: 24,
     nbaId: 1642261,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642261.png',
     quote: 'Rookie sharpshooter with a bright future.'
@@ -239,6 +249,7 @@ const rawCards = [
     pts: 1.7,
     reb: 0.6,
     ast: 1.3,
+    age: 21,
     nbaId: 1642355,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642355.png',
     quote: 'The next chapter of a legendary bloodline.'
@@ -254,6 +265,7 @@ const rawCards = [
     pts: 1.9,
     reb: 1.7,
     ast: 0.7,
+    age: 33,
     nbaId: 1628467,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628467.png',
     quote: 'Stretch big with championship experience.'
@@ -269,6 +281,7 @@ const rawCards = [
     pts: 1.4,
     reb: 1.1,
     ast: 0.3,
+    age: 20,
     nbaId: 1642876,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642876.png',
     quote: 'Young athletic wing with elite potential.'
@@ -285,6 +298,7 @@ const rawCards = [
     pts: 27.2,
     reb: 3.5,
     ast: 4.8,
+    age: 37,
     nbaId: 201939,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png',
     quote: 'The greatest shooter in NBA history. Period.'
@@ -300,6 +314,7 @@ const rawCards = [
     pts: 20.0,
     reb: 5.6,
     ast: 4.9,
+    age: 36,
     nbaId: 202710,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202710.png',
     quote: 'No fear. Just results when it matters most.'
@@ -315,6 +330,7 @@ const rawCards = [
     pts: 15.8,
     reb: 4.8,
     ast: 2.6,
+    age: 30,
     nbaId: 204001,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/204001.png',
     quote: 'The unicorn reborn. Lethal stretch big with elite IQ.'
@@ -330,6 +346,7 @@ const rawCards = [
     pts: 8.6,
     reb: 5.6,
     ast: 5.3,
+    age: 35,
     nbaId: 203110,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203110.png',
     quote: 'The defensive anchor of a dynasty.'
@@ -345,6 +362,7 @@ const rawCards = [
     pts: 12.9,
     reb: 5.2,
     ast: 3.8,
+    age: 22,
     nbaId: 1641764,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641764.png',
     quote: 'The rising star bringing new energy to the Bay.'
@@ -360,6 +378,7 @@ const rawCards = [
     pts: 12.1,
     reb: 3.3,
     ast: 1.6,
+    age: 23,
     nbaId: 1630541,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630541.png',
     quote: 'Athletic, efficient and improving every game.'
@@ -375,6 +394,7 @@ const rawCards = [
     pts: 13.0,
     reb: 3.8,
     ast: 2.3,
+    age: 27,
     nbaId: 1629001,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629001.png',
     quote: 'Pest defender and opportunistic scorer.'
@@ -390,6 +410,7 @@ const rawCards = [
     pts: 8.3,
     reb: 5.0,
     ast: 2.6,
+    age: 39,
     nbaId: 201143,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201143.png',
     quote: 'Veteran anchor. IQ off the charts.'
@@ -405,6 +426,7 @@ const rawCards = [
     pts: 6.9,
     reb: 4.0,
     ast: 1.7,
+    age: 33,
     nbaId: 1627780,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627780.png',
     quote: 'The lockdown defender. Everywhere at once.'
@@ -420,6 +442,7 @@ const rawCards = [
     pts: 7.0,
     reb: 3.5,
     ast: 1.7,
+    age: 25,
     nbaId: 1642366,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642366.png',
     quote: 'Skilled rookie center with a unique toolkit.'
@@ -435,6 +458,7 @@ const rawCards = [
     pts: 7.8,
     reb: 2.2,
     ast: 3.4,
+    age: 35,
     nbaId: 203552,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203552.png',
     quote: 'A sharpshooter with the family touch.'
@@ -450,6 +474,7 @@ const rawCards = [
     pts: 4.2,
     reb: 2.8,
     ast: 0.9,
+    age: 23,
     nbaId: 4997536,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/4997536.png',
     quote: 'Brazilian energy off the bench every night.'
@@ -465,6 +490,7 @@ const rawCards = [
     pts: 3.1,
     reb: 2.1,
     ast: 0.8,
+    age: 23,
     nbaId: 1642954,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642954.png',
     quote: 'Athletic rookie wing earning his NBA minutes.'
@@ -482,6 +508,7 @@ const rawCards = [
     pts: 20.8,
     reb: 3.0,
     ast: 2.4,
+    age: 34,
     nbaId: 203468,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203468.png',
     quote: 'Smooth veteran scoring and leadership for the Hawks backcourt.'
@@ -497,6 +524,7 @@ const rawCards = [
     pts: 19.2,
     reb: 7.6,
     ast: 5.0,
+    age: 24,
     nbaId: 1630552,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630552.png',
     quote: "Atlanta's versatile forward doing it all on both ends."
@@ -512,6 +540,7 @@ const rawCards = [
     pts: 14.2,
     reb: 3.6,
     ast: 0.6,
+    age: 23,
     nbaId: 1630228,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630228.png',
     quote: 'Elite athleticism and rim pressure for the new-look Hawks.'
@@ -527,6 +556,7 @@ const rawCards = [
     pts: 14.2,
     reb: 2.6,
     ast: 2.8,
+    age: 27,
     nbaId: 1629638,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629638.png',
     quote: 'Dynamic scoring and improved playmaking in the Atlanta rotation.'
@@ -542,6 +572,7 @@ const rawCards = [
     pts: 14.2,
     reb: 6.8,
     ast: 1.8,
+    age: 25,
     nbaId: 1630168,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630168.png',
     quote: 'Mobile big man protecting the paint and finishing strong.'
@@ -557,6 +588,7 @@ const rawCards = [
     pts: 8.2,
     reb: 7.4,
     ast: 6.0,
+    age: 22,
     nbaId: 1630713,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630713.png',
     quote: 'Stat-sheet stuffer with elite defensive versatility.'
@@ -572,6 +604,7 @@ const rawCards = [
     pts: 5.2,
     reb: 0.6,
     ast: 1.4,
+    age: 29,
     nbaId: 1629216,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629216.png',
     quote: 'Hard-nosed guard bringing toughness and outside shooting.'
@@ -587,6 +620,7 @@ const rawCards = [
     pts: 5.0,
     reb: 0.0,
     ast: 0.0,
+    age: 33,
     nbaId: 1627741,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627741.png',
     quote: "One of the game's premier shooters spacing the floor."
@@ -602,6 +636,7 @@ const rawCards = [
     pts: 2.0,
     reb: 0.0,
     ast: 1.0,
+    age: 20,
     nbaId: 1642235,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/5105952.png',
     quote: 'Highly-touted rookie forward ready to make an impact.'
@@ -617,6 +652,7 @@ const rawCards = [
     pts: 2.0,
     reb: 2.7,
     ast: 0.7,
+    age: 27,
     nbaId: 1628396,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628396.png',
     quote: 'Reliable backup center providing minutes in the paint.'
@@ -632,6 +668,7 @@ const rawCards = [
     pts: 1.8,
     reb: 1.5,
     ast: 1.3,
+    age: 26,
     nbaId: 1630557,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630557.png',
     quote: 'Sharpshooting wing stretching the defense.'
@@ -647,6 +684,7 @@ const rawCards = [
     pts: 1.6,
     reb: 1.6,
     ast: 0.4,
+    age: 23,
     nbaId: 1631243,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631243.png',
     quote: 'Long and athletic forward with high upside.'
@@ -662,6 +700,7 @@ const rawCards = [
     pts: 1.5,
     reb: 3.0,
     ast: 0.0,
+    age: 20,
     nbaId: 1642234,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642234.png',
     quote: 'The top pick showing flashes of his versatile potential.'
@@ -677,6 +716,7 @@ const rawCards = [
     pts: 1.0,
     reb: 0.0,
     ast: 0.5,
+    age: 26,
     nbaId: 1630613,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630613.png',
     quote: 'Crafty guard adding depth to the backcourt.'
@@ -692,6 +732,7 @@ const rawCards = [
     pts: 4.0,
     reb: 1.5,
     ast: 1.0,
+    age: 25,
     nbaId: 1641753,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/4683017.png',
     quote: 'Athletic rookie guard with scoring punch.'
@@ -707,6 +748,7 @@ const rawCards = [
     pts: 4.0,
     reb: 4.0,
     ast: 0.0,
+    age: 25,
     nbaId: 1631132,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631132.png',
     quote: 'Shot-blocking big man returning to full health.'
@@ -722,6 +764,7 @@ const rawCards = [
     pts: 2.0,
     reb: 1.0,
     ast: 2.0,
+    age: 25,
     nbaId: 1641754,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/4431713.png',
     quote: 'Rookie playmaker with great vision.'
@@ -739,6 +782,7 @@ const rawCards = [
     pts: 28.5,
     reb: 7.0,
     ast: 5.1,
+    age: 29,
     nbaId: 1627759,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627759.png',
     quote: 'The engine. Relentless, explosive and unstoppable.'
@@ -754,6 +798,7 @@ const rawCards = [
     pts: 19.1,
     reb: 8.9,
     ast: 3.3,
+    age: 27,
     nbaId: 1628369,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628369.png',
     quote: 'Celtic pride. A superstar built for the big moment.'
@@ -769,6 +814,7 @@ const rawCards = [
     pts: 17.3,
     reb: 4.5,
     ast: 5.5,
+    age: 31,
     nbaId: 1628401,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628401.png',
     quote: 'Two-way excellence. The unsung hero of every win.'
@@ -784,6 +830,7 @@ const rawCards = [
     pts: 16.9,
     reb: 9.0,
     ast: 3.8,
+    age: 35,
     nbaId: 202696,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202696.png',
     quote: 'Veteran big man, dominant force in the paint.'
@@ -799,6 +846,7 @@ const rawCards = [
     pts: 16.6,
     reb: 4.0,
     ast: 5.3,
+    age: 27,
     nbaId: 1630202,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630202.png',
     quote: 'Sharpshooter and floor general off the bench.'
@@ -814,6 +862,7 @@ const rawCards = [
     pts: 9.0,
     reb: 3.8,
     ast: 1.4,
+    age: 27,
     nbaId: 1630573,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630573.png',
     quote: 'Elite corner shooter with champion DNA.'
@@ -829,6 +878,7 @@ const rawCards = [
     pts: 9.9,
     reb: 8.3,
     ast: 1.5,
+    age: 26,
     nbaId: 1629674,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629674.png',
     quote: 'Shot-blocking specialist protecting the rim.'
@@ -844,6 +894,7 @@ const rawCards = [
     pts: 4.0,
     reb: 3.5,
     ast: 0.6,
+    age: 19,
     nbaId: 1642864,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642864.png',
     quote: 'Spanish rookie with explosive athletic potential.'
@@ -859,6 +910,7 @@ const rawCards = [
     pts: 4.8,
     reb: 2.9,
     ast: 1.3,
+    age: 24,
     nbaId: 1631248,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631248.png',
     quote: 'Versatile wing with a sharp basketball IQ.'
@@ -874,6 +926,7 @@ const rawCards = [
     pts: 3.2,
     reb: 2.1,
     ast: 0.5,
+    age: 22,
     nbaId: 1641775,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641775.png',
     quote: 'Athletic defender still developing his game.'
@@ -889,6 +942,7 @@ const rawCards = [
     pts: 3.4,
     reb: 1.5,
     ast: 0.6,
+    age: 25,
     nbaId: 1631199,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631199.png',
     quote: 'Physical wing fighting for every minute.'
@@ -905,6 +959,7 @@ const rawCards = [
     pts: 17.7,
     reb: 8.4,
     ast: 8.8,
+    age: 23,
     nbaId: 1630581,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630581.png',
     quote: 'Triple-double machine. The future of the Bulls.'
@@ -920,6 +975,7 @@ const rawCards = [
     pts: 16.2,
     reb: 5.6,
     ast: 2.1,
+    age: 21,
     nbaId: 1641824,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641824.png',
     quote: 'The rising star. Long, skilled and dangerous.'
@@ -935,6 +991,7 @@ const rawCards = [
     pts: 15.2,
     reb: 2.8,
     ast: 3.0,
+    age: 26,
     nbaId: 1629014,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629014.png',
     quote: 'Silky scorer with unlimited range.'
@@ -950,6 +1007,7 @@ const rawCards = [
     pts: 16.1,
     reb: 2.2,
     ast: 2.3,
+    age: 27,
     nbaId: 1628384,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628384.png',
     quote: 'Explosive scorer who attacks the paint fearlessly.'
@@ -965,6 +1023,7 @@ const rawCards = [
     pts: 12.8,
     reb: 2.9,
     ast: 5.4,
+    age: 26,
     nbaId: 1630200,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630200.png',
     quote: 'Defensive pest and steady floor general.'
@@ -980,6 +1039,7 @@ const rawCards = [
     pts: 10.3,
     reb: 6.8,
     ast: 1.2,
+    age: 25,
     nbaId: 1630188,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630188.png',
     quote: 'Versatile big who can stretch the floor.'
@@ -995,6 +1055,7 @@ const rawCards = [
     pts: 5.1,
     reb: 3.2,
     ast: 2.0,
+    age: 29,
     nbaId: 1627824,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627824.png',
     quote: 'Physical forward with a reliable mid-range touch.'
@@ -1010,6 +1071,7 @@ const rawCards = [
     pts: 11.5,
     reb: 4.8,
     ast: 4.0,
+    age: 23,
     nbaId: 1631093,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631093.png',
     quote: 'Athletic guard with elite first-step explosion.'
@@ -1025,6 +1087,7 @@ const rawCards = [
     pts: 8.6,
     reb: 2.8,
     ast: 3.3,
+    age: 20,
     nbaId: 1642265,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642265.png',
     quote: 'Lightning-quick rookie point guard.'
@@ -1040,6 +1103,7 @@ const rawCards = [
     pts: 5.8,
     reb: 5.1,
     ast: 0.8,
+    age: 28,
     nbaId: 1630208,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630208.png',
     quote: 'Physical interior presence. Reliable off the bench.'
@@ -1055,6 +1119,7 @@ const rawCards = [
     pts: 4.8,
     reb: 3.8,
     ast: 0.6,
+    age: 22,
     nbaId: 1631159,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631159.png',
     quote: 'Young forward developing his two-way potential.'
@@ -1070,6 +1135,7 @@ const rawCards = [
     pts: 6.8,
     reb: 2.8,
     ast: 1.3,
+    age: 24,
     nbaId: 1630172,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630172.png',
     quote: 'Developing forward with championship potential.'
@@ -1085,6 +1151,7 @@ const rawCards = [
     pts: 9.0,
     reb: 2.5,
     ast: 1.8,
+    age: 24,
     nbaId: 1630171,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630171.png',
     quote: 'Lockdown defender capable of guarding 1-4.'
@@ -1100,6 +1167,7 @@ const rawCards = [
     pts: 3.2,
     reb: 2.1,
     ast: 0.5,
+    age: 19,
     nbaId: 1642855,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642855.png',
     quote: 'French rookie with enormous long-term upside.'
@@ -1116,6 +1184,7 @@ const rawCards = [
     pts: 20.3,
     reb: 9.8,
     ast: 2.9,
+    age: 28,
     nbaId: 1628389,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628389.png',
     quote: "South Beach's anchor."
@@ -1131,6 +1200,7 @@ const rawCards = [
     pts: 23.2,
     reb: 5.2,
     ast: 2.2,
+    age: 32,
     nbaId: 1626181,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1626181.png',
     quote: "Norm is cooking every night."
@@ -1146,6 +1216,7 @@ const rawCards = [
     pts: 21.4,
     reb: 4.5,
     ast: 4.8,
+    age: 26,
     nbaId: 1629639,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629639.png',
     quote: "Built different in Miami."
@@ -1161,6 +1232,7 @@ const rawCards = [
     pts: 17.0,
     reb: 4.9,
     ast: 2.3,
+    age: 31,
     nbaId: 203952,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203952.png',
     quote: "Former #1 pick still delivers."
@@ -1176,6 +1248,7 @@ const rawCards = [
     pts: 10.1,
     reb: 9.2,
     ast: 0.6,
+    age: 21,
     nbaId: 1642276,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642276.png',
     quote: "The Heat's big future."
@@ -1191,6 +1264,7 @@ const rawCards = [
     pts: 9.0,
     reb: 2.6,
     ast: 7.9,
+    age: 27,
     nbaId: 1630558,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630558.png',
     quote: "Point guard from Baylor."
@@ -1206,6 +1280,7 @@ const rawCards = [
     pts: 12.0,
     reb: 3.2,
     ast: 3.5,
+    age: 31,
     nbaId: 1626179,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1626179.png',
     quote: "Scary Terry in the 305."
@@ -1221,6 +1296,7 @@ const rawCards = [
     pts: 7.5,
     reb: 3.0,
     ast: 1.2,
+    age: 30,
     nbaId: 1631323,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631323.png',
     quote: "European sniper."
@@ -1236,6 +1312,7 @@ const rawCards = [
     pts: 8.0,
     reb: 3.8,
     ast: 2.1,
+    age: 24,
     nbaId: 1631170,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631170.png',
     quote: "Hard-nosed UCLA product."
@@ -1251,6 +1328,7 @@ const rawCards = [
     pts: 6.5,
     reb: 4.2,
     ast: 1.8,
+    age: 22,
     nbaId: 1631107,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631107.png',
     quote: "Serbian stretch four."
@@ -1267,6 +1345,7 @@ const rawCards = [
     pts: 28.3,
     reb: 4.5,
     ast: 5.8,
+    age: 29,
     nbaId: 1628378,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628378.png',
     quote: "Spida never misses big shots."
@@ -1282,6 +1361,7 @@ const rawCards = [
     pts: 21.2,
     reb: 5.2,
     ast: 7.8,
+    age: 36,
     nbaId: 201935,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201935.png',
     quote: "The Beard still orchestrates."
@@ -1297,6 +1377,7 @@ const rawCards = [
     pts: 18.3,
     reb: 8.9,
     ast: 2.8,
+    age: 24,
     nbaId: 1630596,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630596.png',
     quote: "Two-way monster from USC."
@@ -1312,6 +1393,7 @@ const rawCards = [
     pts: 12.0,
     reb: 8.5,
     ast: 1.5,
+    age: 27,
     nbaId: 1628386,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628386.png',
     quote: "Rim-running machine."
@@ -1327,6 +1409,7 @@ const rawCards = [
     pts: 11.0,
     reb: 2.8,
     ast: 4.1,
+    age: 25,
     nbaId: 203471,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203471.png',
     quote: "Veteran backup general."
@@ -1342,6 +1425,7 @@ const rawCards = [
     pts: 13.1,
     reb: 5.1,
     ast: 1.5,
+    age: 22,
     nbaId: 1642281,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642281.png',
     quote: "Emerging young forward."
@@ -1357,6 +1441,7 @@ const rawCards = [
     pts: 8.5,
     reb: 3.5,
     ast: 1.8,
+    age: 25,
     nbaId: 1629622,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629622.png',
     quote: "Long-range specialist."
@@ -1372,6 +1457,7 @@ const rawCards = [
     pts: 13.1,
     reb: 2.5,
     ast: 1.2,
+    age: 25,
     nbaId: 1630241,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630241.png',
     quote: "Sharpshooter off the bench."
@@ -1387,6 +1473,7 @@ const rawCards = [
     pts: 5.5,
     reb: 3.8,
     ast: 1.0,
+    age: 25,
     nbaId: 1629731,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629731.png',
     quote: "Versatile veteran wing."
@@ -1403,6 +1490,7 @@ const rawCards = [
     pts: 31.5,
     reb: 5.2,
     ast: 6.2,
+    age: 27,
     nbaId: 1628983,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628983.png',
     quote: "SGA is the best player alive."
@@ -1418,6 +1506,7 @@ const rawCards = [
     pts: 17.5,
     reb: 4.7,
     ast: 5.4,
+    age: 24,
     nbaId: 1631114,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631114.png',
     quote: "J-Dub runs this offence."
@@ -1433,6 +1522,7 @@ const rawCards = [
     pts: 14.0,
     reb: 7.5,
     ast: 1.8,
+    age: 23,
     nbaId: 1631096,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631096.png',
     quote: "The Slim Reaper blocks everything."
@@ -1448,6 +1538,7 @@ const rawCards = [
     pts: 9.6,
     reb: 9.5,
     ast: 2.5,
+    age: 25,
     nbaId: 1628392,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628392.png',
     quote: "Dirty work every single night."
@@ -1463,6 +1554,7 @@ const rawCards = [
     pts: 11.0,
     reb: 3.5,
     ast: 1.8,
+    age: 25,
     nbaId: 1629652,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629652.png',
     quote: "Shutdown defender from Montreal."
@@ -1478,6 +1570,7 @@ const rawCards = [
     pts: 7.5,
     reb: 3.2,
     ast: 3.0,
+    age: 25,
     nbaId: 1627936,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627936.png',
     quote: "The Bald Mamba never quits."
@@ -1493,6 +1586,7 @@ const rawCards = [
     pts: 8.5,
     reb: 3.0,
     ast: 2.0,
+    age: 25,
     nbaId: 1641717,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641717.png',
     quote: "Next gen Oklahoma City product."
@@ -1508,6 +1602,7 @@ const rawCards = [
     pts: 8.0,
     reb: 2.5,
     ast: 1.5,
+    age: 21,
     nbaId: 1642272,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642272.png',
     quote: "Rookie sharpshooter from Duke."
@@ -1523,6 +1618,7 @@ const rawCards = [
     pts: 9.8,
     reb: 3.0,
     ast: 1.2,
+    age: 25,
     nbaId: 1630598,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630598.png',
     quote: "Reliable vet off the bench."
@@ -1538,6 +1634,7 @@ const rawCards = [
     pts: 7.5,
     reb: 4.5,
     ast: 1.5,
+    age: 24,
     nbaId: 1631119,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631119.png',
     quote: "Energy big from Arkansas."
@@ -1554,6 +1651,7 @@ const rawCards = [
     pts: 31.2,
     reb: 3.4,
     ast: 6.6,
+    age: 29,
     nbaId: 1628973,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628973.png',
     quote: "MSG belongs to Jalen Brunson."
@@ -1569,6 +1667,7 @@ const rawCards = [
     pts: 24.5,
     reb: 12.0,
     ast: 3.5,
+    age: 30,
     nbaId: 1626157,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1626157.png',
     quote: "KAT dominates the paint in New York."
@@ -1584,6 +1683,7 @@ const rawCards = [
     pts: 16.7,
     reb: 5.2,
     ast: 2.2,
+    age: 25,
     nbaId: 1628384,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628384.png',
     quote: "OG locks down every night."
@@ -1599,6 +1699,7 @@ const rawCards = [
     pts: 14.7,
     reb: 4.1,
     ast: 3.9,
+    age: 29,
     nbaId: 1628969,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628969.png',
     quote: "Mikal Bridges never takes a play off."
@@ -1614,6 +1715,7 @@ const rawCards = [
     pts: 9.5,
     reb: 6.0,
     ast: 5.0,
+    age: 25,
     nbaId: 1628404,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628404.png',
     quote: "The hustle king of New York."
@@ -1629,6 +1731,7 @@ const rawCards = [
     pts: 11.0,
     reb: 2.8,
     ast: 3.5,
+    age: 25,
     nbaId: 1630540,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630540.png',
     quote: "Deuce McBride coming off the bench."
@@ -1644,6 +1747,7 @@ const rawCards = [
     pts: 7.5,
     reb: 8.5,
     ast: 0.8,
+    age: 29,
     nbaId: 1629011,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629011.png',
     quote: "Rim protector when healthy."
@@ -1659,6 +1763,7 @@ const rawCards = [
     pts: 8.5,
     reb: 4.0,
     ast: 2.0,
+    age: 25,
     nbaId: 1631110,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631110.png',
     quote: "Versatile young defender."
@@ -1674,6 +1779,7 @@ const rawCards = [
     pts: 8.0,
     reb: 2.5,
     ast: 2.0,
+    age: 25,
     nbaId: 203903,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203903.png',
     quote: "Volume scorer off the bench."
@@ -1690,6 +1796,7 @@ const rawCards = [
     pts: 24.3,
     reb: 10.5,
     ast: 3.8,
+    age: 21,
     nbaId: 1641705,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641705.png',
     quote: "The alien has arrived in San Antonio."
@@ -1705,6 +1812,7 @@ const rawCards = [
     pts: 18.9,
     reb: 4.5,
     ast: 7.5,
+    age: 28,
     nbaId: 1628368,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628368.png',
     quote: "Fox is too fast for everyone."
@@ -1720,6 +1828,7 @@ const rawCards = [
     pts: 16.5,
     reb: 5.1,
     ast: 7.1,
+    age: 20,
     nbaId: 1642264,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642264.png',
     quote: "Back-to-back Rookie of the Year."
@@ -1735,6 +1844,7 @@ const rawCards = [
     pts: 14.5,
     reb: 3.8,
     ast: 2.2,
+    age: 25,
     nbaId: 1630170,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630170.png',
     quote: "San Antonio's perimeter weapon."
@@ -1750,6 +1860,7 @@ const rawCards = [
     pts: 11.0,
     reb: 5.4,
     ast: 1.3,
+    age: 25,
     nbaId: 1629640,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629640.png',
     quote: "Kentucky product grinding every game."
@@ -1765,6 +1876,7 @@ const rawCards = [
     pts: 10.5,
     reb: 5.0,
     ast: 1.8,
+    age: 24,
     nbaId: 203084,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203084.png',
     quote: "Veteran leadership in San Antonio."
@@ -1780,6 +1892,7 @@ const rawCards = [
     pts: 11.5,
     reb: 3.5,
     ast: 3.5,
+    age: 25,
     nbaId: 1642844,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642844.png',
     quote: "2025 Draft #2 pick, the future."
@@ -1795,6 +1908,7 @@ const rawCards = [
     pts: 7.5,
     reb: 3.5,
     ast: 1.5,
+    age: 25,
     nbaId: 1630577,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630577.png',
     quote: "St. John's product finding his role."
@@ -1810,6 +1924,7 @@ const rawCards = [
     pts: 6.6,
     reb: 5.0,
     ast: 1.2,
+    age: 25,
     nbaId: 1628436,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628436.png',
     quote: "Stretch center protecting the rim."
@@ -1825,6 +1940,7 @@ const rawCards = [
     pts: 5.0,
     reb: 3.0,
     ast: 1.0,
+    age: 25,
     nbaId: 1642868,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642868.png',
     quote: "Young forward with high ceiling."
@@ -1841,6 +1957,7 @@ const rawCards = [
     pts: 24.5,
     reb: 5.6,
     ast: 9.9,
+    age: 24,
     nbaId: 1630595,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630595.png',
     quote: "Vision, patience, explosion — all in one."
@@ -1856,6 +1973,7 @@ const rawCards = [
     pts: 19.2,
     reb: 10.6,
     ast: 1.7,
+    age: 21,
     nbaId: 1631105,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631105.png',
     quote: "The paint belongs to me."
@@ -1871,6 +1989,7 @@ const rawCards = [
     pts: 9.9,
     reb: 5.8,
     ast: 2.9,
+    age: 22,
     nbaId: 1641709,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641709.png',
     quote: "Energy and intensity, every single night."
@@ -1886,6 +2005,7 @@ const rawCards = [
     pts: 13.1,
     reb: 5.2,
     ast: 2.4,
+    age: 25,
     nbaId: 202699,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202699.png',
     quote: "Veteran presence when it matters most."
@@ -1901,6 +2021,7 @@ const rawCards = [
     pts: 11.9,
     reb: 2.7,
     ast: 2.0,
+    age: 25,
     nbaId: 1629130,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629130.png',
     quote: "Three-point specialist, always ready."
@@ -1916,6 +2037,7 @@ const rawCards = [
     pts: 8.4,
     reb: 5.8,
     ast: 1.3,
+    age: 20,
     nbaId: 1641842,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641842.png',
     quote: "The next generation is here."
@@ -1931,6 +2053,7 @@ const rawCards = [
     pts: 10.0,
     reb: 5.1,
     ast: 1.2,
+    age: 25,
     nbaId: 1630191,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630191.png',
     quote: "Dirty work wins championships."
@@ -1946,6 +2069,7 @@ const rawCards = [
     pts: 8.3,
     reb: 1.9,
     ast: 2.3,
+    age: 25,
     nbaId: 1642450,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642450.png',
     quote: "Every opportunity, maximized."
@@ -1961,6 +2085,7 @@ const rawCards = [
     pts: 7.4,
     reb: 1.9,
     ast: 2.7,
+    age: 25,
     nbaId: 1627747,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627747.png',
     quote: "Veteran energy off the bench."
@@ -1976,6 +2101,7 @@ const rawCards = [
     pts: 7.1,
     reb: 4.4,
     ast: 0.8,
+    age: 40,
     nbaId: 1630194,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630194.png',
     quote: "Ready whenever my number's called."
@@ -1992,6 +2118,7 @@ const rawCards = [
     pts: 25.9,
     reb: 5.5,
     ast: 4.4,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png',
     quote: "Scorer by nature, winner by choice."
@@ -2007,6 +2134,7 @@ const rawCards = [
     pts: 20.4,
     reb: 9.0,
     ast: 6.2,
+    age: 23,
     nbaId: 1630578,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630578.png',
     quote: "The Turkish sensation redefining the center role."
@@ -2022,6 +2150,7 @@ const rawCards = [
     pts: 18.0,
     reb: 7.8,
     ast: 5.2,
+    age: 22,
     nbaId: 1641708,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641708.png',
     quote: "Elite athlete, elite energy."
@@ -2037,6 +2166,7 @@ const rawCards = [
     pts: 15.4,
     reb: 6.8,
     ast: 1.9,
+    age: 25,
     nbaId: 1631095,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631095.png',
     quote: "The cornerstone of Houston's future."
@@ -2052,6 +2182,7 @@ const rawCards = [
     pts: 13.5,
     reb: 2.8,
     ast: 3.4,
+    age: 20,
     nbaId: 1642263,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642263.png',
     quote: "Kentucky shooter lighting up the NBA."
@@ -2067,6 +2198,7 @@ const rawCards = [
     pts: 10.3,
     reb: 6.3,
     ast: 1.6,
+    age: 25,
     nbaId: 1631106,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631106.png',
     quote: "Hustle and heart in every possession."
@@ -2082,6 +2214,7 @@ const rawCards = [
     pts: 5.8,
     reb: 8.6,
     ast: 1.5,
+    age: 32,
     nbaId: 203500,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203500.png',
     quote: "The enforcer. No soft plays."
@@ -2097,6 +2230,7 @@ const rawCards = [
     pts: 4.8,
     reb: 2.6,
     ast: 0.8,
+    age: 25,
     nbaId: 1629006,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629006.png',
     quote: "Lockdown defender off the bench."
@@ -2112,6 +2246,7 @@ const rawCards = [
     pts: 3.8,
     reb: 4.5,
     ast: 0.7,
+    age: 31,
     nbaId: 203991,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203991.png',
     quote: "Still protecting the rim every night."
@@ -2127,6 +2262,7 @@ const rawCards = [
     pts: 3.1,
     reb: 2.6,
     ast: 1.0,
+    age: 25,
     nbaId: 1627827,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627827.png',
     quote: "Defensive stopper, team-first mentality."
@@ -2143,6 +2279,7 @@ const rawCards = [
     pts: 28.0,
     reb: 12.6,
     ast: 10.6,
+    age: 30,
     nbaId: 203999,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203999.png',
     quote: "The game is meant to be enjoyed."
@@ -2158,6 +2295,7 @@ const rawCards = [
     pts: 25.1,
     reb: 4.4,
     ast: 7.1,
+    age: 28,
     nbaId: 1627750,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627750.png',
     quote: "Big moments find me prepared."
@@ -2173,6 +2311,7 @@ const rawCards = [
     pts: 16.6,
     reb: 5.9,
     ast: 2.5,
+    age: 36,
     nbaId: 203932,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203932.png',
     quote: "I do what the team needs."
@@ -2188,6 +2327,7 @@ const rawCards = [
     pts: 14.9,
     reb: 4.9,
     ast: 2.0,
+    age: 25,
     nbaId: 1631212,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631212.png',
     quote: "Every year I'm a better version."
@@ -2203,6 +2343,7 @@ const rawCards = [
     pts: 13.8,
     reb: 2.5,
     ast: 1.7,
+    age: 25,
     nbaId: 203501,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203501.png',
     quote: "Always ready to shoot."
@@ -2218,6 +2359,7 @@ const rawCards = [
     pts: 11.8,
     reb: 3.7,
     ast: 2.3,
+    age: 25,
     nbaId: 1629661,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629661.png',
     quote: "My shot is my identity."
@@ -2233,6 +2375,7 @@ const rawCards = [
     pts: 11.7,
     reb: 4.9,
     ast: 2.9,
+    age: 25,
     nbaId: 1631128,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631128.png',
     quote: "Intensity has no days off."
@@ -2248,6 +2391,7 @@ const rawCards = [
     pts: 8.3,
     reb: 4.9,
     ast: 1.2,
+    age: 33,
     nbaId: 202685,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202685.png',
     quote: "Every second in the paint counts."
@@ -2263,6 +2407,7 @@ const rawCards = [
     pts: 4.2,
     reb: 1.5,
     ast: 0.8,
+    age: 25,
     nbaId: 1641747,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641747.png',
     quote: "The future starts now."
@@ -2278,6 +2423,7 @@ const rawCards = [
     pts: 3.7,
     reb: 2.6,
     ast: 0.5,
+    age: 25,
     nbaId: 1630192,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630192.png',
     quote: "I contribute when they need me."
@@ -2294,6 +2440,7 @@ const rawCards = [
     pts: 20.3,
     reb: 5.0,
     ast: 3.5,
+    age: 22,
     nbaId: 1641706,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641706.png',
     quote: "I'm just getting started. The best is still to come."
@@ -2309,6 +2456,7 @@ const rawCards = [
     pts: 19.7,
     reb: 4.8,
     ast: 7.1,
+    age: 24,
     nbaId: 1630163,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630163.png',
     quote: "When I'm on the court, I just play free."
@@ -2324,6 +2472,7 @@ const rawCards = [
     pts: 19.0,
     reb: 5.3,
     ast: 3.4,
+    age: 25,
     nbaId: 1642271,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642851.png',
     quote: "I let the game come to me and stay ready."
@@ -2339,6 +2488,7 @@ const rawCards = [
     pts: 17.2,
     reb: 5.9,
     ast: 3.3,
+    age: 29,
     nbaId: 1628970,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628970.png',
     quote: "I use everything I've been through as fuel."
@@ -2354,6 +2504,7 @@ const rawCards = [
     pts: 8.2,
     reb: 8.8,
     ast: 1.9,
+    age: 25,
     nbaId: 1631217,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631217.png',
     quote: "I go out there and compete every single night."
@@ -2369,6 +2520,7 @@ const rawCards = [
     pts: 7.9,
     reb: 5.7,
     ast: 0.8,
+    age: 25,
     nbaId: 1641750,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641750.png',
     quote: "My job is to protect the rim and set screens."
@@ -2384,6 +2536,7 @@ const rawCards = [
     pts: 6.8,
     reb: 3.9,
     ast: 1.7,
+    age: 24,
     nbaId: 1629684,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629684.png',
     quote: "I'm a team player first. Always."
@@ -2399,6 +2552,7 @@ const rawCards = [
     pts: 6.2,
     reb: 4.1,
     ast: 0.8,
+    age: 20,
     nbaId: 1642275,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642275.png',
     quote: "I came to the NBA to prove I belong at this level."
@@ -2414,6 +2568,7 @@ const rawCards = [
     pts: 5.4,
     reb: 3.5,
     ast: 2.0,
+    age: 25,
     nbaId: 1642883,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642883.png',
     quote: "Every opportunity I get, I try to make the most of it."
@@ -2430,6 +2585,7 @@ const rawCards = [
     pts: 21.7,
     reb: 5.7,
     ast: 3.8,
+    age: 25,
     nbaId: 1630530,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630530.png',
     quote: "I just want to keep improving and help this team win."
@@ -2445,6 +2601,7 @@ const rawCards = [
     pts: 21.4,
     reb: 5.8,
     ast: 3.3,
+    age: 25,
     nbaId: 1629627,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629627.png',
     quote: "When I'm healthy and locked in, nobody can stop me."
@@ -2460,6 +2617,7 @@ const rawCards = [
     pts: 17.6,
     reb: 5.1,
     ast: 6.7,
+    age: 28,
     nbaId: 1627749,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627749.png',
     quote: "I never let my circumstances define where I'm going."
@@ -2475,6 +2633,7 @@ const rawCards = [
     pts: 17.4,
     reb: 5.7,
     ast: 2.6,
+    age: 25,
     nbaId: 1630180,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630180.png',
     quote: "I take pride in being a two-way player."
@@ -2490,6 +2649,7 @@ const rawCards = [
     pts: 13.3,
     reb: 2.0,
     ast: 3.0,
+    age: 25,
     nbaId: 1629673,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629673.png',
     quote: "I always show up when it matters."
@@ -2505,6 +2665,7 @@ const rawCards = [
     pts: 13.1,
     reb: 3.6,
     ast: 3.2,
+    age: 25,
     nbaId: 1642847,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642847.png',
     quote: "I play with a chip on my shoulder every night."
@@ -2520,6 +2681,7 @@ const rawCards = [
     pts: 11.3,
     reb: 6.8,
     ast: 3.8,
+    age: 25,
     nbaId: 1642852,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642852.png',
     quote: "I just want to be the best version of myself every day."
@@ -2535,6 +2697,7 @@ const rawCards = [
     pts: 9.1,
     reb: 3.5,
     ast: 2.8,
+    age: 25,
     nbaId: 1630529,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630529.png',
     quote: "Defense is a mindset. I live by it."
@@ -2550,6 +2713,7 @@ const rawCards = [
     pts: 8.1,
     reb: 2.1,
     ast: 1.5,
+    age: 25,
     nbaId: 1631121,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631121.png',
     quote: "I take every chance I get and make the most of it."
@@ -2565,6 +2729,7 @@ const rawCards = [
     pts: 5.5,
     reb: 5.8,
     ast: 1.3,
+    age: 21,
     nbaId: 1642274,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642274.png',
     quote: "I protect the paint and do the dirty work."
@@ -2581,6 +2746,7 @@ const rawCards = [
     pts: 26.5,
     reb: 5.8,
     ast: 8.2,
+    age: 26,
     nbaId: 1629630,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629630.png',
     quote: "I just hoop. Nobody can take that away from me."
@@ -2596,6 +2762,7 @@ const rawCards = [
     pts: 18.5,
     reb: 3.2,
     ast: 6.1,
+    age: 25,
     nbaId: 1629660,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629660.png',
     quote: "Hard work beats talent when talent doesn't work hard."
@@ -2611,6 +2778,7 @@ const rawCards = [
     pts: 14.2,
     reb: 7.1,
     ast: 2.5,
+    age: 25,
     nbaId: 1630583,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630583.png',
     quote: "I work on my game every day to keep getting better."
@@ -2626,6 +2794,7 @@ const rawCards = [
     pts: 13.8,
     reb: 9.2,
     ast: 1.5,
+    age: 23,
     nbaId: 1641744,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641744.png',
     quote: "Size is an advantage I'm going to keep using."
@@ -2641,6 +2810,7 @@ const rawCards = [
     pts: 11.5,
     reb: 5.2,
     ast: 2.1,
+    age: 25,
     nbaId: 1642907,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642907.png',
     quote: "I just stay ready and compete every time I step out there."
@@ -2656,6 +2826,7 @@ const rawCards = [
     pts: 10.8,
     reb: 3.4,
     ast: 2.2,
+    age: 25,
     nbaId: 1642377,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642377.png',
     quote: "Consistency is what separates good players from great ones."
@@ -2671,6 +2842,7 @@ const rawCards = [
     pts: 12.5,
     reb: 4.5,
     ast: 1.5,
+    age: 25,
     nbaId: 1641713,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641713.png',
     quote: "I'm still young, I'm hungry, and I want to be great."
@@ -2686,6 +2858,7 @@ const rawCards = [
     pts: 8.4,
     reb: 2.1,
     ast: 2.5,
+    age: 25,
     nbaId: 1642285,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642285.png',
     quote: "I make plays and keep guys around me sharp."
@@ -2701,6 +2874,7 @@ const rawCards = [
     pts: 7.2,
     reb: 3.1,
     ast: 1.2,
+    age: 25,
     nbaId: 1641765,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641765.png',
     quote: "Every rep, every game — I'm building something special."
@@ -2717,6 +2891,7 @@ const rawCards = [
     pts: 19.2,
     reb: 2.8,
     ast: 2.3,
+    age: 25,
     nbaId: 203897,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203897.png',
     quote: "I just go out and play my game. No shortcuts."
@@ -2732,6 +2907,7 @@ const rawCards = [
     pts: 18.2,
     reb: 3.0,
     ast: 4.1,
+    age: 36,
     nbaId: 201942,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201942.png',
     quote: "The mid-range is never dead. Not while I'm playing."
@@ -2747,6 +2923,7 @@ const rawCards = [
     pts: 15.8,
     reb: 11.4,
     ast: 4.1,
+    age: 29,
     nbaId: 1627734,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627734.png',
     quote: "I find a way to be impactful every single night."
@@ -2762,6 +2939,7 @@ const rawCards = [
     pts: 15.2,
     reb: 5.4,
     ast: 6.7,
+    age: 25,
     nbaId: 201566,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201566.png',
     quote: "I play every game like it could be my last."
@@ -2777,6 +2955,7 @@ const rawCards = [
     pts: 14.0,
     reb: 5.7,
     ast: 1.7,
+    age: 28,
     nbaId: 1631099,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631099.png',
     quote: "I'm hungry and I show it every night on the floor."
@@ -2792,6 +2971,7 @@ const rawCards = [
     pts: 12.7,
     reb: 1.9,
     ast: 3.0,
+    age: 25,
     nbaId: 1628370,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628370.png',
     quote: "When I'm in rhythm, I can score from anywhere."
@@ -2807,6 +2987,7 @@ const rawCards = [
     pts: 11.9,
     reb: 7.3,
     ast: 1.3,
+    age: 25,
     nbaId: 1642875,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642875.png',
     quote: "I'm proving every day that I belong in this league."
@@ -2822,6 +3003,7 @@ const rawCards = [
     pts: 9.3,
     reb: 6.5,
     ast: 1.3,
+    age: 25,
     nbaId: 1630173,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630173.png',
     quote: "I bring the energy and rebounding this team needs."
@@ -2837,6 +3019,7 @@ const rawCards = [
     pts: 7.7,
     reb: 3.6,
     ast: 2.2,
+    age: 25,
     nbaId: 1642363,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642363.png',
     quote: "I fight for my spot every single day."
@@ -2853,6 +3036,7 @@ const rawCards = [
     pts: 20.3,
     reb: 6.6,
     ast: 4.6,
+    age: 25,
     nbaId: 1642843,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642843.png',
     quote: "I've been working for this my whole life. I'm ready."
@@ -2868,6 +3052,7 @@ const rawCards = [
     pts: 15.3,
     reb: 4.8,
     ast: 3.3,
+    age: 25,
     nbaId: 1630230,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630230.png',
     quote: "I just stay ready and make plays when called upon."
@@ -2883,6 +3068,7 @@ const rawCards = [
     pts: 14.2,
     reb: 6.9,
     ast: 1.8,
+    age: 25,
     nbaId: 1629023,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629023.png',
     quote: "Versatility is my calling card on both ends."
@@ -2898,6 +3084,7 @@ const rawCards = [
     pts: 12.8,
     reb: 2.9,
     ast: 3.8,
+    age: 24,
     nbaId: 1630314,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630314.png',
     quote: "I give everything I have every time I step on the court."
@@ -2913,6 +3100,7 @@ const rawCards = [
     pts: 12.6,
     reb: 3.3,
     ast: 2.0,
+    age: 25,
     nbaId: 1631108,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631108.png',
     quote: "I stay locked in and shoot with confidence."
@@ -2928,6 +3116,7 @@ const rawCards = [
     pts: 11.9,
     reb: 2.2,
     ast: 1.4,
+    age: 22,
     nbaId: 202691,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202691.png',
     quote: "I've been here before. The fire never goes out."
@@ -2943,6 +3132,7 @@ const rawCards = [
     pts: 9.5,
     reb: 7.0,
     ast: 1.1,
+    age: 25,
     nbaId: 1629655,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629655.png',
     quote: "I protect the rim and finish above the rest."
@@ -2958,6 +3148,7 @@ const rawCards = [
     pts: 6.4,
     reb: 1.9,
     ast: 4.9,
+    age: 25,
     nbaId: 1642948,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642948.png',
     quote: "I run the offense and make my teammates better."
@@ -2973,6 +3164,7 @@ const rawCards = [
     pts: 3.9,
     reb: 2.5,
     ast: 1.4,
+    age: 25,
     nbaId: 1628997,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628997.png',
     quote: "I bring toughness and do the dirty work."
@@ -2989,6 +3181,7 @@ const rawCards = [
     pts: 26.7,
     reb: 6.9,
     ast: 2.1,
+    age: 25,
     nbaId: 1628374,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628374.png',
     quote: "I've evolved into a scorer nobody can stop."
@@ -3004,6 +3197,7 @@ const rawCards = [
     pts: 23.6,
     reb: 3.7,
     ast: 6.1,
+    age: 21,
     nbaId: 1641718,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641718.png',
     quote: "I play with confidence and let my game speak."
@@ -3019,6 +3213,7 @@ const rawCards = [
     pts: 14.1,
     reb: 3.0,
     ast: 1.7,
+    age: 25,
     nbaId: 1641729,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641729.png',
     quote: "I've put in the work and now it's time to show it."
@@ -3034,6 +3229,7 @@ const rawCards = [
     pts: 13.4,
     reb: 4.1,
     ast: 1.8,
+    age: 25,
     nbaId: 1642846,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642846.png',
     quote: "I'm just getting started — the ceiling is sky high."
@@ -3049,6 +3245,7 @@ const rawCards = [
     pts: 11.7,
     reb: 2.5,
     ast: 7.2,
+    age: 25,
     nbaId: 1641729,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/260x190/1641729.png',
     quote: "I see the game differently. I make everyone better."
@@ -3064,6 +3261,7 @@ const rawCards = [
     pts: 10.9,
     reb: 10.4,
     ast: 4.8,
+    age: 31,
     nbaId: 203994,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203994.png',
     quote: "I bring the physicality and toughness inside."
@@ -3079,6 +3277,7 @@ const rawCards = [
     pts: 10.5,
     reb: 6.9,
     ast: 2.4,
+    age: 25,
     nbaId: 1642271,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642271.png',
     quote: "I play smart and bring versatility every game."
@@ -3094,6 +3293,7 @@ const rawCards = [
     pts: 9.1,
     reb: 2.5,
     ast: 1.9,
+    age: 25,
     nbaId: 1629004,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629004.png',
     quote: "I stay ready and shoot when I get the chance."
@@ -3109,6 +3309,7 @@ const rawCards = [
     pts: 7.4,
     reb: 2.8,
     ast: 1.5,
+    age: 24,
     nbaId: 1642262,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642262.png',
     quote: "I'm developing fast and hungry for more minutes."
@@ -3124,6 +3325,7 @@ const rawCards = [
     pts: 6.7,
     reb: 5.8,
     ast: 1.8,
+    age: 25,
     nbaId: 201567,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201567.png',
     quote: "I've been through everything. Experience is undefeated."
@@ -3140,6 +3342,7 @@ const rawCards = [
     pts: 22.7,
     reb: 8.4,
     ast: 5.1,
+    age: 23,
     nbaId: 4432573,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4432573.png',
     quote: 'The cornerstone of the Magic. A versatile force.'
@@ -3155,6 +3358,7 @@ const rawCards = [
     pts: 21.3,
     reb: 5.8,
     ast: 3.6,
+    age: 24,
     nbaId: 4566434,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4566434.png',
     quote: 'Elite skill set and basketball IQ. A rising star.'
@@ -3170,6 +3374,7 @@ const rawCards = [
     pts: 20.3,
     reb: 4.2,
     ast: 4.2,
+    age: 25,
     nbaId: 4066320,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4066320.png',
     quote: 'One of the best shooters in the league. Pure stroke.'
@@ -3185,6 +3390,7 @@ const rawCards = [
     pts: 15.3,
     reb: 3.9,
     ast: 3.8,
+    age: 25,
     nbaId: 4712849,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4712849.png',
     quote: 'Versatile guard with elite playmaking and defensive potential.'
@@ -3200,6 +3406,7 @@ const rawCards = [
     pts: 13.8,
     reb: 3.8,
     ast: 5.3,
+    age: 25,
     nbaId: 4432165,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4432165.png',
     quote: 'Defensive pest and high-energy floor general.'
@@ -3215,6 +3422,7 @@ const rawCards = [
     pts: 11.9,
     reb: 7.5,
     ast: 2.1,
+    age: 25,
     nbaId: 4277847,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4277847.png',
     quote: 'Reliable big man who anchors the defense and hits the glass.'
@@ -3230,6 +3438,7 @@ const rawCards = [
     pts: 9.8,
     reb: 3.7,
     ast: 1.5,
+    age: 25,
     nbaId: 4702382,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4702382.png',
     quote: 'Skilled rookie forward with a high basketball IQ.'
@@ -3245,6 +3454,7 @@ const rawCards = [
     pts: 7.6,
     reb: 3.4,
     ast: 0.8,
+    age: 24,
     nbaId: 3150844,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/3150844.png',
     quote: 'High-energy big man who brings a spark off the bench.'
@@ -3260,6 +3470,7 @@ const rawCards = [
     pts: 5.6,
     reb: 4.8,
     ast: 1.3,
+    age: 25,
     nbaId: 4348700,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4348700.png',
     quote: 'Physical interior presence and reliable rebounder.'
@@ -3275,6 +3486,7 @@ const rawCards = [
     pts: 5.4,
     reb: 1.7,
     ast: 0.9,
+    age: 25,
     nbaId: 5105806,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/5105806.png',
     quote: 'Young sharpshooter with elite scoring potential.'
@@ -3291,6 +3503,7 @@ const rawCards = [
     pts: 29.5,
     reb: 5.1,
     ast: 3.7,
+    age: 24,
     nbaId: 4594268,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4594268.png',
     quote: 'Ant-Man. The most explosive scorer in the league.'
@@ -3306,6 +3519,7 @@ const rawCards = [
     pts: 21.0,
     reb: 6.8,
     ast: 5.1,
+    age: 31,
     nbaId: 3064514,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/3064514.png',
     quote: 'Physical force in the paint with elite playmaking skills.'
@@ -3321,6 +3535,7 @@ const rawCards = [
     pts: 14.6,
     reb: 4.3,
     ast: 2.8,
+    age: 25,
     nbaId: 4431671,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4431671.png',
     quote: 'Lockdown defender with a smooth offensive game.'
@@ -3336,6 +3551,7 @@ const rawCards = [
     pts: 13.7,
     reb: 6.2,
     ast: 2.3,
+    age: 25,
     nbaId: 4396971,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4396971.png',
     quote: 'The best backup big in the league. Instant offense.'
@@ -3351,6 +3567,7 @@ const rawCards = [
     pts: 12.2,
     reb: 4.4,
     ast: 4.0,
+    age: 25,
     nbaId: 3934673,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/3934673.png',
     quote: 'The Big Ragu. Relentless energy and clutch shooting.'
@@ -3366,6 +3583,7 @@ const rawCards = [
     pts: 13.2,
     reb: 2.8,
     ast: 3.2,
+    age: 25,
     nbaId: 1630245,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630245.png',
     quote: 'Versatile guard who brings toughness and playmaking.'
@@ -3381,6 +3599,7 @@ const rawCards = [
     pts: 11.0,
     reb: 11.5,
     ast: 1.7,
+    age: 33,
     nbaId: 3032976,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/3032976.png',
     quote: 'The Stifle Tower. Defensive anchor and rim protector.'
@@ -3396,6 +3615,7 @@ const rawCards = [
     pts: 8.0,
     reb: 1.6,
     ast: 2.5,
+    age: 25,
     nbaId: 4592492,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4592492.png',
     quote: 'Electric scorer with deep range and flashy handles.'
@@ -3411,6 +3631,7 @@ const rawCards = [
     pts: 4.1,
     reb: 1.7,
     ast: 2.9,
+    age: 38,
     nbaId: 3195,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/3195.png',
     quote: 'Veteran floor general and leader in the locker room.'
@@ -3426,6 +3647,7 @@ const rawCards = [
     pts: 4.1,
     reb: 1.0,
     ast: 0.6,
+    age: 25,
     nbaId: 4432847,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4432847.png',
     quote: 'Athletic rookie wing with elite transition scoring.'
@@ -3441,6 +3663,7 @@ const rawCards = [
     pts: 3.8,
     reb: 1.8,
     ast: 0.6,
+    age: 25,
     nbaId: 4432247,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4432247.png',
     quote: 'Defensive specialist with great instincts.'
@@ -3457,6 +3680,7 @@ const rawCards = [
     pts: 28.3,
     reb: 6.3,
     ast: 3.6,
+    age: 34,
     nbaId: 6450,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/6450.png',
     quote: 'The Klaw. Two-way dominance and championship pedigree.'
@@ -3472,6 +3696,7 @@ const rawCards = [
     pts: 20.8,
     reb: 2.3,
     ast: 6.9,
+    age: 25,
     nbaId: 4396907,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4396907.png',
     quote: 'Dynamic point guard with elite vision and scoring.'
@@ -3487,6 +3712,7 @@ const rawCards = [
     pts: 19.9,
     reb: 5.9,
     ast: 2.3,
+    age: 25,
     nbaId: 4683634,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4683634.png',
     quote: 'Fearless scorer who attacks the rim relentlessly.'
@@ -3502,6 +3728,7 @@ const rawCards = [
     pts: 13.7,
     reb: 5.3,
     ast: 1.0,
+    age: 25,
     nbaId: 3908845,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/3908845.png',
     quote: 'High-flying forward with stretch potential.'
@@ -3517,6 +3744,7 @@ const rawCards = [
     pts: 11.1,
     reb: 3.2,
     ast: 1.5,
+    age: 25,
     nbaId: 3936099,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/3936099.png',
     quote: 'Elite athleticism and defensive versatility.'
@@ -3532,6 +3760,7 @@ const rawCards = [
     pts: 9.8,
     reb: 3.1,
     ast: 2.2,
+    age: 22,
     nbaId: 4396818,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4396818.png',
     quote: 'Versatile wing with a high basketball IQ.'
@@ -3547,6 +3776,7 @@ const rawCards = [
     pts: 7.8,
     reb: 3.2,
     ast: 1.2,
+    age: 37,
     nbaId: 3448,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/3448.png',
     quote: 'Splash Mountain. Elite rim protection and spacing.'
@@ -3562,6 +3792,7 @@ const rawCards = [
     pts: 7.7,
     reb: 3.3,
     ast: 3.6,
+    age: 25,
     nbaId: 2991139,
     imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/2991139.png',
     quote: 'Lockdown defender and steady floor general.'
@@ -3578,6 +3809,7 @@ const rawCards = [
     pts: 25.0,
     reb: 11.0,
     ast: 3.0,
+    age: 32,
     nbaId: 203076,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203076.png',
     quote: 'Dominant force on both ends of the floor.'
@@ -3593,6 +3825,7 @@ const rawCards = [
     pts: 22.5,
     reb: 3.0,
     ast: 10.2,
+    age: 25,
     nbaId: 1629027,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629027.png',
     quote: 'Elite playmaker and deep-range threat.'
@@ -3608,6 +3841,7 @@ const rawCards = [
     pts: 16.5,
     reb: 7.4,
     ast: 2.7,
+    age: 20,
     nbaId: 1642259,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642259.png',
     quote: 'Versatile big man with elite defensive potential.'
@@ -3623,6 +3857,7 @@ const rawCards = [
     pts: 14.8,
     reb: 5.1,
     ast: 4.5,
+    age: 21,
     nbaId: 1642273,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642273.png',
     quote: 'Dynamic wing with playmaking and scoring ability.'
@@ -3638,6 +3873,7 @@ const rawCards = [
     pts: 13.5,
     reb: 2.8,
     ast: 5.4,
+    age: 25,
     nbaId: 1626156,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1626156.png',
     quote: 'Crafty guard with smooth shooting stroke.'
@@ -3653,6 +3889,7 @@ const rawCards = [
     pts: 12.8,
     reb: 1.8,
     ast: 1.0,
+    age: 25,
     nbaId: 1630702,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630702.png',
     quote: 'Fearless scorer who can heat up in an instant.'
@@ -3668,6 +3905,7 @@ const rawCards = [
     pts: 12.4,
     reb: 2.8,
     ast: 2.0,
+    age: 25,
     nbaId: 1642848,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642848.png',
     quote: 'Highly touted prospect with elite scoring tools.'
@@ -3683,6 +3921,7 @@ const rawCards = [
     pts: 11.3,
     reb: 4.4,
     ast: 2.7,
+    age: 25,
     nbaId: 1641731,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641731.png',
     quote: 'Athletic forward with high defensive ceiling.'
@@ -3698,6 +3937,7 @@ const rawCards = [
     pts: 10.2,
     reb: 3.6,
     ast: 4.5,
+    age: 20,
     nbaId: 1642267,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642267.png',
     quote: 'Versatile guard with great court vision.'
@@ -3713,6 +3953,7 @@ const rawCards = [
     pts: 8.5,
     reb: 2.5,
     ast: 3.5,
+    age: 25,
     nbaId: 203957,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203957.png',
     quote: 'Experienced guard providing steady playmaking.'
@@ -3729,6 +3970,7 @@ const rawCards = [
     pts: 21.5,
     reb: 7.2,
     ast: 1.8,
+    age: 25,
     nbaId: 1629008,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629008.png',
     quote: 'Elite shooter with great size and length.'
@@ -3744,6 +3986,7 @@ const rawCards = [
     pts: 15.2,
     reb: 8.4,
     ast: 1.5,
+    age: 25,
     nbaId: 1641730,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641730.png',
     quote: 'Versatile forward with rim protection and spacing.'
@@ -3759,6 +4002,7 @@ const rawCards = [
     pts: 12.8,
     reb: 10.2,
     ast: 2.1,
+    age: 26,
     nbaId: 1629651,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629651.png',
     quote: 'Elite defensive anchor and rim runner.'
@@ -3774,6 +4018,7 @@ const rawCards = [
     pts: 14.5,
     reb: 4.2,
     ast: 5.1,
+    age: 25,
     nbaId: 1642856,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642856.png',
     quote: 'Talented playmaker with great size for a guard.'
@@ -3789,6 +4034,7 @@ const rawCards = [
     pts: 11.2,
     reb: 4.1,
     ast: 1.8,
+    age: 24,
     nbaId: 1630533,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630533.png',
     quote: 'Athletic wing with defensive versatility.'
@@ -3804,6 +4050,7 @@ const rawCards = [
     pts: 6.8,
     reb: 5.2,
     ast: 1.2,
+    age: 25,
     nbaId: 1631169,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631169.png',
     quote: 'High-energy forward who impacts the game with hustle.'
@@ -3819,6 +4066,7 @@ const rawCards = [
     pts: 9.8,
     reb: 6.5,
     ast: 2.1,
+    age: 25,
     nbaId: 1642874,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642874.png',
     quote: 'Skilled big man with a soft touch around the rim.'
@@ -3834,6 +4082,7 @@ const rawCards = [
     pts: 8.5,
     reb: 7.2,
     ast: 1.1,
+    age: 25,
     nbaId: 1630549,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630549.png',
     quote: 'Strong rebounder and physical presence inside.'
@@ -3849,6 +4098,7 @@ const rawCards = [
     pts: 9.2,
     reb: 3.8,
     ast: 2.2,
+    age: 25,
     nbaId: 1629611,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629611.png',
     quote: 'Versatile glue guy who does whatever it takes to win.'
@@ -3865,6 +4115,7 @@ const rawCards = [
     pts: 20.1,
     reb: 4.0,
     ast: 10.9,
+    age: 25,
     nbaId: 1630169,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630169.png',
     quote: 'Elite playmaker and the engine of the Pacers offense.'
@@ -3880,6 +4131,7 @@ const rawCards = [
     pts: 23.8,
     reb: 6.6,
     ast: 3.9,
+    age: 31,
     nbaId: 1627783,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627783.png',
     quote: 'Versatile forward with championship experience.'
@@ -3895,6 +4147,7 @@ const rawCards = [
     pts: 17.2,
     reb: 2.8,
     ast: 7.2,
+    age: 25,
     nbaId: 1629614,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629614.png',
     quote: 'Clutch performer and steady floor general.'
@@ -3910,6 +4163,7 @@ const rawCards = [
     pts: 14.1,
     reb: 10.6,
     ast: 2.2,
+    age: 25,
     nbaId: 1627826,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627826.png',
     quote: 'Reliable double-double machine in the paint.'
@@ -3925,6 +4179,7 @@ const rawCards = [
     pts: 13.4,
     reb: 4.2,
     ast: 1.9,
+    age: 25,
     nbaId: 1630174,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630174.png',
     quote: 'Tenacious defender and reliable floor spacer.'
@@ -3940,6 +4195,7 @@ const rawCards = [
     pts: 11.5,
     reb: 5.1,
     ast: 2.4,
+    age: 25,
     nbaId: 1641716,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641716.png',
     quote: 'Highly skilled forward with elite defensive potential.'
@@ -3955,6 +4211,7 @@ const rawCards = [
     pts: 9.4,
     reb: 3.8,
     ast: 1.4,
+    age: 25,
     nbaId: 1630643,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630643.png',
     quote: 'Mobile big man with shot-blocking and shooting ability.'
@@ -3970,6 +4227,7 @@ const rawCards = [
     pts: 9.2,
     reb: 2.3,
     ast: 5.1,
+    age: 25,
     nbaId: 204456,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/204456.png',
     quote: 'High-energy guard and elite pest on defense.'
@@ -3985,6 +4243,7 @@ const rawCards = [
     pts: 9.0,
     reb: 4.1,
     ast: 2.1,
+    age: 25,
     nbaId: 1630167,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630167.png',
     quote: 'High-flying forward who thrives in transition.'
@@ -4000,6 +4259,7 @@ const rawCards = [
     pts: 8.6,
     reb: 2.2,
     ast: 2.4,
+    age: 25,
     nbaId: 1631245,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631245.png',
     quote: 'Explosive guard with great defensive intensity.'
@@ -4016,6 +4276,7 @@ const rawCards = [
     pts: 25.5,
     reb: 3.9,
     ast: 5.9,
+    age: 29,
     nbaId: 1626164,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1626164.png',
     quote: 'Elite three-level scorer and the face of the Suns.'
@@ -4031,6 +4292,7 @@ const rawCards = [
     pts: 20.9,
     reb: 3.7,
     ast: 1.8,
+    age: 25,
     nbaId: 1628415,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628415.png',
     quote: 'Tenacious defender and high-energy competitor.'
@@ -4046,6 +4308,7 @@ const rawCards = [
     pts: 18.5,
     reb: 4.2,
     ast: 3.1,
+    age: 35,
     nbaId: 1630224,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630224.png',
     quote: 'Explosive athlete with elite scoring potential.'
@@ -4061,6 +4324,7 @@ const rawCards = [
     pts: 17.2,
     reb: 3.0,
     ast: 4.1,
+    age: 27,
     nbaId: 1628960,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628960.png',
     quote: 'Elite floor spacer and tough perimeter defender.'
@@ -4076,6 +4340,7 @@ const rawCards = [
     pts: 11.2,
     reb: 9.5,
     ast: 1.2,
+    age: 24,
     nbaId: 1631109,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631109.png',
     quote: 'Dominant interior presence and elite rebounder.'
@@ -4091,6 +4356,7 @@ const rawCards = [
     pts: 8.5,
     reb: 5.2,
     ast: 2.8,
+    age: 25,
     nbaId: 1628400,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628400.png',
     quote: 'Versatile defender and reliable three-point threat.'
@@ -4106,6 +4372,7 @@ const rawCards = [
     pts: 6.5,
     reb: 4.0,
     ast: 0.9,
+    age: 25,
     nbaId: 1642346,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642346.png',
     quote: 'Elite defensive prospect with great versatility.'
@@ -4121,6 +4388,7 @@ const rawCards = [
     pts: 5.2,
     reb: 3.8,
     ast: 1.5,
+    age: 25,
     nbaId: 1642345,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642345.png',
     quote: 'Skilled big man with excellent passing ability.'
@@ -4136,6 +4404,7 @@ const rawCards = [
     pts: 4.8,
     reb: 5.1,
     ast: 0.5,
+    age: 25,
     nbaId: 1642863,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642863.png',
     quote: 'Intriguing young big man with massive wingspan.'
@@ -4151,6 +4420,7 @@ const rawCards = [
     pts: 4.5,
     reb: 1.5,
     ast: 3.2,
+    age: 25,
     nbaId: 1631221,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631221.png',
     quote: 'Steady point guard with great shooting range.'
@@ -4167,6 +4437,7 @@ const rawCards = [
     pts: 24.1,
     reb: 6.9,
     ast: 6.7,
+    age: 25,
     nbaId: 1630166,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630166.png',
     quote: 'Versatile forward with elite playmaking and scoring ability.'
@@ -4182,6 +4453,7 @@ const rawCards = [
     pts: 21.4,
     reb: 4.4,
     ast: 2.6,
+    age: 25,
     nbaId: 1631101,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631101.png',
     quote: 'Explosive scoring guard with unlimited verticality.'
@@ -4197,6 +4469,7 @@ const rawCards = [
     pts: 13.0,
     reb: 5.2,
     ast: 2.5,
+    age: 25,
     nbaId: 1641739,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641739.png',
     quote: 'Tenacious defender and high-IQ role player.'
@@ -4212,6 +4485,7 @@ const rawCards = [
     pts: 15.8,
     reb: 3.5,
     ast: 7.2,
+    age: 21,
     nbaId: 1630703,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630703.png',
     quote: 'Dynamic point guard with elite speed and vision.'
@@ -4227,6 +4501,7 @@ const rawCards = [
     pts: 18.2,
     reb: 4.1,
     ast: 2.4,
+    age: 25,
     nbaId: 203924,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203924.png',
     quote: 'Versatile two-way forward and reliable veteran scorer.'
@@ -4242,6 +4517,7 @@ const rawCards = [
     pts: 10.5,
     reb: 11.5,
     ast: 1.4,
+    age: 21,
     nbaId: 1642270,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642270.png',
     quote: 'Dominant interior presence and elite rim protector.'
@@ -4257,6 +4533,7 @@ const rawCards = [
     pts: 12.4,
     reb: 4.5,
     ast: 5.8,
+    age: 35,
     nbaId: 201950,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201950.png',
     quote: 'Elite perimeter defender and championship-winning veteran.'
@@ -4272,6 +4549,7 @@ const rawCards = [
     pts: 8.5,
     reb: 7.2,
     ast: 1.5,
+    age: 24,
     nbaId: 1629057,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629057.png',
     quote: 'High-impact defensive big man with elite shot-blocking.'
@@ -4287,6 +4565,7 @@ const rawCards = [
     pts: 5.4,
     reb: 2.1,
     ast: 1.4,
+    age: 25,
     nbaId: 1629680,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629680.png',
     quote: 'Elite defensive specialist with active hands.'
@@ -4302,6 +4581,7 @@ const rawCards = [
     pts: 6.1,
     reb: 5.5,
     ast: 1.2,
+    age: 25,
     nbaId: 1642905,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642905.png',
     quote: 'Intriguing young big man with great size and potential.'
@@ -4317,6 +4597,7 @@ const rawCards = [
     pts: 0.0,
     reb: 0.0,
     ast: 0.0,
+    age: 35,
     nbaId: 203081,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203081.png',
     quote: 'The greatest Trail Blazer of all time returning home.'
@@ -4333,6 +4614,7 @@ const rawCards = [
     pts: 27.6,
     reb: 9.8,
     ast: 5.4,
+    age: 31,
     nbaId: 203507,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png',
     quote: 'The Greek Freak. Two-time MVP and champion.'
@@ -4348,6 +4630,7 @@ const rawCards = [
     pts: 17.4,
     reb: 5.2,
     ast: 7.4,
+    age: 25,
     nbaId: 1629645,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629645.png',
     quote: 'Dynamic playmaker with elite handles.'
@@ -4363,6 +4646,7 @@ const rawCards = [
     pts: 16.8,
     reb: 4.6,
     ast: 5.6,
+    age: 25,
     nbaId: 1631157,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631157.png',
     quote: 'Emerging scoring guard with great potential.'
@@ -4378,6 +4662,7 @@ const rawCards = [
     pts: 13.7,
     reb: 6.4,
     ast: 1.6,
+    age: 25,
     nbaId: 1626171,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1626171.png',
     quote: 'The heartbeat of Milwaukee. High energy and rebounding.'
@@ -4393,6 +4678,7 @@ const rawCards = [
     pts: 13.1,
     reb: 4.5,
     ast: 2.6,
+    age: 25,
     nbaId: 1628398,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628398.png',
     quote: 'Versatile forward with championship experience.'
@@ -4408,6 +4694,7 @@ const rawCards = [
     pts: 11.9,
     reb: 5.3,
     ast: 1.5,
+    age: 29,
     nbaId: 1626167,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1626167.png',
     quote: 'Elite rim protector and floor-spacing big man.'
@@ -4423,6 +4710,7 @@ const rawCards = [
     pts: 9.6,
     reb: 2.5,
     ast: 1.8,
+    age: 35,
     nbaId: 1631260,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631260.png',
     quote: 'Sharpshooter with a quick release.'
@@ -4438,6 +4726,7 @@ const rawCards = [
     pts: 9.1,
     reb: 3.8,
     ast: 2.4,
+    age: 25,
     nbaId: 1631172,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631172.png',
     quote: 'Talented young wing with great size and length.'
@@ -4453,6 +4742,7 @@ const rawCards = [
     pts: 7.7,
     reb: 1.0,
     ast: 1.2,
+    age: 25,
     nbaId: 1629018,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629018.png',
     quote: 'Reliable 3-and-D perimeter threat.'
@@ -4468,6 +4758,7 @@ const rawCards = [
     pts: 6.1,
     reb: 2.1,
     ast: 0.9,
+    age: 25,
     nbaId: 1627752,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627752.png',
     quote: 'Veteran 3-and-D forward with great defensive versatility.'
@@ -4484,6 +4775,7 @@ const rawCards = [
     pts: 21.6,
     reb: 5.6,
     ast: 3.7,
+    age: 28,
     nbaId: 1627742,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627742.png',
     quote: 'Elite scorer and playmaker for the North.'
@@ -4499,6 +4791,7 @@ const rawCards = [
     pts: 19.1,
     reb: 5.3,
     ast: 3.3,
+    age: 25,
     nbaId: 1629628,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629628.png',
     quote: 'Homegrown talent with a relentless drive.'
@@ -4514,6 +4807,7 @@ const rawCards = [
     pts: 18.6,
     reb: 7.8,
     ast: 5.4,
+    age: 24,
     nbaId: 1630567,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630567.png',
     quote: 'The versatile engine of the Raptors future.'
@@ -4529,6 +4823,7 @@ const rawCards = [
     pts: 16.9,
     reb: 4.1,
     ast: 6.0,
+    age: 25,
     nbaId: 1630193,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630193.png',
     quote: 'Dynamic floor general with elite range.'
@@ -4544,6 +4839,7 @@ const rawCards = [
     pts: 10.8,
     reb: 4.8,
     ast: 1.9,
+    age: 25,
     nbaId: 1630572,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630572.png',
     quote: 'Versatile big man with great vision.'
@@ -4559,6 +4855,7 @@ const rawCards = [
     pts: 10.4,
     reb: 7.6,
     ast: 2.1,
+    age: 25,
     nbaId: 1627751,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627751.png',
     quote: 'Elite rim protector and efficient finisher.'
@@ -4574,6 +4871,7 @@ const rawCards = [
     pts: 7.8,
     reb: 4.9,
     ast: 2.0,
+    age: 28,
     nbaId: 1642867,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642867.png',
     quote: 'Promising young forward with high motor.'
@@ -4589,6 +4887,7 @@ const rawCards = [
     pts: 7.1,
     reb: 2.4,
     ast: 1.1,
+    age: 21,
     nbaId: 1642266,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642266.png',
     quote: 'Explosive rookie guard with scoring touch.'
@@ -4604,6 +4903,7 @@ const rawCards = [
     pts: 6.5,
     reb: 1.9,
     ast: 5.2,
+    age: 25,
     nbaId: 1642274,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642274.png',
     quote: 'Tenacious defender and floor leader.'
@@ -4619,6 +4919,7 @@ const rawCards = [
     pts: 6.4,
     reb: 2.1,
     ast: 0.7,
+    age: 25,
     nbaId: 1641711,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641711.png',
     quote: 'Sharpshooter with elite range and IQ.'
@@ -4637,6 +4938,7 @@ const rawCards = [
     reb: 0, // Titles
     ast: 1, // Exp
     ovr: 82,
+    age: 25,
     nbaId: 200755,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/200755.png',
     quote: "Modern analytical approach for the Purple & Gold."
@@ -4654,6 +4956,7 @@ const rawCards = [
     reb: 9, // Summing their rings as player and coach
     ast: 11, // Años de experiencia
     ovr: 96,
+    age: 25,
     nbaId: 1052,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPvWWHi2JAAueNMgz05v0PbC72IKwedFnYhM-ELVkhLTTMG4gLNTYNnXbvMWjYa14oFtpP6oaPddHRGBkbD3Ks5KRx16wHiJvc8ktkb6k&s=10',
     quote: "Managing the legendary Warriors core with championship DNA."
@@ -4671,6 +4974,7 @@ const rawCards = [
     reb: 1, // Titles
     ast: 3, // Experience
     ovr: 94,
+    age: 25,
     nbaId: 1630602,
     imageUrl: 'https://i.guim.co.uk/img/media/a56620c4785bac664e936d835a3be628bfd33e98/0_58_4200_2732/master/4200.jpg?width=965&dpr=1&s=none&crop=none',
     quote: "Focusing on the margins and the mindset of a champion."
@@ -4688,6 +4992,7 @@ const rawCards = [
     reb: 2, // Titles
     ast: 16, // Experience
     ovr: 97,
+    age: 25,
     nbaId: 2160,
     imageUrl: 'https://images.wsj.net/im-784088?width=1280&size=1',
     quote: "The Heat Culture is not for everyone, it is for the resilient."
@@ -4705,6 +5010,7 @@ const rawCards = [
     reb: 0, // Titles as HC (legacy just beginning)
     ast: 9, // Años de experiencia en el staff técnico de los Spurs
     ovr: 88, // A great coaching prospect
+    age: 25,
     nbaId: 201142, // ID de referencia
     imageUrl: 'https://s.yimg.com/ny/api/res/1.2/3sD9XRUYR.BTwkQ6yzSbtg--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTQyNjtjZj13ZWJw/https://media.zenfs.com/en/ny_post_sports_articles_389/14eb36ac74c3cb873d1487bb0b8ca7d8',
     quote: "Leading the next generation of the Spurs with discipline and vision."
@@ -4722,6 +5028,7 @@ const rawCards = [
     reb: 0, // Titles
     ast: 13, // Experience
     ovr: 92,
+    age: 25,
     nbaId: 203102,
     imageUrl: 'https://media.cnn.com/api/v1/images/stellar/prod/gettyimages-2217054597.jpg?c=16x9&q=h_833,w_1480,c_fill',
     quote: "Focus on the process, and the results will take care of themselves."
@@ -4739,6 +5046,7 @@ const rawCards = [
     reb: 1, // NBA Championship (2023)
     ast: 7, // Years on the Nuggets' coaching staff
     ovr: 89, // Considered the best assistant coach in the league
+    age: 25,
     nbaId: 203105,
     imageUrl: 'https://www.sandiegouniontribune.com/wp-content/uploads/migration/2024/06/04/0000018f-e54a-d531-a1cf-ed5f25480001.jpg?w=1800&resize=1800,1800',
     quote: "The tactical mind behind the Nuggets' championship offensive system."
@@ -4756,6 +5064,7 @@ const rawCards = [
     reb: 1, // NBA Championship (2008)
     ast: 25, // Years of experience as Head Coach
     ovr: 91,
+    age: 25,
     nbaId: 940,
     imageUrl: 'https://s.yimg.com/ny/api/res/1.2/R4Fr4Lf3eGXhFda.Bjr0hA--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTQyNjtjZj13ZWJw/https://media-mbst-pub-ue1.s3.amazonaws.com/creatr-uploaded-images/2020-10/ff007980-042e-11eb-bfeb-c4965805869b',
     quote: "Expert at managing star talent and championship expectations."
@@ -4773,6 +5082,7 @@ const rawCards = [
     reb: 1, // NBA Championship (2021 with Bucks)
     ast: 10, // Years as Head Coach
     ovr: 93,
+    age: 25,
     nbaId: 203102,
     imageUrl: 'https://gsp-image-cdn.wmsports.io/cms/prod/bleacher-report/getty_images/2197168635_large_image.jpg',
     quote: "Building a championship culture with defensive grit and spacing."
@@ -4790,6 +5100,7 @@ const rawCards = [
     reb: 1, // Championships (1 as player, seeking 1st as HC)
     ast: 8, // Years of experience as Head Coach
     ovr: 94, // Increased due to tactical performance in recent Playoffs
+    age: 25,
     nbaId: 467,
     imageUrl: 'https://s.yimg.com/ny/api/res/1.2/IRWTss8qX0YQ0HX8KrBlUg--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD04MDA7Y2Y9d2VicA--/https://s.yimg.com/os/creatr-uploaded-images/2024-05/99ff27c0-0ba5-11ef-afbd-9618dd776a71',
     quote: "A legendary floor general now orchestrating from the sidelines."
@@ -4807,6 +5118,7 @@ const rawCards = [
     reb: 0, // Championships as HC (Already has Coach of the Year award)
     ast: 4, // Years as Head Coach
     ovr: 95, // One of the best tactical minds today
+    age: 25,
     nbaId: 1630611,
     imageUrl: 'https://www.youth.inc/_next/image?url=%2Fapi%2Fmedia%2Ffile%2FUSATSI_26190223.jpg&w=3840&q=75',
     quote: "Building a versatile and relentless culture in the modern NBA."
@@ -4824,6 +5136,7 @@ const rawCards = [
     reb: 0, // Titles as HC (Led team to Conference Finals)
     ast: 4, // Years as Head Coach in Minnesota
     ovr: 92, // Recognized for elite offensive schemes
+    age: 25,
     nbaId: 1630613,
     imageUrl: 'https://cdn.nba.com/teams/uploads/sites/1610612750/2023/12/18992275_Minnesota_Timberwolves_v_Charlotte_Hornets_Lucy_T_Raskin_Greenfly_20231203_005407.jpg',
     quote: "Building a defensive powerhouse with offensive versatility."
@@ -4841,6 +5154,7 @@ const rawCards = [
     reb: 1, // Titles
     ast: 9, // Experience
     ovr: 95,
+    age: 25,
     nbaId: 1610,
     imageUrl: 'https://static01.nyt.com/images/2019/08/14/sports/14lue/merlin_139297686_dc3cc9b3-5bd8-4a8e-bb21-2b519740017f-superJumbo.jpg',
     quote: "The master of mid-game adjustments and playoff strategy."
@@ -4858,6 +5172,7 @@ const rawCards = [
     reb: 1, // NBA Championship (2019)
     ast: 7, // Years of experience as an NBA Head Coach
     ovr: 93, // Former Coach of the Year and elite defensive tactician
+    age: 25,
     nbaId: 1610612755,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTySKnRtmK_huPrlrH8CCNAM3jfEDM8Z3vxPA&s',
     quote: "A creative mastermind known for defensive innovation and a championship ring."
@@ -4875,6 +5190,7 @@ const rawCards = [
     reb: 1, // NBA Championship (2011)
     ast: 22, // Years of experience as Head Coach
     ovr: 92, // Renowned for offensive efficiency and game management
+    age: 25,
     nbaId: 1610612754,
     imageUrl: 'https://cdn.nba.com/manage/2025/08/rick-carlisle.jpg',
     quote: "One of the most respected tactical minds in the game, bringing championship pedigree to Indiana."
@@ -4892,6 +5208,7 @@ const rawCards = [
     reb: 1, // NBA Championship (2022 as Assistant with GSW)
     ast: 5, // Years of experience as Head Coach
     ovr: 91, // High rating for his player development and offensive system
+    age: 25,
     nbaId: 1610612739,
     imageUrl: 'https://static01.nyt.com/images/2020/03/07/sports/07nba-nets-lede/merlin_170026674_03944f26-61b8-4f91-9428-060a448686a0-mediumSquareAt3X.jpg',
     quote: "A master of player development now leading the Cavaliers' high-powered offense."
@@ -4909,6 +5226,7 @@ const rawCards = [
     reb: 0, // Titles (focused on building a young contender)
     ast: 3, // Years of experience as Head Coach
     ovr: 90, // High rating for his elite defensive culture
+    age: 25,
     nbaId: 1610612753,
     imageUrl: 'https://legacymedia.sportsplatform.io/image/upload/x_35,y_35,w_1736,h_1156,c_crop/v1710248736/rqrxradod9xvy25tycwr.jpg',
     quote: "Building a foundation of defensive grit and selfless basketball in Orlando."
@@ -4926,6 +5244,7 @@ const rawCards = [
     reb: 0, // Titles as Head Coach (has 4 as an Assistant)
     ast: 10, // Years of experience as Head Coach
     ovr: 92, // High rating for his record-breaking offensive schemes
+    age: 29,
     nbaId: 1610612758,
     imageUrl: 'https://media-cldnry.s-nbcnews.com/image/upload/t_fit-560w,f_auto,q_auto:best/rockcms/2025-07/250702-mike-brown-ch-1333-7d60c5.jpg',
     quote: "Igniting the beam with a high-speed offense and championship defensive principles."
@@ -4943,6 +5262,7 @@ const rawCards = [
     reb: 0, // Titles as Head Coach (reached Finals in 2022)
     ast: 3, // Years of experience as Head Coach
     ovr: 91, // Known for elite defensive schemes and discipline
+    age: 25,
     nbaId: 203103,
     imageUrl: 'https://bostonglobe-prod.cdn.arcpublishing.com/resizer/v2/P4Y55QXL2JEVRZSZKGNRZMGBUQ.jpg?auth=a54e650c95c5737e81c50f9d8e5938b886d728b3fa34ec20e3f49637dcf828cb&width=1440',
     quote: "Demanding excellence through hard-nosed defense and accountability."
@@ -4960,6 +5280,7 @@ const rawCards = [
     reb: 0, // Titles (focused on deep playoff runs)
     ast: 6, // Years of experience as Head Coach
     ovr: 90, // Known for high-intensity culture and player development
+    age: 25,
     nbaId: 1610612763,
     imageUrl: 'https://media-cldnry.s-nbcnews.com/image/upload/t_fit-560w,f_auto,q_auto:best/rockcms/2025-03/250328-Taylor-Jenkins-ch-1311-9a2c5b.jpg',
     quote: "Building a 'Grit and Grind' culture for the modern era."
@@ -4977,6 +5298,7 @@ const rawCards = [
     reb: 2, // NBA Championships (as Assistant with SAS)
     ast: 6, // Years of experience as Head Coach
     ovr: 89, // Highly rated for modern spacing and pace-and-space offense
+    age: 25,
     nbaId: 203107,
     imageUrl: 'https://cdn.nba.com/teams/uploads/sites/1610612740/2025/11/Borrego-new-coach.jpg?im=Resize=(640)',
     quote: "Implementing a high-octane offensive system fueled by spacing and ball movement."
@@ -4994,6 +5316,7 @@ const rawCards = [
     reb: 2, // NCAA Championships (as HC for Florida)
     ast: 10, // Years of experience as an NBA Head Coach
     ovr: 91, // Respected for his defensive systems and management
+    age: 25,
     nbaId: 1610612741,
     imageUrl: 'https://legacymedia.sportsplatform.io/image/upload/v1712920339/n7eyp8jwelzithlhthde.jpg',
     quote: "A championship-winning strategist bringing veteran experience and grit to the Windy City."
@@ -5011,6 +5334,7 @@ const rawCards = [
     reb: 0, // Titles as Head Coach
     ast: 11, // Years of experience as Head Coach
     ovr: 92, // Renowned for modern spacing and complex offensive systems
+    age: 25,
     nbaId: 203104,
     imageUrl: 'https://cloudfront-us-east-1.images.arcpublishing.com/sltrib/4GY4DHC5MVC2BBVQV4FCO53GPE.jpg',
     quote: "A tactical genius crafting high-powered offenses with relentless attention to detail."
@@ -5028,6 +5352,7 @@ const rawCards = [
     reb: 1, // Bronze Medal at 2023 FIBA World Cup (as Head Coach of Canada)
     ast: 2, // Years of experience as an NBA Head Coach
     ovr: 88, // Rising star known for modern tactics and player connection
+    age: 25,
     nbaId: 1610612751,
     imageUrl: 'https://images.eurohoops.net/2023/09/616a2045-jordi-fernandez-torres-fiba-950x498.jpg',
     quote: "The first Catalan head coach in NBA history, blending tactical precision with elite player development."
@@ -5045,6 +5370,7 @@ const rawCards = [
     reb: 0, // Titles as HC (focused on the rebuild)
     ast: 2, // Years of experience as Head Coach
     ovr: 87, // Respected for his offensive system and development skills
+    age: 25,
     nbaId: 1610612761,
     imageUrl: 'https://www.vmcdn.ca/f/files/shared/feeds/cp/2024/03/20240319140344-65f9dd978a481d8d1111b04ejpeg.jpg',
     quote: "Implementing a selfless, fast-paced culture in the North."
@@ -5062,6 +5388,7 @@ const rawCards = [
     reb: 0, // Titles as HC (building the Jazz future)
     ast: 4, // Years of experience as Head Coach
     ovr: 89, // One of the most respected young tacticians in the league
+    age: 25,
     nbaId: 1610612762,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/1a/WillHardy_2023_%28cropped%29.jpg',
     quote: "A brilliant young mind focused on playing the right way with high-octane energy."
@@ -5079,6 +5406,7 @@ const rawCards = [
     reb: 1, // NBA Championship (as player, 2004)
     ast: 5, // Years of experience as Head Coach
     ovr: 88, // Respected for his leadership and point guard mentality
+    age: 25,
     nbaId: 1610612757,
     imageUrl: 'https://dims.apnews.com/dims4/default/db20a45/2147483647/strip/true/crop/4012x2675+0+0/resize/599x399!/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2F1e%2F3f%2F49a8dde6c2b2c5b1b4428c4857e4%2Fd9d119974b9b4014aaf6c839313ac4c8',
     quote: "A championship leader instilling toughness and 'Big Shot' poise in the next generation."
@@ -5096,6 +5424,7 @@ const rawCards = [
     reb: 2, // NBA Championships (as Assistant with MIL and BOS)
     ast: 1, // First year as an NBA Head Coach
     ovr: 88, // Highly regarded for his leadership and defensive focus
+    age: 25,
     nbaId: 1610612766,
     imageUrl: 'https://bostonglobe-prod.cdn.arcpublishing.com/resizer/v2/MBO5AQD3VF6GL7B26ITBD7MAZQ.jpg?auth=e1bd2870cd4ba956093d1eb3869399cbd53b4e8b70e9705e74b99fe7ae7af974&width=1440',
     quote: "Bringing a championship-winning culture and elite tactical discipline to the Hornets."
@@ -5113,6 +5442,7 @@ const rawCards = [
     reb: 0, // Titles as Head Coach
     ast: 9, // Years of experience as Head Coach
     ovr: 89, // Respected for defensive identity and rebuilding programs
+    age: 25,
     nbaId: 203106,
     imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_156,w_4800,h_2700/c_fill,w_720,ar_16:9,f_auto,q_auto,g_auto/images/GettyImages/mmsport/67/01k71m35verj13d9by15.jpg',
     quote: "Establishing a hard-nosed defensive culture and championship habits in the Motor City."
@@ -5130,6 +5460,7 @@ const rawCards = [
     reb: 1, // NBA Championship (as Video Coordinator with SAS, 2007)
     ast: 3, // Years of experience as an NBA Head Coach
     ovr: 87, // Expert in player development and modern defensive schemes
+    age: 25,
     nbaId: 1610612764,
     imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_fill,w_1200,ar_4:3,f_auto,q_auto,g_auto/images/ImagnImages/mmsport/150/01kkf48pgxy3mzq71zs4.jpg',
     quote: "A dedicated teacher focused on building winning habits and elite player development."
@@ -5148,6 +5479,7 @@ const rawCards = [
     pts: 29.7,
     reb: 13.6,
     ast: 3.8,
+    age: 25,
     nbaId: 406,
     imageUrl: 'https://basketballforever.com/wp-content/uploads/2020/04/Shaq-2000-Lakers.jpg',
     quote: '29.7 PTS, 13.6 REB - Dominio absoluto en la pintura.'
@@ -5165,6 +5497,7 @@ const rawCards = [
     pts: 31.1,
     reb: 3.8,
     ast: 4.6,
+    age: 27,
     nbaId: 947,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Allen_Iverson_Lipofsky.jpg/250px-Allen_Iverson_Lipofsky.jpg',
     quote: '31.1 PTS, 2.5 STL - The shortest MVP in history.'
@@ -5182,6 +5515,7 @@ const rawCards = [
     pts: 25.5,
     reb: 12.7,
     ast: 3.7,
+    age: 25,
     nbaId: 1495,
     imageUrl: 'https://i.insider.com/5b858aa489c8a119008b5ad4?width=600&format=jpeg&auto=webp',
     quote: '25.5 PTS, 12.7 REB - Golden fundamentals.'
@@ -5199,6 +5533,7 @@ const rawCards = [
     pts: 23.3,
     reb: 12.9,
     ast: 3.9,
+    age: 25,
     nbaId: 1495,
     imageUrl: 'https://i0.wp.com/www.pressherald.com/wp-content/uploads/sites/4/2016/07/27p1-22.jpg?fit=1441%2C1888',
     quote: 'Back-to-back MVP for The Big Fundamental.'
@@ -5216,6 +5551,7 @@ const rawCards = [
     pts: 24.2,
     reb: 13.9,
     ast: 5.0,
+    age: 25,
     nbaId: 708,
     imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/timberwolves/sites/timberwolves/files/50801635.jpg',
     quote: '24.2 PTS, 13.9 REB - Intensidad pura y liderazgo.'
@@ -5233,6 +5569,7 @@ const rawCards = [
     pts: 15.5,
     reb: 3.3,
     ast: 11.5,
+    age: 25,
     nbaId: 959,
     imageUrl: 'https://i.redd.it/rc4p0w2sv9oa1.jpg',
     quote: "11.5 AST - El arquitecto del '7 Seconds or Less'."
@@ -5250,6 +5587,7 @@ const rawCards = [
     pts: 18.8,
     reb: 4.2,
     ast: 10.5,
+    age: 25,
     nbaId: 959,
     imageUrl: 'https://www.nydailynews.com/wp-content/uploads/migration/2015/03/21/SZLPDQHNQ42R7RL55JDUBSEWKI.jpg',
     quote: 'Back-to-back MVP leading the league in assists and efficiency.'
@@ -5267,6 +5605,7 @@ const rawCards = [
     pts: 24.6,
     reb: 8.9,
     ast: 3.4,
+    age: 25,
     nbaId: 1717,
     imageUrl: 'https://e0.365dm.com/21/11/2048x1152/skysports-dirk-nowitzki-dallas-mavericks_5587747.jpg?20211119080851',
     quote: '50-40-90 Club. The first European MVP.'
@@ -5284,6 +5623,7 @@ const rawCards = [
     pts: 28.3,
     reb: 6.3,
     ast: 5.4,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://i.pinimg.com/736x/72/ee/58/72ee5850608aaace557b32469e1e9dd7.jpg',
     quote: '28.3 PTS - The Mamba mentality at its finest.'
@@ -5301,6 +5641,7 @@ const rawCards = [
     pts: 28.4,
     reb: 7.6,
     ast: 7.2,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://legacymedia.sportsplatform.io/images_root/slides/photos/000/444/576/86427925_original.jpg?1287082316',
     quote: '28.4 PTS, 7.6 REB, 7.2 AST - The King\'s first reign.'
@@ -5318,6 +5659,7 @@ const rawCards = [
     pts: 29.7,
     reb: 7.3,
     ast: 8.6,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://legacymedia.sportsplatform.io/images_root/slides/photos/000/399/610/98824747_original.jpg?1284736938',
     quote: 'Second consecutive MVP dominating both sides of the court.'
@@ -5335,6 +5677,7 @@ const rawCards = [
     pts: 25.0,
     reb: 4.1,
     ast: 7.7,
+    age: 25,
     nbaId: 201565,
     imageUrl: 'https://cdn.bleacherreport.net/images_root/slides/photos/000/791/675/109813237_original.jpg?1300221121',
     quote: '25.0 PTS, 7.7 AST - The youngest MVP in NBA history.'
@@ -5352,6 +5695,7 @@ const rawCards = [
     pts: 27.1,
     reb: 7.9,
     ast: 6.2,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_fill,w_720,ar_16:9,f_auto,q_auto,g_auto/shape/cover/sport/dc8fc487007783d714f6a09864cca2156399d89cbd6e58fcd01f3b957d0faed6.jpg',
     quote: '27.1 PTS, 7.9 REB - Eficiencia letal en South Beach.'
@@ -5369,6 +5713,7 @@ const rawCards = [
     pts: 26.8,
     reb: 8.0,
     ast: 7.3,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://s.yimg.com/ny/api/res/1.2/Xnp2MJ9NiRlqfvc3FsWwXg--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTQyNztjZj13ZWJw/https://s.yimg.com/os/en/blogs/sptusnbaexperts/LeBron-James-won-his-fourth-NBA-MVP-trophy-in-May-2013.-Jesse-D.-Garrabrant-NBAE-Getty-Images.jpg',
     quote: 'One vote away from being unanimous. Legendary season.'
@@ -5386,6 +5731,7 @@ const rawCards = [
     pts: 32.0,
     reb: 7.4,
     ast: 5.5,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://wordpress.wbur.org/wp-content/uploads/2014/05/0508_oag_durant-mvp-1000x691.jpg',
     quote: "32.0 PTS - 'You the real MVP'. Scoring title."
@@ -5403,6 +5749,7 @@ const rawCards = [
     pts: 23.8,
     reb: 4.3,
     ast: 7.7,
+    age: 37,
     nbaId: 201939,
     imageUrl: 'https://therookiewire.usatoday.com/gcdn/authoring/images/smg/2025/01/11/SROK/77641293007-12-31804.jpeg',
     quote: '23.8 PTS - Changing the game with three-pointers.'
@@ -5420,6 +5767,7 @@ const rawCards = [
     pts: 30.1,
     reb: 5.4,
     ast: 6.7,
+    age: 37,
     nbaId: 201939,
     imageUrl: 'https://objetos.estaticos-marca.com/assets/multimedia/imagenes/2016/05/11/14629408277905.jpg',
     quote: '30.1 PTS - The first and only unanimous MVP in history. 73 wins.'
@@ -5437,6 +5785,7 @@ const rawCards = [
     pts: 31.6,
     reb: 10.7,
     ast: 10.4,
+    age: 25,
     nbaId: 201566,
     imageUrl: 'https://abc3340.com/resources/media/2634f5c9-1250-487e-9f7c-d084adb08594-jumbo1x1_Westbrook.jpg',
     quote: '31.6 PTS, 10.7 REB, 10.4 AST - Averaging a historic triple-double.'
@@ -5454,6 +5803,7 @@ const rawCards = [
     pts: 30.4,
     reb: 5.4,
     ast: 8.8,
+    age: 36,
     nbaId: 201935,
     imageUrl: 'https://imagenes.elpais.com/resizer/v2/IUADSXWPOV447J2Y6QSUNALRBU.jpg?auth=961c54f1f8c9920b3548970e78f7f7c538926809fe84077dedcbdef9c0bc9a26&width=414',
     quote: '30.4 PTS, 8.8 AST - Imparable en el uno contra uno.'
@@ -5471,6 +5821,7 @@ const rawCards = [
     pts: 27.7,
     reb: 12.5,
     ast: 5.9,
+    age: 31,
     nbaId: 203507,
     imageUrl: 'https://cdn2.mediotiempo.com/uploads/media/2019/06/25/antetokounmpo-jugador-europeo-recibir-trofeo.jpg',
     quote: '27.7 PTS, 12.5 REB - The Greek Freak conquers the league.'
@@ -5488,6 +5839,7 @@ const rawCards = [
     pts: 29.5,
     reb: 13.6,
     ast: 5.6,
+    age: 31,
     nbaId: 203507,
     imageUrl: 'https://images.foxtv.com/static.fox6now.com/www.fox6now.com/content/uploads/2020/07/932/524/gettyimages-1158115391.jpg?ve=1&tl=1',
     quote: 'MVP and DPOY in the same season.'
@@ -5505,6 +5857,7 @@ const rawCards = [
     pts: 26.4,
     reb: 10.8,
     ast: 8.3,
+    age: 30,
     nbaId: 203999,
     imageUrl: 'https://kdvr.com/wp-content/uploads/sites/11/2021/06/AP21163088209102.jpg',
     quote: '26.4 PTS, 10.8 REB, 8.3 AST - The lowest-drafted MVP in history (#41).'
@@ -5522,6 +5875,7 @@ const rawCards = [
     pts: 27.1,
     reb: 13.8,
     ast: 7.9,
+    age: 30,
     nbaId: 203999,
     imageUrl: 'https://cdn.deultimominuto.net/wp-content/uploads/2022/05/Nikola-Jokic.jpg',
     quote: '27.1 PTS, 13.8 REB - Unprecedented statistical season.'
@@ -5539,6 +5893,7 @@ const rawCards = [
     pts: 33.1,
     reb: 10.2,
     ast: 4.2,
+    age: 31,
     nbaId: 203954,
     imageUrl: 'https://www.aljazeera.com/wp-content/uploads/2023/05/2023-05-06T001555Z_1675084552_MT1USATODAY20602769_RTRMADP_3_NBA-PLAYOFFS-BOSTON-CELTICS-AT-PHILADELPHIA-76ERS-1684174955.jpg?w=770&resize=770%2C513&quality=80',
     quote: '33.1 PTS, 10.2 REB - El proceso completado.'
@@ -5556,6 +5911,7 @@ const rawCards = [
     pts: 26.4,
     reb: 12.4,
     ast: 9.0,
+    age: 30,
     nbaId: 203999,
     imageUrl: 'https://static01.nyt.com/athletic/uploads/wp/2024/11/27070929/jokermvp-scaled.jpg',
     quote: 'Third MVP. Absolute dominance of the paint and distribution.'
@@ -5573,6 +5929,7 @@ const rawCards = [
     pts: 30.1,
     reb: 5.5,
     ast: 6.2,
+    age: 27,
     nbaId: 1628983,
     imageUrl: 'https://www.cbc.ca/kidsnews/images/shai-mvp-trophy-may2025-860x484.png',
     quote: '30.1 PTS - Leading the new generation of the Thunder.'
@@ -5591,6 +5948,7 @@ const rawCards = [
     pts: 11.5,
     reb: 12.5,
     ast: 1.4,
+    age: 25,
     nbaId: 87,
     imageUrl: 'https://assets-cms.thescore.com/uploads/image/file/404723/w640xh480_GettyImages-635148094.jpg?ts=1590337836',
     quote: '4x DPOY. A defensive mountain. His iconic finger wag became the universal symbol of a rejected shot.'
@@ -5608,6 +5966,7 @@ const rawCards = [
     pts: 11.5,
     reb: 12.5,
     ast: 1.4,
+    age: 25,
     nbaId: 87,
     imageUrl: 'https://aroundthegame.com/wp-content/uploads/2022/07/payton-1280x640.jpg',
     quote: '4x DPOY. A defensive mountain. His iconic finger wag became the universal symbol of a rejected shot.'
@@ -5625,6 +5984,7 @@ const rawCards = [
     pts: 13.3,
     reb: 11.4,
     ast: 1.4,
+    age: 25,
     nbaId: 87,
     imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/hawks/sites/hawks/files/gettyimages-461239147.jpg',
     quote: '4x DPOY. A defensive mountain. His iconic finger wag became the universal symbol of a rejected shot.'
@@ -5642,6 +6002,7 @@ const rawCards = [
     pts: 13.4,
     reb: 11.4,
     ast: 1.0,
+    age: 25,
     nbaId: 87,
     imageUrl: 'https://static.wixstatic.com/media/d318a6_f07f871012b74912885047813200f2f5~mv2.jpg/v1/fill/w_568,h_852,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/d318a6_f07f871012b74912885047813200f2f5~mv2.jpg',
     quote: '4x DPOY. A defensive mountain. His iconic finger wag became the universal symbol of a rejected shot.'
@@ -5659,6 +6020,7 @@ const rawCards = [
     pts: 20.1,
     reb: 11.0,
     ast: 1.6,
+    age: 25,
     nbaId: 278,
     imageUrl: 'https://i.namu.wiki/i/r1xHXBhJsZQNN3w5Vp0rzaRT3SdM_BRJOFhn4ypzi5XkP0-hV2VI51IlOTgxsMYeJbS0x_i3TRMK8fuBDjAQMg.webp',
     quote: '2x DPOY. The ultimate rim protector for Miami, known for his unmatched intensity and shot-blocking dominance.'
@@ -5676,6 +6038,7 @@ const rawCards = [
     pts: 21.7,
     reb: 9.5,
     ast: 1.6,
+    age: 25,
     nbaId: 278,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b7/Alonzo_Mourning.jpg',
     quote: '2x DPOY. The ultimate rim protector for Miami, known for his unmatched intensity and shot-blocking dominance.'
@@ -5693,6 +6056,7 @@ const rawCards = [
     pts: 10.0,
     reb: 13.5,
     ast: 1.0,
+    age: 25,
     nbaId: 87,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Lipofsky-Dikembe_Mutombo.jpg',
     quote: '4x DPOY. A defensive mountain. His iconic finger wag became the universal symbol of a rejected shot.'
@@ -5710,6 +6074,7 @@ const rawCards = [
     pts: 7.6,
     reb: 13.0,
     ast: 1.4,
+    age: 25,
     nbaId: 1112,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1112.png',
     quote: '4x DPOY. The undrafted anchor of the \'Goin\' to Work\' Pistons. Feared for his raw strength and rebounding.'
@@ -5727,6 +6092,7 @@ const rawCards = [
     pts: 6.9,
     reb: 15.4,
     ast: 1.4,
+    age: 25,
     nbaId: 1112,
     imageUrl: 'https://library.sportingnews.com/styles/crop_style_16_9_desktop_webp/s3/2021-11/ben-wallace-detroit_1lci0x2hm6gao18a1qqtlj02bk.jpg.webp?itok=IesjzmCB',
     quote: '4x DPOY. The undrafted anchor of the \'Goin\' to Work\' Pistons. Feared for his raw strength and rebounding.'
@@ -5744,6 +6110,7 @@ const rawCards = [
     pts: 18.3,
     reb: 5.3,
     ast: 3.7,
+    age: 25,
     nbaId: 1894,
     imageUrl: 'https://pbs.twimg.com/media/GIlHnpLbgAATRFv.png',
     quote: '1x DPOY. A relentless and physical perimeter defender capable of shutting down any opposing star.'
@@ -5761,6 +6128,7 @@ const rawCards = [
     pts: 9.7,
     reb: 112.2,
     ast: 1.7,
+    age: 25,
     nbaId: 1112,
     imageUrl: 'https://slamonline.com/wp-content/uploads/2018/06/wallace.jpg',
     quote: '4x DPOY. The undrafted anchor of the \'Goin\' to Work\' Pistons. Feared for his raw strength and rebounding.'
@@ -5778,6 +6146,7 @@ const rawCards = [
     pts: 7.3,
     reb: 11.3,
     ast: 1.9,
+    age: 25,
     nbaId: 1112,
     imageUrl: 'https://library.sportingnews.com/styles/twitter_card_120x120/s3/2022-01/ben-wallace-four-time-defensive-player-of-the-yearjpeg_n7z4vvzplpmu1253sjklg5z7s.jpeg?itok=md92clsO',
     quote: '4x DPOY. The undrafted anchor of the \'Goin\' to Work\' Pistons. Feared for his raw strength and rebounding.'
@@ -5795,6 +6164,7 @@ const rawCards = [
     pts: 11.2,
     reb: 11.7,
     ast: 3.2,
+    age: 25,
     nbaId: 948,
     imageUrl: 'https://pbs.twimg.com/media/GAmpIXTXwAAzL7z.jpg',
     quote: '1x DPOY. Led the league in blocks, patrolling the paint with elite timing and defensive awareness.'
@@ -5812,6 +6182,7 @@ const rawCards = [
     pts: 18.8,
     reb: 9.2,
     ast: 3.4,
+    age: 25,
     nbaId: 708,
     imageUrl: 'https://a.espncdn.com/photo/2016/0923/r130129_2288x2487cc.jpg',
     quote: '1x DPOY. His legendary intensity, versatility, and vocal leadership transformed the Celtics\' defense into a historic unit.'
@@ -5829,6 +6200,7 @@ const rawCards = [
     pts: 20.6,
     reb: 13.8,
     ast: 1.4,
+    age: 25,
     nbaId: 2730,
     imageUrl: 'https://www.sandiegouniontribune.com/wp-content/uploads/migration/2009/04/21/00000169-0ce2-dbbe-a16f-4ee271760000.jpg?w=535',
     quote: '3x DPOY. Superman dominated the paint completely, winning three consecutive awards through unparalleled athleticism.'
@@ -5846,6 +6218,7 @@ const rawCards = [
     pts: 18.3,
     reb: 13.2,
     ast: 1.8,
+    age: 25,
     nbaId: 2730,
     imageUrl: 'https://daveontalkssports.wordpress.com/wp-content/uploads/2011/04/112.jpg',
     quote: '3x DPOY. Superman dominated the paint completely, winning three consecutive awards through unparalleled athleticism.'
@@ -5863,6 +6236,7 @@ const rawCards = [
     pts: 22.9,
     reb: 14.1,
     ast: 1.4,
+    age: 25,
     nbaId: 2730,
     imageUrl: 'https://s.hdnux.com/photos/22/47/56/4881292/64/1920x0.jpg',
     quote: '3x DPOY. Superman dominated the paint completely, winning three consecutive awards through unparalleled athleticism.'
@@ -5880,6 +6254,7 @@ const rawCards = [
     pts: 11.3,
     reb: 9.9,
     ast: 0.9,
+    age: 22,
     nbaId: 2199,
     imageUrl: 'https://www.longislandpress.com/wp-content/uploads/2022/07/chandler-1.jpg?w=333',
     quote: '1x DPOY. The vocal leader and defensive heart who completely changed the culture for the Knicks.'
@@ -5897,6 +6272,7 @@ const rawCards = [
     pts: 14.1,
     reb: 7.8,
     ast: 4.0,
+    age: 25,
     nbaId: 201188,
     imageUrl: 'https://pbs.twimg.com/media/E_Vg7H-WYAc_e7l.jpg',
     quote: '1x DPOY. The defensive mastermind of the \'Grit and Grind\' era, relying on elite IQ and perfect positioning.'
@@ -5914,6 +6290,7 @@ const rawCards = [
     pts: 12.6,
     reb: 11.3,
     ast: 5.4,
+    age: 25,
     nbaId: 201149,
     imageUrl: 'https://www.chicagotribune.com/wp-content/uploads/migration/2014/06/04/FEADTRNL6ZGMXBTICG7B26T2XI.jpg?w=535',
     quote: '1x DPOY. Pure passion and endless energy. A versatile big who could switch onto guards and command the paint.'
@@ -5931,6 +6308,7 @@ const rawCards = [
     pts: 16.5,
     reb: 7.2,
     ast: 2.5,
+    age: 34,
     nbaId: 202695,
     imageUrl: 'https://ca-times.brightspotcdn.com/dims4/default/64daba3/2147483647/strip/false/crop/2048x1507+0+0/resize/1486x1093!/quality/75/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2F88%2Fbf%2Faf4d4a7b401691ec2fa9e1b895da%2Fla-sp-kawhi-leonard-spurs-wre0037910863-20160418',
     quote: '2x DPOY. \'The Klaw\' suffocated the league\'s best scorers with massive hands, lateral quickness, and lethal instincts.'
@@ -5948,6 +6326,7 @@ const rawCards = [
     pts: 21.2,
     reb: 6.8,
     ast: 2.6,
+    age: 34,
     nbaId: 202695,
     imageUrl: 'https://s.hdnux.com/photos/36/02/66/7875975/32/rawImage.jpg',
     quote: '2x DPOY. \'The Klaw\' suffocated the league\'s best scorers with massive hands, lateral quickness, and lethal instincts.'
@@ -5965,6 +6344,7 @@ const rawCards = [
     pts: 10.2,
     reb: 7.9,
     ast: 7.0,
+    age: 35,
     nbaId: 203110,
     imageUrl: 'https://www.eastbaytimes.com/wp-content/uploads/2017/09/bng-l-warriors-1001-157.jpg?w=1800&resize=1800,1800',
     quote: '1x DPOY. The defensive engine of the Warriors\' dynasty. A basketball genius capable of guarding all five positions.'
@@ -5982,6 +6362,7 @@ const rawCards = [
     pts: 13.5,
     reb: 10.7,
     ast: 1.3,
+    age: 33,
     nbaId: 203497,
     imageUrl: 'https://cdn.kslsports.com/kslsports/wp-content/uploads/2022/05/GettyImages-1239654887.jpg',
     quote: '4x DPOY. \'The Stifle Tower\' redefined modern rim protection, single-handedly deterring entire offenses from the paint.'
@@ -5999,6 +6380,7 @@ const rawCards = [
     pts: 15.9,
     reb: 12.9,
     ast: 2.0,
+    age: 33,
     nbaId: 203497,
     imageUrl: 'https://sportshub.cbsistatic.com/i/2019/06/25/2fd539d3-4205-40e0-bdb9-30406afcb3fb/rudy-gobert.jpg',
     quote: '4x DPOY. \'The Stifle Tower\' redefined modern rim protection, single-handedly deterring entire offenses from the paint.'
@@ -6016,6 +6398,7 @@ const rawCards = [
     pts: 29.5,
     reb: 13.6,
     ast: 5.6,
+    age: 31,
     nbaId: 203507,
     imageUrl: 'https://e0.365dm.com/20/08/800x600/skysports-giannis-antetokounmpo_5077571.jpg?20200826053720',
     quote: '1x DPOY. A physical marvel who used his incredible length and speed to cover the entire floor as a help defender.'
@@ -6033,6 +6416,7 @@ const rawCards = [
     pts: 14.3,
     reb: 13.5,
     ast: 1.3,
+    age: 33,
     nbaId: 203497,
     imageUrl: 'https://www.sltrib.com/resizer/AbKEcRE8JWAoAspJV84zKVVmp6Y=/arc-anglerfish-arc2-prod-sltrib/public/34OGAS5IBNBXHG42CO44XM3DXQ.jpg',
     quote: '4x DPOY. \'The Stifle Tower\' redefined modern rim protection, single-handedly deterring entire offenses from the paint.'
@@ -6050,6 +6434,7 @@ const rawCards = [
     pts: 12.1,
     reb: 3.8,
     ast: 5.9,
+    age: 25,
     nbaId: 203935,
     imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/celtics/sites/celtics/files/microsoftteams-image_0.png',
     quote: '1x DPOY. The first guard to win the award since Gary Payton. The absolute embodiment of hustle, heart, and grit.'
@@ -6067,6 +6452,7 @@ const rawCards = [
     pts: 18.6,
     reb: 6.8,
     ast: 1.0,
+    age: 25,
     nbaId: 1628984,
     imageUrl: 'https://fivethirtyeight.com/wp-content/uploads/2022/06/AP22005095137556-4x3-1.jpg',
     quote: '1x DPOY. A terrifying weak-side shot blocker whose timing and verticality made the rim a no-fly zone.'
@@ -6084,6 +6470,7 @@ const rawCards = [
     pts: 14.0,
     reb: 12.9,
     ast: 1.3,
+    age: 33,
     nbaId: 203497,
     imageUrl: 'https://ca-times.brightspotcdn.com/dims4/default/2973549/2147483647/strip/true/crop/2667x3477+0+0/resize/1200x1564!/quality/75/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2F5e%2Ff7%2Fcecd30ed4650bd24cd1e63c0b2ab%2F1406749-sp-clippers-timberwolves-5-gmf.jpg',
     quote: '4x DPOY. \'The Stifle Tower\' redefined modern rim protection, single-handedly deterring entire offenses from the paint.'
@@ -6101,6 +6488,7 @@ const rawCards = [
     pts: 16.0,
     reb: 9.4,
     ast: 3.2,
+    age: 24,
     nbaId: 1630596,
     imageUrl: 'https://platform.fearthesword.com/wp-content/uploads/sites/78/chorus/uploads/chorus_asset/file/25927821/2206945377.jpg?quality=90&strip=all&crop=16.666666666667,0,66.666666666667,100',
     quote: '1x DPOY. Stepped up as the ultimate defensive anchor for Cleveland, dominating the paint and the perimeter with elite versatility.'
@@ -6118,6 +6506,7 @@ const rawCards = [
     pts: 25.0,
     reb: 11.5,
     ast: 3.1,
+    age: 21,
     nbaId: 1630596,
     imageUrl: 'https://dims.apnews.com/dims4/default/285c86c/2147483647/strip/true/crop/6777x4453+0+0/resize/599x394!/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2Ffc%2Fd6%2F5ee0413a2b36a095c85f0113d666%2Fad79761944954cfe9e8bf326e08304ac',
     quote: 'First unanimous DPOY.'
@@ -6136,6 +6525,7 @@ const rawCards = [
     pts: 17.6,
     reb: 8.9,
     ast: 2.7,
+    age: 25,
     nbaId: 2200,
     imageUrl: 'https://i0.wp.com/elgurudelbasket.com/wp-content/uploads/2019/11/pau-gasol-1.jpg?resize=290%2C317&ssl=1',
     quote: 'First European player to win the award. Instant impact in Memphis with elite post moves.'
@@ -6153,6 +6543,7 @@ const rawCards = [
     pts: 17.6,
     reb: 8.9,
     ast: 2.7,
+    age: 25,
     nbaId: 2200,
     imageUrl: 'https://legacymedia.sportsplatform.io/img/images/photos/003/614/213/hi-res-203da9d00c953c6e523c59e0d1812770_crop_north.jpg?1469626405&w=630&h=420',
     quote: 'First European player to win the award. Instant impact in Memphis with elite post moves.'
@@ -6170,6 +6561,7 @@ const rawCards = [
     pts: 20.9,
     reb: 5.5,
     ast: 5.9,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://ewnqp79wvj7.exactdn.com/wp-content/uploads/2025/04/LeBron-James-rookie-de-lannee.jpg',
     quote: 'The Chosen One lived up to the unbelievable hype straight out of high school.'
@@ -6187,6 +6579,7 @@ const rawCards = [
     pts: 16.1,
     reb: 5.1,
     ast: 7.8,
+    age: 40,
     nbaId: 101108,
     imageUrl: 'https://i.redd.it/who-has-the-best-rookie-season-since-2000-v0-ii4n84vajx5e1.jpg?width=1200&format=pjpg&auto=webp&s=4cf4b7a0dd221690b0a8c26fdacd6d79c81395bc',
     quote: 'Transformed the franchise completely with elite playmaking and leadership from day one.'
@@ -6204,6 +6597,7 @@ const rawCards = [
     pts: 16.8,
     reb: 4.4,
     ast: 4.0,
+    age: 25,
     nbaId: 101108,
     imageUrl: 'https://pic.pimg.tw/kusoest/1328274669-827557933_m.jpg',
     quote: 'Transformed the franchise completely with elite playmaking and leadership from day one.'
@@ -6221,6 +6615,7 @@ const rawCards = [
     pts: 20.3,
     reb: 4.4,
     ast: 2.4,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://pbs.twimg.com/media/Do00V3kU8AUfJjz.jpg',
     quote: 'An unstoppable scoring machine showing flashes of greatness in Seattle\'s final season.'
@@ -6238,6 +6633,7 @@ const rawCards = [
     pts: 16.8,
     reb: 3.9,
     ast: 6.3,
+    age: 25,
     nbaId: 201565,
     imageUrl: 'https://images.sidearmdev.com/resize?url=https%3A%2F%2Fdxbhsrqyrr690.cloudfront.net%2Fsidearm.nextgen.sites%2Fgotigersgo.com%2Fimages%2F2011%2F5%2F4%2F6506774.jpeg&width=1600&type=jpeg',
     quote: 'Explosive athleticism and clutch moments that brought hope back to the Windy City.'
@@ -6255,6 +6651,7 @@ const rawCards = [
     pts: 20.1,
     reb: 5.3,
     ast: 5.8,
+    age: 25,
     nbaId: 201565,
     imageUrl: 'https://www.si.com/.image/t_share/MTY4MjYxMTg3NjYzODMyMzQx/tyreke-evans-royjpg.jpg',
     quote: 'Explosive athleticism and clutch moments that brought hope back to the Windy City.'
@@ -6272,6 +6669,7 @@ const rawCards = [
     pts: 22.5,
     reb: 12.1,
     ast: 3.8,
+    age: 25,
     nbaId: 201933,
     imageUrl: 'https://www.nydailynews.com/wp-content/uploads/migration/2011/05/05/NYJLFJ3VBZN4SAGYXZ4GAOKF4A.jpg?w=535',
     quote: 'A redshirt rookie season filled with spectacular highlights. The birth of Lob City.'
@@ -6289,6 +6687,7 @@ const rawCards = [
     pts: 18.5,
     reb: 3.7,
     ast: 5.4,
+    age: 33,
     nbaId: 201933,
     imageUrl: 'https://www.cavshistory.com/images/misc/ki-roy.png',
     quote: 'A redshirt rookie season filled with spectacular highlights. The birth of Lob City.'
@@ -6306,6 +6705,7 @@ const rawCards = [
     pts: 19.0,
     reb: 3.1,
     ast: 6.5,
+    age: 35,
     nbaId: 203081,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZvJhHIc0253JquvNgsBPEBesIbGn2kSIQEA&s',
     quote: 'Unanimous winner. Hit the ground running with clutch performances and deep range.'
@@ -6323,6 +6723,7 @@ const rawCards = [
     pts: 16.7,
     reb: 6.2,
     ast: 6.3,
+    age: 24,
     nbaId: 203081,
     imageUrl: 'https://pbs.twimg.com/media/DGZbgVJUIAEnW2i.jpg',
     quote: 'Unanimous winner. Hit the ground running with clutch performances and deep range.'
@@ -6340,6 +6741,7 @@ const rawCards = [
     pts: 16.9,
     reb: 4.6,
     ast: 2.1,
+    age: 25,
     nbaId: 203952,
     imageUrl: 'https://pbs.twimg.com/media/E0ORINbXEAQ2jY2.jpg',
     quote: 'The Maple Jordan. Dominated the rim and showed elite scoring potential from day one.'
@@ -6357,6 +6759,7 @@ const rawCards = [
     pts: 18.3,
     reb: 10.5,
     ast: 2.0,
+    age: 30,
     nbaId: 1626157,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSS95i549muXQ5VGh0Q3nWllmp6qStsyjmcKw&s',
     quote: 'Unanimous selection. A modern big man with a perfect touch from inside and out.'
@@ -6374,6 +6777,7 @@ const rawCards = [
     pts: 10.2,
     reb: 2.8,
     ast: 4.2,
+    age: 25,
     nbaId: 203506,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfkbET9GGRK236S52h8ae9I1PeE4dmQ_0H7Q&s',
     quote: 'The President. The first second-round pick to win ROTY in the common draft era.'
@@ -6391,6 +6795,7 @@ const rawCards = [
     pts: 15.8,
     reb: 8.1,
     ast: 8.2,
+    age: 25,
     nbaId: 1627732,
     imageUrl: 'https://sixerswire.usatoday.com/gcdn/authoring/images/smg/2024/11/11/SSIX/76209235007-30-903.jpeg',
     quote: 'A triple-double threat every night. Led the Process to the playoffs in his debut year.'
@@ -6408,6 +6813,7 @@ const rawCards = [
     pts: 21.2,
     reb: 7.8,
     ast: 6.0,
+    age: 26,
     nbaId: 1629029,
     imageUrl: 'https://platform.mavsmoneyball.com/wp-content/uploads/sites/104/chorus/uploads/chorus_asset/file/16680805/usa_today_12952405.jpg?quality=90&strip=all&crop=0,0,100,78.661729025667',
     quote: 'Brought European magic to the NBA. A walking triple-double threat immediately.'
@@ -6425,6 +6831,7 @@ const rawCards = [
     pts: 17.8,
     reb: 3.9,
     ast: 7.3,
+    age: 26,
     nbaId: 1629630,
     imageUrl: 'https://npr.brightspotcdn.com/legacy/sites/wkms/files/202009/ja_with_trophy.jpg',
     quote: 'Electrifying speed, bounce, and swagger that redefined the Grizzlies\' culture.'
@@ -6442,6 +6849,7 @@ const rawCards = [
     pts: 15.7,
     reb: 5.9,
     ast: 6.1,
+    age: 24,
     nbaId: 1630163,
     imageUrl: 'https://www.zagsblog.com/wp-content/uploads/2021/06/E4DB_RKXwAo0HcO.jpg',
     quote: 'Electrifying playmaker. Brought showtime back to Charlotte with elite passing and flair.'
@@ -6459,6 +6867,7 @@ const rawCards = [
     pts: 15.3,
     reb: 7.5,
     ast: 3.5,
+    age: 24,
     nbaId: 1630567,
     imageUrl: 'https://sportshub.cbsistatic.com/i/r/2022/04/23/820de824-4ae3-47a6-849d-1a313ec8b6ac/thumbnail/1200x675/589820e6384982ece625d9ef499742d0/barnes-roy-g.jpg',
     quote: 'Versatile engine. A do-it-all wing who impacted winning on both ends of the floor.'
@@ -6476,6 +6885,7 @@ const rawCards = [
     pts: 20.0,
     reb: 6.9,
     ast: 3.7,
+    age: 23,
     nbaId: 1631094,
     imageUrl: 'https://www.vmcdn.ca/f/files/shared/feeds/cp/2023/05/20230508170516-645966c3caeb15c9dad90d59jpeg.jpg',
     quote: 'Physical force. First rookie since LeBron to average 20 points, 5 rebounds, and 5 assists in debut month.'
@@ -6493,6 +6903,7 @@ const rawCards = [
     pts: 21.4,
     reb: 10.6,
     ast: 3.9,
+    age: 21,
     nbaId: 1641705,
     imageUrl: 'https://dims.apnews.com/dims4/default/285c86c/2147483647/strip/true/crop/6777x4453+0+0/resize/599x394!/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2Ffc%2Fd6%2F5ee0413a2b36a095c85f0113d666%2Fad79761944954cfe9e8bf326e08304ac',
     quote: 'A generational prospect who delivered historic numbers on both ends of the floor.'
@@ -6510,6 +6921,7 @@ const rawCards = [
     pts: 14.8,
     reb: 4.2,
     ast: 1.9,
+    age: 20,
     nbaId: 1642258,
     imageUrl: 'https://s.yimg.com/ny/api/res/1.2/o0gwhfvQEIY1Wj6FQCZ8iw--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTQyNztjZj13ZWJw/https://media.zenfs.com/en/the_lead_articles_184/b9c464acfff553d6ace1d517070dad48',
     quote: 'The #1 pick lived up to the hype. A modern two-way wing with elite shooting and defensive length.'
@@ -6527,6 +6939,7 @@ const rawCards = [
     pts: 48.5,
     reb: 18.2,
     ast: 8.5,
+    age: 25,
     nbaId: 977,
     player2Id: 406,
     imageUrl: 'https://imagenes.elpais.com/resizer/v2/4YWLFOH6RAWZ7K6DALUY6ZAC5U.jpg?auth=c6aa064336e16462d7df23ef5d20fa1b15f9164824321a323d0a4f5259c8d06c&width=414',
@@ -6544,6 +6957,7 @@ const rawCards = [
     pts: 45.2,
     reb: 8.5,
     ast: 12.4,
+    age: 25,
     nbaId: 201939,
     player2Id: 202691,
     imageUrl: 'https://mir-s3-cdn-cf.behance.net/projects/404/3d1f09188483667.Y3JvcCwyMTYwLDE2ODksMCww.jpg',
@@ -6561,6 +6975,7 @@ const rawCards = [
     pts: 46.8,
     reb: 14.2,
     ast: 15.5,
+    age: 25,
     nbaId: 2544,
     player2Id: 2548,
     imageUrl: 'https://www.mundodeportivo.com/files/og_thumbnail/uploads/2021/12/07/61aef564ec572.jpeg',
@@ -6578,6 +6993,7 @@ const rawCards = [
     pts: 42.5,
     reb: 22.8,
     ast: 6.4,
+    age: 25,
     nbaId: 1495,
     player2Id: 1122,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoOY4PBRVq9kdf66pXBapjdZLrDVCTBiOfdQ&s',
@@ -6595,6 +7011,7 @@ const rawCards = [
     pts: 40.2,
     reb: 18.5,
     ast: 8.2,
+    age: 25,
     nbaId: 1718,
     player2Id: 708,
     imageUrl: 'https://a.espncdn.com/photo/2018/0210/r326449_1296x729_16-9.jpg',
@@ -6612,6 +7029,7 @@ const rawCards = [
     pts: 44.5,
     reb: 15.8,
     ast: 18.2,
+    age: 25,
     nbaId: 203999,
     player2Id: 1627750,
     imageUrl: 'https://imageio.forbes.com/specials-images/dam/imageserve/1147220931/960x0.jpg?height=458&width=711&fit=bounds',
@@ -6629,6 +7047,7 @@ const rawCards = [
     pts: 48.2,
     reb: 12.5,
     ast: 14.8,
+    age: 25,
     nbaId: 201142,
     player2Id: 201566,
     imageUrl: 'https://www.denverpost.com/wp-content/uploads/2018/02/gettyimages-114168932.jpg?w=1024&h=673',
@@ -6646,6 +7065,7 @@ const rawCards = [
     pts: 38.5,
     reb: 16.2,
     ast: 18.5,
+    age: 25,
     nbaId: 201933,
     player2Id: 101108,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fphoto%2F2015%2F0514%2Fla_u_paulgriff_1296x729.jpg',
@@ -6663,6 +7083,7 @@ const rawCards = [
     pts: 45.8,
     reb: 16.5,
     ast: 10.2,
+    age: 25,
     nbaId: 203507,
     player2Id: 203114,
     imageUrl: 'https://a.espncdn.com/photo/2021/0715/r880599_1296x729_16-9.jpg',
@@ -6680,6 +7101,7 @@ const rawCards = [
     pts: 48.5,
     reb: 12.2,
     ast: 16.5,
+    age: 25,
     nbaId: 1629029,
     player2Id: 202681,
     imageUrl: 'https://assets-cms.thescore.com/uploads/image/file/630218/w640xh480_GettyImages-2153900965.jpg?ts=1716643291',
@@ -6697,6 +7119,7 @@ const rawCards = [
     pts: 38.4,
     reb: 20.5,
     ast: 8.2,
+    age: 25,
     nbaId: 201188,
     player2Id: 201938,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTieaCDxulGkha9jWhLfcVw1S2Asau3gxtFEQ&s',
@@ -6714,6 +7137,7 @@ const rawCards = [
     pts: 55.2,
     reb: 15.4,
     ast: 10.8,
+    age: 25,
     nbaId: 203954,
     player2Id: 1630178,
     imageUrl: 'https://cdn.abcotvs.com/dip/images/14775146_050624-wpvi-maxey-embiid-img.jpg',
@@ -6731,6 +7155,7 @@ const rawCards = [
     pts: 52.8,
     reb: 14.5,
     ast: 9.2,
+    age: 25,
     nbaId: 1627759,
     player2Id: 1628369,
     imageUrl: 'https://cdn.nba.com/manage/2024/06/tatum-brown-060424.jpg',
@@ -6748,6 +7173,7 @@ const rawCards = [
     pts: 52.4,
     reb: 13.1,
     ast: 11.4,
+    age: 25,
     nbaId: 893, // Michael Jordan
     player2Id: 711, // Scottie Pippen
     imageUrl: 'https://media.newyorker.com/photos/5e9df8b7ac4b8100087487d5/master/pass/Thomas-TheLastDanceMJ.jpg',
@@ -6765,6 +7191,7 @@ const rawCards = [
     pts: 35.8,
     reb: 22.4,
     ast: 12.5,
+    age: 25,
     nbaId: 200746,
     player2Id: 200745,
     imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/pistons/sites/pistons/files/wallace_billups_800.jpg',
@@ -6782,6 +7209,7 @@ const rawCards = [
     pts: 40.2,
     reb: 7.1,
     ast: 14.5,
+    age: 25,
     nbaId: 78318, // Isiah Thomas
     player2Id: 76606, // Joe Dumars
     imageUrl: 'https://a.espncdn.com/photo/2020/0501/r694475_667x376_16-9.jpg',
@@ -6799,6 +7227,7 @@ const rawCards = [
     pts: 44.8,
     reb: 16.5,
     ast: 12.2,
+    age: 25,
     nbaId: 202710,
     player2Id: 1628389,
     imageUrl: 'https://www.sun-sentinel.com/wp-content/uploads/2023/05/TFL-FL0130292884.jpg?w=525',
@@ -6816,6 +7245,7 @@ const rawCards = [
     pts: 42.5,
     reb: 18.8,
     ast: 14.5,
+    age: 25,
     nbaId: 201565,
     player2Id: 201149,
     imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_fill,w_720,ar_16:9,f_auto,q_auto,g_auto/shape/cover/sport/2f7af99b9fcd2c5eb3ab6bc339663c0b1d6d3de8c04555b4d9ed5dfb42df8cd7.jpg',
@@ -6833,6 +7263,7 @@ const rawCards = [
     pts: 48.5,
     reb: 14.2,
     ast: 12.5,
+    age: 25,
     nbaId: 1628983,
     player2Id: 1641706,
     imageUrl: 'https://braze-images.com/appboy/communication/assets/image_assets/images/68591d92d972fd0074f3c832/original.png?1750670738',
@@ -6878,6 +7309,7 @@ const rawCards = [
     pts: 27,
     reb: 11,
     ast: 11,
+    age: 25,
     nbaId: 2544,
     year: 2016,
     imageUrl: 'https://media.tenor.com/5Z0KOZ1aZZYAAAAM/blocked-bye-felicia.gif',
@@ -6895,6 +7327,7 @@ const rawCards = [
     pts: 41,
     reb: 8,
     ast: 3,
+    age: 25,
     nbaId: 202695,
     year: 2019,
     imageUrl: 'https://media.tenor.com/xJIif7fVqfUAAAAM/kawhi-the-shot.gif',
@@ -6912,6 +7345,7 @@ const rawCards = [
     pts: 50,
     reb: 7,
     ast: 6,
+    age: 25,
     nbaId: 203081,
     year: 2019,
     imageUrl: 'https://64.media.tumblr.com/5e30c60bbc746d5366cb6a5a043765c9/tumblr_pqhezcs1p81u2klrwo1_400.gif',
@@ -6929,6 +7363,7 @@ const rawCards = [
     pts: 33,
     reb: 8,
     ast: 2,
+    age: 25,
     nbaId: 1503,
     year: 2004,
     imageUrl: 'https://i.makeagif.com/media/11-22-2018/Oag6Lk.gif',
@@ -6946,6 +7381,7 @@ const rawCards = [
     pts: 9,
     reb: 1,
     ast: 2,
+    age: 27,
     nbaId: 951,
     year: 2013,
     imageUrl: 'https://media.tenor.com/RNzYmnPTe1YAAAAM/nba-basketball.gif',
@@ -6963,6 +7399,7 @@ const rawCards = [
     pts: 52,
     reb: 2,
     ast: 5,
+    age: 25,
     nbaId: 202691,
     year: 2015,
     imageUrl: 'https://i.makeagif.com/media/10-07-2015/0x_mMY.gif',
@@ -6980,6 +7417,7 @@ const rawCards = [
     pts: 73,
     reb: 10,
     ast: 7,
+    age: 25,
     nbaId: 1629029,
     year: 2024,
     imageUrl: 'https://platform.mavsmoneyball.com/wp-content/uploads/sites/104/chorus/uploads/chorus_asset/file/22993103/Luka_3_Celtics.gif?quality=90&strip=all&crop=0,0,100,100',
@@ -6997,6 +7435,7 @@ const rawCards = [
     pts: 25,
     reb: 4,
     ast: 10,
+    age: 36,
     nbaId: 201935,
     year: 2018,
     imageUrl: 'https://media.tenor.com/wQPMHo7nc10AAAAM/ankle-breaker-crossover.gif',
@@ -7014,6 +7453,7 @@ const rawCards = [
     pts: 48,
     reb: 6,
     ast: 12,
+    age: 25,
     nbaId: 2548,
     year: 2009,
     imageUrl: 'https://media3.giphy.com/media/d35xNm1idb6Ghcdi/giphy.gif',
@@ -7031,6 +7471,7 @@ const rawCards = [
     pts: 26,
     reb: 6,
     ast: 1,
+    age: 25,
     nbaId: 202681,
     year: 2016,
     imageUrl: 'https://media2.giphy.com/media/v1.Y2lkPTZjMDliOTUycHFoOTc1OWtscG10NHF5c3RrczNndWwyNG5lY21sNnB4Njh0aHVjeiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/xT8qBd0tFdFV7l0gr6/200w.gif',
@@ -7048,6 +7489,7 @@ const rawCards = [
     pts: 55.0,
     reb: 25.0,
     ast: 20.0,
+    age: 25,
     nbaId: 1610612747,
     imageUrl: 'https://cdn.nba.com/teams/uploads/sites/1610612747/2022/06/OTD-220611-3Peat-1600x900-7thPhoto.jpg',
     quote: 'The Shaq and Kobe era that dominated the early 2000s with three straight titles.'
@@ -7064,6 +7506,7 @@ const rawCards = [
     pts: 52.0,
     reb: 28.0,
     ast: 22.0,
+    age: 25,
     nbaId: 1610612759,
     imageUrl: 'https://media.licdn.com/dms/image/v2/C4D12AQG1KPieZD6jPw/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1598536660361?e=2147483647&v=beta&t=EZhmJKIVy7Am4cqYGTC_CF0iXPTcFyPq7O8EKn7a1ps',
     quote: 'Two decades of consistent greatness under Popovich and the Big Three.'
@@ -7080,6 +7523,7 @@ const rawCards = [
     pts: 58.0,
     reb: 22.0,
     ast: 24.0,
+    age: 25,
     nbaId: 1610612748,
     imageUrl: 'https://nbcsports.brightspotcdn.com/dims4/default/37ca610/2147483647/strip/true/crop/3000x1688+0+156/resize/1440x810!/quality/90/?url=https%3A%2F%2Fnbc-sports-production-nbc-sports.s3.us-east-1.amazonaws.com%2Fbrightspot%2Feb%2Fec%2F6d45810e0a90b58d7400e3fb22a3%2Fcd0ymzcznguwzdbhnduynddiytjhm2yyzthlmtjjotqwyyznptayzdczmjbknme1zwi0mjhkogy1yjfizmiwnzzmmmfk.jpeg',
     quote: 'LeBron, Wade, and Bosh: Four straight Finals and two historic championships.'
@@ -7096,6 +7540,7 @@ const rawCards = [
     pts: 62.0,
     reb: 20.0,
     ast: 30.0,
+    age: 25,
     nbaId: 1610612744,
     imageUrl: 'https://fivethirtyeight.com/wp-content/uploads/2018/06/dynasty1.jpg?w=712',
     quote: 'The small-ball revolution that redefined modern basketball and won four rings.'
@@ -7112,6 +7557,7 @@ const rawCards = [
     pts: 54.0,
     reb: 26.0,
     ast: 21.0,
+    age: 25,
     nbaId: 1610612738,
     imageUrl: 'https://www.masslive.com/resizer/v2/AZOMCB73SFCFHH57N3VJZ2RQNI.jpg?auth=1dd264ac8e16b221d9145299a8d02eedfa505ca4fad468a567146aa24b96d479&width=500&smart=true&quality=90',
     quote: 'Pierce, Garnett, and Allen: The 2008 champions who restored Celtic pride.'
@@ -7128,6 +7574,7 @@ const rawCards = [
     pts: 56.0,
     reb: 24.0,
     ast: 25.0,
+    age: 25,
     nbaId: 1610612760,
     imageUrl: 'https://okcfriday.com/27-06-2025-02-29-33-pm-6993666.jpg',
     quote: "SGA, Chet, and J-Dub: The league's most exciting young core building a new dynasty."
@@ -7144,6 +7591,7 @@ const rawCards = [
     pts: 57.0,
     reb: 27.0,
     ast: 20.0,
+    age: 25,
     nbaId: 1610612749,
     imageUrl: 'https://www.wpr.org/wp-content/uploads/2021/07/ap_paul_sancya_-_giannis_trophy.jpg',
     quote: 'Giannis and the Bucks: Bringing the championship back to Milwaukee after 50 years.'
@@ -7160,6 +7608,7 @@ const rawCards = [
     pts: 59.0,
     reb: 26.0,
     ast: 28.0,
+    age: 25,
     nbaId: 1610612743,
     imageUrl: 'https://cdn.nba.com/manage/2025/05/GettyImages-1498038723.jpg',
     quote: 'Jokic and Murray: The unstoppable duo that brought Denver its first NBA title.'
@@ -7176,6 +7625,7 @@ const rawCards = [
     pts: 48.0,
     reb: 30.0,
     ast: 18.0,
+    age: 25,
     nbaId: 1610612765,
     imageUrl: 'https://tiempomuerto3.com/wp-content/uploads/2020/07/636318449938785783-pistons-061504-dpg-16-1-.jpg',
     quote: 'The 2004 "No-Star" champions who defeated the Lakers with elite defense.'
@@ -7192,6 +7642,7 @@ const rawCards = [
     pts: 58.0,
     reb: 23.0,
     ast: 24.0,
+    age: 25,
     nbaId: 1610612739,
     imageUrl: 'https://cdn.nba.com/manage/2016/12/160620002308-lebron-james-nba-finals-cleveland-cavaliers-at-golden-state-warriors.1280x720.jpeg',
     quote: 'LeBron returns to Cleveland to fulfill his promise and win the 2016 title.'
@@ -7208,6 +7659,7 @@ const rawCards = [
     pts: 12.0,
     reb: 6.0,
     ast: 4.0,
+    age: 25,
     nbaId: 711,
     imageUrl: 'https://i1.sndcdn.com/artworks-aPrXGTNKVFNYzEIe-hYL6Kw-t500x500.jpg',
     quote: '"Big Shot Rob". 7 rings. The best clutch shooter in history.'
@@ -7224,6 +7676,7 @@ const rawCards = [
     pts: 14.0,
     reb: 5.0,
     ast: 5.0,
+    age: 25,
     nbaId: 2738,
     imageUrl: 'https://www.arabnews.com/sites/default/files/styles/n_670_395/public/2015/06/17/file-17-iggy%20mvp.jpg?itok=UIt-lo0w',
     quote: 'The defensive anchor of the dynasty. 2015 Finals MVP coming off the bench.'
@@ -7240,6 +7693,7 @@ const rawCards = [
     pts: 16.0,
     reb: 4.0,
     ast: 5.0,
+    age: 25,
     nbaId: 1938,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTuy4BB46wSY9HO3p_SbIjGMQyNXOYsVbWvaA&s',
     quote: 'The ultimate 6th man. Sacrificed starting for the good of the dynasty.'
@@ -7256,6 +7710,7 @@ const rawCards = [
     pts: 15.0,
     reb: 2.0,
     ast: 4.0,
+    age: 25,
     nbaId: 1891,
     imageUrl: 'https://a.espncdn.com/photo/2011/0526/dal_g_terryj_300.jpg',
     quote: '"The Jet". His triples were key to taking down LeBron\'s Heat in 2011.'
@@ -7272,6 +7727,7 @@ const rawCards = [
     pts: 13.0,
     reb: 6.0,
     ast: 3.0,
+    age: 25,
     nbaId: 2419,
     imageUrl: 'https://thumb.spokesman.com/g_spB6WdLAjJ-WgopCOpqHsADd4=/400x0/media.spokesman.com/photos/2004/05/25/spt_princepic25_05-25-2004_G51L7SP.jpg',
     quote: 'The block on Miller and his perimeter defense defined the 2004 Pistons.'
@@ -7288,6 +7744,7 @@ const rawCards = [
     pts: 10.0,
     reb: 5.0,
     ast: 6.0,
+    age: 25,
     nbaId: 2563,
     imageUrl: 'https://a.espncdn.com/photo/2012/0530/nba_g_boris-diaw_mb_576.jpg',
     quote: 'The "master" of passing. The piece that made Popovich\'s system flow.'
@@ -7304,6 +7761,7 @@ const rawCards = [
     pts: 11.0,
     reb: 3.0,
     ast: 4.0,
+    age: 25,
     nbaId: 965,
     imageUrl: 'https://www.dailynews.com/wp-content/uploads/migration/2013/201312/SPORTS_131219792_AR_0_GZJMKGZCUUOT.jpg?w=1800&resize=1800,1800',
     quote: 'The vocal leader and author of the legendary 0.4 second shot against the Spurs.'
@@ -7320,6 +7778,7 @@ const rawCards = [
     pts: 14.0,
     reb: 4.0,
     ast: 2.0,
+    age: 25,
     nbaId: 2747,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/c4/J.R._Smith_%2840627108671%29_%28cropped%29.jpg',
     quote: 'When he was on fire, he was the scoring support LeBron needed.'
@@ -7336,6 +7795,7 @@ const rawCards = [
     pts: 9.0,
     reb: 4.0,
     ast: 2.0,
+    age: 25,
     nbaId: 2203,
     imageUrl: 'https://media.newyorker.com/photos/59095788c14b3c606c104a1d/master/pass/ShaneBattier_AP120617051483_Original_opt.jpg',
     quote: 'The king of "invisible stats" and elite defensive marking.'
@@ -7352,6 +7812,7 @@ const rawCards = [
     pts: 8.0,
     reb: 6.0,
     ast: 1.0,
+    age: 25,
     nbaId: 200782,
     imageUrl: 'https://imageio.forbes.com/specials-images/dam/imageserve/8d5793cf5e4947d39ed55feb7e6bc92e/960x0.jpg?height=1013&width=711&fit=bounds',
     quote: 'The "corner 3" and extreme physical defense every champion needs.'
@@ -7368,6 +7829,7 @@ const rawCards = [
     pts: 15.0,
     reb: 9.0,
     ast: 4.0,
+    age: 25,
     nbaId: 1885,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/LamarOdomLakers.jpg/250px-LamarOdomLakers.jpg',
     quote: 'Total versatility. Could play point guard or center for Kobe\'s Lakers.'
@@ -7384,6 +7846,7 @@ const rawCards = [
     pts: 14.0,
     reb: 3.0,
     ast: 5.0,
+    age: 25,
     nbaId: 1627832,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLP79Q8-metZDFTjxxrybI1UDm7bzqReTo2w&s',
     quote: 'From undrafted to hitting key triples in the 2019 Finals.'
@@ -7402,6 +7865,7 @@ const rawCards = [
     pts: 15.4,
     reb: 2.9,
     ast: 5.1,
+    age: 25,
     nbaId: 1628374,
     imageUrl: 'https://cdn.nba.com/manage/2024/06/malik-monk-iso.jpg',
     quote: 'The spark plug for the Kings. Instant offense off the bench.'
@@ -7419,6 +7883,7 @@ const rawCards = [
     pts: 13.5,
     reb: 5.2,
     ast: 1.3,
+    age: 25,
     nbaId: 1629675,
     imageUrl: 'https://cdn.nba.com/teams/uploads/sites/1610612750/2024/04/GettyImages-1868659894.jpg',
     quote: 'Naz Reid. The Timberwolves fan favorite and elite bench big.'
@@ -7436,6 +7901,7 @@ const rawCards = [
     pts: 14.9,
     reb: 4.2,
     ast: 3.7,
+    age: 25,
     nbaId: 1627763,
     imageUrl: 'https://ca-times.brightspotcdn.com/dims4/default/ac7fb68/2147483647/strip/true/crop/4716x2653+0+0/resize/1200x675!/quality/75/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2F32%2F45%2F870f875a492db9ef9f0397739a47%2Fceltics-heat-basketball-61553.jpg',
     quote: 'The President. Brought veteran leadership and elite shooting to the Celtics bench.'
@@ -7453,6 +7919,7 @@ const rawCards = [
     pts: 20.7,
     reb: 5.0,
     ast: 4.0,
+    age: 25,
     nbaId: 1629639,
     imageUrl: 'https://basketballforever.com/wp-content/uploads/2019/11/Herro-article_FB.jpg',
     quote: 'Boy Wonder. The first Heat player to win Sixth Man of the Year.'
@@ -7470,6 +7937,7 @@ const rawCards = [
     pts: 18.4,
     reb: 4.0,
     ast: 2.5,
+    age: 25,
     nbaId: 203903,
     imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_558,w_3566,h_2005/c_fill,w_720,ar_16:9,f_auto,q_auto,g_auto/images/ImagnImages/mmsport/123/01jaecrxnqtmg69j606s.jpg',
     quote: 'Flamethrower. Could get hot in an instant and take over games.'
@@ -7487,6 +7955,7 @@ const rawCards = [
     pts: 18.6,
     reb: 7.1,
     ast: 1.7,
+    age: 25,
     nbaId: 1626149,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxwJh4EhxOf_riGF8lCFaYPmhTNk6zCU2VtHNGW4aF0w&s',
     quote: 'Energy and hustle. A dominant force in the paint for the Clippers.'
@@ -7504,6 +7973,7 @@ const rawCards = [
     pts: 22.6,
     reb: 2.5,
     ast: 5.3,
+    age: 24,
     nbaId: 201155,
     imageUrl: 'https://www.ocregister.com/wp-content/uploads/2019/06/imageedit_4_70751589-16x9-1.jpg?w=1800&resize=1800,1800',
     quote: '3-time winner (2015, 2018, 2019). The ultimate bucket getter.'
@@ -7521,6 +7991,7 @@ const rawCards = [
     pts: 16.2,
     reb: 2.7,
     ast: 2.5,
+    age: 36,
     nbaId: 201566,
     imageUrl: 'https://www.backsportspage.com/wp-content/uploads/2023/02/eric-gordon-tradesss.jpg',
     quote: 'Splash Brother from another mother. Elite range and scoring.'
@@ -7538,6 +8009,7 @@ const rawCards = [
     pts: 18.6,
     reb: 2.3,
     ast: 3.2,
+    age: 25,
     nbaId: 2037,
     imageUrl: 'https://a2.espncdn.com/combiner/i?img=%2Fphoto%2F2014%2F0412%2Fla_g_jamal%2Dcrawford_mb_1296x729.jpg',
     quote: '3-time winner (2010, 2014, 2016). The crossover king of the bench.'
@@ -7555,6 +8027,7 @@ const rawCards = [
     pts: 18.1,
     reb: 5.3,
     ast: 2.7,
+    age: 25,
     nbaId: 2747,
     imageUrl: 'https://people.com/thmb/gAncpQ_PJHB2HSGSo7lNlQTuNYc=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(749x279:751x281)/jr-smith-1-9969690fcb614245b5238af71a596225.jpg',
     quote: 'Swish. When he was on, he was one of the most dangerous scorers in the league.'
@@ -7572,6 +8045,7 @@ const rawCards = [
     pts: 16.8,
     reb: 4.1,
     ast: 3.7,
+    age: 36,
     nbaId: 201935,
     imageUrl: 'https://s.yimg.com/ny/api/res/1.2/92xR131yD3Dzc9cyCMS4xg--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTQ3NDtjZj13ZWJw/https://media.zenfs.com/en/thunder_wire_usa_today_sports_articles_686/8e7cf25315ee28b89b53d95aba9584e6',
     quote: 'The Beard begins. A superstar in the making coming off the bench for OKC.'
@@ -7589,6 +8063,7 @@ const rawCards = [
     pts: 14.4,
     reb: 8.7,
     ast: 3.0,
+    age: 25,
     nbaId: 1885,
     imageUrl: 'https://assets3.cbsnewsstatic.com/hub/i/r/2015/10/14/67ca6f8d-1f10-49ed-86c2-2ff08a32a76b/thumbnail/1200x630/f5c2f12c76890f6839301275be05e434/ap081111027322.jpg',
     quote: 'The ultimate Swiss Army knife. Could do everything on the court.'
@@ -7606,6 +8081,7 @@ const rawCards = [
     pts: 19.6,
     reb: 2.4,
     ast: 4.7,
+    age: 25,
     nbaId: 1891,
     imageUrl: 'https://hoopdirt.com/wp-content/uploads/2020/05/jason_terry_spurs-640x340.jpg',
     quote: 'The Jet. A clutch performer and elite shooter for the Mavs.'
@@ -7623,6 +8099,7 @@ const rawCards = [
     pts: 19.5,
     reb: 4.8,
     ast: 4.5,
+    age: 25,
     nbaId: 1938,
     imageUrl: 'https://cdn.vox-cdn.com/thumbor/HldsAyzP5wtxSM9LNN1EuCedc78=/0x0:3000x2131/1400x1400/filters:focal(1268x667:1748x1147):format(jpeg)/cdn.vox-cdn.com/uploads/chorus_image/image/55784425/53142074.0.jpg',
     quote: 'El Contorsionista. A creative genius who sacrificed stardom for the team.'
@@ -7640,6 +8117,7 @@ const rawCards = [
     pts: 18.1,
     reb: 2.7,
     ast: 4.0,
+    age: 25,
     nbaId: 2571,
     imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/suns/sites/suns/files/lb11.jpg',
     quote: 'The Brazilian Blur. Lightning quick in the Suns Seven Seconds or Less system.'
@@ -7657,6 +8135,7 @@ const rawCards = [
     pts: 13.7,
     reb: 5.4,
     ast: 2.7,
+    age: 22,
     nbaId: 2034,
     imageUrl: 'https://a57.foxnews.com/static.foxnews.com/foxnews.com/content/uploads/2018/09/918/516/Grizzlies-Miller-Time-Basketball-1-1.jpg?ve=1&tl=1',
     quote: 'Elite sharpshooter and versatile wing for the Grizzlies.'
@@ -7674,6 +8153,7 @@ const rawCards = [
     pts: 15.1,
     reb: 2.6,
     ast: 2.0,
+    age: 36,
     nbaId: 2732,
     imageUrl: 'https://imengine.public.prod.pdh.navigacloud.com/?uuid=EFC80648-6529-439C-A97A-8DA4DD9F0EF3&type=preview&function=cover&height=609&width=800',
     quote: 'The only rookie to ever win Sixth Man of the Year. Pure scorer.'
@@ -7691,6 +8171,7 @@ const rawCards = [
     pts: 14.8,
     reb: 7.3,
     ast: 1.2,
+    age: 25,
     nbaId: 1712,
     imageUrl: 'https://fadeawayworld.net/wp-content/uploads/2022/02/hi-res-65a972f553885f4eedcfacb862d344d0_crop_exact.jpg',
     quote: 'Versatile forward with a unique scoring touch.'
@@ -7708,6 +8189,7 @@ const rawCards = [
     pts: 15.2,
     reb: 3.7,
     ast: 3.1,
+    age: 25,
     nbaId: 1517,
     imageUrl: 'https://www.espn.com/media/nba/2002/0511/photo/nbagallery8.jpg',
     quote: 'The energy behind the Greatest Show on Court Kings.'
@@ -7725,6 +8207,7 @@ const rawCards = [
     pts: 13.6,
     reb: 4.1,
     ast: 1.2,
+    age: 24,
     nbaId: 739,
     imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/pistons/sites/pistons/files/legacy/photos/williamson_254_020102.jpg',
     quote: 'Big Nasty. A physical presence in the paint for the Pistons.'
@@ -7742,6 +8225,7 @@ const rawCards = [
     pts: 11.6,
     reb: 4.1,
     ast: 5.0,
+    age: 25,
     nbaId: 258,
     imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_fill,w_1200,ar_4:3,f_auto,q_auto,g_auto/shape/cover/sport/f70d050e8c6d4e34436642cecac2938a3a75688497f18d3abd145c477e25603c.jpg',
     quote: 'The steady hand for the Iverson-led Sixers Finals run.'
@@ -7759,6 +8243,7 @@ const rawCards = [
     pts: 13.8,
     reb: 5.5,
     ast: 2.1,
+    age: 25,
     nbaId: 164,
     imageUrl: 'https://assets-cms.thescore.com/uploads/image/file/811030/w640xh480_GettyImages-725185.jpg?ts=1763847138',
     quote: 'A versatile forward with a sweet shooting stroke.'
@@ -7776,6 +8261,7 @@ const rawCards = [
     pts: 30.1,
     reb: 5.4,
     ast: 6.7,
+    age: 37,
     nbaId: 201939,
     imageUrl: 'https://www.baltana.com/files/wallpapers-36/Stephen-Curry-Wallpaper-126257.jpg',
     quote: '402 Triples: Most three-pointers made in a single season (2015-16).'
@@ -7793,6 +8279,7 @@ const rawCards = [
     pts: 50.4,
     reb: 25.7,
     ast: 2.4,
+    age: 25,
     nbaId: 76375,
     imageUrl: 'https://library.sportingnews.com/2022-01/wilt-chamberlain_kwn6o3hy8tdi1jckujwvhw5s0.jpeg',
     quote: '50.4 PPG: Highest scoring average in a single season (1961-62).'
@@ -7810,6 +8297,7 @@ const rawCards = [
     pts: 31.6,
     reb: 10.7,
     ast: 10.4,
+    age: 25,
     nbaId: 201566,
     imageUrl: 'https://w0.peakpx.com/wallpaper/665/406/HD-wallpaper-russell-westbrook-back-view-basketball-stars-nba-oklahoma-city-thunder-okc-abstract-art-russell-westbrook-iii-neon-lights-basketball-creative.jpg',
     quote: '42 Triple-Doubles: Most triple-doubles in a single campaign until Jokic.'
@@ -7827,6 +8315,7 @@ const rawCards = [
     pts: 36.1,
     reb: 6.6,
     ast: 7.5,
+    age: 36,
     nbaId: 201935,
     imageUrl: 'https://w0.peakpx.com/wallpaper/936/787/HD-wallpaper-james-harden-2019-basketball-stars-nba-houston-rockets-joy-james-edward-harden-abstract-art-basketball-neon-lights-creative-usa-james-harden.jpg',
     quote: '36.1 PPG: Highest scoring average of the modern era (2018-19).'
@@ -7844,6 +8333,7 @@ const rawCards = [
     pts: 17.2,
     reb: 2.9,
     ast: 14.2,
+    age: 25,
     nbaId: 304,
     imageUrl: 'https://www.bballytics.co/assets/stockton/stockton.jpg',
     quote: '1,164 Assists: Most total assists in a single season (1990-91).'
@@ -7861,6 +8351,7 @@ const rawCards = [
     pts: 9.8,
     reb: 18.7,
     ast: 2.3,
+    age: 25,
     nbaId: 23,
     imageUrl: 'https://i.insider.com/5ea6439869852564ea052423?width=700',
     quote: '18.7 RPG: Most brutal rebounding average of the modern era (1991-92).'
@@ -7878,6 +8369,7 @@ const rawCards = [
     pts: 9.7,
     reb: 11.3,
     ast: 1.5,
+    age: 25,
     nbaId: 76631,
     imageUrl: 'https://static01.nyt.com/images/2021/06/01/obituaries/30EATON-03/30EATON-03-superJumbo.jpg',
     quote: '5.6 BPG: The Wall. Highest blocks average in history (1984-85).'
@@ -7895,6 +8387,7 @@ const rawCards = [
     pts: 8.0,
     reb: 3.3,
     ast: 8.5,
+    age: 25,
     nbaId: 76313,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcxRTO-mmxsMhQZNuI8e64fszKoFxBsmo7rg&s',
     quote: '3.5 SPG: Highest steals average in history (1976-77).'
@@ -7912,6 +8405,7 @@ const rawCards = [
     pts: 21.4,
     reb: 10.6,
     ast: 3.9,
+    age: 21,
     nbaId: 1641705,
     imageUrl: 'https://media-cldnry.s-nbcnews.com/image/upload/t_fit-1500w,f_auto,q_auto:best/rockcms/2024-05/240506-Victor-Wembanyama-spurs-court-ac-558p-b56fa5.jpg',
     quote: '250+ Blocks Rookie: Rookie record for defensive intimidation (2024).'
@@ -7929,6 +8423,7 @@ const rawCards = [
     pts: 38.4,
     reb: 27.2,
     ast: 2.4,
+    age: 25,
     nbaId: 76375,
     imageUrl: 'https://lakersnation.com/wp-content/uploads/2016/04/Wilt_Chamberlain.png',
     quote: '27.2 RPG: The all-time record for the highest rebounding average in a season (1960-61).'
@@ -7946,6 +8441,7 @@ const rawCards = [
     pts: 3.7,
     reb: 6.0,
     ast: 0.0,
+    age: 25,
     nbaId: 76195,
     imageUrl: 'https://pbs.twimg.com/media/CWCbH0MUsAAo9yx.jpg',
     quote: '397 Total Blocks: The most blocks ever recorded by a rookie in a single season (1985-86).'
@@ -7963,6 +8459,7 @@ const rawCards = [
     pts: 34.0,
     reb: 2.8,
     ast: 11.4,
+    age: 25,
     nbaId: 76054,
     imageUrl: 'https://www.basketballnetwork.net/.image/w_2560,q_auto:good,c_limit/MjAxNjA4MjU3ODM0MzI5NDcz/nate-archibald.jpg?arena_f_auto',
     quote: '34.0 PPG & 11.4 APG: The only player to lead the league in Points and Assists in the same year.'
@@ -7980,6 +8477,7 @@ const rawCards = [
     pts: 12.8,
     reb: 2.9,
     ast: 8.9,
+    age: 25,
     nbaId: 101181,
     imageUrl: 'https://www.sportsnet.ca/wp-content/uploads/2013/01/calderon_jose640.jpg',
     quote: '98.1% FT: The near-perfect season. Only missed 3 free throws in the entire year (2008-09).'
@@ -7997,6 +8495,7 @@ const rawCards = [
     pts: 17.1,
     reb: 3.0,
     ast: 13.6,
+    age: 25,
     nbaId: 30,
     imageUrl: 'https://cdn.nba.com/manage/2021/08/stockton-pass-081821-1568x882.jpg',
     quote: '3.2 SPG: The ultimate thief. Led the league in steals for 9 consecutive seasons.'
@@ -8014,6 +8513,7 @@ const rawCards = [
     pts: 13.8,
     reb: 3.6,
     ast: 6.7,
+    age: 25,
     nbaId: 35,
     imageUrl: 'https://assets-cms.thescore.com/uploads/image/file/385896/w640xh480_GettyImages-1932457.jpg?ts=1576014577',
     quote: '6th Man & MIP: The only player to win 6th Man and Most Improved Player in the same year.'
@@ -8030,6 +8530,7 @@ const rawCards = [
     pts: 22.5,
     reb: 8.4,
     ast: 4.2,
+    age: 25,
     nbaId: 1642258,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642258.png',
     quote: '2025 #1 Overall Pick: A generational two-way talent and the new face of the franchise.'
@@ -8046,6 +8547,7 @@ const rawCards = [
     pts: 24.1,
     reb: 6.2,
     ast: 2.8,
+    age: 25,
     nbaId: 1642259,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642259.png',
     quote: 'Elite Scorer: Unmatched shot-making ability and explosive athleticism on the wing.'
@@ -8062,6 +8564,7 @@ const rawCards = [
     pts: 19.8,
     reb: 5.5,
     ast: 7.2,
+    age: 25,
     nbaId: 1642260,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642260.png',
     quote: 'Pure Playmaker: A big, physical guard with elite basketball IQ and scoring instincts.'
@@ -8078,6 +8581,7 @@ const rawCards = [
     pts: 18.4,
     reb: 4.2,
     ast: 3.5,
+    age: 25,
     nbaId: 1642261,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642261.png',
     quote: 'High-Flyer: The most athletic guard in the class, known for elite transition finishing.'
@@ -8094,6 +8598,7 @@ const rawCards = [
     pts: 16.2,
     reb: 3.1,
     ast: 8.4,
+    age: 25,
     nbaId: 1642262,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642262.png',
     quote: 'The Floor General: Elite French playmaker with lightning speed and court vision.'
@@ -8110,6 +8615,7 @@ const rawCards = [
     pts: 14.5,
     reb: 11.2,
     ast: 1.5,
+    age: 25,
     nbaId: 1642263,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642263.png',
     quote: 'Modern Giant: A 7\'2" mobile center with elite rim protection and shooting touch.'
@@ -8126,6 +8632,7 @@ const rawCards = [
     pts: 21.2,
     reb: 4.5,
     ast: 3.2,
+    age: 25,
     nbaId: 1642264,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642264.png',
     quote: 'Pure Sniper: Considered the best pure shooter of the 2025 Draft class.'
@@ -8142,6 +8649,7 @@ const rawCards = [
     pts: 15.8,
     reb: 5.4,
     ast: 3.8,
+    age: 25,
     nbaId: 1642265,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642265.png',
     quote: 'European Star: High-intensity wing with elite cutting and defensive versatility.'
@@ -8158,6 +8666,7 @@ const rawCards = [
     pts: 17.5,
     reb: 4.8,
     ast: 2.5,
+    age: 25,
     nbaId: 1642266,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642266.png',
     quote: 'IQ Specialist: Lethal outside shooter with advanced footwork and playmaking skills.'
@@ -8174,6 +8683,7 @@ const rawCards = [
     pts: 14.8,
     reb: 6.2,
     ast: 6.5,
+    age: 25,
     nbaId: 1642267,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png',
     quote: 'Point Forward: A 6\'9" playmaker with elite vision and transition passing.'
@@ -8190,6 +8700,7 @@ const rawCards = [
     pts: 13.5,
     reb: 5.8,
     ast: 2.4,
+    age: 25,
     nbaId: 1642268,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642268.png',
     quote: 'Lockdown Wing: Premier perimeter defender with a rapidly developing offensive game.'
@@ -8206,6 +8717,7 @@ const rawCards = [
     pts: 16.4,
     reb: 4.2,
     ast: 2.1,
+    age: 25,
     nbaId: 1642269,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642269.png',
     quote: 'Deadly Spacer: Elite floor spacer with one of the quickest releases in the class.'
@@ -8222,6 +8734,7 @@ const rawCards = [
     pts: 15.2,
     reb: 7.5,
     ast: 2.8,
+    age: 25,
     nbaId: 1642270,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642270.png',
     quote: 'Versatile Forward: High-motor player capable of guarding multiple positions.'
@@ -8238,6 +8751,7 @@ const rawCards = [
     pts: 12.8,
     reb: 6.5,
     ast: 1.5,
+    age: 25,
     nbaId: 1642271,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642271.png',
     quote: 'Stretch Big: Modern frontcourt player with reliable three-point shooting range.'
@@ -8254,6 +8768,7 @@ const rawCards = [
     pts: 18.5,
     reb: 3.2,
     ast: 4.8,
+    age: 25,
     nbaId: 1642272,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642272.png',
     quote: 'Electric Guard: Shifty ball-handler with elite shot-creation and clutch scoring.'
@@ -8272,6 +8787,7 @@ const rawCards = [
     pts: 29.5,
     reb: 4.7,
     ast: 4.8,
+    age: 24,
     nbaId: 201939,
     imageUrl: 'https://manofmany.com/_next/image?url=https%3A%2F%2Fapi.manofmany.com%2Fwp-content%2Fuploads%2F2026%2F02%2FAll-Star-Game-MVP.jpg&w=768&q=75',
     quote: 'Young talent.'
@@ -8289,6 +8805,7 @@ const rawCards = [
     pts: 24.5,
     reb: 4.2,
     ast: 6.8,
+    age: 37,
     nbaId: 201939,
     imageUrl: 'https://cdn.nba.com/manage/2025/02/curry-all-star-mvp.jpg',
     quote: 'Golden Homecoming: Won his second Kobe Trophy in front of his home fans.'
@@ -8306,6 +8823,7 @@ const rawCards = [
     pts: 39.0,
     reb: 3.0,
     ast: 6.0,
+    age: 35,
     nbaId: 203081,
     imageUrl: 'https://a1.espncdn.com/combiner/i?img=%2Fphoto%2F2024%2F0219%2Fr1293164_1296x729_16%2D9.jpg',
     quote: 'Dame Time: 39 points and 11 triples in a record-breaking East performance.'
@@ -8323,6 +8841,7 @@ const rawCards = [
     pts: 55.0,
     reb: 10.0,
     ast: 6.0,
+    age: 27,
     nbaId: 1628369,
     imageUrl: 'https://thumb.spokesman.com/nEBS8BO2FiBlOWWvzofUfSJaPjs=/2500x1875/smart/media.spokesman.com/photos/2023/02/19/63f2f66db0166.hires.jpg',
     quote: 'Record Breaker: Set the all-time All-Star scoring record with 55 points.'
@@ -8340,6 +8859,7 @@ const rawCards = [
     pts: 50.0,
     reb: 5.0,
     ast: 2.0,
+    age: 37,
     nbaId: 201939,
     imageUrl: 'https://www.si.com/.image/t_share/MTg3NTY1MDQ1Njc5NDAwMTkx/stephen-curry-all-star-game-mvp.jpg',
     quote: 'Rainmaker: An incredible 16 three-pointers in a single legendary night.'
@@ -8357,6 +8877,7 @@ const rawCards = [
     pts: 35.0,
     reb: 7.0,
     ast: 3.0,
+    age: 31,
     nbaId: 203507,
     imageUrl: 'https://res.cloudinary.com/ybmedia/image/upload/c_crop,h_909,w_1618,x_0,y_40/c_fill,f_auto,h_900,q_auto,w_1600/v1/m/5/d/5da24e1d670e31b12b36e52793693a46ac25e8eb/giannis-antetokounmpo-on-star-game-mvp-amazing.jpg',
     quote: 'Perfect Game: Went 16-of-16 from the field. 100% shooting dominance.'
@@ -8374,6 +8895,7 @@ const rawCards = [
     pts: 30.0,
     reb: 7.0,
     ast: 4.0,
+    age: 34,
     nbaId: 202695,
     imageUrl: 'https://pbs.twimg.com/media/EQ9TxL5XYAEkOKh.jpg',
     quote: 'The First Kobe Trophy: Honored the Mamba with 8 triples and elite defense.'
@@ -8391,6 +8913,7 @@ const rawCards = [
     pts: 31.0,
     reb: 7.0,
     ast: 2.0,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://www.kron4.com/wp-content/uploads/sites/11/2019/02/durant_1550521615526_73689442_ver1.0.jpeg',
     quote: 'The Sniper: 31 points to lead a massive second-half comeback.'
@@ -8408,6 +8931,7 @@ const rawCards = [
     pts: 29.0,
     reb: 10.0,
     ast: 8.0,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://library.sportingnews.com/styles/twitter_card_120x120/s3/2021-08/lebron-james-2018-all-star-mvp-021119-ftr-nba-gettyjpg_1w6lk38rcv5mz10t1637kzqa7m.jpg?itok=Ca5PtnQp',
     quote: 'Captain LeBron: 29 points in the very first All-Star Draft format.'
@@ -8425,6 +8949,7 @@ const rawCards = [
     pts: 52.0,
     reb: 10.0,
     ast: 0.0,
+    age: 32,
     nbaId: 203076,
     imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/pelicans/sites/pelicans/files/gettyimages-643008528_master-w750.jpg',
     quote: 'Home Cooking: 52 points in New Orleans. The most points at the time.'
@@ -8442,6 +8967,7 @@ const rawCards = [
     pts: 31.0,
     reb: 8.0,
     ast: 5.0,
+    age: 25,
     nbaId: 201566,
     imageUrl: 'https://www.sacbee.com/public/sports/nba/qb6fzt/picture60418451/alternates/FREE_1140/All%20Star%20Game%20Basketball',
     quote: 'Back-to-Back: The only player to win two consecutive outright MVPs.'
@@ -8459,6 +8985,7 @@ const rawCards = [
     pts: 41.0,
     reb: 5.0,
     ast: 1.0,
+    age: 25,
     nbaId: 201566,
     imageUrl: 'https://a.espncdn.com/photo/2015/0215/nba_g_russwts_1296x729.jpg',
     quote: 'Electric Burst: 41 points off the bench in a historic Madison Square Garden game.'
@@ -8476,6 +9003,7 @@ const rawCards = [
     pts: 31.0,
     reb: 5.0,
     ast: 14.0,
+    age: 33,
     nbaId: 202681,
     imageUrl: 'https://i.ytimg.com/vi/NqCcF1uNOHU/sddefault.jpg',
     quote: 'Uncle Drew: 31 points and 14 assists to spark an Eastern comeback.'
@@ -8493,6 +9021,7 @@ const rawCards = [
     pts: 20.0,
     reb: 0.0,
     ast: 15.0,
+    age: 40,
     nbaId: 101108,
     imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/clippers/sites/clippers/files/legacy/main_photo/paul-300-130218.jpg',
     quote: 'Point God: Orchestrated the West with 20 points and 15 assists.'
@@ -8510,6 +9039,7 @@ const rawCards = [
     pts: 36.0,
     reb: 7.0,
     ast: 3.0,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhvb2f7GGkoW3_lNrMHpyGz-KYFOmQERofVyM2-a_HycOW-Cr9zHUmXroeMMywg_mh-PyThpYYs5HLhnmQEN_32i8yTJRV-SoNLUmfNG1lUXhVhXk1I1dxAHXPt6DXfeHhCogVdRfdVLto/s1600/kevin-durant-2012-nba-all-star-mvp.jpg',
     quote: 'Unstoppable: 36 points in a high-scoring Orlando showdown.'
@@ -8527,6 +9057,7 @@ const rawCards = [
     pts: 37.0,
     reb: 14.0,
     ast: 3.0,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://im.haberturk.com/2023/01/25/3559469_aadb129345ec9114d2c1a9ebd6e621b4.jpg',
     quote: 'LA Legend: 37 points and 14 rebounds in his home arena.'
@@ -8544,6 +9075,7 @@ const rawCards = [
     pts: 28.0,
     reb: 6.0,
     ast: 11.0,
+    age: 25,
     nbaId: 2548,
     imageUrl: 'https://www.ocregister.com/wp-content/uploads/migration/kxv/kxvejr-b78605990z.120100214223913000guamipmj.3.jpg?w=620',
     quote: 'Flash: 28 points, 11 assists, and 5 steals in a thrilling 1-point win.'
@@ -8561,6 +9093,7 @@ const rawCards = [
     pts: 27.0,
     reb: 5.0,
     ast: 4.0,
+    age: 25,
     nbaId: 977,
     player2Id: 757,
     imageUrl: 'https://www.sandiegouniontribune.com/wp-content/uploads/migration/2009/02/16/00000169-0ce2-dbbe-a16f-4ee229060000.jpg?w=535',
@@ -8579,6 +9112,7 @@ const rawCards = [
     pts: 27.0,
     reb: 8.0,
     ast: 9.0,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://lh4.google.com/kaczalas/R7nHtotYuoI/AAAAAAAAhss/9rmodxa-tvM/s600/nba_080217_all-star_b-13.jpg',
     quote: 'All-Around Greatness: 27 points, 8 rebounds, and 9 assists for the King.'
@@ -8596,6 +9130,7 @@ const rawCards = [
     pts: 31.0,
     reb: 5.0,
     ast: 6.0,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://www.chinadaily.com.cn/sports/2007-02/19/xin_4402041913518031206714.jpg',
     quote: 'Las Vegas Lights: 31 points and 6 steals in the historic Vegas game.'
@@ -8613,6 +9148,7 @@ const rawCards = [
     pts: 29.0,
     reb: 6.0,
     ast: 2.0,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/manage/2021/08/GettyImages-56889648.jpg',
     quote: 'Rising King: Became the youngest All-Star MVP in history at age 21.'
@@ -8630,6 +9166,7 @@ const rawCards = [
     pts: 15.0,
     reb: 4.0,
     ast: 10.0,
+    age: 27,
     nbaId: 1505,
     imageUrl: 'https://i.pinimg.com/736x/c5/db/59/c5db593394dbf9b16e844314ba8aed9f.jpg',
     quote: 'The Answer: 15 points and 10 assists to secure the East victory.'
@@ -8647,6 +9184,7 @@ const rawCards = [
     pts: 24.0,
     reb: 11.0,
     ast: 1.0,
+    age: 25,
     nbaId: 757,
     imageUrl: 'https://i0.wp.com/b-rise.com/wp-content/uploads/2018/01/Shaquille-ONeal-troph%C3%A9e-MVP-All-Star-Game-2004-c-Getty.jpg?resize=295%2C360&ssl=1',
     quote: 'The Diesel: 24 points and 11 rebounds in just 23 minutes of play.'
@@ -8664,6 +9202,7 @@ const rawCards = [
     pts: 37.0,
     reb: 9.0,
     ast: 3.0,
+    age: 25,
     nbaId: 708,
     imageUrl: 'https://pbs.twimg.com/media/BfQRKseCAAA-oe7.jpg',
     quote: 'The Big Ticket: 37 points in the legendary double-overtime battle.'
@@ -8681,6 +9220,7 @@ const rawCards = [
     pts: 31.0,
     reb: 5.0,
     ast: 5.0,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://www.inquirer.com/resizer/v2/VD2442YYRNDDZH4MJSJEZSJRM4.jpg?auth=5aba6f0931d9d2a936428287e87a8250a46e3aed22dbc8c148c39cb83338197e&width=760&height=507&smart=true',
     quote: 'Philly\'s Own: 31 points in his hometown despite the heavy boos.'
@@ -8698,6 +9238,7 @@ const rawCards = [
     pts: 25.0,
     reb: 2.0,
     ast: 5.0,
+    age: 27,
     nbaId: 1505,
     imageUrl: 'https://www.sltrib.com/resizer/v2/JPWS3UUED5D4HFEMWE5U4KL3WQ.jpg?auth=f65109a17b41413502b064667380cc35ec32728ac94517b557d676ce741b41cc&width=750&quality=88',
     quote: 'The Heart: Led a 21-point comeback in the final nine minutes.'
@@ -8715,6 +9256,7 @@ const rawCards = [
     pts: 23.0,
     reb: 11.5,
     ast: 2.0,
+    age: 25,
     nbaId: 757,
     player2Id: 1495,
     imageUrl: 'https://cdn.nba.com/manage/2021/08/duncan-shaq-082421.jpg',
@@ -8734,6 +9276,7 @@ const rawCards = [
     pts: 31.2,
     reb: 6.4,
     ast: 5.8,
+    age: 27,
     nbaId: 1628983,
     imageUrl: 'https://platform.aseaofblue.com/wp-content/uploads/sites/13/chorus/uploads/chorus_asset/file/26050692/2220902781.jpg?quality=90&strip=all&crop=0%2C7.0565403027559%2C100%2C44.43869409583&w=2400',
     quote: 'The New Era: Led OKC to their first title in the modern era with clinical scoring.'
@@ -8751,6 +9294,7 @@ const rawCards = [
     pts: 20.8,
     reb: 5.4,
     ast: 5.0,
+    age: 29,
     nbaId: 1627759,
     imageUrl: 'https://basketnews.com/image-416945-crop516x516.jpg',
     quote: 'Banner 18: The two-way force that secured Boston\'s record-breaking championship.'
@@ -8768,6 +9312,7 @@ const rawCards = [
     pts: 30.2,
     reb: 14.0,
     ast: 7.2,
+    age: 25,
     nbaId: 203999,
     imageUrl: 'https://www.denverpost.com/wp-content/uploads/2023/06/TDP-L-NUGGETS-HEAT_AAO0928x.jpg?w=1024&h=683',
     quote: 'Mile High Magic: First center to lead the league in total points, rebounds, and assists in playoffs.'
@@ -8785,6 +9330,7 @@ const rawCards = [
     pts: 31.2,
     reb: 6.0,
     ast: 5.0,
+    age: 37,
     nbaId: 201939,
     imageUrl: 'https://people.com/thmb/MukObFBFmhP-kVZtL-cNB4rjiiw=/4000x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(674x319:676x321)/nba-finals-2022-steph-curry-3-2000-18e06f29b0fc4abab69b346223c62f9d.jpg',
     quote: 'The Missing Piece: Cemented his legacy with a legendary 31.2 PPG performance.'
@@ -8802,6 +9348,7 @@ const rawCards = [
     pts: 35.2,
     reb: 13.2,
     ast: 5.0,
+    age: 31,
     nbaId: 203507,
     imageUrl: 'https://www.conchovalleyhomepage.com/wp-content/uploads/sites/83/2021/07/e967b71e6cd943eaa7567028ebb97c43.jpg',
     quote: '50-Piece Closure: Ended the 50-year drought with 50 points in the clinching Game 6.'
@@ -8819,6 +9366,7 @@ const rawCards = [
     pts: 29.8,
     reb: 11.8,
     ast: 8.5,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/manage/2020/10/lebron-finals-mvp-trophy-2020-scaled-e1603202751519.jpg',
     quote: 'Bubble King: First player to win Finals MVP with three different franchises.'
@@ -8836,6 +9384,7 @@ const rawCards = [
     pts: 28.5,
     reb: 9.8,
     ast: 4.2,
+    age: 34,
     nbaId: 202695,
     imageUrl: 'https://images.eurohoops.net/2019/06/4a9c2624-kawhi-625x375.jpg',
     quote: 'The North King: Led Canada to its first NBA title in a historic playoff run.'
@@ -8853,6 +9402,7 @@ const rawCards = [
     pts: 28.8,
     reb: 10.8,
     ast: 7.5,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://images.seattletimes.com/wp-content/uploads/2018/06/2329fb6034014c78998db1f1a46e83a0.jpg?d=780x1069',
     quote: 'Back-to-Back: Averaged 28.8 points to secure the Warriors\' second straight title.'
@@ -8870,6 +9420,7 @@ const rawCards = [
     pts: 35.2,
     reb: 8.2,
     ast: 5.4,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://ww2.hdnux.com/photos/61/64/55/13075534/5/2000x0.jpg',
     quote: 'The Ultimate Weapon: 35.2 PPG on 55/47/92 shooting splits in his first title run.'
@@ -8887,6 +9438,7 @@ const rawCards = [
     pts: 29.7,
     reb: 11.3,
     ast: 8.9,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://a.espncdn.com/photo/2016/0619/r94462_1296x729_16-9.jpg',
     quote: 'The Promise Kept: Led the only 3-1 comeback in Finals history for Cleveland.'
@@ -8904,6 +9456,7 @@ const rawCards = [
     pts: 16.3,
     reb: 5.8,
     ast: 4.0,
+    age: 25,
     nbaId: 2738,
     imageUrl: 'https://www.mercurynews.com/wp-content/uploads/2016/08/20150616__WARRIORS-06174.jpg?w=1024',
     quote: 'The Specialist: The first winner to not start a single game during the regular season.'
@@ -8921,6 +9474,7 @@ const rawCards = [
     pts: 17.8,
     reb: 6.4,
     ast: 2.0,
+    age: 34,
     nbaId: 202695,
     imageUrl: 'https://pbs.twimg.com/media/GWEiHlYXcAAk0a1.jpg',
     quote: 'The Rising Klaw: Shut down the Heat dynasty at just 22 years old.'
@@ -8938,6 +9492,7 @@ const rawCards = [
     pts: 25.3,
     reb: 10.9,
     ast: 7.0,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://s.yimg.com/ny/api/res/1.2/GjaOL2jX12bQZV55WHrNeg--/YXBwaWQ9aGlnaGxhbmRlcjt3PTYzMDtoPTQ3NDtjZj13ZWJw/https://media.zenfs.com/en/blogs/sptusnbaexperts/LeBron-James-celebrates-the-Heats-second-straight-NBA-title-and-his-NBA-Finals-MVP.-Steve-Mitchell-USA-TODAY-Sports.jpg',
     quote: 'Back-to-Back: 37 points and 12 rebounds in an epic Game 7 against the Spurs.'
@@ -8955,6 +9510,7 @@ const rawCards = [
     pts: 28.6,
     reb: 10.2,
     ast: 7.4,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://pbs.twimg.com/media/CHgoTyLUEAAHH-_.jpg',
     quote: 'First Ring: Finally reached the mountain top with a triple-double in the clincher.'
@@ -8972,6 +9528,7 @@ const rawCards = [
     pts: 26.0,
     reb: 9.7,
     ast: 2.0,
+    age: 25,
     nbaId: 1717,
     imageUrl: 'https://legacymedia.sportsplatform.io/images_root/slides/photos/001/011/814/115950832_original.jpg?1307960071',
     quote: 'German Precision: Defeated the "Big Three" with one of the greatest solo carry jobs ever.'
@@ -8989,6 +9546,7 @@ const rawCards = [
     pts: 28.6,
     reb: 8.0,
     ast: 3.9,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://covingtonnews.cdn-anvilcms.net/media/images/2022/06/15/images/Screen_Shot_2022-06-13_at_4.05.55_PM.max-752x423.png',
     quote: 'Revenge: Secured his 5th ring by defeating the Celtics in a gritty 7-game battle.'
@@ -9006,6 +9564,7 @@ const rawCards = [
     pts: 32.4,
     reb: 5.6,
     ast: 7.4,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://i.pinimg.com/736x/18/e3/9a/18e39a8703e3bebb230363b36d1d8c40.jpg',
     quote: 'Mamba Out: Proved he could win as the main leader, averaging 32.4 PPG.'
@@ -9023,6 +9582,7 @@ const rawCards = [
     pts: 21.8,
     reb: 4.5,
     ast: 6.3,
+    age: 40,
     nbaId: 1718,
     imageUrl: 'https://thumb.spokesman.com/xnmtO3mVGSHg5RyM4zvIm_2y_yA=/400x0/media.spokesman.com/photos/2008/06/18/piercetrophy18_06-18-2008_3ODL3MO.jpg',
     quote: 'The Truth: Returned from injury to lead the Big Three to Boston\'s 17th title.'
@@ -9040,6 +9600,7 @@ const rawCards = [
     pts: 24.5,
     reb: 5.0,
     ast: 3.3,
+    age: 25,
     nbaId: 2225,
     imageUrl: 'https://www.chinadaily.com.cn/sports/2007-06/15/xin_3506041513168702520568.jpg',
     quote: 'Euro Step: The first European player to ever win the NBA Finals MVP award.'
@@ -9057,6 +9618,7 @@ const rawCards = [
     pts: 34.7,
     reb: 7.8,
     ast: 3.8,
+    age: 25,
     nbaId: 2548,
     imageUrl: 'https://content.api.news/v3/images/bin/b6154b40b9e6cd7ac80dee51c7710b48',
     quote: 'Flash: One of the most dominant individual Finals series in history (34.7 PPG).'
@@ -9074,6 +9636,7 @@ const rawCards = [
     pts: 20.6,
     reb: 14.1,
     ast: 2.1,
+    age: 25,
     nbaId: 1495,
     imageUrl: 'https://www.chinadaily.com.cn/english/doc/2005-06/24/xin_080602241337223164268.jpg',
     quote: 'The Fundamental: Controlled the paint to win his 3rd Finals MVP trophy.'
@@ -9091,6 +9654,7 @@ const rawCards = [
     pts: 21.0,
     reb: 3.2,
     ast: 5.2,
+    age: 25,
     nbaId: 1503,
     imageUrl: 'https://andscape.com/wp-content/uploads/2024/10/GettyImages-81373392.jpg?w=683',
     quote: 'Mr. Big Shot: The floor general of the "Bad Boys 2.0" that upset the Lakers.'
@@ -9108,6 +9672,7 @@ const rawCards = [
     pts: 24.2,
     reb: 17.0,
     ast: 5.3,
+    age: 25,
     nbaId: 1495,
     imageUrl: 'https://cdn.nba.com/teams/uploads/sites/1610612759/2023/09/GettyImages-74831519.jpg',
     quote: 'Near Quad-Double: 21 pts, 20 reb, 10 ast, and 8 blk in the clinching game.'
@@ -9125,6 +9690,7 @@ const rawCards = [
     pts: 36.3,
     reb: 12.3,
     ast: 3.8,
+    age: 25,
     nbaId: 757,
     imageUrl: 'https://i.insider.com/5acbaaf587826b28008b49b3?width=600&format=jpeg&auto=webp',
     quote: 'Three-Peat: The most dominant physical force the Finals has ever seen.'
@@ -9142,6 +9708,7 @@ const rawCards = [
     pts: 33.0,
     reb: 15.8,
     ast: 4.8,
+    age: 25,
     nbaId: 757,
     imageUrl: 'https://cdn.nba.com/manage/2021/08/shaq-kobe-2002-finals.jpg',
     quote: 'Unstoppable: Averaged 33 points and 15 rebounds to crush the Sixers.'
@@ -9159,6 +9726,7 @@ const rawCards = [
     pts: 38.0,
     reb: 16.7,
     ast: 2.3,
+    age: 25,
     nbaId: 757,
     imageUrl: 'https://lakersnation.com/wp-content/uploads/2018/06/Shaquille-ONeal-3.jpg',
     quote: 'The Diesel: Scored 38 points per game to start the Lakers dynasty.'
@@ -9176,6 +9744,7 @@ const rawCards = [
     pts: 27.4,
     reb: 14.0,
     ast: 2.4,
+    age: 25,
     nbaId: 1495,
     imageUrl: 'https://pbs.twimg.com/media/FzdBQRJakAAwy6v.jpg',
     quote: 'Twin Towers: Won his first title in just his second year in the league.'
@@ -9193,6 +9762,7 @@ const rawCards = [
     pts: 33.5,
     reb: 4.0,
     ast: 2.3,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://www.sltrib.com/resizer/v2/K5GJSRWT3BA2TOAAAFEBABIIRQ.jpg?auth=a7a4751c63b4c77364df47a4bc2f1d24d8b739617ef93c33b05d5b8822680e48&width=1024&quality=88',
     quote: 'The Last Dance: Hit "The Shot" in Utah to secure his 6th ring and 6th MVP.'
@@ -9210,6 +9780,7 @@ const rawCards = [
     pts: 32.3,
     reb: 7.0,
     ast: 6.0,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://external-preview.redd.it/video-surfaces-of-michael-jordan-winning-1997-finals-mvp-v0-xdWcoHd4k2_DfXEaaq00ahW7AkeTjMC8u0P8ROAgO_0.jpg?width=640&crop=smart&auto=webp&s=b73082cf928990df08ef1baad6f0430371a51b3f',
     quote: 'Unrivaled: Led the Bulls to 69 wins and another championship trophy.'
@@ -9227,6 +9798,7 @@ const rawCards = [
     pts: 27.3,
     reb: 5.3,
     ast: 4.2,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://pbs.twimg.com/media/EQ_mbz8W4AAuEov.jpg:large',
     quote: 'Redemption: Won the title on Father\'s Day after returning from retirement.'
@@ -9244,6 +9816,7 @@ const rawCards = [
     pts: 32.8,
     reb: 11.5,
     ast: 5.5,
+    age: 25,
     nbaId: 165,
     imageUrl: 'https://rocketswire.usatoday.com/gcdn/authoring/images/smg/2025/01/08/SROC/77554093007-29-28518.jpeg',
     quote: 'The Dream: Outplayed Shaq in the Finals to secure back-to-back titles.'
@@ -9261,6 +9834,7 @@ const rawCards = [
     pts: 26.9,
     reb: 9.1,
     ast: 3.6,
+    age: 25,
     nbaId: 165,
     imageUrl: 'https://cdn.nba.com/manage/2022/04/OlajuwonHakeem95NSBB13490-scaled.jpg',
     quote: 'Historic Year: Only player to win MVP, DPOY, and Finals MVP in the same season.'
@@ -9278,6 +9852,7 @@ const rawCards = [
     pts: 41.0,
     reb: 8.5,
     ast: 6.3,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://fanidotcom.wordpress.com/wp-content/uploads/2012/06/3-peat.jpg',
     quote: 'Three-Peat: Averaged an all-time record 41.0 PPG during the series.'
@@ -9295,6 +9870,7 @@ const rawCards = [
     pts: 35.8,
     reb: 4.8,
     ast: 6.5,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://www.rollingstone.com/wp-content/uploads/2020/08/MJ9202c.jpg?w=800',
     quote: 'The Shrug: Dominance from the perimeter to beat the Blazers in 6 games.'
@@ -9312,6 +9888,7 @@ const rawCards = [
     pts: 31.2,
     reb: 6.6,
     ast: 11.4,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://www.chicagotribune.com/wp-content/uploads/migration/2020/04/27/KGTMDIIEYZGNNEE6N5EDRDKQXE.jpg?w=1200&resize=1200,900',
     quote: 'Passing the Torch: Defeated Magic Johnson to win his very first NBA ring.'
@@ -9329,6 +9906,7 @@ const rawCards = [
     pts: 27.6,
     reb: 5.2,
     ast: 7.0,
+    age: 25,
     nbaId: 78318,
     imageUrl: 'https://cdn.nba.com/manage/2022/02/ThomasI89NSB5832-scaled.jpg',
     quote: 'Bad Boy: The heart and soul of the back-to-back Detroit championships.'
@@ -9346,6 +9924,7 @@ const rawCards = [
     pts: 27.3,
     reb: 1.8,
     ast: 6.0,
+    age: 25,
     nbaId: 76607,
     imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_fill,w_1200,ar_1:1,f_auto,q_auto,g_auto/shape/cover/sport/b069e3acfc6301318bbd3f57509a3cdaf0d06cb22e1a01975de84015aa90a2ce.jpg',
     quote: 'Lockdown: Elite defense and scoring to sweep the Showtime Lakers.'
@@ -9363,6 +9942,7 @@ const rawCards = [
     pts: 22.0,
     reb: 7.4,
     ast: 4.4,
+    age: 25,
     nbaId: 78586,
     imageUrl: 'https://i.pinimg.com/736x/7e/72/ce/7e72ce7219e0c029bca37160f961beae.jpg',
     quote: 'Big Game James: Recorded a triple-double in Game 7 to save the title.'
@@ -9380,6 +9960,7 @@ const rawCards = [
     pts: 26.2,
     reb: 8.0,
     ast: 13.0,
+    age: 25,
     nbaId: 77142,
     imageUrl: 'https://library.sportingnews.com/styles/twitter_card_120x120/s3/2021-08/magicmvp_16z7egirhfq381kedkjsmhiq97.jpeg?itok=mdrZcu5S',
     quote: 'Junior Sky Hook: Hit the iconic game-winner to defeat the Celtics.'
@@ -9397,6 +9978,7 @@ const rawCards = [
     pts: 24.0,
     reb: 9.7,
     ast: 9.5,
+    age: 25,
     nbaId: 76164,
     imageUrl: 'https://library.sportingnews.com/styles/crop_style_16_9_desktop_webp/s3/2022-01/larry-bird_19nfnvwyxxojk136sbdlp9o1ia.jpg.webp?itok=ZqOO30Es',
     quote: 'Legend: Led what many consider the greatest team in NBA history.'
@@ -9414,6 +9996,7 @@ const rawCards = [
     pts: 25.7,
     reb: 9.0,
     ast: 5.2,
+    age: 25,
     nbaId: 76003,
     imageUrl: 'https://i0.wp.com/legendsofsport.blog/wp-content/uploads/2020/06/gettyimages-455538828.jpg?fit=2400%2C3000&ssl=1',
     quote: 'The Captain: The oldest Finals MVP in history at 38 years old.'
@@ -9431,6 +10014,7 @@ const rawCards = [
     pts: 27.4,
     reb: 14.0,
     ast: 3.6,
+    age: 25,
     nbaId: 76164,
     imageUrl: 'https://talksport.com/wp-content/uploads/2024/06/null-JS910256860.jpg?strip=all&w=756',
     quote: 'The Duel: Beat Magic in a classic 7-game series between rivals.'
@@ -9448,6 +10032,7 @@ const rawCards = [
     pts: 25.8,
     reb: 18.0,
     ast: 2.0,
+    age: 25,
     nbaId: 77449,
     imageUrl: 'https://sportsteamhistory.com/wp-content/uploads/2016/12/Philadelphia-76ers-NBA-Champs-1983.jpeg',
     quote: 'Fo\', Fo\', Fo\': Predicted the sweep and delivered the title to Philly.'
@@ -9465,6 +10050,7 @@ const rawCards = [
     pts: 16.2,
     reb: 10.8,
     ast: 8.0,
+    age: 25,
     nbaId: 77142,
     imageUrl: 'https://pbs.twimg.com/media/FMKuBOEagAILi7H.png',
     quote: 'The Maestro: Controlled every aspect of the game to win his 2nd Finals MVP.'
@@ -9482,6 +10068,7 @@ const rawCards = [
     pts: 17.7,
     reb: 9.5,
     ast: 2.8,
+    age: 25,
     nbaId: 77488,
     imageUrl: 'https://charlotte49ers.com/images/2022/9/8/SBC_Champs_-_Maxwell_1977.jpg',
     quote: 'Cornbread: Outshined the stars to lead Boston to their 14th banner.'
@@ -9499,6 +10086,7 @@ const rawCards = [
     pts: 21.5,
     reb: 11.2,
     ast: 8.7,
+    age: 25,
     nbaId: 77142,
     imageUrl: 'https://ca-times.brightspotcdn.com/dims4/default/34ff1b2/2147483647/strip/true/crop/1424x2128+0+0/resize/1200x1793!/quality/75/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2F36%2F0c%2F2681e9924d6da63901b78c6aa4af%2Flakers11.png',
     quote: 'Rookie Magic: Played center in Game 6 to win the title as a 20-year-old rookie.'
@@ -9516,6 +10104,7 @@ const rawCards = [
     pts: 28.3,
     reb: 4.1,
     ast: 6.6,
+    age: 25,
     nbaId: 1630178,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630178.png',
     quote: 'The undisputed leader of Philly, carrying the team every night.'
@@ -9531,6 +10120,7 @@ const rawCards = [
     pts: 26.9,
     reb: 7.7,
     ast: 3.9,
+    age: 31,
     nbaId: 203954,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203954.png',
     quote: 'When healthy, still one of the most unstoppable big men in the league.'
@@ -9546,6 +10136,7 @@ const rawCards = [
     pts: 17.3,
     reb: 5.3,
     ast: 3.6,
+    age: 21,
     nbaId: 202331,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202331.png',
     quote: 'Veteran presence who brings scoring and experience on both ends.'
@@ -9561,6 +10152,7 @@ const rawCards = [
     pts: 16.0,
     reb: 5.6,
     ast: 4.2,
+    age: 25,
     nbaId: 1642250,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642250.png',
     quote: 'The exciting rookie proving he belongs in the NBA spotlight.'
@@ -9576,6 +10168,7 @@ const rawCards = [
     pts: 14.1,
     reb: 5.0,
     ast: 1.6,
+    age: 25,
     nbaId: 1626162,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1626162.png',
     quote: 'A reliable scorer off the wing with defensive energy.'
@@ -9591,6 +10184,7 @@ const rawCards = [
     pts: 13.4,
     reb: 3.6,
     ast: 3.3,
+    age: 25,
     nbaId: 1630524,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630524.png',
     quote: 'Solid two-way guard who gives the team consistent floor spacing.'
@@ -9606,6 +10200,7 @@ const rawCards = [
     pts: 7.7,
     reb: 4.8,
     ast: 1.2,
+    age: 25,
     nbaId: 1631230,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631230.png',
     quote: 'A rising young forward making the most of his minutes.'
@@ -9621,6 +10216,7 @@ const rawCards = [
     pts: 7.4,
     reb: 2.0,
     ast: 2.6,
+    age: 25,
     nbaId: 1626166,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1626166.png',
     quote: 'Reliable backup point guard who keeps the offense moving.'
@@ -9636,6 +10232,7 @@ const rawCards = [
     pts: 6.8,
     reb: 2.3,
     ast: 1.1,
+    age: 25,
     nbaId: 1630699,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630699.png',
     quote: 'A versatile wing with potential still being unlocked.'
@@ -9651,6 +10248,7 @@ const rawCards = [
     pts: 6.5,
     reb: 3.3,
     ast: 2.5,
+    age: 25,
     nbaId: 1630570,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630570.png',
     quote: 'A smart, versatile big who does the little things well.'
@@ -9666,6 +10264,7 @@ const rawCards = [
     pts: 6.4,
     reb: 8.4,
     ast: 1.3,
+    age: 25,
     nbaId: 203083,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203083.png',
     quote: 'The hustle machine — no one crashes the boards harder.'
@@ -9681,6 +10280,7 @@ const rawCards = [
     pts: 6.0,
     reb: 1.5,
     ast: 1.3,
+    age: 24,
     nbaId: 1642266,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642266.png',
     quote: 'Athletic young forward still developing his NBA game.'
@@ -9696,6 +10296,7 @@ const rawCards = [
     pts: 5.5,
     reb: 0.3,
     ast: 0.5,
+    age: 36,
     nbaId: 201569,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201569.png',
     quote: 'A seasoned veteran who can still get hot from deep.'
@@ -9711,6 +10312,7 @@ const rawCards = [
     pts: 4.8,
     reb: 4.3,
     ast: 0.5,
+    age: 25,
     nbaId: 1642272,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642272.png',
     quote: 'A shot-blocking presence who protects the rim with authority.'
@@ -9726,6 +10328,7 @@ const rawCards = [
     pts: 4.3,
     reb: 3.0,
     ast: 0.5,
+    age: 25,
     nbaId: 1631133,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631133.png',
     quote: 'Hard-working forward who fights for every rebound.'
@@ -9741,6 +10344,7 @@ const rawCards = [
     pts: 4.1,
     reb: 1.6,
     ast: 1.6,
+    age: 25,
     nbaId: 1631105,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631105.png',
     quote: 'A defensive-minded wing still searching for his offensive role.'
@@ -9756,6 +10360,7 @@ const rawCards = [
     pts: 1.2,
     reb: 0.6,
     ast: 0.8,
+    age: 39,
     nbaId: 200768,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/200768.png',
     quote: 'A legendary point guard riding out a veteran career in Philly.'
@@ -9771,6 +10376,7 @@ const rawCards = [
     pts: 2.2,
     reb: 1.1,
     ast: 1.0,
+    age: 25,
     nbaId: 1631213,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631213.png',
     quote: 'A fringe roster player fighting for a permanent spot.'
@@ -9786,6 +10392,7 @@ const rawCards = [
     pts: 0.9,
     reb: 1.5,
     ast: 0.4,
+    age: 25,
     nbaId: 1642352,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642352.png',
     quote: 'A raw rookie still learning the ropes at the NBA level.'
@@ -9805,6 +10412,7 @@ const rawCards = [
     pts: 16.6,
     reb: 10.4,
     ast: 1.2,
+    age: 25,
     nbaId: 71,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/71.png',
     quote: 'A raw but powerful center who turned hustle into production.'
@@ -9822,6 +10430,7 @@ const rawCards = [
     pts: 17.1,
     reb: 3.4,
     ast: 8.4,
+    age: 25,
     nbaId: 147,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/147.png',
     quote: 'Set the all-time single-game assists record that very season.'
@@ -9839,6 +10448,7 @@ const rawCards = [
     pts: 20.0,
     reb: 11.2,
     ast: 2.0,
+    age: 25,
     nbaId: 151,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/151.png',
     quote: 'Nicknamed "Never Nervous" — finally lived up to the hype.'
@@ -9856,6 +10466,7 @@ const rawCards = [
     pts: 19.2,
     reb: 2.4,
     ast: 6.0,
+    age: 25,
     nbaId: 154,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/154.png',
     quote: 'A lightning-quick scorer with one of the purest shooting strokes.'
@@ -9873,6 +10484,7 @@ const rawCards = [
     pts: 17.1,
     reb: 5.0,
     ast: 1.5,
+    age: 25,
     nbaId: 161,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/161.png',
     quote: 'A forgotten gem who had one incredible breakthrough year.'
@@ -9890,6 +10502,7 @@ const rawCards = [
     pts: 20.6,
     reb: 2.7,
     ast: 7.5,
+    age: 25,
     nbaId: 164,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/164.png',
     quote: 'A tiny guard with a massive game — Philly\'s unlikely hero.'
@@ -9907,6 +10520,7 @@ const rawCards = [
     pts: 14.5,
     reb: 9.6,
     ast: 0.9,
+    age: 25,
     nbaId: 172,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/172.png',
     quote: 'The tallest player in NBA history who dominated the paint.'
@@ -9924,6 +10538,7 @@ const rawCards = [
     pts: 12.8,
     reb: 6.4,
     ast: 2.1,
+    age: 25,
     nbaId: 201,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201.png',
     quote: 'Undrafted and unstoppable — the ultimate underdog story.'
@@ -9941,6 +10556,7 @@ const rawCards = [
     pts: 14.7,
     reb: 8.7,
     ast: 0.9,
+    age: 21,
     nbaId: 711,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/711.png',
     quote: 'A blue-collar forward who outworked everyone around him.'
@@ -9958,6 +10574,7 @@ const rawCards = [
     pts: 13.5,
     reb: 3.5,
     ast: 6.1,
+    age: 25,
     nbaId: 703,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/703.png',
     quote: 'The undrafted guard who earned every minute with pure grit.'
@@ -9975,6 +10592,7 @@ const rawCards = [
     pts: 18.2,
     reb: 4.4,
     ast: 5.1,
+    age: 25,
     nbaId: 147,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/147.png',
     quote: 'Blossomed into a legit star on a Finals-bound Pacers squad.'
@@ -9992,6 +10610,7 @@ const rawCards = [
     pts: 26.8,
     reb: 7.5,
     ast: 4.6,
+    age: 25,
     nbaId: 1503,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1503.png',
     quote: 'Became a superstar overnight — one of the best MIP seasons ever.'
@@ -10009,6 +10628,7 @@ const rawCards = [
     pts: 19.2,
     reb: 10.5,
     ast: 2.0,
+    age: 25,
     nbaId: 979,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/979.png',
     quote: 'Erupted into an All-Star big man after years of waiting.'
@@ -10026,6 +10646,7 @@ const rawCards = [
     pts: 18.3,
     reb: 3.8,
     ast: 5.9,
+    age: 25,
     nbaId: 2240,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2240.png',
     quote: 'Agent Zero announced his arrival with fearless scoring.'
@@ -10043,6 +10664,7 @@ const rawCards = [
     pts: 20.1,
     reb: 10.5,
     ast: 2.0,
+    age: 25,
     nbaId: 2216,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2216.png',
     quote: 'Z-Bo\'s raw power made him impossible to stop in the post.'
@@ -10060,6 +10682,7 @@ const rawCards = [
     pts: 16.4,
     reb: 6.6,
     ast: 2.5,
+    age: 25,
     nbaId: 2244,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2244.png',
     quote: 'A surprise winner who had the best season of his career.'
@@ -10077,6 +10700,7 @@ const rawCards = [
     pts: 13.3,
     reb: 6.0,
     ast: 6.2,
+    age: 25,
     nbaId: 2564,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2564.png',
     quote: 'A uniquely skilled playmaker who redefined the power forward role.'
@@ -10094,6 +10718,7 @@ const rawCards = [
     pts: 19.0,
     reb: 3.1,
     ast: 4.2,
+    age: 25,
     nbaId: 101145,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/101145.png',
     quote: 'A fearless scorer who put the league on notice in Year 2.'
@@ -10111,6 +10736,7 @@ const rawCards = [
     pts: 19.4,
     reb: 5.7,
     ast: 5.0,
+    age: 25,
     nbaId: 2067,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2067.png',
     quote: 'The quiet star who made Orlando a genuine playoff threat.'
@@ -10128,6 +10754,7 @@ const rawCards = [
     pts: 25.8,
     reb: 5.1,
     ast: 2.7,
+    age: 25,
     nbaId: 200750,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/200750.png',
     quote: 'Indiana\'s quiet assassin carried a whole franchise on his back.'
@@ -10145,6 +10772,7 @@ const rawCards = [
     pts: 19.6,
     reb: 2.7,
     ast: 5.3,
+    age: 25,
     nbaId: 201166,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201166.png',
     quote: 'A speedy little guard who outplayed everyone\'s expectations.'
@@ -10162,6 +10790,7 @@ const rawCards = [
     pts: 20.2,
     reb: 15.2,
     ast: 2.5,
+    age: 25,
     nbaId: 201567,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201567.png',
     quote: 'Put up historic rebounding numbers in the middle of nowhere.'
@@ -10179,6 +10808,7 @@ const rawCards = [
     pts: 16.1,
     reb: 7.7,
     ast: 0.9,
+    age: 25,
     nbaId: 201583,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201583.png',
     quote: 'A floor-spacing big man before it was even trendy.'
@@ -10196,6 +10826,7 @@ const rawCards = [
     pts: 17.4,
     reb: 7.6,
     ast: 4.1,
+    age: 21,
     nbaId: 202331,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202331.png',
     quote: 'Transformed into a two-way star and future All-NBA talent.'
@@ -10213,6 +10844,7 @@ const rawCards = [
     pts: 20.3,
     reb: 3.5,
     ast: 5.9,
+    age: 25,
     nbaId: 201601,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201601.png',
     quote: 'The Dragon breathed fire — one of the most dominant MIP seasons. '
@@ -10230,6 +10862,7 @@ const rawCards = [
     pts: 20.0,
     reb: 5.8,
     ast: 3.3,
+    age: 36,
     nbaId: 202710,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202710.png',
     quote: 'Hard work personified — went from role player to franchise star.'
@@ -10247,6 +10880,7 @@ const rawCards = [
     pts: 20.8,
     reb: 3.5,
     ast: 4.3,
+    age: 25,
     nbaId: 203468,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203468.png',
     quote: 'Burst onto the scene as one of the craftiest scorers in the West.'
@@ -10264,6 +10898,7 @@ const rawCards = [
     pts: 22.9,
     reb: 8.8,
     ast: 5.4,
+    age: 31,
     nbaId: 203507,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png',
     quote: 'The Greek Freak\'s MIP was just the beginning of a dynasty.'
@@ -10281,6 +10916,7 @@ const rawCards = [
     pts: 23.1,
     reb: 5.2,
     ast: 4.3,
+    age: 25,
     nbaId: 203506,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203506.png',
     quote: 'A reinvented superstar who shocked the entire league.'
@@ -10298,6 +10934,7 @@ const rawCards = [
     pts: 16.9,
     reb: 6.9,
     ast: 3.1,
+    age: 31,
     nbaId: 1627783,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627783.png',
     quote: 'Went from bench piece to champion in the same magical season.'
@@ -10315,6 +10952,7 @@ const rawCards = [
     pts: 24.3,
     reb: 6.3,
     ast: 4.2,
+    age: 28,
     nbaId: 1627742,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627742.png',
     quote: 'Grew into a legitimate All-Star force in the Crescent City.'
@@ -10332,6 +10970,7 @@ const rawCards = [
     pts: 24.1,
     reb: 10.2,
     ast: 6.0,
+    age: 31,
     nbaId: 203944,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203944.png',
     quote: 'Brought life back to Madison Square Garden in a massive breakout.'
@@ -10349,6 +10988,7 @@ const rawCards = [
     pts: 27.4,
     reb: 5.7,
     ast: 6.7,
+    age: 26,
     nbaId: 1629630,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629630.png',
     quote: 'Electrifying, fearless, and must-watch TV every single night.'
@@ -10366,6 +11006,7 @@ const rawCards = [
     pts: 25.6,
     reb: 8.6,
     ast: 1.9,
+    age: 25,
     nbaId: 1628374,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628374.png',
     quote: 'Turned Utah\'s rebuild into a showcase for his All-Star talent.'
@@ -10383,6 +11024,7 @@ const rawCards = [
     pts: 25.9,
     reb: 3.7,
     ast: 6.2,
+    age: 25,
     nbaId: 1630178,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630178.png',
     quote: 'Stepped up huge and became Philly\'s undisputed franchise star.'
@@ -10400,6 +11042,7 @@ const rawCards = [
     pts: 17.0,
     reb: 5.5,
     ast: 5.5,
+    age: 25,
     nbaId: 1630713,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630713.png',
     quote: 'A two-way monster who led the league in steals and reinvented himself.'
@@ -10417,6 +11060,7 @@ const rawCards = [
     pts: 20.6,
     reb: 3.4,
     ast: 3.7,
+    age: 25,
     nbaId: 1629638,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629638.png',
     quote: 'Back-to-back MIPs for Atlanta — NAW took his game to a whole new level.'
@@ -10435,6 +11079,7 @@ const rawCards = [
     pts: 60,
     reb: 22,
     ast: 3,
+    age: 25,
     nbaId: 1610612765,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612765/global/L/logo.svg',
     quote: '3-Time NBA Champions. The Bad Boys are back.'
@@ -10451,6 +11096,7 @@ const rawCards = [
     pts: 56,
     reb: 26,
     ast: 18,
+    age: 25,
     nbaId: 1610612738,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612738/global/L/logo.svg',
     quote: '18-Time NBA Champions. A legacy of greatness.'
@@ -10467,6 +11113,7 @@ const rawCards = [
     pts: 53,
     reb: 29,
     ast: 2,
+    age: 25,
     nbaId: 1610612752,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612752/global/L/logo.svg',
     quote: '2-Time NBA Champions. The pulse of New York City.'
@@ -10483,6 +11130,7 @@ const rawCards = [
     pts: 52,
     reb: 30,
     ast: 1,
+    age: 25,
     nbaId: 1610612739,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612739/global/L/logo.svg',
     quote: '2016 NBA Champions. Believeland forever.'
@@ -10499,6 +11147,7 @@ const rawCards = [
     pts: 49,
     reb: 33,
     ast: 2,
+    age: 25,
     nbaId: 1610612749,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612749/global/L/logo.svg',
     quote: '2-Time NBA Champions. Fear the Deer.'
@@ -10515,6 +11164,7 @@ const rawCards = [
     pts: 48,
     reb: 34,
     ast: 0,
+    age: 25,
     nbaId: 1610612754,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612754/global/L/logo.svg',
     quote: 'Built on tradition. Chasing the first ring in Indiana.'
@@ -10531,6 +11181,7 @@ const rawCards = [
     pts: 45,
     reb: 37,
     ast: 3,
+    age: 25,
     nbaId: 1610612755,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612755/global/L/logo.svg',
     quote: '3-Time NBA Champions. Trust the process and the legacy.'
@@ -10547,6 +11198,7 @@ const rawCards = [
     pts: 45,
     reb: 37,
     ast: 0,
+    age: 25,
     nbaId: 1610612753,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612753/global/L/logo.svg',
     quote: 'Magic in the making. Pure talent rising in Orlando.'
@@ -10563,6 +11215,7 @@ const rawCards = [
     pts: 44,
     reb: 38,
     ast: 0,
+    age: 25,
     nbaId: 1610612766,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612766/global/L/logo.svg',
     quote: 'The Hive is alive. Charlotte\'s high-flying basketball.'
@@ -10579,6 +11232,7 @@ const rawCards = [
     pts: 43,
     reb: 39,
     ast: 3,
+    age: 25,
     nbaId: 1610612748,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612748/global/L/logo.svg',
     quote: '3-Time NBA Champions. Heat Culture is built differently.'
@@ -10595,6 +11249,7 @@ const rawCards = [
     pts: 42,
     reb: 40,
     ast: 1,
+    age: 25,
     nbaId: 1610612737,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612737/global/L/logo.svg',
     quote: '1958 NBA Champions. True to Atlanta.'
@@ -10611,6 +11266,7 @@ const rawCards = [
     pts: 38,
     reb: 44,
     ast: 6,
+    age: 25,
     nbaId: 1610612741,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612741/global/L/logo.svg',
     quote: '6-Time NBA Champions. The spirit of the 90s dynasty.'
@@ -10627,6 +11283,7 @@ const rawCards = [
     pts: 35,
     reb: 47,
     ast: 1,
+    age: 25,
     nbaId: 1610612761,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612761/global/L/logo.svg',
     quote: '2019 NBA Champions. We The North.'
@@ -10643,6 +11300,7 @@ const rawCards = [
     pts: 25,
     reb: 57,
     ast: 1,
+    age: 25,
     nbaId: 1610612764,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612764/global/L/logo.svg',
     quote: '1978 NBA Champions. Rebuilding the magic in DC.'
@@ -10659,6 +11317,7 @@ const rawCards = [
     pts: 20,
     reb: 62,
     ast: 0,
+    age: 25,
     nbaId: 1610612751,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612751/global/L/logo.svg',
     quote: 'Street style, Brooklyn grit. Chasing the ultimate prize.'
@@ -10675,6 +11334,7 @@ const rawCards = [
     pts: 64,
     reb: 18,
     ast: 1,
+    age: 25,
     nbaId: 1610612760,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612760/global/L/logo.svg',
     quote: '1979 NBA Champions. A storm is brewing in OKC.'
@@ -10691,6 +11351,7 @@ const rawCards = [
     pts: 54,
     reb: 28,
     ast: 2,
+    age: 25,
     nbaId: 1610612745,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612745/global/L/logo.svg',
     quote: '2-Time NBA Champions. Launching into a new era.'
@@ -10707,6 +11368,7 @@ const rawCards = [
     pts: 53,
     reb: 29,
     ast: 17,
+    age: 25,
     nbaId: 1610612747,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612747/global/L/logo.svg',
     quote: '17-Time NBA Champions. Showtime never ends.'
@@ -10723,6 +11385,7 @@ const rawCards = [
     pts: 51,
     reb: 31,
     ast: 1,
+    age: 25,
     nbaId: 1610612743,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612743/global/L/logo.svg',
     quote: '2023 NBA Champions. Mile High basketball at its peak.'
@@ -10739,6 +11402,7 @@ const rawCards = [
     pts: 49,
     reb: 33,
     ast: 0,
+    age: 25,
     nbaId: 1610612746,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612746/global/L/logo.svg',
     quote: 'Clippers Spirit. A new identity in Los Angeles.'
@@ -10755,6 +11419,7 @@ const rawCards = [
     pts: 47,
     reb: 35,
     ast: 0,
+    age: 25,
     nbaId: 1610612756,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg',
     quote: 'Rise Up. Phoenix chasing that elusive first title.'
@@ -10771,6 +11436,7 @@ const rawCards = [
     pts: 46,
     reb: 36,
     ast: 0,
+    age: 25,
     nbaId: 1610612750,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612750/global/L/logo.svg',
     quote: 'Raised by Wolves. A pack hungry for success.'
@@ -10787,6 +11453,7 @@ const rawCards = [
     pts: 43,
     reb: 39,
     ast: 5,
+    age: 25,
     nbaId: 1610612759,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612759/global/L/logo.svg',
     quote: '5-Time NBA Champions. Excellence is a habit.'
@@ -10803,6 +11470,7 @@ const rawCards = [
     pts: 41,
     reb: 41,
     ast: 1,
+    age: 25,
     nbaId: 1610612757,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612757/global/L/logo.svg',
     quote: '1977 NBA Champions. Rip City pride.'
@@ -10819,6 +11487,7 @@ const rawCards = [
     pts: 40,
     reb: 42,
     ast: 1,
+    age: 25,
     nbaId: 1610612758,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612758/global/L/logo.svg',
     quote: '1951 NBA Champions. Light the Beam.'
@@ -10835,6 +11504,7 @@ const rawCards = [
     pts: 37,
     reb: 45,
     ast: 7,
+    age: 25,
     nbaId: 1610612744,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612744/global/L/logo.svg',
     quote: '7-Time NBA Champions. The Dub Nation dynasty.'
@@ -10851,6 +11521,7 @@ const rawCards = [
     pts: 26,
     reb: 56,
     ast: 1,
+    age: 25,
     nbaId: 1610612742,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612742/global/L/logo.svg',
     quote: '2011 NBA Champions. MFFL - Mavs Fan For Life.'
@@ -10867,6 +11538,7 @@ const rawCards = [
     pts: 26,
     reb: 56,
     ast: 0,
+    age: 25,
     nbaId: 1610612740,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612740/global/L/logo.svg',
     quote: 'Pelicans Pride. Let the good times roll in NOLA.'
@@ -10883,6 +11555,7 @@ const rawCards = [
     pts: 25,
     reb: 57,
     ast: 0,
+    age: 25,
     nbaId: 1610612763,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612763/global/L/logo.svg',
     quote: 'Grit and Grind. Memphis is never satisfied.'
@@ -10899,6 +11572,7 @@ const rawCards = [
     pts: 22,
     reb: 60,
     ast: 0,
+    age: 25,
     nbaId: 1610612762,
     imageUrl: 'https://cdn.nba.com/logos/nba/1610612762/global/L/logo.svg',
     quote: 'Elevating the game in Utah. Chasing the peak.'
@@ -10917,6 +11591,7 @@ const rawCards = [
     pts: 19580,
     reb: 1995,
     ast: 0,
+    age: 25,
     nbaId: 10001,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/59e05ff4c819893fc2a09372320a20136eccd343.jpg',
     quote: 'The heart of Boston sports, home to the championship-winning Celtics.'
@@ -10933,6 +11608,7 @@ const rawCards = [
     pts: 19812,
     reb: 1968,
     ast: 0,
+    age: 25,
     nbaId: 10002,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/6a4562864ec9bc1c78d57ef22b881316330331ae.jpg',
     quote: 'The World\'s Most Famous Arena, iconic in every sense.'
@@ -10949,6 +11625,7 @@ const rawCards = [
     pts: 17732,
     reb: 2012,
     ast: 0,
+    age: 25,
     nbaId: 10003,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/0c6c4ca1653c7991bf0a01dd9f7df7a8b3c9d66f.jpg',
     quote: 'Brooklyn\'s modern architectural marvel and hub for the Nets.'
@@ -10965,6 +11642,7 @@ const rawCards = [
     pts: 20478,
     reb: 1996,
     ast: 0,
+    age: 25,
     nbaId: 10004,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/ef0be57a74ad420b2f4ecdd455867fd4d63d255e.jpg',
     quote: 'A loud and energetic home for the 76ers in Philadelphia.'
@@ -10981,6 +11659,7 @@ const rawCards = [
     pts: 19800,
     reb: 1999,
     ast: 0,
+    age: 25,
     nbaId: 10005,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/870cacd5b19acd2d41d27301b6d2ef31e6ba60b8.jpg',
     quote: 'Where the Raptors guard the North in front of passionate fans.'
@@ -10997,6 +11676,7 @@ const rawCards = [
     pts: 20917,
     reb: 1994,
     ast: 0,
+    age: 25,
     nbaId: 10006,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/a2729fd93344f025ba2bd876a53124b19ddb5e2.jpg',
     quote: 'The house that Michael Jordan built, still a fortress for the Bulls.'
@@ -11013,6 +11693,7 @@ const rawCards = [
     pts: 19432,
     reb: 1994,
     ast: 0,
+    age: 25,
     nbaId: 10007,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/caf9d52bb9171f9ebd7426a07fc2ead14f8fdab4.jpg',
     quote: 'A vibrant and modern fieldhouse for Cleveland basketball.'
@@ -11029,6 +11710,7 @@ const rawCards = [
     pts: 20332,
     reb: 2017,
     ast: 0,
+    age: 25,
     nbaId: 10008,
     imageUrl: 'https://picsum.photos/seed/littlecaesars/800/500',
     quote: 'The state-of-the-art home in the heart of Hockeytown for the Pistons.'
@@ -11045,6 +11727,7 @@ const rawCards = [
     pts: 17923,
     reb: 1999,
     ast: 0,
+    age: 25,
     nbaId: 10009,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/64ec5a952acb87e42f1bd2374e3b5e5b0ae13df9.jpg',
     quote: 'A traditional yet modern basketball cathedral in Indiana.'
@@ -11061,6 +11744,7 @@ const rawCards = [
     pts: 17500,
     reb: 2018,
     ast: 0,
+    age: 25,
     nbaId: 10010,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/4e4feace824c32c4dd019fb2defed47cac6273a3.jpg',
     quote: 'A world-class arena that fueled the Bucks to a championship.'
@@ -11077,6 +11761,7 @@ const rawCards = [
     pts: 16600,
     reb: 1999,
     ast: 0,
+    age: 25,
     nbaId: 10011,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/fb86bae8426802a606f82e790c91e6c2f05f83a4.jpg',
     quote: 'The transformed and energetic nest of the Atlanta Hawks.'
@@ -11093,6 +11778,7 @@ const rawCards = [
     pts: 19077,
     reb: 2005,
     ast: 0,
+    age: 25,
     nbaId: 10012,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/44dcf41d4ef1bdbc4bfc28e5a91ad861e8f8d35a.jpg',
     quote: 'The colorful hive where the Hornets buzz every night.'
@@ -11109,6 +11795,7 @@ const rawCards = [
     pts: 19600,
     reb: 1999,
     ast: 0,
+    age: 25,
     nbaId: 10013,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/1e8089a9f7174d86be34068953d77fce1d11242b.jpg',
     quote: 'The tropical home of Heat Culture on the Miami waterfront.'
@@ -11125,6 +11812,7 @@ const rawCards = [
     pts: 18846,
     reb: 2010,
     ast: 0,
+    age: 25,
     nbaId: 10014,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/d5bfe27a42eab5833d120b36efb12936bac93918.jpg',
     quote: 'Where the Magic happens in center of Orlando.'
@@ -11141,6 +11829,7 @@ const rawCards = [
     pts: 20356,
     reb: 1997,
     ast: 0,
+    age: 25,
     nbaId: 10015,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/d740ccaaade949715cd9747aa8cfa81cd4e40b25.jpg',
     quote: 'The downtown hub for basketball in the nation\'s capital.'
@@ -11157,6 +11846,7 @@ const rawCards = [
     pts: 19068,
     reb: 1999,
     ast: 0,
+    age: 25,
     nbaId: 10016,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/3258c7482a053a2c70c9df6248cb2df75813b3da.jpg',
     quote: 'The glamorous center of Los Angeles sports and entertainment.'
@@ -11173,6 +11863,7 @@ const rawCards = [
     pts: 18000,
     reb: 2024,
     ast: 0,
+    age: 25,
     nbaId: 10017,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/4ce40e30b3ae51639b851dacdfe310c5bc362904.jpg',
     quote: 'The futuristic and fan-focused new home for the Clippers.'
@@ -11189,6 +11880,7 @@ const rawCards = [
     pts: 18064,
     reb: 2019,
     ast: 0,
+    age: 25,
     nbaId: 10018,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/0da34a5efdb45396254cebe7657d6f65fec47370.jpg',
     quote: 'The waterfront home of the high-flying Warriors in San Francisco.'
@@ -11205,6 +11897,7 @@ const rawCards = [
     pts: 17071,
     reb: 1992,
     ast: 0,
+    age: 25,
     nbaId: 10019,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/f7614dcbe79412bf665270fc080ddc02046af82e.jpg',
     quote: 'The desert oasis where the Suns shine brightest.'
@@ -11221,6 +11914,7 @@ const rawCards = [
     pts: 17583,
     reb: 2016,
     ast: 0,
+    age: 25,
     nbaId: 10020,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/af3fb855f340320507ddd5db07323c8ea28f79a6.jpg',
     quote: 'Sacramento\'s vibrant arena and home to the Beam.'
@@ -11237,6 +11931,7 @@ const rawCards = [
     pts: 19441,
     reb: 1995,
     ast: 0,
+    age: 25,
     nbaId: 10021,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/0b295c0b54e02290a221ffb9805f4de7e1b98dd8.jpg',
     quote: 'Rip City\'s loyal home, known for its intense atmosphere.'
@@ -11253,6 +11948,7 @@ const rawCards = [
     pts: 18203,
     reb: 2002,
     ast: 0,
+    age: 25,
     nbaId: 10022,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/a6c5e34097ef3d625caa7d7768c15d539c84f208.jpg',
     quote: 'The electric and loud center of the Thunder storm.'
@@ -11269,6 +11965,7 @@ const rawCards = [
     pts: 18306,
     reb: 1991,
     ast: 0,
+    age: 25,
     nbaId: 10023,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/89c807c50ecbda0461c216428527726b65912440.jpg',
     quote: 'The high-altitude home of the Jazz and their loyal fans.'
@@ -11285,6 +11982,7 @@ const rawCards = [
     pts: 19520,
     reb: 1999,
     ast: 0,
+    age: 24,
     nbaId: 10024,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/1880e45443518b1eb5f86fb630f7b92365c3dfeb.jpg',
     quote: 'Where the Nuggets play at a mile high in Denver.'
@@ -11301,6 +11999,7 @@ const rawCards = [
     pts: 18978,
     reb: 1990,
     ast: 0,
+    age: 25,
     nbaId: 10025,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/9ddad5677df4a824af2df33018472b602516f6a4.jpg',
     quote: 'The pack\'s home in downtown Minneapolis.'
@@ -11317,6 +12016,7 @@ const rawCards = [
     pts: 19200,
     reb: 2001,
     ast: 0,
+    age: 25,
     nbaId: 10026,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/5a7dd3735a8dc5cd31dc420c0830480242955df7.jpg',
     quote: 'A big, bold arena for a big, bold Mavericks team.'
@@ -11333,6 +12033,7 @@ const rawCards = [
     pts: 18055,
     reb: 2003,
     ast: 0,
+    age: 25,
     nbaId: 10027,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/8be0ce44abe7c5297b2410f298a2436a381388c9.jpg',
     quote: 'The launchpad for Rockets greatness in Houston.'
@@ -11349,6 +12050,7 @@ const rawCards = [
     pts: 17794,
     reb: 2004,
     ast: 0,
+    age: 25,
     nbaId: 10028,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/667779eef37f133b1766062274c07024f6f232f7.jpg',
     quote: 'The gritty and soulful home for Grizzles basketball.'
@@ -11365,6 +12067,7 @@ const rawCards = [
     pts: 16867,
     reb: 1999,
     ast: 0,
+    age: 25,
     nbaId: 10029,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/92f532fad162c1fd64178e8cf458d93acf6bcd66.jpg',
     quote: 'A vibrant nest for the Pelicans in the Big Easy.'
@@ -11381,6 +12084,7 @@ const rawCards = [
     pts: 18354,
     reb: 2002,
     ast: 0,
+    age: 25,
     nbaId: 10030,
     imageUrl: 'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/3939d29ef38847833e57027d36d16842fc6cd79a.jpg',
     quote: 'The fortress of Spurs excellence and tradition.'
@@ -11399,6 +12103,7 @@ const rawCards = [
     pts: 25.5,
     reb: 6.8,
     ast: 3.7,
+    age: 25,
     nbaId: 5142718,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5142718.png',
     quote: 'The consensus #1 pick. A scoring machine with NBA size and length.'
@@ -11415,6 +12120,7 @@ const rawCards = [
     pts: 20.5,
     reb: 4.3,
     ast: 3.8,
+    age: 25,
     nbaId: 5041955,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5041955.png',
     quote: 'Elite shot creator with deep range and polished offensive game.'
@@ -11431,6 +12137,7 @@ const rawCards = [
     pts: 22.5,
     reb: 10.2,
     ast: 4.1,
+    age: 25,
     nbaId: 5041935,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5041935.png',
     quote: 'Double-double machine with high basketball IQ and interior dominance.'
@@ -11447,6 +12154,7 @@ const rawCards = [
     pts: 17.2,
     reb: 8.9,
     ast: 2.1,
+    age: 25,
     nbaId: 5142800,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5142800.png',
     quote: 'Versatile forward with elite defensive potential and growing offensive skill.'
@@ -11463,6 +12171,7 @@ const rawCards = [
     pts: 17.9,
     reb: 3.1,
     ast: 4.4,
+    age: 25,
     nbaId: 5142856,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5142856.png',
     quote: 'Crafty playmaker with great vision and ability to control the tempo.'
@@ -11479,6 +12188,7 @@ const rawCards = [
     pts: 18.4,
     reb: 3.9,
     ast: 5.1,
+    age: 25,
     nbaId: 5175005,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5175005.png',
     quote: 'High-octane scorer and distributor heading to Musselman\'s squad.'
@@ -11495,6 +12205,7 @@ const rawCards = [
     pts: 17.2,
     reb: 3.5,
     ast: 4.8,
+    age: 25,
     nbaId: 5174981,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5174981.png',
     quote: 'Lockdown defender with explosive transition finishing.'
@@ -11511,6 +12222,7 @@ const rawCards = [
     pts: 14.8,
     reb: 7.2,
     ast: 2.3,
+    age: 25,
     nbaId: 5142833,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5142833.png',
     quote: 'Long, athletic wing with a high ceiling as a two-way force.'
@@ -11527,6 +12239,7 @@ const rawCards = [
     pts: 19.4,
     reb: 4.1,
     ast: 4.7,
+    age: 29,
     nbaId: 5174983,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5174983.png',
     quote: 'Dynamic point guard with elite ball-handling and playmaking chops.'
@@ -11543,6 +12256,7 @@ const rawCards = [
     pts: 15.3,
     reb: 3.8,
     ast: 3.2,
+    age: 25,
     nbaId: 5175054,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5175054.png',
     quote: 'Strong-bodied guard who can overpower defenders and hit outside shots.'
@@ -11559,6 +12273,7 @@ const rawCards = [
     pts: 21.5,
     reb: 3.2,
     ast: 4.6,
+    age: 25,
     nbaId: 5041964,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5041964.png',
     quote: 'Lightning quick guard perfectly suited for Alabama\'s fast-paced system.'
@@ -11575,6 +12290,7 @@ const rawCards = [
     pts: 15.7,
     reb: 9.4,
     ast: 2.1,
+    age: 25,
     nbaId: 4700908,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F4700908.png',
     quote: 'Productive big man with strong rebounding and shot-blocking instincts.'
@@ -11591,6 +12307,7 @@ const rawCards = [
     pts: 14.1,
     reb: 6.2,
     ast: 2.4,
+    age: 25,
     nbaId: 4683777,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F4683777.png',
     quote: 'Skilled wing with good size and shooting ability.'
@@ -11607,6 +12324,7 @@ const rawCards = [
     pts: 12.8,
     reb: 8.1,
     ast: 1.4,
+    age: 25,
     nbaId: 5174984, // Adjusted from duplicate
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5174983.png',
     quote: 'Spanish giant with elite passing and shot-blocking at 7\'3".'
@@ -11623,6 +12341,7 @@ const rawCards = [
     pts: 13.6,
     reb: 7.8,
     ast: 1.9,
+    age: 25,
     nbaId: 5175032,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5175032.png',
     quote: 'German prospect with high motor and versatile inside-out game.'
@@ -11639,6 +12358,7 @@ const rawCards = [
     pts: 12.4,
     reb: 6.8,
     ast: 1.6,
+    age: 25,
     nbaId: 5175052,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5175052.png',
     quote: 'Physical forward who plays with toughness and finishes strong at the rim.'
@@ -11655,6 +12375,7 @@ const rawCards = [
     pts: 11.9,
     reb: 7.4,
     ast: 0.8,
+    age: 25,
     nbaId: 5142826,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5142826.png',
     quote: 'Extremely young big man with massive defensive potential and length.'
@@ -11671,6 +12392,7 @@ const rawCards = [
     pts: 13.2,
     reb: 8.9,
     ast: 0.9,
+    age: 25,
     nbaId: 5042032,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5042032.png',
     quote: 'Mobile center with great footwork and interior presence.'
@@ -11687,6 +12409,7 @@ const rawCards = [
     pts: 14.3,
     reb: 4.1,
     ast: 2.2,
+    age: 25,
     nbaId: 5175007,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5175007.png',
     quote: 'Smooth shooting guard with "Baby Ingram" vibes and elite scoring potential.'
@@ -11703,6 +12426,7 @@ const rawCards = [
     pts: 16.8,
     reb: 4.3,
     ast: 3.7,
+    age: 25,
     nbaId: 5174990,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5174990.png',
     quote: 'Nigerian prospect with elite athletic profile and defensive versatility.'
@@ -11719,6 +12443,7 @@ const rawCards = [
     pts: 15.2,
     reb: 5.4,
     ast: 2.8,
+    age: 25,
     nbaId: 4901888,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F4901888.png',
     quote: 'Long wing with multi-positional defensive ability and playmaking upside.'
@@ -11735,6 +12460,7 @@ const rawCards = [
     pts: 19.2,
     reb: 3.7,
     ast: 5.4,
+    age: 25,
     nbaId: 4683815,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F4683815.png',
     quote: 'High-IQ floor general with efficient scoring and floor spacing.'
@@ -11751,6 +12477,7 @@ const rawCards = [
     pts: 11.2,
     reb: 8.7,
     ast: 0.6,
+    age: 25,
     nbaId: 5041996,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5041996.png',
     quote: 'Physical center who dominates the glass and protects the paint.'
@@ -11767,6 +12494,7 @@ const rawCards = [
     pts: 12.7,
     reb: 5.9,
     ast: 1.3,
+    age: 25,
     nbaId: 5175008,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5175008.png',
     quote: 'Skilled forward with excellent size and perimeter ability.'
@@ -11783,6 +12511,7 @@ const rawCards = [
     pts: 16.3,
     reb: 3.8,
     ast: 3.5,
+    age: 25,
     nbaId: 5042020,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5042020.png',
     quote: 'Dynamic scorer who can heat up quickly from beyond the arc.'
@@ -11799,6 +12528,7 @@ const rawCards = [
     pts: 13.4,
     reb: 5.7,
     ast: 1.9,
+    age: 24,
     nbaId: 5142825,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5142825.png',
     quote: 'Athletic wing with strong defensive engagement and transition scoring.'
@@ -11815,6 +12545,7 @@ const rawCards = [
     pts: 14.8,
     reb: 4.1,
     ast: 3.9,
+    age: 25,
     nbaId: 5175040,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5175040.png',
     quote: 'Versatile guard with high motor and winning intangibles for UConn.'
@@ -11831,6 +12562,7 @@ const rawCards = [
     pts: 10.8,
     reb: 7.2,
     ast: 1.1,
+    age: 25,
     nbaId: 5175011,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5175011.png',
     quote: 'Estonian big with modern skill set and stretch potential.'
@@ -11847,6 +12579,7 @@ const rawCards = [
     pts: 15.8,
     reb: 8.4,
     ast: 1.7,
+    age: 25,
     nbaId: 4683786,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F4683786.png',
     quote: 'Relentless worker on the glass with high efficiency around the rim.'
@@ -11863,6 +12596,7 @@ const rawCards = [
     pts: 14.2,
     reb: 7.6,
     ast: 1.8,
+    age: 37,
     nbaId: 5175095,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fmens-college-basketball%2Fplayers%2Ffull%2F5175095.png',
     quote: 'Elite Mexican prospect developing in the NBL Next Stars program.'
@@ -11882,6 +12616,7 @@ const rawCards = [
     pts: 33.1,
     reb: 5.2,
     ast: 2.9,
+    age: 21,
     nbaId: 76804,
     imageUrl: 'https://www.basketball-reference.com/req/202106291/images/headshots/gervige01.jpg',
     description: '1979-80 NBA Scoring Champion. "The Iceman" dominated from the perimeter.',
@@ -11900,6 +12635,7 @@ const rawCards = [
     pts: 30.7,
     reb: 7.0,
     ast: 2.2,
+    age: 25,
     nbaId: 76505,
     imageUrl: 'https://www.basketball-reference.com/req/202106291/images/headshots/dantlad01.jpg',
     description: '1980-81 NBA Scoring Champion. A master of the low post and the free throw line.',
@@ -11918,6 +12654,7 @@ const rawCards = [
     pts: 32.3,
     reb: 4.6,
     ast: 2.8,
+    age: 21,
     nbaId: 76804,
     imageUrl: 'https://www.basketball-reference.com/req/202106291/images/headshots/gervige01.jpg',
     description: '1981-82 NBA Scoring Champion. Captured his 4th scoring title in five years.',
@@ -11936,6 +12673,7 @@ const rawCards = [
     pts: 28.4,
     reb: 6.0,
     ast: 3.7,
+    age: 25,
     nbaId: 76673,
     imageUrl: 'https://www.basketball-reference.com/req/202106291/images/headshots/englial01.jpg',
     description: '1982-83 NBA Scoring Champion. The leading scorer of the 1980s.',
@@ -11954,6 +12692,7 @@ const rawCards = [
     pts: 30.6,
     reb: 6.0,
     ast: 2.8,
+    age: 25,
     nbaId: 76505,
     imageUrl: 'https://www.basketball-reference.com/req/202106291/images/headshots/dantlad01.jpg',
     description: '1983-84 NBA Scoring Champion. Secured his second career scoring title.',
@@ -11972,6 +12711,7 @@ const rawCards = [
     pts: 32.9,
     reb: 5.8,
     ast: 3.0,
+    age: 25,
     nbaId: 77263,
     imageUrl: 'https://www.basketball-reference.com/req/202106291/images/headshots/kingbe01.jpg',
     description: '1984-85 NBA Scoring Champion. A legendary scorer who redefined the SF position.',
@@ -11990,6 +12730,7 @@ const rawCards = [
     pts: 30.3,
     reb: 7.8,
     ast: 2.7,
+    age: 25,
     nbaId: 78534,
     imageUrl: 'https://www.basketball-reference.com/req/202106291/images/headshots/wilkido01.jpg',
     description: '1985-86 NBA Scoring Champion. "The Human Highlight Film" soared above all.',
@@ -12008,6 +12749,7 @@ const rawCards = [
     pts: 37.1,
     reb: 5.2,
     ast: 4.6,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1986-87 NBA Scoring Champion. One of the highest scoring seasons in NBA history.',
@@ -12026,6 +12768,7 @@ const rawCards = [
     pts: 35.0,
     reb: 5.5,
     ast: 5.9,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1987-88 NBA Scoring Champion. Completed a historic Triple Crown: Scoring, MVP, and DPOY.',
@@ -12044,6 +12787,7 @@ const rawCards = [
     pts: 32.5,
     reb: 8.0,
     ast: 8.0,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1988-89 NBA Scoring Champion. Perhaps MJ\'s most statistically complete season.',
@@ -12062,6 +12806,7 @@ const rawCards = [
     pts: 33.6,
     reb: 6.9,
     ast: 6.3,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1989-90 NBA Scoring Champion. Continued his dominance with his 4th straight title.',
@@ -12080,6 +12825,7 @@ const rawCards = [
     pts: 31.5,
     reb: 6.0,
     ast: 5.5,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1990-91 NBA Scoring Champion. Led the Bulls to their first ever NBA Championship.',
@@ -12098,6 +12844,7 @@ const rawCards = [
     pts: 30.1,
     reb: 6.4,
     ast: 6.1,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1991-92 NBA Scoring Champion. Six straight scoring titles and back-to-back rings.',
@@ -12116,6 +12863,7 @@ const rawCards = [
     pts: 32.6,
     reb: 6.7,
     ast: 5.5,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1992-93 NBA Scoring Champion. Completed the first Three-Peat of the Jordan era.',
@@ -12134,6 +12882,7 @@ const rawCards = [
     pts: 29.8,
     reb: 10.7,
     ast: 4.8,
+    age: 25,
     nbaId: 95,
     imageUrl: 'https://sanantoniosports.org/wp-content/uploads/2024/04/Running-1.jpg',
     description: '1993-94 NBA Scoring Champion. "The Admiral" scored 71 points on the final day to clinch the title.',
@@ -12152,6 +12901,7 @@ const rawCards = [
     pts: 27.6,
     reb: 10.8,
     ast: 2.9,
+    age: 25,
     nbaId: 95,
     imageUrl: 'https://sanantoniosports.org/wp-content/uploads/2024/04/Running-1.jpg',
     description: '1994-95 NBA Scoring Champion. Combined scoring dominance with league MVP honors.',
@@ -12170,6 +12920,7 @@ const rawCards = [
     pts: 30.4,
     reb: 6.6,
     ast: 4.3,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1995-96 NBA Scoring Champion. Returned to lead the Bulls to a then-record 72 wins.',
@@ -12188,6 +12939,7 @@ const rawCards = [
     pts: 29.6,
     reb: 5.9,
     ast: 4.3,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1996-97 NBA Scoring Champion. Nine scoring titles and still flying high.',
@@ -12206,6 +12958,7 @@ const rawCards = [
     pts: 28.7,
     reb: 5.8,
     ast: 3.5,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.britannica.com/96/195196-050-3909D5BD/Michael-Jordan-1988.jpg',
     description: '1997-98 NBA Scoring Champion. Captured a record 10th scoring title and the Last Dance championship.',
@@ -12224,6 +12977,7 @@ const rawCards = [
     pts: 26.8,
     reb: 4.9,
     ast: 4.6,
+    age: 27,
     nbaId: 947,
     imageUrl: 'https://i.ytimg.com/vi/2REkZG-dhHc/hqdefault.jpg',
     description: '1998-99 NBA Scoring Champion. "The Answer" became the shortest player to lead the league in scoring.',
@@ -12242,6 +12996,7 @@ const rawCards = [
     pts: 29.7,
     reb: 13.6,
     ast: 3.8,
+    age: 25,
     nbaId: 406,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F614.png',
     description: '1999-00 NBA Scoring Champion. Most dominant physical force in NBA history.',
@@ -12260,6 +13015,7 @@ const rawCards = [
     pts: 31.1,
     reb: 3.8,
     ast: 4.6,
+    age: 27,
     nbaId: 947,
     imageUrl: 'https://i.ytimg.com/vi/2REkZG-dhHc/hqdefault.jpg',
     description: '2000-01 NBA Scoring Champion. Led the Sixers to the NBA Finals in his MVP year.',
@@ -12278,6 +13034,7 @@ const rawCards = [
     pts: 31.4,
     reb: 3.5,
     ast: 5.5,
+    age: 27,
     nbaId: 947,
     imageUrl: 'https://i.ytimg.com/vi/2REkZG-dhHc/hqdefault.jpg',
     description: '2001-02 NBA Scoring Champion. Won his second straight and third overall scoring title.',
@@ -12296,6 +13053,7 @@ const rawCards = [
     pts: 32.1,
     reb: 6.5,
     ast: 5.5,
+    age: 25,
     nbaId: 1515,
     imageUrl: 'https://platform.sbnation.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/9202649/2733366.jpg?quality=90&strip=all&crop=2.925%2C0%2C94.15%2C100&w=2400',
     description: '2002-03 NBA Scoring Champion. T-Mac reached his absolute peak as a scorer.',
@@ -12314,6 +13072,7 @@ const rawCards = [
     pts: 28.0,
     reb: 6.0,
     ast: 5.5,
+    age: 25,
     nbaId: 1515,
     imageUrl: 'https://platform.sbnation.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/9202649/2733366.jpg?quality=90&strip=all&crop=2.925%2C0%2C94.15%2C100&w=2400',
     description: '2003-04 NBA Scoring Champion. Back-to-back scoring titles for the Magic superstar.',
@@ -12332,6 +13091,7 @@ const rawCards = [
     pts: 30.7,
     reb: 3.7,
     ast: 7.9,
+    age: 27,
     nbaId: 947,
     imageUrl: 'https://i.ytimg.com/vi/2REkZG-dhHc/hqdefault.jpg',
     description: '2004-05 NBA Scoring Champion. A 4th scoring title for one of the greatest little men ever.',
@@ -12350,6 +13110,7 @@ const rawCards = [
     pts: 35.4,
     reb: 5.3,
     ast: 4.5,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F110.png',
     description: '2005-06 NBA Scoring Champion. The "Mamba Mentality" season with 81 points and 35.4 PPG.',
@@ -12368,6 +13129,7 @@ const rawCards = [
     pts: 31.6,
     reb: 5.7,
     ast: 5.4,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F110.png',
     description: '2006-07 NBA Scoring Champion. Captured back-to-back scoring titles.',
@@ -12386,6 +13148,7 @@ const rawCards = [
     pts: 30.0,
     reb: 7.9,
     ast: 7.2,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1966.png',
     description: '2007-08 NBA Scoring Champion. "The Chosen One" officially became the league\'s scoring king.',
@@ -12404,6 +13167,7 @@ const rawCards = [
     pts: 30.2,
     reb: 5.0,
     ast: 7.5,
+    age: 25,
     nbaId: 2548,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F1987.png',
     description: '2008-09 NBA Scoring Champion. A masterclass of speed and slashing from "Flash".',
@@ -12422,6 +13186,7 @@ const rawCards = [
     pts: 30.1,
     reb: 7.6,
     ast: 2.8,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3202.png',
     description: '2009-10 NBA Scoring Champion. At 21, KD became the youngest scoring champion in NBA history.',
@@ -12440,6 +13205,7 @@ const rawCards = [
     pts: 27.7,
     reb: 6.8,
     ast: 2.7,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3202.png',
     description: '2010-11 NBA Scoring Champion. Second straight title as the most pure scorer in the game.',
@@ -12458,6 +13224,7 @@ const rawCards = [
     pts: 28.0,
     reb: 8.0,
     ast: 3.5,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3202.png',
     description: '2011-12 NBA Scoring Champion. A Three-Peat of scoring titles as a 23-year-old phenom.',
@@ -12476,6 +13243,7 @@ const rawCards = [
     pts: 28.7,
     reb: 6.9,
     ast: 2.6,
+    age: 25,
     nbaId: 2546,
     imageUrl: 'https://media.cnn.com/api/v1/images/stellar/prod/230522103741-03-carmelo-anthony-file.jpg?c=original',
     description: '2012-13 NBA Scoring Champion. Melo brought scoring glory back to Madison Square Garden.',
@@ -12494,6 +13262,7 @@ const rawCards = [
     pts: 32.0,
     reb: 7.4,
     ast: 5.5,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3202.png',
     description: '2013-14 NBA Scoring Champion. Durant joined the elite of the elite with his 4th title and league MVP.',
@@ -12512,6 +13281,7 @@ const rawCards = [
     pts: 28.1,
     reb: 7.3,
     ast: 8.6,
+    age: 25,
     nbaId: 201566,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3468.png',
     description: '2014-15 NBA Scoring Champion. Russ took over while KD was injured and secured his first scoring title.',
@@ -12530,6 +13300,7 @@ const rawCards = [
     pts: 30.1,
     reb: 5.4,
     ast: 6.7,
+    age: 37,
     nbaId: 201939,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3975.png',
     description: '2015-16 NBA Scoring Champion. The unanimous MVP season: 402 threes and a scoring crown.',
@@ -12548,6 +13319,7 @@ const rawCards = [
     pts: 31.6,
     reb: 10.7,
     ast: 10.4,
+    age: 25,
     nbaId: 201566,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3468.png',
     description: '2016-17 NBA Scoring Champion. Broke Oscar Robertson\'s triple-double record and won the scoring title.',
@@ -12566,6 +13338,7 @@ const rawCards = [
     pts: 30.4,
     reb: 5.4,
     ast: 8.8,
+    age: 36,
     nbaId: 201935,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3992.png',
     description: '2017-18 NBA Scoring Champion. "The Beard" manipulated every defense and became MVP.',
@@ -12584,6 +13357,7 @@ const rawCards = [
     pts: 36.1,
     reb: 6.6,
     ast: 7.5,
+    age: 36,
     nbaId: 201935,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3992.png',
     description: '2018-19 NBA Scoring Champion. One of the most prolific individual scoring runs in modern history.',
@@ -12602,6 +13376,7 @@ const rawCards = [
     pts: 34.3,
     reb: 6.4,
     ast: 7.4,
+    age: 36,
     nbaId: 201935,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3992.png',
     description: '2019-20 NBA Scoring Champion. Secured his 3rd straight scoring title before the league shifted.',
@@ -12620,6 +13395,7 @@ const rawCards = [
     pts: 32.0,
     reb: 5.5,
     ast: 5.8,
+    age: 37,
     nbaId: 201939,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3975.png',
     description: '2020-21 NBA Scoring Champion. Steph proved the doubters wrong with a second scoring crown at 33.',
@@ -12638,6 +13414,7 @@ const rawCards = [
     pts: 30.6,
     reb: 11.7,
     ast: 4.2,
+    age: 31,
     nbaId: 203954,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3059318.png',
     description: '2021-22 NBA Scoring Champion. The first center to lead the league in scoring since Shaq.',
@@ -12656,6 +13433,7 @@ const rawCards = [
     pts: 33.1,
     reb: 10.2,
     ast: 4.2,
+    age: 31,
     nbaId: 203954,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3059318.png',
     description: '2022-23 NBA Scoring Champion. Back-to-back scoring titles confirmed his place as an all-time great peak center.',
@@ -12674,6 +13452,7 @@ const rawCards = [
     pts: 33.9,
     reb: 9.2,
     ast: 9.8,
+    age: 25,
     nbaId: 1629029,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3945274.png',
     description: '2023-24 NBA Scoring Champion. The Slovenian magician conquered the NBA scoring world.',
@@ -12692,6 +13471,7 @@ const rawCards = [
     pts: 32.7,
     reb: 4.7,
     ast: 6.4,
+    age: 27,
     nbaId: 1628983,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F4278073.png',
     description: '2024-25 NBA Scoring Champion. SGA reached the pinnacle with elite mid-range and rim pressure.',
@@ -12710,6 +13490,7 @@ const rawCards = [
     pts: 33.5,
     reb: 7.7,
     ast: 8.3,
+    age: 25,
     nbaId: 1629029,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3945274.png',
     description: '2025-26 NBA Scoring Champion. Now in Tinseltown, Luka continues to light up the scoreboard.',
@@ -12730,6 +13511,7 @@ const rawCards = [
     pts: 27.0,
     reb: 5.8,
     ast: 6.7,
+    age: 25,
     nbaId: 600015,
     imageUrl: 'https://objetos-xlk.estaticos-marca.com/uploads/2024/07/05/17182013983349.png',
     quote: 'The Logo.'
@@ -12747,6 +13529,7 @@ const rawCards = [
     pts: 25.7,
     reb: 7.5,
     ast: 9.5,
+    age: 25,
     nbaId: 600007,
     imageUrl: 'https://www.myblackhistory.net/oscar.jpg',
     quote: 'The Big O.'
@@ -12764,6 +13547,7 @@ const rawCards = [
     pts: 30.1,
     reb: 22.9,
     ast: 4.4,
+    age: 25,
     nbaId: 600004,
     imageUrl: 'https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcRRG5sGbCA8NDw_J7RM1iTDDre5aYzg96DHVOhyq8mxWAlERnifnOksiPkC1ca_-6GfoGR4PECQp99_1uU',
     quote: 'The Big Dipper.'
@@ -12781,6 +13565,7 @@ const rawCards = [
     pts: 15.1,
     reb: 22.5,
     ast: 4.3,
+    age: 25,
     nbaId: 600003,
     imageUrl: 'https://www.hollywoodreporter.com/wp-content/uploads/2022/01/Bill-Russell-Boston-1950s-Everett-P8DBIRU_EC001-EMBED-2022.jpg',
     quote: 'The ultimate winner.'
@@ -12798,6 +13583,7 @@ const rawCards = [
     pts: 27.4,
     reb: 13.5,
     ast: 4.3,
+    age: 25,
     nbaId: 600008,
     imageUrl: 'https://people.com/thmb/A985skBp-7CoPESTJY01mMG8XBo=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(750x379:752x381)/elgin-baylor-1-2000-9afb8cf311fb480fbbe2b12f31a66bf5.jpg',
     quote: 'The first great high-flyer.'
@@ -12815,6 +13601,7 @@ const rawCards = [
     pts: 18.8,
     reb: 3.0,
     ast: 3.9,
+    age: 25,
     nbaId: 600019,
     imageUrl: 'https://www.nbamaniacs.com/wp-content/uploads/2022/07/GettyImages-455539916-1568x882-1.jpg',
     quote: 'Earl the Pearl.'
@@ -12832,6 +13619,7 @@ const rawCards = [
     pts: 18.9,
     reb: 5.9,
     ast: 6.1,
+    age: 25,
     nbaId: 600016,
     imageUrl: 'https://cdn.britannica.com/07/258007-050-4F67E33A/Basketball-player-Walt-Frazier-dribbles-the-ball-against-the-Baltimore-Bullets-during-an-NBA-basketball-game-1971.jpg',
     quote: 'Clyde.'
@@ -12849,6 +13637,7 @@ const rawCards = [
     pts: 24.6,
     reb: 11.2,
     ast: 3.6,
+    age: 25,
     nbaId: 600001,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Kareem_Abdul-Jabbar_1974.jpeg/250px-Kareem_Abdul-Jabbar_1974.jpeg',
     quote: 'Cap. Master of the Skyhook.'
@@ -12866,6 +13655,7 @@ const rawCards = [
     pts: 22.0,
     reb: 8.5,
     ast: 4.2,
+    age: 25,
     nbaId: 600013,
     imageUrl: 'https://cdn.britannica.com/14/198714-050-2883B189/Julius-Erving.jpg',
     quote: 'Dr. J.'
@@ -12883,6 +13673,7 @@ const rawCards = [
     pts: 24.3,
     reb: 10.0,
     ast: 6.3,
+    age: 25,
     nbaId: 2182,
     imageUrl: 'https://cdn.britannica.com/60/258260-050-35DB0395/larry-bird-of-boston-celtics-shoots-free-throw-against-the-washington-bullets-1985.jpg',
     quote: 'Larry Legend.'
@@ -12900,6 +13691,7 @@ const rawCards = [
     pts: 19.5,
     reb: 7.2,
     ast: 11.2,
+    age: 25,
     nbaId: 600025,
     imageUrl: 'https://cdn.britannica.com/27/189527-050-5BAD12C2/Magic-Johnson.jpg',
     quote: 'Showtime.'
@@ -12917,6 +13709,7 @@ const rawCards = [
     pts: 22.1,
     reb: 11.7,
     ast: 3.9,
+    age: 25,
     nbaId: 787,
     imageUrl: 'https://cdn.nba.com/manage/2021/09/charlesbarkley-1568x882.jpg',
     quote: 'Sir Charles.'
@@ -12934,6 +13727,7 @@ const rawCards = [
     pts: 16.1,
     reb: 6.4,
     ast: 5.2,
+    age: 25,
     nbaId: 600039,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHvd5FDEr5Us_6Wr26gB03J4HO0kJSkET8EyikZ0PVGgcKncbGOdaT83zEyCkg8vdIw-171rgSo4bUq01f5UMG5EfCWM5Y_d4zFTbtww&s=10',
     quote: 'One of the greatest perimeter defenders.'
@@ -12951,6 +13745,7 @@ const rawCards = [
     pts: 21.0,
     reb: 9.8,
     ast: 2.9,
+    age: 25,
     nbaId: 600036,
     imageUrl: 'https://tuscamisetasnba.com/wp-content/uploads/curiosidades-patrick-ewing.jpg',
     quote: 'The heart of the Knicks.'
@@ -12968,6 +13763,7 @@ const rawCards = [
     pts: 16.1,
     reb: 3.1,
     ast: 4.5,
+    age: 25,
     nbaId: 600033,
     imageUrl: 'https://michigansportshof.org/wp-content/uploads/2019/01/joe-dumars.jpg',
     quote: 'A class act and a tough defender.'
@@ -12985,6 +13781,7 @@ const rawCards = [
     pts: 20.4,
     reb: 6.1,
     ast: 5.6,
+    age: 25,
     nbaId: 600031,
     imageUrl: 'https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/clyde-drexler-dick-raphael.jpg',
     quote: 'Clyde the Glide.'
@@ -13002,6 +13799,7 @@ const rawCards = [
     pts: 21.8,
     reb: 11.1,
     ast: 2.5,
+    age: 25,
     nbaId: 600037,
     imageUrl: 'https://cdn.nba.com/manage/2017/08/hakeem-olajuwon-iso-stands.jpg',
     quote: 'The Dream.'
@@ -13019,6 +13817,7 @@ const rawCards = [
     pts: 30.1,
     reb: 6.2,
     ast: 5.3,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://static.wikia.nocookie.net/nbastreet/images/9/97/FDB1BF72-3F75-446F-B4F2-000331AE638B.jpeg/revision/latest?cb=20210419024456',
     quote: 'The GOAT.'
@@ -13036,6 +13835,7 @@ const rawCards = [
     pts: 13.1,
     reb: 2.7,
     ast: 10.5,
+    age: 25,
     nbaId: 600043,
     imageUrl: 'https://platform.slcdunk.com/wp-content/uploads/sites/145/chorus/uploads/chorus_asset/file/15987854/1500510.jpg.jpg?quality=90&strip=all&crop=0,4.1508916323731,100,65.953360768176',
     quote: 'The master of the assist.'
@@ -13053,6 +13853,7 @@ const rawCards = [
     pts: 25.0,
     reb: 10.1,
     ast: 3.6,
+    age: 25,
     nbaId: 600044,
     imageUrl: 'https://cdn.britannica.com/38/256938-050-D1B6AF47/Karl-Malone-NBA-Utah-Jazz-basketball-player.jpg',
     quote: 'The Mailman.'
@@ -13070,6 +13871,7 @@ const rawCards = [
     pts: 16.1,
     reb: 6.4,
     ast: 5.2,
+    age: 25,
     nbaId: 600039,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Lipofsky_Pippen.jpg/250px-Lipofsky_Pippen.jpg',
     quote: 'Pip.'
@@ -13087,6 +13889,7 @@ const rawCards = [
     pts: 7.3,
     reb: 13.1,
     ast: 1.8,
+    age: 25,
     nbaId: 600047,
     imageUrl: 'https://cdn.gigantes.com/wp-content/uploads/sites/4/2020/03/rodman-a.jpg',
     quote: 'The Worm.'
@@ -13104,6 +13907,7 @@ const rawCards = [
     pts: 18.2,
     reb: 3.0,
     ast: 3.0,
+    age: 22,
     nbaId: 714,
     imageUrl: 'https://m.media-amazon.com/images/M/MV5BMTUxODg1Nzg5OV5BMl5BanBnXkFtZTcwNTMzMjkwMw@@._V1_.jpg',
     quote: 'Miller Time.'
@@ -13121,6 +13925,7 @@ const rawCards = [
     pts: 16.3,
     reb: 4.3,
     ast: 6.7,
+    age: 25,
     nbaId: 600053,
     imageUrl: 'https://static.wikia.nocookie.net/nba/images/b/b1/Gary-payton-net-worth2.jpg/revision/latest?cb=20170302235016',
     quote: 'The Glove.'
@@ -13138,6 +13943,7 @@ const rawCards = [
     pts: 21.0,
     reb: 3.8,
     ast: 3.3,
+    age: 25,
     nbaId: 600055,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTj3KHBaH0KsTzdh1xRWPUVGyu8BGBxMvX-Yg&s',
     quote: 'The Rock.'
@@ -13155,6 +13961,7 @@ const rawCards = [
     pts: 17.1,
     reb: 8.5,
     ast: 1.2,
+    age: 25,
     nbaId: 600057,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b7/Alonzo_Mourning.jpg',
     quote: 'Zo.'
@@ -13172,6 +13979,7 @@ const rawCards = [
     pts: 26.7,
     reb: 3.7,
     ast: 6.2,
+    age: 27,
     nbaId: 190,
     imageUrl: 'https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcTVyN6kTMpgFUTFFFrnalJeT_f_SrXOX1dUEakW1Hexnc_q-jhU7QM66W-DuiIwFHYICYxIxOVLDwGzE4E',
     quote: 'The Answer.'
@@ -13189,6 +13997,7 @@ const rawCards = [
     pts: 19.0,
     reb: 9.2,
     ast: 1.9,
+    age: 25,
     nbaId: 2397,
     imageUrl: 'https://bucket-image.inkmaginecms.com/version/social/1/image/2024/05/d9421767-62e7-4ffe-a862-1a0838d34131.jpg',
     quote: 'Great Wall of Yao.'
@@ -13206,6 +14015,7 @@ const rawCards = [
     pts: 23.7,
     reb: 10.9,
     ast: 2.5,
+    age: 25,
     nbaId: 406,
     imageUrl: 'https://i.pinimg.com/474x/8a/6a/77/8a6a77ce4bdf658b627a779c83cb0bf0.jpg',
     quote: 'Shaq Diesel.'
@@ -13223,6 +14033,7 @@ const rawCards = [
     pts: 19.6,
     reb: 5.6,
     ast: 4.4,
+    age: 25,
     nbaId: 1515,
     imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_fill,w_1200,ar_1:1,f_auto,q_auto,g_auto/shape/cover/sport/d4627c41abd99f569b157d269181284b7029b07099e76992c8f1d2a2839f0828.jpg',
     quote: 'T-Mac.'
@@ -13240,6 +14051,7 @@ const rawCards = [
     pts: 14.3,
     reb: 3.0,
     ast: 8.5,
+    age: 25,
     nbaId: 201565,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Steve_Nash_00054544.jpg/250px-Steve_Nash_00054544.jpg',
     quote: 'Point God Nash.'
@@ -13257,6 +14069,7 @@ const rawCards = [
     pts: 18.9,
     reb: 4.1,
     ast: 3.4,
+    age: 27,
     nbaId: 947,
     imageUrl: 'https://platform.sbnation.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/8539251/52951161.jpg?quality=90&strip=all&crop=0%2C0%2C100%2C94.392104082548&w=2400',
     quote: 'Jesus Shuttlesworth. The perfect jumper.'
@@ -13274,6 +14087,7 @@ const rawCards = [
     pts: 25.0,
     reb: 5.2,
     ast: 4.7,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://cdn.artphotolimited.com/images/67ceea65865e9b3b9ef7de2b/300x300/kobe-bryant-2001-nba-finals.jpg',
     quote: 'Mamba Out.'
@@ -13291,6 +14105,7 @@ const rawCards = [
     pts: 19.0,
     reb: 10.8,
     ast: 3.0,
+    age: 25,
     nbaId: 1495,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Tim_Duncan_Walks_Verizon_Center%27s_Floor_%28cropped%29.jpg/960px-Tim_Duncan_Walks_Verizon_Center%27s_Floor_%28cropped%29.jpg',
     quote: 'The Big Fundamental.'
@@ -13308,6 +14123,7 @@ const rawCards = [
     pts: 17.8,
     reb: 10.0,
     ast: 3.7,
+    age: 25,
     nbaId: 708,
     imageUrl: 'https://i.redd.it/4va5s86dnvje1.jpeg',
     quote: 'Anything is possible!'
@@ -13325,6 +14141,7 @@ const rawCards = [
     pts: 20.7,
     reb: 9.8,
     ast: 4.2,
+    age: 25,
     nbaId: 185,
     imageUrl: 'https://static.wikia.nocookie.net/nba-contrafactic/images/4/4f/Webber.jpg/revision/latest?cb=20210716183716&path-prefix=es',
     quote: 'C-Webb.'
@@ -13342,6 +14159,7 @@ const rawCards = [
     pts: 19.7,
     reb: 5.6,
     ast: 3.5,
+    age: 40,
     nbaId: 1718,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Paul_pierce_1.jpg/960px-Paul_pierce_1.jpg',
     quote: 'The Truth.'
@@ -13359,6 +14177,7 @@ const rawCards = [
     pts: 5.7,
     reb: 9.6,
     ast: 1.3,
+    age: 25,
     nbaId: 1111,
     imageUrl: 'https://media-cldnry.s-nbcnews.com/image/upload/t_social_share_1024x768_scale,f_auto,q_auto:best/msnbc/Components/Photos/050610/050610_ben_wallace_hmed.jpg',
     quote: 'Big Ben.'
@@ -13376,6 +14195,7 @@ const rawCards = [
     pts: 13.3,
     reb: 3.5,
     ast: 3.8,
+    age: 25,
     nbaId: 1938,
     imageUrl: 'https://fotos.perfil.com/2022/04/02/trim/720/410/ginobili-1335881.jpg',
     quote: 'The Eurostep pioneer.'
@@ -13393,6 +14213,7 @@ const rawCards = [
     pts: 17.7,
     reb: 3.4,
     ast: 7.8,
+    age: 25,
     nbaId: 88,
     imageUrl: 'https://imageio.forbes.com/specials-images/imageserve/65d25debd91f185c5cac9977/0x0.jpg?format=jpg&crop=3596,2022,x0,y22,safe&height=900&width=1600&fit=bounds',
     quote: 'The UTEP Two-Step.'
@@ -13410,6 +14231,7 @@ const rawCards = [
     pts: 20.7,
     reb: 7.5,
     ast: 2.4,
+    age: 25,
     nbaId: 1717,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Dirk_Nowitzki_2.jpg/250px-Dirk_Nowitzki_2.jpg',
     quote: 'The greatest European player.'
@@ -13427,6 +14249,7 @@ const rawCards = [
     pts: 15.5,
     reb: 2.9,
     ast: 5.6,
+    age: 25,
     nbaId: 2225,
     imageUrl: 'https://tuscamisetasnba.com/wp-content/uploads/curiosidaes-tony-parker.jpg',
     quote: 'The blur.'
@@ -13444,6 +14267,7 @@ const rawCards = [
     pts: 22.0,
     reb: 4.7,
     ast: 5.4,
+    age: 25,
     nbaId: 2548,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Dwyane_Wade_e1.jpg/1280px-Dwyane_Wade_e1.jpg',
     quote: 'Flash.'
@@ -13461,6 +14285,7 @@ const rawCards = [
     pts: 17.0,
     reb: 8.9,
     ast: 3.3,
+    age: 25,
     nbaId: 2203,
     imageUrl: 'https://sport.jotdown.es/wp-content/uploads/2025/05/Proyecto-nuevo-2025-05-11T180514.769.jpg',
     quote: 'The heart and mind of a champion.'
@@ -13478,6 +14303,7 @@ const rawCards = [
     pts: 16.7,
     reb: 4.3,
     ast: 3.1,
+    age: 25,
     nbaId: 1713,
     imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMQY_uW3wQ2DZsaR9zetur2_CH_rmW5YoCfcKRWadiblodTAQ3bHNB3H1IO0QuTp4i95kPGX40Dz5WfakgpEA7FNAhYX64O07eYDmUjqo&s=10',
     quote: 'Half-Man, Half-Amazing.'
@@ -13495,6 +14321,7 @@ const rawCards = [
     pts: 15.6,
     reb: 3.0,
     ast: 5.7,
+    age: 25,
     nbaId: 1497,
     imageUrl: 'https://static01.nyt.com/images/2025/10/23/multimedia/23met-nba-gambling-billups-bio-top-fqwl/23met-nba-gambling-billups-bio-top-fqwl-articleLarge.jpg?quality=75&auto=webp&disable=upscale',
     quote: 'Mr. Big Shot.'
@@ -13512,6 +14339,7 @@ const rawCards = [
     pts: 22.5,
     reb: 6.2,
     ast: 2.7,
+    age: 25,
     nbaId: 2546,
     imageUrl: 'https://imageio.forbes.com/specials-images/imageserve/646b9b77976ffbea12b502f7/Denver-Nuggets-v-Los-Angeles-Lakers--Game-2/0x0.jpg?crop=1998,2996,x0,y0,safe&height=1066&width=711&fit=bounds',
     quote: 'Stay Me7o.'
@@ -13529,6 +14357,7 @@ const rawCards = [
     pts: 17.1,
     reb: 12.5,
     ast: 1.5,
+    age: 25,
     nbaId: 2730,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/76/Dwight_Howard.jpg',
     quote: 'Superman.'
@@ -13546,6 +14375,7 @@ const rawCards = [
     pts: 18.9,
     reb: 8.0,
     ast: 1.8,
+    age: 25,
     nbaId: 2403,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Amar%27e_Stoudemire_free_throw.jpg/250px-Amar%27e_Stoudemire_free_throw.jpg',
     quote: 'STAT.'
@@ -13565,6 +14395,7 @@ const rawCards = [
     pts: 61,
     reb: 21,
     ast: 0,
+    age: 25,
     nbaId: 600060,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600060.png',
     description: "Built the foundation of a dynasty — Bird's first coach.",
@@ -13583,6 +14414,7 @@ const rawCards = [
     pts: 44,
     reb: 38,
     ast: 0,
+    age: 25,
     nbaId: 600061,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600061.png',
     description: 'A comeback story — returned to coaching after a near-fatal accident.',
@@ -13601,6 +14433,7 @@ const rawCards = [
     pts: 43,
     reb: 39,
     ast: 0,
+    age: 25,
     nbaId: 600062,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600062.png',
     description: 'A tactical mastermind who squeezed greatness out of limited talent.',
@@ -13619,6 +14452,7 @@ const rawCards = [
     pts: 51,
     reb: 31,
     ast: 0,
+    age: 25,
     nbaId: 600063,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600063.png',
     description: 'The godfather of small-ball — 30 years ahead of his time.',
@@ -13637,6 +14471,7 @@ const rawCards = [
     pts: 45,
     reb: 37,
     ast: 0,
+    age: 25,
     nbaId: 600064,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600064.png',
     description: 'Turned Utah into a legitimate Western Conference contender.',
@@ -13655,6 +14490,7 @@ const rawCards = [
     pts: 59,
     reb: 23,
     ast: 0,
+    age: 25,
     nbaId: 600063,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600063.png',
     description: 'His second COY — Nellie Ball was unstoppable in its prime.',
@@ -13673,6 +14509,7 @@ const rawCards = [
     pts: 50,
     reb: 32,
     ast: 0,
+    age: 25,
     nbaId: 600065,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600065.png',
     description: 'Defensive genius who made Atlanta feared across the East.',
@@ -13691,6 +14528,7 @@ const rawCards = [
     pts: 49,
     reb: 33,
     ast: 0,
+    age: 25,
     nbaId: 600066,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600066.png',
     description: 'Got the most out of a young Clyde Drexler and a hungry squad.',
@@ -13709,6 +14547,7 @@ const rawCards = [
     pts: 54,
     reb: 28,
     ast: 0,
+    age: 25,
     nbaId: 600067,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600067.png',
     description: 'The architect of the most entertaining offense in NBA history.',
@@ -13727,6 +14566,7 @@ const rawCards = [
     pts: 55,
     reb: 27,
     ast: 0,
+    age: 25,
     nbaId: 600068,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600068.png',
     description: 'Took a broken franchise and turned it into a 55-win team overnight.',
@@ -13745,6 +14585,7 @@ const rawCards = [
     pts: 63,
     reb: 19,
     ast: 0,
+    age: 25,
     nbaId: 2133,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F2133.png',
     description: 'Showtime at its peak — Riley had LA running like a machine.',
@@ -13763,6 +14604,7 @@ const rawCards = [
     pts: 52,
     reb: 30,
     ast: 0,
+    age: 25,
     nbaId: 600069,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600069.png',
     description: "Quietly turned Houston into one of the West's toughest outs.",
@@ -13781,6 +14623,7 @@ const rawCards = [
     pts: 55,
     reb: 27,
     ast: 0,
+    age: 25,
     nbaId: 600063,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600063.png',
     description: 'Run TMC at full speed — his third COY cemented the legend.',
@@ -13799,6 +14642,7 @@ const rawCards = [
     pts: 60,
     reb: 22,
     ast: 0,
+    age: 25,
     nbaId: 2133,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F2133.png',
     description: 'Turned Broadway into a war zone — the Knicks were terrifying.',
@@ -13817,6 +14661,7 @@ const rawCards = [
     pts: 57,
     reb: 25,
     ast: 0,
+    age: 25,
     nbaId: 600070,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600070.png',
     description: 'A Hall of Famer on the bench — calm, collected, elite.',
@@ -13835,6 +14680,7 @@ const rawCards = [
     pts: 48,
     reb: 34,
     ast: 0,
+    age: 25,
     nbaId: 600071,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600071.png',
     description: 'Steady hands rebuilding the Lakers in the post-Magic era.',
@@ -13853,6 +14699,7 @@ const rawCards = [
     pts: 72,
     reb: 10,
     ast: 0,
+    age: 25,
     nbaId: 600072,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600072.png',
     description: '72 wins. The greatest regular season ever. Enough said.',
@@ -13871,6 +14718,7 @@ const rawCards = [
     pts: 61,
     reb: 21,
     ast: 0,
+    age: 25,
     nbaId: 2133,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F2133.png',
     description: 'His third COY with a third team — the mark of a true genius.',
@@ -13889,6 +14737,7 @@ const rawCards = [
     pts: 58,
     reb: 24,
     ast: 0,
+    age: 25,
     nbaId: 2182,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F2182.png',
     description: 'The greatest player who became a great coach — instantly.',
@@ -13907,6 +14756,7 @@ const rawCards = [
     pts: 35,
     reb: 15,
     ast: 0,
+    age: 25,
     nbaId: 600073,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600073.png',
     description: 'Won a shortened season with a deep, dangerous Blazers squad.',
@@ -13925,6 +14775,7 @@ const rawCards = [
     pts: 41,
     reb: 41,
     ast: 0,
+    age: 25,
     nbaId: 2186,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F2186.png',
     description: 'Made the playoffs with a .500 team — pure coaching excellence.',
@@ -13943,6 +14794,7 @@ const rawCards = [
     pts: 56,
     reb: 26,
     ast: 0,
+    age: 29,
     nbaId: 600074,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600074.png',
     description: 'Took AI and a team of role players to the NBA Finals.',
@@ -13961,6 +14813,7 @@ const rawCards = [
     pts: 50,
     reb: 32,
     ast: 0,
+    age: 25,
     nbaId: 2028,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F2028.png',
     description: 'Installed a defensive culture that would win a title two years later.',
@@ -13979,6 +14832,7 @@ const rawCards = [
     pts: 60,
     reb: 22,
     ast: 0,
+    age: 25,
     nbaId: 600075,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600075.png',
     description: 'The beginning of an unmatched dynasty — Pop\'s first COY.',
@@ -13997,6 +14851,7 @@ const rawCards = [
     pts: 50,
     reb: 32,
     ast: 0,
+    age: 29,
     nbaId: 600076,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600076.png',
     description: 'Came out of retirement at 71 and won COY — an incredible story.',
@@ -14015,6 +14870,7 @@ const rawCards = [
     pts: 62,
     reb: 20,
     ast: 0,
+    age: 25,
     nbaId: 600077,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600077.png',
     description: '7 Seconds or Less — the offensive revolution started here.',
@@ -14033,6 +14889,7 @@ const rawCards = [
     pts: 60,
     reb: 22,
     ast: 0,
+    age: 25,
     nbaId: 600078,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600078.png',
     description: 'Took Dirk and the Mavs all the way to the Finals with pure fire.',
@@ -14051,6 +14908,7 @@ const rawCards = [
     pts: 47,
     reb: 35,
     ast: 0,
+    age: 29,
     nbaId: 600079,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600079.png',
     description: "Built Toronto's identity from scratch — Canada's coaching hero.",
@@ -14069,6 +14927,7 @@ const rawCards = [
     pts: 56,
     reb: 26,
     ast: 0,
+    age: 25,
     nbaId: 600080,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600080.png',
     description: 'Post-Katrina New Orleans had a team to believe in — thanks to Scott.',
@@ -14087,6 +14946,7 @@ const rawCards = [
     pts: 66,
     reb: 16,
     ast: 0,
+    age: 29,
     nbaId: 600081,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600081.png',
     description: '66 wins with LeBron — maximized every single resource he had.',
@@ -14105,6 +14965,7 @@ const rawCards = [
     pts: 50,
     reb: 32,
     ast: 0,
+    age: 25,
     nbaId: 600082,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600082.png',
     description: 'The young Thunder were flying — Brooks was the steady hand.',
@@ -14123,6 +14984,7 @@ const rawCards = [
     pts: 62,
     reb: 20,
     ast: 0,
+    age: 25,
     nbaId: 3906,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3906.png',
     description: 'Built the most suffocating defense in the modern era.',
@@ -14141,6 +15003,7 @@ const rawCards = [
     pts: 50,
     reb: 16,
     ast: 0,
+    age: 25,
     nbaId: 600075,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600075.png',
     description: 'In a lockout-shortened season, Pop still found a way to dominate.',
@@ -14159,6 +15022,7 @@ const rawCards = [
     pts: 57,
     reb: 25,
     ast: 0,
+    age: 21,
     nbaId: 600083,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600083.png',
     description: '57 wins despite losing Carmelo — Karl was pure tactical genius.',
@@ -14177,6 +15041,7 @@ const rawCards = [
     pts: 62,
     reb: 20,
     ast: 0,
+    age: 25,
     nbaId: 600075,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600075.png',
     description: 'His third COY — and that same year he won the championship.',
@@ -14195,6 +15060,7 @@ const rawCards = [
     pts: 60,
     reb: 22,
     ast: 0,
+    age: 25,
     nbaId: 600084,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600084.png',
     description: 'Turned Atlanta into the most fluid offensive team in the East.',
@@ -14213,6 +15079,7 @@ const rawCards = [
     pts: 73,
     reb: 9,
     ast: 0,
+    age: 25,
     nbaId: 600085,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600085.png',
     description: '73 wins. The best regular season record in NBA history.',
@@ -14231,6 +15098,7 @@ const rawCards = [
     pts: 55,
     reb: 27,
     ast: 0,
+    age: 25,
     nbaId: 600077,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600077.png',
     description: 'Reinvented Houston with Harden and the 3-point revolution.',
@@ -14249,6 +15117,7 @@ const rawCards = [
     pts: 59,
     reb: 23,
     ast: 0,
+    age: 25,
     nbaId: 600086,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600086.png',
     description: 'Built a 59-win team — then got fired. One of the sport\'s great injustices.',
@@ -14267,6 +15136,7 @@ const rawCards = [
     pts: 60,
     reb: 22,
     ast: 0,
+    age: 25,
     nbaId: 600084,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600084.png',
     description: 'Unlocked Giannis\'s full potential — the dynasty was beginning.',
@@ -14285,6 +15155,7 @@ const rawCards = [
     pts: 53,
     reb: 19,
     ast: 0,
+    age: 25,
     nbaId: 600087,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600087.png',
     description: 'Defending champions playing even better — Nurse had the answers.',
@@ -14303,6 +15174,7 @@ const rawCards = [
     pts: 41,
     reb: 31,
     ast: 0,
+    age: 25,
     nbaId: 3906,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F3906.png',
     description: 'Turned the Knicks from a joke into a playoff team overnight.',
@@ -14321,6 +15193,7 @@ const rawCards = [
     pts: 64,
     reb: 18,
     ast: 0,
+    age: 24,
     nbaId: 600088,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600088.png',
     description: '64 wins — the best record in the league, led with class and culture.',
@@ -14339,6 +15212,7 @@ const rawCards = [
     pts: 48,
     reb: 34,
     ast: 0,
+    age: 29,
     nbaId: 600081,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600081.png',
     description: "Ended Sacramento's 16-year playoff drought in year one.",
@@ -14357,6 +15231,7 @@ const rawCards = [
     pts: 57,
     reb: 25,
     ast: 0,
+    age: 25,
     nbaId: 600089,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600089.png',
     description: 'The youngest COY winner in decades — built OKC into a powerhouse.',
@@ -14375,6 +15250,7 @@ const rawCards = [
     pts: 64,
     reb: 18,
     ast: 0,
+    age: 25,
     nbaId: 600090,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600090.png',
     description: '15-0 start, three 12-game win streaks — Cleveland was unstoppable.',
@@ -14393,6 +15269,7 @@ const rawCards = [
     pts: 60,
     reb: 22,
     ast: 0,
+    age: 25,
     nbaId: 600091,
     imageUrl: 'https://a.espncdn.com/combiner/i?img=%2Fi%2Fheadshots%2Fnba%2Fplayers%2Ffull%2F600091.png',
     description: 'First 60-win season in Detroit since 2006 — the Pistons are back.',
@@ -14413,6 +15290,7 @@ const rawCards = [
     pts: 18.2,
     reb: 7.4,
     ast: 4.1,
+    age: 25,
     nbaId: 1642843,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642843.png',
     quote: 'The most anticipated prospect since LeBron. The Next Big Thing.',
@@ -14432,6 +15310,7 @@ const rawCards = [
     pts: 17.8,
     reb: 4.2,
     ast: 3.3,
+    age: 25,
     nbaId: 1642271,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642271.png',
     quote: 'Elite shotmaker with unlimited range.',
@@ -14451,6 +15330,7 @@ const rawCards = [
     pts: 16.4,
     reb: 4.1,
     ast: 5.2,
+    age: 25,
     nbaId: 1642844,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642844.png',
     quote: 'High-IQ playmaker with great size for a guard.',
@@ -14470,6 +15350,7 @@ const rawCards = [
     pts: 14.9,
     reb: 3.8,
     ast: 2.7,
+    age: 25,
     nbaId: 1642250,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642250.png',
     quote: 'Electrifying athlete and explosive finisher.',
@@ -14489,6 +15370,7 @@ const rawCards = [
     pts: 13.1,
     reb: 3.2,
     ast: 4.4,
+    age: 25,
     nbaId: 1642847,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642847.png',
     quote: 'Crafty guard with elite scoring instincts.',
@@ -14508,6 +15390,7 @@ const rawCards = [
     pts: 12.8,
     reb: 2.9,
     ast: 2.1,
+    age: 25,
     nbaId: 1642848,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642848.png',
     quote: 'Pure scorer with a deadly mid-range game.',
@@ -14527,6 +15410,7 @@ const rawCards = [
     pts: 12.3,
     reb: 5.1,
     ast: 1.8,
+    age: 25,
     nbaId: 1642846,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642846.png',
     quote: 'Unmatched physical tools and versatile skill set.',
@@ -14546,6 +15430,7 @@ const rawCards = [
     pts: 11.7,
     reb: 7.2,
     ast: 2.3,
+    age: 25,
     nbaId: 1642852,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642852.png',
     quote: 'Elite footwork and soft touch in the post.',
@@ -14565,6 +15450,7 @@ const rawCards = [
     pts: 10.9,
     reb: 4.4,
     ast: 1.9,
+    age: 25,
     nbaId: 1642907,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642907.png',
     quote: 'Versatile defender with a developing offensive game.',
@@ -14584,6 +15470,7 @@ const rawCards = [
     pts: 9.8,
     reb: 2.8,
     ast: 3.6,
+    age: 25,
     nbaId: 1642864,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642864.png',
     quote: 'International prodigy with exceptional court vision.',
@@ -14603,6 +15490,7 @@ const rawCards = [
     pts: 18.4,
     reb: 6.1,
     ast: 6.9,
+    age: 20,
     nbaId: 1642265,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642265.png',
     quote: 'The ultimate winner. Impacting winning at every level.',
@@ -14622,6 +15510,7 @@ const rawCards = [
     pts: 15.1,
     reb: 5.7,
     ast: 4.7,
+    age: 21,
     nbaId: 1642273,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642273.png',
     quote: 'The Swiss Army Knife of the capital.',
@@ -14641,6 +15530,7 @@ const rawCards = [
     pts: 14.8,
     reb: 7.9,
     ast: 2.8,
+    age: 20,
     nbaId: 1642259,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642259.png',
     quote: 'Defensive anchor with modern mobility.',
@@ -14660,6 +15550,7 @@ const rawCards = [
     pts: 14.2,
     reb: 4.8,
     ast: 2.1,
+    age: 20,
     nbaId: 1642258,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642258.png',
     quote: 'Smooth operator from France. The #1 overall pick.',
@@ -14679,6 +15570,7 @@ const rawCards = [
     pts: 14.0,
     reb: 3.3,
     ast: 3.7,
+    age: 29,
     nbaId: 1642352,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642352.png',
     quote: 'Calculated and cold-blooded scorer.',
@@ -14698,6 +15590,7 @@ const rawCards = [
     pts: 13.6,
     reb: 3.1,
     ast: 2.9,
+    age: 21,
     nbaId: 1642272,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642272.png',
     quote: 'Limitless range and infectious energy.',
@@ -14717,6 +15610,7 @@ const rawCards = [
     pts: 12.1,
     reb: 8.6,
     ast: 1.4,
+    age: 23,
     nbaId: 1641744,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1641744.png',
     quote: 'Big Zach. Dominating the paint with size.',
@@ -14736,6 +15630,7 @@ const rawCards = [
     pts: 11.2,
     reb: 3.4,
     ast: 4.8,
+    age: 20,
     nbaId: 1642267,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642267.png',
     quote: 'The vision of a veteran. Floor general from Pitt.',
@@ -14755,6 +15650,7 @@ const rawCards = [
     pts: 11.3,
     reb: 10.1,
     ast: 0.6,
+    age: 21,
     nbaId: 1642276,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642276.png',
     quote: 'The prototype modern center for Culture.',
@@ -14774,6 +15670,7 @@ const rawCards = [
     pts: 10.4,
     reb: 9.8,
     ast: 1.2,
+    age: 21,
     nbaId: 1642270,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642270.png',
     quote: 'Cling-Kong. Protecting the rim in PDX.',
@@ -14793,6 +15690,7 @@ const rawCards = [
     pts: 9.4,
     reb: 3.1,
     ast: 5.2,
+    age: 25,
     nbaId: 1642251,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642251.png',
     quote: 'The European Maestro. Vision like no other.',
@@ -14813,6 +15711,7 @@ const rawCards = [
     pts: 33.6,
     reb: 6.9,
     ast: 6.3,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/893.png',
     quote: 'Dominating at both ends of the floor.'
@@ -14830,6 +15729,7 @@ const rawCards = [
     pts: 22.3,
     reb: 6.6,
     ast: 11.5,
+    age: 25,
     nbaId: 77142,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/77142.png',
     quote: 'The engine of the Showtime Lakers.'
@@ -14847,6 +15747,7 @@ const rawCards = [
     pts: 25.2,
     reb: 11.5,
     ast: 3.9,
+    age: 25,
     nbaId: 782,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/782.png',
     quote: 'The Round Mound of Rebound.'
@@ -14864,6 +15765,7 @@ const rawCards = [
     pts: 28.6,
     reb: 10.9,
     ast: 2.2,
+    age: 25,
     nbaId: 121,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/121.png',
     quote: 'The heart and soul of the Garden.'
@@ -14881,6 +15783,7 @@ const rawCards = [
     pts: 31.0,
     reb: 11.1,
     ast: 2.8,
+    age: 25,
     nbaId: 252,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/252.png',
     quote: 'The Mailman always delivers.'
@@ -14898,6 +15801,7 @@ const rawCards = [
     pts: 31.5,
     reb: 6.0,
     ast: 5.5,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/893.png',
     quote: 'The ultimate competitor on his first title run.'
@@ -14915,6 +15819,7 @@ const rawCards = [
     pts: 19.4,
     reb: 7.0,
     ast: 12.5,
+    age: 25,
     nbaId: 77142,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/77142.png',
     quote: 'Still the best playmaker in the world.'
@@ -14932,6 +15837,7 @@ const rawCards = [
     pts: 27.6,
     reb: 10.1,
     ast: 4.1,
+    age: 25,
     nbaId: 782,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/782.png',
     quote: 'Dominant scoring and board-crashing.'
@@ -14949,6 +15855,7 @@ const rawCards = [
     pts: 25.6,
     reb: 13.0,
     ast: 2.5,
+    age: 25,
     nbaId: 192,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/192.png',
     quote: 'The Admiral at his defensive peak.'
@@ -14966,6 +15873,7 @@ const rawCards = [
     pts: 29.0,
     reb: 11.8,
     ast: 3.3,
+    age: 25,
     nbaId: 252,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/252.png',
     quote: 'Consistency personified in the post.'
@@ -14983,6 +15891,7 @@ const rawCards = [
     pts: 30.1,
     reb: 6.4,
     ast: 6.1,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/893.png',
     quote: 'Repeat champion and scoring king.'
@@ -15000,6 +15909,7 @@ const rawCards = [
     pts: 25.0,
     reb: 6.6,
     ast: 6.7,
+    age: 25,
     nbaId: 95,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/95.png',
     quote: 'Clyde the Glide flying through the Rip City.'
@@ -15017,6 +15927,7 @@ const rawCards = [
     pts: 28.0,
     reb: 11.2,
     ast: 3.0,
+    age: 25,
     nbaId: 252,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/252.png',
     quote: 'Pick and roll mastery with Stockton.'
@@ -15034,6 +15945,7 @@ const rawCards = [
     pts: 23.2,
     reb: 12.2,
     ast: 2.7,
+    age: 25,
     nbaId: 192,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/192.png',
     quote: 'The ultimate two-way big man.'
@@ -15051,6 +15963,7 @@ const rawCards = [
     pts: 25.6,
     reb: 5.9,
     ast: 4.4,
+    age: 25,
     nbaId: 157,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/157.png',
     quote: 'The sharpest shooter in Run TMC.'
@@ -15068,6 +15981,7 @@ const rawCards = [
     pts: 32.6,
     reb: 6.7,
     ast: 5.5,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/893.png',
     quote: 'A historic Three-Peat cemented.'
@@ -15085,6 +15999,7 @@ const rawCards = [
     pts: 18.2,
     reb: 3.3,
     ast: 8.0,
+    age: 25,
     nbaId: 147,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/147.png',
     quote: 'Elite shooting and precise playmaking.'
@@ -15102,6 +16017,7 @@ const rawCards = [
     pts: 25.6,
     reb: 12.2,
     ast: 5.1,
+    age: 25,
     nbaId: 782,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/782.png',
     quote: 'MVP season and a trip to the Finals.'
@@ -15119,6 +16035,7 @@ const rawCards = [
     pts: 26.1,
     reb: 13.0,
     ast: 3.5,
+    age: 25,
     nbaId: 165,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/165.png',
     quote: 'The Dream Shake in full effect.'
@@ -15136,6 +16053,7 @@ const rawCards = [
     pts: 29.9,
     reb: 6.8,
     ast: 2.9,
+    age: 25,
     nbaId: 254,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/254.png',
     quote: 'The Human Highlight Film still soaring.'
@@ -15153,6 +16071,7 @@ const rawCards = [
     pts: 22.0,
     reb: 8.7,
     ast: 5.6,
+    age: 25,
     nbaId: 937,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/937.png',
     quote: 'Proving he can lead without MJ.'
@@ -15170,6 +16089,7 @@ const rawCards = [
     pts: 17.0,
     reb: 3.3,
     ast: 12.6,
+    age: 25,
     nbaId: 304,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/304.png',
     quote: 'The master of the assist and the steal.'
@@ -15187,6 +16107,7 @@ const rawCards = [
     pts: 25.0,
     reb: 11.5,
     ast: 4.0,
+    age: 25,
     nbaId: 252,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/252.png',
     quote: 'Unstoppable in the pick and roll.'
@@ -15204,6 +16125,7 @@ const rawCards = [
     pts: 27.3,
     reb: 11.9,
     ast: 3.6,
+    age: 25,
     nbaId: 165,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/165.png',
     quote: 'MVP and DPOY in a historic season.'
@@ -15221,6 +16143,7 @@ const rawCards = [
     pts: 18.1,
     reb: 10.8,
     ast: 2.0,
+    age: 25,
     nbaId: 432,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/432.png',
     quote: 'Reigningite dunks and explosive power.'
@@ -15238,6 +16161,7 @@ const rawCards = [
     pts: 27.6,
     reb: 10.8,
     ast: 2.9,
+    age: 25,
     nbaId: 192,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/192.png',
     quote: 'MVP season for The Admiral.'
@@ -15255,6 +16179,7 @@ const rawCards = [
     pts: 17.2,
     reb: 3.2,
     ast: 12.3,
+    age: 25,
     nbaId: 304,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/304.png',
     quote: 'Precision passing at its absolute finest.'
@@ -15272,6 +16197,7 @@ const rawCards = [
     pts: 26.7,
     reb: 10.6,
     ast: 3.7,
+    age: 25,
     nbaId: 252,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/252.png',
     quote: 'The ultimate finish on the break.'
@@ -15289,6 +16215,7 @@ const rawCards = [
     pts: 29.3,
     reb: 13.2,
     ast: 2.7,
+    age: 25,
     nbaId: 406,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/406.png',
     quote: 'Physical dominance the league hadn\'t seen.'
@@ -15306,6 +16233,7 @@ const rawCards = [
     pts: 20.9,
     reb: 4.4,
     ast: 7.2,
+    age: 25,
     nbaId: 302,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/302.png',
     quote: 'The next magic taking over in Orlando.'
@@ -15323,6 +16251,7 @@ const rawCards = [
     pts: 30.4,
     reb: 6.6,
     ast: 4.3,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/893.png',
     quote: '72-10. Enough said.'
@@ -15340,6 +16269,7 @@ const rawCards = [
     pts: 19.3,
     reb: 4.2,
     ast: 7.5,
+    age: 25,
     nbaId: 840,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/840.png',
     quote: 'The Glove on defense, floor general on offense.'
@@ -15357,6 +16287,7 @@ const rawCards = [
     pts: 19.4,
     reb: 6.4,
     ast: 5.9,
+    age: 25,
     nbaId: 937,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/937.png',
     quote: 'The silent assassin of the greatest team ever.'
@@ -15374,6 +16305,7 @@ const rawCards = [
     pts: 25.0,
     reb: 12.2,
     ast: 2.9,
+    age: 25,
     nbaId: 192,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/192.png',
     quote: 'Consistency and class from the Admiral.'
@@ -15391,6 +16323,7 @@ const rawCards = [
     pts: 25.7,
     reb: 9.8,
     ast: 4.0,
+    age: 25,
     nbaId: 252,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/252.png',
     quote: 'Power and finesse in the low block.'
@@ -15408,6 +16341,7 @@ const rawCards = [
     pts: 29.6,
     reb: 5.9,
     ast: 4.3,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/893.png',
     quote: 'Back-to-back titles and legendary status.'
@@ -15425,6 +16359,7 @@ const rawCards = [
     pts: 20.3,
     reb: 3.5,
     ast: 8.6,
+    age: 25,
     nbaId: 150,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/150.png',
     quote: 'The killer crossover in South Beach.'
@@ -15442,6 +16377,7 @@ const rawCards = [
     pts: 20.2,
     reb: 6.5,
     ast: 5.7,
+    age: 25,
     nbaId: 937,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/937.png',
     quote: 'Lockdown defense and secondary playmaking.'
@@ -15459,6 +16395,7 @@ const rawCards = [
     pts: 23.2,
     reb: 9.2,
     ast: 2.9,
+    age: 25,
     nbaId: 165,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/165.png',
     quote: 'Elegance and power in the post.'
@@ -15476,6 +16413,7 @@ const rawCards = [
     pts: 27.4,
     reb: 9.9,
     ast: 4.5,
+    age: 25,
     nbaId: 252,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/252.png',
     quote: 'MVP season and first Finals appearance.'
@@ -15493,6 +16431,7 @@ const rawCards = [
     pts: 28.7,
     reb: 5.8,
     ast: 3.5,
+    age: 25,
     nbaId: 893,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/893.png',
     quote: 'The Last Dance. The Second Three-Peat.'
@@ -15510,6 +16449,7 @@ const rawCards = [
     pts: 19.2,
     reb: 4.4,
     ast: 8.9,
+    age: 25,
     nbaId: 840,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/840.png',
     quote: 'Elite trash talk and elite defense.'
@@ -15527,6 +16467,7 @@ const rawCards = [
     pts: 19.1,
     reb: 6.6,
     ast: 5.8,
+    age: 25,
     nbaId: 937,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/937.png',
     quote: 'The ultimate glue guy on a championship squad.'
@@ -15544,6 +16485,7 @@ const rawCards = [
     pts: 28.3,
     reb: 12.5,
     ast: 2.4,
+    age: 25,
     nbaId: 406,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/406.png',
     quote: 'Beginning of the Lakers dynasty.'
@@ -15561,6 +16503,7 @@ const rawCards = [
     pts: 27.0,
     reb: 10.3,
     ast: 3.9,
+    age: 25,
     nbaId: 252,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/252.png',
     quote: 'Standard of excellence in Salt Lake City.'
@@ -15578,6 +16521,7 @@ const rawCards = [
     pts: 26.8,
     reb: 4.9,
     ast: 4.6,
+    age: 27,
     nbaId: 947,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/947.png',
     quote: 'The Answer arrives as a superstar.'
@@ -15595,6 +16539,7 @@ const rawCards = [
     pts: 16.9,
     reb: 6.8,
     ast: 10.8,
+    age: 25,
     nbaId: 467,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/467.png',
     quote: 'The ultimate floor general in Phoenix.'
@@ -15612,6 +16557,7 @@ const rawCards = [
     pts: 23.8,
     reb: 9.4,
     ast: 3.9,
+    age: 25,
     nbaId: 252,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/252.png',
     quote: 'MVP season at age 35.'
@@ -15629,6 +16575,7 @@ const rawCards = [
     pts: 20.1,
     reb: 9.5,
     ast: 1.5,
+    age: 25,
     nbaId: 297,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/297.png',
     quote: 'Defensive anchor and DPOY.'
@@ -15646,6 +16593,7 @@ const rawCards = [
     pts: 21.7,
     reb: 11.4,
     ast: 2.4,
+    age: 25,
     nbaId: 1495,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1495.png',
     quote: 'The rebirth of the Spurs dynasty.'
@@ -15663,6 +16611,7 @@ const rawCards = [
     pts: 29.7,
     reb: 13.6,
     ast: 3.8,
+    age: 25,
     nbaId: 406,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/406.png',
     quote: 'Most dominant season in modern history.'
@@ -15680,6 +16629,7 @@ const rawCards = [
     pts: 24.2,
     reb: 6.6,
     ast: 8.9,
+    age: 25,
     nbaId: 840,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/840.png',
     quote: 'The Sonics star at his offensive peak.'
@@ -15697,6 +16647,7 @@ const rawCards = [
     pts: 14.3,
     reb: 7.2,
     ast: 10.1,
+    age: 25,
     nbaId: 467,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/467.png',
     quote: 'Maestro of the fast break.'
@@ -15714,6 +16665,7 @@ const rawCards = [
     pts: 23.2,
     reb: 12.4,
     ast: 3.2,
+    age: 25,
     nbaId: 1495,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1495.png',
     quote: 'Consistency and fundamentals in San Antonio.'
@@ -15731,6 +16683,7 @@ const rawCards = [
     pts: 22.9,
     reb: 11.8,
     ast: 5.0,
+    age: 25,
     nbaId: 708,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/708.png',
     quote: 'The Big Ticket leading Minnesota.'
@@ -15748,6 +16701,7 @@ const rawCards = [
     pts: 31.1,
     reb: 3.8,
     ast: 4.6,
+    age: 27,
     nbaId: 947,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/947.png',
     quote: 'MVP season and a legendary Finals run.'
@@ -15765,6 +16719,7 @@ const rawCards = [
     pts: 14.7,
     reb: 7.8,
     ast: 9.9,
+    age: 25,
     nbaId: 467,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/467.png',
     quote: 'Transforming the Nets into contenders.'
@@ -15782,6 +16737,7 @@ const rawCards = [
     pts: 22.2,
     reb: 12.2,
     ast: 3.0,
+    age: 25,
     nbaId: 1495,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1495.png',
     quote: 'The fundamental force in San Antonio.'
@@ -15799,6 +16755,7 @@ const rawCards = [
     pts: 28.7,
     reb: 12.7,
     ast: 3.7,
+    age: 25,
     nbaId: 406,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/406.png',
     quote: 'Repeat champion and Finals MVP dominance.'
@@ -15816,6 +16773,7 @@ const rawCards = [
     pts: 27.1,
     reb: 11.1,
     ast: 5.0,
+    age: 25,
     nbaId: 185,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/185.png',
     quote: 'The heart of the Greatest Show on Court.'
@@ -15833,6 +16791,7 @@ const rawCards = [
     pts: 25.2,
     reb: 5.5,
     ast: 5.5,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
     quote: 'Ascending to the top of the NBA.'
@@ -15850,6 +16809,7 @@ const rawCards = [
     pts: 14.7,
     reb: 6.8,
     ast: 9.9,
+    age: 25,
     nbaId: 467,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/467.png',
     quote: 'The triple-double king of the East.'
@@ -15867,6 +16827,7 @@ const rawCards = [
     pts: 25.5,
     reb: 12.7,
     ast: 3.7,
+    age: 25,
     nbaId: 1495,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1495.png',
     quote: 'Back-to-back MVP excellence.'
@@ -15884,6 +16845,7 @@ const rawCards = [
     pts: 27.2,
     reb: 10.7,
     ast: 3.0,
+    age: 25,
     nbaId: 406,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/406.png',
     quote: 'Three-Peat complete. Simply unguardable.'
@@ -15901,6 +16863,7 @@ const rawCards = [
     pts: 23.4,
     reb: 9.9,
     ast: 2.4,
+    age: 25,
     nbaId: 1717,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1717.png',
     quote: 'The German Wunderkind changing the game.'
@@ -15918,6 +16881,7 @@ const rawCards = [
     pts: 30.0,
     reb: 6.9,
     ast: 5.9,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
     quote: 'The Mamba Mentality in full effect.'
@@ -15935,6 +16899,7 @@ const rawCards = [
     pts: 17.7,
     reb: 3.7,
     ast: 7.3,
+    age: 25,
     nbaId: 959,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/959.png',
     quote: 'Maestro of the Mavericks offense.'
@@ -15952,6 +16917,7 @@ const rawCards = [
     pts: 23.3,
     reb: 12.9,
     ast: 3.9,
+    age: 25,
     nbaId: 1495,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1495.png',
     quote: 'MVP and champion in a dominant year.'
@@ -15969,6 +16935,7 @@ const rawCards = [
     pts: 23.0,
     reb: 13.4,
     ast: 4.8,
+    age: 25,
     nbaId: 708,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/708.png',
     quote: 'Elite intensity and all-around excellence.'
@@ -15986,6 +16953,7 @@ const rawCards = [
     pts: 25.1,
     reb: 9.9,
     ast: 3.0,
+    age: 25,
     nbaId: 1717,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1717.png',
     quote: 'The ultimate offensive weapon from Europe.'
@@ -16003,6 +16971,7 @@ const rawCards = [
     pts: 24.2,
     reb: 13.9,
     ast: 5.0,
+    age: 25,
     nbaId: 708,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/708.png',
     quote: 'MVP season for the Big Ticket.'
@@ -16020,6 +16989,7 @@ const rawCards = [
     pts: 15.5,
     reb: 6.4,
     ast: 9.2,
+    age: 25,
     nbaId: 467,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/467.png',
     quote: 'Master of the fast break and defense.'
@@ -16037,6 +17007,7 @@ const rawCards = [
     pts: 22.3,
     reb: 12.4,
     ast: 3.1,
+    age: 25,
     nbaId: 1495,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1495.png',
     quote: 'Silent dominance in San Antonio.'
@@ -16054,6 +17025,7 @@ const rawCards = [
     pts: 21.5,
     reb: 11.5,
     ast: 2.9,
+    age: 25,
     nbaId: 406,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/406.png',
     quote: 'The Big Diesel\'s final run in LA.'
@@ -16071,6 +17043,7 @@ const rawCards = [
     pts: 24.0,
     reb: 5.5,
     ast: 5.1,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
     quote: 'Dynamic scoring alongside Shaq.'
@@ -16088,6 +17061,7 @@ const rawCards = [
     pts: 15.5,
     reb: 3.3,
     ast: 11.5,
+    age: 25,
     nbaId: 959,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/959.png',
     quote: 'MVP and Seven Seconds or Less era.'
@@ -16105,6 +17079,7 @@ const rawCards = [
     pts: 24.1,
     reb: 5.2,
     ast: 6.8,
+    age: 25,
     nbaId: 2548,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2548.png',
     quote: 'Flash arriving on the big stage.'
@@ -16122,6 +17097,7 @@ const rawCards = [
     pts: 27.2,
     reb: 7.4,
     ast: 7.2,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
     quote: 'The King taking his throne.'
@@ -16139,6 +17115,7 @@ const rawCards = [
     pts: 20.3,
     reb: 11.1,
     ast: 2.7,
+    age: 25,
     nbaId: 1495,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1495.png',
     quote: 'Championship standards in San Antonio.'
@@ -16156,6 +17133,7 @@ const rawCards = [
     pts: 26.1,
     reb: 9.7,
     ast: 3.1,
+    age: 25,
     nbaId: 1717,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1717.png',
     quote: 'Elite scoring and leadership in Dallas.'
@@ -16173,6 +17151,7 @@ const rawCards = [
     pts: 35.4,
     reb: 5.3,
     ast: 4.5,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
     quote: 'Historic 35 PPG season. Peak Kobe.'
@@ -16190,6 +17169,7 @@ const rawCards = [
     pts: 18.8,
     reb: 4.2,
     ast: 10.5,
+    age: 25,
     nbaId: 959,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/959.png',
     quote: 'Back-to-back MVP excellence.'
@@ -16207,6 +17187,7 @@ const rawCards = [
     pts: 31.4,
     reb: 7.0,
     ast: 6.6,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
     quote: 'Dominating at age 21.'
@@ -16224,6 +17205,7 @@ const rawCards = [
     pts: 18.6,
     reb: 11.0,
     ast: 3.2,
+    age: 25,
     nbaId: 1495,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1495.png',
     quote: 'The Big Fundamental always in the mix.'
@@ -16241,6 +17223,7 @@ const rawCards = [
     pts: 26.6,
     reb: 9.0,
     ast: 2.8,
+    age: 25,
     nbaId: 1717,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1717.png',
     quote: 'Leading the Mavs to the Finals.'
@@ -16258,6 +17241,7 @@ const rawCards = [
     pts: 31.6,
     reb: 5.7,
     ast: 5.4,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
     quote: 'Unstoppable individual scoring brilliance.'
@@ -16275,6 +17259,7 @@ const rawCards = [
     pts: 18.6,
     reb: 4.5,
     ast: 11.6,
+    age: 25,
     nbaId: 959,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/959.png',
     quote: 'The heart of the league\'s best offense.'
@@ -16292,6 +17277,7 @@ const rawCards = [
     pts: 27.3,
     reb: 6.7,
     ast: 6.0,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
     quote: 'Leading Cleveland to the NBA Finals.'
@@ -16309,6 +17295,7 @@ const rawCards = [
     pts: 24.6,
     reb: 8.9,
     ast: 3.4,
+    age: 25,
     nbaId: 1717,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1717.png',
     quote: 'MVP season for the German Legend.'
@@ -16326,6 +17313,7 @@ const rawCards = [
     pts: 20.4,
     reb: 8.8,
     ast: 1.7,
+    age: 25,
     nbaId: 2405,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2405.png',
     quote: 'Explosive power and finishing in the paint.'
@@ -16343,6 +17331,7 @@ const rawCards = [
     pts: 28.3,
     reb: 6.3,
     ast: 5.4,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
     quote: 'MVP season and returning to the Finals.'
@@ -16360,6 +17349,7 @@ const rawCards = [
     pts: 21.1,
     reb: 4.0,
     ast: 11.6,
+    age: 40,
     nbaId: 101108,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/101108.png',
     quote: 'Point God dominance in the Big Easy.'
@@ -16377,6 +17367,7 @@ const rawCards = [
     pts: 30.0,
     reb: 7.9,
     ast: 7.2,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
     quote: 'The King\'s all-around peak performance.'
@@ -16394,6 +17385,7 @@ const rawCards = [
     pts: 18.8,
     reb: 9.2,
     ast: 3.4,
+    age: 25,
     nbaId: 708,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/708.png',
     quote: 'ANYTHING IS POSSIBLE! Champion in Boston.'
@@ -16411,6 +17403,7 @@ const rawCards = [
     pts: 20.7,
     reb: 13.8,
     ast: 1.3,
+    age: 25,
     nbaId: 2730,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2730.png',
     quote: 'Superman flying high in Orlando.'
@@ -16428,6 +17421,7 @@ const rawCards = [
     pts: 26.8,
     reb: 5.2,
     ast: 4.9,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
     quote: 'Leading the Lakers to the promised land.'
@@ -16445,6 +17439,7 @@ const rawCards = [
     pts: 30.2,
     reb: 5.0,
     ast: 7.5,
+    age: 25,
     nbaId: 2548,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2548.png',
     quote: 'Scoring title and absolute dominance.'
@@ -16462,6 +17457,7 @@ const rawCards = [
     pts: 28.4,
     reb: 7.6,
     ast: 7.2,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
     quote: 'First MVP season for the King.'
@@ -16479,6 +17475,7 @@ const rawCards = [
     pts: 20.6,
     reb: 13.8,
     ast: 1.4,
+    age: 25,
     nbaId: 2730,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2730.png',
     quote: 'DPOY and leading Orlando to the Finals.'
@@ -16496,6 +17493,7 @@ const rawCards = [
     pts: 25.9,
     reb: 8.4,
     ast: 2.4,
+    age: 25,
     nbaId: 1717,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1717.png',
     quote: 'Elite shooting prowess remains unmatched.'
@@ -16513,6 +17511,7 @@ const rawCards = [
     pts: 27.0,
     reb: 5.4,
     ast: 5.0,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
     quote: 'Back-to-back champion and Finals MVP.'
@@ -16530,6 +17529,7 @@ const rawCards = [
     pts: 26.6,
     reb: 4.8,
     ast: 6.5,
+    age: 25,
     nbaId: 2548,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2548.png',
     quote: 'Unstoppable agility and finishing.'
@@ -16547,6 +17547,7 @@ const rawCards = [
     pts: 29.7,
     reb: 7.3,
     ast: 8.6,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
     quote: 'Back-to-back MVP honors for the King.'
@@ -16564,6 +17565,7 @@ const rawCards = [
     pts: 18.3,
     reb: 13.2,
     ast: 1.6,
+    age: 25,
     nbaId: 2730,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2730.png',
     quote: 'The dominant force in the paint.'
@@ -16581,6 +17583,7 @@ const rawCards = [
     pts: 30.1,
     reb: 7.6,
     ast: 2.8,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png',
     quote: 'The youngest scoring champion in history.'
@@ -16598,6 +17601,7 @@ const rawCards = [
     pts: 25.3,
     reb: 5.1,
     ast: 4.7,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
     quote: 'Standard of veteran excellence.'
@@ -16615,6 +17619,7 @@ const rawCards = [
     pts: 25.0,
     reb: 4.1,
     ast: 7.7,
+    age: 25,
     nbaId: 201565,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201565.png',
     quote: 'Youngest MVP in NBA history.'
@@ -16632,6 +17637,7 @@ const rawCards = [
     pts: 26.7,
     reb: 7.5,
     ast: 7.0,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
     quote: 'Taking his talents to South Beach.'
@@ -16649,6 +17655,7 @@ const rawCards = [
     pts: 22.9,
     reb: 14.1,
     ast: 1.4,
+    age: 25,
     nbaId: 2730,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2730.png',
     quote: 'A force of nature in the interior.'
@@ -16666,6 +17673,7 @@ const rawCards = [
     pts: 27.7,
     reb: 6.8,
     ast: 2.7,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png',
     quote: 'Scoring mastery from the perimeter.'
@@ -16683,6 +17691,7 @@ const rawCards = [
     pts: 19.8,
     reb: 3.6,
     ast: 9.1,
+    age: 40,
     nbaId: 101108,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/101108.png',
     quote: 'Lob City\'s conductor in LAC.'
@@ -16700,6 +17709,7 @@ const rawCards = [
     pts: 27.9,
     reb: 5.4,
     ast: 4.6,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
     quote: 'Elite competitive spirit remains.'
@@ -16717,6 +17727,7 @@ const rawCards = [
     pts: 28.0,
     reb: 8.0,
     ast: 3.5,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png',
     quote: 'Leading OKC to the NBA Finals.'
@@ -16734,6 +17745,7 @@ const rawCards = [
     pts: 27.1,
     reb: 7.9,
     ast: 6.2,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
     quote: 'First championship and MVP season in Miami.'
@@ -16751,6 +17763,7 @@ const rawCards = [
     pts: 20.6,
     reb: 14.5,
     ast: 1.9,
+    age: 25,
     nbaId: 2730,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2730.png',
     quote: 'Defensive anchor in Orlando.'
@@ -16768,6 +17781,7 @@ const rawCards = [
     pts: 16.9,
     reb: 3.7,
     ast: 9.7,
+    age: 40,
     nbaId: 101108,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/101108.png',
     quote: 'The ultimate floor general.'
@@ -16785,6 +17799,7 @@ const rawCards = [
     pts: 27.3,
     reb: 5.6,
     ast: 6.0,
+    age: 25,
     nbaId: 977,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/977.png',
     quote: 'Vino gets better with age.'
@@ -16802,6 +17817,7 @@ const rawCards = [
     pts: 28.1,
     reb: 7.9,
     ast: 4.6,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png',
     quote: 'Efficiency at its highest peak.'
@@ -16819,6 +17835,7 @@ const rawCards = [
     pts: 26.8,
     reb: 8.0,
     ast: 7.3,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
     quote: 'Back-to-back MVP and champion.'
@@ -16836,6 +17853,7 @@ const rawCards = [
     pts: 17.8,
     reb: 9.9,
     ast: 2.7,
+    age: 25,
     nbaId: 1495,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1495.png',
     quote: 'Fundamental longevity in San Antonio.'
@@ -16853,6 +17871,7 @@ const rawCards = [
     pts: 19.1,
     reb: 4.3,
     ast: 10.7,
+    age: 40,
     nbaId: 101108,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/101108.png',
     quote: 'Master of the mid-range and assist.'
@@ -16870,6 +17889,7 @@ const rawCards = [
     pts: 25.4,
     reb: 4.7,
     ast: 6.1,
+    age: 36,
     nbaId: 201935,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201935.png',
     quote: 'Fear the Beard in Houston.'
@@ -16887,6 +17907,7 @@ const rawCards = [
     pts: 32.0,
     reb: 7.4,
     ast: 5.5,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png',
     quote: 'You the real MVP. Historic scoring season.'
@@ -16904,6 +17925,7 @@ const rawCards = [
     pts: 27.1,
     reb: 6.9,
     ast: 6.3,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
     quote: 'Final season of the Heatles era.'
@@ -16921,6 +17943,7 @@ const rawCards = [
     pts: 12.6,
     reb: 11.3,
     ast: 5.4,
+    age: 25,
     nbaId: 201149,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201149.png',
     quote: 'DPOY and point-center excellence.'
@@ -16938,6 +17961,7 @@ const rawCards = [
     pts: 23.8,
     reb: 4.3,
     ast: 7.7,
+    age: 37,
     nbaId: 201939,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png',
     quote: 'MVP and changing the game forever.'
@@ -16955,6 +17979,7 @@ const rawCards = [
     pts: 27.4,
     reb: 5.7,
     ast: 7.0,
+    age: 36,
     nbaId: 201935,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201935.png',
     quote: 'Offensive maestro in H-Town.'
@@ -16972,6 +17997,7 @@ const rawCards = [
     pts: 25.3,
     reb: 6.0,
     ast: 7.4,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
     quote: 'The King returns to Cleveland.'
@@ -16989,6 +18015,7 @@ const rawCards = [
     pts: 24.4,
     reb: 10.2,
     ast: 2.2,
+    age: 32,
     nbaId: 203076,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203076.png',
     quote: 'The Brow dominating in NOLA.'
@@ -17006,6 +18033,7 @@ const rawCards = [
     pts: 17.4,
     reb: 7.8,
     ast: 3.8,
+    age: 25,
     nbaId: 201188,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201188.png',
     quote: 'Grit and Grind anchor.'
@@ -17023,6 +18051,7 @@ const rawCards = [
     pts: 30.1,
     reb: 5.4,
     ast: 6.7,
+    age: 37,
     nbaId: 201939,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png',
     quote: 'Unanimous MVP and 73-9 record.'
@@ -17040,6 +18069,7 @@ const rawCards = [
     pts: 23.5,
     reb: 7.8,
     ast: 10.4,
+    age: 25,
     nbaId: 201566,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201566.png',
     quote: 'Unrelenting energy and triple-doubles.'
@@ -17057,6 +18087,7 @@ const rawCards = [
     pts: 25.3,
     reb: 7.4,
     ast: 6.8,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
     quote: 'Cleveland, this is for you!'
@@ -17074,6 +18105,7 @@ const rawCards = [
     pts: 21.2,
     reb: 6.8,
     ast: 2.6,
+    age: 34,
     nbaId: 202695,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202695.png',
     quote: 'Elite two-way mastery.'
@@ -17091,6 +18123,7 @@ const rawCards = [
     pts: 12.7,
     reb: 13.8,
     ast: 1.2,
+    age: 25,
     nbaId: 201599,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201599.png',
     quote: 'High-flying rim protection.'
@@ -17108,6 +18141,7 @@ const rawCards = [
     pts: 25.3,
     reb: 4.5,
     ast: 6.6,
+    age: 37,
     nbaId: 201939,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png',
     quote: 'Leading the Warriors to another title.'
@@ -17125,6 +18159,7 @@ const rawCards = [
     pts: 29.1,
     reb: 8.1,
     ast: 11.2,
+    age: 36,
     nbaId: 201935,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201935.png',
     quote: 'The Beard as the ultimate point guard.'
@@ -17142,6 +18177,7 @@ const rawCards = [
     pts: 26.4,
     reb: 8.6,
     ast: 8.7,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
     quote: 'Consistent excellence from the King.'
@@ -17159,6 +18195,7 @@ const rawCards = [
     pts: 25.5,
     reb: 5.8,
     ast: 3.5,
+    age: 34,
     nbaId: 202695,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202695.png',
     quote: 'The silent assassin of San Antonio.'
@@ -17176,6 +18213,7 @@ const rawCards = [
     pts: 28.0,
     reb: 11.8,
     ast: 2.1,
+    age: 32,
     nbaId: 203076,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203076.png',
     quote: 'Dominating both ends of the floor.'
@@ -17193,6 +18231,7 @@ const rawCards = [
     pts: 26.9,
     reb: 4.5,
     ast: 6.6,
+    age: 35,
     nbaId: 203081,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203081.png',
     quote: 'Dame Time in Portland.'
@@ -17210,6 +18249,7 @@ const rawCards = [
     pts: 30.4,
     reb: 5.4,
     ast: 8.8,
+    age: 36,
     nbaId: 201935,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201935.png',
     quote: 'MVP season for the scoring genius.'
@@ -17227,6 +18267,7 @@ const rawCards = [
     pts: 27.5,
     reb: 8.6,
     ast: 9.1,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
     quote: 'Played all 82 games. Peak durability.'
@@ -17244,6 +18285,7 @@ const rawCards = [
     pts: 26.4,
     reb: 6.8,
     ast: 5.4,
+    age: 37,
     nbaId: 201142,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png',
     quote: 'Unstoppable efficiency on the dynasty.'
@@ -17261,6 +18303,7 @@ const rawCards = [
     pts: 28.1,
     reb: 11.1,
     ast: 2.3,
+    age: 32,
     nbaId: 203076,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203076.png',
     quote: 'Defensive powerhouse and offensive star.'
@@ -17278,6 +18321,7 @@ const rawCards = [
     pts: 27.3,
     reb: 5.3,
     ast: 5.2,
+    age: 37,
     nbaId: 201939,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png',
     quote: 'The Splash Brother excellence continues.'
@@ -17295,6 +18339,7 @@ const rawCards = [
     pts: 36.1,
     reb: 6.6,
     ast: 7.5,
+    age: 36,
     nbaId: 201935,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201935.png',
     quote: 'Historic 36 PPG scoring run.'
@@ -17312,6 +18357,7 @@ const rawCards = [
     pts: 27.7,
     reb: 12.5,
     ast: 5.9,
+    age: 31,
     nbaId: 203507,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png',
     quote: 'First MVP season for the Greek Freak.'
@@ -17329,6 +18375,7 @@ const rawCards = [
     pts: 28.0,
     reb: 8.2,
     ast: 4.1,
+    age: 21,
     nbaId: 202331,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202331.png',
     quote: 'Two-way brilliance in OKC.'
@@ -17346,6 +18393,7 @@ const rawCards = [
     pts: 20.1,
     reb: 10.8,
     ast: 7.3,
+    age: 30,
     nbaId: 203999,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203999.png',
     quote: 'The Joker changing the center position.'
@@ -17363,6 +18411,7 @@ const rawCards = [
     pts: 28.8,
     reb: 9.4,
     ast: 8.8,
+    age: 26,
     nbaId: 1629029,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png',
     quote: 'Slovenian sensation taking over.'
@@ -17380,6 +18429,7 @@ const rawCards = [
     pts: 34.3,
     reb: 6.6,
     ast: 7.5,
+    age: 36,
     nbaId: 201935,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201935.png',
     quote: 'Unstoppable step-back master.'
@@ -17397,6 +18447,7 @@ const rawCards = [
     pts: 25.3,
     reb: 7.8,
     ast: 10.2,
+    age: 41,
     nbaId: 2544,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png',
     quote: 'Led the league in assists and won a title.'
@@ -17414,6 +18465,7 @@ const rawCards = [
     pts: 29.5,
     reb: 13.6,
     ast: 5.6,
+    age: 31,
     nbaId: 203507,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png',
     quote: 'Back-to-back MVP and DPOY season.'
@@ -17431,6 +18483,7 @@ const rawCards = [
     pts: 26.1,
     reb: 9.3,
     ast: 3.2,
+    age: 32,
     nbaId: 203076,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203076.png',
     quote: 'Championship dominance in the Bubble.'
@@ -17448,6 +18501,7 @@ const rawCards = [
     pts: 32.0,
     reb: 5.5,
     ast: 5.8,
+    age: 37,
     nbaId: 201939,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png',
     quote: 'Scoring champion and offensive engine.'
@@ -17465,6 +18519,7 @@ const rawCards = [
     pts: 27.7,
     reb: 8.0,
     ast: 8.6,
+    age: 26,
     nbaId: 1629029,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png',
     quote: 'Elite playmaking and scoring mastery.'
@@ -17482,6 +18537,7 @@ const rawCards = [
     pts: 28.1,
     reb: 11.0,
     ast: 5.9,
+    age: 31,
     nbaId: 203507,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png',
     quote: 'Championship MVP for the Bucks.'
@@ -17499,6 +18555,7 @@ const rawCards = [
     pts: 24.8,
     reb: 6.5,
     ast: 5.2,
+    age: 34,
     nbaId: 202695,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202695.png',
     quote: 'Two-way efficiency personified.'
@@ -17516,6 +18573,7 @@ const rawCards = [
     pts: 26.4,
     reb: 10.8,
     ast: 8.3,
+    age: 30,
     nbaId: 203999,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203999.png',
     quote: 'The first center MVP since Shaq.'
@@ -17533,6 +18591,7 @@ const rawCards = [
     pts: 28.4,
     reb: 9.1,
     ast: 8.7,
+    age: 26,
     nbaId: 1629029,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png',
     quote: 'Maverick brilliance in Dallas.'
@@ -17550,6 +18609,7 @@ const rawCards = [
     pts: 26.8,
     reb: 5.0,
     ast: 4.8,
+    age: 29,
     nbaId: 1626164,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1626164.png',
     quote: 'Leading the Suns to a franchise record.'
@@ -17567,6 +18627,7 @@ const rawCards = [
     pts: 26.9,
     reb: 8.0,
     ast: 4.4,
+    age: 27,
     nbaId: 1628369,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628369.png',
     quote: 'Ascending to superstardom in Boston.'
@@ -17584,6 +18645,7 @@ const rawCards = [
     pts: 29.9,
     reb: 11.6,
     ast: 5.8,
+    age: 31,
     nbaId: 203507,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png',
     quote: 'Dominance in the paint and transition.'
@@ -17601,6 +18663,7 @@ const rawCards = [
     pts: 27.1,
     reb: 13.8,
     ast: 7.9,
+    age: 30,
     nbaId: 203999,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203999.png',
     quote: 'Back-to-back MVP excellence.'
@@ -17618,6 +18681,7 @@ const rawCards = [
     pts: 31.4,
     reb: 4.8,
     ast: 5.5,
+    age: 27,
     nbaId: 1628983,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628983.png',
     quote: 'Precision scoring and leadership.'
@@ -17635,6 +18699,7 @@ const rawCards = [
     pts: 32.4,
     reb: 8.6,
     ast: 8.0,
+    age: 26,
     nbaId: 1629029,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png',
     quote: 'Offensive genius in Dallas.'
@@ -17652,6 +18717,7 @@ const rawCards = [
     pts: 30.1,
     reb: 8.8,
     ast: 4.6,
+    age: 27,
     nbaId: 1628369,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628369.png',
     quote: 'Climbing to the top of the East.'
@@ -17669,6 +18735,7 @@ const rawCards = [
     pts: 31.1,
     reb: 11.8,
     ast: 5.7,
+    age: 31,
     nbaId: 203507,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png',
     quote: 'Consistent MVP-level dominance.'
@@ -17686,6 +18753,7 @@ const rawCards = [
     pts: 33.1,
     reb: 10.2,
     ast: 4.2,
+    age: 31,
     nbaId: 203954,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203954.png',
     quote: 'MVP season for the Process.'
@@ -17703,6 +18771,7 @@ const rawCards = [
     pts: 30.1,
     reb: 5.5,
     ast: 6.2,
+    age: 27,
     nbaId: 1628983,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628983.png',
     quote: 'Elite efficiency and clutch genes.'
@@ -17720,6 +18789,7 @@ const rawCards = [
     pts: 33.9,
     reb: 9.2,
     ast: 9.8,
+    age: 26,
     nbaId: 1629029,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png',
     quote: 'Historic offensive production.'
@@ -17737,6 +18807,7 @@ const rawCards = [
     pts: 26.9,
     reb: 8.1,
     ast: 4.9,
+    age: 27,
     nbaId: 1628369,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628369.png',
     quote: 'Leading the Celtics to a historic season.'
@@ -17754,6 +18825,7 @@ const rawCards = [
     pts: 30.4,
     reb: 11.5,
     ast: 6.5,
+    age: 31,
     nbaId: 203507,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png',
     quote: 'Power and precision in Milwaukee.'
@@ -17771,6 +18843,7 @@ const rawCards = [
     pts: 26.4,
     reb: 12.4,
     ast: 9.0,
+    age: 30,
     nbaId: 203999,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203999.png',
     quote: 'Third MVP honors for the Serbian star.'

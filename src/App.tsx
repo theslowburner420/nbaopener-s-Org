@@ -50,53 +50,51 @@ function AppContent() {
     }
   }, [isPremium]);
 
-  // Tactical Image Preloading
+  // Tactical Image Preloading (Prioritized)
   useEffect(() => {
     const prefetchAssets = () => {
-      // 1. Essential UI Images (Only if they exist, or use known CDNs)
-      const uiAssets = [
-        'https://picsum.photos/seed/cards/400/600', // Placeholder for card back
+      // 1. Critical Logos & Players
+      const criticalLogos = [
+        'https://cdn.nba.com/logos/nba/1610612747/primary/L/logo.svg',
+        'https://cdn.nba.com/logos/nba/1610612744/primary/L/logo.svg',
+        'https://cdn.nba.com/logos/nba/1610612738/primary/L/logo.svg',
+        'https://cdn.nba.com/logos/nba/1610612741/primary/L/logo.svg',
       ];
       
-      // 2. Critical Team Logos (Top 10 most popular teams)
-      const criticalLogos = [
-        'https://cdn.nba.com/logos/nba/1610612747/primary/L/logo.svg', // Lakers
-        'https://cdn.nba.com/logos/nba/1610612744/primary/L/logo.svg', // Warriors
-        'https://cdn.nba.com/logos/nba/1610612738/primary/L/logo.svg', // Celtics
-        'https://cdn.nba.com/logos/nba/1610612741/primary/L/logo.svg', // Bulls
-      ];
-
-      // 3. Top Tier Players (Legends & Superstars)
-      const criticalPlayers = ALL_CARDS.slice(0, 30).map(c => c.imageUrl);
-
-      const allCritical = [...uiAssets, ...criticalLogos, ...criticalPlayers];
-
-      allCritical.forEach(url => {
-        const img = document.createElement('img');
-        img.src = url;
+      const topPlayers = ALL_CARDS.slice(0, 15).map(c => c.imageUrl);
+      
+      // Use Link preloading for highest priority
+      [...criticalLogos, ...topPlayers].forEach(url => {
+        try {
+          const link = document.createElement('link');
+          link.rel = 'preload';
+          link.as = 'image';
+          link.href = url;
+          document.head.appendChild(link);
+        } catch (e) { /* ignore */ }
       });
 
-      // 4. Background prefetch of the rest in chunks
-      const remainingCards = ALL_CARDS.slice(30, 200);
+      // 2. Background prefetch remaining essential cards
+      const remainingCards = ALL_CARDS.slice(15, 80);
       const batchSize = 10;
       for (let i = 0; i < remainingCards.length; i += batchSize) {
         setTimeout(() => {
           remainingCards.slice(i, i + batchSize).forEach(card => {
-            const img = document.createElement('img');
+            const img = new Image();
             img.src = card.imageUrl;
             if (card.teamLogoUrl) {
-              const logo = document.createElement('img');
+              const logo = new Image();
               logo.src = card.teamLogoUrl;
             }
           });
-        }, 1000 + (i * 200)); // Start after 1s
+        }, 2500 + (i * 250));
       }
     };
     
     if ('requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(prefetchAssets);
+      (window as any).requestIdleCallback(prefetchAssets, { timeout: 3000 });
     } else {
-      setTimeout(prefetchAssets, 1500);
+      setTimeout(prefetchAssets, 1200);
     }
   }, []);
 
@@ -283,6 +281,11 @@ function AppContent() {
             {/* HOME (Center) */}
             <button 
               onClick={() => handleViewChange('home')}
+              onMouseEnter={() => {
+                // Predictive preloading for home view elements
+                const homeAssets = ALL_CARDS.slice(0, 5).map(c => c.imageUrl);
+                homeAssets.forEach(url => { const img = new Image(); img.src = url; });
+              }}
               className={`flex-1 relative flex flex-col items-center justify-center transition-all duration-500 ${currentView === 'home' || currentView === 'open' || currentView === 'draft' ? 'scale-110 -translate-y-1' : ''}`}
             >
               <div className={`p-2.5 rounded-xl transition-all ${currentView === 'home' || currentView === 'open' || currentView === 'draft' ? 'bg-amber-500 text-black shadow-[0_0_20px_rgba(245,158,11,0.4)]' : 'bg-zinc-900 text-zinc-500'}`}>

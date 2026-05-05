@@ -1,6 +1,6 @@
 import { FranchiseState } from '../types';
 import { ALL_CARDS } from '../../data/cards';
-import { getInitialSalary } from './rosterService';
+import { getInitialSalary, generateContract, getContractType } from './rosterService';
 
 export const marketService = {
   // Cap Space: $136.0M (Soft Cap)
@@ -17,29 +17,24 @@ export const marketService = {
     if (!state.freeAgentPool.includes(cardId)) return { success: false, reason: 'Player is not a free agent' };
     if (userTeam.roster.length >= 15) return { success: false, reason: 'Roster is full (15 players max)' };
 
-    const salary = getInitialSalary(card);
+    const ovr = state.playerProgress[cardId]?.ovr || card.stats.ovr;
+    const seasons = 0; // Fresh signing
+    const contract = generateContract(cardId, ovr, seasons);
 
     // Check CAP
-    if (userTeam.payroll + salary > this.SOFT_CAP) {
+    if (userTeam.payroll + contract.salary > this.SOFT_CAP) {
        return { 
          success: false, 
-         reason: `Insufficient Cap Space. Salary: $${(salary/1000000).toFixed(1)}M. Available: $${((this.SOFT_CAP - userTeam.payroll)/1000000).toFixed(1)}M` 
+         reason: `Insufficient Cap Space. Salary: $${(contract.salary/1000000).toFixed(1)}M. Available: $${((this.SOFT_CAP - userTeam.payroll)/1000000).toFixed(1)}M` 
        };
     }
 
     // Process Signing
     userTeam.roster = [...userTeam.roster, cardId];
-    userTeam.payroll += salary;
+    userTeam.payroll += contract.salary;
     userTeam.contracts = {
       ...userTeam.contracts,
-      [cardId]: {
-        playerId: cardId,
-        salary,
-        yearsRemaining: 1,
-        type: 'Veteran',
-        noTradeClause: false,
-        injuryStatus: 'Healthy'
-      }
+      [cardId]: contract
     };
 
     // Remove from pool
@@ -53,7 +48,6 @@ export const marketService = {
     const team = state.teams[targetTeamId];
     if (team.roster.length >= 15) return { success: false, reason: 'Roster is full' };
 
-    // Process Draft: Player can be an ID or a full object
     const cardId = typeof player === 'string' ? player : player.id;
     const card = typeof player === 'object' ? player : (
       ALL_CARDS.find(c => c.id === cardId) || 
@@ -63,37 +57,32 @@ export const marketService = {
     
     if (!card) return { success: false, reason: 'Card not found' };
 
-    // Remove from draftPool if exists
     if (state.draftPool) {
       state.draftPool = state.draftPool.filter(p => p.id !== cardId);
     }
 
-    const salary = 1500000; // Fixed rookie salary $1.5M as requested
+    // Rookie contract
+    const ovr = card.stats.ovr;
+    const contract = generateContract(cardId, ovr, 0); 
+    contract.contractType = 'rookie';
+    contract.yearsRemaining = 4;
+    contract.optionType = 'team';
+    contract.salary = 1500000 + (ovr > 80 ? 2000000 : 0); // Pick based bonus logic? Simple for now.
 
     if (typeof player === 'object' && !state.customCards?.find(c => c.id === player.id)) {
       state.customCards = [...(state.customCards || []), player];
     }
 
     team.roster = [...team.roster, cardId];
-    team.payroll += salary;
+    team.payroll += contract.salary;
     team.contracts = {
       ...team.contracts,
-      [cardId]: {
-        playerId: cardId,
-        salary,
-        yearsRemaining: 4,
-        type: 'Rookie',
-        noTradeClause: false,
-        injuryStatus: 'Healthy',
-        canExtend: true,
-        canTrade: true
-      }
+      [cardId]: contract
     };
 
-    // Add to playerProgress
     if (!state.playerProgress[cardId]) {
       state.playerProgress[cardId] = {
-        age: 19,
+        age: Math.floor(Math.random() * 3) + 19,
         potential: Math.min(99, card.stats.ovr + Math.floor(Math.random() * 12)),
         form: 1.0,
         ovr: card.stats.ovr
@@ -116,7 +105,6 @@ export const marketService = {
     delete userTeam.contracts[cardId];
     state.freeAgentPool.push(cardId);
 
-    // Clean lineup
     const positions = ['PG', 'SG', 'SF', 'PF', 'C'] as const;
     positions.forEach(pos => {
       if (userTeam.lineup[pos] === cardId) userTeam.lineup[pos] = null;
@@ -129,28 +117,31 @@ export const marketService = {
   calculateMarketDemand(state: FranchiseState, cardId: string): { salary: number; years: number } {
     const card = ALL_CARDS.find(c => c.id === cardId) || state.customCards?.find(c => c.id === cardId) || state.draftPool?.find(c => c.id === cardId);
     const progress = state.playerProgress?.[cardId];
+    const userTeam = state.userTeamId ? state.teams[state.userTeamId] : null;
+    const currentContract = userTeam?.contracts[cardId];
+    const seasons = currentContract?.seasonsWithTeam || 0;
+
     if (!card) return { salary: 5000000, years: 1 };
     
     const ovr = progress?.ovr || card.stats.ovr;
     const age = progress?.age || 25;
-    const potential = progress?.potential || ovr;
     
-    let baseSalary = 1000000;
-    if (ovr >= 95) baseSalary = 50000000;
-    else if (ovr >= 90) baseSalary = 40000000;
-    else if (ovr >= 85) baseSalary = 25000000;
-    else if (ovr >= 80) baseSalary = 12000000;
-    else if (ovr >= 75) baseSalary = 6000000;
-    else if (ovr >= 70) baseSalary = 2500000;
+    const contractType = getContractType(ovr, seasons);
+    let baseSalary = getInitialSalary(ovr, contractType);
 
     // Adjust for potential and age
-    if (age < 23 && potential > ovr + 5) baseSalary *= 1.2; // Young potential tax
-    if (age > 33) baseSalary *= 0.85; // Veteran discount
+    if (age < 23 && (progress?.potential || ovr) > ovr + 5) baseSalary *= 1.2; 
+    if (age > 33) baseSalary *= 0.85; 
 
     let preferredYears = 1;
-    if (ovr > 90) preferredYears = age > 32 ? 2 : 4;
-    else if (ovr > 80) preferredYears = age > 32 ? 1 : 3;
-    else preferredYears = age < 25 ? 2 : 1;
+    if (contractType === 'max' || contractType === 'supermax') preferredYears = 4;
+    else if (ovr > 80) preferredYears = 3;
+    else preferredYears = 1;
+
+    // RULE: Players < 24 demand at least 3-year deals
+    if (age < 24 && preferredYears < 3) preferredYears = 3;
+    // RULE: Players > 32 never accept more than 2-year deals
+    if (age > 32 && preferredYears > 2) preferredYears = 2;
 
     return { salary: Math.round(baseSalary), years: preferredYears };
   },
@@ -162,6 +153,8 @@ export const marketService = {
     const progress = state.playerProgress[cardId];
     const ovr = progress?.ovr || card?.stats.ovr || 70;
     const age = progress?.age || 25;
+    const userTeam = state.teams[state.userTeamId];
+    const seasons = userTeam?.contracts[cardId]?.seasonsWithTeam || 0;
     
     let neg = state.negotiations[cardId];
     if (!neg) {
@@ -180,8 +173,24 @@ export const marketService = {
     const salaryDiff = (demand.salary - offerSalary) / demand.salary;
     const yearsDiff = demand.years - offerYears;
 
-    // Logic for different player profiles
-    // 1. Superstars (OVR 90+)
+    // AGE RESTRICTION: Players < 24 demand at least 3 years
+    if (age < 24 && offerYears < 3) {
+      return { success: false, message: "I'm looking for long-term security. I want at least 3 years.", status: "Active", counterOffer: { salary: demand.salary, years: Math.max(3, demand.years) } };
+    }
+
+    // AGE RESTRICTION: Players > 32 never accept more than 2 years
+    if (age > 32 && offerYears > 2) {
+      return { success: false, message: "At my age, I'd prefer a shorter deal to maintain flexibility. No more than 2 years.", status: "Active", counterOffer: { salary: demand.salary, years: 2 } };
+    }
+
+    // Supermax check
+    if (getContractType(ovr, seasons) === 'supermax') {
+        const supermaxCap = 50000000;
+        if (offerSalary < supermaxCap * 0.95) {
+            return { success: false, message: "I qualify for a Supermax. I won't settle for less than the max.", status: "Active" };
+        }
+    }
+
     if (ovr >= 90) {
       if (salaryDiff > 0.15) {
         neg.status = "Rejected";
@@ -192,90 +201,75 @@ export const marketService = {
       }
     }
 
-    // 2. Veterans (Age 32+)
     if (age >= 32 && offerYears > 2 && ovr < 85) {
       return { success: false, message: "I'm looking for a short-term deal to stay flexible. Fewer years, please.", status: "Active", counterOffer: { salary: demand.salary, years: 1 } };
     }
 
-    // General acceptance criteria
     if (salaryDiff <= 0.05 && Math.abs(yearsDiff) <= 1) {
       neg.status = "Accepted";
-      // Determine if it's FA signing or extension
-      const userTeam = state.teams[state.userTeamId];
       if (userTeam.roster.includes(cardId)) {
         this.extendContract(state, cardId, offerYears, offerSalary);
       } else {
-        // Handle FA Signing logic here or in the caller
         this.completeFASigning(state, cardId, offerSalary, offerYears);
       }
       return { success: true, message: "We have a deal! I'm excited to get to work.", status: "Accepted" };
     }
 
-    // Check rounds limit
     if (neg.rounds >= 3) {
       neg.status = "Rejected";
       return { success: false, message: "We've been through enough rounds. We're too far apart.", status: "Rejected" };
     }
 
-    // Hard rejection for lowball
     if (salaryDiff > 0.4) {
       neg.status = "Rejected";
       return { success: false, message: "This isn't even close. I'm walking away.", status: "Rejected" };
     }
 
-    // Counter Offer
     const counterSalary = Math.round(demand.salary * (1 - (salaryDiff * 0.4)));
     const counterYears = demand.years;
 
-    let msg = "I'm interested, but you'll need to improve the terms. Here is my counter.";
-    if (salaryDiff > 0.2) msg = "That's quite low for a player of my caliber. Let's try something closer to this.";
-    
     return { 
       success: false, 
-      message: msg, 
+      message: "I'm interested, but you'll need to improve the terms. Here is my counter.", 
       status: "Active",
       counterOffer: { salary: counterSalary, years: counterYears }
     };
   },
 
   completeFASigning(state: FranchiseState, cardId: string, salary: number, years: number): { success: boolean, reason: string } {
-    if (!state.freeAgentPool) state.freeAgentPool = [];
     const userTeam = state.teams[state.userTeamId];
     if (userTeam.roster.length >= 15) return { success: false, reason: 'Roster full' };
+
+    const ovr = state.playerProgress[cardId]?.ovr || 70;
+    const contract = generateContract(cardId, ovr, 0);
+    contract.salary = salary;
+    contract.yearsRemaining = years;
 
     userTeam.roster = [...userTeam.roster, cardId];
     userTeam.payroll += salary;
     userTeam.contracts = {
       ...userTeam.contracts,
-      [cardId]: {
-        playerId: cardId,
-        salary,
-        yearsRemaining: years,
-        type: 'Veteran',
-        noTradeClause: false,
-        injuryStatus: 'Healthy'
-      }
+      [cardId]: contract
     };
     state.freeAgentPool = state.freeAgentPool.filter(id => id !== cardId);
     return { success: true, reason: 'Signed' };
-  },
-
-  calculateExtensionCost(state: FranchiseState, cardId: string): number {
-    return this.calculateMarketDemand(state, cardId).salary;
   },
 
   extendContract(state: FranchiseState, cardId: string, years: number, salary?: number): { success: boolean; reason: string } {
     const userTeam = state.teams[state.userTeamId];
     const contract = userTeam.contracts[cardId];
     if (!contract) return { success: false, reason: 'No contract' };
-    if (contract.yearsRemaining > 1) return { success: false, reason: 'Extensions only for last year' };
+    
+    // Extensions can happen mid-season if canExtend is true
+    if (!contract.canExtend) return { success: false, reason: 'Not eligible for extension yet' };
 
-    const cost = salary || this.calculateExtensionCost(state, cardId);
+    const cost = salary || this.calculateMarketDemand(state, cardId).salary;
     contract.yearsRemaining += years;
     
     userTeam.payroll -= contract.salary;
     contract.salary = cost;
     userTeam.payroll += cost;
+    contract.canExtend = false; // Used its extension slot
 
     return { success: true, reason: 'Extension signed' };
   },

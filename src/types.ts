@@ -29,7 +29,9 @@ export interface Card {
     assists: number;
     ovr: number;
     potential?: number;
+    draftPotential?: string;
   };
+  age?: number;
   description: string;
   momentTitle?: string;
   momentDate?: string;
@@ -127,9 +129,9 @@ export interface Milestone {
 
 export interface PlayerContract {
   cardId: string;
-  yearsLeft: number; // 1-5
-  salary: number; // millions $
-  type: 'rookie' | 'veteran' | 'max' | 'mid-level' | 'minimum';
+  yearsLeft: number;
+  salary: number;
+  type: 'max' | 'supermax' | 'mid' | 'minimum' | 'rookie' | 'two-way';
   canExtend: boolean;
   canTrade: boolean;
 }
