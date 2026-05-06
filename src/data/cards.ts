@@ -590,7 +590,7 @@ const rawCards = [
     ast: 6.0,
     age: 22,
     nbaId: 1630713,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630713.png',
+    imageUrl: 'https://www.proballers.com/media/cache/resize_600_png/https---www.proballers.com/ul/player/dyson-daniels-1f0cfbce-56cb-642a-bd65-53947d103a1d.png',
     quote: 'Stat-sheet stuffer with elite defensive versatility.'
   },
   {
@@ -638,7 +638,7 @@ const rawCards = [
     ast: 1.0,
     age: 20,
     nbaId: 1642235,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/5105952.png',
+    imageUrl: 'https://www.proballers.com/media/cache/resize_600_png/https---www.proballers.com/ul/player/asa-newell-1f0cfc66-2778-6086-8e54-1b8ae77b76b8.png',
     quote: 'Highly-touted rookie forward ready to make an impact.'
   },
   {
@@ -654,7 +654,7 @@ const rawCards = [
     ast: 0.7,
     age: 27,
     nbaId: 1628396,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628396.png',
+    imageUrl: 'https://a.espncdn.com/i/headshots/nba/players/full/4065673.png',
     quote: 'Reliable backup center providing minutes in the paint.'
   },
   {
@@ -689,87 +689,7 @@ const rawCards = [
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631243.png',
     quote: 'Long and athletic forward with high upside.'
   },
-  {
-    id: 'atl-013',
-    name: 'Zaccharie Risacher',
-    team: 'Atlanta Hawks',
-    teamAbbr: 'ATL',
-    position: 'F',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 1.5,
-    reb: 3.0,
-    ast: 0.0,
-    age: 20,
-    nbaId: 1642234,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642234.png',
-    quote: 'The top pick showing flashes of his versatile potential.'
-  },
-  {
-    id: 'atl-014',
-    name: 'Keaton Wallace',
-    team: 'Atlanta Hawks',
-    teamAbbr: 'ATL',
-    position: 'PG',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 1.0,
-    reb: 0.0,
-    ast: 0.5,
-    age: 26,
-    nbaId: 1630613,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630613.png',
-    quote: 'Crafty guard adding depth to the backcourt.'
-  },
-  {
-    id: 'atl-015',
-    name: 'Keshon Gilbert',
-    team: 'Atlanta Hawks',
-    teamAbbr: 'ATL',
-    position: 'G',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 4.0,
-    reb: 1.5,
-    ast: 1.0,
-    age: 25,
-    nbaId: 1641753,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/4683017.png',
-    quote: 'Athletic rookie guard with scoring punch.'
-  },
-  {
-    id: 'atl-016',
-    name: 'Christian Koloko',
-    team: 'Atlanta Hawks',
-    teamAbbr: 'ATL',
-    position: 'C',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 4.0,
-    reb: 4.0,
-    ast: 0.0,
-    age: 25,
-    nbaId: 1631132,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631132.png',
-    quote: 'Shot-blocking big man returning to full health.'
-  },
-  {
-    id: 'atl-017',
-    name: 'RayJ Dennis',
-    team: 'Atlanta Hawks',
-    teamAbbr: 'ATL',
-    position: 'G',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 2.0,
-    reb: 1.0,
-    ast: 2.0,
-    age: 25,
-    nbaId: 1641754,
-    imageUrl: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/4431713.png',
-    quote: 'Rookie playmaker with great vision.'
-  },
-
+  
   // BOSTON CELTICS
   {
     id: 'bos-001',
@@ -4905,7 +4825,7 @@ const rawCards = [
     ast: 5.2,
     age: 25,
     nbaId: 1642274,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642274.png',
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642347.png',
     quote: 'Tenacious defender and floor leader.'
   },
   {
@@ -8549,7 +8469,7 @@ const rawCards = [
     ast: 2.8,
     age: 25,
     nbaId: 1642259,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642259.png',
+    imageUrl: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/4873138.png&w=350&h=254',
     quote: 'Elite Scorer: Unmatched shot-making ability and explosive athleticism on the wing.'
   },
   {
@@ -8566,7 +8486,7 @@ const rawCards = [
     ast: 7.2,
     age: 25,
     nbaId: 1642260,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642260.png',
+    imageUrl: 'https://www.proballers.com/media/cache/resize_600_png/https---www.proballers.com/ul/player/dylan-harper-1f0cfc1a-07fd-64a0-8ac6-9d1960a5939a.png',
     quote: 'Pure Playmaker: A big, physical guard with elite basketball IQ and scoring instincts.'
   },
   {
@@ -8583,7 +8503,7 @@ const rawCards = [
     ast: 3.5,
     age: 25,
     nbaId: 1642261,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642261.png',
+    imageUrl: 'https://www.proballers.com/media/cache/resize_600_png/https---www.proballers.com/ul/player/vj-edgecombe-1f0cfbdf-e113-6fea-8f02-4311cc6a8589.png',
     quote: 'High-Flyer: The most athletic guard in the class, known for elite transition finishing.'
   },
   {
@@ -8600,7 +8520,7 @@ const rawCards = [
     ast: 8.4,
     age: 25,
     nbaId: 1642262,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642262.png',
+    imageUrl: 'https://www.proballers.com/media/cache/resize_600_png/https---www.proballers.com/ul/player/nolan-traore-1f0cfc9d-5958-6c7c-baf5-7d22a7ff6471.png',
     quote: 'The Floor General: Elite French playmaker with lightning speed and court vision.'
   },
   {
@@ -8617,7 +8537,7 @@ const rawCards = [
     ast: 1.5,
     age: 25,
     nbaId: 1642263,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642263.png',
+    imageUrl: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/5203685.png&w=350&h=254',
     quote: 'Modern Giant: A 7\'2" mobile center with elite rim protection and shooting touch.'
   },
   {
@@ -8634,7 +8554,7 @@ const rawCards = [
     ast: 3.2,
     age: 25,
     nbaId: 1642264,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642264.png',
+    imageUrl: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/5238230.png&w=350&h=254',
     quote: 'Pure Sniper: Considered the best pure shooter of the 2025 Draft class.'
   },
   {
@@ -8651,7 +8571,7 @@ const rawCards = [
     ast: 3.8,
     age: 25,
     nbaId: 1642265,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642265.png',
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642864.png',
     quote: 'European Star: High-intensity wing with elite cutting and defensive versatility.'
   },
   {
@@ -8668,7 +8588,7 @@ const rawCards = [
     ast: 2.5,
     age: 25,
     nbaId: 1642266,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642266.png',
+    imageUrl: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/5061575.png&w=350&h=254',
     quote: 'IQ Specialist: Lethal outside shooter with advanced footwork and playmaking skills.'
   },
   {
@@ -8702,7 +8622,7 @@ const rawCards = [
     ast: 2.4,
     age: 25,
     nbaId: 1642268,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642268.png',
+    imageUrl: 'https://www.proballers.com/media/cache/resize_600_png/https---www.proballers.com/ul/player/drake-powell-1f0cfc77-a796-6536-ab5d-d7606867ccf8.png',
     quote: 'Lockdown Wing: Premier perimeter defender with a rapidly developing offensive game.'
   },
   {
@@ -8721,57 +8641,6 @@ const rawCards = [
     nbaId: 1642269,
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642269.png',
     quote: 'Deadly Spacer: Elite floor spacer with one of the quickest releases in the class.'
-  },
-  {
-    id: 'rookie-reid',
-    name: 'Derrion Reid',
-    team: 'Atlanta Hawks',
-    teamAbbr: 'ATL',
-    position: 'F',
-    rarity: 'rookie' as const,
-    category: 'Rookie' as const,
-    isHistorical: false,
-    pts: 15.2,
-    reb: 7.5,
-    ast: 2.8,
-    age: 25,
-    nbaId: 1642270,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642270.png',
-    quote: 'Versatile Forward: High-motor player capable of guarding multiple positions.'
-  },
-  {
-    id: 'rookie-stevenson',
-    name: 'Jarin Stevenson',
-    team: 'New Orleans Pelicans',
-    teamAbbr: 'NOP',
-    position: 'F',
-    rarity: 'rookie' as const,
-    category: 'Rookie' as const,
-    isHistorical: false,
-    pts: 12.8,
-    reb: 6.5,
-    ast: 1.5,
-    age: 25,
-    nbaId: 1642271,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642271.png',
-    quote: 'Stretch Big: Modern frontcourt player with reliable three-point shooting range.'
-  },
-  {
-    id: 'rookie-fland',
-    name: 'Boogie Fland',
-    team: 'Miami Heat',
-    teamAbbr: 'MIA',
-    position: 'G',
-    rarity: 'rookie' as const,
-    category: 'Rookie' as const,
-    isHistorical: false,
-    pts: 18.5,
-    reb: 3.2,
-    ast: 4.8,
-    age: 25,
-    nbaId: 1642272,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642272.png',
-    quote: 'Electric Guard: Shifty ball-handler with elite shot-creation and clutch scoring.'
   },
   // ALL-STAR MVP SERIES
   {
@@ -10154,7 +10023,7 @@ const rawCards = [
     ast: 4.2,
     age: 25,
     nbaId: 1642250,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642250.png',
+    imageUrl: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/5124612.png&w=350&h=254',
     quote: 'The exciting rookie proving he belongs in the NBA spotlight.'
   },
   {
@@ -10186,7 +10055,7 @@ const rawCards = [
     ast: 3.3,
     age: 25,
     nbaId: 1630524,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630524.png',
+    imageUrl: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/4397014.png&w=350&h=254',
     quote: 'Solid two-way guard who gives the team consistent floor spacing.'
   },
   {
@@ -10206,55 +10075,7 @@ const rawCards = [
     quote: 'A rising young forward making the most of his minutes.'
   },
   {
-    id: 'phi-008',
-    name: 'Cameron Payne',
-    team: 'Philadelphia 76ers',
-    teamAbbr: 'PHI',
-    position: 'PG',
-    rarity: 'starter' as const,
-    isHistorical: false,
-    pts: 7.4,
-    reb: 2.0,
-    ast: 2.6,
-    age: 25,
-    nbaId: 1626166,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1626166.png',
-    quote: 'Reliable backup point guard who keeps the offense moving.'
-  },
-  {
     id: 'phi-009',
-    name: 'MarJon Beauchamp',
-    team: 'Philadelphia 76ers',
-    teamAbbr: 'PHI',
-    position: 'F',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 6.8,
-    reb: 2.3,
-    ast: 1.1,
-    age: 25,
-    nbaId: 1630699,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630699.png',
-    quote: 'A versatile wing with potential still being unlocked.'
-  },
-  {
-    id: 'phi-011',
-    name: 'Trendon Watford',
-    team: 'Philadelphia 76ers',
-    teamAbbr: 'PHI',
-    position: 'F',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 6.5,
-    reb: 3.3,
-    ast: 2.5,
-    age: 25,
-    nbaId: 1630570,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630570.png',
-    quote: 'A smart, versatile big who does the little things well.'
-  },
-  {
-    id: 'phi-012',
     name: 'Andre Drummond',
     team: 'Philadelphia 76ers',
     teamAbbr: 'PHI',
@@ -10269,135 +10090,7 @@ const rawCards = [
     imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203083.png',
     quote: 'The hustle machine — no one crashes the boards harder.'
   },
-  {
-    id: 'phi-013',
-    name: 'Justin Edwards',
-    team: 'Philadelphia 76ers',
-    teamAbbr: 'PHI',
-    position: 'F',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 6.0,
-    reb: 1.5,
-    ast: 1.3,
-    age: 24,
-    nbaId: 1642266,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642266.png',
-    quote: 'Athletic young forward still developing his NBA game.'
-  },
-  {
-    id: 'phi-014',
-    name: 'Eric Gordon',
-    team: 'Philadelphia 76ers',
-    teamAbbr: 'PHI',
-    position: 'G',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 5.5,
-    reb: 0.3,
-    ast: 0.5,
-    age: 36,
-    nbaId: 201569,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201569.png',
-    quote: 'A seasoned veteran who can still get hot from deep.'
-  },
-  {
-    id: 'phi-015',
-    name: 'Adem Bona',
-    team: 'Philadelphia 76ers',
-    teamAbbr: 'PHI',
-    position: 'C',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 4.8,
-    reb: 4.3,
-    ast: 0.5,
-    age: 25,
-    nbaId: 1642272,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642272.png',
-    quote: 'A shot-blocking presence who protects the rim with authority.'
-  },
-  {
-    id: 'phi-016',
-    name: 'Jabari Walker',
-    team: 'Philadelphia 76ers',
-    teamAbbr: 'PHI',
-    position: 'F',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 4.3,
-    reb: 3.0,
-    ast: 0.5,
-    age: 25,
-    nbaId: 1631133,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631133.png',
-    quote: 'Hard-working forward who fights for every rebound.'
-  },
-  {
-    id: 'phi-017',
-    name: 'Dalen Terry',
-    team: 'Philadelphia 76ers',
-    teamAbbr: 'PHI',
-    position: 'F',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 4.1,
-    reb: 1.6,
-    ast: 1.6,
-    age: 25,
-    nbaId: 1631105,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631105.png',
-    quote: 'A defensive-minded wing still searching for his offensive role.'
-  },
-  {
-    id: 'phi-018',
-    name: 'Kyle Lowry',
-    team: 'Philadelphia 76ers',
-    teamAbbr: 'PHI',
-    position: 'G',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 1.2,
-    reb: 0.6,
-    ast: 0.8,
-    age: 39,
-    nbaId: 200768,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/200768.png',
-    quote: 'A legendary point guard riding out a veteran career in Philly.'
-  },
-  {
-    id: 'phi-019',
-    name: 'Tyrese Martin',
-    team: 'Philadelphia 76ers',
-    teamAbbr: 'PHI',
-    position: 'G',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 2.2,
-    reb: 1.1,
-    ast: 1.0,
-    age: 25,
-    nbaId: 1631213,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1631213.png',
-    quote: 'A fringe roster player fighting for a permanent spot.'
-  },
-  {
-    id: 'phi-020',
-    name: 'Johni Broome',
-    team: 'Philadelphia 76ers',
-    teamAbbr: 'PHI',
-    position: 'F',
-    rarity: 'bench' as const,
-    isHistorical: false,
-    pts: 0.9,
-    reb: 1.5,
-    ast: 0.4,
-    age: 25,
-    nbaId: 1642352,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642352.png',
-    quote: 'A raw rookie still learning the ropes at the NBA level.'
-  },
-  
+    
   // MOST IMPROVED PLAYER (MIP) HISTORICAL SERIES
   {
     id: 'mip-1990',
@@ -10414,7 +10107,7 @@ const rawCards = [
     ast: 1.2,
     age: 25,
     nbaId: 71,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/71.png',
+    imageUrl: 'https://i.redd.it/8e6qe0r4726f1.jpeg',
     quote: 'A raw but powerful center who turned hustle into production.'
   },
   {
@@ -10432,7 +10125,7 @@ const rawCards = [
     ast: 8.4,
     age: 25,
     nbaId: 147,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/147.png',
+    imageUrl: 'https://basquetplus.com/sites/default/files/main/articles/skiles.jpg',
     quote: 'Set the all-time single-game assists record that very season.'
   },
   {
@@ -10450,7 +10143,7 @@ const rawCards = [
     ast: 2.0,
     age: 25,
     nbaId: 151,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/151.png',
+    imageUrl: 'https://i.ytimg.com/vi/oZq6q9Ru3nc/sddefault.jpg?v=6318daa8',
     quote: 'Nicknamed "Never Nervous" — finally lived up to the hype.'
   },
   {
@@ -10468,7 +10161,7 @@ const rawCards = [
     ast: 6.0,
     age: 25,
     nbaId: 154,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/154.png',
+    imageUrl: 'https://preview.redd.it/mahmoud-abdul-rauf-with-the-denver-nuggets-in-1994-v0-iy208rf7t03a1.jpg?width=640&crop=smart&auto=webp&s=916e0eb9ef6b4e909afb108a057348bedf5e82b0',
     quote: 'A lightning-quick scorer with one of the purest shooting strokes.'
   },
   {
@@ -10486,7 +10179,7 @@ const rawCards = [
     ast: 1.5,
     age: 25,
     nbaId: 161,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/161.png',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSN2PFPwJMFUypiGtLz4u9vfJ48sIs5QZwrDQ&s',
     quote: 'A forgotten gem who had one incredible breakthrough year.'
   },
   {
@@ -10504,7 +10197,7 @@ const rawCards = [
     ast: 7.5,
     age: 25,
     nbaId: 164,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/164.png',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYV7xBUJftplqFWWPVQ70G6pzawleKOr4Kdw&s',
     quote: 'A tiny guard with a massive game — Philly\'s unlikely hero.'
   },
   {
@@ -10522,7 +10215,7 @@ const rawCards = [
     ast: 0.9,
     age: 25,
     nbaId: 172,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/172.png',
+    imageUrl: 'https://basquetplus.com/sites/default/files/main/articles/gheorghe%20muresan.jpg',
     quote: 'The tallest player in NBA history who dominated the paint.'
   },
   {
@@ -10540,7 +10233,7 @@ const rawCards = [
     ast: 2.1,
     age: 25,
     nbaId: 201,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201.png',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuA7tMZ0ayTQeSPpXRghyNnGaqrPetZZh5BA&s',
     quote: 'Undrafted and unstoppable — the ultimate underdog story.'
   },
   {
@@ -10558,7 +10251,7 @@ const rawCards = [
     ast: 0.9,
     age: 21,
     nbaId: 711,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/711.png',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSofMue4Zm9UHa5j6KykK7odoiOi5cP0SGSXQ&s',
     quote: 'A blue-collar forward who outworked everyone around him.'
   },
   {
@@ -10576,7 +10269,7 @@ const rawCards = [
     ast: 6.1,
     age: 25,
     nbaId: 703,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/703.png',
+    imageUrl: 'https://assets-cms.thescore.com/uploads/image/file/385896/w640xh480_GettyImages-1932457.jpg?ts=1576014577',
     quote: 'The undrafted guard who earned every minute with pure grit.'
   },
   {
@@ -10594,7 +10287,7 @@ const rawCards = [
     ast: 5.1,
     age: 25,
     nbaId: 147,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/147.png',
+    imageUrl: 'https://michigansportshof.org/wp-content/uploads/2019/01/Rose-Jalen-Jalen-Rose-04.jpg',
     quote: 'Blossomed into a legit star on a Finals-bound Pacers squad.'
   },
   {
@@ -10630,7 +10323,7 @@ const rawCards = [
     ast: 2.0,
     age: 25,
     nbaId: 979,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/979.png',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLmKjaBhrdiVCsUpkuhJEEe4HrYf3yX3aRRw&s',
     quote: 'Erupted into an All-Star big man after years of waiting.'
   },
   {
@@ -10684,7 +10377,7 @@ const rawCards = [
     ast: 2.5,
     age: 25,
     nbaId: 2244,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2244.png',
+    imageUrl: 'https://vz.cnwimg.com/wp-content/uploads/2014/11/Bobby-Simmons.jpg',
     quote: 'A surprise winner who had the best season of his career.'
   },
   {
@@ -10720,7 +10413,7 @@ const rawCards = [
     ast: 4.2,
     age: 25,
     nbaId: 101145,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/101145.png',
+    imageUrl: 'https://s.yimg.com/ny/api/res/1.2/_uSNoWkWMSCIpH08OaTJkg--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTgwODtjZj13ZWJw/https://s.yimg.com/os/en_us/News/Yahoo/ept_sports_nba_experts-946391445-1258491265.jpg',
     quote: 'A fearless scorer who put the league on notice in Year 2.'
   },
   {
@@ -10738,7 +10431,7 @@ const rawCards = [
     ast: 5.0,
     age: 25,
     nbaId: 2067,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/2067.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Hedo_Turkoglu_11-27-08.jpg/250px-Hedo_Turkoglu_11-27-08.jpg',
     quote: 'The quiet star who made Orlando a genuine playoff threat.'
   },
   {
@@ -10756,7 +10449,7 @@ const rawCards = [
     ast: 2.7,
     age: 25,
     nbaId: 200750,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/200750.png',
+    imageUrl: 'https://lasportshall.com/wp-content/uploads/2024/09/GettyImages-107333869-scaled.jpg',
     quote: 'Indiana\'s quiet assassin carried a whole franchise on his back.'
   },
   {
@@ -10774,7 +10467,7 @@ const rawCards = [
     ast: 5.3,
     age: 25,
     nbaId: 201166,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201166.png',
+    imageUrl: 'https://goducks.com/images/2009/5/6/AVGZLJYHDHUQYJG.20090506192358.jpg',
     quote: 'A speedy little guard who outplayed everyone\'s expectations.'
   },
   {
@@ -10792,7 +10485,7 @@ const rawCards = [
     ast: 2.5,
     age: 25,
     nbaId: 201567,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201567.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Kevin_Love.jpg/250px-Kevin_Love.jpg',
     quote: 'Put up historic rebounding numbers in the middle of nowhere.'
   },
   {
@@ -10810,7 +10503,7 @@ const rawCards = [
     ast: 0.9,
     age: 25,
     nbaId: 201583,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201583.png',
+    imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/magic/sites/magic/files/legacy/main_photo/andersoniso_300_010412_0.jpg',
     quote: 'A floor-spacing big man before it was even trendy.'
   },
   {
@@ -10828,7 +10521,7 @@ const rawCards = [
     ast: 4.1,
     age: 21,
     nbaId: 202331,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202331.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/d6/Paul_George_Pacers.jpg',
     quote: 'Transformed into a two-way star and future All-NBA talent.'
   },
   {
@@ -10846,7 +10539,7 @@ const rawCards = [
     ast: 5.9,
     age: 25,
     nbaId: 201601,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201601.png',
+    imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/suns/sites/suns/files/legacy/main_photo/485517313.jpg',
     quote: 'The Dragon breathed fire — one of the most dominant MIP seasons. '
   },
   {
@@ -10864,7 +10557,7 @@ const rawCards = [
     ast: 3.3,
     age: 36,
     nbaId: 202710,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/202710.png',
+    imageUrl: 'https://cdn.nba.com/teams/legacy/www.nba.com/bulls/sites/bulls/files/butler2_-_gary_dineen.jpg',
     quote: 'Hard work personified — went from role player to franchise star.'
   },
   {
@@ -10882,7 +10575,7 @@ const rawCards = [
     ast: 4.3,
     age: 25,
     nbaId: 203468,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203468.png',
+    imageUrl: 'https://e0.365dm.com/21/12/2048x1152/skysports-cj-mccollum-portland-trail-blazers_5607870.jpg?20211208061408',
     quote: 'Burst onto the scene as one of the craftiest scorers in the West.'
   },
   {
@@ -10900,7 +10593,7 @@ const rawCards = [
     ast: 5.4,
     age: 31,
     nbaId: 203507,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png',
+    imageUrl: 'https://basketballforever.com/wp-content/uploads/2018/11/GiannisDunk.jpg',
     quote: 'The Greek Freak\'s MIP was just the beginning of a dynasty.'
   },
   {
@@ -10918,7 +10611,7 @@ const rawCards = [
     ast: 4.3,
     age: 25,
     nbaId: 203506,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203506.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/87/Victor_Oladipo_%2839060706270%29_crop.jpg',
     quote: 'A reinvented superstar who shocked the entire league.'
   },
   {
@@ -10936,7 +10629,7 @@ const rawCards = [
     ast: 3.1,
     age: 31,
     nbaId: 1627783,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627783.png',
+    imageUrl: 'https://cdn.nba.com/teams/uploads/sites/1610612754/2024/01/GettyImages-1477211578.jpg',
     quote: 'Went from bench piece to champion in the same magical season.'
   },
   {
@@ -10954,7 +10647,7 @@ const rawCards = [
     ast: 4.2,
     age: 28,
     nbaId: 1627742,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627742.png',
+    imageUrl: 'https://www.sportsnet.ca/wp-content/uploads/2024/03/Ingram-768x432.jpg',
     quote: 'Grew into a legitimate All-Star force in the Crescent City.'
   },
   {
@@ -10972,7 +10665,7 @@ const rawCards = [
     ast: 6.0,
     age: 31,
     nbaId: 203944,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203944.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/00/Jalen_Brunson_-_52977333593_%28cropped%29.jpg',
     quote: 'Brought life back to Madison Square Garden in a massive breakout.'
   },
   {
@@ -10990,7 +10683,7 @@ const rawCards = [
     ast: 6.7,
     age: 26,
     nbaId: 1629630,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629630.png',
+    imageUrl: 'https://www.blogdebasket.com/sites/default/files/inline-images/morant-grizzlies-ja.jpg',
     quote: 'Electrifying, fearless, and must-watch TV every single night.'
   },
   {
@@ -11008,7 +10701,7 @@ const rawCards = [
     ast: 1.9,
     age: 25,
     nbaId: 1628374,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1628374.png',
+    imageUrl: 'https://cdn.nba.com/teams/uploads/sites/1610612762/2025/11/U5A0299-1.jpg?im=Resize=(640)',
     quote: 'Turned Utah\'s rebuild into a showcase for his All-Star talent.'
   },
   {
@@ -11026,7 +10719,7 @@ const rawCards = [
     ast: 6.2,
     age: 25,
     nbaId: 1630178,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630178.png',
+    imageUrl: 'https://pbs.twimg.com/media/FgmVP9pUoAEsDKZ.jpg',
     quote: 'Stepped up huge and became Philly\'s undisputed franchise star.'
   },
   {
@@ -11044,7 +10737,7 @@ const rawCards = [
     ast: 5.5,
     age: 25,
     nbaId: 1630713,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1630713.png',
+    imageUrl: 'https://livesport-ott-images.ssl.cdn.cra.cz/r900xfq60/a4ec241b-899a-4010-afd7-9f60e6bbc52d.jpeg',
     quote: 'A two-way monster who led the league in steals and reinvented himself.'
   },
   {
@@ -11062,7 +10755,7 @@ const rawCards = [
     ast: 3.7,
     age: 25,
     nbaId: 1629638,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1629638.png',
+    imageUrl: 'https://images2.minutemediacdn.com/image/upload/c_fill,w_1200,ar_4:3,f_auto,q_auto,g_auto/images/GettyImages/mmsport/131/01kc8tadrdqbzrse5y3f.jpg',
     quote: 'Back-to-back MIPs for Atlanta — NAW took his game to a whole new level.'
   },
   
@@ -15292,7 +14985,7 @@ const rawCards = [
     ast: 4.1,
     age: 25,
     nbaId: 1642843,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1642843.png',
+    imageUrl: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/5041939.png&w=350&h=254',
     quote: 'The most anticipated prospect since LeBron. The Next Big Thing.',
     description: 'Projected #1 Pick in 2025. Two-way phenom.'
   },

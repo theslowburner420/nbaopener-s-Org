@@ -32,7 +32,7 @@ const CardDetailModal = React.memo(({ card, onClose }: CardDetailModalProps) => 
               onClick={onClose}
               className="absolute -top-12 sm:-top-16 right-4 sm:right-0 p-2.5 sm:p-3 bg-zinc-900 rounded-full text-zinc-500 hover:text-white transition-colors border border-zinc-800 z-50 shadow-2xl"
             >
-              <X size={20} sm:size={24} />
+              <X size={20} className="sm:w-6 sm:h-6" />
             </button>
 
             {/* Large Card Display */}

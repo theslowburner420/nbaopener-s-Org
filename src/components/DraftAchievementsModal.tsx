@@ -49,19 +49,19 @@ export default function DraftAchievementsModal({ isOpen, onClose }: DraftAchieve
             className="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-[2.5rem] overflow-hidden flex flex-col h-[70vh]"
           >
             {/* Header */}
-            <div className="p-8 border-b border-zinc-900/50 bg-gradient-to-br from-zinc-900/40 to-transparent">
+            <div className="p-5 md:p-8 border-b border-zinc-900/50 bg-gradient-to-br from-zinc-900/40 to-transparent">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
-                    <Trophy size={24} />
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
+                    <Trophy size={20} className="md:w-6 md:h-6" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white leading-none">Draft Missions</h2>
-                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Exclusive rewards for HoopsDraft</p>
+                    <h2 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-white leading-none">Draft Missions</h2>
+                    <p className="text-[8px] md:text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Exclusive rewards for HoopsDraft</p>
                   </div>
                 </div>
-                <button onClick={onClose} className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-500 hover:text-white transition-colors">
-                  <X size={20} />
+                <button onClick={onClose} className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-500 hover:text-white transition-colors">
+                  <X size={16} className="md:w-5 md:h-5" />
                 </button>
               </div>
 
@@ -87,14 +87,14 @@ export default function DraftAchievementsModal({ isOpen, onClose }: DraftAchieve
                 return (
                   <div 
                     key={ach.id}
-                    className={`p-5 rounded-3xl border transition-all duration-300 flex items-center gap-5 ${
+                    className={`p-4 md:p-5 rounded-[1.5rem] md:rounded-3xl border transition-all duration-300 flex items-center gap-3 md:gap-5 ${
                       isUnlocked ? 'bg-zinc-900 border-amber-500/30' : 'bg-zinc-950 border-zinc-900 opacity-60'
                     }`}
                   >
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${
+                    <div className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 ${
                       isUnlocked ? 'bg-amber-500 text-black shadow-[0_0_30px_rgba(245,158,11,0.3)]' : 'bg-zinc-900 text-zinc-700'
                     }`}>
-                      <Icon size={28} />
+                      <Icon size={20} className="md:w-7 md:h-7" />
                     </div>
 
                     <div className="flex-1">

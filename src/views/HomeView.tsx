@@ -30,7 +30,7 @@ const HomeView: React.FC = () => {
 
             <div className="relative flex flex-col items-center justify-center text-center space-y-3 sm:space-y-6">
               <div className="w-16 h-16 sm:w-20 md:w-28 bg-amber-500 rounded-2xl md:rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.3)] group-hover:scale-110 transition-transform duration-500">
-                <Zap size={32} sm:size={40} className="text-black" fill="currentColor" />
+                <Zap size={32} className="text-black sm:w-10 sm:h-10" fill="currentColor" />
               </div>
               
               <div className="space-y-1.5 sm:space-y-3">
@@ -59,7 +59,7 @@ const HomeView: React.FC = () => {
             
             <div className="relative flex flex-col items-center justify-center text-center space-y-3 sm:space-y-6">
               <div className="w-16 h-16 sm:w-20 md:w-28 bg-blue-600 rounded-2xl md:rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(59,130,246,0.3)] group-hover:scale-110 transition-transform duration-500">
-                <Trophy size={32} sm:size={40} className="text-white" />
+                <Trophy size={32} className="text-white sm:w-10 sm:h-10" />
               </div>
               
               <div className="space-y-1.5 sm:space-y-3">
@@ -89,7 +89,7 @@ const HomeView: React.FC = () => {
           
           <div className="relative flex items-center gap-5 sm:gap-8">
             <div className="w-16 h-16 sm:w-20 md:w-24 bg-purple-600 rounded-2xl md:rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.3)] group-hover:rotate-12 transition-transform duration-500">
-              <RefreshCw size={32} sm:size={40} className="text-white" />
+              <RefreshCw size={32} className="text-white sm:w-10 sm:h-10" />
             </div>
             
             <div className="space-y-2 sm:space-y-4">

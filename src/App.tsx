@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, lazy, Suspense } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { GameProvider, useGame } from './context/GameContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ALL_CARDS } from './data/cards';
-import { LayoutGrid, ShoppingBag, Zap, Trophy, Coins, User as UserIcon, Gift, X, Star, Home, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
+import { LogIn, LogOut, User as UserIcon, Coins, AlertCircle, ChevronDown, Settings, Cloud, Check, RefreshCw, X, Gift, Star, Home, ShoppingBag, LayoutGrid, Trophy, Zap, AlertTriangle, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MemoryManager } from './lib/memory';
 import { Analytics } from "@vercel/analytics/react";
@@ -38,7 +38,20 @@ const ViewLoader = () => (
 );
 
 function AppContent() {
-  const { currentView, setCurrentView, isPremium, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setShowWelcomeGift } = useGame();
+  const { currentView, setCurrentView, isPremium, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setShowWelcomeGift, login, user, claimLoginReward } = useGame();
+  const [showLoginIncentive, setShowLoginIncentive] = useState(false);
+  const [hasShownLoginIncentive, setHasShownLoginIncentive] = useState(false);
+
+  // Show login incentive if user is NOT logged in and hasn't seen it this session
+  useEffect(() => {
+    if (!user && isInitialSyncDone && !hasShownLoginIncentive) {
+      const timer = setTimeout(() => {
+        setShowLoginIncentive(true);
+        setHasShownLoginIncentive(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [user, isInitialSyncDone, hasShownLoginIncentive]);
 
   // Adsterra Script Logic - ONLY load if NOT premium
   useEffect(() => {
@@ -321,6 +334,73 @@ function AppContent() {
 
       {/* Welcome Gift Modal */}
       <AnimatePresence>
+        {showLoginIncentive && !user && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-md flex items-center justify-center p-6"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-3xl p-6 md:p-8 relative overflow-hidden shadow-2xl"
+            >
+              <div className="relative z-10 flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-xl mb-6">
+                  <LogIn size={32} className="text-black" />
+                </div>
+                
+                <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white mb-2 leading-none">
+                  Save Your Progress
+                </h2>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500 mb-6">
+                  Login for Exclusive Rewards
+                </p>
+                
+                <div className="space-y-3 w-full mb-8">
+                  <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex items-center gap-4">
+                    <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500">
+                      <Cloud size={16} />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-white">Cloud Sync</p>
+                      <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Never lose your collection</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex items-center gap-4">
+                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
+                      <Gift size={16} />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-white">Login Bonus</p>
+                      <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">+50,000 Coins & Mega Pack</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={() => {
+                    login();
+                    setShowLoginIncentive(false);
+                  }}
+                  className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-amber-400 active:scale-95 transition-all shadow-xl mb-3"
+                >
+                  Login with Google
+                </button>
+                
+                <button
+                  onClick={() => setShowLoginIncentive(false)}
+                  className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest hover:text-white transition-colors"
+                >
+                  Maybe Later
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
         {showWelcomeGift && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -331,62 +411,62 @@ function AppContent() {
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
-              className="w-full max-w-sm bg-zinc-900 border border-amber-500/30 rounded-3xl p-8 relative overflow-hidden shadow-[0_0_50px_rgba(245,158,11,0.2)]"
+              className="w-full max-w-sm bg-zinc-900 border border-amber-500/30 rounded-3xl p-6 md:p-8 relative overflow-y-auto max-h-[90vh] shadow-[0_0_50px_rgba(245,158,11,0.2)]"
             >
               {/* Background Glow */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-amber-500/20 blur-[60px] rounded-full" />
               
               <div className="relative z-10 flex flex-col items-center text-center">
-                <div className="w-20 h-20 bg-amber-500 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.4)] mb-6">
-                  <Gift size={40} className="text-black" />
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-amber-500 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.4)] mb-4 md:mb-6">
+                  <Gift size={32} className="text-black md:w-10 md:h-10" />
                 </div>
                 
-                <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white mb-2 leading-none">
+                <h2 className="text-2xl md:text-3xl font-black italic uppercase tracking-tighter text-white mb-1 md:mb-2 leading-none">
                   Welcome!
                 </h2>
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-500 mb-6">
+                <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-amber-500 mb-4 md:mb-6">
                   Exclusive Starter Pack
                 </p>
                 
-                <div className="space-y-3 w-full mb-8">
-                  <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
-                        <Coins size={16} />
+                <div className="space-y-2 md:space-y-3 w-full mb-6 md:mb-8">
+                  <div className="bg-black/40 border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
+                        <Coins size={14} className="md:w-4 md:h-4" />
                       </div>
-                      <span className="text-sm font-black uppercase tracking-widest text-zinc-400">Coins</span>
+                      <span className="text-xs md:text-sm font-black uppercase tracking-widest text-zinc-400">Coins</span>
                     </div>
-                    <span className="text-xl font-black italic text-white">+100,000</span>
+                    <span className="text-lg md:text-xl font-black italic text-white">+100,000</span>
                   </div>
 
-                  <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
-                        <ShoppingBag size={16} />
+                  <div className="bg-black/40 border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                        <ShoppingBag size={14} className="md:w-4 md:h-4" />
                       </div>
-                      <span className="text-sm font-black uppercase tracking-widest text-zinc-400">Welcome Mega</span>
+                      <span className="text-xs md:text-sm font-black uppercase tracking-widest text-zinc-400">Welcome Mega</span>
                     </div>
-                    <span className="text-xl font-black italic text-white">x5</span>
+                    <span className="text-lg md:text-xl font-black italic text-white">x5</span>
                   </div>
                   
-                  <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500">
-                        <Star size={16} />
+                  <div className="bg-black/40 border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500">
+                        <Star size={14} className="md:w-4 md:h-4" />
                       </div>
-                      <span className="text-sm font-black uppercase tracking-widest text-zinc-400">MVP Packs</span>
+                      <span className="text-xs md:text-sm font-black uppercase tracking-widest text-zinc-400">MVP Packs</span>
                     </div>
-                    <span className="text-xl font-black italic text-white">x3</span>
+                    <span className="text-lg md:text-xl font-black italic text-white">x3</span>
                   </div>
                 </div>
                 
-                <p className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest leading-relaxed mb-8 max-w-[240px]">
-                  Here is your gift: 100,000 coins, 5 Welcome Mega Packs and 3 MVP Packs to start your collection.
+                <p className="text-[8px] md:text-[9px] text-zinc-500 uppercase font-bold tracking-widest leading-relaxed mb-6 md:mb-8 max-w-[240px]">
+                  Here is your gift: 100,000 coins, 5 Welcome Mega Packs and 3 MVP Packs to start your collection. <span className="text-amber-500">Sign in now for an extra +50,000 coins and another Mega Pack!</span>
                 </p>
                 
                 <button
                   onClick={() => setShowWelcomeGift(false)}
-                  className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-amber-400 active:scale-95 transition-all shadow-xl"
+                  className="w-full bg-white text-black py-3 md:py-4 rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs hover:bg-amber-400 active:scale-95 transition-all shadow-xl"
                 >
                   Claim Rewards
                 </button>

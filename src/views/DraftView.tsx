@@ -1053,28 +1053,28 @@ const LiveMatchSimulation = memo<{
               exit={{ opacity: 0, scale: 0.95 }}
               className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6"
             >
-              <div className="w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-6 md:p-8 space-y-6 md:space-y-8 shadow-2xl overflow-y-auto max-h-full">
+              <div className="w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-8 space-y-5 md:space-y-8 shadow-2xl overflow-y-auto max-h-[90vh]">
                 {!interactiveResolution ? (
                   <>
-                    <div className="text-center space-y-3">
-                      <div className="inline-block px-4 py-1 bg-amber-500 text-black rounded-full text-[10px] font-black uppercase tracking-widest">
+                    <div className="text-center space-y-2 md:space-y-3">
+                      <div className="inline-block px-3 md:px-4 py-1 bg-amber-500 text-black rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest">
                         {activeInteractiveEvent.mechanic === 'choice' ? 'Decision Moment' : activeInteractiveEvent.mechanic === 'meter' ? 'Skill Check' : 'Rapid Action'}
                       </div>
-                      <h3 className="text-xl md:text-2xl font-black italic uppercase text-white leading-tight">{activeInteractiveEvent.title}</h3>
-                      <p className="text-zinc-400 font-medium text-sm md:text-base">{activeInteractiveEvent.description}</p>
+                      <h3 className="text-lg md:text-2xl font-black italic uppercase text-white leading-tight">{activeInteractiveEvent.title}</h3>
+                      <p className="text-zinc-400 font-medium text-xs md:text-base px-2">{activeInteractiveEvent.description}</p>
                     </div>
 
                     {activeInteractiveEvent.mechanic === 'choice' && (
                       <div className="grid grid-cols-1 gap-2 md:gap-3">
                         {activeInteractiveEvent.options?.map((opt, i) => (
-                          <button key={i} onClick={() => handleInteractiveChoice(opt)} className="w-full p-4 bg-zinc-950 border border-zinc-800 rounded-2xl hover:border-amber-500 active:scale-[0.98] group transition-all text-left flex items-center justify-between">
+                          <button key={i} onClick={() => handleInteractiveChoice(opt)} className="w-full p-3.5 md:p-4 bg-zinc-950 border border-zinc-800 rounded-xl md:rounded-2xl hover:border-amber-500 active:scale-[0.98] group transition-all text-left flex items-center justify-between">
                             <div>
-                              <p className="text-xs md:text-sm font-black uppercase italic text-white group-hover:text-amber-500">{opt.label}</p>
-                              <p className="text-[9px] md:text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+                              <p className="text-[10px] md:text-sm font-black uppercase italic text-white group-hover:text-amber-500">{opt.label}</p>
+                              <p className="text-[8px] md:text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
                                 Risk: <span className={opt.risk === 'low' ? 'text-green-500' : opt.risk === 'medium' ? 'text-amber-500' : 'text-red-500'}>{opt.risk.toUpperCase()}</span>
                               </p>
                             </div>
-                            <ArrowRight size={16} className="text-zinc-500 group-hover:text-amber-500" />
+                            <ArrowRight size={14} className="text-zinc-500 group-hover:text-amber-500 md:w-4 md:h-4" />
                           </button>
                         ))}
                       </div>
@@ -1899,13 +1899,13 @@ const DraftView: React.FC = () => {
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-80 h-32 border-t-2 border-x-2 border-white/20" />
             </div>
   
-            <div className="relative z-10 h-full w-full flex flex-col justify-around py-1 md:py-4 min-h-0">
-              {/* Mobile Layout (Remains as is) */}
-              <div className="lg:hidden flex flex-col gap-1 md:gap-4 justify-around h-full">
+            <div className="relative z-10 h-full w-full flex flex-col justify-center py-2 md:py-4 min-h-0">
+              {/* Mobile Layout (Optimized for all screens) */}
+              <div className="lg:hidden flex flex-col gap-2 md:gap-6 justify-center h-full max-h-[600px] mx-auto w-full">
                 {/* Row 1: PG, SG, SF */}
-                <div className="flex justify-center gap-2 md:gap-4 h-[44%]">
+                <div className="flex justify-center gap-2 md:gap-6 h-[40%] min-h-[120px]">
                   {[starters[0], starters[1], starters[2]].map(slot => (
-                    <div key={slot.id} className="w-[30%] max-w-[100px] h-full flex items-center">
+                    <div key={slot.id} className="w-[28%] max-w-[110px] aspect-[2.5/3.5] flex items-center">
                       <Slot 
                         slot={slot} 
                         onClick={() => handleSlotClick(slot)} 
@@ -1915,9 +1915,9 @@ const DraftView: React.FC = () => {
                   ))}
                 </div>
                 {/* Row 2: PF, C */}
-                <div className="flex justify-center gap-4 md:gap-8 h-[44%]">
+                <div className="flex justify-center gap-4 md:gap-10 h-[40%] min-h-[120px]">
                   {[starters[3], starters[4]].map(slot => (
-                    <div key={slot.id} className="w-[35%] max-w-[110px] h-full flex items-center">
+                    <div key={slot.id} className="w-[32%] max-w-[120px] aspect-[2.5/3.5] flex items-center">
                       <Slot 
                         slot={slot} 
                         onClick={() => handleSlotClick(slot)} 

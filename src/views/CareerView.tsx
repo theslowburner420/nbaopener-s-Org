@@ -58,11 +58,6 @@ const CareerView: React.FC = () => {
   const { state, isLoading, startNewFranchise, advanceWeek, resetFranchise, setState } = useFranchise();
   const { notifyError, notifySuccess } = useNotification();
 
-  const userTeam = useMemo(() => {
-    if (!state || !state.userTeamId) return null;
-    return state.teams[state.userTeamId];
-  }, [state]);
-
   const [activeTab, setActiveTab] = useState<FranchiseTab>('hub');
   const [activeNegotiation, setActiveNegotiation] = useState<{
     playerId: string;
@@ -72,6 +67,43 @@ const CareerView: React.FC = () => {
     status: 'Active' | 'Accepted' | 'Rejected';
     counterOffer?: { salary: number; years: number };
   } | null>(null);
+
+  const [activeStatsCat, setActiveStatsCat] = useState<'Points' | 'Rebounds' | 'Assists'>('Points');
+  const [statsSubTab, setStatsSubTab] = useState<'League' | 'Highs' | 'Team'>('League');
+  const [teamStatsTab, setTeamStatsTab] = useState<'Current' | 'History'>('Current');
+  const [showAwards, setShowAwards] = useState(false);
+  const [awardRevealStep, setAwardRevealStep] = useState(0);
+  const [activePlayoffConf, setActivePlayoffConf] = useState<'East' | 'West'>('East');
+  const [showChampCelebrate, setShowChampCelebrate] = useState(false);
+  const [viewingProspectId, setViewingProspectId] = useState<string | null>(null);
+  
+  const [selectedConf, setSelectedConf] = useState<'East' | 'West'>('East');
+  const [lineupModalPos, setLineupModalPos] = useState<string | null>(null);
+  const [tradeTargetTeamId, setTradeTargetTeamId] = useState<string | null>(null);
+  const [userOfferedIds, setUserOfferedIds] = useState<string[]>([]);
+  const [cpuRequestedIds, setCpuRequestedIds] = useState<string[]>([]);
+  const [userOfferedPickIds, setUserOfferedPickIds] = useState<string[]>([]);
+  const [cpuRequestedPickIds, setCpuRequestedPickIds] = useState<string[]>([]);
+  const [lastGameResult, setLastGameResult] = useState<{ result: any; match: FranchiseMatch } | null>(null);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showLottery, setShowLottery] = useState(false);
+  const [lotteryPicks, setLotteryPicks] = useState<string[]>([]);
+  const [scoutingPoints, setScoutingPoints] = useState(5);
+  const [scoutedProspects, setScoutedProspects] = useState<Set<string>>(new Set());
+
+  const [draftState, setDraftState] = useState({
+    pick: 1,
+    round: 1,
+    history: [] as { teamId: string, player: any, pick: number }[],
+    isPaused: true,
+    timer: 30,
+    order: [] as string[]
+  });
+
+  const userTeam = useMemo(() => {
+    if (!state || !state.userTeamId) return null;
+    return state.teams[state.userTeamId];
+  }, [state]);
 
   // OPTIMIZATION: Memoized Card Lookup Map
   const allCardsLookupMap = useMemo(() => {
@@ -123,15 +155,6 @@ const CareerView: React.FC = () => {
     });
     return map;
   }, [state?.teams]);
-
-  const [activeStatsCat, setActiveStatsCat] = useState<'Points' | 'Rebounds' | 'Assists'>('Points');
-  const [statsSubTab, setStatsSubTab] = useState<'League' | 'Highs' | 'Team'>('League');
-  const [teamStatsTab, setTeamStatsTab] = useState<'Current' | 'History'>('Current');
-  const [showAwards, setShowAwards] = useState(false);
-  const [awardRevealStep, setAwardRevealStep] = useState(0);
-  const [activePlayoffConf, setActivePlayoffConf] = useState<'East' | 'West'>('East');
-  const [showChampCelebrate, setShowChampCelebrate] = useState(false);
-  const [viewingProspectId, setViewingProspectId] = useState<string | null>(null);
 
   React.useEffect(() => {
     if (state?.userTeamId && state.teams[state.userTeamId]) {
@@ -244,31 +267,6 @@ const CareerView: React.FC = () => {
       }
     };
   }, [state?.stats?.seasonal, state?.teams, findCard, state?.season, state?.playerProgress, state?.playoffSeries]);
-
-  const [selectedConf, setSelectedConf] = useState<'East' | 'West'>('East');
-  const [lineupModalPos, setLineupModalPos] = useState<string | null>(null);
-  const [tradeTargetTeamId, setTradeTargetTeamId] = useState<string | null>(null);
-  const [userOfferedIds, setUserOfferedIds] = useState<string[]>([]);
-  const [cpuRequestedIds, setCpuRequestedIds] = useState<string[]>([]);
-  const [userOfferedPickIds, setUserOfferedPickIds] = useState<string[]>([]);
-  const [cpuRequestedPickIds, setCpuRequestedPickIds] = useState<string[]>([]);
-  const [lastGameResult, setLastGameResult] = useState<{ result: any; match: FranchiseMatch } | null>(null);
-  const [showExitConfirm, setShowExitConfirm] = useState(false);
-  
-  // DRAFT ENHANCEMENTS
-  const [showLottery, setShowLottery] = useState(false);
-  const [lotteryPicks, setLotteryPicks] = useState<string[]>([]);
-  const [scoutingPoints, setScoutingPoints] = useState(5);
-  const [scoutedProspects, setScoutedProspects] = useState<Set<string>>(new Set());
-
-  const [draftState, setDraftState] = useState({
-    pick: 1,
-    round: 1,
-    history: [] as { teamId: string, player: any, pick: number }[],
-    isPaused: true,
-    timer: 30,
-    order: [] as string[]
-  });
 
   const handleUserDraftChoice = React.useCallback((card: any) => {
     if (!state) return;
@@ -908,17 +906,17 @@ const CareerView: React.FC = () => {
                    if (!card) return null;
 
                    return (
-                      <div className="flex flex-col h-full max-h-[90vh]">
+                      <div className="flex flex-col h-full max-h-[95vh] md:max-h-[85vh]">
                          {/* Header */}
-                         <div className="p-6 md:p-8 bg-black/40 border-b border-white/5 flex items-center justify-between">
+                         <div className="p-4 md:p-8 bg-black/40 border-b border-white/5 flex items-center justify-between shrink-0">
                             <div className="flex items-center gap-4">
-                               <div className="w-12 h-12 md:w-20 md:h-20 bg-zinc-800 rounded-2xl p-2 border border-white/5 relative group">
+                               <div className="w-12 h-12 md:w-20 md:h-20 bg-zinc-800 rounded-xl md:rounded-2xl p-1.5 md:p-2 border border-white/5 relative group">
                                   <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-full h-full object-contain" />
-                                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-white text-black text-[10px] font-black rounded-full flex items-center justify-center border-2 border-zinc-900">{card.stats.ovr}</div>
+                                  <div className="absolute -top-1 -right-1 w-5 h-5 md:w-6 md:h-6 bg-white text-black text-[8px] md:text-[10px] font-black rounded-full flex items-center justify-center border-2 border-zinc-900">{card.stats.ovr}</div>
                                </div>
                                <div>
-                                  <h3 className="text-xl md:text-3xl font-black uppercase italic tracking-tighter text-white leading-none">{card.name}</h3>
-                                  <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em]">{card.position} • {card.age}Y • {card.stats.ovr} OVR • {card.rarity.toUpperCase()}</p>
+                                  <h3 className="text-lg md:text-3xl font-black uppercase italic tracking-tighter text-white leading-none">{card.name}</h3>
+                                  <p className="text-[8px] md:text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] md:tracking-[0.3em] mt-0.5">{card.position} • {card.age}Y • {card.stats.ovr} OVR</p>
                                    <div className="flex items-center gap-2 mt-1">
                                       <span className="text-[8px] font-black bg-white/10 text-zinc-400 px-1.5 py-0.5 rounded uppercase tracking-widest">{card.rarity}</span>
                                       {card.age > 33 && (
@@ -935,19 +933,19 @@ const CareerView: React.FC = () => {
                          </div>
 
                          {/* Chat / Message Area */}
-                         <div className="flex-1 p-6 md:p-10 space-y-8 overflow-y-auto no-scrollbar">
+                         <div className="flex-1 p-5 md:p-10 space-y-6 md:space-y-8 overflow-y-auto custom-scrollbar">
                             <div className="space-y-4">
                                <div className="flex justify-start">
-                                  <div className="max-w-[80%] bg-zinc-800 p-4 rounded-2xl rounded-tl-none border border-white/5">
-                                     <p className="text-xs md:text-sm font-medium text-zinc-300 leading-relaxed italic">"{activeNegotiation.message}"</p>
+                                  <div className="max-w-[85%] md:max-w-[80%] bg-zinc-800 p-3 md:p-4 rounded-xl md:rounded-2xl rounded-tl-none border border-white/5">
+                                     <p className="text-[11px] md:text-sm font-medium text-zinc-300 leading-relaxed italic">"{activeNegotiation.message}"</p>
                                   </div>
                                </div>
                                
                                {activeNegotiation.counterOffer && activeNegotiation.status === 'Active' && (
                                   <div className="flex justify-start">
-                                     <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl flex flex-col gap-2">
+                                     <div className="bg-amber-500/10 border border-amber-500/20 p-3 md:p-4 rounded-xl md:rounded-2xl flex flex-col gap-1 md:gap-2">
                                         <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Counter Offer</p>
-                                        <p className="text-sm font-black text-white italic">${(activeNegotiation.counterOffer.salary/1000000).toFixed(1)}M / {activeNegotiation.counterOffer.years} Years</p>
+                                        <p className="text-xs md:text-sm font-black text-white italic">${(activeNegotiation.counterOffer.salary/1000000).toFixed(1)}M / {activeNegotiation.counterOffer.years} Years</p>
                                      </div>
                                   </div>
                                )}
@@ -959,7 +957,7 @@ const CareerView: React.FC = () => {
                                      {/* Salary Slider */}
                                      <div className="space-y-4">
                                         <div className="flex justify-between items-end">
-                                           <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Proposed Salary</label>
+                                           <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-500">Proposed Salary</label>
                                            <span className="text-xl font-black italic text-white">${(activeNegotiation.salary/1000000).toFixed(1)}M</span>
                                         </div>
                                         <input 
@@ -971,7 +969,7 @@ const CareerView: React.FC = () => {
                                           onChange={(e) => setActiveNegotiation({ ...activeNegotiation, salary: Number(e.target.value) })}
                                           className="w-full accent-amber-500 bg-zinc-800 rounded-lg h-2"
                                         />
-                                        <div className="flex justify-between text-[8px] font-bold text-zinc-700 uppercase">
+                                        <div className="flex justify-between text-[7px] md:text-[8px] font-bold text-zinc-700 uppercase">
                                           <span>$1M</span>
                                           <span>$60M</span>
                                         </div>
@@ -979,13 +977,13 @@ const CareerView: React.FC = () => {
 
                                      {/* Years Selector */}
                                      <div className="space-y-4">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Contract Duration</label>
+                                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-500">Contract Duration</label>
                                         <div className="flex gap-2">
                                            {[1, 2, 3, 4].map(y => (
                                               <button 
                                                 key={y}
                                                 onClick={() => setActiveNegotiation({ ...activeNegotiation, years: y })}
-                                                className={`flex-1 py-4 rounded-xl border text-sm font-black transition-all ${activeNegotiation.years === y ? 'bg-white text-black border-white shadow-xl' : 'bg-zinc-800 text-zinc-500 border-white/5 hover:border-white/20'}`}
+                                                className={`flex-1 py-3 md:py-4 rounded-xl border text-xs md:text-sm font-black transition-all ${activeNegotiation.years === y ? 'bg-white text-black border-white shadow-xl' : 'bg-zinc-800 text-zinc-500 border-white/5 hover:border-white/20'}`}
                                               >
                                                  {y}Y
                                               </button>

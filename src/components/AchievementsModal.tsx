@@ -85,12 +85,12 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
                 <div className="flex items-center justify-between w-full sm:w-auto">
                   <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="p-1.5 sm:p-2 bg-amber-500/10 rounded-lg">
-                      <Trophy className="text-amber-500" size={18} sm:size={24} />
+                    <div className="p-1.5 sm:p-2 bg-amber-500/10 rounded-lg shrink-0">
+                      <Trophy className="text-amber-500 w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                      <h2 className="text-xl sm:text-3xl font-black uppercase italic tracking-tighter">Achievements</h2>
-                      <p className="hidden sm:block text-[8px] sm:text-xs text-zinc-500 font-bold uppercase tracking-widest">Track your Hoops Collector legacy</p>
+                      <h2 className="text-lg sm:text-3xl font-black uppercase italic tracking-tighter leading-none">Achievements</h2>
+                      <p className="hidden sm:block text-[8px] sm:text-xs text-zinc-500 font-bold uppercase tracking-widest mt-1">Track your Hoops Collector legacy</p>
                     </div>
                   </div>
                   <button 

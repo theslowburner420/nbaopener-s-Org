@@ -784,6 +784,25 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [updateGameStateAsync, updateGameState]);
 
+  const claimLoginReward = useCallback(async () => {
+    if (!stateRef.current.user) return;
+    
+    // Add specific login rewards: 50,000 extra coins and a Mega Pack
+    const megaPack = { id: 'mega', type: 'mega', name: 'Mega Pack' };
+    let newPacks = [...stateRef.current.inventoryPacks];
+    const existing = newPacks.find(p => p.type === 'mega');
+    if (existing) {
+      newPacks = newPacks.map(p => p.type === 'mega' ? { ...p, count: p.count + 1 } : p);
+    } else {
+      newPacks.push({ ...megaPack, count: 1 });
+    }
+
+    await updateGameStateAsync({
+      coins: stateRef.current.coins + 50000,
+      inventoryPacks: newPacks,
+    });
+  }, [updateGameStateAsync]);
+
   const addPackToInventory = useCallback(async (pack: { id: string; type: string; name: string }, sync: boolean = true) => {
     const existing = stateRef.current.inventoryPacks.find(p => p.type === pack.type);
     let newPacks;
@@ -942,9 +961,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setShowWelcomeGift,
     login,
     logout,
+    claimLoginReward,
     startFranchise,
     updateFranchise
-  }), [state, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, forceSync, isSaving, isBackgroundSaving, login, logout, startFranchise, updateFranchise]);
+  }), [state, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimAchievementReward, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, forceSync, refreshFromCloud, isSaving, isBackgroundSaving, login, logout, claimLoginReward, startFranchise, updateFranchise]);
 
   return (
     <GameContext.Provider value={contextValue}>
