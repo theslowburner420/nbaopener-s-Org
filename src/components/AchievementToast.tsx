@@ -1,18 +1,19 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Trophy } from 'lucide-react';
+import { Trophy, X } from 'lucide-react';
 import { Achievement } from '../types';
 
 interface AchievementToastProps {
   achievement: Achievement;
+  onClose?: () => void;
 }
 
-const AchievementToast: React.FC<AchievementToastProps> = ({ achievement }) => {
+const AchievementToast: React.FC<AchievementToastProps> = ({ achievement, onClose }) => {
   const Icon = achievement.icon || Trophy;
   
   return (
     <div
-      className="w-full max-w-[340px] bg-black/80 backdrop-blur-xl border border-yellow-500/30 rounded-2xl p-4 shadow-2xl flex items-center space-x-4 pointer-events-auto relative"
+      className="w-full max-w-[340px] bg-black/80 backdrop-blur-xl border border-yellow-500/30 rounded-2xl p-4 shadow-2xl flex items-center space-x-4 pointer-events-auto relative group"
     >
       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center shadow-lg shrink-0">
         <Icon className="text-white" size={24} />
@@ -32,11 +33,22 @@ const AchievementToast: React.FC<AchievementToastProps> = ({ achievement }) => {
           </span>
         </div>
       </div>
+
+      {onClose && (
+        <button 
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          className="absolute top-2 right-2 p-1 text-white/20 hover:text-white transition-colors"
+        >
+          <X size={14} />
+        </button>
+      )}
       
       {/* Decorative gold corner */}
-      <div className="absolute top-0 right-0 w-8 h-8 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-[200%] h-[200%] bg-yellow-500/10 rotate-45 translate-x-[50%] -translate-y-[50%]" />
-      </div>
+      {!onClose && (
+        <div className="absolute top-0 right-0 w-8 h-8 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 right-0 w-[200%] h-[200%] bg-yellow-500/10 rotate-45 translate-x-[50%] -translate-y-[50%]" />
+        </div>
+      )}
     </div>
   );
 };

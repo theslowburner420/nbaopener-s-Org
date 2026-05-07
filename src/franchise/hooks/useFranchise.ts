@@ -3,10 +3,13 @@ import { FranchiseState } from '../types';
 import { stateService } from '../services/stateService';
 import { initializeFranchiseState } from '../services/rosterService';
 import { gameService } from '../services/gameService';
+import { useGame } from '../../context/GameContext';
 
 export function useFranchise() {
+  const { franchise: cloudFranchise, user } = useGame();
   const [state, setState] = useState<FranchiseState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     const savedState = stateService.load();
@@ -34,6 +37,24 @@ export function useFranchise() {
     setIsLoading(false);
   }, []);
 
+  // Sync Logic
+  useEffect(() => {
+    if (user && cloudFranchise && state) {
+      const cloudPhase = (cloudFranchise as any).phase;
+      if (cloudPhase && cloudPhase !== state.phase) {
+        setIsSyncing(true);
+        console.log(`[FRANCHISE] Syncing Phase Discrepancy: ${state.phase} (local) vs ${cloudPhase} (Firestore). Firestore priority.`);
+        
+        const newState = { ...state, phase: cloudPhase };
+        setState(newState);
+        stateService.save(newState);
+        
+        const timer = setTimeout(() => setIsSyncing(false), 1000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [user, cloudFranchise, state?.phase]);
+
   const startNewFranchise = useCallback((teamId: string) => {
     const newState = initializeFranchiseState(teamId);
     stateService.save(newState);
@@ -55,6 +76,7 @@ export function useFranchise() {
     state,
     setState,
     isLoading,
+    isSyncing,
     startNewFranchise,
     advanceWeek,
     resetFranchise

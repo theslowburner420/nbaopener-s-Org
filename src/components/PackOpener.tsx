@@ -301,9 +301,10 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
     // and correctly preloaded to ensure no spoilers
     if (!isRevealing && isPreloaded) {
       const currentCard = cards[activeCardIndex];
+      const allRevealed = activeCardIndex === totalCards - 1;
       const achievementsToTrigger = newlyUnlockedAchievements.filter(ach => 
         !shownAchievementIds.has(ach.id) && 
-        (ach.triggeredByCardId === currentCard.id || ach.triggeredByCardId === null)
+        (ach.triggeredByCardId === currentCard.id || (allRevealed && ach.triggeredByCardId === null))
       );
 
       if (achievementsToTrigger.length > 0) {
@@ -877,16 +878,18 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
                 {showPack && isActive ? (
                   <motion.div
                     key="pack"
-                    initial={{ scale: 0.8, rotate: 0 }}
+                    initial={{ scale: 0.8, x: "-50%", y: "-50%", left: "50%", top: "50%" }}
                     animate={{ 
                       scale: [0.8, 1.1, 0.9, 1.2],
                       rotate: [0, -5, 5, -5, 5, 0],
+                      x: "-50%",
+                      y: "-50%"
                     }}
-                    exit={{ scale: 2, opacity: 0, filter: 'brightness(2)' }}
+                    exit={{ scale: 2, opacity: 0, filter: 'brightness(2)', x: "-50%", y: "-50%" }}
                     transition={{ duration: 0.8, ease: "easeInOut" }}
-                    className="w-full h-full flex items-center justify-center"
+                    className="fixed z-[5000] w-64 h-80 flex items-center justify-center pointer-events-none"
                   >
-                    <div className="w-40 h-56 sm:w-48 sm:h-64 bg-gradient-to-br from-amber-500 to-amber-900 rounded-2xl shadow-[0_0_50px_rgba(245,158,11,0.5)] border-2 border-white/20 flex items-center justify-center relative overflow-hidden">
+                    <div className="w-48 h-64 sm:w-56 sm:h-72 bg-gradient-to-br from-amber-500 to-amber-900 rounded-2xl shadow-[0_0_50px_rgba(245,158,11,0.5)] border-2 border-white/20 flex items-center justify-center relative overflow-hidden">
                       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
                       <Sparkles size={isMobile ? 48 : 64} className="text-white/80 animate-pulse" />
                       <div className="absolute bottom-4 text-white font-black italic uppercase tracking-widest text-[10px] sm:text-xs">Opening...</div>

@@ -16,11 +16,11 @@ export const tradeEngine = {
 
   // Evaluates a trade proposal by the user
   evaluateUserTrade(state: FranchiseState, offer: TradeOffer): { accepted: boolean; reason: string } {
-    if (state.phase !== 'Regular' && state.phase !== 'Preseason') {
-      return { accepted: false, reason: 'Trades can only be made during the Preseason or Regular Season.' };
+    if (state.phase !== 'regular_season') {
+      return { accepted: false, reason: 'Trades can only be made during the Regular Season.' };
     }
 
-    if (state.phase === 'Regular' && state.week > this.TRADE_DEADLINE_WEEK) {
+    if (state.week > this.TRADE_DEADLINE_WEEK) {
       return { accepted: false, reason: 'The trade deadline has passed. No more trades allowed this season.' };
     }
 

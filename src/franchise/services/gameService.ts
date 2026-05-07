@@ -4,12 +4,12 @@ import { stateService } from './stateService';
 import { tradeEngine } from './tradeEngine';
 import { playoffService } from './playoffService';
 import { ALL_CARDS } from '../../data/cards';
-import { getInitialSalary, runCPUMidSeasonLogic } from './rosterService';
+import { getInitialSalary, runCPUMidSeasonLogic, calculateAwards } from './rosterService';
 
 export const gameService = {
   // Simulates the next available game for the user
   simulateNextUserGame(state: FranchiseState): { result: any, match: FranchiseMatch } | null {
-    if (state.phase === 'Playoffs' || state.phase === 'PlayIn') {
+    if (state.phase === 'playoffs') {
       return this.simulateUserPlayoffGame(state);
     }
 
@@ -40,10 +40,14 @@ export const gameService = {
 
     // Update state week to reflect lead team's progress (user team)
     state.week = Math.max(state.week, targetGameNumber);
+    state.currentGameIndex = (state.currentGameIndex || 0) + 1;
 
     // End of Season check
-    if (state.week >= 82 && state.phase === 'Regular') {
-      state.phase = 'Awards';
+    if (state.currentGameIndex >= 82 && state.phase === 'regular_season') {
+      console.log(`[FRANCHISE] Phase transition: regular_season → season_awards (End of Regular Season)`);
+      state.phase = 'season_awards';
+      // Calculate and save standings for playoffs
+      playoffService.calculateSeasonStandings(state);
     }
 
     stateService.save(state);
@@ -72,9 +76,10 @@ export const gameService = {
     // Simulate other series
     playoffService.simulateNextPlayoffStep(state);
     
-    // Check if Finals are over to move to Draft
+    // Check if Finals are over to move to Offseason
     if (state.championId || state.playoffSeries.find(s => s.round === 4)?.winnerId) {
-       state.phase = 'Draft';
+       console.log(`[FRANCHISE] Phase transition: playoffs → offseason_start (Finals Finished)`);
+       state.phase = 'offseason_start';
     }
 
     stateService.save(state);
@@ -86,7 +91,7 @@ export const gameService = {
   advanceWeek(state: FranchiseState): FranchiseState {
     const newState = { ...state };
     
-    if (state.phase === 'Regular') {
+    if (state.phase === 'regular_season') {
       // 1. Process CPU-to-CPU Trades
       const tradeLogs = tradeEngine.processWeeklyCPUTrades(newState);
       tradeLogs.forEach(log => {
@@ -101,30 +106,40 @@ export const gameService = {
       });
 
       // 2. Simulate all remaining unplayed matches for the current "cycle" (4 games)
-      const currentRoundMatches = newState.schedule.filter(m => 
-        m.gameNumber < state.week + 4 && !m.played
-      );
+      const userNextGames = newState.schedule.filter(m => 
+        !m.played && (m.homeTeamId === newState.userTeamId || m.awayTeamId === newState.userTeamId)
+      ).slice(0, 4);
 
-      currentRoundMatches.forEach(match => {
-        const homeTeam = newState.teams[match.homeTeamId];
-        const awayTeam = newState.teams[match.awayTeamId];
-        const result = simulationEngine.simulateMatch(homeTeam, awayTeam, newState);
-        this.updateMatchResult(newState, match.id, result);
-      });
-
-      newState.week += 4;
+      if (userNextGames.length > 0) {
+          const maxGameNum = userNextGames[userNextGames.length - 1].gameNumber;
+          const leagueMatches = newState.schedule.filter(m => !m.played && m.gameNumber <= maxGameNum);
+          
+          leagueMatches.forEach(match => {
+            const homeTeam = newState.teams[match.homeTeamId];
+            const awayTeam = newState.teams[match.awayTeamId];
+            const result = simulationEngine.simulateMatch(homeTeam, awayTeam, newState);
+            this.updateMatchResult(newState, match.id, result);
+            if (match.homeTeamId === newState.userTeamId || match.awayTeamId === newState.userTeamId) {
+                newState.currentGameIndex = (newState.currentGameIndex || 0) + 1;
+            }
+          });
+          newState.week = maxGameNum;
+      }
 
       // Check for End of Season
-      if (newState.week >= 82) {
-        newState.phase = 'Awards';
+      if (newState.currentGameIndex >= 82) {
+        console.log(`[FRANCHISE] Phase transition: regular_season → season_awards (Simulated End of Regular Season)`);
+        newState.phase = 'season_awards';
+        playoffService.calculateSeasonStandings(newState);
       }
-    } else if (newState.phase !== 'Awards' && newState.phase !== 'Draft') {
+    } else if (newState.phase !== 'season_awards' && newState.phase !== 'draft' && newState.phase !== 'free_agency') {
       // Advance playoffs if user is not in any series or already finished
       playoffService.simulateNextPlayoffStep(newState);
 
-      // Transition to Draft phase if champion is decided
+      // Transition to offseason_start phase if champion is decided
       if (newState.championId || newState.playoffSeries.find(s => s.round === 4)?.winnerId) {
-         newState.phase = 'Draft';
+         console.log(`[FRANCHISE] Phase transition: ${newState.phase} → offseason_start (Champion Decided)`);
+         newState.phase = 'offseason_start';
       }
     }
 

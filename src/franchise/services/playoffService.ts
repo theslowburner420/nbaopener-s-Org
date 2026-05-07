@@ -3,51 +3,36 @@ import { simulationEngine } from './simulationEngine';
 import { ALL_CARDS } from '../../data/cards';
 
 export const playoffService = {
-  generatePlayIn(state: FranchiseState): PlayoffSeries[] {
+  calculateSeasonStandings(state: FranchiseState) {
     const conferences: ('East' | 'West')[] = ['East', 'West'];
-    const allSeries: PlayoffSeries[] = [];
+    const standings: Record<string, any> = {};
 
     conferences.forEach(conf => {
-      const standings = Object.values(state.teams)
+      const teams = Object.values(state.teams)
         .filter(t => t.conference === conf)
-        .sort((a, b) => b.wins - a.wins || a.losses - b.losses);
-
-      const t7 = standings[6];
-      const t8 = standings[7];
-      const t9 = standings[8];
-      const t10 = standings[9];
-
-      // Stage 1 of Play-In
-      // Game: 7 vs 8 (Winner gets 7th seed)
-      allSeries.push({
-        id: `playin-${conf}-7v8`,
-        team1Id: t7.teamId,
-        team2Id: t8.teamId,
-        wins1: 0,
-        wins2: 0,
-        matches: [],
-        round: 0, // Round 0 Stage 1
-        conference: conf,
-        seed1: 7,
-        seed2: 8
-      });
-
-      // Game: 9 vs 10 (Winner plays loser of 7v8)
-      allSeries.push({
-        id: `playin-${conf}-9v10`,
-        team1Id: t9.teamId,
-        team2Id: t10.teamId,
-        wins1: 0,
-        wins2: 0,
-        matches: [],
-        round: 0,
-        conference: conf,
-        seed1: 9,
-        seed2: 10
-      });
+        .map(t => {
+           // Calculate Point Differential (PD)
+           let pointsFor = 0;
+           let pointsAgainst = 0;
+           state.schedule.forEach(m => {
+             if (!m.played || !m.score) return;
+             if (m.homeTeamId === t.teamId) {
+                pointsFor += m.score.home;
+                pointsAgainst += m.score.away;
+             } else if (m.awayTeamId === t.teamId) {
+                pointsFor += m.score.away;
+                pointsAgainst += m.score.home;
+             }
+           });
+           return { ...t, pd: pointsFor - pointsAgainst };
+        })
+        .sort((a, b) => b.wins - a.wins || b.pd - a.pd);
+      
+      standings[conf] = teams;
     });
 
-    return allSeries;
+    state.standings = standings;
+    state.playoffSeries = this.generateInitialBracket(state);
   },
 
   generateInitialBracket(state: FranchiseState): PlayoffSeries[] {
@@ -55,11 +40,11 @@ export const playoffService = {
     const allSeries: PlayoffSeries[] = [];
 
     conferences.forEach(conf => {
-       const seeds = this.getSeedsForConference(state, conf);
+       const seeds = state.standings[conf].slice(0, 8);
        
-       // Matchups: 1v8, 4v5, 3v6, 2v7
+       // Matchups: 1v8, 2v7, 3v6, 4v5
        const matchups = [
-         [0, 7], [3, 4], [2, 5], [1, 6]
+         [0, 7], [1, 6], [2, 5], [3, 4]
        ];
 
        matchups.forEach(([s1Index, s2Index], idx) => {
@@ -81,33 +66,6 @@ export const playoffService = {
     return allSeries;
   },
 
-  getSeedsForConference(state: FranchiseState, conf: 'East' | 'West'): TeamObject[] {
-    const standings = Object.values(state.teams)
-        .filter(t => t.conference === conf)
-        .sort((a, b) => b.wins - a.wins || a.losses - b.losses);
-
-    // Initial 6 seeds are fixed from standings
-    const seeds: TeamObject[] = standings.slice(0, 6);
-
-    // Seeds 7 and 8 come from Play-In resolution
-    const playin7v8 = state.playoffSeries.find(s => s.id === `playin-${conf}-7v8`);
-    const playinFinal = state.playoffSeries.find(s => s.id === `playin-${conf}-final`);
-
-    if (playin7v8?.winnerId) {
-        seeds.push(state.teams[playin7v8.winnerId]);
-    } else {
-        seeds.push(standings[6]); // Fallback if bypassed
-    }
-
-    if (playinFinal?.winnerId) {
-        seeds.push(state.teams[playinFinal.winnerId]);
-    } else {
-        seeds.push(standings[7]); // Fallback if bypassed
-    }
-
-    return seeds;
-  },
-
   simulateNextPlayoffStep(state: FranchiseState) {
     // Find active series that user is NOT part of
     state.playoffSeries.forEach(series => {
@@ -126,7 +84,7 @@ export const playoffService = {
   },
 
   simulateSeriesUntilFinished(state: FranchiseState, series: PlayoffSeries) {
-    const targetWins = series.round === 0 ? 1 : 4;
+    const targetWins = 4; // Best of 7
     while (series.wins1 < targetWins && series.wins2 < targetWins) {
       this.simulateSeriesGame(state, series);
     }
@@ -136,24 +94,38 @@ export const playoffService = {
     const t1 = state.teams[series.team1Id];
     const t2 = state.teams[series.team2Id];
     
-    // Higher OVR has 55-65% probability of winning each game according to the OVR difference.
-    const ovr1 = this.calculateTeamOvr(t1, state);
-    const ovr2 = this.calculateTeamOvr(t2, state);
+    // Sim engine but without detailed boxscore for CPU to keep performance
+    const res = simulationEngine.simulateMatch(t1, t2, state);
     
-    const diff = ovr1 - ovr2;
-    // Win prob = 50% + (diff * 2.5%), max 70%, min 30%
-    let winProb1 = 0.5 + (diff * 0.025);
-    winProb1 = Math.max(0.3, Math.min(0.7, winProb1));
-    
-    if (Math.random() < winProb1) {
+    // Log playoff stats
+    this.trackPlayoffStats(state, res.boxScore.home);
+    this.trackPlayoffStats(state, res.boxScore.away);
+
+    if (res.winnerId === t1.teamId) {
       series.wins1++;
     } else {
       series.wins2++;
     }
 
-    const targetWins = series.round === 0 ? 1 : 4;
+    const targetWins = 4;
     if (series.wins1 === targetWins) series.winnerId = series.team1Id;
     if (series.wins2 === targetWins) series.winnerId = series.team2Id;
+  },
+
+  trackPlayoffStats(state: FranchiseState, entries: any[]) {
+    if (!state.stats.playoffs) state.stats.playoffs = {};
+    const pStats = state.stats.playoffs;
+
+    entries.forEach(e => {
+        if (!pStats[e.playerId]) {
+            pStats[e.playerId] = { points: 0, rebounds: 0, assists: 0, steals: 0, blocks: 0, plusMinus: 0, gamesPlayed: 0, fgPct: 0 };
+        }
+        const s = pStats[e.playerId];
+        s.points += e.points;
+        s.rebounds += e.rebounds;
+        s.assists += e.assists;
+        s.gamesPlayed += 1;
+    });
   },
 
   calculateTeamOvr(team: TeamObject, state: FranchiseState): number {
@@ -228,7 +200,7 @@ export const playoffService = {
         }
 
         // Post Play-In (Stage 2 finished): Generate R1
-        state.phase = "Playoffs";
+        state.phase = "playoffs";
         state.playoffSeries = [...state.playoffSeries, ...this.generateInitialBracket(state)];
      } else if (lastRound === 1) {
         // Round 1 -> Semis
@@ -308,6 +280,8 @@ export const playoffService = {
       }
       state.awards[state.season].championId = finals.winnerId;
 
+      this.calculateFinalsMvp(state, finals.winnerId);
+
       if (finals.winnerId === state.userTeamId) {
         const hasTrophy = state.trophyCase.some(t => t.type === 'CHAMP' && t.season === state.season);
         if (!hasTrophy) {
@@ -318,6 +292,46 @@ export const playoffService = {
           });
         }
       }
+    }
+  },
+
+  calculateFinalsMvp(state: FranchiseState, champTeamId: string) {
+    const champTeam = state.teams[champTeamId];
+    const playoffStats = state.stats.playoffs;
+
+    let fmvpId = '';
+    let bestScore = -1;
+
+    if (playoffStats) {
+        champTeam.roster.forEach(pid => {
+            const s = playoffStats[pid];
+            if (s && s.gamesPlayed > 0) {
+                const score = (s.points / s.gamesPlayed) + (s.assists / s.gamesPlayed) * 0.9 + (s.rebounds / s.gamesPlayed) * 0.7;
+                if (score > bestScore) {
+                    bestScore = score;
+                    fmvpId = pid;
+                }
+            }
+        });
+    }
+
+    if (!fmvpId) {
+        // Fallback: Highest OVR
+        fmvpId = [...champTeam.roster].sort((a,b) => {
+            const ovrA = state.playerProgress[a]?.ovr || 0;
+            const ovrB = state.playerProgress[b]?.ovr || 0;
+            return ovrB - ovrA;
+        })[0];
+    }
+
+    state.awards[state.season].finalsMvp = fmvpId;
+    if (champTeam.isHuman) {
+        state.trophyCase.push({
+            type: 'FMVP',
+            season: state.season,
+            playerId: fmvpId,
+            label: 'Finals MVP'
+        });
     }
   }
 };

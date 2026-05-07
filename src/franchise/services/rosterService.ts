@@ -60,70 +60,152 @@ export function generateContract(playerId: string, ovr: number, seasons: number 
   };
 }
 
+export function calculateAwards(state: FranchiseState) {
+  const userTeam = state.teams[state.userTeamId];
+  const awards: any = state.awards[state.season] || {
+    mvp: '',
+    dpoy: '',
+    roy: '',
+    mip: '',
+    allNba: []
+  };
+  state.awards[state.season] = awards;
+  const seasonalStats = state.stats.seasonal;
+
+  // Final Standings calculate for award eligibility (MVP)
+  const standings = Object.values(state.teams).map(t => ({
+    id: t.teamId,
+    winPct: t.wins / (t.wins + t.losses || 1),
+    wins: t.wins,
+    losses: t.losses
+  }));
+
+  // LEAGUE AWARDS CALCULATION
+  const leagueStats = Object.keys(seasonalStats).map(id => {
+    const s = seasonalStats[id];
+    const games = s.gamesPlayed || 1;
+    const teamId = Object.values(state.teams).find(t => t.roster.includes(id))?.teamId;
+    const team = teamId ? state.teams[teamId] : null;
+    const isStarter = team && (Object.values(team.lineup).slice(0, 5) as any[]).includes(id);
+
+    return {
+      id,
+      stats: s,
+      games,
+      ppg: s.points / games,
+      rpg: s.rebounds / games,
+      apg: s.assists / games,
+      spg: (s.steals || 0) / games,
+      bpg: (s.blocks || 0) / games,
+      teamStandings: standings.find(st => st.id === teamId),
+      isStarter,
+      mvpScore: (s.points / games) + (s.assists / games) * 0.9 + (s.rebounds / games) * 0.7,
+      dpoyScore: ((s.steals || 0) / games) * 2.5 + ((s.blocks || 0) / games) * 3 + ((s.rebounds || 0) / games) * 0.5,
+      royScore: (s.points / games) + (s.rebounds / games) + (s.assists / games)
+    };
+  }).filter(p => p.games >= 20);
+
+  // Fallback if no stats
+  let finalCandidates = leagueStats;
+  if (leagueStats.length === 0) {
+    const userRosterByOvr = [...userTeam.roster].sort((a,b) => {
+        const ovrA = state.playerProgress[a]?.ovr || 0;
+        const ovrB = state.playerProgress[b]?.ovr || 0;
+        return ovrB - ovrA;
+    });
+    // This is a minimal fallback to avoid errors
+    if (userRosterByOvr.length > 0) {
+        awards.mvp = userRosterByOvr[0];
+        awards.dpoy = userRosterByOvr[0];
+        awards.roy = userRosterByOvr.find(id => state.playerProgress[id]?.age < 23);
+        awards.allNba = userRosterByOvr.slice(0, 5);
+        return;
+    }
+  }
+
+  // MVP: Score + Winning Record + Starter
+  const mvpCandidates = [...leagueStats]
+    .filter(p => p.teamStandings && p.teamStandings.winPct > 0.5 && p.isStarter)
+    .sort((a,b) => b.mvpScore - a.mvpScore);
+  
+  if (mvpCandidates.length > 0) {
+    awards.mvp = mvpCandidates[0].id;
+  } else {
+    // If no winning starters, pick absolute best mvpScore
+    awards.mvp = [...leagueStats].sort((a,b) => b.mvpScore - a.mvpScore)[0]?.id;
+  }
+
+  // DPOY: dpoyScore
+  awards.dpoy = [...leagueStats].sort((a,b) => b.dpoyScore - a.dpoyScore)[0]?.id;
+
+  // ROY: age < 23 or draft player
+  const royCandidates = leagueStats.filter(p => {
+    const progress = state.playerProgress[p.id];
+    return progress && (progress.age < 23 || p.id.includes('draft'));
+  }).sort((a,b) => b.royScore - a.royScore);
+  if (royCandidates.length > 0) awards.roy = royCandidates[0].id;
+
+  // MIP: OVR Improvement
+  const mipCandidates = leagueStats.map(p => {
+    const progress = state.playerProgress[p.id];
+    const improvement = (progress?.ovr || 0) - (progress?.ovrAtSeasonStart || progress?.ovr || 0);
+    return { id: p.id, improvement };
+  }).sort((a,b) => b.improvement - a.improvement);
+  if (mipCandidates.length > 0 && mipCandidates[0].improvement > 0) {
+    awards.mip = mipCandidates[0].id;
+  }
+
+  // All-NBA First Team: PG, SG, SF, PF, C
+  const allNbaPositions = ['PG', 'SG', 'SF', 'PF', 'C'] as const;
+  const allNbaSelection: string[] = [];
+  
+  allNbaPositions.forEach(pos => {
+    const candidates = leagueStats.filter(p => {
+        const card = ALL_CARDS.find(c => c.id === p.id) || state.customCards?.find(c => c.id === p.id) || state.draftPool?.find(c => c.id === p.id);
+        return card?.position === pos;
+    }).sort((a,b) => (b.ppg + b.rpg + b.apg) - (a.ppg + a.rpg + a.apg));
+
+    if (candidates.length > 0) {
+        allNbaSelection.push(candidates[0].id);
+    } else {
+        // Fallback to highest OVR in User Team at that position
+        const userBestAtPos = userTeam.roster.filter(id => {
+            const card = ALL_CARDS.find(c => c.id === id) || state.customCards?.find(c => c.id === id);
+            return card?.position === pos;
+        }).sort((a,b) => (state.playerProgress[b]?.ovr || 0) - (state.playerProgress[a]?.ovr || 0))[0];
+        if (userBestAtPos) allNbaSelection.push(userBestAtPos);
+    }
+  });
+  awards.allNba = allNbaSelection.slice(0, 5);
+
+  // Add trophies to trophyCase if user team players won
+  const userTeamPlayers = new Set(userTeam.roster);
+  if (awards.mvp && userTeamPlayers.has(awards.mvp)) {
+      state.trophyCase.push({ type: 'MVP', season: state.season, playerId: awards.mvp, label: 'League MVP' });
+  }
+  if (awards.dpoy && userTeamPlayers.has(awards.dpoy)) {
+      state.trophyCase.push({ type: 'DPOY', season: state.season, playerId: awards.dpoy, label: 'Defensive Player of the Year' });
+  }
+  if (awards.roy && userTeamPlayers.has(awards.roy)) {
+      state.trophyCase.push({ type: 'ROY', season: state.season, playerId: awards.roy, label: 'Rookie of the Year' });
+  }
+}
+
 export function generateDraftPool(year: number): Card[] {
   const pool: Card[] = [];
   const collegues = [
     'Kentucky', 'Duke', 'Kansas', 'North Carolina', 'Villanova', 
-    'UCLA', 'Arizona', 'Indiana', 'Michigan State', 'Gonzaga',
-    'LSU', 'Texas', 'Florida State', 'Virginia', 'Auburn',
-    'Real Madrid (Spain)', 'Barcelona (Spain)', 'Metropolitans 92 (France)', 'Mega Leks (Serbia)'
+    'UCLA', 'Arizona', 'Indiana', 'Michigan State', 'Gonzaga'
   ];
 
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 70; i++) {
     const firstName = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
     const lastName = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
     const name = `${firstName} ${lastName}`;
     const college = collegues[Math.floor(Math.random() * collegues.length)];
-    
-    const positions = ['PG', 'SG', 'SF', 'PF', 'C'];
-    const position = positions[Math.floor(Math.random() * positions.length)];
+    const pos = (['PG', 'SG', 'SF', 'PF', 'C'] as const)[Math.floor(Math.random() * 5)];
 
-    let ovr = 60;
-    let potential: 'star' | 'starter' | 'rotation' | 'bust' = 'rotation';
-
-    if (i < 5) { // Picks 1-5
-      ovr = Math.floor(Math.random() * 7) + 82; // 82-88
-      const roll = Math.random();
-      potential = roll < 0.6 ? 'star' : roll < 0.9 ? 'starter' : 'bust';
-    } else if (i < 14) { // Picks 6-14
-      ovr = Math.floor(Math.random() * 8) + 76; // 76-83
-      const roll = Math.random();
-      potential = roll < 0.3 ? 'star' : roll < 0.8 ? 'starter' : 'rotation';
-    } else if (i < 30) { // Picks 15-30
-      ovr = Math.floor(Math.random() * 8) + 70; // 70-77
-      const roll = Math.random();
-      potential = roll < 0.1 ? 'star' : roll < 0.5 ? 'starter' : roll < 0.9 ? 'rotation' : 'bust';
-    } else { // Picks 31-60
-      ovr = Math.floor(Math.random() * 11) + 62; // 62-72
-      const roll = Math.random();
-      potential = roll < 0.05 ? 'starter' : roll < 0.6 ? 'rotation' : 'bust';
-    }
-
-    const getStats = (pos: string, ovr: number) => {
-      let p = 0, r = 0, a = 0;
-      // Add one elite stat based on OVR or rank
-      const isElite = ovr >= 82;
-      const multiplier = isElite ? 1.2 : 1.0;
-
-      if (pos === 'PG') {
-        p = ovr * 0.22 * multiplier; a = ovr * 0.16 * multiplier; r = ovr * 0.05;
-      } else if (pos === 'SG') {
-        p = ovr * 0.25 * multiplier; a = ovr * 0.08; r = ovr * 0.06;
-      } else if (pos === 'SF') {
-        p = ovr * 0.21 * multiplier; a = ovr * 0.07; r = ovr * 0.10;
-      } else if (pos === 'PF') {
-        p = ovr * 0.18; a = ovr * 0.05; r = ovr * 0.13 * multiplier;
-      } else { // C
-        p = ovr * 0.16; a = ovr * 0.04; r = ovr * 0.16 * multiplier;
-      }
-      return { 
-        points: Number(p.toFixed(1)), 
-        rebounds: Number(r.toFixed(1)), 
-        assists: Number(a.toFixed(1)) 
-      };
-    };
-
-    const s = getStats(position, ovr);
+    const baseOvr = 68 + Math.floor(Math.random() * 20);
 
     const newCard: Card = {
       id: `draft_${year}_${i}`,
@@ -132,27 +214,26 @@ export function generateDraftPool(year: number): Card[] {
       team: '',
       teamAbbr: 'DRFT',
       teamColor: '#6366F1',
-      position,
-      rarity: ovr >= 85 ? 'franchise' : ovr >= 80 ? 'allstar' : ovr >= 72 ? 'starter' : 'bench',
+      position: pos,
+      rarity: baseOvr >= 85 ? 'franchise' : baseOvr >= 80 ? 'allstar' : baseOvr >= 72 ? 'starter' : 'bench',
       category: 'Rookie',
       subtitle: `${college}`,
       isHistorical: false,
       pts: 0,
       reb: 0,
       ast: 0,
-      age: Math.floor(Math.random() * 3) + 19,
+      age: 19 + Math.floor(Math.random() * 3),
       nbaId: 0,
       stats: {
-        points: s.points,
-        rebounds: s.rebounds,
-        assists: s.assists,
-        ovr,
-        potential: ovr + 10, // Legacy fallback
-        draftPotential: potential // New specific hidden potential
+        points: Number((baseOvr * 0.22).toFixed(1)),
+        rebounds: Number((baseOvr * 0.12).toFixed(1)),
+        assists: Number((baseOvr * 0.1).toFixed(1)),
+        ovr: baseOvr,
+        potential: baseOvr + 10
       },
-      description: `A promising young ${position} from ${college}.`,
-      quote: "I'm just here to work hard and help the team win.",
-      imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/0.png',
+      description: `A promising young ${pos} from ${college}.`,
+      quote: "Ready to work.",
+      imageUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}${year}${i}`,
       teamLogoUrl: 'https://cdn.nba.com/logos/nba/stats/main.svg'
     };
     pool.push(newCard);
@@ -162,17 +243,16 @@ export function generateDraftPool(year: number): Card[] {
 
 export function applyProgression(state: FranchiseState) {
   // Update ALL players in the league
-  const allCardIds = new Set<string>();
-  Object.values(state.teams).forEach(t => t.roster.forEach(id => allCardIds.add(id)));
-  state.freeAgentPool.forEach(id => allCardIds.add(id));
+  const allTeamPlayers = Object.values(state.teams).flatMap(t => t.roster);
+  const allCardIds = new Set([...allTeamPlayers, ...state.freeAgentPool]);
 
   const retiredPlayers: string[] = [];
+  const awards: any = state.awards[state.season] || {};
 
   allCardIds.forEach(id => {
     const card = ALL_CARDS.find(c => c.id === id) || 
                  state.customCards?.find(c => c.id === id) || 
-                 state.draftPool?.find(c => c.id === id) ||
-                 state.draftHistory?.find(h => h.player.id === id)?.player;
+                 state.draftPool?.find(c => c.id === id);
                  
     const progress = state.playerProgress[id];
     
@@ -181,32 +261,36 @@ export function applyProgression(state: FranchiseState) {
       progress.age += 1;
       const age = progress.age;
       const currentOvr = progress.ovr || card.stats.ovr;
-      let delta = 0;
+      
+      // Save current OVR as starting OVR for next season's MIP calculation
+      progress.ovrAtSeasonStart = currentOvr;
 
-      const draftPotential = (card.stats as any).draftPotential as 'star' | 'starter' | 'rotation' | 'bust' | undefined;
+      let delta = 0;
+      const potential = (card.stats as any).draftPotential || (progress.potential > currentOvr ? 'starter' : 'rotation');
       
       // 2. OVR Progression/Regression Logic
       if (age < 25) {
-        if (draftPotential === 'bust') {
-          delta = 0; // Busts < 25 don't improve
+        if (potential === 'bust') {
+          delta = Math.floor(Math.random() * 2); // 0 or 1
         } else {
-          // Up to +3 per season normally, but we have a max increase rule of +4
-          delta = Math.floor(Math.random() * 4); // 0 to 3
-          if (draftPotential === 'star') delta += 1; // Stars can reach +4
+          delta = Math.floor(Math.random() * 4) + 1; // 1 to 4
+          if (potential === 'star' || potential === 'franchise') delta = Math.max(delta, 2);
         }
       } else if (age >= 25 && age <= 30) {
-        delta = 0; // Stable
-      } else if (age > 30 && age <= 33) {
-        if (Math.random() < 0.4) delta = -1;
-      } else if (age > 33) {
-        if (Math.random() < 0.7) delta = -1;
+        delta = Math.floor(Math.random() * 3) - 1; // -1 to 1
+      } else if (age > 30 && age <= 35) {
+        delta = Math.floor(Math.random() * 3) - 2; // -2 to 0
+      } else if (age > 35) {
+        delta = Math.floor(Math.random() * 4) - 4; // -4 to -1
       }
 
-      // 3. Special Exceptions
-      if (card.rarity === 'franchise' && age > 30 && delta < 0) {
-        // Franchise rarity > 30 with stable/improved OVR have a 50% chance of no regression
-        if (Math.random() < 0.5) delta = 0;
+      // Bonus for Awards
+      if (awards.mvp === id || awards.dpoy === id) {
+          delta = Math.max(delta, 1);
       }
+
+      // Cap increase at +4
+      if (delta > 4) delta = 4;
 
       // Apply the change
       const newOvr = Math.min(99, Math.max(60, currentOvr + delta));
@@ -214,22 +298,9 @@ export function applyProgression(state: FranchiseState) {
 
       // 4. Retirement Logic
       if (age > 37) {
-        let retirementProb = 0.20;
-
-        // Franchise rarity > 37 have 10% retirement probability
-        if (card.rarity === 'franchise') {
-          retirementProb = 0.10;
-        }
-
-        // Check if won MVP/DPOY in last 2 seasons
-        const wonRecently = [state.season, state.season - 1].some(s => {
-          const award = state.awards[s];
-          return award && (award.mvp === id || award.dpoy === id);
-        });
-
-        if (wonRecently && age > 33) {
-          retirementProb /= 2;
-        }
+        let retirementProb = 0.30;
+        if (card.rarity === 'franchise') retirementProb = 0.15;
+        if (age > 40) retirementProb = 0.80;
 
         if (Math.random() < retirementProb) {
           retiredPlayers.push(id);
@@ -246,16 +317,14 @@ export function applyProgression(state: FranchiseState) {
     if (team) {
       team.roster = team.roster.filter(id => id !== pid);
       delete team.contracts[pid];
-      // Clear from lineup
       (['PG', 'SG', 'SF', 'PF', 'C'] as const).forEach(pos => {
         if (team.lineup[pos] === pid) team.lineup[pos] = null;
       });
-      team.lineup.bench = team.lineup.bench.filter(id => id !== pid);
+      team.lineup.bench = team.lineup.bench.filter(rid => rid !== pid);
     }
     
     state.freeAgentPool = state.freeAgentPool.filter(id => id !== pid);
     
-    // Add retirement news
     state.notifications.push({
       id: `retire-${pid}-${state.season}`,
       type: 'NEWS',
@@ -468,96 +537,98 @@ export function runCPUMidSeasonLogic(state: FranchiseState) {
   });
 }
 
-export function advanceSeason(state: FranchiseState): FranchiseState {
-  const newState = { ...state };
+export function runCPUOffseasonLogic(state: FranchiseState) {
+  const CP_SALARY_CAP = 160000000;
   
-  // 1. ARCHIVE AWARDS & CHAMPION
-  const userTeam = state.teams[state.userTeamId];
+  Object.values(state.teams).forEach(team => {
+    if (team.isHuman) return;
 
-  // LEAGUE AWARDS CALCULATION
-  const leagueStats = Object.keys(state.stats.seasonal).map(id => {
-    const s = state.stats.seasonal[id];
-    const games = s.gamesPlayed || 1;
-    return {
-      id,
-      stats: s,
-      games,
-      ppg: s.points / games,
-      rpg: s.rebounds / games,
-      apg: s.assists / games,
-      spg: s.steals / games,
-      bpg: s.blocks / games,
-      score: (s.points * 1.0 + s.rebounds * 0.8 + s.assists * 0.8 + s.steals * 2 + s.blocks * 2) / games
-    };
-  }).filter(p => p.games > 50); // Qualification
-
-  if (!newState.awards[state.season]) {
-    newState.awards[state.season] = { allNba: [] };
-  }
-  const awards = newState.awards[state.season];
-
-  // MVP
-  const mvpCand = [...leagueStats].sort((a,b) => b.score - a.score)[0];
-  if (mvpCand) {
-    awards.mvp = mvpCand.id;
-    if (userTeam.roster.includes(mvpCand.id)) {
-      newState.trophyCase.push({ type: 'MVP', season: state.season, playerId: mvpCand.id, label: 'League MVP' });
-    }
-  }
-
-  // DPOY
-  const dpoyCand = [...leagueStats].sort((a,b) => (b.spg + b.bpg) - (a.spg + a.bpg))[0];
-  if (dpoyCand) {
-    awards.dpoy = dpoyCand.id;
-    if (userTeam.roster.includes(dpoyCand.id)) {
-      newState.trophyCase.push({ type: 'DPOY', season: state.season, playerId: dpoyCand.id, label: 'DPOY' });
-    }
-  }
-
-  // ROY
-  const rookies = leagueStats.filter(p => {
-    const card = ALL_CARDS.find(c => c.id === p.id) || 
-                 state.customCards?.find(c => c.id === p.id) || 
-                 state.draftPool?.find(c => c.id === p.id);
-    return card?.category === 'Rookie' || p.id.includes('draft');
-  });
-  const royCand = [...rookies].sort((a,b) => b.score - a.score)[0];
-  if (royCand) {
-    awards.roy = royCand.id;
-    if (userTeam.roster.includes(royCand.id)) {
-      newState.trophyCase.push({ type: 'ROY', season: state.season, playerId: royCand.id, label: 'Rookie of the Year' });
-    }
-  }
-
-  // All-NBA (Top 5 scores)
-  awards.allNba = leagueStats.sort((a,b) => b.score - a.score).slice(0, 5).map(p => p.id);
-
-  // Finals MVP (Look at finals games in playoffSeries)
-  const finals = state.playoffSeries.find(s => s.round === 4);
-  if (finals && finals.winnerId && finals.matches.length > 0) {
-    const champRoster = state.teams[finals.winnerId].roster;
-    const finalBoxScores = finals.matches.flatMap(m => 
-       m.winner === finals.team1Id ? (m.boxScore?.home || []) : (m.boxScore?.away || [])
-    ).filter(be => champRoster.includes(be.playerId));
-    
-    const performance: Record<string, number> = {};
-    finalBoxScores.forEach(be => {
-      performance[be.playerId] = (performance[be.playerId] || 0) + (be.points + be.rebounds + be.assists + be.steals + be.blocks);
+    // 1. RENEWALS (50% probability for players with 0 years left)
+    const expiredIds = team.roster.filter(pid => {
+      const contract = team.contracts[pid];
+      return !contract || contract.yearsRemaining <= 0;
     });
-    
-    const fmvpId = Object.keys(performance).sort((a,b) => performance[b] - performance[a])[0];
-    if (fmvpId) {
-      awards.finalsMvp = fmvpId;
-      if (userTeam.roster.includes(fmvpId)) {
-        newState.trophyCase.push({ type: 'FMVP', season: state.season, playerId: fmvpId, label: 'Finals MVP' });
+
+    expiredIds.forEach(id => {
+      const card = ALL_CARDS.find(c => c.id === id) || state.customCards?.find(c => c.id === id) || state.draftPool?.find(c => c.id === id);
+      if (!card) return;
+
+      const ovr = state.playerProgress[id]?.ovr || card.stats.ovr;
+      // 50% fixed probability as requested
+      if (Math.random() < 0.50) {
+        const seasons = team.contracts[id]?.seasonsWithTeam || 0;
+        const newContract = generateContract(id, ovr, seasons + 1);
+        team.contracts[id] = newContract;
+        
+        state.notifications.unshift({
+          id: `renew-off-${team.teamId}-${id}-${Date.now()}`,
+          type: 'NEWS',
+          message: `${card.name} signs with ${team.abbreviation} on a ${newContract.yearsRemaining}-year deal.`,
+          week: state.week,
+          season: state.season,
+          read: false
+        });
+      } else {
+        // Goes to Free Agency
+        team.roster = team.roster.filter(rid => rid !== id);
+        delete team.contracts[id];
+        state.freeAgentPool.push(id);
+        (['PG', 'SG', 'SF', 'PF', 'C'] as const).forEach(pos => {
+          if (team.lineup[pos] === id) team.lineup[pos] = null;
+        });
+        team.lineup.bench = team.lineup.bench.filter(rid => rid !== id);
+      }
+    });
+
+    // 2. FILL ROSTER IF BELOW 10 PLAYERS (Up to 12)
+    // Prioritizing high OVR from free agency
+    if (team.roster.length < 10) {
+      const availableFA = state.freeAgentPool
+        .map(id => {
+          const card = ALL_CARDS.find(c => c.id === id) || state.draftPool?.find(c => c.id === id);
+          return { id, ovr: state.playerProgress[id]?.ovr || card?.stats.ovr || 0, card };
+        })
+        .sort((a, b) => b.ovr - a.ovr);
+
+      for (const fa of availableFA) {
+        if (team.roster.length >= 12) break;
+        if (!fa.card) continue;
+
+        const salary = getInitialSalary(fa.ovr, getContractType(fa.ovr));
+        const currentPayroll = Object.values(team.contracts).reduce((sum, c) => sum + c.salary, 0);
+
+        if (currentPayroll + salary < CP_SALARY_CAP) {
+          team.roster.push(fa.id);
+          const newContract = generateContract(fa.id, fa.ovr, 0);
+          team.contracts[fa.id] = newContract;
+          state.freeAgentPool = state.freeAgentPool.filter(id => id !== fa.id);
+          
+          state.notifications.unshift({
+            id: `fa-sign-${team.teamId}-${fa.id}-${Date.now()}`,
+            type: 'NEWS',
+            message: `${fa.card.name} signs with ${team.abbreviation} on a ${newContract.yearsRemaining}-year deal.`,
+            week: state.week,
+            season: state.season,
+            read: false
+          });
+        }
       }
     }
-  }
 
-  // 2. ARCHIVE TEAM HISTORY
-  const totalPoints = Object.keys(state.stats.seasonal)
+    team.payroll = Object.values(team.contracts).reduce((s, c) => s + c.salary, 0);
+  });
+}
+
+export function advanceSeason(state: FranchiseState): FranchiseState {
+  const newState = { ...state };
+  console.log(`[FRANCHISE] Starting New Season setup (Phase: new_season)`);
+  
+  const userTeam = newState.teams[newState.userTeamId];
+
+  // 1. ARCHIVE TEAM HISTORY
+  const totalPoints = Object.keys(newState.stats.seasonal)
     .filter(id => userTeam.roster.includes(id))
-    .reduce((acc, id) => acc + state.stats.seasonal[id].points, 0);
+    .reduce((acc, id) => acc + (newState.stats.seasonal[id]?.points || 0), 0);
   const totalGames = userTeam.wins + userTeam.losses;
   const ppgResult = totalGames > 0 ? totalPoints / totalGames : 0;
 
@@ -565,23 +636,14 @@ export function advanceSeason(state: FranchiseState): FranchiseState {
     season: state.season,
     record: `${userTeam.wins}-${userTeam.losses}`,
     ppg: parseFloat(ppgResult.toFixed(1)),
-    awards: state.trophyCase.filter(t => t.season === state.season).map(t => t.type),
-    champion: state.championId ? state.teams[state.championId]?.name || 'N/A' : 'N/A'
+    awards: newState.trophyCase.filter(t => t.season === state.season).map(t => t.type),
+    champion: state.championId ? (state.teams[state.championId]?.name || 'N/A') : 'N/A'
   });
 
-  // 3. SEASON INCREMENT
-  newState.season += 1;
-  newState.week = 1;
-  newState.phase = 'Draft';
-  newState.championId = undefined;
+  // 2. APPLY PROGRESSION & AGING
+  applyProgression(newState);
 
-  // 4. RESET RECORDS
-  Object.values(newState.teams).forEach(team => {
-    team.wins = 0;
-    team.losses = 0;
-  });
-
-  // 5. UPDATE CAREER STATS & CLEAR SEASONAL
+  // 3. STATS ARCHIVING
   Object.entries(newState.stats.seasonal).forEach(([pid, s]) => {
      if (!newState.stats.career[pid]) {
         newState.stats.career[pid] = { ...s };
@@ -596,59 +658,57 @@ export function advanceSeason(state: FranchiseState): FranchiseState {
      }
   });
   newState.stats.seasonal = {};
+  if (newState.stats.playoffs) newState.stats.playoffs = {};
   newState.seasonHighs = {};
-  
-  // 6. APPLY PROGRESSION
-  applyProgression(newState);
 
-      // 7. UPDATE CONTRACTS
-      Object.values(newState.teams).forEach(team => {
-          const expiredIds: string[] = [];
-          team.roster.forEach(playerId => {
-            let contract = team.contracts[playerId];
-            if (contract) {
-              contract.yearsRemaining -= 1;
-              contract.seasonsWithTeam += 1;
-              contract.canExtend = contract.yearsRemaining <= 2;
-              if (contract.yearsRemaining <= 0) expiredIds.push(playerId);
-            } else {
-              expiredIds.push(playerId);
-            }
-          });
-    
-          if (!team.isHuman) {
-            // CPU Renewal (End of Season)
-            expiredIds.forEach((id, idx) => {
-              const card = ALL_CARDS.find(c => c.id === id) || newState.customCards?.find(c => c.id === id) || newState.draftPool?.find(c => c.id === id);
-              if (card) {
-                 const currentContract = team.contracts[id];
-                 const seasons = (currentContract?.seasonsWithTeam || 0);
-                 const ovr = newState.playerProgress[id]?.ovr || card.stats.ovr;
-                 const renewalProb = ovr >= 90 ? 0.90 : ovr >= 85 ? 0.80 : ovr >= 78 ? 0.60 : 0.20;
-
-                 if (Math.random() < renewalProb) {
-                    const newContract = generateContract(id, ovr, seasons);
-                    team.contracts[id] = newContract;
-                    // Remove from expired so it stays in roster
-                    expiredIds.splice(idx, 1);
-                 }
-              }
-            });
-          }
-
-      expiredIds.forEach(id => {
-        team.roster = team.roster.filter(rid => rid !== id);
-        delete team.contracts[id];
-        newState.freeAgentPool.push(id);
+  // 4. CONTRACT MANAGEMENT (yearsLeft --)
+  Object.values(newState.teams).forEach(team => {
+    Object.keys(team.contracts).forEach(pid => {
+      const contract = team.contracts[pid];
+      contract.yearsRemaining -= 1;
+      if (contract.yearsRemaining <= 0) {
+        // Contract expired - move to FA
+        if (!newState.freeAgentPool.includes(pid)) newState.freeAgentPool.push(pid);
+        delete team.contracts[pid];
+        team.roster = team.roster.filter(id => id !== pid);
+        // Clear lineup
         (['PG', 'SG', 'SF', 'PF', 'C'] as const).forEach(pos => {
-          if (team.lineup[pos] === id) team.lineup[pos] = null;
+           if (team.lineup[pos] === pid) team.lineup[pos] = null;
         });
-        team.lineup.bench = team.lineup.bench.filter(rid => rid !== id);
-      });
-      team.payroll = Object.values(team.contracts).reduce((total, c) => total + c.salary, 0);
+        team.lineup.bench = team.lineup.bench.filter(id => id !== pid);
+      }
+    });
   });
 
+  // 5. RESET RECORDS & STANDINGS
+  Object.values(newState.teams).forEach(team => {
+    team.wins = 0;
+    team.losses = 0;
+  });
+  newState.currentGameIndex = 0;
+
+  // 6. SEASON INCREMENT
+  newState.season += 1;
+  newState.week = 1;
+  newState.phase = 'regular_season';
+  newState.championId = undefined;
+  newState.playoffSeries = [];
+  newState.standings = null;
+  newState.lotteryPicks = [];
+
+  // 7. GENERATE NEW SCHEDULE
+  const { scheduleService } = require('./scheduleService');
   newState.schedule = scheduleService.generateSchedule(newState.teams);
+
+  newState.notifications.unshift({
+    id: `new-season-${newState.season}`,
+    type: 'NEWS',
+    message: `🏀 Welcome to Season ${newState.season}! The new season tips off now.`,
+    week: 1,
+    season: newState.season,
+    read: false
+  });
+
   return newState;
 }
 
@@ -657,12 +717,13 @@ export function initializeFranchiseState(userTeamId: string): FranchiseState {
   
   if (teams[userTeamId]) teams[userTeamId].isHuman = true;
 
-  const playerProgress: Record<string, { age: number; potential: number; form: number }> = {};
+  const playerProgress: Record<string, { age: number; potential: number; form: number, ovrAtSeasonStart?: number }> = {};
   ALL_CARDS.forEach(c => {
     playerProgress[c.id] = {
       age: c.age || Math.floor(Math.random() * 8) + 22,
       potential: c.stats.ovr + Math.floor(Math.random() * 10),
-      form: 1.0
+      form: 1.0,
+      ovrAtSeasonStart: c.stats.ovr
     };
   });
 
@@ -672,13 +733,14 @@ export function initializeFranchiseState(userTeamId: string): FranchiseState {
     version: "2.0",
     season: 2025,
     week: 1,
-    phase: "Regular",
+    phase: "regular_season",
     userTeamId,
     teams,
     freeAgentPool: freeAgents,
     schedule,
     playoffSeries: [],
     playerProgress,
+    currentGameIndex: 0,
     stats: {
       seasonal: {},
       career: {}

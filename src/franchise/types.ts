@@ -1,6 +1,14 @@
 import { Rarity } from '../types';
 
-export type FranchisePhase = "Preseason" | "Regular" | "Awards" | "PlayIn" | "Playoffs" | "Draft" | "FreeAgency";
+export type FranchisePhase = 
+  "regular_season" | 
+  "season_awards" | 
+  "playoffs" | 
+  "offseason_start" | 
+  "draft_lottery" | 
+  "draft" | 
+  "free_agency" | 
+  "new_season";
 
 export interface ContractObject {
   playerId: string;
@@ -111,6 +119,26 @@ export interface PlayoffSeries {
   seed2?: number;
 }
 
+export interface FranchiseNotification {
+  id: string;
+  type: 'TRADE' | 'NEWS' | 'INJURY';
+  message: string;
+  week: number;
+  season: number;
+  read: boolean;
+  data?: any;
+}
+
+export interface FranchiseNotification {
+  id: string;
+  type: 'TRADE' | 'NEWS' | 'INJURY';
+  message: string;
+  week: number;
+  season: number;
+  read: boolean;
+  data?: any;
+}
+
 export interface FranchiseState {
   version: "2.0";
   season: number;
@@ -127,11 +155,17 @@ export interface FranchiseState {
     potential: number;
     form: number;
     ovr?: number;
+    ovrAtSeasonStart?: number;
   }>;
   stats: {
     seasonal: Record<string, PlayerStats>;
     career: Record<string, PlayerStats>;
+    playoffs?: Record<string, PlayerStats>;
   };
+  currentGameIndex?: number;
+  standings?: any;
+  lotteryPicks?: any[];
+  finalsMvp?: any;
   draftHistory: any[];
   tradeHistory: any[];
   draftOrder?: any[];
@@ -171,14 +205,7 @@ export interface FranchiseState {
     lastOfferYears: number;
     status: "Active" | "Rejected" | "Accepted";
   }>;
-  notifications: {
-    id: string;
-    type: 'TRADE' | 'NEWS' | 'INJURY';
-    message: string;
-    week: number;
-    season: number;
-    read: boolean;
-  }[];
+  notifications: FranchiseNotification[];
   customCards?: any[]; 
   draftPool?: any[]; 
 }

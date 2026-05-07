@@ -5,14 +5,16 @@ import { marketService } from '../../franchise/services/marketService';
 
 interface MarketTabProps {
   state: any;
-  handleSignPlayer: (playerId: string) => void;
+  onSignPlayer: (playerId: string) => void;
   findCard: (id: string, season?: number) => any;
+  onFinalizeMarket?: () => void;
 }
 
 const MarketTab: React.FC<MarketTabProps> = React.memo(({ 
   state, 
-  handleSignPlayer,
-  findCard
+  onSignPlayer,
+  findCard,
+  onFinalizeMarket
 }) => {
   const userTeam = state.teams[state.userTeamId];
   const capSpace = 136000000 - userTeam.payroll;
@@ -24,10 +26,10 @@ const MarketTab: React.FC<MarketTabProps> = React.memo(({
       className="max-w-7xl mx-auto space-y-6 md:space-y-12 pb-20 px-3"
     >
       {/* MARKET HEADER */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-zinc-900/50 border border-white/5 p-6 rounded-3xl flex flex-col justify-center">
             <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Market Environment</p>
-            <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">FA Phase {state.season}</h3>
+            <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">{state.phase === 'free_agency' ? 'OFFSEASON FA' : `WEEK ${state.week} MARKET`}</h3>
           </div>
           
           <div className="bg-zinc-900/50 border border-white/5 p-6 rounded-3xl flex flex-col justify-center relative overflow-hidden group">
@@ -39,19 +41,23 @@ const MarketTab: React.FC<MarketTabProps> = React.memo(({
                </h3>
                <span className="text-[8px] font-black text-zinc-700 uppercase">of $136M Limit</span>
             </div>
-            <div className="mt-3 h-1 bg-black rounded-full overflow-hidden">
-               <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min((userTeam.payroll / 136000000) * 100, 100)}%` }}
-                  className="h-full bg-amber-500"
-               />
-            </div>
           </div>
 
           <div className="bg-zinc-900/50 border border-white/5 p-6 rounded-3xl flex flex-col justify-center">
             <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Talent Pool</p>
             <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">{(state.freeAgentPool || []).length} Free Agents</h3>
           </div>
+
+          {state.phase === 'free_agency' && (
+             <div className="flex flex-col justify-center">
+                <button 
+                  onClick={() => onFinalizeMarket?.()}
+                  className="w-full h-full bg-white text-black rounded-3xl font-black uppercase tracking-widest text-xs hover:bg-amber-500 transition-all shadow-2xl active:scale-95"
+                >
+                  Finalize Roster
+                </button>
+             </div>
+          )}
       </div>
 
       {state.season === 2025 && state.week < 5 ? (
@@ -107,7 +113,7 @@ const MarketTab: React.FC<MarketTabProps> = React.memo(({
                       </div>
                     </div>
                     <button 
-                      onClick={() => handleSignPlayer(id)}
+                      onClick={() => onSignPlayer(id)}
                       className="relative z-10 px-5 md:px-7 py-3 md:py-4 bg-white text-black text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-amber-500 transition-all shadow-xl active:scale-95 shrink-0"
                     >
                       Sign

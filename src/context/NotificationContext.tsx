@@ -65,14 +65,25 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
               key={notif.id}
               initial={{ opacity: 0, y: -20, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9, y: -10 }}
-              className="pointer-events-auto"
+              exit={{ opacity: 0, scale: 0.9, y: -40, x: 100 }}
+              drag
+              dragConstraints={{ left: 0, bottom: 0 }}
+              dragElastic={0.1}
+              onDragEnd={(_, info) => {
+                if (info.offset.x > 80 || info.offset.y < -80) {
+                  removeNotification(notif.id);
+                }
+              }}
+              className="pointer-events-auto cursor-grab active:cursor-grabbing relative group"
             >
               {notif.type === 'achievement' && notif.achievement ? (
-                <AchievementToast achievement={notif.achievement} />
+                <AchievementToast 
+                  achievement={notif.achievement} 
+                  onClose={() => removeNotification(notif.id)}
+                />
               ) : (
                 <div
-                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border backdrop-blur-xl ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border backdrop-blur-xl pr-10 ${
                     notif.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
                     notif.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-400' :
                     'bg-zinc-900/90 border-zinc-800 text-zinc-300'
@@ -82,6 +93,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                   {notif.type === 'success' && <CheckCircle2 size={18} />}
                   {notif.type === 'info' && <Info size={18} />}
                   <span className="text-sm font-bold tracking-tight">{notif.message}</span>
+                  
+                  <button 
+                    onClick={() => removeNotification(notif.id)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-white/20 hover:text-white transition-colors"
+                  >
+                    <XCircle size={14} className="opacity-40 group-hover:opacity-100" />
+                  </button>
                 </div>
               )}
             </motion.div>

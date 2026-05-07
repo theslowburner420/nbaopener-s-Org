@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { LayoutDashboard, ChevronRight, Sparkles } from 'lucide-react';
+import { LayoutDashboard, ChevronRight, Sparkles, Trophy } from 'lucide-react';
 import { getTeamLogo } from '../../data/nbaTeams';
 import { NBA_TEAMS } from '../../data/nbaTeams';
 
@@ -12,6 +12,7 @@ interface HubTabProps {
   setActiveTab: (tab: any) => void;
   setState: (state: any) => void;
   renderPlayoffs: () => React.ReactNode;
+  triggerLottery: () => void;
 }
 
 const HubTab: React.FC<HubTabProps> = React.memo(({ 
@@ -21,7 +22,8 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
   leagueLeaders, 
   setActiveTab,
   setState,
-  renderPlayoffs
+  renderPlayoffs,
+  triggerLottery
 }) => {
   return (
     <motion.div 
@@ -33,6 +35,24 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
         renderPlayoffs()
       ) : (
         <>
+          {state.phase === 'Offseason' && (
+            <div className="bg-gradient-to-br from-indigo-500/20 to-zinc-900 border border-indigo-500/30 rounded-3xl p-8 text-center space-y-6">
+               <div className="w-16 h-16 bg-indigo-500 rounded-2xl flex items-center justify-center text-black mx-auto">
+                  <Trophy size={32} />
+               </div>
+               <div className="space-y-2">
+                  <h3 className="text-2xl font-black uppercase italic tracking-tighter text-white">Offseason Begun</h3>
+                  <p className="text-zinc-500 text-xs md:text-lg font-medium max-w-md mx-auto">The rosters have been reset. It's time to determine the order of selection for the upcoming Draft.</p>
+               </div>
+               <button 
+                 onClick={triggerLottery}
+                 className="px-8 py-4 bg-indigo-500 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(99,102,241,0.2)]"
+               >
+                 Execute Draft Lottery
+               </button>
+            </div>
+          )}
+
           {state.phase === 'Draft' && (
             <div className="bg-gradient-to-br from-amber-500/20 to-zinc-900 border border-amber-500/30 rounded-3xl p-8 text-center space-y-6">
                <div className="w-16 h-16 bg-amber-500 rounded-2xl flex items-center justify-center text-black mx-auto">
