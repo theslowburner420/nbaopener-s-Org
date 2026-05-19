@@ -390,12 +390,19 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         completedSbcs: Array.from(new Set([...(currentLiveState.completedSbcs || []), ...(guestData?.completedSbcs || [])])),
       };
 
-      // 1. Fetch Cloud Data
-      const { data: cloudProfile, error: fetchError } = await supabase!
+      // 1. Fetch Cloud Data with Timeout
+      const cloudFetchPromise = supabase!
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
+
+      // Race against a 10s timeout
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Cloud response timeout')), 10000)
+      );
+
+      const { data: cloudProfile, error: fetchError } = await (Promise.race([cloudFetchPromise, timeoutPromise]) as any);
 
       if (fetchError && fetchError.code !== 'PGRST116') {
         throw fetchError;
@@ -426,7 +433,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           cards: (() => {
             const raw = cloudProfile.cards;
             if (Array.isArray(raw)) {
-              // Migrate cloud legacy array
               const migrated: Record<string, number> = {};
               raw.forEach((id: string) => migrated[id] = (migrated[id] || 0) + 1);
               return migrated;
@@ -443,18 +449,26 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           battle_pass_xp: Number(cloudProfile.battle_pass_xp) || 0,
           battle_pass_level: Number(cloudProfile.battle_pass_level) || 0,
           subscription_expiry: cloudProfile.subscription_expiry,
-          franchise: cloudProfile.franchise_state ? JSON.parse(cloudProfile.franchise_state) : localProgress.franchise,
+          franchise: cloudProfile.franchise_state ? (typeof cloudProfile.franchise_state === 'string' ? JSON.parse(cloudProfile.franchise_state) : cloudProfile.franchise_state) : localProgress.franchise,
         };
 
         const mergeArrays = (a: any[], b: any[]) => Array.from(new Set([...(a || []), ...(b || [])]));
-        
+
+        // Smarter inventory merge
+        const mergePacks = (cloud: any[], local: any[]) => {
+          const merged = [...cloud];
+          local.forEach(lp => {
+            const existing = merged.find(cp => cp.type === lp.type);
+            if (!existing) merged.push(lp);
+            else if (!isInitialSyncDoneRef.current) existing.count = Math.max(existing.count || 1, lp.count || 1);
+          });
+          return normalizePacks(merged);
+        };
+
         finalMergedData = {
-          // If we haven't finished our very first sync ever, we merge guest + cloud cautiously (additive)
-          // Once the app is running (isInitialSyncDoneRef), we TRUST the cloud as the master for logged-in sessions
           coins: isInitialSyncDoneRef.current ? pc.coins : Math.max(pc.coins, localProgress.coins),
           collection: (() => {
-            if (isInitialSyncDoneRef.current) return pc.cards; // Trust cloud master during active session
-            
+            if (isInitialSyncDoneRef.current) return pc.cards; 
             const merged = { ...pc.cards };
             Object.entries(localProgress.collection).forEach(([id, count]) => {
               merged[id] = Math.max(merged[id] || 0, count);
@@ -463,14 +477,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           })(),
           unlockedAchievements: isInitialSyncDoneRef.current ? pc.unlocked_achievements : mergeArrays(pc.unlocked_achievements, localProgress.unlockedAchievements),
           claimedAchievements: isInitialSyncDoneRef.current ? pc.claimed_achievements : mergeArrays(pc.claimed_achievements, localProgress.claimedAchievements),
-          inventoryPacks: normalizePacks(isInitialSyncDoneRef.current ? pc.inventory_packs : (pc.inventory_packs.length > localProgress.inventoryPacks.length ? pc.inventory_packs : localProgress.inventoryPacks)),
+          inventoryPacks: mergePacks(pc.inventory_packs, localProgress.inventoryPacks),
           completedSbcs: isInitialSyncDoneRef.current ? pc.completed_sbcs : Array.from(new Set([...(pc.completed_sbcs || []), ...(localProgress.completedSbcs || [])])),
           isPremium: pc.ads_disabled || localProgress.isPremium,
           hasLifetimeNoAds: (pc as any).has_lifetime_no_ads || localProgress.hasLifetimeNoAds,
           isBattlePassPremium: (pc as any).is_battle_pass_premium || localProgress.isBattlePassPremium,
-          battlePassXP: isInitialSyncDoneRef.current ? (pc as any).battle_pass_xp : Math.max((pc as any).battle_pass_xp || 0, localProgress.battlePassXP),
-          battlePassLevel: isInitialSyncDoneRef.current ? (pc as any).battle_pass_level : Math.max((pc as any).battle_pass_level || 0, localProgress.battlePassLevel),
-          subscriptionExpiry: (pc as any).subscription_expiry || localProgress.subscriptionExpiry,
+          battlePassXP: isInitialSyncDoneRef.current ? pc.battle_pass_xp : Math.max(pc.battle_pass_xp || 0, localProgress.battlePassXP),
+          battlePassLevel: isInitialSyncDoneRef.current ? pc.battle_pass_level : Math.max(pc.battle_pass_level || 0, localProgress.battlePassLevel),
+          subscriptionExpiry: pc.subscription_expiry || localProgress.subscriptionExpiry,
           franchise: isInitialSyncDoneRef.current ? pc.franchise : (pc.franchise || localProgress.franchise),
         };
       }
@@ -533,9 +547,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       console.error('❌ CRITICAL SYNC ERROR:', err);
       setSyncError(`Data Sync Failed: ${err.message || 'Network error'}`);
+      
       setIsAuthLoading(false);
-      // NEVER set isInitialSyncDone(true) here, or auto-save will nuke the cloud data with empty state
       setIsBackgroundSaving(false);
+      
+      // After 5 seconds of failure, let them play locally but warn them
+      setTimeout(() => {
+        if (!isInitialSyncDoneRef.current) {
+          console.warn('⚠️ Sync failed but unblocking UI for local play');
+          setIsInitialSyncDone(true);
+        }
+      }, 5000);
     } finally {
       isSyncingRef.current = false;
     }

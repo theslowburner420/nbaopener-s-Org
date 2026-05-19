@@ -132,10 +132,10 @@ const Header: React.FC = React.memo(() => {
         ) : supabase ? (
           <button
             onClick={login}
-            className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-amber-400 transition-all active:scale-95 shadow-xl border border-white/10"
+            className="flex items-center gap-1.5 bg-white text-black px-3 py-1.5 rounded-full text-[8px] font-black uppercase tracking-[0.1em] hover:bg-amber-400 transition-all active:scale-95 shadow-lg border border-white/10"
           >
-            <LogIn size={12} />
-            <span>Login with Google</span>
+            <LogIn size={10} />
+            <span>Google Login</span>
           </button>
         ) : (
           <div className="flex items-center gap-1.5 text-zinc-600 px-3 py-1.5 rounded-full border border-white/5 bg-zinc-900/30">

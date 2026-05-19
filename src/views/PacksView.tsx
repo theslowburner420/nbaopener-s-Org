@@ -181,46 +181,46 @@ export default function PacksView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 p-4 sm:p-6 pb-20"
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 p-4 sm:p-6 pb-24"
             >
               {PACKS.map((pack) => (
                 <motion.div 
                   key={pack.id} 
-                  className="flex flex-col h-full"
-                  whileHover={{ y: -5 }}
+                  className="flex flex-col items-center"
+                  whileHover={{ y: -10, scale: 1.05 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                 >
-                  <div className="flex-1 flex flex-col gap-4">
-                    <div className={`aspect-[4/5.5] rounded-[2.5rem] bg-zinc-900 shadow-2xl relative overflow-hidden group border border-white/5 flex-shrink-0 cursor-pointer`}
-                         onClick={() => handleBuy(pack)}>
+                  <div className="relative w-full aspect-[2/3] group cursor-pointer"
+                       onClick={() => handleBuy(pack)}>
+                    {/* The Pack Image Itself */}
+                    <div className="absolute inset-0 z-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] group-hover:shadow-[0_40px_80px_rgba(0,0,0,0.8)] transition-all duration-500 rounded-lg overflow-hidden border border-white/5">
                       <img 
                         src={pack.image} 
                         alt={pack.name} 
-                        className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-1000"
+                        className="w-full h-full object-cover"
                         referrerPolicy="no-referrer"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
-                      
-                      {/* Collection Indicator Badge */}
-                      {(() => {
-                        const progress = packProgresses[pack.id];
-                        return (
-                          <div className="absolute top-4 left-4 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 z-20">
-                            <CheckCircle2 size={10} className={progress.percent === 100 ? "text-green-400" : "text-amber-500"} />
-                            <span className="text-[9px] font-black text-white uppercase tracking-widest">
-                              {progress.percent}% COLLECTED
-                            </span>
-                          </div>
-                        );
-                      })()}
-                      
-                      {/* Price Tag */}
-                      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-2xl px-6 py-2 rounded-full border border-white/20 z-20 flex items-center gap-2 group-hover:bg-amber-500 transition-colors group-hover:border-amber-400">
-                        <Zap size={12} className="text-amber-400 group-hover:text-black" fill="currentColor" />
-                        <span className="text-sm font-black text-white group-hover:text-black italic tracking-tighter">
-                          {pack.price.toLocaleString()}
-                        </span>
+                    </div>
+
+                    {/* Progress Indicator */}
+                    <div className="absolute -top-3 -right-3 z-30 flex items-center justify-center w-10 h-10 bg-black border border-amber-500/30 rounded-full shadow-2xl backdrop-blur-xl">
+                      <span className="text-[8px] font-black text-amber-500">{packProgresses[pack.id].percent}%</span>
+                    </div>
+                    
+                    {/* Buy Prompt Overlay */}
+                    <div className="absolute inset-x-0 bottom-0 z-20 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 px-4 pb-4">
+                      <div className="bg-amber-500 text-black py-2 rounded-full text-center text-[10px] font-black uppercase tracking-tighter shadow-2xl flex items-center justify-center gap-2">
+                        <ShoppingCart size={12} fill="currentColor" />
+                        BUX {pack.price.toLocaleString()}
                       </div>
                     </div>
+                  </div>
+                  
+                  <div className="mt-4 text-center">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/90 italic">{pack.name}</h3>
+                    <p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mt-1">
+                      {pack.id === 'legendary_mvp' ? '1 CARD' : 'MULTIPLE CARDS'}
+                    </p>
                   </div>
                 </motion.div>
               ))}
