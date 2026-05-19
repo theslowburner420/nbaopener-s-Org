@@ -578,35 +578,71 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     let mounted = true;
+    let authSubscription: any = null;
 
-    // 1. Initial Session Check (Fast path)
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      if (session?.user) {
-        console.log('Session found on mount:', session.user.id);
-        syncProfile(session.user);
-      } else {
-        console.log('No session found on mount');
-        setIsAuthLoading(false);
-        isInitialSyncDoneRef.current = true;
-        setIsInitialSyncDone(true);
-      }
-    });
+    async function initializeAuth() {
+      try {
+        console.log('🔄 Mount: Retrieving session via getSession() first...');
+        const { data: { session }, error } = await supabase!.auth.getSession();
+        
+        if (!mounted) return;
 
-    // 2. Auth Listener - Subscribed once
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!mounted) return;
-      console.log(`🔐 AUTH EVENT: ${event}`);
-      
-      if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'INITIAL_SESSION') {
-        // Only trigger sync if user changed or session is fresh
-        if (session?.user && stateRef.current.user?.id !== session.user.id) {
-          await syncProfile(session.user);
+        if (error) {
+          console.error('Session retrieval error on mount:', error);
         }
-      } else if (event === 'SIGNED_OUT') {
-        await syncProfile(null);
+
+        if (session?.user) {
+          console.log('Mount: Valid session found for user:', session.user.id);
+          await syncProfile(session.user);
+        } else {
+          console.log('Mount: No session found on mount');
+          setIsAuthLoading(false);
+          isInitialSyncDoneRef.current = true;
+          setIsInitialSyncDone(true);
+        }
+
+        // 2. Set up auth listener AFTER getSession() has resolved.
+        // This ensures sequential flow and avoids parallel racing fetches.
+        const { data: { subscription } } = supabase!.auth.onAuthStateChange(async (event, currentSession) => {
+          if (!mounted) return;
+          console.log(`🔐 AUTH EVENT: ${event}`);
+          
+          if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED') {
+            if (currentSession?.user) {
+              const currentUserId = stateRef.current.user?.id;
+              
+              const userData: User = {
+                id: currentSession.user.id,
+                email: currentSession.user.email,
+                username: currentSession.user.user_metadata?.full_name || currentSession.user.email?.split('@')[0],
+                avatar_url: currentSession.user.user_metadata?.avatar_url,
+              };
+
+              // Update user profile immediately
+              setState(prev => ({ ...prev, user: userData }));
+
+              if (currentUserId !== currentSession.user.id || event === 'TOKEN_REFRESHED') {
+                console.log(`🔐 Refreshing state/data for ${event}`);
+                await syncProfile(currentSession.user);
+              }
+            }
+          } else if (event === 'SIGNED_OUT') {
+            await syncProfile(null);
+          }
+        });
+
+        authSubscription = subscription;
+      } catch (err) {
+        console.error('Failure initializing connection:', err);
+        if (mounted) {
+          setIsAuthLoading(false);
+          isInitialSyncDoneRef.current = true;
+          setIsInitialSyncDone(true);
+        }
       }
-    });
+    }
+
+    initializeAuth();
 
     const safetyTimeout = setTimeout(() => {
       // Reduced safety unblock to 4s
@@ -621,7 +657,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       mounted = false;
       clearTimeout(safetyTimeout);
-      subscription.unsubscribe();
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+      }
     };
   }, []); // Strictly empty array to prevent listener re-runs
 
