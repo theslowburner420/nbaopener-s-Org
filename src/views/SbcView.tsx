@@ -90,7 +90,11 @@ const SbcListItem: React.FC<{
         <h3 className="text-sm font-black text-white uppercase italic truncate">
           {challenge.name}
         </h3>
-        <p className="text-[9px] text-zinc-500 uppercase truncate">
+        <div className="flex items-center gap-1.5 mt-0.5">
+           <span className="text-[7px] font-bold text-zinc-600 uppercase tracking-widest">REWARD:</span>
+           <span className="text-[8px] font-black text-amber-500 uppercase truncate max-w-[120px]">{challenge.reward.playerName}</span>
+        </div>
+        <p className="text-[9px] text-zinc-500 uppercase truncate mt-0.5">
           {challenge.description}
         </p>
       </div>
@@ -450,6 +454,7 @@ const SbcView: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            style={{ height: '800px' }}
             className="fixed inset-0 z-[7000] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-0 md:p-8"
           >
             <div className="w-full h-full max-w-7xl flex flex-col">

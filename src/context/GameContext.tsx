@@ -205,7 +205,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.error(`❌ Supabase Error ${status} (Attempt ${attempt}):`, error);
             
             // Detect missing column errors and retry without them
-            const missingColumnMatch = error.message?.match(/column "(.+)" of relation "profiles" does not exist/);
+            // Format 1: PostgreSQL native error (column "x" does not exist)
+            // Format 2: PostgREST schema cache error (Could not find the 'x' column of 'profiles' in the schema cache)
+            const missingColumnMatch = error.message?.match(/column "(.+)" of relation "profiles" does not exist/) || 
+                                     error.message?.match(/Could not find the '(.+)' column/);
+            
             if (missingColumnMatch && missingColumnMatch[1]) {
               const missingField = missingColumnMatch[1];
               if (!omitFields.includes(missingField)) {

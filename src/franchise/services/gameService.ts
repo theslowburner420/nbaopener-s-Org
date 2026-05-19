@@ -49,7 +49,7 @@ export const gameService = {
     state.currentGameIndex = (state.currentGameIndex || 0) + 1;
 
     // End of Regular Season check (Game 82 is index 81 before increment, or 82 after increment)
-    if (state.currentGameIndex >= totalGames || state.currentGameIndex >= 82) {
+    if ((state.currentGameIndex || 0) >= totalGames || (state.currentGameIndex || 0) >= 82) {
       if (state.phase === 'regular_season') {
         this.endRegularSeason(state);
       }
@@ -99,13 +99,14 @@ export const gameService = {
     // 1. Guardar ovrAtSeasonStart de todos los jugadores del roster para calcular MIP
     Object.values(state.teams).forEach(team => {
       team.roster.forEach(pid => {
+        if (!state.playerProgress[pid]) {
+          state.playerProgress[pid] = { age: 25, potential: 80, form: 50 };
+        }
         const progress = state.playerProgress[pid];
-        if (progress) {
-          // If we haven't saved it yet, save current OVR as starting point (or keep what we have if it was set at start)
-          if (progress.ovrAtSeasonStart === undefined) {
-             const card = ALL_CARDS.find(c => c.id === pid) || state.customCards?.find(c => c.id === pid) || state.draftPool?.find(c => c.id === pid);
-             progress.ovrAtSeasonStart = card?.stats.ovr || 70;
-          }
+        // If we haven't saved it yet, save current OVR as starting point
+        if (progress.ovrAtSeasonStart === undefined) {
+           const card = ALL_CARDS.find(c => c.id === pid) || state.customCards?.find(c => c.id === pid) || state.draftPool?.find(c => c.id === pid);
+           progress.ovrAtSeasonStart = card?.stats.ovr || 70;
         }
       });
     });
@@ -114,7 +115,15 @@ export const gameService = {
     playoffService.calculateSeasonStandings(state);
 
     // 3. Calcular premios
-    calculateAwards(state);
+    try {
+      calculateAwards(state);
+    } catch (e) {
+      console.error('[AWARDS ERROR] Failed to calculate awards, using fallback', e);
+      // Fallback: at least set a basic structure if it failed
+      if (!state.awards[state.season]) {
+        state.awards[state.season] = { allNba: [] };
+      }
+    }
 
     // 4. Marcar fase como awards
     state.phase = 'season_awards';
@@ -128,6 +137,8 @@ export const gameService = {
       season: state.season,
       read: false
     });
+
+    stateService.save(state);
   },
 
   simulateUserPlayoffGame(state: FranchiseState) {

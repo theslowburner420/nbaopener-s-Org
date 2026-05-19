@@ -72,13 +72,14 @@ export function calculateAwards(state: FranchiseState) {
   state.awards[state.season] = awards;
   const seasonalStats = state.stats.seasonal;
 
-  // Final Standings calculate for award eligibility (MVP)
+  // Finalize Standings calculate for award eligibility (MVP)
+  // Ensure standings use up-to-date wins/losses
   const standings = Object.values(state.teams).map(t => ({
     id: t.teamId,
-    winPct: t.wins / (t.wins + t.losses || 1),
-    wins: t.wins,
-    losses: t.losses
-  }));
+    winPct: (t.wins || 0) / ((t.wins || 0) + (t.losses || 0) || 1),
+    wins: t.wins || 0,
+    losses: t.losses || 0
+  })).sort((a,b) => b.winPct - a.winPct);
 
   // LEAGUE AWARDS CALCULATION
   const leagueStats = Object.keys(seasonalStats).map(id => {
@@ -99,7 +100,7 @@ export function calculateAwards(state: FranchiseState) {
       bpg: (s.blocks || 0) / games,
       teamStandings: standings.find(st => st.id === teamId),
       isStarter,
-      mvpScore: (s.points / games) + (s.assists / games) * 0.9 + (s.rebounds / games) * 0.7,
+      mvpScore: (s.points / games) + (s.assists / games) * 0.9 + (s.rebounds / games) * 0.7 + ((standings.find(st => st.id === teamId)?.wins || 0) / 2),
       dpoyScore: ((s.steals || 0) / games) * 2.5 + ((s.blocks || 0) / games) * 3 + ((s.rebounds || 0) / games) * 0.5,
       royScore: (s.points / games) + (s.rebounds / games) + (s.assists / games)
     };
@@ -650,7 +651,7 @@ export function runCPUOffseasonLogic(state: FranchiseState) {
 
 export function advanceSeason(state: FranchiseState): FranchiseState {
   const newState = { ...state };
-  console.log(`[FRANCHISE] Starting New Season setup (Phase: new_season)`);
+  console.log(`[FRANCHISE] Finishing Season ${state.season}. Advancing to ${state.season + 1}`);
   
   const userTeam = newState.teams[newState.userTeamId];
   
@@ -659,17 +660,19 @@ export function advanceSeason(state: FranchiseState): FranchiseState {
   
   // Get playoff result for user
   let playoffResult = 'Missed Playoffs';
-  const series = state.playoffSeries.filter(s => s.team1Id === state.userTeamId || s.team2Id === state.userTeamId);
-  if (series.length > 0) {
-      const maxRound = Math.max(...series.map(s => s.round));
-      const latestSeries = series.find(s => s.round === maxRound);
+  const userSeries = (state.playoffSeries || []).filter(s => s.team1Id === state.userTeamId || s.team2Id === state.userTeamId);
+  if (userSeries.length > 0) {
+      const maxRound = Math.max(...userSeries.map(s => s.round));
+      const latestSeries = userSeries.find(s => s.round === maxRound);
       const isWinner = latestSeries?.winnerId === state.userTeamId;
       
       if (maxRound === 1) playoffResult = isWinner ? 'Conference Semifinals' : 'First Round';
       if (maxRound === 2) playoffResult = isWinner ? 'Conference Finals' : 'Conference Semifinals';
       if (maxRound === 3) playoffResult = isWinner ? '🏆 CHAMPION' : 'Runner-Up';
+      if (maxRound === 0) playoffResult = isWinner ? 'First Round' : 'Play-In Loss';
   }
 
+  if (!newState.seasonHistory) newState.seasonHistory = [];
   newState.seasonHistory.push({
     seasonYear: state.season,
     wins: userTeam.wins,
@@ -688,7 +691,8 @@ export function advanceSeason(state: FranchiseState): FranchiseState {
   applyProgression(newState);
 
   // 3. STATS ARCHIVING
-  Object.entries(newState.stats.seasonal).forEach(([pid, s]) => {
+  if (!newState.stats.career) newState.stats.career = {};
+  Object.entries(newState.stats.seasonal || {}).forEach(([pid, s]) => {
      if (!newState.stats.career[pid]) {
         newState.stats.career[pid] = { ...s };
      } else {
@@ -702,12 +706,6 @@ export function advanceSeason(state: FranchiseState): FranchiseState {
      }
   });
 
-  // Hall of Fame retired user players
-  const allTeamPlayers = Object.values(state.teams).flatMap(t => t.roster);
-  const userRosterIds = new Set(userTeam.roster);
-
-  // Retirement Logic in applyProgression already identifies retired players
-  // but we need to capture them for Hall of Fame if they were ours.
   newState.stats.seasonal = {};
   if (newState.stats.playoffs) newState.stats.playoffs = {};
   newState.seasonHighs = {};
@@ -717,16 +715,12 @@ export function advanceSeason(state: FranchiseState): FranchiseState {
     Object.keys(team.contracts).forEach(pid => {
       const contract = team.contracts[pid];
       contract.yearsRemaining -= 1;
-      
-      // Update extendability
       contract.canExtend = contract.yearsRemaining <= 2;
 
       if (contract.yearsRemaining <= 0) {
-        // Contract expired - move to FA
         if (!newState.freeAgentPool.includes(pid)) newState.freeAgentPool.push(pid);
         delete team.contracts[pid];
         team.roster = team.roster.filter(id => id !== pid);
-        // Clear lineup
         (['PG', 'SG', 'SF', 'PF', 'C'] as const).forEach(pos => {
            if (team.lineup[pos] === pid) team.lineup[pos] = null;
         });
@@ -748,8 +742,12 @@ export function advanceSeason(state: FranchiseState): FranchiseState {
   newState.week = 1;
   newState.phase = 'regular_season';
   
-  console.log('[FRANCHISE PHASE]', previousPhase, '→', newState.phase, 
-    { currentGameIndex: newState.currentGameIndex, season: newState.season, timestamp: new Date().toISOString() });
+  console.log('[FRANCHISE PHASE CHANGE]', { 
+    from: previousPhase, 
+    to: newState.phase, 
+    newSeason: newState.season, 
+    timestamp: new Date().toISOString() 
+  });
 
   newState.championId = undefined;
   newState.playoffSeries = [];
@@ -757,16 +755,15 @@ export function advanceSeason(state: FranchiseState): FranchiseState {
   newState.lotteryPicks = [];
 
   // 7. GENERATE NEW SCHEDULE
-  // Generate schedule for new season
   newState.schedule = scheduleService.generateSchedule(newState.teams);
 
   // 5. Run CPU Offseason Logic (Trades, Signings, Releases)
   runCPUOffseasonLogic(newState);
 
   newState.notifications.unshift({
-    id: `new-season-${newState.season}`,
+    id: `new-season-${newState.season}-${Date.now()}`,
     type: 'NEWS',
-    message: `🏀 Welcome to Season ${newState.season}! The new season tips off now.`,
+    message: `🏀 Welcome to Season ${newState.season}! The regular season has officially begun.`,
     week: 1,
     season: newState.season,
     read: false

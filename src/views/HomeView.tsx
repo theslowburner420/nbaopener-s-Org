@@ -82,6 +82,7 @@ const HomeView: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
+          style={{ height: '800px' }}
           className="relative group cursor-pointer overflow-hidden rounded-2xl md:rounded-[2.5rem] border border-zinc-800 bg-zinc-950 flex flex-1 items-center justify-between p-5 md:p-8"
           onClick={() => setCurrentView('trading')}
         >

@@ -192,22 +192,32 @@ const CareerView: React.FC = () => {
   // Phase transition handlers
   const handleFinalizeOffseason = () => {
     if (!state) return;
-    const newState = advanceSeason(state);
-    setState(newState);
+    const newState = { ...state };
+    const finalizedState = advanceSeason(newState);
+    setState(finalizedState);
     setActiveTab('hub');
-    notifySuccess(`🏀 Welcome to Season ${newState.season}!`);
-    stateService.save(newState);
+    notifySuccess(`🏀 Welcome to Season ${finalizedState.season}!`);
+    stateService.save(finalizedState);
   };
 
   const handleStartDraftLottery = () => {
     if (!state) return;
+    const newState = { ...state };
+    newState.phase = 'draft_lottery' as FranchisePhase;
+    setState(newState);
     setShowLottery(true);
+    stateService.save(newState);
   };
 
   const handleCompleteLottery = () => {
     if (!state) return;
+    const previousPhase = state.phase;
     const newState = { ...state };
     newState.phase = 'draft' as FranchisePhase;
+    
+    console.log('[FRANCHISE PHASE]', previousPhase, '→', newState.phase, 
+      { currentGameIndex: newState.currentGameIndex, wins: state.teams[state.userTeamId].wins, losses: state.teams[state.userTeamId].losses, timestamp: new Date().toISOString() });
+
     newState.draftPool = generateDraftPool(newState.season);
     setShowLottery(false);
     setActiveTab('draft');
@@ -217,7 +227,12 @@ const CareerView: React.FC = () => {
 
   const handleCompleteDraft = () => {
     if (!state) return;
+    const previousPhase = state.phase;
     const newState = { ...state, phase: 'free_agency' as FranchisePhase };
+    
+    console.log('[FRANCHISE PHASE]', previousPhase, '→', newState.phase, 
+      { currentGameIndex: newState.currentGameIndex, wins: state.teams[state.userTeamId].wins, losses: state.teams[state.userTeamId].losses, timestamp: new Date().toISOString() });
+
     setState(newState);
     setActiveTab('market');
     stateService.save(newState);
@@ -225,7 +240,12 @@ const CareerView: React.FC = () => {
 
   const handleContinueFromAwards = () => {
     if (!state) return;
+    const previousPhase = state.phase;
     const newState = { ...state, phase: 'playoffs' as FranchisePhase };
+    
+    console.log('[FRANCHISE PHASE]', previousPhase, '→', newState.phase, 
+      { currentGameIndex: newState.currentGameIndex, wins: state.teams[state.userTeamId].wins, losses: state.teams[state.userTeamId].losses, timestamp: new Date().toISOString() });
+
     setState(newState);
     stateService.save(newState);
   };

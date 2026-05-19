@@ -191,6 +191,16 @@ const TOURNAMENTS: Tournament[] = [
     minOpponentOvr: 92,
     maxOpponentOvr: 98,
     opponentPool: ['Celtics \'24', 'Warriors \'17', 'Bulls \'96', 'Lakers \'01', 'Spurs \'14', 'Heat \'13', 'Cavaliers \'16', 'Bucks \'71']
+  },
+  {
+    id: 'rookies',
+    name: 'Rising Stars',
+    difficulty: 'Medium',
+    recommendedOvr: 80,
+    rewards: '30,000 Coins + 3 Premium Rookie Packs',
+    minOpponentOvr: 78,
+    maxOpponentOvr: 85,
+    opponentPool: ['Thunder Youths', 'Magic Future', 'Rockets Prospects', 'Pistons Young Core', 'Spurs Rookies', 'Hornets Prospects', 'Jazz Youths', 'Blazers Future']
   }
 ];
 
@@ -229,6 +239,12 @@ const REWARDS = {
     finalist: { coins: 75000, packs: [{ id: 'mvp-1', type: 'mvp', name: 'Finals MVP Pack' }] },
     semis: { coins: 35000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
     quarters: { coins: 15000, packs: [] },
+  },
+  'Rising Stars': {
+    champion: { coins: 30000, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Premium Rookie Pack' }, { id: 'rookie-2', type: 'rookie', name: 'Premium Rookie Pack' }, { id: 'rookie-3', type: 'rookie', name: 'Premium Rookie Pack' }] },
+    finalist: { coins: 15000, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Premium Rookie Pack' }, { id: 'rookie-2', type: 'rookie', name: 'Premium Rookie Pack' }] },
+    semis: { coins: 7500, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Premium Rookie Pack' }] },
+    quarters: { coins: 2000, packs: [] },
   }
 };
 
@@ -653,9 +669,10 @@ const LiveMatchSimulation = memo<{
   starters: DraftSlot[];
   teamOVR: number;
   benchOVR: number;
+  chemistry: number;
   onFinish: (matchId: string, s1: number, s2: number, winner: any) => void;
   onClose: () => void;
-}>(({ match, starters, teamOVR, benchOVR, onFinish, onClose }) => {
+}>(({ match, starters, teamOVR, benchOVR, chemistry, onFinish, onClose }) => {
   const [liveScore, setLiveScore] = useState({ s1: 0, s2: 0 });
   const [liveQuarter, setLiveQuarter] = useState(1);
   const [liveEvents, setLiveEvents] = useState<MatchEvent[]>([]);
@@ -791,15 +808,19 @@ const LiveMatchSimulation = memo<{
     const t2BenchOvr = match.team2 === 'USER' ? benchOVR : (match.team2 as GhostTeam).benchOvr;
 
     // Improved Realistic Scoring Logic
+    const t1Chem = match.team1 === 'USER' ? chemistry : (70 + Math.random() * 25);
+    const t2Chem = match.team2 === 'USER' ? chemistry : (70 + Math.random() * 25);
+
     const ovrDiff = t1Ovr - t2Ovr;
-    const benchDiff = (t1BenchOvr - t2BenchOvr) / 2; // Bench has less weight but still matters
+    const benchDiff = (t1BenchOvr - t2BenchOvr) / 2;
+    const chemDiff = (t1Chem - t2Chem) / 5; // Chemistry adds up to ~6 pts boost
+    
     const baseScore = 98 + Math.floor(Math.random() * 15);
     
-    // Final scores based on OVR difference + Bench contribution + some controlled variance
-    // We add a "Momentum" factor to vary results
+    // Final scores based on OVR difference + Bench contribution + Chemistry + some controlled variance
     const momentum = Math.random() * 12 - 6;
-    let s1Final = Math.max(76, Math.round(baseScore + (ovrDiff * 1.8) + (benchDiff * 0.5) + momentum + (Math.random() * 8 - 4)));
-    let s2Final = Math.max(76, Math.round(baseScore - (ovrDiff * 1.8) - (benchDiff * 0.5) - momentum + (Math.random() * 8 - 4)));
+    let s1Final = Math.max(76, Math.round(baseScore + (ovrDiff * 1.8) + (benchDiff * 0.5) + chemDiff + momentum + (Math.random() * 8 - 4)));
+    let s2Final = Math.max(76, Math.round(baseScore - (ovrDiff * 1.8) - (benchDiff * 0.5) - chemDiff - momentum + (Math.random() * 8 - 4)));
     
     // Logic for Overtime if tied
     if (s1Final === s2Final) {
@@ -1139,6 +1160,7 @@ const DraftView: React.FC = () => {
     spendCoins, 
     setCurrentView, 
     addCoins, 
+    addToCollection,
     addPackToInventory, 
     unlockAchievement,
     updateGameState,
@@ -1243,11 +1265,11 @@ const DraftView: React.FC = () => {
     }
   }, [phase, activeMatchId, bracket, currentRound]);
 
-  const { teamOVR, benchOVR } = useMemo(() => {
+  const { teamOVR, benchOVR, chemistry } = useMemo(() => {
     const starterPlayers = starters.map(s => s.card).filter(Boolean) as Card[];
     const benchPlayers = bench.map(s => s.card).filter(Boolean) as Card[];
     
-    if (starterPlayers.length === 0 && benchPlayers.length === 0) return { teamOVR: 0, benchOVR: 0 };
+    if (starterPlayers.length === 0 && benchPlayers.length === 0) return { teamOVR: 0, benchOVR: 0, chemistry: 0 };
     
     const startersAvg = starterPlayers.length > 0
       ? starterPlayers.reduce((acc, p) => acc + (p.stats?.ovr || 0), 0) / starterPlayers.length
@@ -1259,7 +1281,27 @@ const DraftView: React.FC = () => {
     
     // Balanced OVR: 70% Starters, 30% Bench
     const teamOVR = Math.round((startersAvg * 0.7) + (benchAvg * 0.3));
-    return { teamOVR, benchOVR: Math.round(benchAvg) };
+
+    // CHEMISTRY CALCULATION (Max 100)
+    let chem = 0;
+    starters.forEach((slot, i) => {
+      if (!slot.card) return;
+      
+      // 1. Natural Position Bonus (+14 per player)
+      const isNatural = slot.card.position.split('/').some(p => p.trim() === slot.position);
+      if (isNatural) chem += 14;
+      else if (slot.position) chem += 4; // Out of position but still base
+      
+      // 2. Team Links (+7.5 per link, checking neighbors: 0-1, 1-2, 2-3, 3-4)
+      if (i < starters.length - 1) {
+        const nextSlot = starters[i+1];
+        if (nextSlot.card && slot.card.team === nextSlot.card.team) {
+          chem += 7.5;
+        }
+      }
+    });
+
+    return { teamOVR, benchOVR: Math.round(benchAvg), chemistry: Math.min(100, Math.round(chem)) };
   }, [starters, bench]);
 
   useEffect(() => {
@@ -1660,7 +1702,24 @@ const DraftView: React.FC = () => {
 
   const handleTournamentEnd = async (position: 'quarters' | 'semis' | 'finalist' | 'champion') => {
     if (!selectedTournament) return;
-    const rewards = REWARDS[selectedTournament.name as keyof typeof REWARDS][position];
+    const baseRewards = REWARDS[selectedTournament.name as keyof typeof REWARDS][position];
+    const rewards = JSON.parse(JSON.stringify(baseRewards));
+    
+    // Add one random drafted card as a reward if they reach finals
+    if (position === 'champion' || position === 'finalist') {
+      const allDraftedCards = [...starters, ...bench].map(s => s.card).filter(Boolean) as Card[];
+      const preservedCard = allDraftedCards[Math.floor(Math.random() * allDraftedCards.length)];
+      if (preservedCard) {
+        rewards.packs.push({ 
+          id: `draft-reward-${preservedCard.id}`, 
+          type: 'special_item', 
+          name: `Draft Card: ${preservedCard.name}`,
+          isDirectCard: true,
+          card: preservedCard
+        });
+      }
+    }
+
     setFinalPosition(position);
     setEarnedRewards(rewards);
     setShowTournamentSummary(true);
@@ -1681,20 +1740,24 @@ const DraftView: React.FC = () => {
 
   const claimRewards = async (targetView: 'draft' | 'home' = 'draft') => {
     if (earnedRewards) {
-      // Batch update everything (coins + stacked packs)
-      const currentInventory = JSON.parse(JSON.stringify(inventoryPacks)); // Deep clone
-      
-      for (const pack of earnedRewards.packs) {
-        const existing = currentInventory.find((p: any) => p.type === pack.type);
-        if (existing) {
-          existing.count = (existing.count || 1) + 1;
+      const currentInventory = JSON.parse(JSON.stringify(inventoryPacks));
+      const collectionUpdates: string[] = [];
+
+      for (const item of earnedRewards.packs) {
+        if ((item as any).isDirectCard && (item as any).card) {
+          collectionUpdates.push((item as any).card.id);
         } else {
-          currentInventory.push({ 
-            id: pack.type, 
-            type: pack.type, 
-            name: pack.name, 
-            count: 1 
-          });
+          const existing = currentInventory.find((p: any) => p.type === item.type);
+          if (existing) {
+            existing.count = (existing.count || 1) + 1;
+          } else {
+            currentInventory.push({ 
+              id: item.type, 
+              type: item.type, 
+              name: item.name, 
+              count: 1 
+            });
+          }
         }
       }
 
@@ -1702,6 +1765,10 @@ const DraftView: React.FC = () => {
         coins: coins + earnedRewards.coins,
         inventoryPacks: currentInventory
       });
+
+      if (collectionUpdates.length > 0) {
+        await addToCollection(collectionUpdates);
+      }
     }
 
     // Reset Draft State
@@ -1861,9 +1928,17 @@ const DraftView: React.FC = () => {
         {/* Left Stats Panel - Floating on Mobile, Sidebar on Desktop */}
         <div className="lg:w-40 flex flex-col gap-4 shrink-0 z-30">
           <div className="bg-zinc-900/80 backdrop-blur-md lg:bg-zinc-900/50 border border-zinc-800 lg:border-zinc-800/50 rounded-2xl p-4 flex lg:flex-col items-center justify-between lg:justify-center gap-4 shadow-2xl">
-            <div className="text-center">
-              <p className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-zinc-500">Team OVR</p>
+            <div className="text-center group">
+              <p className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-amber-500 transition-colors">Team OVR</p>
               <p className="text-2xl md:text-3xl font-black italic text-amber-500">{teamOVR}</p>
+            </div>
+            <div className="hidden lg:block w-full h-px bg-white/5" />
+            <div className="text-center group">
+              <p className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-blue-500 transition-colors">Chemistry</p>
+              <div className="flex items-center justify-center gap-1">
+                <Shield size={12} className={chemistry > 80 ? "text-green-500" : chemistry > 50 ? "text-amber-500" : "text-zinc-500"} />
+                <p className={`text-xl md:text-2xl font-black italic ${chemistry > 80 ? "text-green-500" : chemistry > 50 ? "text-amber-500" : "text-white"}`}>{chemistry}</p>
+              </div>
             </div>
             <div className="hidden lg:block w-full h-px bg-white/5" />
             <div className="text-right lg:text-center">
@@ -2109,21 +2184,43 @@ const DraftView: React.FC = () => {
         </div>
 
         <div className="w-full flex-1 md:flex-none flex flex-col items-center justify-center gap-1 sm:gap-6 overflow-y-auto px-1 sm:px-4">
-          <div className="grid grid-cols-2 sm:flex sm:flex-row sm:flex-nowrap gap-3 md:gap-6 w-full max-w-4xl justify-items-center">
+          <div className="grid grid-cols-2 sm:flex sm:flex-row sm:flex-nowrap gap-3 md:gap-6 w-full max-w-5xl justify-items-center">
             {currentOptions.map((card, idx) => (
               <motion.div
                 key={card.id + idx}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="w-full sm:w-44 xl:w-48 aspect-[2.5/3.5] shrink-0"
+                initial={{ opacity: 0, y: 100, rotateY: 90, scale: 0.5 }}
+                animate={{ 
+                  opacity: 1, 
+                  y: 0, 
+                  rotateY: 0, 
+                  scale: 1,
+                  transition: { 
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15,
+                    delay: idx * 0.15 
+                  }
+                }}
+                whileHover={{ scale: 1.05, y: -10, transition: { duration: 0.2 } }}
+                className="relative w-full sm:w-48 xl:w-52 aspect-[2.5/3.5] shrink-0 group"
               >
+                {/* Glow behind the card */}
+                <div className="absolute inset-0 bg-amber-500/0 group-hover:bg-amber-500/10 blur-2xl rounded-3xl transition-all duration-500" />
+                
                 <CardItem 
                   card={card} 
                   isOwned={true} 
                   mode={isMobile ? "large" : "mini"} 
                   onClick={() => handleSelectCard(card)}
                 />
+
+                {/* Pick Indicator Overlay on Hover */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none flex items-center justify-center">
+                  <div className="bg-amber-500/20 backdrop-blur-md px-4 py-2 rounded-full border border-amber-500/50 flex items-center gap-2">
+                    <Sparkles size={14} className="text-amber-500" />
+                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Select</span>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -2604,6 +2701,7 @@ const DraftView: React.FC = () => {
             starters={starters}
             teamOVR={teamOVR}
             benchOVR={benchOVR}
+            chemistry={chemistry}
             onFinish={handleFinishMatch}
             onClose={() => setIsLiveMatchActive(false)}
           />
@@ -2629,6 +2727,17 @@ const DraftView: React.FC = () => {
                   <h3 className="text-5xl font-black italic uppercase tracking-tighter text-white leading-none">
                     {matchResult.winner === 'Your Team' ? 'Victory!' : 'Defeat'}
                   </h3>
+                  {matchResult.winner === 'Your Team' && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: [0, 1.2, 1] }}
+                      className="flex justify-center py-2"
+                    >
+                      <div className="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center text-black">
+                        <Sparkles size={24} />
+                      </div>
+                    </motion.div>
+                  )}
                   <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">
                     {matchResult.winner === 'Your Team' ? 'You advanced to the next round' : 'Your tournament run has ended'}
                   </p>
