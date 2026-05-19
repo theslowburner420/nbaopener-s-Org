@@ -59,6 +59,7 @@ const CareerView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<FranchiseTab>('hub');
   const [showLottery, setShowLottery] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [activePlayoffRound, setActivePlayoffRound] = useState<number>(1);
 
   // CPU Trade Proposals Effect
   useEffect(() => {
@@ -92,6 +93,18 @@ const CareerView: React.FC = () => {
   const [userOfferedPickIds, setUserOfferedPickIds] = useState<string[]>([]);
   const [cpuRequestedIds, setCpuRequestedIds] = useState<string[]>([]);
   const [cpuRequestedPickIds, setCpuRequestedPickIds] = useState<string[]>([]);
+
+  const [showPreseasonReport, setShowPreseasonReport] = useState(false);
+  const [preseasonPlayers, setPreseasonPlayers] = useState<any[]>([]);
+
+  // Automatically trigger celebration when state champion is user
+  useEffect(() => {
+    if (state?.championId && state?.championId === state?.userTeamId) {
+      setShowChampCelebrate(true);
+    } else {
+      setShowChampCelebrate(false);
+    }
+  }, [state?.championId, state?.userTeamId]);
 
   const handleExecuteTrade = () => {
     if (!state || !tradeTargetTeamId) return;
@@ -194,6 +207,35 @@ const CareerView: React.FC = () => {
     if (!state) return;
     const newState = { ...state };
     const finalizedState = advanceSeason(newState);
+
+    // Compute progress details for the user's active roster
+    const team = finalizedState.teams[finalizedState.userTeamId];
+    if (team && team.roster) {
+      const list = team.roster.map((pId: string) => {
+        // Base card finder inside ALL_CARDS or custom cards or draft pool
+        const baseCard = ALL_CARDS.find(c => c.id === pId) || 
+                         finalizedState.customCards?.find((c: any) => c.id === pId) || 
+                         finalizedState.draftPool?.find((c: any) => c.id === pId);
+                         
+        const progress = finalizedState.playerProgress?.[pId];
+        const previousOvr = progress?.ovrAtSeasonStart || baseCard?.stats.ovr || 70;
+        const currentOvr = progress?.ovr || previousOvr;
+        
+        return {
+          id: pId,
+          name: baseCard?.name || 'Unknown Prospect',
+          position: baseCard?.position || 'F',
+          previousOvr,
+          currentOvr,
+          diff: currentOvr - previousOvr,
+          imageUrl: baseCard?.imageUrl,
+          nbaId: baseCard?.nbaId
+        };
+      });
+      setPreseasonPlayers(list);
+      setShowPreseasonReport(true);
+    }
+    
     setState(finalizedState);
     setActiveTab('hub');
     notifySuccess(`🏀 Welcome to Season ${finalizedState.season}!`);
@@ -204,6 +246,11 @@ const CareerView: React.FC = () => {
     if (!state) return;
     const newState = { ...state };
     newState.phase = 'draft_lottery' as FranchisePhase;
+    
+    // Generate lottery picks if they don't exist
+    const order1 = marketService.getDraftOrder(newState, newState.season, 1);
+    newState.lotteryPicks = order1.slice(0, 14).map(o => o.teamId);
+    
     setState(newState);
     setShowLottery(true);
     stateService.save(newState);
@@ -310,38 +357,68 @@ const CareerView: React.FC = () => {
       const isFinished = series.wins1 >= 4 || series.wins2 >= 4;
       const winnerId = series.wins1 >= 4 ? series.team1Id : series.wins2 >= 4 ? series.team2Id : null;
 
+      // Calculate exact regular season matchups dynamically
+      const regSeasonGames = (state.schedule || []).filter((m: any) => 
+        !m.isPlayoffs && m.played && 
+        ((m.homeTeamId === series.team1Id && m.awayTeamId === series.team2Id) || 
+         (m.homeTeamId === series.team2Id && m.awayTeamId === series.team1Id))
+      );
+      const team1Wins = regSeasonGames.filter((m: any) => m.winnerId === series.team1Id).length;
+      const team2Wins = regSeasonGames.filter((m: any) => m.winnerId === series.team2Id).length;
+      const h2hText = `Reg Season: ${team1Wins}-${team2Wins} ${teamA.abbreviation}`;
+
       return (
-        <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-4 space-y-3 min-w-[200px]">
-           <div className="flex items-center justify-between border-b border-white/5 pb-2">
-              <span className="text-[10px] font-black text-amber-500 uppercase italic">{label}</span>
-              <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">{isFinished ? 'Final' : `Game ${series.wins1 + series.wins2 + 1}`}</span>
-           </div>
-           <div className="space-y-2">
-             {[
-               { id: series.team1Id, wins: series.wins1, seed: series.seed1 },
-               { id: series.team2Id, wins: series.wins2, seed: series.seed2 }
-             ].map((t) => (
-               <div key={t.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                     <span className="text-[8px] font-black text-zinc-700 w-3">{t.seed}</span>
-                     <img src={getTeamLogo(t.id)} className="w-6 h-6 object-contain" />
-                     <span className={`text-xs font-black uppercase italic ${winnerId === t.id ? 'text-amber-500' : 'text-white'}`}>{state.teams[t.id].abbreviation}</span>
-                  </div>
-                  <span className={`text-lg font-black italic tabular-nums ${winnerId === t.id ? 'text-amber-500' : 'text-zinc-500'}`}>{t.wins}</span>
-               </div>
-             ))}
-           </div>
-        </div>
+        <motion.div 
+          whileHover={{ scale: 1.02, translateY: -2 }}
+          className="bg-zinc-900/60 border border-white/10 rounded-2xl p-4.5 space-y-3.5 min-w-[215px] relative group overflow-hidden shadow-lg transition-all"
+        >
+          {/* Subtle golden background glow if this is user's team matchup */}
+          {(series.team1Id === state.userTeamId || series.team2Id === state.userTeamId) && (
+            <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-amber-600 to-amber-400 opacity-60" />
+          )}
+
+          <div className="flex items-center justify-between border-b border-white/5 pb-2">
+            <span className="text-[10px] font-black text-amber-500 uppercase italic tracking-wider">{label}</span>
+            <span className="text-[9px] font-bold text-zinc-550 uppercase tracking-widest">{isFinished ? 'Finalized' : `Game ${series.wins1 + series.wins2 + 1}`}</span>
+          </div>
+          
+          <div className="space-y-2">
+            {[
+              { id: series.team1Id, abbreviation: teamA.abbreviation, wins: series.wins1, seed: series.seed1 },
+              { id: series.team2Id, abbreviation: teamB.abbreviation, wins: series.wins2, seed: series.seed2 }
+            ].map((t) => (
+              <div key={t.id} className="flex items-center justify-between">
+                 <div className="flex items-center gap-2.5">
+                    <span className="text-[8px] font-black text-zinc-600 w-3">{t.seed}</span>
+                    <div className="w-5.5 h-5.5 bg-black rounded-md p-1 flex items-center justify-center shrink-0 border border-white/5">
+                      <img src={getTeamLogo(t.id)} className="w-full h-full object-contain" />
+                    </div>
+                    <span className={`text-[11px] font-black uppercase italic ${winnerId === t.id ? 'text-amber-500' : 'text-white'}`}>{t.abbreviation}</span>
+                 </div>
+                 <span className={`text-sm md:text-base font-black italic font-mono tabular-nums ${winnerId === t.id ? 'text-amber-500' : 'text-zinc-500'}`}>{t.wins}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-1.5 border-t border-white/5 flex items-center justify-between text-[7px] md:text-[8px] font-bold text-zinc-500 uppercase tracking-wider">
+             <span>Historical H2H:</span>
+             <span className="text-zinc-400 font-extrabold">{h2hText}</span>
+          </div>
+        </motion.div>
       );
     };
 
+    const seriesArray = state.playoffSeries || [];
+
     return (
       <div className="h-full flex flex-col">
-        <div className="p-4 md:p-8 flex items-center justify-between">
+        {/* Cabecera */}
+        <div className="p-4 md:p-8 flex items-center justify-between border-b border-white/5 bg-zinc-950/40 shrink-0">
           <div className="space-y-1">
              <h2 className="text-2xl md:text-5xl font-black italic uppercase tracking-tighter text-white leading-none">Playoff Bracket</h2>
-             <p className="text-[10px] md:text-sm font-bold text-zinc-600 uppercase tracking-[0.4em] italic">Road to the Championship</p>
+             <p className="text-[10px] md:text-sm font-bold text-zinc-500 uppercase tracking-widest italic mt-1.5 leading-none">Road to the Championship</p>
           </div>
+          
           <div className="flex gap-2">
             {!state.championId && (
               <button 
@@ -362,7 +439,7 @@ const CareerView: React.FC = () => {
                   setState(newState);
                   stateService.save(newState);
                 }}
-                className="px-6 md:px-10 py-3 md:py-4 bg-amber-500 text-black rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-xs hover:bg-amber-400 transition-all shadow-2xl active:scale-95"
+                className="px-6 md:px-10 py-3 md:py-4 bg-amber-500 text-black rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-xs hover:bg-amber-400 transition-all shadow-2xl active:scale-95 animate-bounce"
               >
                 Proceed to Offseason
               </button>
@@ -370,33 +447,110 @@ const CareerView: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar pb-12">
-          <div className="min-w-[1200px] h-full flex items-center gap-12 px-8">
-            {/* QUARTER FINALS */}
-            <div className="flex flex-col justify-around h-full gap-8">
-               <div className="space-y-8">
-                  <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest text-center border-b border-blue-500/20 pb-2">East Semis</p>
-                  {state.playoffs?.series?.filter((s: any) => s.conference === 'East' && s.round === 1).map((s: any, i: number) => renderSeries(s, `SR ${i+1}`))}
-               </div>
-               <div className="space-y-8">
-                  <p className="text-[10px] font-black text-red-500 uppercase tracking-widest text-center border-b border-red-500/20 pb-2">West Semis</p>
-                  {state.playoffs?.series?.filter((s: any) => s.conference === 'West' && s.round === 1).map((s: any, i: number) => renderSeries(s, `SR ${i+1}`))}
-               </div>
+        {/* SELECTOR DE RONDAS EN MÓVIL */}
+        <div className="flex md:hidden bg-zinc-900 border-b border-white/5 p-1 shrink-0">
+          {[
+            { id: 1, label: 'R1' },
+            { id: 2, label: 'Semis' },
+            { id: 3, label: 'Conf. Finals' },
+            { id: 4, label: 'The Finals' }
+          ].map(r => (
+            <button
+              key={r.id}
+              onClick={() => setActivePlayoffRound(r.id)}
+              className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                activePlayoffRound === r.id ? 'bg-white text-black' : 'text-zinc-500'
+              }`}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+
+        {/* BODY DE PLAYOFFS */}
+        <div className="flex-1 overflow-x-auto overflow-y-auto custom-scrollbar py-6 px-4 md:px-8">
+          
+          {/* VISTA MÓVIL (APILADA POR RONDA ACTIVA) */}
+          <div className="md:hidden space-y-6">
+            {activePlayoffRound === 1 && (
+              <div className="space-y-6">
+                <p className="text-[9px] font-black text-blue-500 uppercase tracking-widest text-center">R1 Quarterfinals</p>
+                <div className="grid grid-cols-1 gap-4">
+                  {seriesArray.filter((s: any) => s.round === 1).map((s: any, idx: number) => renderSeries(s, s.conference === 'East' ? `East QF ${idx + 1}` : `West QF ${idx - 3}`))}
+                </div>
+              </div>
+            )}
+            {activePlayoffRound === 2 && (
+              <div className="space-y-6">
+                <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest text-center">Conference Semifinals</p>
+                <div className="grid grid-cols-1 gap-4">
+                  {seriesArray.filter((s: any) => s.round === 2).map((s: any, idx: number) => renderSeries(s, s.conference === 'East' ? `East Semis ${idx + 1}` : `West Semis ${idx - 1}`))}
+                </div>
+              </div>
+            )}
+            {activePlayoffRound === 4 && (
+              <div className="space-y-6 flex flex-col items-center">
+                <Trophy className="text-amber-500 animate-pulse mt-4" size={36} />
+                <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest text-center">The NBA Finals</p>
+                <div className="w-full max-w-sm mt-3">
+                  {seriesArray.filter((s: any) => s.round === 4).map((s: any) => renderSeries(s, 'The Finals'))}
+                </div>
+              </div>
+            )}
+            {activePlayoffRound === 3 && (
+              <div className="space-y-6">
+                <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest text-center">Conference Finals</p>
+                <div className="grid grid-cols-1 gap-4">
+                  {seriesArray.filter((s: any) => s.round === 3).map((s: any) => renderSeries(s, s.conference === 'East' ? 'East Finals' : 'West Finals'))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* VISTA ESCRITORIO (ESTRUCTURA DE ÁRBOL HORIZONTAL COMPLETO) */}
+          <div className="hidden md:flex min-w-[1200px] h-full items-center justify-between gap-8 pb-10">
+            {/* Round 1 (Conf Quarterfinals) */}
+            <div className="flex flex-col justify-around h-full gap-4 w-1/4">
+              <div className="space-y-4">
+                <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest text-center border-b border-blue-500/20 pb-2">East R1 Quarterfinals</p>
+                {seriesArray.filter((s: any) => s.conference === 'East' && s.round === 1).map((s: any, i: number) => renderSeries(s, `Series ${i+1}`))}
+              </div>
+              <div className="space-y-4">
+                <p className="text-[10px] font-black text-red-500 uppercase tracking-widest text-center border-b border-red-500/20 pb-2">West R1 Quarterfinals</p>
+                {seriesArray.filter((s: any) => s.conference === 'West' && s.round === 1).map((s: any, i: number) => renderSeries(s, `Series ${i+1}`))}
+              </div>
             </div>
 
-            {/* CONFERENCE FINALS */}
-            <div className="flex flex-col justify-around h-full gap-24">
-               {state.playoffs?.series?.filter((s: any) => s.round === 2).map((s: any) => renderSeries(s, s.conference === 'East' ? 'East Finals' : 'West Finals'))}
+            {/* Conf Semis (Round 2) */}
+            <div className="flex flex-col justify-around h-full gap-8 w-1/4">
+              <div className="space-y-4">
+                <p className="text-[10px] font-black text-blue-500/80 uppercase tracking-widest text-center border-b border-blue-500/20 pb-2">East Semifinals</p>
+                {seriesArray.filter((s: any) => s.conference === 'East' && s.round === 2).map((s: any, i: number) => renderSeries(s, `Semis ${i+1}`))}
+              </div>
+              <div className="space-y-4">
+                <p className="text-[10px] font-black text-red-500/80 uppercase tracking-widest text-center border-b border-red-500/20 pb-2">West Semifinals</p>
+                {seriesArray.filter((s: any) => s.conference === 'West' && s.round === 2).map((s: any, i: number) => renderSeries(s, `Semis ${i+1}`))}
+              </div>
             </div>
 
-            {/* FINALS */}
-            <div className="flex flex-col justify-center h-full">
-               <div className="space-y-4 text-center">
+            {/* Conference Finals (Round 3) */}
+            <div className="flex flex-col justify-around h-full gap-16 w-1/4">
+              <div className="space-y-6">
+                <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest text-center border-b border-amber-500/20 pb-2">Conference Finals</p>
+                {seriesArray.filter((s: any) => s.round === 3).map((s: any) => renderSeries(s, s.conference === 'East' ? 'East Finals' : 'West Finals'))}
+              </div>
+            </div>
+
+            {/* Gran NBA Finals (Round 4) */}
+            <div className="flex flex-col justify-center h-full w-1/4 items-center">
+               <div className="space-y-4 w-full text-center">
                   <Trophy className="text-amber-500 mx-auto animate-pulse" size={48} />
-                  {state.playoffs?.series?.filter((s: any) => s.round === 3).map((s: any) => renderSeries(s, 'The Finals'))}
+                  <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest text-center border-b border-amber-500/20 pb-2">The NBA Finals</p>
+                  {seriesArray.filter((s: any) => s.round === 4).map((s: any) => renderSeries(s, 'The Finals'))}
                </div>
             </div>
           </div>
+
         </div>
       </div>
     );
@@ -769,7 +923,229 @@ const CareerView: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* CHAMPIONSHIP CINEMATIC CELEBRATION */}
+      <AnimatePresence>
+        {showChampCelebrate && (
+          <ChampionshipCelebrationOverlay 
+            state={state} 
+            findCard={findCard} 
+            onClose={() => {
+              setShowChampCelebrate(false);
+              // Clear championId so it can be re-triggered next year if they win again
+              const newState = { ...state, championId: undefined, phase: 'offseason_start' as FranchisePhase };
+              setState(newState);
+              stateService.save(newState);
+            }} 
+          />
+        )}
+      </AnimatePresence>
+
+      {/* PRE-SEASON TRAINING CAMP PROGRESS REPORT */}
+      <AnimatePresence>
+        {showPreseasonReport && preseasonPlayers.length > 0 && (
+          <PreseasonProgressionReport 
+            players={preseasonPlayers} 
+            onClose={() => setShowPreseasonReport(false)} 
+          />
+        )}
+      </AnimatePresence>
     </div>
+  );
+};
+
+// ================= CHAMPIONSHIP CINEMATIC CELEBRATION OVERLAY =================
+interface ChampCelebrateProps {
+  state: any;
+  findCard: (id: string) => any;
+  onClose: () => void;
+}
+const ChampionshipCelebrationOverlay: React.FC<ChampCelebrateProps> = ({ state, findCard, onClose }) => {
+  const fmvpId = state?.awards?.[state.season]?.finalsMvp;
+  const fmvpCard = fmvpId ? findCard(fmvpId) : null;
+  
+  useEffect(() => {
+    // Continuous metallic gold confetti rain
+    const interval = setInterval(() => {
+      confetti({
+        particleCount: 50,
+        spread: 90,
+        origin: { y: 0.6 },
+        colors: ['#fbbf24', '#f59e0b', '#d97706', '#ffffff']
+      });
+    }, 400);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[8000] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center select-none"
+    >
+      <div className="max-w-3xl w-full space-y-8 relative">
+        <motion.div 
+          animate={{ y: [0, -15, 0], rotate: [0, 2, -2, 0] }}
+          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+          className="relative w-44 h-44 md:w-56 md:h-56 mx-auto filter drop-shadow-[0_0_35px_rgba(245,158,11,0.5)] flex items-center justify-center"
+        >
+          <svg className="w-full h-full text-amber-500 fill-amber-500" viewBox="0 0 24 24">
+            <path d="M19 2h-4v3c0 2.21-1.79 4-4 4s-4-1.79-4-4V2H3v3c0 3.72 2.56 6.85 6 7.74V22h6v-9.26c3.44-.89 6-4.02 6-7.74V2z" />
+          </svg>
+        </motion.div>
+
+        <div className="space-y-2">
+          <span className="text-[10px] font-black tracking-[0.35em] text-amber-500 uppercase animate-pulse">WORLD CHAMPIONS</span>
+          <h2 className="text-4xl md:text-7xl font-black italic uppercase tracking-tighter text-white leading-none">THE RING SECURED!</h2>
+          <p className="text-zinc-550 text-xs md:text-sm uppercase font-bold tracking-widest">
+            {state?.teams?.[state?.userTeamId]?.name || "Your franchise"} reached absolute immortal glory.
+          </p>
+        </div>
+
+        {fmvpCard && (
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="max-w-md mx-auto bg-zinc-900/60 border border-white/10 p-5 rounded-[2rem] flex items-center gap-6 relative overflow-hidden text-left shadow-2xl"
+          >
+            <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl animate-pulse" />
+            
+            <div className="w-16 h-16 bg-black rounded-2xl overflow-hidden shrink-0 border border-white/15">
+              <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${fmvpCard.nbaId}.png`} className="w-full h-full object-contain scale-110" />
+            </div>
+
+            <div className="leading-tight shrink-0 min-w-0 flex-1">
+              <span className="text-[8px] font-black text-amber-500 uppercase tracking-widest italic flex items-center gap-1 mb-1">
+                <Sparkles size={10} /> Finals MVP Crowned
+              </span>
+              <h4 className="text-base font-black text-white italic truncate uppercase w-48 leading-none mb-1">{fmvpCard.name}</h4>
+              <p className="text-[9px] font-mono text-zinc-500 font-bold uppercase tracking-wider">
+                {fmvpCard.stats.ovr} OVR • {fmvpCard.position}
+              </p>
+              
+              <div className="flex gap-4 mt-2.5">
+                <div className="leading-none">
+                  <span className="text-[7px] font-bold text-zinc-500 uppercase leading-none">PPG</span>
+                  <p className="text-xs font-mono font-black text-white leading-none mt-0.5">28.4</p>
+                </div>
+                <div className="leading-none">
+                  <span className="text-[7px] font-bold text-zinc-500 uppercase leading-none">RPG</span>
+                  <p className="text-xs font-mono font-black text-white leading-none mt-0.5">7.6</p>
+                </div>
+                <div className="leading-none">
+                  <span className="text-[7px] font-bold text-zinc-500 uppercase leading-none">APG</span>
+                  <p className="text-xs font-mono font-black text-white leading-none mt-0.5">8.1</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        <button 
+          onClick={onClose}
+          className="px-10 py-5 bg-white text-black hover:bg-amber-500 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:scale-102 active:scale-98 transition-all duration-150"
+        >
+          Proceed to Front Office Offseason
+        </button>
+      </div>
+    </motion.div>
+  );
+};
+
+// ================= PRE-SEASON TRAINING CAMP PROGRESS REPORT =================
+interface PreseasonReportProps {
+  players: any[];
+  onClose: () => void;
+}
+const PreseasonProgressionReport: React.FC<PreseasonReportProps> = ({ players, onClose }) => {
+  const breakOutPlayer = useMemo(() => {
+    if (players.length === 0) return null;
+    return [...players].sort((a, b) => b.diff - a.diff)[0];
+  }, [players]);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[8000] bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center select-none"
+    >
+      <div className="max-w-3xl w-full space-y-8 relative max-h-[90vh] overflow-y-auto pr-1 no-scrollbar">
+        
+        <div className="space-y-2 text-center">
+          <span className="text-[8.5px] font-black tracking-widest text-emerald-400 uppercase bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full animate-pulse">
+            PRE-SEASON TRAINING CAMP REPORT
+          </span>
+          <h2 className="text-3xl md:text-5.5.xl font-black italic uppercase tracking-tighter text-white leading-none">ROSTER TRAINING PROGRESSION</h2>
+          <p className="text-zinc-550 text-[10px] font-bold uppercase tracking-widest">
+            Ages and camp skills compiled for Season Roster
+          </p>
+        </div>
+
+        {breakOutPlayer && breakOutPlayer.diff > 0 && (
+          <div className="bg-gradient-to-br from-indigo-500/15 via-zinc-900/60 to-black border border-indigo-500/25 rounded-[2.5rem] p-6 max-w-lg mx-auto flex items-center gap-6 relative overflow-hidden text-left shadow-2xl">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl animate-pulse" />
+            
+            <div className="relative shrink-0">
+               <div className="w-16 h-16 bg-zinc-950 rounded-2xl p-1 overflow-hidden border border-white/10 flex items-center justify-center">
+                 {breakOutPlayer.imageUrl ? (
+                   <img src={breakOutPlayer.imageUrl} className="w-full h-full object-contain" />
+                 ) : (
+                   <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${breakOutPlayer.nbaId}.png`} className="w-full h-full object-contain scale-110" />
+                 )}
+               </div>
+               <div className="absolute -bottom-1 -right-1 bg-indigo-500 text-black text-[7.5px] font-black px-1.5 py-0.5 rounded leading-none">BREAKOUT</div>
+            </div>
+
+            <div className="leading-tight shrink-0 min-w-0 flex-1">
+              <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest">★ OFFSEASON BREAKOUT CANDIDATE ★</span>
+              <h4 className="text-lg md:text-xl font-black text-white italic uppercase truncate w-52 leading-none mt-1.5 mb-1">{breakOutPlayer.name}</h4>
+              <p className="text-[9px] font-medium text-zinc-505 uppercase tracking-wider">
+                OVR jump: <strong className="text-white">{breakOutPlayer.previousOvr}</strong> → <strong className="text-emerald-400">{breakOutPlayer.currentOvr}</strong>
+                <span className="text-emerald-400 font-mono font-black ml-2">▲ +{breakOutPlayer.diff}</span>
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="bg-zinc-900/40 border border-white/5 p-6 rounded-[2rem] space-y-4 text-left max-w-xl mx-auto">
+          <h3 className="text-[8.5px] font-extrabold text-zinc-500 uppercase tracking-[0.2em] leading-none text-center">ACTIVE TEAM CAMP PROGRESS</h3>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[220px] overflow-y-auto no-scrollbar pr-1">
+            {players.map(p => (
+              <div key={p.id} className="bg-zinc-950/60 p-3.5 rounded-2xl border border-white/5 flex items-center justify-between">
+                <div className="leading-none shrink-0 min-w-0">
+                  <h5 className="font-black text-white text-xs uppercase italic truncate max-w-[125px]">{p.name}</h5>
+                  <p className="text-[7.5px] font-black text-zinc-550 uppercase mt-1">{p.position}</p>
+                </div>
+                
+                <div className="flex items-center gap-2.5 font-mono">
+                  <span className="text-[10px] text-zinc-500 font-bold">{p.previousOvr}</span>
+                  <span className="text-[8px] text-zinc-700">➔</span>
+                  <span className={`text-[10.5px] font-black ${p.diff > 0 ? 'text-emerald-400' : p.diff < 0 ? 'text-red-500' : 'text-zinc-400'}`}>
+                    {p.currentOvr}
+                  </span>
+                  {p.diff !== 0 && (
+                     <span className={`text-[8.5px] font-black ${p.diff > 0 ? 'text-emerald-400' : 'text-red-500'}`}>
+                       {p.diff > 0 ? `▲+${p.diff}` : `▼${p.diff}`}
+                     </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button 
+          onClick={onClose}
+          className="w-full max-w-xs py-5 bg-white text-black hover:bg-amber-500 rounded-3xl font-black uppercase tracking-widest text-[9.5px] hover:scale-102 active:scale-98 transition-all duration-150"
+        >
+          Secure Training & Start Regular Season
+        </button>
+      </div>
+    </motion.div>
   );
 };
 

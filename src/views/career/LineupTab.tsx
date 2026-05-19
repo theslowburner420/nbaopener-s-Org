@@ -25,15 +25,16 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
 }) => {
   const positions = ['PG', 'SG', 'SF', 'PF', 'C'] as const;
   
-  // Layout positions for court visualization (percent-based)
-  // Adjusted for standard half-court perspective
-  const courtLayout: Record<string, { top: string, left: string, label: string }> = {
-    'PG': { top: '20%', left: '50%', label: 'Point Guard' },
-    'SG': { top: '45%', left: '25%', label: 'Shooting Guard' },
-    'SF': { top: '45%', left: '75%', label: 'Small Forward' },
-    'PF': { top: '75%', left: '35%', label: 'Power Forward' },
-    'C': { top: '75%', left: '65%', label: 'Center' }
-  };
+  // Responsive layout state
+  const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const [sortMode, setSortMode] = React.useState<'OVR' | 'POS'>('OVR');
 
@@ -100,70 +101,58 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
               Starting Five
            </h4>
            
-           {/* MOBILE STACKED VIEW */}
-           <div className="md:hidden space-y-2">
-              {positions.map(pos => {
-                 const card = findCard(userTeam.lineup[pos]);
-                 return (
-                   <div 
-                    key={pos} 
-                    onClick={() => setLineupModalPos(pos)}
-                    className="flex items-center justify-between p-3 bg-zinc-900 border border-white/5 rounded-2xl active:bg-white/10"
-                   >
-                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-black rounded-lg border border-white/10 flex items-center justify-center overflow-hidden">
-                           {card ? (
-                             <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-full h-full object-cover" />
-                           ) : (
-                             <Plus className="text-zinc-700" size={16} />
-                           )}
-                        </div>
-                        <div>
-                           <p className="text-[10px] font-black text-white italic uppercase tracking-tighter">{card?.name || `ADD ${pos}`}</p>
-                           <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">{pos}</p>
-                        </div>
-                     </div>
-                     {card && <span className="text-xs font-black text-amber-500 italic tabular-nums">{card.stats.ovr} OVR</span>}
-                   </div>
-                 );
-              })}
-           </div>
-
-           {/* DESKTOP COURT VIEW */}
-           <div className="hidden md:flex relative w-full aspect-[16/10] bg-zinc-950 rounded-[4rem] border border-white/5 overflow-hidden shadow-2xl items-center justify-center p-4">
+           {/* MOBILE AND DESKTOP FLUID COURT VIEW */}
+           <div className="relative w-full aspect-[3/4] md:aspect-[16/10] bg-zinc-950 rounded-[3rem] md:rounded-[4rem] border border-white/5 overflow-hidden shadow-2xl flex items-center justify-center p-4">
               {/* COURT DECORATIONS */}
-              <div className="absolute inset-0 opacity-[0.05] pointer-events-none">
-                  <div className="absolute inset-4 border-2 border-white rounded-[2rem]" />
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] aspect-square rounded-full border-4 border-white -translate-y-1/2" />
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[30%] h-[40%] bg-white/5 border-2 border-white" />
-                  <div className="absolute top-[40%] left-1/2 -translate-x-1/2 w-[15%] aspect-square rounded-full border-2 border-white -translate-y-1/2" />
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[20%] aspect-square rounded-full border-2 border-white translate-y-1/2" />
+              <div className="absolute inset-0 opacity-[0.04] pointer-events-none">
+                <div className="absolute inset-4 border-2 border-white rounded-[2rem]" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] aspect-square rounded-full border-4 border-white -translate-y-1/2" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[40%] md:w-[30%] h-[45%] bg-white/5 border-2 border-white" />
+                <div className="absolute top-[40%] md:top-[45%] left-1/2 -translate-x-1/2 w-[15%] aspect-square rounded-full border-2 border-white -translate-y-1/2" />
               </div>
 
               {/* POSITIONS GRID */}
               <div className="relative w-full h-full">
                  {positions.map(pos => {
                     const card = findCard(userTeam.lineup[pos]);
-                    const layout = courtLayout[pos];
+                    
+                    const mobileCoords = {
+                      'PG': { top: '15%', left: '50%' },
+                      'SG': { top: '42%', left: '20%' },
+                      'SF': { top: '42%', left: '80%' },
+                      'PF': { top: '75%', left: '28%' },
+                      'C': { top: '75%', left: '72%' }
+                    };
+
+                    const desktopCoords = {
+                      'PG': { top: '20%', left: '50%' },
+                      'SG': { top: '45%', left: '25%' },
+                      'SF': { top: '45%', left: '75%' },
+                      'PF': { top: '72%', left: '35%' },
+                      'C': { top: '72%', left: '65%' }
+                    };
+
+                    const coords = isMobile ? mobileCoords[pos] : desktopCoords[pos];
+
                     return (
                        <motion.div 
                           key={pos}
-                          style={{ top: layout.top, left: layout.left }}
-                          className="absolute -translate-x-1/2 -translate-y-1/2 w-[12%] min-w-[110px] max-w-[200px] z-20 group"
+                          style={{ top: coords.top, left: coords.left }}
+                          className="absolute -translate-x-1/2 -translate-y-1/2 w-[26%] min-w-[75px] max-w-[110px] md:w-[12%] md:min-w-[110px] md:max-w-[200px] z-20 group"
                           whileHover={{ scale: 1.05, zIndex: 50 }}
                        >
                           <div onClick={() => setLineupModalPos(pos)} className="cursor-pointer relative">
                              {card ? (
                                 <>
                                    <CardItem card={card} isOwned={true} mode="mini" />
-                                   <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-black border border-white/20 whitespace-nowrap px-3 py-1 rounded shadow-2xl transform transition-transform group-hover:scale-110">
-                                      <span className="text-[10px] font-black text-white italic tracking-tighter uppercase">{pos}</span>
+                                   <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-black border border-white/20 whitespace-nowrap px-2.5 py-0.5 rounded shadow-2xl transform transition-transform group-hover:scale-110">
+                                      <span className="text-[8px] md:text-[10px] font-black text-white italic tracking-tighter uppercase">{pos}</span>
                                    </div>
                                 </>
                              ) : (
-                                <div className="aspect-[1/1.4] bg-white/5 rounded-2xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-3 hover:bg-white/10 transition-all">
-                                   <Plus className="text-zinc-600" />
-                                   <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest italic">{pos}</span>
+                                <div className="aspect-[1/1.4] bg-white/5 rounded-2xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-2 hover:bg-white/10 transition-all">
+                                   <Plus className="text-zinc-650 w-4 h-4 md:w-6 md:h-6" />
+                                   <span className="text-[8px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest italic">{pos}</span>
                                 </div>
                              )}
                           </div>
