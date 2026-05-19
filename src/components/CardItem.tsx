@@ -40,6 +40,12 @@ const getRarityClass = (rarity: Rarity) => {
     case 'coy': return 'card-coy';
     case 'rising_star': return 'card-rising-star';
     case 'allnba_1st': return 'card-allnba-1st';
+    case 'invincible': return 'card-invincible';
+    case 'galaxy': return 'card-galaxy';
+    case 'legend_sbc': return 'card-legend_sbc';
+    case 'icon_sbc': return 'card-icon_sbc';
+    case 'moments_sbc': return 'card-moments_sbc';
+    case 'future_star': return 'card-future_star';
     default: return '';
   }
 };
@@ -63,6 +69,12 @@ const RARITY_COLORS: Record<Rarity, string> = {
   'coy': '#FDE047', // Gold
   'rising_star': '#06B6D4', // Cyan
   'allnba_1st': '#F59E0B',   // Gold/Amber
+  'invincible': '#FFD700',
+  'galaxy': '#E94560',
+  'legend_sbc': '#F59E0B',
+  'icon_sbc': '#8B5CF6',
+  'moments_sbc': '#FFFFFF',
+  'future_star': '#10B981',
 };
 
 const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', onClick, showBack = false, isFocused = false, isNew = false, quantity = 0, dynamicOvr, dynamicStats }) => {
@@ -111,8 +123,8 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
         card.category === 'Finals MVP' ? 'card-fmvp' : 
         isMoment ? 'card-moment' : '';
         
-    const dark = isAward || card.category === 'Coach' || card.rarity === 'dpoy' || card.rarity === 'roty' || card.rarity === 'record' || card.rarity === 'logo' || card.rarity === 'arena' || card.rarity === 'draft2026' || card.rarity === 'scoring_champ' || card.rarity === 'hof' || card.rarity === 'coy' || card.rarity === 'rising_star' || card.rarity === 'allnba_1st' || isDynasty || isXFactor || card.category === 'NBA Record' || isRookie || isDraft2026 || isScoringChamp || isHOF || isCOY || isRisingStar || isAllNBA || card.category === 'All-Star MVP' || card.category === 'Finals MVP' || isMoment || card.rarity === 'franchise';
-    const holo = ['allstar', 'franchise', 'legend', 'dpoy', 'roty', 'record', 'rookie', 'logo', 'arena', 'draft2026', 'scoring_champ', 'hof', 'coy', 'rising_star', 'allnba_1st'].includes(card.rarity) || isDynasty || isXFactor || isMoment;
+    const dark = isAward || card.category === 'Coach' || card.rarity === 'dpoy' || card.rarity === 'roty' || card.rarity === 'record' || card.rarity === 'logo' || card.rarity === 'arena' || card.rarity === 'draft2026' || card.rarity === 'scoring_champ' || card.rarity === 'hof' || card.rarity === 'coy' || card.rarity === 'rising_star' || card.rarity === 'allnba_1st' || isDynasty || isXFactor || card.category === 'NBA Record' || isRookie || isDraft2026 || isScoringChamp || isHOF || isCOY || isRisingStar || isAllNBA || card.category === 'All-Star MVP' || card.category === 'Finals MVP' || isMoment || card.rarity === 'franchise' || ['invincible', 'galaxy', 'legend_sbc', 'icon_sbc', 'moments_sbc', 'future_star'].includes(card.rarity);
+    const holo = ['allstar', 'franchise', 'legend', 'dpoy', 'roty', 'record', 'rookie', 'logo', 'arena', 'draft2026', 'scoring_champ', 'hof', 'coy', 'rising_star', 'allnba_1st', 'invincible', 'galaxy', 'legend_sbc', 'icon_sbc', 'moments_sbc', 'future_star'].includes(card.rarity) || isDynasty || isXFactor || isMoment;
     const franchise = card.rarity === 'franchise';
     const legend = card.rarity === 'legend' || isDynasty || isMoment;
     const dpoy = card.rarity === 'dpoy';
@@ -263,7 +275,7 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
   };
 
   const renderQuantityBadge = () => {
-    if (!quantity || quantity <= 1) return null;
+    if (!quantity || quantity <= 0) return null;
     return (
       <div className={isMini 
         ? "absolute bottom-12 right-2 z-[60] bg-blue-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full shadow-lg border border-white/20 scale-90"
@@ -279,9 +291,14 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
       return (
         <div className="absolute top-0 left-0 right-0 p-1.5 z-50 flex justify-between items-start bg-gradient-to-b from-black/60 to-transparent">
           <div className="flex flex-col min-w-0">
-            <h3 className={`text-[9px] font-black uppercase italic leading-none drop-shadow-md truncate ${isMoment ? 'moment-title-text mini-moment-title-text' : (isDarkCard ? 'text-white' : 'text-zinc-900')}`}>
-              {isMoment && card.momentTitle ? card.momentTitle : card.name}
-            </h3>
+            <div className="flex items-center gap-1">
+              <h3 className={`text-[9px] font-black uppercase italic leading-none drop-shadow-md truncate ${isMoment ? 'moment-title-text mini-moment-title-text' : (isDarkCard ? 'text-white' : 'text-zinc-900')}`}>
+                {isMoment && card.momentTitle ? card.momentTitle : card.name}
+              </h3>
+              {card.isSpecialSBC && (
+                <span className="bg-amber-500 text-black text-[5px] font-black px-0.5 rounded-[1px] leading-tight">SBC</span>
+              )}
+            </div>
             <span className={`text-[6px] font-bold uppercase tracking-tighter truncate ${isDarkCard ? 'text-white/70 shadow-black' : 'text-zinc-700'}`}>
               {isMoment ? card.name : card.subtitle} • {card.age}Y
             </span>
@@ -301,9 +318,14 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
               {card.momentTitle}
             </h3>
           ) : (
-            <h3 className={`text-base md:text-lg font-black uppercase tracking-tighter leading-[0.9] drop-shadow-sm italic ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'} truncate`}>
-              {card.name}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className={`text-base md:text-lg font-black uppercase tracking-tighter leading-[0.9] drop-shadow-sm italic ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'} truncate`}>
+                {card.name}
+              </h3>
+              {card.isSpecialSBC && (
+                <span className="bg-amber-500 text-black text-[8px] font-black px-1.5 py-0.5 rounded shadow-lg">SBC</span>
+              )}
+            </div>
           )}
           <span className={`text-[7px] md:text-[9px] font-bold uppercase tracking-widest mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis ${isDarkCard ? 'card-text-secondary' : 'text-zinc-700'} ${isXFactor ? 'font-mono tracking-[0.2em] text-blue-300' : ''}`}>
             {isXFactor ? 'X-FACTOR' : isMoment ? card.name : card.subtitle}

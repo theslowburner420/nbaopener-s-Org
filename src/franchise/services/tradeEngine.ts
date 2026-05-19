@@ -11,176 +11,158 @@ export interface TradeOffer {
 }
 
 export const tradeEngine = {
-  SALARY_CAP: 136000000,
-  TRADE_DEADLINE_WEEK: 18,
+  SALARY_CAP: 180000000,
+  TRADE_DEADLINE_WEEK: 50, // Matches 82 games schedule better
 
-  // Evaluates a trade proposal by the user
-  evaluateUserTrade(state: FranchiseState, offer: TradeOffer): { accepted: boolean; reason: string } {
-    if (state.phase !== 'regular_season') {
-      return { accepted: false, reason: 'Trades can only be made during the Regular Season.' };
+  // 1 — TRADES INTELIGENTES ENTRE EQUIPOS
+  calculateTradeValue(playerId: string, state: FranchiseState): number {
+    const card = ALL_CARDS.find(c => c.id === playerId) || state.customCards?.find(c => c.id === playerId) || state.draftPool?.find(c => c.id === playerId);
+    const progress = state.playerProgress[playerId];
+    const team = Object.values(state.teams).find(t => t.roster.includes(playerId));
+    const contract = team?.contracts[playerId];
+
+    if (!card || !progress) return 0;
+
+    const ovr = progress.ovr || card.stats.ovr;
+    
+    // potential_bonus: bust=0, role_player=5, starter=15, star=30, franchise=50
+    const potential = (card.stats as any).draftPotential || 'starter';
+    const potBonus = potential === 'franchise' ? 50 : potential === 'star' ? 30 : potential === 'starter' ? 15 : potential === 'role_player' ? 5 : 0;
+    
+    // age_penalty: age < 25 → 0 | 25-29 → 5 | 30-33 → 15 | > 33 → 30
+    let agePenalty = 0;
+    if (progress.age >= 34) agePenalty = 30;
+    else if (progress.age >= 30) agePenalty = 15;
+    else if (progress.age >= 25) agePenalty = 5;
+
+    // salary_penalty: salary > 25M → 10 | salary > 35M → 25
+    let salaryPenalty = 0;
+    if (contract) {
+      if (contract.salary > 35000000) salaryPenalty = 25;
+      else if (contract.salary > 25000000) salaryPenalty = 10;
     }
 
-    if (state.week > this.TRADE_DEADLINE_WEEK) {
-      return { accepted: false, reason: 'The trade deadline has passed. No more trades allowed this season.' };
-    }
+    return (ovr * 2) + potBonus - agePenalty - salaryPenalty;
+  },
 
+  // Evaluates a trade proposal
+  evaluateUserTrade(state: FranchiseState, offer: TradeOffer): { accepted: boolean; reason: string; fairness: number } {
     const fromTeam = state.teams[offer.fromTeamId];
     const toTeam = state.teams[offer.toTeamId];
 
-    if (!fromTeam || !toTeam) return { accepted: false, reason: 'Invalid teams' };
+    if (!fromTeam || !toTeam) return { accepted: false, reason: 'Invalid teams', fairness: 0 };
 
-    // SALARY MATCHING LOGIC (NBA Style)
-    const getSalary = (ids: string[], team: TeamObject) => ids.reduce((sum, id) => {
-      const contract = team.contracts[id];
-      return sum + (contract?.salary || 0);
-    }, 0);
-
+    // Salary matching (relaxed for game fun but still exists)
+    const getSalary = (ids: string[], team: TeamObject) => ids.reduce((sum, id) => sum + (team.contracts[id]?.salary || 0), 0);
     const incomingSalary = getSalary(offer.requestedPlayerIds, toTeam);
     const outgoingSalary = getSalary(offer.offeredPlayerIds, fromTeam);
 
-    // If team is over cap, incoming salary must be within 125% + $100k of outgoing
-    if (fromTeam.payroll > this.SALARY_CAP) {
-       const limit = outgoingSalary * 1.25 + 100000;
-       if (incomingSalary > limit) {
-          return { accepted: false, reason: `Salary mismatch. Sending $${(outgoingSalary/1e6).toFixed(1)}M but taking back $${(incomingSalary/1e6).toFixed(1)}M. (Over cap trade limit: $${(limit/1e6).toFixed(1)}M)` };
-       }
+    if (fromTeam.payroll - outgoingSalary + incomingSalary > this.SALARY_CAP * 1.1) {
+       return { accepted: false, reason: 'This trade would put your team too far over the salary cap.', fairness: 0 };
     }
 
-    // Player Value Calculation: OVR * years_contract * age_factor
-    const getPlayerVal = (ids: string[], team: TeamObject) => ids.reduce((sum, id) => {
-      const card = ALL_CARDS.find(c => c.id === id) || state.customCards?.find(c => c.id === id);
-      const contract = team.contracts[id];
-      const progress = state.playerProgress[id] || { age: 25, potential: 80 };
-      
-      if (!card || !contract) return sum;
+    const offeredVal = offer.offeredPlayerIds.reduce((sum, id) => sum + this.calculateTradeValue(id, state), 0);
+    const requestedVal = offer.requestedPlayerIds.reduce((sum, id) => sum + this.calculateTradeValue(id, state), 0);
 
-      // Age factor: 20 -> 1.5, 25 -> 1.2, 30 -> 1.0, 35 -> 0.8
-      let ageFactor = 1.0;
-      if (progress.age <= 22) ageFactor = 1.5;
-      else if (progress.age <= 26) ageFactor = 1.3;
-      else if (progress.age <= 30) ageFactor = 1.1;
-      else if (progress.age <= 34) ageFactor = 0.9;
-      else ageFactor = 0.7;
+    const fairness = offeredVal === 0 ? 0 : offeredVal / Math.max(1, requestedVal);
 
-      // Potential bonus for young players
-      const potentialBonus = (progress.age < 25) ? (progress.potential - card.stats.ovr) * 2 : 0;
+    // CPU interest modifier based on team needs
+    const getPosImportance = (team: TeamObject, playerIds: string[]) => {
+       const rosterPosCount: Record<string, number> = {};
+       team.roster.forEach(id => {
+         const c = ALL_CARDS.find(c => c.id === id) || state.customCards?.find(c => c.id === id);
+         if (c) rosterPosCount[c.position] = (rosterPosCount[c.position] || 0) + 1;
+       });
 
-      const baseVal = (card.stats.ovr + potentialBonus) * contract.yearsRemaining * ageFactor;
-      return sum + baseVal;
-    }, 0);
-
-    // Pick Value Calculation
-    const getPickVal = (team: TeamObject, pickIds: string[] = []) => {
-      const winPct = team.wins / Math.max(1, team.wins + team.losses);
-      const isRebuilding = winPct < 0.4 || team.wins + team.losses < 10; // Value picks more early on or if losing
-      
-      return pickIds.reduce((sum, id) => {
-         const pick = team.draftPicks.find(p => p.id === id);
-         if (!pick) return sum;
-         
-         let val = pick.round === 1 ? 150 : 60;
-         if (isRebuilding) val *= 1.5; // Rebuilding teams value picks 50% more
-         
-         return sum + val;
-      }, 0);
-    };
-
-    const offeredVal = getPlayerVal(offer.offeredPlayerIds, fromTeam) + getPickVal(fromTeam, offer.offeredPickIds);
-    const requestedVal = getPlayerVal(offer.requestedPlayerIds, toTeam) + getPickVal(toTeam, offer.requestedPickIds);
-
-    if (offeredVal === 0 && requestedVal === 0) return { accepted: false, reason: 'Empty trade' };
-
-    // TEAM INTEREST MODIFIER
-    // Evaluate if the NPC team actually needs what's offered
-    const npcTeamWeight = (team: TeamObject, playerIds: string[]) => {
-       const findLocalCard = (id: string) => ALL_CARDS.find(c => c.id === id) || state.customCards?.find(c => c.id === id) || state.draftPool?.find(c => c.id === id);
-       const rosterPositions = team.roster.map(id => findLocalCard(id)?.position.charAt(0));
-       return playerIds.reduce((sum, id) => {
-          const card = findLocalCard(id);
-          if (!card) return sum;
-          const pos = card.position.charAt(0);
-          const count = rosterPositions.filter(p => p === pos).length;
-          // If they have 4+ players at that position, they want it less
-          const weight = count >= 4 ? 0.7 : count === 3 ? 0.9 : 1.1;
-          return sum * weight;
+       return playerIds.reduce((acc, id) => {
+          const c = ALL_CARDS.find(c => c.id === id) || state.customCards?.find(c => c.id === id);
+          if (!c) return acc;
+          const count = rosterPosCount[c.position] || 0;
+          if (count <= 1) return acc * 1.3; // High need
+          if (count >= 4) return acc * 0.7; // Low need
+          return acc;
        }, 1.0);
     };
 
-    const weightedOfferedVal = offeredVal * npcTeamWeight(toTeam, offer.offeredPlayerIds);
+    const weightedFairness = fairness * getPosImportance(toTeam, offer.offeredPlayerIds);
 
-    const deficit = (requestedVal - weightedOfferedVal) / Math.max(1, requestedVal);
-
-    // AI DECISION LOGIC
-    if (deficit <= 0) {
-      return { accepted: true, reason: 'The front office likes this deal. Trade accepted!' };
+    if (weightedFairness >= 0.9) {
+      return { accepted: true, reason: 'TRADE ACCEPTED: The front office agrees to the deal!', fairness };
+    } else if (weightedFairness >= 0.7) {
+      return { accepted: false, reason: 'OFFER DECLINED: The value is close, but we need more to pull the trigger.', fairness };
+    } else {
+      return { accepted: false, reason: 'OFFER REJECTED: This is an unfair proposal and we are not interested.', fairness };
     }
-
-    if (deficit < 0.08) {
-      // Small deficit: Check positional needs
-      const cardA = ALL_CARDS.find(c => c.id === offer.requestedPlayerIds[0]) || state.customCards?.find(c => c.id === offer.requestedPlayerIds[0]) || state.draftPool?.find(c => c.id === offer.requestedPlayerIds[0]);
-      const targetPos = cardA?.position.charAt(0);
-      const hasReplacement = toTeam.roster.some(id => 
-        !offer.requestedPlayerIds.includes(id) && 
-        ((ALL_CARDS.find(c => c.id === id) || state.customCards?.find(c => c.id === id))?.position.includes(targetPos || ''))
-      );
-
-      if (hasReplacement) {
-        return { accepted: true, reason: 'It was a tough call, but we accept. Trade accepted!' };
-      }
-      return { accepted: false, reason: `The ${toTeam.name} feel they can't afford to lose this positional depth right now without a better return.` };
-    }
-
-    if (deficit >= 0.08 && deficit <= 0.20) {
-       return { 
-         accepted: false, 
-         reason: `NOT ENOUGH VALUE: The ${toTeam.name} are interested but want more. Try adding a draft pick or a young prospect to even the value.` 
-       };
-    }
-
-    // Heavy deficit
-    const topRequested = ALL_CARDS.find(c => c.id === offer.requestedPlayerIds[0]) || state.customCards?.find(c => c.id === offer.requestedPlayerIds[0]) || state.draftPool?.find(c => c.id === offer.requestedPlayerIds[0]);
-    if (topRequested && topRequested.stats.ovr > 90) {
-        return { accepted: false, reason: `UNTOUCHABLE: The ${toTeam.name} view ${topRequested.name} as a cornerstone and won't move him for this package.` };
-    }
-
-    return { 
-      accepted: false, 
-      reason: `Proposal Rejected: The value difference is too great for the ${toTeam.name} to consider (${Math.round(requestedVal)} vs ${Math.round(weightedOfferedVal)} points).` 
-    };
   },
 
-  // Simulates 1-2 trades between CPU teams to keep the league dynamic
+  // CPU proposes a trade to the user
+  generateCPUTradeProposal(state: FranchiseState): TradeOffer | null {
+    const userTeam = state.teams[state.userTeamId];
+    const cpuTeamIds = Object.keys(state.teams).filter(id => id !== state.userTeamId);
+    const cpuId = cpuTeamIds[Math.floor(Math.random() * cpuTeamIds.length)];
+    const cpuTeam = state.teams[cpuId];
+
+    if (cpuTeam.roster.length < 8 || userTeam.roster.length < 6) return null;
+
+    // CPU picks one of its players to offer
+    const cpuOfferId = cpuTeam.roster[Math.floor(Math.random() * cpuTeam.roster.length)];
+    const cpuVal = this.calculateTradeValue(cpuOfferId, state);
+
+    // CPU picks a user player it wants (not the franchise player)
+    const userRosterSorted = [...userTeam.roster].sort((a,b) => this.calculateTradeValue(b, state) - this.calculateTradeValue(a, state));
+    const franchisePlayerId = userRosterSorted[0];
+    const targetableUsers = userTeam.roster.filter(id => id !== franchisePlayerId);
+    
+    if (targetableUsers.length === 0) return null;
+    const userTargetId = targetableUsers[Math.floor(Math.random() * targetableUsers.length)];
+    const userVal = this.calculateTradeValue(userTargetId, state);
+
+    // Only propose if CPU's offer is at least 85% of what it's asking for
+    if (cpuVal >= userVal * 0.85) {
+      return {
+        fromTeamId: cpuId,
+        toTeamId: state.userTeamId,
+        offeredPlayerIds: [cpuOfferId],
+        requestedPlayerIds: [userTargetId]
+      };
+    }
+
+    return null;
+  },
+
+  // Simulates logical trades between CPU teams
   processWeeklyCPUTrades(state: FranchiseState): string[] {
     const logs: string[] = [];
-    const teamIds = Object.keys(state.teams).filter(id => id !== state.userTeamId);
+    const cpuIds = Object.keys(state.teams);
     
-    // Attempt 2 random trades per week
-    for (let i = 0; i < 2; i++) {
-      const teamAIdx = Math.floor(Math.random() * teamIds.length);
-      const teamBIdx = Math.floor(Math.random() * teamIds.length);
-      if (teamAIdx === teamBIdx) continue;
+    // Only mid-season (around game 40)
+    if (state.currentGameIndex !== 40) return [];
 
-      const teamA = state.teams[teamIds[teamAIdx]];
-      const teamB = state.teams[teamIds[teamBIdx]];
+    for (let i = 0; i < 3; i++) {
+      const idA = cpuIds[Math.floor(Math.random() * cpuIds.length)];
+      const idB = cpuIds[Math.floor(Math.random() * cpuIds.length)];
+      if (idA === idB) continue;
 
-      // Pick a random bench player from each to swap
-      if (teamA.roster.length > 8 && teamB.roster.length > 8) {
-        const pAId = teamA.roster[Math.floor(Math.random() * teamA.roster.length)];
-        const pBId = teamB.roster[Math.floor(Math.random() * teamB.roster.length)];
+      const teamA = state.teams[idA];
+      const teamB = state.teams[idB];
+      
+      const pAId = teamA.roster[Math.floor(Math.random() * teamA.roster.length)];
+      const pBId = teamB.roster[Math.floor(Math.random() * teamB.roster.length)];
+      
+      const valA = this.calculateTradeValue(pAId, state);
+      const valB = this.calculateTradeValue(pBId, state);
 
-        // Only swap if values are somewhat similar (within 10 OVR)
-        const findLocalCard = (id: string) => ALL_CARDS.find(c => c.id === id) || state.customCards?.find(c => c.id === id) || state.draftPool?.find(c => c.id === id);
-        const cardA = findLocalCard(pAId);
-        const cardB = findLocalCard(pBId);
-
-        if (cardA && cardB && Math.abs(cardA.stats.ovr - cardB.stats.ovr) < 8) {
-           this.executeTrade(state, {
-             fromTeamId: teamA.teamId,
-             toTeamId: teamB.teamId,
-             offeredPlayerIds: [pAId],
-             requestedPlayerIds: [pBId]
-           });
-           logs.push(`The ${teamA.name} traded ${cardA.name} to the ${teamB.name} for ${cardB.name}`);
+      if (Math.abs(valA - valB) < 15) {
+        const cardA = ALL_CARDS.find(c => c.id === pAId);
+        const cardB = ALL_CARDS.find(c => c.id === pBId);
+        if (cardA && cardB) {
+          this.executeTrade(state, {
+            fromTeamId: idA,
+            toTeamId: idB,
+            offeredPlayerIds: [pAId],
+            requestedPlayerIds: [pBId]
+          });
+          logs.push(`TRADE: ${cardA.name} to ${teamB.abbreviation} for ${cardB.name}`);
         }
       }
     }

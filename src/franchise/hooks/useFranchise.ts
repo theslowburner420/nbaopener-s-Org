@@ -27,12 +27,9 @@ export function useFranchise() {
       if (!savedState.awards) savedState.awards = {};
       if (!savedState.trophyCase) savedState.trophyCase = [];
       if (!savedState.playoffSeries) savedState.playoffSeries = [];
-      if (!savedState.teamHistory) savedState.teamHistory = [];
-      if (!savedState.seasonHighs) savedState.seasonHighs = {};
-      if (!savedState.freeAgentPool) savedState.freeAgentPool = [];
       if (!savedState.notifications) savedState.notifications = [];
       
-      setState(savedState);
+      setState(savedState as FranchiseState);
     }
     setIsLoading(false);
   }, []);

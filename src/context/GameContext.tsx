@@ -76,6 +76,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       inventoryPacks: normalizePacks(initialGuestState?.inventoryPacks ?? []),
       isPremium: initialGuestState?.isPremium ?? false,
       franchise: initialGuestState?.franchise ?? undefined,
+      completedSbcs: initialGuestState?.completedSbcs ?? [],
     };
   });
 
@@ -115,6 +116,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         inventoryPacks: state.inventoryPacks,
         isPremium: state.isPremium,
         franchise: state.franchise,
+        completedSbcs: state.completedSbcs,
       };
       localStorage.setItem('GUEST_PROGRESS', JSON.stringify(guestData));
     } else {
@@ -156,6 +158,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         unlocked_achievements: Array.isArray(newState.unlockedAchievements) ? newState.unlockedAchievements : [],
         claimed_achievements: Array.isArray(newState.claimedAchievements) ? newState.claimedAchievements : [],
         inventory_packs: Array.isArray(newState.inventoryPacks) ? newState.inventoryPacks : [],
+        completed_sbcs: Array.isArray(newState.completedSbcs) ? newState.completedSbcs : [],
         ads_disabled: !!newState.isPremium,
         franchise_state: newState.franchise ? JSON.stringify(newState.franchise) : null,
         last_claimed_date: newState.lastClaimedDate,
@@ -169,6 +172,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         unlockedAchievements: payload.unlocked_achievements,
         claimedAchievements: payload.claimed_achievements,
         inventoryPacks: payload.inventory_packs,
+        completedSbcs: payload.completed_sbcs,
         isPremium: payload.ads_disabled,
         last_claimed_date: payload.last_claimed_date,
         claimed_days: payload.claimed_days,
@@ -359,6 +363,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         inventoryPacks: currentLiveState.inventoryPacks.length > 0 ? currentLiveState.inventoryPacks : (guestData?.inventoryPacks || []),
         isPremium: currentLiveState.isPremium || guestData?.isPremium || false,
         franchise: currentLiveState.franchise || guestData?.franchise || backupData?.franchise,
+        completedSbcs: Array.from(new Set([...(currentLiveState.completedSbcs || []), ...(guestData?.completedSbcs || [])])),
       };
 
       // 1. Fetch Cloud Data
@@ -407,6 +412,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           unlocked_achievements: Array.isArray(cloudProfile.unlocked_achievements) ? cloudProfile.unlocked_achievements : [],
           claimed_achievements: Array.isArray(cloudProfile.claimed_achievements) ? cloudProfile.claimed_achievements : [],
           inventory_packs: Array.isArray(cloudProfile.inventory_packs) ? cloudProfile.inventory_packs : [],
+          completed_sbcs: Array.isArray(cloudProfile.completed_sbcs) ? cloudProfile.completed_sbcs : [],
           ads_disabled: !!cloudProfile.ads_disabled,
           franchise: cloudProfile.franchise_state ? JSON.parse(cloudProfile.franchise_state) : localProgress.franchise,
         };
@@ -429,6 +435,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           unlockedAchievements: isInitialSyncDoneRef.current ? pc.unlocked_achievements : mergeArrays(pc.unlocked_achievements, localProgress.unlockedAchievements),
           claimedAchievements: isInitialSyncDoneRef.current ? pc.claimed_achievements : mergeArrays(pc.claimed_achievements, localProgress.claimedAchievements),
           inventoryPacks: normalizePacks(isInitialSyncDoneRef.current ? pc.inventory_packs : (pc.inventory_packs.length > localProgress.inventoryPacks.length ? pc.inventory_packs : localProgress.inventoryPacks)),
+          completedSbcs: isInitialSyncDoneRef.current ? pc.completed_sbcs : Array.from(new Set([...(pc.completed_sbcs || []), ...(localProgress.completedSbcs || [])])),
           isPremium: pc.ads_disabled || localProgress.isPremium,
           franchise: isInitialSyncDoneRef.current ? pc.franchise : (pc.franchise || localProgress.franchise),
         };
@@ -476,6 +483,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
               coins: updated.coins !== undefined ? Number(updated.coins) : prev.coins,
               collection: migratedCollection,
               inventoryPacks: updated.inventory_packs || prev.inventoryPacks,
+              completedSbcs: updated.completed_sbcs || prev.completedSbcs,
               isPremium: updated.ads_disabled !== undefined ? !!updated.ads_disabled : prev.isPremium,
               franchise: updated.franchise_state ? JSON.parse(updated.franchise_state) : prev.franchise,
             }));
@@ -561,6 +569,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     unlockedAchievements: state.unlockedAchievements,
     claimedAchievements: state.claimedAchievements,
     inventoryPacks: state.inventoryPacks,
+    completedSbcs: state.completedSbcs,
     isPremium: state.isPremium,
     franchise: state.franchise,
     user: state.user?.id

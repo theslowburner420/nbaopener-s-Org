@@ -57,125 +57,168 @@ function calculateTeamPower(team: TeamObject, state: FranchiseState, isHome: boo
 }
 
 function generateBoxScore(team: TeamObject, totalPoints: number, state: FranchiseState, teamPlusMinus: number): BoxScoreEntry[] {
-  const entries: BoxScoreEntry[] = [];
-  const seenIds = new Set<string>();
-  const players = [
-      ...[team.lineup.PG, team.lineup.SG, team.lineup.SF, team.lineup.PF, team.lineup.C].map(id => ({ id, role: 'starter' })),
-      ...team.lineup.bench.map(id => ({ id, role: 'bench' }))
-  ].filter(p => {
-      if (!p.id || seenIds.has(p.id)) return false;
-      seenIds.add(p.id);
-      return true;
-  });
+  try {
+    const entries: BoxScoreEntry[] = [];
+    const seenIds = new Set<string>();
+    
+    // 1 — Build roster with filler for simulation reliability
+    const players = [
+        ...[team.lineup.PG, team.lineup.SG, team.lineup.SF, team.lineup.PF, team.lineup.C].map(id => ({ id, role: 'starter' })),
+        ...team.lineup.bench.map(id => ({ id, role: 'bench' }))
+    ].filter(p => {
+        if (!p.id || seenIds.has(p.id)) return false;
+        seenIds.add(p.id);
+        return true;
+    });
 
-  const getDistributionFactor = () => {
-    const r = Math.random();
-    if (r < 0.60) return 0.75 + Math.random() * 0.50;
-    if (r < 0.85) return Math.random() > 0.5 ? (0.50 + Math.random() * 0.25) : (1.25 + Math.random() * 0.35);
-    if (r < 0.95) return Math.random() > 0.5 ? (0.30 + Math.random() * 0.20) : (1.60 + Math.random() * 0.40);
-    return 2.0 + Math.random() * 0.50;
-  };
+    const getDistributionFactor = () => {
+      const r = Math.random();
+      if (r < 0.60) return 0.75 + Math.random() * 0.50;
+      if (r < 0.85) return Math.random() > 0.5 ? (0.50 + Math.random() * 0.25) : (1.25 + Math.random() * 0.35);
+      if (r < 0.95) return Math.random() > 0.5 ? (0.30 + Math.random() * 0.20) : (1.60 + Math.random() * 0.40);
+      return 2.0 + Math.random() * 0.50;
+    };
 
-  const playerData = players.map(p => {
-    const card = findCard(p.id!, state);
-    const mins = p.role === 'starter' ? 28 + Math.floor(Math.random() * 11) : 10 + Math.floor(Math.random() * 13);
-    return { id: p.id!, role: p.role, card, mins };
-  });
+    const playerData = players.map(p => {
+      const card = findCard(p.id!, state);
+      const mins = p.role === 'starter' ? 28 + Math.floor(Math.random() * 11) : 10 + Math.floor(Math.random() * 13);
+      return { id: p.id!, role: p.role, card, mins };
+    });
 
-  const rawScores = playerData.map(p => {
-     if (!p.card) return 0;
-     const progress = state.playerProgress[p.id!] || { form: 1.0, ovr: p.card.stats.ovr };
-     const currentOvr = progress.ovr || p.card.stats.ovr;
-     const ovrMod = currentOvr / p.card.stats.ovr;
-     
-     const basePPG = p.card.stats.points;
-     const raw = (basePPG / 34) * p.mins * getDistributionFactor() * ovrMod * progress.form;
-     return raw;
-  });
+    const rawScores = playerData.map(p => {
+       const progress = state.playerProgress[p.id!] || { form: 1.0, ovr: p.card?.stats.ovr || 60 };
+       const currentOvr = progress.ovr || p.card?.stats.ovr || 60;
+       const baseOvr = p.card?.stats.ovr || 60;
+       const ovrMod = currentOvr / baseOvr;
+       
+       const basePPG = p.card?.stats.points || (currentOvr > 85 ? 25 : currentOvr > 75 ? 18 : currentOvr > 65 ? 10 : 5);
+       const raw = (basePPG / 34) * p.mins * getDistributionFactor() * ovrMod * progress.form;
+       return raw;
+    });
 
-  const currentTotalRaw = rawScores.reduce((a, b) => a + b, 0);
-  const normalizationFactor = totalPoints / (currentTotalRaw || 1);
+    const currentTotalRaw = rawScores.reduce((a, b) => a + b, 0);
+    const normalizationFactor = totalPoints / (currentTotalRaw || 1);
 
-  playerData.forEach((p, idx) => {
-      if (!p.card) return;
-      const progress = state.playerProgress[p.card.id] || { form: 1.0, ovr: p.card.stats.ovr };
-      const currentOvr = progress.ovr || p.card.stats.ovr;
-      const ovrMod = currentOvr / p.card.stats.ovr;
-      
-      let pts = Math.round(rawScores[idx] * normalizationFactor);
-      
-      const rebFactor = getDistributionFactor();
-      const astFactor = getDistributionFactor();
+    playerData.forEach((p, idx) => {
+        const progress = state.playerProgress[p.id] || { form: 1.0, ovr: p.card?.stats.ovr || 60 };
+        const currentOvr = progress.ovr || p.card?.stats.ovr || 60;
+        const baseOvr = p.card?.stats.ovr || 60;
+        const ovrMod = currentOvr / baseOvr;
+        
+        let pts = Math.round(rawScores[idx] * normalizationFactor);
+        
+        const rebFactor = getDistributionFactor();
+        const astFactor = getDistributionFactor();
 
-      const reb = Math.max(0, Math.round((p.card.stats.rebounds / 34) * p.mins * rebFactor * ovrMod));
-      const ast = Math.max(0, Math.round((p.card.stats.assists / 34) * p.mins * astFactor * ovrMod));
-      
-      const stl = Math.random() > (0.6 / progress.form) ? Math.floor(Math.random() * 3) + (p.role === 'starter' ? 1 : 0) : 0;
-      const blk = Math.random() > (0.7 / progress.form) ? Math.floor(Math.random() * 3) + (p.card.position === 'C' ? 1 : 0) : 0;
-      
-      const individualPM = Math.round((teamPlusMinus * (p.mins / 48)) + (Math.random() * 10 - 5));
+        const baseReb = p.card?.stats.rebounds || (currentOvr > 80 ? 8 : 4);
+        const baseAst = p.card?.stats.assists || (currentOvr > 80 ? 7 : 3);
 
-      entries.push({
-          playerId: p.card.id,
-          name: p.card.name,
-          points: pts,
-          rebounds: reb,
-          assists: ast,
-          steals: stl,
-          blocks: blk,
-          plusMinus: individualPM,
-          minutes: p.mins
-      });
-  });
+        const reb = Math.max(0, Math.round((baseReb / 34) * p.mins * rebFactor * ovrMod));
+        const ast = Math.max(0, Math.round((baseAst / 34) * p.mins * astFactor * ovrMod));
+        
+        const stl = Math.random() > (0.6 / progress.form) ? Math.floor(Math.random() * 3) + (p.role === 'starter' ? 1 : 0) : 0;
+        const blk = Math.random() > (0.7 / progress.form) ? Math.floor(Math.random() * 3) + (p.card?.position === 'C' ? 1 : 0) : 0;
+        
+        const individualPM = Math.round((teamPlusMinus * (p.mins / 48)) + (Math.random() * 10 - 5));
 
-  return entries;
+        entries.push({
+            playerId: p.id,
+            name: p.card?.name || `Player ${idx + 1}`,
+            points: pts,
+            rebounds: reb,
+            assists: ast,
+            steals: stl,
+            blocks: blk,
+            plusMinus: individualPM,
+            minutes: p.mins
+        });
+    });
+
+    return entries;
+  } catch (error) {
+    console.error("[BOX SCORE ERROR] Fallback generated:", error);
+    return [];
+  }
 }
 
 export const simulationEngine = {
   simulateMatch(homeTeam: TeamObject, awayTeam: TeamObject, state: FranchiseState): MatchResult {
-    const homePower = calculateTeamPower(homeTeam, state, true);
-    const awayPower = calculateTeamPower(awayTeam, state, false);
-
-    let homeScore = 0;
-    let awayScore = 0;
-    const homePeriods: number[] = [];
-    const awayPeriods: number[] = [];
-
-    let momentum = 1.0;
-    for (let q = 1; q <= 4; q++) {
-        const qHome = Math.round((homePower / 99) * 28 + (Math.random() * 8 - 4)) * momentum;
-        const qAway = Math.round((awayPower / 99) * 28 + (Math.random() * 8 - 4)) * (2 - momentum);
-        
-        const hQ = Math.max(15, Math.round(qHome));
-        const aQ = Math.max(15, Math.round(qAway));
-
-        homePeriods.push(hQ);
-        awayPeriods.push(aQ);
-        homeScore += hQ;
-        awayScore += aQ;
-
-        const diff = homeScore - awayScore;
-        if (diff > 10) momentum -= 0.05;
-        if (diff < -10) momentum += 0.05;
-    }
-
-    if (homeScore === awayScore) {
-        const ot = Math.random() > 0.5;
-        if (ot) homeScore += 2; else awayScore += 2;
-    }
-
-    const winnerId = homeScore > awayScore ? homeTeam.teamId : awayTeam.teamId;
-    const plusMinusDiff = homeScore - awayScore;
-
-    return {
-        winnerId,
-        score: { home: homeScore, away: awayScore },
-        periods: { home: homePeriods, away: awayPeriods },
-        boxScore: {
-            home: generateBoxScore(homeTeam, homeScore, state, plusMinusDiff),
-            away: generateBoxScore(awayTeam, awayScore, state, -plusMinusDiff)
+    try {
+      // 1 — Ensure minimum roster capacity (60 OVR fictional players)
+      const ensureRoster = (team: TeamObject) => {
+        const roster = [...team.roster];
+        while (roster.length < 5) {
+          const fakeId = `fake_${team.teamId}_${roster.length}`;
+          roster.push(fakeId);
+          // Insert minimal progress if not exists
+          if (!state.playerProgress[fakeId]) {
+            state.playerProgress[fakeId] = { age: 25, potential: 60, form: 1.0, ovr: 60 };
+          }
         }
-    };
+        return { ...team, roster };
+      };
+
+      const hTeam = ensureRoster(homeTeam);
+      const aTeam = ensureRoster(awayTeam);
+
+      const homePower = calculateTeamPower(hTeam, state, true);
+      const awayPower = calculateTeamPower(aTeam, state, false);
+
+      let homeScore = 0;
+      let awayScore = 0;
+      const homePeriods: number[] = [];
+      const awayPeriods: number[] = [];
+
+      let momentum = 1.0;
+      for (let q = 1; q <= 4; q++) {
+          const qHome = Math.round((homePower / 99) * 28 + (Math.random() * 8 - 4)) * momentum;
+          const qAway = Math.round((awayPower / 99) * 28 + (Math.random() * 8 - 4)) * (2 - momentum);
+          
+          const hQ = Math.max(15, Math.round(qHome));
+          const aQ = Math.max(15, Math.round(qAway));
+
+          homePeriods.push(hQ);
+          awayPeriods.push(aQ);
+          homeScore += hQ;
+          awayScore += aQ;
+
+          const diff = homeScore - awayScore;
+          if (diff > 10) momentum -= 0.05;
+          if (diff < -10) momentum += 0.05;
+      }
+
+      if (homeScore === awayScore) {
+          const ot = Math.random() > 0.5;
+          if (ot) homeScore += 2; else awayScore += 2;
+      }
+
+      const winnerId = homeScore > awayScore ? hTeam.teamId : aTeam.teamId;
+      const plusMinusDiff = homeScore - awayScore;
+
+      return {
+          winnerId,
+          score: { home: homeScore, away: awayScore },
+          periods: { home: homePeriods, away: awayPeriods },
+          boxScore: {
+              home: generateBoxScore(hTeam, homeScore, state, plusMinusDiff),
+              away: generateBoxScore(aTeam, awayScore, state, -plusMinusDiff)
+          }
+      };
+    } catch (error) {
+      console.error("[SIMULATION ERROR] Fallback MatchResult triggered:", error);
+      // Absolute failsafe fallback
+      const hScore = 100 + Math.floor(Math.random() * 15);
+      const aScore = 100 + Math.floor(Math.random() * 15);
+      return {
+        winnerId: hScore >= aScore ? homeTeam.teamId : awayTeam.teamId,
+        score: { home: hScore, away: aScore },
+        periods: { home: [25, 25, 25, hScore - 75], away: [25, 25, 25, aScore - 75] },
+        boxScore: {
+          home: generateBoxScore(homeTeam, hScore, state, hScore - aScore),
+          away: generateBoxScore(awayTeam, aScore, state, aScore - hScore)
+        }
+      };
+    }
   },
 
   findCard,

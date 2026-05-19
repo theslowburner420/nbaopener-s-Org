@@ -180,14 +180,26 @@ export function calculateAwards(state: FranchiseState) {
 
   // Add trophies to trophyCase if user team players won
   const userTeamPlayers = new Set(userTeam.roster);
-  if (awards.mvp && userTeamPlayers.has(awards.mvp)) {
+  const awardExists = (type: any, pid: any) => state.trophyCase.some(t => t.type === type && t.season === state.season && t.playerId === pid);
+
+  if (awards.mvp && userTeamPlayers.has(awards.mvp) && !awardExists('MVP', awards.mvp)) {
       state.trophyCase.push({ type: 'MVP', season: state.season, playerId: awards.mvp, label: 'League MVP' });
   }
-  if (awards.dpoy && userTeamPlayers.has(awards.dpoy)) {
+  if (awards.dpoy && userTeamPlayers.has(awards.dpoy) && !awardExists('DPOY', awards.dpoy)) {
       state.trophyCase.push({ type: 'DPOY', season: state.season, playerId: awards.dpoy, label: 'Defensive Player of the Year' });
   }
-  if (awards.roy && userTeamPlayers.has(awards.roy)) {
+  if (awards.roy && userTeamPlayers.has(awards.roy) && !awardExists('ROY', awards.roy)) {
       state.trophyCase.push({ type: 'ROY', season: state.season, playerId: awards.roy, label: 'Rookie of the Year' });
+  }
+  if (awards.mip && userTeamPlayers.has(awards.mip) && !awardExists('RECORD', awards.mip)) {
+      state.trophyCase.push({ type: 'RECORD', season: state.season, playerId: awards.mip, label: 'Most Improved Player' });
+  }
+  if (awards.allNba) {
+      awards.allNba.forEach((id: string) => {
+          if (userTeamPlayers.has(id) && !awardExists('ALL_NBA', id)) {
+              state.trophyCase.push({ type: 'ALL_NBA', season: state.season, playerId: id, label: 'All-NBA First Team' });
+          }
+      });
   }
 }
 
@@ -315,6 +327,23 @@ export function applyProgression(state: FranchiseState) {
     const team = Object.values(state.teams).find(t => t.roster.includes(pid));
     
     if (team) {
+      // 3 — HALL OF FAME
+      if (team.isHuman) {
+          const stats = state.stats.career[pid] || { points: 0, rebounds: 0, assists: 0, steals: 0, blocks: 0, plusMinus: 0, gamesPlayed: 0, fgPct: 0 };
+          const awardsWon = state.trophyCase.filter(t => t.playerId === pid).map(t => t.type);
+          const seasonsPlayed = Object.values(state.awards).filter(a => a.mvp === pid || a.roy === pid || (a.allNba || []).includes(pid)).length; // Simplified check
+          
+          state.hallOfFame.push({
+             id: pid,
+             name: card?.name || 'Retired Legend',
+             card: card,
+             stats: stats as any,
+             seasonsPlayed: seasonsPlayed + 1,
+             awards: awardsWon,
+             lastTeam: team.name
+          });
+      }
+
       team.roster = team.roster.filter(id => id !== pid);
       delete team.contracts[pid];
       (['PG', 'SG', 'SF', 'PF', 'C'] as const).forEach(pos => {
@@ -624,20 +653,35 @@ export function advanceSeason(state: FranchiseState): FranchiseState {
   console.log(`[FRANCHISE] Starting New Season setup (Phase: new_season)`);
   
   const userTeam = newState.teams[newState.userTeamId];
+  
+  // 3 — HISTORIAL DE CAMPEONES Y TROFEOS
+  const awards = (state.awards[state.season] || {}) as any;
+  
+  // Get playoff result for user
+  let playoffResult = 'Missed Playoffs';
+  const series = state.playoffSeries.filter(s => s.team1Id === state.userTeamId || s.team2Id === state.userTeamId);
+  if (series.length > 0) {
+      const maxRound = Math.max(...series.map(s => s.round));
+      const latestSeries = series.find(s => s.round === maxRound);
+      const isWinner = latestSeries?.winnerId === state.userTeamId;
+      
+      if (maxRound === 1) playoffResult = isWinner ? 'Conference Semifinals' : 'First Round';
+      if (maxRound === 2) playoffResult = isWinner ? 'Conference Finals' : 'Conference Semifinals';
+      if (maxRound === 3) playoffResult = isWinner ? '🏆 CHAMPION' : 'Runner-Up';
+  }
 
-  // 1. ARCHIVE TEAM HISTORY
-  const totalPoints = Object.keys(newState.stats.seasonal)
-    .filter(id => userTeam.roster.includes(id))
-    .reduce((acc, id) => acc + (newState.stats.seasonal[id]?.points || 0), 0);
-  const totalGames = userTeam.wins + userTeam.losses;
-  const ppgResult = totalGames > 0 ? totalPoints / totalGames : 0;
-
-  newState.teamHistory.push({
-    season: state.season,
-    record: `${userTeam.wins}-${userTeam.losses}`,
-    ppg: parseFloat(ppgResult.toFixed(1)),
-    awards: newState.trophyCase.filter(t => t.season === state.season).map(t => t.type),
-    champion: state.championId ? (state.teams[state.championId]?.name || 'N/A') : 'N/A'
+  newState.seasonHistory.push({
+    seasonYear: state.season,
+    wins: userTeam.wins,
+    losses: userTeam.losses,
+    playoffResult,
+    champion: state.championId ? (state.teams[state.championId]?.name || 'N/A') : 'N/A',
+    mvp: awards.mvp,
+    dpoy: awards.dpoy,
+    roy: awards.roy,
+    mip: awards.mip,
+    allNba: awards.allNba || [],
+    finalsMvp: awards.finalsMvp
   });
 
   // 2. APPLY PROGRESSION & AGING
@@ -657,6 +701,13 @@ export function advanceSeason(state: FranchiseState): FranchiseState {
         c.gamesPlayed += s.gamesPlayed;
      }
   });
+
+  // Hall of Fame retired user players
+  const allTeamPlayers = Object.values(state.teams).flatMap(t => t.roster);
+  const userRosterIds = new Set(userTeam.roster);
+
+  // Retirement Logic in applyProgression already identifies retired players
+  // but we need to capture them for Hall of Fame if they were ours.
   newState.stats.seasonal = {};
   if (newState.stats.playoffs) newState.stats.playoffs = {};
   newState.seasonHighs = {};
@@ -666,6 +717,10 @@ export function advanceSeason(state: FranchiseState): FranchiseState {
     Object.keys(team.contracts).forEach(pid => {
       const contract = team.contracts[pid];
       contract.yearsRemaining -= 1;
+      
+      // Update extendability
+      contract.canExtend = contract.yearsRemaining <= 2;
+
       if (contract.yearsRemaining <= 0) {
         // Contract expired - move to FA
         if (!newState.freeAgentPool.includes(pid)) newState.freeAgentPool.push(pid);
@@ -688,17 +743,25 @@ export function advanceSeason(state: FranchiseState): FranchiseState {
   newState.currentGameIndex = 0;
 
   // 6. SEASON INCREMENT
+  const previousPhase = newState.phase;
   newState.season += 1;
   newState.week = 1;
   newState.phase = 'regular_season';
+  
+  console.log('[FRANCHISE PHASE]', previousPhase, '→', newState.phase, 
+    { currentGameIndex: newState.currentGameIndex, season: newState.season, timestamp: new Date().toISOString() });
+
   newState.championId = undefined;
   newState.playoffSeries = [];
   newState.standings = null;
   newState.lotteryPicks = [];
 
   // 7. GENERATE NEW SCHEDULE
-  const { scheduleService } = require('./scheduleService');
+  // Generate schedule for new season
   newState.schedule = scheduleService.generateSchedule(newState.teams);
+
+  // 5. Run CPU Offseason Logic (Trades, Signings, Releases)
+  runCPUOffseasonLogic(newState);
 
   newState.notifications.unshift({
     id: `new-season-${newState.season}`,
@@ -750,7 +813,8 @@ export function initializeFranchiseState(userTeamId: string): FranchiseState {
     awards: {},
     trophyCase: [],
     seasonHighs: {},
-    teamHistory: [],
+    seasonHistory: [],
+    hallOfFame: [],
     negotiations: {},
     notifications: []
   };

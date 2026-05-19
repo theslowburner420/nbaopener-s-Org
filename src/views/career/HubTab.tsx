@@ -7,6 +7,7 @@ import { NBA_TEAMS } from '../../data/nbaTeams';
 interface HubTabProps {
   state: any;
   nextUserGame: any;
+  userTeam: any;
   simulateGame: () => void;
   leagueLeaders: any[];
   setActiveTab: (tab: any) => void;
@@ -18,6 +19,7 @@ interface HubTabProps {
 const HubTab: React.FC<HubTabProps> = React.memo(({ 
   state, 
   nextUserGame, 
+  userTeam,
   simulateGame, 
   leagueLeaders, 
   setActiveTab,
@@ -31,11 +33,11 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
       className="max-w-7xl mx-auto space-y-6 md:space-y-12 pb-20 px-3"
     >
-      {state.phase === 'Playoffs' ? (
-        renderPlayoffs()
+      {state.phase === 'playoffs' ? (
+        renderPlayoffs?.()
       ) : (
         <>
-          {state.phase === 'Offseason' && (
+          {state.phase === 'offseason_start' && (
             <div className="bg-gradient-to-br from-indigo-500/20 to-zinc-900 border border-indigo-500/30 rounded-3xl p-8 text-center space-y-6">
                <div className="w-16 h-16 bg-indigo-500 rounded-2xl flex items-center justify-center text-black mx-auto">
                   <Trophy size={32} />
@@ -50,10 +52,16 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
                >
                  Execute Draft Lottery
                </button>
+               <button 
+                 disabled
+                 className="px-8 py-4 bg-zinc-800 text-zinc-600 rounded-2xl font-black uppercase tracking-widest text-xs cursor-not-allowed opacity-50 md:ml-4 w-full md:w-auto mt-4 md:mt-0"
+               >
+                 Enter Draft Room (Locked)
+               </button>
             </div>
           )}
 
-          {state.phase === 'Draft' && (
+          {state.phase === 'draft' && (
             <div className="bg-gradient-to-br from-amber-500/20 to-zinc-900 border border-amber-500/30 rounded-3xl p-8 text-center space-y-6">
                <div className="w-16 h-16 bg-amber-500 rounded-2xl flex items-center justify-center text-black mx-auto">
                   <Sparkles size={32} />
@@ -73,44 +81,44 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
 
           {/* TOP FEATURE: NEXT MATCH */}
           {nextUserGame && (
-            <div className="bg-gradient-to-br from-zinc-900 to-black border border-white/10 rounded-3xl md:rounded-[3.5rem] p-4 md:p-12 flex flex-col items-center justify-between gap-6 md:gap-16 relative overflow-hidden group shadow-2xl">
+            <div className="bg-gradient-to-br from-zinc-900 to-black border border-white/10 rounded-3xl md:rounded-[3.5rem] p-6 md:p-12 flex flex-col items-center justify-between gap-8 md:gap-16 relative overflow-hidden group shadow-2xl">
               <div className="absolute top-0 right-0 w-64 h-64 md:w-80 md:h-80 bg-amber-500/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2 opacity-30" />
               
               <div className="space-y-4 md:space-y-8 relative z-10 text-center w-full">
                 <div className="space-y-1 md:space-y-2">
-                  <p className="text-[7px] md:text-sm font-black text-amber-500 uppercase tracking-[0.5em] md:tracking-[0.8em]">Gamecenter</p>
-                  <h3 className="text-3xl md:text-7xl font-black italic uppercase tracking-tighter text-white leading-none truncate">Matchday {nextUserGame.gameNumber}</h3>
+                  <p className="text-[9px] md:text-sm font-black text-amber-500 uppercase tracking-[0.4em] md:tracking-[0.8em]">Gamecenter</p>
+                  <h3 className="text-3xl md:text-7xl font-black italic uppercase tracking-tighter text-white leading-none">Matchday {nextUserGame.gameNumber}</h3>
                 </div>
                 <div className="flex items-center justify-center gap-3">
-                  <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[7px] md:text-xs font-black uppercase tracking-widest text-zinc-400">
+                  <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] md:text-xs font-black uppercase tracking-widest text-zinc-400">
                       Regular Season
                   </div>
-                  <div className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[7px] md:text-xs font-black uppercase tracking-widest text-amber-500">
+                  <div className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[9px] md:text-xs font-black uppercase tracking-widest text-amber-500">
                     {nextUserGame.homeTeamId === state.userTeamId ? 'Home Court' : 'On Road'}
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-center gap-4 md:gap-16 relative z-10 w-full">
-                  <div className="text-center space-y-2 md:space-y-6">
+              <div className="flex items-center justify-center gap-8 md:gap-16 relative z-10 w-full">
+                  <div className="text-center space-y-4 md:space-y-6">
                     <motion.div 
                       whileHover={{ scale: 1.05 }}
-                      className="w-16 h-16 md:w-40 md:h-40 bg-zinc-950 rounded-2xl md:rounded-[3rem] p-3 md:p-8 border border-white/10 shadow-2xl transition-all"
+                      className="w-20 h-20 md:w-40 md:h-40 bg-zinc-950 rounded-2xl md:rounded-[3rem] p-5 md:p-8 border border-white/10 shadow-2xl transition-all"
                     >
                       <img src={getTeamLogo(state.userTeamId)} className="w-full h-full object-contain" />
                     </motion.div>
                     <p className="text-xs md:text-2xl font-black text-white italic tracking-tighter uppercase">{state.teams[state.userTeamId].abbreviation}</p>
                   </div>
                   
-                  <div className="flex flex-col items-center gap-1 md:gap-4">
-                    <div className="text-xl md:text-6xl font-black italic text-zinc-800 uppercase tracking-tighter select-none">VS</div>
-                    <div className="h-px w-8 md:w-20 bg-white/10" />
+                  <div className="flex flex-col items-center gap-2 md:gap-4">
+                    <div className="text-2xl md:text-6xl font-black italic text-zinc-800 uppercase tracking-tighter select-none">VS</div>
+                    <div className="h-px w-12 md:w-20 bg-white/10" />
                   </div>
 
-                  <div className="text-center space-y-2 md:space-y-6">
+                  <div className="text-center space-y-4 md:space-y-6">
                     <motion.div 
                       whileHover={{ scale: 1.05 }}
-                      className="w-16 h-16 md:w-40 md:h-40 bg-zinc-950 rounded-2xl md:rounded-[3rem] p-3 md:p-8 border border-white/10 shadow-2xl transition-all"
+                      className="w-20 h-20 md:w-40 md:h-40 bg-zinc-950 rounded-2xl md:rounded-[3rem] p-5 md:p-8 border border-white/10 shadow-2xl transition-all"
                     >
                       <img src={getTeamLogo(nextUserGame.homeTeamId === state.userTeamId ? nextUserGame.awayTeamId : nextUserGame.homeTeamId)} className="w-full h-full object-contain" />
                     </motion.div>
@@ -121,7 +129,7 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
               <div className="relative z-10 w-full md:w-auto flex flex-col md:flex-row items-center gap-4 bg-black/40 backdrop-blur-xl p-4 md:p-8 rounded-3xl border border-white/5">
                 <button 
                   onClick={simulateGame}
-                  className="w-full md:w-auto h-14 md:h-20 px-12 md:px-20 bg-white text-black rounded-2xl md:rounded-[2.5rem] font-black uppercase italic tracking-tighter text-sm md:text-3xl hover:bg-amber-500 transition-all active:scale-95 shadow-2xl shadow-white/5 relative group/btn overflow-hidden"
+                  className="w-full md:w-auto h-16 md:h-20 px-12 md:px-20 bg-white text-black rounded-2xl md:rounded-[2.5rem] font-black uppercase italic tracking-tighter text-base md:text-3xl hover:bg-amber-500 transition-all active:scale-95 shadow-2xl shadow-white/5 relative group/btn overflow-hidden"
                 >
                   <span className="relative z-10">Simulate Match</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-white/10 to-amber-500/0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
@@ -131,14 +139,14 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="md:col-span-1 lg:col-span-2 space-y-4 md:space-y-6">
+            <div className="md:col-span-1 lg:col-span-2 space-y-4 md:space-y-6 shrink-0 min-w-0">
               <div className="flex items-center justify-between px-2">
                 <h3 className="text-sm md:text-xl font-black uppercase italic tracking-tighter text-zinc-500 flex items-center gap-2">
                     <LayoutDashboard size={14} /> Next 5 Matches
                 </h3>
               </div>
               <div className="space-y-2 md:space-y-4">
-                {state.schedule
+                {(state.schedule || [])
                   .filter((m: any) => (m.homeTeamId === state.userTeamId || m.awayTeamId === state.userTeamId) && !m.played)
                   .slice(0, 5)
                   .map((match: any) => {
@@ -206,7 +214,7 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
                 <div className="bg-zinc-900 rounded-[1.5rem] md:rounded-[2.5rem] p-5 md:p-8 border border-white/5 space-y-4 md:space-y-6">
                     <h3 className="text-[9px] md:text-xs font-black uppercase tracking-[0.4em] text-zinc-600 italic text-center">Leaders</h3>
                     <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:gap-3">
-                        {leagueLeaders.map((leader: any) => (
+                        {(leagueLeaders || []).map((leader: any) => (
                           <div key={leader.cat} className="flex items-center justify-between bg-black/40 p-3 md:p-4 rounded-xl md:rounded-2xl border border-white/5">
                               <div>
                                 <p className="text-[7px] md:text-[8px] font-black text-zinc-600 uppercase tracking-widest">{leader.cat}</p>

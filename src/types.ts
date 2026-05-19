@@ -1,4 +1,4 @@
-export type Rarity = 'bench' | 'starter' | 'allstar' | 'franchise' | 'legend' | 'coach' | 'dpoy' | 'roty' | 'record' | 'rookie' | 'logo' | 'arena' | 'draft2026' | 'scoring_champ' | 'hof' | 'coy' | 'rising_star' | 'allnba_1st';
+export type Rarity = 'bench' | 'starter' | 'allstar' | 'franchise' | 'legend' | 'coach' | 'dpoy' | 'roty' | 'record' | 'rookie' | 'logo' | 'arena' | 'draft2026' | 'scoring_champ' | 'hof' | 'coy' | 'rising_star' | 'allnba_1st' | 'invincible' | 'galaxy' | 'legend_sbc' | 'icon_sbc' | 'moments_sbc' | 'future_star';
 
 export type CardCategory = 'Base' | 'Award' | 'Moment' | 'Duo' | 'Coach' | 'Dynasty' | 'X-Factor' | 'NBA Record' | 'Rookie' | 'All-Star MVP' | 'Finals MVP' | 'Logo' | 'Arena' | 'Draft 2026' | 'Scoring Champion' | 'Hall of Fame' | 'Coach of the Year' | 'Rising Star' | 'All-NBA 1st Team';
 
@@ -41,9 +41,10 @@ export interface Card {
   coach?: string;
   player2Id?: number;
   teamLogoUrl?: string;
+  isSpecialSBC?: boolean;
 }
 
-export type ViewType = 'collection' | 'open' | 'packs' | 'rewards' | 'shop' | 'profile' | 'home' | 'draft' | 'trading' | 'career';
+export type ViewType = 'collection' | 'open' | 'packs' | 'rewards' | 'shop' | 'profile' | 'home' | 'draft' | 'trading' | 'career' | 'sbc';
 
 export interface Achievement {
   id: string;
@@ -238,6 +239,30 @@ export interface FranchiseState {
   gamesSinceWaiverRefresh?: number;
 }
 
+export interface SbcRequirement {
+  type: 'MIN_RARITY' | 'EXACT_RARITY' | 'POSITION' | 'MIN_OVR' | 'TOTAL_CARDS' | 'UNIQUE_PLAYERS';
+  value: any;
+  count?: number;
+}
+
+export interface SbcChallenge {
+  id: string;
+  name: string;
+  description: string;
+  difficulty: 'bronze' | 'silver' | 'gold' | 'elite' | 'legendary';
+  type: 'permanent' | 'limited';
+  expiresAt: string | null;
+  requirements: SbcRequirement[];
+  reward: {
+    playerName: string;
+    rarity: Rarity;
+    ovr: number;
+    playerId?: string; // If we want to link to an existing player card
+  };
+  isActive: boolean;
+  cardsRequired: number;
+}
+
 export interface GameState {
   user: User | null;
   coins: number;
@@ -251,4 +276,5 @@ export interface GameState {
   inventoryPacks: InventoryPack[];
   isPremium: boolean;
   franchise?: FranchiseState;
+  completedSbcs?: string[];
 }

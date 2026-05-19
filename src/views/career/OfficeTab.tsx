@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Trophy, Sparkles, Activity, TrendingUp, Building, History, X } from 'lucide-react';
+import { Trophy, Sparkles, Activity, TrendingUp, Building, History, X, Star } from 'lucide-react';
 
 interface OfficeTabProps {
   state: any;
@@ -17,7 +17,16 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
   handleNegotiationStart,
   setState
 }) => {
-  const [subTab, setSubTab] = React.useState<'legacy' | 'contracts'>('legacy');
+  const [subTab, setSubTab] = React.useState<'legacy' | 'hof' | 'contracts'>('legacy');
+
+  if (!state || !userTeam) return null;
+
+  const trophyCase = state.trophyCase || [];
+  const seasonHistory = state.seasonHistory || [];
+  const draftPicks = userTeam.draftPicks || [];
+  const roster = userTeam.roster || [];
+  const contracts = userTeam.contracts || {};
+  const hallOfFame = state.hallOfFame || [];
 
   const marketService = {
       releasePlayer: (state: any, id: string) => {
@@ -35,6 +44,7 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
        <div className="flex bg-zinc-900/50 p-1 rounded-xl md:w-fit mx-auto border border-white/5">
          {[
            { id: 'legacy', label: 'Legacy & Vault', icon: <Trophy size={14} /> },
+           { id: 'hof', label: 'Hall of Fame', icon: <Star size={14} /> },
            { id: 'contracts', label: 'Contracts & Finance', icon: <Building size={14} /> }
          ].map((t) => (
            <button
@@ -66,8 +76,8 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
                   {[
                     { type: 'CHAMP', label: 'Rings', icon: <Trophy size={20} />, color: 'bg-amber-500', glow: 'shadow-[0_0_30px_rgba(245,158,11,0.3)]' },
                     { type: 'MVP', label: 'MVPs', icon: <Sparkles size={20} />, color: 'bg-white', glow: 'shadow-[0_0_30px_rgba(255,255,255,0.2)]' },
-                    { type: 'DPOY', label: 'Best Defense', icon: <Activity size={20} />, color: 'bg-zinc-700', glow: 'shadow-[0_0_30px_rgba(63,63,70,0.2)]' },
-                    { type: 'RECORD', label: 'High Scores', icon: <TrendingUp size={20} />, color: 'bg-zinc-900', glow: '' }
+                    { type: 'DPOY', label: 'Best Defense', icon: <Activity size={20} />, color: 'bg-emerald-500', glow: 'shadow-[0_0_30px_rgba(16,185,129,0.2)]' },
+                    { type: 'ALL_NBA', label: 'All-NBA', icon: <Star size={20} />, color: 'bg-blue-500', glow: 'shadow-[0_0_30px_rgba(59,130,246,0.2)]' }
                   ].map((t) => {
                     const achievements = (state.trophyCase || []).filter((item: any) => item.type === t.type);
                     return (
@@ -86,7 +96,7 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
 
                {state.trophyCase.length > 0 ? (
                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                    {state.trophyCase.slice().reverse().map((award: any, i: number) => {
+                    {trophyCase.slice().reverse().map((award: any, i: number) => {
                         const player = award.playerId ? findCard(award.playerId) : null;
                         return (
                           <motion.div 
@@ -123,7 +133,7 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
                )}
             </div>
 
-            {/* TEAM HISTORY */}
+            {/* SEASON HISTORY */}
             <div className="space-y-6">
                <div className="flex items-center justify-between px-2 text-sans">
                   <div className="space-y-1">
@@ -131,39 +141,118 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
                      <p className="text-[8px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest">Year-by-Year Performance</p>
                   </div>
                </div>
-               <div className="bg-zinc-900/50 border border-white/5 rounded-2xl md:rounded-3xl overflow-hidden">
+               
+               {/* MOBILE VIEW cards */}
+               <div className="md:hidden space-y-3">
+                  {seasonHistory.slice().reverse().map((h: any) => (
+                     <div key={h.seasonYear} className="bg-zinc-900/50 border border-white/5 p-4 rounded-2xl flex items-center justify-between">
+                        <div className="flex flex-col">
+                           <span className="text-amber-500 font-black italic">Season #{h.seasonYear}</span>
+                           <span className="text-white font-black text-xs">{h.wins}-{h.losses} Record</span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                           <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${h.playoffResult.includes('CHAMP') ? 'bg-amber-500 text-black' : 'bg-white/5 text-zinc-500'}`}>
+                              {h.playoffResult}
+                           </span>
+                           <span className="text-[8px] text-zinc-600 mt-1 uppercase italic">{h.champion}</span>
+                        </div>
+                     </div>
+                  ))}
+               </div>
+
+               <div className="hidden md:block bg-zinc-900/50 border border-white/5 rounded-2xl md:rounded-3xl overflow-hidden">
                   <table className="w-full text-[10px] md:text-sm text-left">
                      <thead>
                         <tr className="border-b border-white/5 bg-black/40">
                            <th className="px-4 py-3 md:px-6 md:py-4 font-black uppercase text-zinc-600 tracking-widest">Year</th>
-                           <th className="px-4 py-3 md:px-6 md:py-4 font-black uppercase text-zinc-600 tracking-widest">Result</th>
+                           <th className="px-4 py-3 md:px-6 md:py-4 font-black uppercase text-zinc-600 tracking-widest">Record</th>
+                           <th className="px-4 py-3 md:px-6 md:py-4 font-black uppercase text-zinc-600 tracking-widest">Playoffs</th>
                            <th className="px-4 py-3 md:px-6 md:py-4 font-black uppercase text-zinc-600 tracking-widest">Champion</th>
-                           <th className="px-4 py-3 md:px-6 md:py-4 font-black uppercase text-zinc-600 tracking-widest text-right">Awards</th>
+                           <th className="px-4 py-3 md:px-6 md:py-4 font-black uppercase text-zinc-600 tracking-widest text-right">League Awards</th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-white/5">
-                        {state.teamHistory.slice().reverse().map((h: any) => (
-                           <tr key={h.season} className="hover:bg-white/5 transition-colors">
-                              <td className="px-4 py-3 md:px-6 md:py-4 font-black text-amber-500 italic">#{h.season}</td>
-                              <td className="px-4 py-3 md:px-6 md:py-4 font-black text-white">{h.record}</td>
-                              <td className="px-4 py-3 md:px-6 md:py-4 text-zinc-400 font-medium">{h.champion}</td>
+                        {seasonHistory.slice().reverse().map((h: any) => (
+                           <tr key={h.seasonYear} className="hover:bg-white/5 transition-colors">
+                              <td className="px-4 py-3 md:px-6 md:py-4 font-black text-amber-500 italic">#{h.seasonYear}</td>
+                              <td className="px-4 py-3 md:px-6 md:py-4 font-black text-white">{h.wins}-{h.losses}</td>
+                              <td className="px-4 py-3 md:px-6 md:py-4">
+                                <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-tighter ${h.playoffResult.includes('CHAMP') ? 'bg-amber-500 text-black' : 'bg-white/5 text-zinc-400'}`}>
+                                  {h.playoffResult}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 md:px-6 md:py-4 text-zinc-400 font-medium italic">{h.champion}</td>
                               <td className="px-4 py-3 md:px-6 md:py-4 text-right">
-                                 <div className="flex justify-end gap-1">
-                                    {h.awards.map((a: string, idx: number) => (
-                                       <span key={idx} className="w-4 h-4 md:w-5 md:h-5 bg-white/10 rounded flex items-center justify-center text-[8px] md:text-[10px] font-black text-white" title={a}>{a[0]}</span>
-                                    ))}
+                                 <div className="flex justify-end gap-2 flex-wrap max-w-[200px]">
+                                    {h.mvp && <span className="px-2 py-0.5 bg-white text-black rounded text-[8px] font-black uppercase">MVP</span>}
+                                    {h.allNba?.length > 0 && <span className="px-2 py-0.5 bg-blue-500 text-white rounded text-[8px] font-black uppercase">ALL-NBA</span>}
                                  </div>
                               </td>
                            </tr>
                         ))}
-                        {state.teamHistory.length === 0 && (
+                        {seasonHistory.length === 0 && (
                            <tr>
-                              <td colSpan={4} className="px-6 py-12 text-center text-zinc-600 italic font-medium uppercase tracking-widest text-xs">No season history recorded yet</td>
+                              <td colSpan={5} className="px-6 py-12 text-center text-zinc-600 italic font-medium uppercase tracking-widest text-xs">No season history recorded yet</td>
                            </tr>
                         )}
                      </tbody>
                   </table>
                </div>
+            </div>
+         </div>
+       ) : subTab === 'hof' ? (
+         <div className="space-y-12">
+            <div className="flex items-center justify-between px-2">
+                <div className="space-y-1">
+                    <h3 className="text-xl md:text-4xl font-black italic uppercase tracking-tighter text-white">Hall of Fame</h3>
+                    <p className="text-[9px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest">Retired Legends</p>
+                </div>
+                <Star className="text-amber-500/20 md:w-12 md:h-12" size={32} />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+               {(state.hallOfFame || []).map((player: any) => (
+                  <div key={player.id} className="bg-zinc-900 border border-white/5 rounded-[2.5rem] p-6 space-y-6 relative overflow-hidden group hover:border-amber-500/30 transition-all">
+                     <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl opacity-50" />
+                     
+                     <div className="flex items-center gap-4">
+                        <div className="w-20 h-20 bg-black rounded-3xl overflow-hidden border border-white/10">
+                           <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.card?.nbaId}.png`} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="space-y-1">
+                           <h4 className="text-xl font-black text-white italic uppercase tracking-tighter leading-none">{player.name}</h4>
+                           <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">{player.seasonsPlayed} Seasons • {player.lastTeam}</p>
+                        </div>
+                     </div>
+
+                     <div className="grid grid-cols-3 gap-4 border-y border-white/5 py-4">
+                        <div className="text-center">
+                           <p className="text-[8px] font-black text-zinc-600 uppercase">Points</p>
+                           <p className="text-lg font-black text-white italic">{player.stats.points}</p>
+                        </div>
+                        <div className="text-center">
+                           <p className="text-[8px] font-black text-zinc-600 uppercase">Rebounds</p>
+                           <p className="text-lg font-black text-white italic">{player.stats.rebounds}</p>
+                        </div>
+                        <div className="text-center">
+                           <p className="text-[8px] font-black text-zinc-600 uppercase">Assists</p>
+                           <p className="text-lg font-black text-white italic">{player.stats.assists}</p>
+                        </div>
+                     </div>
+
+                     <div className="flex flex-wrap gap-2">
+                        {player.awards.map((a: string, i: number) => (
+                           <span key={i} className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[8px] font-black uppercase text-zinc-400">{a}</span>
+                        ))}
+                     </div>
+                  </div>
+               ))}
+               {hallOfFame.length === 0 && (
+                  <div className="col-span-full py-20 text-center space-y-4">
+                     <Star size={48} className="text-zinc-800 mx-auto" />
+                     <p className="text-zinc-600 font-black uppercase italic tracking-widest text-sm">No legends have retired yet</p>
+                  </div>
+               )}
             </div>
          </div>
        ) : (
@@ -184,22 +273,22 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
                      <div className="grid grid-cols-3 gap-2">
                        <div className="space-y-0.5">
                          <p className="text-[8px] font-black text-zinc-700 uppercase tracking-widest">Payroll</p>
-                         <p className="text-sm md:text-xl font-black text-white italic tracking-tighter leading-none">${(userTeam.payroll / 1000000).toFixed(1)}M</p>
+                         <p className="text-xs md:text-xl font-black text-white italic tracking-tighter leading-none">${(userTeam.payroll / 1000000).toFixed(1)}M</p>
                        </div>
                        <div className="space-y-0.5 border-x border-white/5 px-2">
                          <p className="text-[8px] font-black text-zinc-700 uppercase tracking-widest">Cap Limit</p>
-                         <p className="text-sm md:text-xl font-black text-zinc-500 italic tracking-tighter leading-none">$136.0M</p>
+                         <p className="text-xs md:text-xl font-black text-zinc-500 italic tracking-tighter leading-none">$136.0M</p>
                        </div>
                        <div className="space-y-0.5 text-right">
                          <p className="text-[8px] font-black text-zinc-700 uppercase tracking-widest">Space</p>
-                         <p className={`text-sm md:text-xl font-black italic tracking-tighter leading-none ${userTeam.payroll > 136000000 ? 'text-red-500' : 'text-green-500'}`}>
+                         <p className={`text-xs md:text-xl font-black italic tracking-tighter leading-none ${userTeam.payroll > 136000000 ? 'text-red-500' : 'text-green-500'}`}>
                            ${((136000000 - userTeam.payroll) / 1000000).toFixed(1)}M
                          </p>
                        </div>
                      </div>
                      
                      <div className="space-y-2">
-                        <div className="h-1.5 md:h-3 bg-black rounded-full overflow-hidden border border-white/5 p-0.5 shadow-inner">
+                        <div className="h-2 md:h-3 bg-black rounded-full overflow-hidden border border-white/5 p-0.5 shadow-inner">
                            <motion.div 
                              initial={{ width: 0 }}
                              animate={{ width: `${Math.min((userTeam.payroll / 136000000) * 100, 100)}%` }}
@@ -207,8 +296,8 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
                            />
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-[7px] md:text-[9px] font-black text-zinc-800 uppercase tracking-[0.2em]">Usage Percentage</span>
-                          <span className="text-[7px] md:text-[9px] font-black text-amber-500 uppercase tracking-[0.2em]">{((userTeam.payroll / 136000000) * 100).toFixed(1)}%</span>
+                          <span className="text-[8px] md:text-[9px] font-black text-zinc-800 uppercase tracking-[0.2em]">Usage Percentage</span>
+                          <span className="text-[8px] md:text-[9px] font-black text-amber-500 uppercase tracking-[0.2em]">{((userTeam.payroll / 136000000) * 100).toFixed(1)}%</span>
                         </div>
                      </div>
                   </div>
@@ -224,11 +313,11 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
                     <History size={24} className="text-zinc-800" />
                   </div>
 
-                  <div className="flex flex-wrap gap-2 md:gap-3 relative z-10">
-                     {userTeam.draftPicks.slice(0, 10).map((p: any) => (
+                     <div className="flex flex-wrap gap-2 md:gap-3 relative z-10 pb-2">
+                     {draftPicks.slice(0, 10).map((p: any) => (
                         <div key={p.id} className="px-3 md:px-5 py-2 md:py-3 bg-black/40 border border-white/5 rounded-xl md:rounded-2xl flex flex-col items-start gap-0.5 hover:border-amber-500/30 transition-all cursor-default">
                            <span className="text-[8px] md:text-[10px] font-black text-zinc-600 uppercase leading-none">{p.year} {p.round === 1 ? '1ST' : '2ND'}</span>
-                           <span className="text-[10px] md:text-sm font-black text-white italic tracking-tighter leading-none">{p.originalOwnerId}</span>
+                           <span className="text-[8px] md:text-sm font-black text-white italic tracking-tighter leading-none">{p.originalOwnerId}</span>
                         </div>
                      ))}
                   </div>
@@ -245,9 +334,9 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
                </div>
                
                <div className="grid grid-cols-1 gap-3 md:gap-4">
-                  {userTeam.roster.sort((a: string, b: string) => (userTeam.contracts[b]?.salary || 0) - (userTeam.contracts[a]?.salary || 0)).map((id: string) => {
+                  {roster.slice().sort((a: string, b: string) => (contracts[b]?.salary || 0) - (contracts[a]?.salary || 0)).map((id: string) => {
                      const card = findCard(id);
-                     const contract = userTeam.contracts[id];
+                     const contract = contracts[id];
                      if (!card || !contract) return null;
                      const isExpiring = contract.yearsRemaining === 1;
 

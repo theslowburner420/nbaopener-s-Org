@@ -24,6 +24,14 @@ const getRarityColor = (rarity: Rarity) => {
     case 'roty': return '#EA580C';
     case 'record': return '#F59E0B';
     case 'rookie': return '#3B82F6';
+    case 'rising_star': return '#06B6D4';
+    case 'allnba_1st': return '#F59E0B';
+    case 'invincible': return '#FFD700';
+    case 'galaxy': return '#E94560';
+    case 'legend_sbc': return '#F59E0B';
+    case 'icon_sbc': return '#8B5CF6';
+    case 'moments_sbc': return '#FFFFFF';
+    case 'future_star': return '#10B981';
     default: return '#333';
   }
 };

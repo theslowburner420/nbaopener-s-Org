@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { X, History } from 'lucide-react';
+import { X } from 'lucide-react';
+import { tradeEngine } from '../../franchise/services/tradeEngine';
+import { ALL_CARDS } from '../../data/cards';
 import { NBA_TEAMS } from '../../data/nbaTeams';
 
 interface TradesTabProps {
@@ -36,6 +38,19 @@ const TradesTab: React.FC<TradesTabProps> = React.memo(({
 }) => {
   const userTeam = state.teams[state.userTeamId];
 
+  const tradeFairness = React.useMemo(() => {
+    if (userOfferedIds.length === 0 && cpuRequestedIds.length === 0) return 0;
+    
+    const offeredVal = userOfferedIds.reduce((sum, id) => sum + tradeEngine.calculateTradeValue(id, state), 0);
+    const requestedVal = cpuRequestedIds.reduce((sum, id) => sum + tradeEngine.calculateTradeValue(id, state), 0);
+    
+    if (requestedVal === 0) return 0;
+    return offeredVal / requestedVal;
+  }, [userOfferedIds, cpuRequestedIds, state]);
+
+  const fairnessColor = tradeFairness >= 0.9 ? 'bg-green-500' : tradeFairness >= 0.7 ? 'bg-amber-500' : 'bg-red-500';
+  const fairnessLabel = tradeFairness >= 0.9 ? 'FAIR' : tradeFairness >= 0.7 ? 'QUESTIONABLE' : 'UNFAIR';
+
   return (
     <motion.div 
       key="trades"
@@ -45,7 +60,14 @@ const TradesTab: React.FC<TradesTabProps> = React.memo(({
       <div className="flex items-center justify-between mb-2">
           <div className="space-y-0.5">
             <h3 className="text-lg md:text-xl font-black uppercase italic tracking-tighter text-white">Negotiate</h3>
-            <p className="text-[7px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest">Select Swap Targets</p>
+            <div className="flex items-center gap-2">
+                <p className="text-[7px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest">Select Swap Targets</p>
+                {tradeFairness > 0 && (
+                    <div className="flex items-center gap-2 border-l border-white/10 pl-2">
+                        <span className={`text-[8px] font-black px-1.5 py-0.5 rounded ${fairnessColor} text-black`}>{fairnessLabel}</span>
+                    </div>
+                )}
+            </div>
           </div>
           <select 
             value={tradeTargetTeamId || ""}
@@ -64,7 +86,7 @@ const TradesTab: React.FC<TradesTabProps> = React.memo(({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-8 mb-32">
           {/* USER SIDE */}
-          <div className="bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden flex flex-col h-[350px] md:h-[500px]">
+          <div className="bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden flex flex-col h-[400px] md:h-[500px]">
               <div className="p-3 border-b border-white/5 bg-white/2 flex items-center justify-between">
                 <span className="text-[10px] font-black text-white italic tracking-widest">YOUR ROSTER</span>
                 <span className="text-[9px] font-bold text-zinc-500 uppercase">{userOfferedIds.length + userOfferedPickIds.length} ITEMS</span>
@@ -73,6 +95,8 @@ const TradesTab: React.FC<TradesTabProps> = React.memo(({
                 {userTeam.roster.map((id: string) => {
                     const card = findCard(id);
                     const isSelected = userOfferedIds.includes(id);
+                    const val = tradeEngine.calculateTradeValue(id, state);
+
                     return (
                       <div key={id} onClick={() => setUserOfferedIds(prev => isSelected ? prev.filter(x => x !== id) : [...prev, id])} className={`p-4 flex items-center justify-between hover:bg-white/5 cursor-pointer transition-colors ${isSelected ? 'bg-amber-500/10' : ''}`}>
                           <div className="flex items-center gap-3">
@@ -85,7 +109,10 @@ const TradesTab: React.FC<TradesTabProps> = React.memo(({
                                 <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">{card?.position} • ${(userTeam.contracts[id]?.salary / 1e6).toFixed(1)}M</span>
                             </div>
                           </div>
-                          <span className="text-xs font-black text-amber-500 italic tabular-nums">{card?.stats.ovr}</span>
+                          <div className="text-right">
+                              <span className="text-xs font-black text-amber-500 italic tabular-nums block">{card?.stats.ovr} OVR</span>
+                              <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">VAL: {Math.round(val)}</span>
+                          </div>
                       </div>
                     );
                 })}
@@ -113,7 +140,7 @@ const TradesTab: React.FC<TradesTabProps> = React.memo(({
           </div>
 
           {/* RIVAL SIDE */}
-          <div className="bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden flex flex-col h-[350px] md:h-[500px]">
+          <div className="bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden flex flex-col h-[400px] md:h-[500px]">
               <div className="p-3 border-b border-white/5 bg-white/2 flex items-center justify-between">
                 <span className="text-[10px] font-black text-white italic tracking-widest">RECEIVING</span>
                 <span className="text-[9px] font-bold text-zinc-500 uppercase">{cpuRequestedIds.length + cpuRequestedPickIds.length} ITEMS</span>
@@ -123,6 +150,8 @@ const TradesTab: React.FC<TradesTabProps> = React.memo(({
                     const card = findCard(id);
                     const isSelected = cpuRequestedIds.includes(id);
                     const contract = state.teams[tradeTargetTeamId!].contracts[id];
+                    const val = tradeEngine.calculateTradeValue(id, state);
+
                     return (
                       <div key={id} onClick={() => setCpuRequestedIds(prev => isSelected ? prev.filter(x => x !== id) : [...prev, id])} className={`p-4 flex items-center justify-between hover:bg-white/5 cursor-pointer transition-colors ${isSelected ? 'bg-amber-500/10' : ''}`}>
                           <div className="flex items-center gap-3">
@@ -135,7 +164,10 @@ const TradesTab: React.FC<TradesTabProps> = React.memo(({
                                 <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">{card?.position} • ${(contract?.salary / 1e6).toFixed(1)}M</span>
                             </div>
                           </div>
-                          <span className="text-xs font-black text-white italic tabular-nums">{card?.stats.ovr}</span>
+                          <div className="text-right">
+                              <span className="text-xs font-black text-white italic tabular-nums block">{card?.stats.ovr} OVR</span>
+                              <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">VAL: {Math.round(val)}</span>
+                          </div>
                       </div>
                     );
                 }) : (

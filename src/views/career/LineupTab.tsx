@@ -38,7 +38,7 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
   const [sortMode, setSortMode] = React.useState<'OVR' | 'POS'>('OVR');
 
   const rosterSorted = React.useMemo(() => {
-    return [...(userTeam.roster as string[])].sort((a, b) => {
+    return [...((userTeam?.roster || []) as string[])].sort((a, b) => {
       const cardA = findCard(a);
       const cardB = findCard(b);
       if (sortMode === 'OVR') {
@@ -53,8 +53,8 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
   }, [userTeam.roster, sortMode, findCard]);
 
   const teamOvr = React.useMemo(() => {
-    const starters = positions.map(p => findCard(userTeam.lineup[p])?.stats.ovr || 0);
-    const bench = (userTeam.lineup.bench as string[]).map(id => findCard(id)?.stats.ovr || 0);
+    const starters = positions.map(p => findCard(userTeam?.lineup?.[p])?.stats.ovr || 0);
+    const bench = ((userTeam?.lineup?.bench || []) as string[]).map(id => findCard(id)?.stats.ovr || 0);
     const all = [...starters, ...bench];
     if (all.length === 0) return 0;
     return Math.round(all.reduce((a, b) => a + b, 0) / all.length);
@@ -100,18 +100,43 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
               Starting Five
            </h4>
            
-           <div className="relative w-full aspect-[3/4] md:aspect-[16/10] bg-zinc-950 rounded-[2rem] md:rounded-[4rem] border border-white/5 overflow-hidden shadow-2xl flex items-center justify-center p-4">
+           {/* MOBILE STACKED VIEW */}
+           <div className="md:hidden space-y-2">
+              {positions.map(pos => {
+                 const card = findCard(userTeam.lineup[pos]);
+                 return (
+                   <div 
+                    key={pos} 
+                    onClick={() => setLineupModalPos(pos)}
+                    className="flex items-center justify-between p-3 bg-zinc-900 border border-white/5 rounded-2xl active:bg-white/10"
+                   >
+                     <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-black rounded-lg border border-white/10 flex items-center justify-center overflow-hidden">
+                           {card ? (
+                             <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-full h-full object-cover" />
+                           ) : (
+                             <Plus className="text-zinc-700" size={16} />
+                           )}
+                        </div>
+                        <div>
+                           <p className="text-[10px] font-black text-white italic uppercase tracking-tighter">{card?.name || `ADD ${pos}`}</p>
+                           <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">{pos}</p>
+                        </div>
+                     </div>
+                     {card && <span className="text-xs font-black text-amber-500 italic tabular-nums">{card.stats.ovr} OVR</span>}
+                   </div>
+                 );
+              })}
+           </div>
+
+           {/* DESKTOP COURT VIEW */}
+           <div className="hidden md:flex relative w-full aspect-[16/10] bg-zinc-950 rounded-[4rem] border border-white/5 overflow-hidden shadow-2xl items-center justify-center p-4">
               {/* COURT DECORATIONS */}
               <div className="absolute inset-0 opacity-[0.05] pointer-events-none">
-                 {/* Outer boundary */}
                   <div className="absolute inset-4 border-2 border-white rounded-[2rem]" />
-                  {/* Three-point line (simplified) */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] aspect-square rounded-full border-4 border-white -translate-y-1/2" />
-                 {/* Key/Paint area */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[30%] h-[40%] bg-white/5 border-2 border-white" />
-                 {/* Free throw circle */}
                   <div className="absolute top-[40%] left-1/2 -translate-x-1/2 w-[15%] aspect-square rounded-full border-2 border-white -translate-y-1/2" />
-                 {/* Center court circle */}
                   <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[20%] aspect-square rounded-full border-2 border-white translate-y-1/2" />
               </div>
 
@@ -124,32 +149,21 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                        <motion.div 
                           key={pos}
                           style={{ top: layout.top, left: layout.left }}
-                          className="absolute -translate-x-1/2 -translate-y-1/2 w-[22%] md:w-[12%] min-w-[70px] md:min-w-[110px] max-w-[200px] z-20 group"
+                          className="absolute -translate-x-1/2 -translate-y-1/2 w-[12%] min-w-[110px] max-w-[200px] z-20 group"
                           whileHover={{ scale: 1.05, zIndex: 50 }}
                        >
                           <div onClick={() => setLineupModalPos(pos)} className="cursor-pointer relative">
                              {card ? (
                                 <>
-                                   <div className="md:block hidden">
-                                      <CardItem card={card} isOwned={true} mode="mini" />
-                                   </div>
-                                   <div className="md:hidden block">
-                                      {/* Compact card for mobile court view */}
-                                      <div className="aspect-[1/1.4] bg-zinc-900 rounded-lg border border-white/10 overflow-hidden relative shadow-2xl">
-                                         <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-full h-full object-contain" />
-                                         <div className="absolute top-1 right-1 bg-white rounded-sm px-1 flex items-center justify-center">
-                                            <span className="text-[6px] font-black text-black italic">{card.stats.ovr}</span>
-                                         </div>
-                                      </div>
-                                   </div>
-                                   <div className="absolute -bottom-3 md:-bottom-4 left-1/2 -translate-x-1/2 bg-white md:bg-black border border-black/10 md:border-white/20 whitespace-nowrap px-1.5 md:px-3 py-0.5 md:py-1 rounded shadow-2xl transform transition-transform group-hover:scale-110">
-                                      <span className="text-[6px] md:text-[10px] font-black text-black md:text-white italic tracking-tighter uppercase">{pos}</span>
+                                   <CardItem card={card} isOwned={true} mode="mini" />
+                                   <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-black border border-white/20 whitespace-nowrap px-3 py-1 rounded shadow-2xl transform transition-transform group-hover:scale-110">
+                                      <span className="text-[10px] font-black text-white italic tracking-tighter uppercase">{pos}</span>
                                    </div>
                                 </>
                              ) : (
-                                <div className="aspect-[1/1.4] bg-white/5 rounded-xl md:rounded-2xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-2 md:gap-3 hover:bg-white/10 transition-all">
-                                   <Plus className="text-zinc-600 scale-75 md:scale-100" />
-                                   <span className="text-[8px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest italic">{pos}</span>
+                                <div className="aspect-[1/1.4] bg-white/5 rounded-2xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-3 hover:bg-white/10 transition-all">
+                                   <Plus className="text-zinc-600" />
+                                   <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest italic">{pos}</span>
                                 </div>
                              )}
                           </div>
@@ -157,8 +171,6 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                     );
                  })}
               </div>
-
-
            </div>
         </div>
 
@@ -168,7 +180,7 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
              <div className="flex items-center gap-4">
                 <h3 className="text-xl md:text-3xl font-black uppercase italic text-white tracking-tighter">Second Unit & Bench</h3>
                 <span className="text-[10px] font-black bg-zinc-800 text-zinc-400 px-2.5 py-1 rounded-full uppercase tracking-widest border border-white/5">
-                   {userTeam.lineup.bench.length} Active Reserves
+                   {(userTeam?.lineup?.bench || []).length} Active Reserves
                 </span>
              </div>
              <button 
@@ -180,7 +192,7 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
           </div>
           
           <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-6">
-             {(userTeam.lineup.bench as string[]).map((id) => {
+             {((userTeam?.lineup?.bench || []) as string[]).map((id) => {
                 const card = findCard(id);
                 if (!card) return null;
                 return (
@@ -202,7 +214,7 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                    </motion.div>
                 );
              })}
-             {userTeam.lineup.bench.length === 0 && (
+             {((userTeam?.lineup?.bench || []) as string[]).length === 0 && (
                 <div className="col-span-full py-20 flex flex-col items-center justify-center border border-dashed border-white/5 bg-white/[0.01] rounded-[2rem] gap-4">
                    <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center">
                       <Users className="text-zinc-700" size={32} />
@@ -278,8 +290,8 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
 
                       // Also check if they are already assigned SOMEWHERE else (only allow moving if swap logic is clear)
                       const isAssignedElsewhere = lineupModalPos !== 'bench' 
-                        ? Object.values(userTeam.lineup).some((v, idx) => v === id && positions[idx] !== lineupModalPos) || (userTeam.lineup.bench as string[]).includes(id)
-                        : Object.values(userTeam.lineup).slice(0, 5).some(v => v === id);
+                        ? Object.values(userTeam?.lineup || {}).some((v, idx) => v === id && positions[idx] !== lineupModalPos) || ((userTeam?.lineup?.bench || []) as string[]).includes(id)
+                        : Object.values(userTeam?.lineup || {}).slice(0, 5).some(v => v === id);
 
                       return (
                          <motion.div 

@@ -7,13 +7,14 @@ import { useEffect, useState, lazy, Suspense } from 'react';
 import { GameProvider, useGame } from './context/GameContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ALL_CARDS } from './data/cards';
-import { LogIn, LogOut, User as UserIcon, Coins, AlertCircle, ChevronDown, Settings, Cloud, Check, RefreshCw, X, Gift, Star, Home, ShoppingBag, LayoutGrid, Trophy, Zap, AlertTriangle, Loader2 } from 'lucide-react';
+import { LogIn, LogOut, User as UserIcon, Coins, AlertCircle, ChevronDown, Settings, Cloud, Check, RefreshCw, X, Gift, Star, Home, ShoppingBag, LayoutGrid, Trophy, Zap, AlertTriangle, Loader2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MemoryManager } from './lib/memory';
 import { Analytics } from "@vercel/analytics/react";
 
 import Header from './components/Header';
 import StaticAd from './components/StaticAd';
+import { Puzzle } from 'lucide-react';
 
 // Lazy load views for code splitting
 const HomeView = lazy(() => import('./views/HomeView'));
@@ -26,6 +27,7 @@ const ShopView = lazy(() => import('./views/ShopView'));
 const ProfileView = lazy(() => import('./views/ProfileView'));
 const TradingView = lazy(() => import('./views/TradingView'));
 const CareerView = lazy(() => import('./views/CareerView'));
+const SbcView = lazy(() => import('./views/SbcView'));
 
 // Simple View Loader
 const ViewLoader = () => (
@@ -142,6 +144,7 @@ function AppContent() {
             case 'profile': return <ProfileView />;
             case 'trading': return <TradingView />;
             case 'career': return <CareerView />;
+            case 'sbc': return <SbcView />;
             default: return <HomeView />;
           }
         })()}
@@ -279,7 +282,7 @@ function AppContent() {
               </div>
               <span className="text-[8px] font-black uppercase tracking-wider">Roster</span>
             </button>
-  
+
             {/* Rewards */}
             <button 
               onClick={() => handleViewChange('rewards')}
@@ -317,7 +320,7 @@ function AppContent() {
               </div>
               <span className="text-[8px] font-black uppercase tracking-wider">Packs</span>
             </button>
-  
+
             {/* Shop */}
             <button 
               onClick={() => handleViewChange('shop')}

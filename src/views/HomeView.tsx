@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Zap, Trophy, Sparkles, Star, RefreshCw, Building, User as UserIcon } from 'lucide-react';
+import { Zap, Trophy, Sparkles, Star, RefreshCw, Building, User as UserIcon, Puzzle } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 
 const HomeView: React.FC = () => {
@@ -120,7 +120,7 @@ const HomeView: React.FC = () => {
           
           <div className="relative flex items-center gap-5 sm:gap-8">
             <div className="w-16 h-16 sm:w-20 md:w-24 bg-emerald-600 rounded-2xl md:rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)] group-hover:scale-110 transition-transform duration-500">
-              <Building size={32} sm:size={40} className="text-white" />
+              <Building size={32} className="text-white" />
             </div>
             
             <div className="space-y-2 sm:space-y-4">
@@ -139,6 +139,37 @@ const HomeView: React.FC = () => {
 
           <div className="relative flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-emerald-600/10 border border-emerald-500/20 rounded-full group-hover:scale-110 group-hover:bg-emerald-600 group-hover:border-emerald-600 transition-all duration-300">
              <div className="text-[10px] font-black text-emerald-500 group-hover:text-white transition-colors tracking-tighter">OFFICE</div>
+          </div>
+        </motion.div>
+
+        {/* Bloque E: SBC Mode */}
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="relative group cursor-pointer overflow-hidden rounded-2xl md:rounded-[2.5rem] border border-zinc-800 bg-zinc-950 flex flex-1 items-center justify-between p-5 md:p-8"
+          onClick={() => setCurrentView('sbc')}
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,_rgba(245,158,11,0.1)_0%,_transparent_70%)]" />
+          
+          <div className="relative flex items-center gap-5 sm:gap-8">
+            <div className="w-16 h-16 sm:w-20 md:w-24 bg-amber-600 rounded-2xl md:rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.3)] group-hover:scale-110 transition-transform duration-500">
+              <Puzzle size={32} className="text-white" />
+            </div>
+            
+            <div className="space-y-2 sm:space-y-4">
+              <h2 className="text-xl sm:text-3xl md:text-6xl lg:text-7xl font-black italic uppercase tracking-tighter text-white leading-none">
+                Squad Builder
+              </h2>
+              <p className="text-[10px] sm:text-sm md:text-base font-black uppercase tracking-[0.3em] text-amber-400 flex items-center gap-2">
+                <Sparkles size={14} />
+                Exclusive Challenges
+              </p>
+            </div>
+          </div>
+
+          <div className="relative flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-amber-600/10 border border-amber-500/20 rounded-full group-hover:scale-110 group-hover:bg-amber-600 group-hover:border-amber-600 transition-all duration-300">
+             <div className="text-[10px] font-black text-amber-500 group-hover:text-white transition-colors tracking-tighter">SBC</div>
           </div>
         </motion.div>
 

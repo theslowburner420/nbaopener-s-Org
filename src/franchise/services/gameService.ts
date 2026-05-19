@@ -2,6 +2,7 @@ import { FranchiseMatch, FranchiseState, TeamObject, ContractObject } from '../t
 import { simulationEngine } from './simulationEngine';
 import { stateService } from './stateService';
 import { tradeEngine } from './tradeEngine';
+import { newsService } from './newsService';
 import { playoffService } from './playoffService';
 import { ALL_CARDS } from '../../data/cards';
 import { getInitialSalary, runCPUMidSeasonLogic, calculateAwards } from './rosterService';
@@ -18,6 +19,11 @@ export const gameService = {
     );
     
     if (!nextMatch) return null;
+
+    const currentGameIndex = state.currentGameIndex || 0;
+    const totalGames = state.schedule.filter(m => m.homeTeamId === state.userTeamId || m.awayTeamId === state.userTeamId).length;
+
+    console.log('[SEASON PROGRESS]', { currentGameIndex, totalGames, nextMatchGameNumber: nextMatch.gameNumber });
 
     // Critical 1 Fix: Simulate ALL games with gameNumber <= nextMatch.gameNumber that haven't been played
     const targetGameNumber = nextMatch.gameNumber;
@@ -42,17 +48,86 @@ export const gameService = {
     state.week = Math.max(state.week, targetGameNumber);
     state.currentGameIndex = (state.currentGameIndex || 0) + 1;
 
-    // End of Season check
-    if (state.currentGameIndex >= 82 && state.phase === 'regular_season') {
-      console.log(`[FRANCHISE] Phase transition: regular_season → season_awards (End of Regular Season)`);
-      state.phase = 'season_awards';
-      // Calculate and save standings for playoffs
-      playoffService.calculateSeasonStandings(state);
+    // End of Regular Season check (Game 82 is index 81 before increment, or 82 after increment)
+    if (state.currentGameIndex >= totalGames || state.currentGameIndex >= 82) {
+      if (state.phase === 'regular_season') {
+        this.endRegularSeason(state);
+      }
+    }
+
+    // Dynamic News & Events
+    if (state.currentGameIndex % 15 === 0) {
+      const injuryNotif = newsService.generateInjuryNews(state);
+      if (injuryNotif) state.notifications.unshift(injuryNotif);
+    }
+    
+    if (state.currentGameIndex % 20 === 0) {
+      const rumorNotif = newsService.generateRumorNews(state);
+      if (rumorNotif) state.notifications.unshift(rumorNotif);
+    }
+
+    // Trade Proposal Logic
+    if (state.currentGameIndex % 4 === 0 && Math.random() < 0.3) {
+      const proposal = tradeEngine.generateCPUTradeProposal(state);
+      if (proposal) {
+        const cpuTeam = state.teams[proposal.fromTeamId];
+        const cpuPlayer = ALL_CARDS.find(c => c.id === proposal.offeredPlayerIds[0]) || state.customCards?.find(c => c.id === proposal.offeredPlayerIds[0]);
+        const userPlayer = ALL_CARDS.find(c => c.id === proposal.requestedPlayerIds[0]) || state.customCards?.find(c => c.id === proposal.requestedPlayerIds[0]);
+
+        state.notifications.unshift({
+          id: `prop-${Date.now()}`,
+          type: 'TRADE_PROPOSAL',
+          category: 'TRADE',
+          message: `🤝 TRADE OFFER: ${cpuTeam.name} wants to trade ${cpuPlayer?.name} for ${userPlayer?.name}`,
+          week: state.week,
+          season: state.season,
+          read: false,
+          data: proposal
+        });
+      }
     }
 
     stateService.save(state);
-    
     return { result, match: nextMatch };
+  },
+
+  endRegularSeason(state: FranchiseState) {
+    const previousPhase = state.phase;
+    console.log('[FRANCHISE PHASE]', previousPhase, '→', 'season_awards', 
+      { currentGameIndex: state.currentGameIndex, wins: state.teams[state.userTeamId].wins, losses: state.teams[state.userTeamId].losses, timestamp: new Date().toISOString() });
+    
+    // 1. Guardar ovrAtSeasonStart de todos los jugadores del roster para calcular MIP
+    Object.values(state.teams).forEach(team => {
+      team.roster.forEach(pid => {
+        const progress = state.playerProgress[pid];
+        if (progress) {
+          // If we haven't saved it yet, save current OVR as starting point (or keep what we have if it was set at start)
+          if (progress.ovrAtSeasonStart === undefined) {
+             const card = ALL_CARDS.find(c => c.id === pid) || state.customCards?.find(c => c.id === pid) || state.draftPool?.find(c => c.id === pid);
+             progress.ovrAtSeasonStart = card?.stats.ovr || 70;
+          }
+        }
+      });
+    });
+
+    // 2. Calcular standings finales y preparar bracket
+    playoffService.calculateSeasonStandings(state);
+
+    // 3. Calcular premios
+    calculateAwards(state);
+
+    // 4. Marcar fase como awards
+    state.phase = 'season_awards';
+    
+    // 5. Notificación de fin de temporada
+    state.notifications.unshift({
+      id: `season-end-${state.season}-${Date.now()}`,
+      type: 'NEWS',
+      message: `🏁 Regular Season complete! Final record: ${state.teams[state.userTeamId].wins}-${state.teams[state.userTeamId].losses}`,
+      week: state.week,
+      season: state.season,
+      read: false
+    });
   },
 
   simulateUserPlayoffGame(state: FranchiseState) {
@@ -127,10 +202,8 @@ export const gameService = {
       }
 
       // Check for End of Season
-      if (newState.currentGameIndex >= 82) {
-        console.log(`[FRANCHISE] Phase transition: regular_season → season_awards (Simulated End of Regular Season)`);
-        newState.phase = 'season_awards';
-        playoffService.calculateSeasonStandings(newState);
+      if ((newState.currentGameIndex || 0) >= 82) {
+        this.endRegularSeason(newState);
       }
     } else if (newState.phase !== 'season_awards' && newState.phase !== 'draft' && newState.phase !== 'free_agency') {
       // Advance playoffs if user is not in any series or already finished

@@ -44,8 +44,10 @@ import OfficeTab from './career/OfficeTab';
 import TradesTab from './career/TradesTab';
 import SettingsTab from './career/SettingsTab';
 import DraftTab from './career/DraftTab';
+import BoxScoreModal from './career/BoxScoreModal';
 import DraftLotteryOverlay from './career/DraftLotteryOverlay';
 import SeasonAwardsOverlay from './career/SeasonAwardsOverlay';
+import NegotiationOverlay from '../components/NegotiationOverlay';
 
 type FranchiseTab = 'hub' | 'lineup' | 'market' | 'league' | 'stats' | 'trades' | 'settings' | 'draft' | 'office';
 
@@ -56,6 +58,7 @@ const CareerView: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<FranchiseTab>('hub');
   const [showLottery, setShowLottery] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
 
   // CPU Trade Proposals Effect
   useEffect(() => {
@@ -81,10 +84,57 @@ const CareerView: React.FC = () => {
   const [selectedConf, setSelectedConf] = useState<'East' | 'West'>('East');
   const [lineupModalPos, setLineupModalPos] = useState<string | null>(null);
   const [showChampCelebrate, setShowChampCelebrate] = useState(false);
+  const [negotiationPlayerId, setNegotiationPlayerId] = useState<string | null>(null);
+  const [negotiationMode, setNegotiationMode] = useState<'extension' | 'signing'>('signing');
+
+  const [tradeTargetTeamId, setTradeTargetTeamId] = useState<string | null>(null);
+  const [userOfferedIds, setUserOfferedIds] = useState<string[]>([]);
+  const [userOfferedPickIds, setUserOfferedPickIds] = useState<string[]>([]);
+  const [cpuRequestedIds, setCpuRequestedIds] = useState<string[]>([]);
+  const [cpuRequestedPickIds, setCpuRequestedPickIds] = useState<string[]>([]);
+
+  const handleExecuteTrade = () => {
+    if (!state || !tradeTargetTeamId) return;
+    
+    // Construct offer
+    const offer = {
+      fromTeamId: state.userTeamId,
+      toTeamId: tradeTargetTeamId,
+      offeredPlayerIds: userOfferedIds,
+      requestedPlayerIds: cpuRequestedIds,
+      offeredPickIds: userOfferedPickIds,
+      requestedPickIds: cpuRequestedPickIds
+    };
+
+    // Evaluate trade
+    const evaluation = tradeEngine.evaluateUserTrade(state, offer);
+
+    if (evaluation.accepted) {
+      // executeTrade modifies the state object directly
+      tradeEngine.executeTrade(state, offer);
+      
+      const newState = { ...state };
+      setState(newState);
+      stateService.save(newState);
+      notifySuccess("✅ Trade Accepted!");
+      
+      // Reset trade states
+      setUserOfferedIds([]);
+      setUserOfferedPickIds([]);
+      setCpuRequestedIds([]);
+      setCpuRequestedPickIds([]);
+    } else {
+      notifyError(`❌ Trade Rejected: ${evaluation.reason}`);
+    }
+  };
 
   // Sync state to firestore when it changes locally
   React.useEffect(() => {
     if (state) {
+      if (!state.phase) {
+        state.phase = 'regular_season';
+        stateService.save(state);
+      }
       syncToFirestore(state);
     }
   }, [state?.phase, state?.season, state?.week, state?.currentGameIndex]);
@@ -92,6 +142,13 @@ const CareerView: React.FC = () => {
   const userTeam = useMemo(() => {
     if (!state || !state.userTeamId) return null;
     return state.teams[state.userTeamId];
+  }, [state]);
+
+  const nextUserGame = useMemo(() => {
+    if (!state || !state.userTeamId || !state.schedule) return null;
+    return state.schedule.find((m: any) => 
+      !m.played && (m.homeTeamId === state.userTeamId || m.awayTeamId === state.userTeamId)
+    );
   }, [state]);
 
   // OPTIMIZATION: Memoized Card Lookup Map
@@ -178,10 +235,17 @@ const CareerView: React.FC = () => {
     const res = gameService.simulateNextUserGame(state);
     if (res) {
       setLastGameResult(res);
+      // simulateNextUserGame already modified state in memory and saved it
       setState({ ...state });
-      stateService.save(state);
     }
   }, [state, setState]);
+
+  const handleCloseBoxScore = () => {
+    setLastGameResult(null);
+    // If the game result we just closed was the end of the season, 
+    // the phase transition already happened in simulateNextUserGame.
+    // CareerView re-renders and will show SeasonAwardsOverlay.
+  };
 
   const handleGoToNewSeason = () => {
     if (!state) return;
@@ -191,8 +255,8 @@ const CareerView: React.FC = () => {
   };
 
   const handleSignPlayer = React.useCallback((cardId: string) => {
-    // This could open a negotiation modal or handle instant signing
-    console.log("Signing player:", cardId);
+    setNegotiationMode('signing');
+    setNegotiationPlayerId(cardId);
   }, []);
 
   const leagueLeaders = useMemo(() => {
@@ -216,48 +280,147 @@ const CareerView: React.FC = () => {
 
   const renderPlayoffs = () => {
     if (!state) return null;
+    const bracket = state.playoffs?.bracket || {};
+    
+    const renderSeries = (series: PlayoffSeries, label: string) => {
+      const teamA = state.teams[series.team1Id];
+      const teamB = state.teams[series.team2Id];
+      if (!teamA || !teamB) return null;
+
+      const isFinished = series.wins1 >= 4 || series.wins2 >= 4;
+      const winnerId = series.wins1 >= 4 ? series.team1Id : series.wins2 >= 4 ? series.team2Id : null;
+
+      return (
+        <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-4 space-y-3 min-w-[200px]">
+           <div className="flex items-center justify-between border-b border-white/5 pb-2">
+              <span className="text-[10px] font-black text-amber-500 uppercase italic">{label}</span>
+              <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">{isFinished ? 'Final' : `Game ${series.wins1 + series.wins2 + 1}`}</span>
+           </div>
+           <div className="space-y-2">
+             {[
+               { id: series.team1Id, wins: series.wins1, seed: series.seed1 },
+               { id: series.team2Id, wins: series.wins2, seed: series.seed2 }
+             ].map((t) => (
+               <div key={t.id} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                     <span className="text-[8px] font-black text-zinc-700 w-3">{t.seed}</span>
+                     <img src={getTeamLogo(t.id)} className="w-6 h-6 object-contain" />
+                     <span className={`text-xs font-black uppercase italic ${winnerId === t.id ? 'text-amber-500' : 'text-white'}`}>{state.teams[t.id].abbreviation}</span>
+                  </div>
+                  <span className={`text-lg font-black italic tabular-nums ${winnerId === t.id ? 'text-amber-500' : 'text-zinc-500'}`}>{t.wins}</span>
+               </div>
+             ))}
+           </div>
+        </div>
+      );
+    };
+
     return (
-      <div className="p-8">
-        <h2 className="text-4xl font-black italic uppercase text-white mb-8">Playoff Bracket</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div>
-             <h3 className="text-blue-500 font-bold uppercase tracking-widest mb-4">Eastern Conference</h3>
-             {/* Render East Series */}
+      <div className="h-full flex flex-col">
+        <div className="p-4 md:p-8 flex items-center justify-between">
+          <div className="space-y-1">
+             <h2 className="text-2xl md:text-5xl font-black italic uppercase tracking-tighter text-white leading-none">Playoff Bracket</h2>
+             <p className="text-[10px] md:text-sm font-bold text-zinc-600 uppercase tracking-[0.4em] italic">Road to the Championship</p>
           </div>
-          <div>
-             <h3 className="text-red-500 font-bold uppercase tracking-widest mb-4">Western Conference</h3>
-             {/* Render West Series */}
+          <div className="flex gap-2">
+            {!state.championId && (
+              <button 
+                onClick={() => {
+                  playoffService.simulateNextRoundOnly(state);
+                  setState({...state});
+                  stateService.save(state);
+                }}
+                className="px-6 md:px-10 py-3 md:py-4 bg-white text-black rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-xs hover:bg-amber-500 transition-all shadow-2xl active:scale-95"
+              >
+                Simulate Round
+              </button>
+            )}
+            {state.championId && (
+              <button 
+                onClick={() => {
+                  const newState = { ...state, phase: 'offseason_start' as FranchisePhase };
+                  setState(newState);
+                  stateService.save(newState);
+                }}
+                className="px-6 md:px-10 py-3 md:py-4 bg-amber-500 text-black rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-xs hover:bg-amber-400 transition-all shadow-2xl active:scale-95"
+              >
+                Proceed to Offseason
+              </button>
+            )}
           </div>
         </div>
-        {/* Sim buttons etc */}
-        <div className="mt-8 flex gap-4">
-           {!state.championId && (
-             <button 
-               onClick={() => {
-                 playoffService.simulateNextRoundOnly(state);
-                 setState({...state});
-                 stateService.save(state);
-               }}
-               className="px-8 py-3 bg-white text-black rounded-xl font-bold uppercase tracking-widest text-xs"
-             >
-               Simulate Round
-             </button>
-           )}
-           {state.championId && (
-             <button 
-               onClick={() => {
-                 const newState = { ...state, phase: 'offseason_start' as FranchisePhase };
-                 setState(newState);
-                 stateService.save(newState);
-               }}
-               className="px-8 py-3 bg-amber-500 text-black rounded-xl font-bold uppercase tracking-widest text-xs"
-             >
-               Proceed to Offseason
-             </button>
-           )}
+
+        <div className="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar pb-12">
+          <div className="min-w-[1200px] h-full flex items-center gap-12 px-8">
+            {/* QUARTER FINALS */}
+            <div className="flex flex-col justify-around h-full gap-8">
+               <div className="space-y-8">
+                  <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest text-center border-b border-blue-500/20 pb-2">East Semis</p>
+                  {state.playoffs?.series?.filter((s: any) => s.conference === 'East' && s.round === 1).map((s: any, i: number) => renderSeries(s, `SR ${i+1}`))}
+               </div>
+               <div className="space-y-8">
+                  <p className="text-[10px] font-black text-red-500 uppercase tracking-widest text-center border-b border-red-500/20 pb-2">West Semis</p>
+                  {state.playoffs?.series?.filter((s: any) => s.conference === 'West' && s.round === 1).map((s: any, i: number) => renderSeries(s, `SR ${i+1}`))}
+               </div>
+            </div>
+
+            {/* CONFERENCE FINALS */}
+            <div className="flex flex-col justify-around h-full gap-24">
+               {state.playoffs?.series?.filter((s: any) => s.round === 2).map((s: any) => renderSeries(s, s.conference === 'East' ? 'East Finals' : 'West Finals'))}
+            </div>
+
+            {/* FINALS */}
+            <div className="flex flex-col justify-center h-full">
+               <div className="space-y-4 text-center">
+                  <Trophy className="text-amber-500 mx-auto animate-pulse" size={48} />
+                  {state.playoffs?.series?.filter((s: any) => s.round === 3).map((s: any) => renderSeries(s, 'The Finals'))}
+               </div>
+            </div>
+          </div>
         </div>
       </div>
     );
+  };
+
+  const handleNegotiationStart = (playerId: string) => {
+    setNegotiationMode('extension');
+    setNegotiationPlayerId(playerId);
+  };
+
+  const handleAcceptNegotiation = (salary: number, years: number) => {
+    if (!state || !negotiationPlayerId) return;
+
+    const newState = { ...state };
+    const team = newState.teams[state.userTeamId];
+    
+    if (negotiationMode === 'signing') {
+      // Free agency signing
+      team.roster.push(negotiationPlayerId);
+      team.contracts[negotiationPlayerId] = {
+        salary,
+        yearsRemaining: years,
+        canExtend: false,
+        contractType: salary > 20_000_000 ? 'max' : 'veteran'
+      };
+      newState.freeAgentPool = newState.freeAgentPool.filter((id: string) => id !== negotiationPlayerId);
+      notifySuccess("Player signed successfully!");
+    } else {
+      // Contract extension
+      team.contracts[negotiationPlayerId] = {
+        ...team.contracts[negotiationPlayerId],
+        salary,
+        yearsRemaining: team.contracts[negotiationPlayerId].yearsRemaining + years,
+        canExtend: false
+      };
+      notifySuccess("Contract extended!");
+    }
+
+    // Recalculate payroll
+    team.payroll = Object.values(team.contracts).reduce((sum: any, c: any) => sum + c.salary, 0);
+
+    setState(newState);
+    stateService.save(newState);
+    setNegotiationPlayerId(null);
   };
 
   const renderPhaseSpecificContent = () => {
@@ -358,15 +521,40 @@ const CareerView: React.FC = () => {
                           key="hub" 
                           state={state} 
                           userTeam={userTeam!} 
-                          findCard={findCard} 
+                          nextUserGame={nextUserGame}
                           simulateGame={simulateGame}
-                          advanceWeek={advanceWeek}
-                          lastGameResult={lastGameResult}
-                          onCloseLastGame={() => setLastGameResult(null)}
                           leagueLeaders={leagueLeaders}
+                          setActiveTab={setActiveTab}
+                          setState={setState}
+                          renderPlayoffs={renderPlayoffs}
+                          triggerLottery={handleStartDraftLottery}
                         />
                       )}
-                      {activeTab === 'lineup' && <LineupTab key="lineup" state={state} userTeam={userTeam!} findCard={findCard} onOpenModal={setLineupModalPos} />}
+                      {activeTab === 'lineup' && (
+                        <LineupTab 
+                          key="lineup" 
+                          state={state} 
+                          userTeam={userTeam!} 
+                          findCard={findCard} 
+                          lineupModalPos={lineupModalPos}
+                          setLineupModalPos={setLineupModalPos}
+                          handleUpdateLineup={(playerId) => {
+                            if (!state || !lineupModalPos) return;
+                            const newState = { ...state };
+                            const team = newState.teams[state.userTeamId];
+                            if (lineupModalPos === 'bench') {
+                               if (!team.lineup.bench.includes(playerId)) {
+                                  team.lineup.bench.push(playerId);
+                               }
+                            } else {
+                               team.lineup[lineupModalPos] = playerId;
+                            }
+                            setState(newState);
+                            stateService.save(newState);
+                          }}
+                          setState={setState}
+                        />
+                      )}
                       {activeTab === 'market' && (
                         <MarketTab 
                           key="market" 
@@ -384,9 +572,42 @@ const CareerView: React.FC = () => {
                           renderPlayoffs={renderPlayoffs}
                         />
                       )}
-                      {activeTab === 'stats' && <StatsTab key="stats" state={state} findCard={findCard} />}
-                      {activeTab === 'trades' && <TradesTab key="trades" state={state} setState={setState} findCard={findCard} />}
-                      {activeTab === 'office' && <OfficeTab key="office" state={state} findCard={findCard} />}
+                      {activeTab === 'stats' && (
+                        <StatsTab 
+                          key="stats" 
+                          state={state} 
+                          userTeam={userTeam!}
+                          findCard={findCard} 
+                        />
+                      )}
+                      {activeTab === 'trades' && (
+                        <TradesTab 
+                          key="trades" 
+                          state={state} 
+                          tradeTargetTeamId={tradeTargetTeamId}
+                          setTradeTargetTeamId={setTradeTargetTeamId}
+                          userOfferedIds={userOfferedIds}
+                          setUserOfferedIds={setUserOfferedIds}
+                          userOfferedPickIds={userOfferedPickIds}
+                          setUserOfferedPickIds={setUserOfferedPickIds}
+                          cpuRequestedIds={cpuRequestedIds}
+                          setCpuRequestedIds={setCpuRequestedIds}
+                          cpuRequestedPickIds={cpuRequestedPickIds}
+                          setCpuRequestedPickIds={setCpuRequestedPickIds}
+                          handleExecuteTrade={handleExecuteTrade}
+                          findCard={findCard} 
+                        />
+                      )}
+                      {activeTab === 'office' && (
+                        <OfficeTab 
+                          key="office" 
+                          state={state} 
+                          userTeam={userTeam!}
+                          findCard={findCard} 
+                          handleNegotiationStart={handleNegotiationStart}
+                          setState={setState}
+                        />
+                      )}
                       {activeTab === 'settings' && <SettingsTab key="settings" state={state} onReset={resetFranchise} />}
                     </AnimatePresence>
                    </div>
@@ -439,10 +660,84 @@ const CareerView: React.FC = () => {
   }
 
   return (
-    <div className="flex bg-black h-screen w-screen overflow-hidden text-white font-sans selection:bg-amber-500/30">
-      {renderPhaseSpecificContent()}
+    <div className="flex bg-black h-screen w-screen overflow-hidden text-white font-sans selection:bg-amber-500/30 touch-none">
+      <div className="flex-1 flex flex-col md:flex-row h-full w-full overflow-hidden relative">
+        {renderPhaseSpecificContent()}
+        
+        {/* MOBILE BOTTOM NAVIGATION */}
+        <div className="md:hidden fixed bottom-0 inset-x-0 h-16 bg-zinc-950/80 backdrop-blur-xl border-t border-white/5 flex items-center justify-around z-[4000] pb-safe">
+          <MobileTab id="hub" icon={<LayoutDashboard size={20} />} label="Hub" active={activeTab === 'hub'} onClick={() => setActiveTab('hub')} />
+          <MobileTab id="lineup" icon={<Users size={20} />} label="Roster" active={activeTab === 'lineup'} onClick={() => setActiveTab('lineup')} />
+          <MobileTab id="market" icon={<ShoppingCart size={20} />} label="Market" active={activeTab === 'market'} onClick={() => setActiveTab('market')} />
+          <MobileTab id="league" icon={<Trophy size={20} />} label="League" active={activeTab === 'league'} onClick={() => setActiveTab('league')} />
+          <button 
+            onClick={() => setShowMoreMenu(true)} 
+            className="flex flex-col items-center justify-center gap-1 w-12"
+          >
+            <div className="flex gap-0.5">
+               <div className="w-1 h-1 bg-zinc-500 rounded-full" />
+               <div className="w-1 h-1 bg-zinc-500 rounded-full" />
+               <div className="w-1 h-1 bg-zinc-500 rounded-full" />
+            </div>
+            <span className="text-[8px] font-black uppercase text-zinc-500">More</span>
+          </button>
+        </div>
+
+        {/* BOX SCORE MODAL */}
+        <AnimatePresence>
+          {lastGameResult && (
+             <BoxScoreModal 
+               result={lastGameResult.result}
+               homeTeam={state.teams[lastGameResult.match.homeTeamId]}
+               awayTeam={state.teams[lastGameResult.match.awayTeamId]}
+               userTeamId={state.userTeamId}
+               onContinue={handleCloseBoxScore}
+             />
+          )}
+        </AnimatePresence>
+
+        {/* NEGOTIATION OVERLAY */}
+        <AnimatePresence>
+          {negotiationPlayerId && (
+            <NegotiationOverlay 
+              card={findCard(negotiationPlayerId)}
+              state={state}
+              userTeam={userTeam}
+              mode={negotiationMode}
+              onAccept={handleAcceptNegotiation}
+              onClose={() => setNegotiationPlayerId(null)}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* MORE MENU DRAWER (Mobile) */}
+        <AnimatePresence>
+          {showMoreMenu && (
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="md:hidden fixed inset-0 z-[4500] bg-black/90 backdrop-blur-md flex flex-col justify-end"
+              onClick={() => setShowMoreMenu(false)}
+            >
+              <motion.div 
+                initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+                className="bg-zinc-900 rounded-t-[2.5rem] p-8 border-t border-white/10"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="grid grid-cols-3 gap-6">
+                   <DrawerItem icon={<TrendingUp size={24} />} label="Trade" active={activeTab === 'trades'} onClick={() => { setActiveTab('trades'); setShowMoreMenu(false); }} />
+                   <DrawerItem icon={<Building size={24} />} label="Office" active={activeTab === 'office'} onClick={() => { setActiveTab('office'); setShowMoreMenu(false); }} />
+                   <DrawerItem icon={<BarChart3 size={24} />} label="Stats" active={activeTab === 'stats'} onClick={() => { setActiveTab('stats'); setShowMoreMenu(false); }} />
+                   <DrawerItem icon={<SettingsIcon size={24} />} label="Settings" active={activeTab === 'settings'} onClick={() => { setActiveTab('settings'); setShowMoreMenu(false); }} />
+                </div>
+                <button onClick={() => setShowMoreMenu(false)} className="w-full mt-12 py-4 bg-white/5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-zinc-500">Close</button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* GLOBAL SYNC OVERLAY */}
+
       <AnimatePresence>
         {isSyncing && (
           <motion.div 
@@ -466,6 +761,23 @@ const SidebarItem: React.FC<{ id: string, icon: any, label: string, active: bool
     {icon}
     <span className="hidden lg:block text-[10px] font-black uppercase tracking-widest truncate">{label}</span>
   </button>
+);
+
+const MobileTab: React.FC<{ id: string, icon: any, label: string, active: boolean, onClick: () => void }> = ({ icon, label, active, onClick }) => (
+  <button 
+    onClick={onClick}
+    className={`flex flex-col items-center justify-center gap-1 w-14 h-full border-t-2 transition-all ${active ? 'border-amber-500 text-amber-500' : 'border-transparent text-zinc-500'}`}
+  >
+    {icon}
+    <span className="text-[8px] font-black uppercase tracking-tighter">{label}</span>
+  </button>
+);
+
+const DrawerItem: React.FC<{ icon: any, label: string, active: boolean, onClick: () => void }> = ({ icon, label, active, onClick }) => (
+    <button onClick={onClick} className={`flex flex-col items-center gap-2 p-4 rounded-3xl transition-all ${active ? 'bg-amber-500 text-black' : 'bg-white/5 text-zinc-400'}`}>
+       {icon}
+       <span className="text-[9px] font-black uppercase">{label}</span>
+    </button>
 );
 
 export default CareerView;

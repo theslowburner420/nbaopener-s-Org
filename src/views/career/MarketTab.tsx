@@ -81,7 +81,7 @@ const MarketTab: React.FC<MarketTabProps> = React.memo(({
               <h3 className="text-[10px] md:text-sm font-black uppercase italic text-zinc-500 tracking-[0.2em]">Available Talents</h3>
               <p className="text-[8px] md:text-[10px] font-black text-zinc-700 uppercase">Top 50 Prospects</p>
             </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {(state.freeAgentPool || []).slice(0, 50).map((id: string, i: number) => {
               const card = findCard(id);
               if (!card) return null;

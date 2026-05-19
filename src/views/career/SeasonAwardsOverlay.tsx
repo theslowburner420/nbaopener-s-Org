@@ -81,9 +81,9 @@ const SeasonAwardsOverlay: React.FC<SeasonAwardsOverlayProps> = ({ state, onCont
               </h2>
             </div>
 
-            {/* Winner Display */}
+             {/* Winner Display */}
             {currentAward.key === 'allNba' ? (
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {allNbaIds.map((pid, idx) => {
                   const card = findCard(pid);
                   const team = Object.values(state.teams as Record<string, TeamObject>).find(t => t.roster.includes(pid));
@@ -93,12 +93,20 @@ const SeasonAwardsOverlay: React.FC<SeasonAwardsOverlayProps> = ({ state, onCont
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.1 }}
-                      className="bg-zinc-900 border border-white/5 rounded-2xl p-4 text-center space-y-4"
+                      className="bg-zinc-900 border border-white/5 rounded-2xl p-4 text-center space-y-4 group hover:border-amber-500/50 transition-all"
                     >
-                       <img src={card?.imageUrl} className="w-full aspect-[2/3] object-cover rounded-lg" />
+                       <div className="aspect-[3/4] bg-zinc-800 rounded-xl overflow-hidden relative border border-white/10">
+                          <img 
+                            src={card?.nbaId ? `https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png` : card?.imageUrl} 
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform" 
+                          />
+                          <div className="absolute top-0 right-0 p-1.5">
+                             <img src={getTeamLogo(team?.teamId || '')} className="w-5 h-5 object-contain" />
+                          </div>
+                       </div>
                        <div>
-                         <p className="text-[10px] font-black uppercase text-white truncate">{card?.name}</p>
-                         <p className="text-[8px] font-bold text-zinc-500 uppercase">{team?.abbreviation}</p>
+                         <p className="text-[10px] md:text-sm font-black uppercase text-white truncate italic leading-none">{card?.name}</p>
+                         <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest mt-1">{team?.abbreviation} • {card?.position}</p>
                        </div>
                     </motion.div>
                   );

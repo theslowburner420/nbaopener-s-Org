@@ -121,7 +121,8 @@ export interface PlayoffSeries {
 
 export interface FranchiseNotification {
   id: string;
-  type: 'TRADE' | 'NEWS' | 'INJURY';
+  type: 'TRADE' | 'NEWS' | 'INJURY' | 'TRADE_PROPOSAL' | 'MILESTONE' | 'STREAK' | 'RUMOR';
+  category?: 'TRADE' | 'INJURY' | 'MILESTONE' | 'STREAK' | 'RUMOR' | 'PERFORMANCE' | 'CPU';
   message: string;
   week: number;
   season: number;
@@ -129,14 +130,28 @@ export interface FranchiseNotification {
   data?: any;
 }
 
-export interface FranchiseNotification {
+export interface SeasonHistoryItem {
+  seasonYear: number;
+  wins: number;
+  losses: number;
+  playoffResult: string;
+  champion: string;
+  mvp?: string;
+  dpoy?: string;
+  roy?: string;
+  mip?: string;
+  allNba: string[];
+  finalsMvp?: string;
+}
+
+export interface RetiredPlayer {
   id: string;
-  type: 'TRADE' | 'NEWS' | 'INJURY';
-  message: string;
-  week: number;
-  season: number;
-  read: boolean;
-  data?: any;
+  name: string;
+  card: any;
+  stats: PlayerStats;
+  seasonsPlayed: number;
+  awards: string[];
+  lastTeam: string;
 }
 
 export interface FranchiseState {
@@ -156,6 +171,8 @@ export interface FranchiseState {
     form: number;
     ovr?: number;
     ovrAtSeasonStart?: number;
+    injuryWeeks?: number;
+    injuryType?: string;
   }>;
   stats: {
     seasonal: Record<string, PlayerStats>;
@@ -180,7 +197,7 @@ export interface FranchiseState {
     allNba: string[];
   }>;
   trophyCase: {
-    type: 'CHAMP' | 'MVP' | 'FMVP' | 'DPOY' | 'ROY' | 'RECORD';
+    type: 'CHAMP' | 'MVP' | 'FMVP' | 'DPOY' | 'ROY' | 'RECORD' | 'ALL_NBA';
     season: number;
     playerId?: string;
     label?: string;
@@ -192,13 +209,8 @@ export interface FranchiseState {
     steals: { value: number; rival: string; date: string };
     blocks: { value: number; rival: string; date: string };
   }>;
-  teamHistory: {
-    season: number;
-    record: string;
-    ppg: number;
-    champion: string;
-    awards: string[];
-  }[];
+  seasonHistory: SeasonHistoryItem[];
+  hallOfFame: RetiredPlayer[];
   negotiations: Record<string, {
     rounds: number;
     lastOfferSalary: number;
