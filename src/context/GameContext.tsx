@@ -519,6 +519,25 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const updated = payload.new as any;
             console.log('🔔 Remote update received via Realtime');
             
+            // CRITICAL: Avoid infinite write loops by checking if the incoming data matches our last synced state
+            const incomingStateString = JSON.stringify({
+              coins: Number(updated.coins) || 0,
+              collection: updated.cards || [],
+              unlockedAchievements: Array.isArray(updated.unlocked_achievements) ? updated.unlocked_achievements : [],
+              claimedAchievements: Array.isArray(updated.claimed_achievements) ? updated.claimed_achievements : [],
+              inventoryPacks: Array.isArray(updated.inventory_packs) ? updated.inventory_packs : [],
+              completedSbcs: Array.isArray(updated.completed_sbcs) ? updated.completed_sbcs : [],
+              isPremium: !!updated.ads_disabled,
+              last_claimed_date: updated.last_claimed_date,
+              claimed_days: updated.claimed_days,
+              userId: user.id
+            });
+
+            if (incomingStateString === lastSyncedStateRef.current) {
+              console.log('🔄 Remote update matches last synced state, ignoring to prevent loop');
+              return;
+            }
+
             // CRITICAL: Transform remote cards array to local collection map
             let migratedCollection = stateRef.current.collection;
             if (updated.cards && Array.isArray(updated.cards)) {
@@ -539,8 +558,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
               franchise: updated.franchise_state ? JSON.parse(updated.franchise_state) : prev.franchise,
             }));
             
-            // Sync the ref too to prevent immediate bounce-back save
-            lastSyncedStateRef.current = ''; 
+            // Sync the ref to prevent a bounce-back save
+            lastSyncedStateRef.current = incomingStateString; 
           }).subscribe();
       }
 
