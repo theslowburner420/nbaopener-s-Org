@@ -397,9 +397,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', user.id)
         .single();
 
-      // Race against a 10s timeout
+      // Race against a 3s timeout for faster unblocking
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Cloud response timeout')), 10000)
+        setTimeout(() => reject(new Error('Cloud response timeout')), 3000)
       );
 
       const { data: cloudProfile, error: fetchError } = await (Promise.race([cloudFetchPromise, timeoutPromise]) as any);
@@ -602,13 +602,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     const safetyTimeout = setTimeout(() => {
-      // Extended safety unblock to 10s
+      // Reduced safety unblock to 4s
       if (!isInitialSyncDoneRef.current) {
-        console.warn('⚠️ Safety unblock triggered after 10s');
+        console.warn('⚠️ Safety unblock triggered after 4s');
         setIsAuthLoading(false);
         setIsInitialSyncDone(true);
       }
-    }, 10000);
+    }, 4000);
 
     return () => {
       mounted = false;

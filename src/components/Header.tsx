@@ -38,10 +38,10 @@ const Header: React.FC = React.memo(() => {
   }, [coins]);
 
   return (
-    <header className="h-14 md:h-16 bg-black/40 backdrop-blur-3xl border-b border-white/5 flex items-center justify-between px-4 md:px-10 shrink-0 z-[5000] relative">
+    <header className="h-12 md:h-16 bg-black/40 backdrop-blur-3xl border-b border-white/5 flex items-center justify-between px-3 md:px-10 shrink-0 z-[5000] relative">
       {/* Left side: Logo */}
       <div className="flex items-center gap-4 cursor-pointer group" onClick={() => setCurrentView('home')}>
-        <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl overflow-hidden shadow-[0_5px_15px_rgba(255,255,255,0.1)] border border-white/10 shrink-0 group-hover:scale-110 transition-transform duration-700">
+        <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl overflow-hidden shadow-lg border border-white/10 shrink-0 group-hover:scale-110 transition-transform duration-700">
           <img 
             src="https://i.postimg.cc/K83yjb9c/Wvn-WDz-Es-400x400.jpg" 
             alt="Logo" 
@@ -52,40 +52,40 @@ const Header: React.FC = React.memo(() => {
       </div>
 
       {/* Right side: Coins & Profile */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 md:gap-4">
         {/* Coins Display */}
-        <div className="flex items-center gap-2 bg-white/5 backdrop-blur-xl px-3 py-1.5 md:px-4 md:py-2 rounded-full border border-white/5 shadow-2xl group hover:border-amber-500/30 transition-colors cursor-pointer"
+        <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-xl px-2.5 py-1 rounded-full border border-white/5 shadow-2xl group hover:border-amber-500/30 transition-colors cursor-pointer"
              onClick={() => setCurrentView('shop')}>
-          <Coins size={14} className="text-amber-500" fill="currentColor" />
-          <span className="text-xs md:text-sm font-black tabular-nums text-amber-500 tracking-tight">
+          <Coins size={12} className="text-amber-500 md:size-14" fill="currentColor" />
+          <span className="text-[10px] md:text-sm font-black tabular-nums text-amber-500 tracking-tight">
             {displayCoins}
           </span>
         </div>
 
         {/* User Profile / Login */}
         {isAuthLoading ? (
-          <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-white/5 animate-pulse shrink-0" />
+          <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-white/5 animate-pulse shrink-0" />
         ) : user ? (
           <div className="relative" ref={menuRef}>
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="flex items-center gap-2 pl-3 border-l border-white/5 hover:opacity-80 transition-all"
+              className="flex items-center gap-1.5 pl-2 border-l border-white/5 hover:opacity-80 transition-all"
             >
               <div className="relative">
                 {user.avatar_url ? (
                   <img 
                     src={user.avatar_url} 
                     alt={user.username} 
-                    className="w-8 h-8 md:w-9 md:h-9 rounded-lg border border-white/10 shadow-xl shrink-0 object-cover"
+                    className="w-7 h-7 md:w-9 md:h-9 rounded-lg border border-white/10 shadow-xl shrink-0 object-cover"
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-zinc-800 flex items-center justify-center border border-white/10 shadow-xl shrink-0">
-                    <UserIcon size={14} className="text-zinc-500" />
+                  <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg bg-zinc-800 flex items-center justify-center border border-white/10 shadow-xl shrink-0">
+                    <UserIcon size={12} className="text-zinc-500 md:size-14" />
                   </div>
                 )}
               </div>
-              <ChevronDown size={14} className={`text-zinc-500 transition-transform duration-500 ${isMenuOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown size={12} className={`text-zinc-500 transition-transform duration-500 ${isMenuOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {/* Premium Dropdown Menu */}
@@ -132,10 +132,9 @@ const Header: React.FC = React.memo(() => {
         ) : supabase ? (
           <button
             onClick={login}
-            className="flex items-center gap-1.5 bg-white text-black px-3 py-1.5 rounded-full text-[8px] font-black uppercase tracking-[0.1em] hover:bg-amber-400 transition-all active:scale-95 shadow-lg border border-white/10"
+            className="px-2.5 py-1 bg-white text-black rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-tight hover:bg-amber-400 transition-all active:scale-95 shadow-md"
           >
-            <LogIn size={10} />
-            <span>Google Login</span>
+            Google
           </button>
         ) : (
           <div className="flex items-center gap-1.5 text-zinc-600 px-3 py-1.5 rounded-full border border-white/5 bg-zinc-900/30">
