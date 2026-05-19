@@ -224,7 +224,10 @@ function AppContent() {
   }
 
   return (
-    <div className="h-[100dvh] w-full bg-black text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black">
+    <div className="h-[100dvh] w-full bg-black text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black relative overflow-hidden">
+      {/* Premium Texture Overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-[10000] mix-blend-overlay" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
+      
       {/* Offline Warning */}
       <AnimatePresence>
         {isOffline && (

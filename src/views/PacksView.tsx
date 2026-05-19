@@ -1,7 +1,7 @@
 import React, { ReactNode, useState, useMemo } from 'react';
 import { useGame } from '../context/GameContext';
 import { useEngine, PackType, DROP_RATES } from '../hooks/useEngine';
-import { ShoppingCart, Zap, Trophy, Crown, Star, CheckCircle2, Shield, Package, Gift, Sparkles } from 'lucide-react';
+import { ShoppingCart, Zap, Trophy, Crown, Star, CheckCircle2, Shield, Package, Gift, Sparkles, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import PackOpener from '../components/PackOpener';
 import { Card } from '../types';
@@ -14,7 +14,7 @@ interface Pack {
   description: string;
   price: number;
   color: string;
-  icon: ReactNode;
+  image: string;
 }
 
 const PACKS: Pack[] = [
@@ -24,7 +24,7 @@ const PACKS: Pack[] = [
     description: 'Perfect for beginners. Contains 3 cards.',
     price: 1000,
     color: 'from-orange-800 to-orange-950',
-    icon: <Zap size={48} className="text-orange-400" />
+    image: 'https://i.postimg.cc/d1xbwS8d/generated-image-(6).png'
   },
   {
     id: 'allstar',
@@ -32,7 +32,7 @@ const PACKS: Pack[] = [
     description: 'High chance of elite players. Contains 4 cards.',
     price: 5000,
     color: 'from-zinc-400 to-zinc-600',
-    icon: <Star size={24} className="text-zinc-200" />
+    image: 'https://i.postimg.cc/RVKZpcmB/generated-image-(7).png'
   },
   {
     id: 'mvp',
@@ -40,7 +40,7 @@ const PACKS: Pack[] = [
     description: 'Guaranteed high-tier players. Contains 5 cards.',
     price: 25000,
     color: 'from-amber-500 to-amber-700',
-    icon: <Trophy size={48} className="text-amber-200" />
+    image: 'https://i.postimg.cc/T3kMtwps/generated-image-(8).png'
   },
   {
     id: 'hof',
@@ -48,7 +48,7 @@ const PACKS: Pack[] = [
     description: 'The ultimate collection. Highest Mythic rates.',
     price: 100000,
     color: 'from-yellow-400 via-orange-500 to-red-600',
-    icon: <Crown size={48} />
+    image: 'https://i.postimg.cc/Pfb76x7C/generated-image-(9).png'
   },
   {
     id: 'legendary_mvp',
@@ -56,15 +56,7 @@ const PACKS: Pack[] = [
     description: 'Exclusive series of historical MVP winners. Contains 1 card.',
     price: 250000,
     color: 'from-zinc-900 via-amber-900 to-black',
-    icon: <Trophy size={48} className="text-amber-500" />
-  },
-  {
-    id: 'rising_star',
-    name: 'Rising Star',
-    description: 'Special edition featuring the best young prospects. Contains 4 cards.',
-    price: 50000,
-    color: 'from-cyan-600 via-teal-900 to-black',
-    icon: <Sparkles size={48} className="text-cyan-400" />
+    image: 'https://i.postimg.cc/GtzqbBwc/generated-image-(10).png'
   }
 ];
 
@@ -89,10 +81,10 @@ export default function PacksView() {
       if (packId === 'legendary_mvp') {
         pool = ALL_CARDS.filter(c => c.series === 'Legendary MVP Series');
       } else {
-        const rates = DROP_RATES[packId];
+        const rates = DROP_RATES[packId as PackType];
         const mainRarities = rates
-          .filter(r => r.rate > 10)
-          .map(r => r.rarity);
+          ? rates.filter(r => r.rate > 10).map(r => r.rarity)
+          : [];
         pool = ALL_CARDS.filter(c => mainRarities.includes(c.rarity));
       }
 
@@ -195,86 +187,40 @@ export default function PacksView() {
                 <motion.div 
                   key={pack.id} 
                   className="flex flex-col h-full"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ 
-                    x: [-1, 1, -1, 1, 0],
-                    transition: { duration: 0.1, repeat: 2 }
-                  }}
+                  whileHover={{ y: -5 }}
                 >
-                  <div className="flex-1 flex flex-col">
-                    <div className={`aspect-[3/4.2] rounded-2xl bg-gradient-to-br ${pack.color} p-0.5 shadow-lg relative overflow-hidden group border border-white/10 flex-shrink-0`}>
-                      <div className="absolute inset-0 bg-black/10 group-active:bg-black/30 transition-colors" />
+                  <div className="flex-1 flex flex-col gap-4">
+                    <div className={`aspect-[4/5.5] rounded-[2.5rem] bg-zinc-900 shadow-2xl relative overflow-hidden group border border-white/5 flex-shrink-0 cursor-pointer`}
+                         onClick={() => handleBuy(pack)}>
+                      <img 
+                        src={pack.image} 
+                        alt={pack.name} 
+                        className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-1000"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
                       
                       {/* Collection Indicator Badge */}
                       {(() => {
                         const progress = packProgresses[pack.id];
                         return (
-                          <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10 z-20">
-                            <CheckCircle2 size={8} className={progress.percent === 100 ? "text-green-400" : "text-white/60"} />
-                            <span className="text-[7px] font-black text-white/90 uppercase tracking-tighter">
-                              {progress.percent}%
+                          <div className="absolute top-4 left-4 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 z-20">
+                            <CheckCircle2 size={10} className={progress.percent === 100 ? "text-green-400" : "text-amber-500"} />
+                            <span className="text-[9px] font-black text-white uppercase tracking-widest">
+                              {progress.percent}% COLLECTED
                             </span>
                           </div>
                         );
                       })()}
                       
                       {/* Price Tag */}
-                      <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10 z-20 flex items-center gap-1">
-                        <Zap size={8} className="text-amber-400" fill="currentColor" />
-                        <span className="text-[9px] font-black text-white italic tracking-tighter">
+                      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-2xl px-6 py-2 rounded-full border border-white/20 z-20 flex items-center gap-2 group-hover:bg-amber-500 transition-colors group-hover:border-amber-400">
+                        <Zap size={12} className="text-amber-400 group-hover:text-black" fill="currentColor" />
+                        <span className="text-sm font-black text-white group-hover:text-black italic tracking-tighter">
                           {pack.price.toLocaleString()}
                         </span>
                       </div>
-
-                      {/* Pack Content */}
-                      <div className="absolute inset-0 flex flex-col items-center justify-center p-3 sm:p-4 text-center">
-                        <motion.div 
-                          animate={{ 
-                            scale: [1, 1.05, 1],
-                            rotate: [0, 2, -2, 0]
-                          }}
-                          transition={{ duration: 4, repeat: Infinity }}
-                          className="mb-2 sm:mb-4 text-white/90 drop-shadow-xl"
-                        >
-                          {/* Smaller Icon */}
-                          {React.cloneElement(pack.icon as React.ReactElement, { size: isMobile ? 24 : 32 })}
-                        </motion.div>
-                        
-                        <h2 className="text-lg sm:text-xl font-black tracking-tighter uppercase italic text-white drop-shadow-lg mb-1 leading-none">
-                          {pack.name.split(' ')[0]}
-                          <br />
-                          <span className="text-[10px] sm:text-sm opacity-80">{pack.name.split(' ').slice(1).join(' ')}</span>
-                        </h2>
-                        <p className="text-[7px] sm:text-[8px] text-white/60 font-bold uppercase tracking-widest leading-tight line-clamp-2 px-1 sm:px-2">
-                          {pack.description}
-                        </p>
-                      </div>
                     </div>
-
-                    {/* Buy Button - Premium Redesign */}
-                    <button 
-                      onClick={() => handleBuy(pack)}
-                      disabled={coins < pack.price || isSaving}
-                      className="mt-2 sm:mt-3 w-full group relative overflow-hidden rounded-xl active:scale-95 transition-all shrink-0 disabled:opacity-50"
-                    >
-                      <div className="absolute inset-0 bg-white group-hover:bg-amber-400 transition-colors" />
-                      <div className="relative px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 sm:gap-2">
-                          {isSaving ? (
-                            <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                          ) : (
-                            <ShoppingCart size={12} className="text-black sm:size-14" />
-                          )}
-                          <span className="text-[8px] sm:text-[10px] font-black text-black uppercase tracking-widest italic">
-                            {isSaving ? 'Saving...' : 'Get Pack'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-0.5 sm:gap-1 bg-black/10 px-1.5 sm:px-2 py-0.5 rounded-full">
-                          <Zap size={8} className="text-amber-600 sm:size-10" fill="currentColor" />
-                          <span className="text-[8px] sm:text-[10px] font-black text-black italic">{pack.price.toLocaleString()}</span>
-                        </div>
-                      </div>
-                    </button>
                   </div>
                 </motion.div>
               ))}
@@ -296,39 +242,34 @@ export default function PacksView() {
               ) : (
                 <div className="grid grid-cols-1 gap-3 sm:gap-4 mt-4">
                   {groupedInventory.map((pack) => {
-                    const packInfo = PACKS.find(p => p.id === pack.type) || { color: 'from-zinc-700 to-zinc-900', icon: <Package size={24} /> };
+                    const packInfo = PACKS.find(p => p.id === pack.type) || { color: 'from-zinc-700 to-zinc-900', image: 'https://i.postimg.cc/TwG0zjyz/generated-image-(1).png' };
                     return (
                       <motion.div
                         key={`${pack.type}-${pack.id}`}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4 group relative overflow-hidden"
+                        className="bg-zinc-950/50 backdrop-blur-xl border border-white/5 rounded-3xl p-5 flex items-center gap-6 group relative overflow-hidden"
                       >
-                        {/* Quantity Badge */}
-                        <div className="absolute top-0 right-0 bg-amber-500 px-3 py-1 rounded-bl-xl shadow-lg z-10">
-                          <span className="text-[10px] font-black text-white uppercase tracking-tighter">x{pack.count}</span>
+                        <div className="absolute top-0 right-0 bg-amber-500 px-4 py-1.5 rounded-bl-2xl shadow-lg z-10">
+                          <span className="text-[10px] font-black text-black uppercase tracking-widest">x{pack.count}</span>
                         </div>
 
-                        <div className={`w-14 h-18 sm:w-16 sm:h-20 rounded-xl bg-gradient-to-br ${packInfo.color} flex items-center justify-center text-white/80 shadow-lg shrink-0 relative`}>
-                          {React.cloneElement(packInfo.icon as React.ReactElement, { size: 24 })}
+                        <div className="w-20 h-28 rounded-2xl overflow-hidden shadow-2xl shrink-0 relative border border-white/10">
+                          <img src={packInfo.image} className="w-full h-full object-cover" referrerPolicy="no-referrer" alt={pack.name} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-xs sm:text-sm font-black uppercase italic tracking-tight truncate pr-12">{pack.name}</h3>
-                          <div className="flex items-center gap-2 mt-0.5 sm:mt-1">
-                            <span className="text-[8px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Unopened Pack</span>
-                          </div>
+                          <h3 className="text-lg font-black uppercase italic tracking-tight truncate text-white">{pack.name}</h3>
+                          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">Stored Reward</p>
+                          <button
+                            onClick={() => handleOpenInventory(pack.id, pack.type)}
+                            disabled={isSaving}
+                            className="mt-4 w-full bg-white text-black py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-400 active:scale-95 transition-all shadow-xl disabled:opacity-50 flex items-center justify-center"
+                          >
+                            {isSaving ? (
+                              <RefreshCw size={14} className="animate-spin" />
+                            ) : (
+                              'Decompress Pack'
+                            )}
+                          </button>
                         </div>
-                        <button
-                          onClick={() => handleOpenInventory(pack.id, pack.type)}
-                          disabled={isSaving}
-                          className="bg-white text-black px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg shrink-0 disabled:opacity-50 flex items-center justify-center min-w-[70px]"
-                        >
-                          {isSaving ? (
-                            <div className="w-3 h-3 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                          ) : (
-                            'Open'
-                          )}
-                        </button>
                       </motion.div>
                     );
                   })}

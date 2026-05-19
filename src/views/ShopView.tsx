@@ -5,57 +5,34 @@ import { Zap, Star, Trophy, ShoppingCart, ShieldCheck, Sparkles, X, Play } from 
 import { useNotification } from '../context/NotificationContext';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
-interface CoinPack {
-  id: string;
-  name: string;
-  coins: number;
-  price: number;
-  bonus?: string;
-  icon: React.ReactNode;
-  color: string;
-  popular?: boolean;
-}
-
-const COIN_PACKS: CoinPack[] = [
-  {
-    id: 'starter',
-    name: 'Starter Pack',
-    coins: 25000,
-    price: 1.99,
-    icon: <Zap size={24} className="text-blue-400" />,
-    color: 'from-blue-600/20 to-blue-900/40',
-  },
-  {
-    id: 'pro',
-    name: 'Pro Pack',
-    coins: 75000,
-    price: 4.99,
-    bonus: '+15% Bonus',
-    icon: <Star size={24} className="text-purple-400" />,
-    color: 'from-purple-600/20 to-purple-900/40',
-    popular: true,
-  },
-  {
-    id: 'whale',
-    name: 'Whale Pack',
-    coins: 250000,
-    price: 14.99,
-    bonus: '+30% Bonus',
-    icon: <Trophy size={24} className="text-amber-400" />,
-    color: 'from-amber-600/20 to-amber-900/40',
-  }
-];
-
-const ADS_FREE_PRICE = 2.00;
+// Removed Coin Packs as per user request to only have subscriptions and lifetime upgrades
+const LIFETIME_NO_ADS_PRICE = 5.00;
+const SUBSCRIPTION_BATTLE_PASS_PRICE = 3.00;
 
 export default function ShopView() {
-  const { coins, addCoins, isPremium, setPremium, forceSync, isSaving } = useGame();
+  const { 
+    coins, 
+    addCoins, 
+    isPremium, 
+    setPremium, 
+    hasLifetimeNoAds,
+    isBattlePassPremium,
+    subscriptionExpiry,
+    updateGameStateAsync,
+    forceSync, 
+    isSaving 
+  } = useGame();
   const { notifySuccess, notifyError } = useNotification();
   const [isAdPlaying, setIsAdPlaying] = useState(false);
   const [adCountdown, setAdCountdown] = useState(30);
   const adContainerRef = useRef<HTMLDivElement>(null);
   
   const paypalClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+
+  const isSubActive = subscriptionExpiry && new Date(subscriptionExpiry) > new Date();
+  
+  // Lifetime No-Ads is active if either the lifetime purchase was made OR the subscription is active
+  const isNoAdsActive = hasLifetimeNoAds || isSubActive;
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -111,24 +88,32 @@ export default function ShopView() {
     setAdCountdown(30);
   };
 
-  const handlePaymentSuccess = async (rewardType: 'coins' | 'isPremium', amount: number, transactionId?: string) => {
-    if (rewardType === 'coins') {
-      await addCoins(amount);
+  const handlePurchaseSuccess = async (type: 'lifetime' | 'subscription') => {
+    if (type === 'lifetime') {
+      await updateGameStateAsync({ 
+        hasLifetimeNoAds: true,
+        isPremium: true
+      });
+      notifySuccess("Lifetime No-Ads Activated!");
     } else {
-      await setPremium(true);
+      const expiry = new Date();
+      expiry.setMonth(expiry.getMonth() + 1);
+      await updateGameStateAsync({ 
+        isBattlePassPremium: true,
+        subscriptionExpiry: expiry.toISOString(),
+        isPremium: true
+      });
+      notifySuccess("Subscription Activated! Battle Pass Unlocked.");
     }
-    
-    console.log(`💰 PURCHASE VERIFIED: ${rewardType} - Amount: ${amount} - TX: ${transactionId}`);
-    notifySuccess("Purchase Successful! Your progress has been synced to the cloud.");
   };
 
   if (!paypalClientId) {
     return (
       <div className="h-full w-full flex items-center justify-center bg-black text-zinc-500 p-8 text-center">
-        <div>
-          <ShieldCheck size={48} className="mx-auto mb-4 opacity-20" />
-          <p className="text-sm font-black uppercase tracking-widest">PayPal Not Configured</p>
-          <p className="text-[10px] mt-2 uppercase tracking-widest opacity-60">Please set VITE_PAYPAL_CLIENT_ID in environment variables</p>
+        <div className="max-w-xs">
+          <ShieldCheck size={48} className="mx-auto mb-6 opacity-20 text-amber-500" />
+          <h2 className="text-xl font-black uppercase italic tracking-tighter text-white mb-2">Secure Vault</h2>
+          <p className="text-[10px] uppercase tracking-[0.2em] font-bold leading-relaxed">The premium shop is currently in restricted mode. Please contact administrator to enable payments.</p>
         </div>
       </div>
     );
@@ -148,217 +133,184 @@ export default function ShopView() {
         {/* Background Ambience */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(245,158,11,0.05)_0%,transparent_70%)] pointer-events-none" />
 
-        {/* Compact Header */}
-        <header className="px-6 py-4 flex justify-between items-center shrink-0 z-20 border-b border-white/5 bg-black/40 backdrop-blur-md">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center shadow-[0_0_15_rgba(245,158,11,0.3)]">
-              <ShoppingCart size={16} className="text-black" />
-            </div>
-            <div>
-              <h1 className="text-xl font-black tracking-tighter uppercase italic leading-none">Shop</h1>
-              <p className="text-[8px] text-zinc-500 uppercase tracking-[0.2em] font-bold">Hoops Economy</p>
-            </div>
-          </div>
-        </header>
-
         {/* Content */}
-        <div className="flex-1 px-4 sm:px-6 py-4 sm:py-6 space-y-6 sm:space-y-8 no-scrollbar pb-32 z-10">
+        <div className="flex-1 px-4 sm:px-8 py-6 sm:py-10 space-y-8 no-scrollbar pb-32 z-10 max-w-lg mx-auto w-full">
           
-          {/* Ads Free Option */}
-          {!isPremium ? (
-            <div className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-zinc-900/40 p-4 sm:p-5 group">
-              <div className="flex flex-col gap-4 sm:gap-5 relative z-10">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-purple-500 flex items-center justify-center text-white shadow-[0_0_15px_rgba(168,85,247,0.3)] shrink-0">
-                      <Zap size={16} sm:size={20} fill="currentColor" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm sm:text-base font-black uppercase italic tracking-tighter text-white">Ad-Free Experience</h3>
-                      <p className="text-[8px] sm:text-[9px] text-zinc-500 uppercase font-bold tracking-widest">One-time payment • Lifetime access</p>
-                    </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <span className="block text-base sm:text-lg font-black italic tracking-tighter text-purple-400">${ADS_FREE_PRICE.toFixed(2)}</span>
-                  </div>
+          <div className="text-center space-y-2 mb-10">
+             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full mb-4">
+                <Sparkles size={12} className="text-amber-500" />
+                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Exclusive Services</span>
+             </div>
+             <h1 className="text-5xl font-black italic uppercase tracking-tighter text-white leading-none">Hoops<span className="text-amber-500">Shop</span></h1>
+             <p className="text-[10px] text-zinc-500 uppercase tracking-[0.4em] font-bold">Ultra Pro Collector Vault</p>
+          </div>
+
+          {/* Subscription Option: ELITE PASS */}
+          <div className={`relative overflow-hidden rounded-[2.5rem] border-2 transition-all duration-500 p-8 group ${isSubActive ? 'border-amber-500 bg-amber-500/10 shadow-[0_40px_100px_rgba(245,158,11,0.2)]' : 'border-zinc-800 bg-zinc-900/40 hover:border-amber-500/30'}`}>
+            {isSubActive && (
+              <div className="absolute top-6 right-6 px-4 py-1.5 bg-amber-500 text-black text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg -rotate-6">
+                Active Member
+              </div>
+            )}
+            
+            <div className="flex flex-col gap-8 relative z-10">
+              <div className="flex flex-col gap-4">
+                <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-black shadow-[0_20px_40px_rgba(245,158,11,0.3)] shrink-0">
+                  <Trophy size={32} fill="currentColor" />
+                </div>
+                <div>
+                  <h3 className="text-3xl font-black uppercase italic tracking-tighter text-white">Elite Pass</h3>
+                  <p className="text-[9px] text-zinc-500 uppercase font-black tracking-widest mt-1">Full Premium Experience</p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="text-4xl font-black italic tracking-tighter text-white">
+                  $3.00<span className="text-sm font-black uppercase tracking-widest text-zinc-500 ml-2">/ month</span>
                 </div>
                 
-                <div className="mt-1">
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="flex items-center gap-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+                    <div className="w-5 h-5 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                      <ShieldCheck size={12} className="text-amber-500" />
+                    </div>
+                    Permanent No Ads
+                  </div>
+                  <div className="flex items-center gap-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+                    <div className="w-5 h-5 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                      <Zap size={12} className="text-amber-500" />
+                    </div>
+                    Premium Battle Pass
+                  </div>
+                  <div className="flex items-center gap-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+                    <div className="w-5 h-5 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                      <Sparkles size={12} className="text-amber-500" />
+                    </div>
+                    Daily Reward Multiplier
+                  </div>
+                </div>
+              </div>
+
+              {!isSubActive && (
+                <div className="mt-4">
                   <PayPalButtons
-                    style={{ 
-                      layout: "vertical", 
-                      height: 50, 
-                      color: 'blue', 
-                      shape: 'rect', 
-                      label: 'pay',
-                      tagline: false
-                    }}
-                    fundingSource={undefined} // Allow all eligible funding sources (Card, Apple Pay, Google Pay)
+                    style={{ layout: "vertical", height: 55, color: 'gold', shape: 'pill', label: 'subscribe', tagline: false }}
                     createOrder={(data, actions) => {
                       return actions.order.create({
                         intent: "CAPTURE",
                         purchase_units: [{
-                          description: "Ad-Free Experience",
-                          amount: {
-                            currency_code: "USD",
-                            value: ADS_FREE_PRICE.toFixed(2)
-                          }
+                          description: "Elite Pass Monthly Subscription",
+                          amount: { currency_code: "USD", value: SUBSCRIPTION_BATTLE_PASS_PRICE.toFixed(2) }
                         }],
-                        application_context: {
-                          shipping_preference: 'NO_SHIPPING',
-                          user_action: 'PAY_NOW'
-                        }
+                        application_context: { shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW' }
                       });
                     }}
                     onApprove={async (data, actions) => {
                       const details = await actions.order?.capture();
                       if (details?.status === 'COMPLETED') {
-                        handlePaymentSuccess('isPremium', 0, details.id);
+                        handlePurchaseSuccess('subscription');
                       }
                     }}
                     onError={(err) => {
                       console.error("PayPal Error:", err);
-                      notifyError("Payment failed. Please try again.");
+                      notifyError("Elite Pass activation failed.");
                     }}
                   />
                 </div>
-              </div>
+              )}
             </div>
-          ) : (
-            <div className="bg-zinc-900/30 border border-green-500/20 rounded-2xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 shrink-0">
-                <ShieldCheck size={16} sm:size={20} />
-              </div>
-              <div>
-                <h3 className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-green-500">Ads Free Active</h3>
-                <p className="text-[8px] sm:text-[9px] text-zinc-500 uppercase font-bold tracking-widest">Thank you for supporting the game</p>
-              </div>
-            </div>
-          )}
+          </div>
 
-          {/* Ad Reward Banner */}
-          <div className="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-transparent p-4 sm:p-5 group cursor-pointer active:scale-[0.98] transition-all"
+          {/* Upgrade Option: LIFETIME NO-ADS */}
+          <div className={`relative overflow-hidden rounded-[2.5rem] border-2 transition-all duration-500 p-8 group ${hasLifetimeNoAds ? 'border-purple-500 bg-purple-500/10 shadow-[0_40px_100px_rgba(168,85,247,0.2)]' : 'border-zinc-800 bg-zinc-900/40 hover:border-purple-500/30'}`}>
+            {hasLifetimeNoAds && (
+              <div className="absolute top-6 right-6 px-4 py-1.5 bg-purple-500 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
+                OWNED
+              </div>
+            )}
+            
+            <div className="flex flex-col gap-8 relative z-10">
+              <div className="flex flex-col gap-4">
+                <div className="w-16 h-16 rounded-3xl bg-purple-600 flex items-center justify-center text-white shadow-[0_20px_40px_rgba(168,85,247,0.3)] shrink-0">
+                  <ShieldCheck size={32} fill="currentColor" />
+                </div>
+                <div>
+                  <h3 className="text-3xl font-black uppercase italic tracking-tighter text-white">Lifetime No-Ads</h3>
+                  <p className="text-[9px] text-zinc-500 uppercase font-black tracking-widest mt-1">One-time payment • Forever</p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="text-4xl font-black italic tracking-tighter text-white">
+                  $5.00<span className="text-xs font-black uppercase tracking-[0.3em] text-zinc-500 ml-3 italic">LIFETIME ACCESS</span>
+                </div>
+                
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest leading-relaxed">
+                  Remove all banner and popup advertisements permanently from your account. Invest once, play forever.
+                </p>
+              </div>
+
+              {!hasLifetimeNoAds && (
+                <div className="mt-4">
+                  <PayPalButtons
+                    style={{ layout: "vertical", height: 55, color: 'blue', shape: 'pill', label: 'pay', tagline: false }}
+                    createOrder={(data, actions) => {
+                      return actions.order.create({
+                        intent: "CAPTURE",
+                        purchase_units: [{
+                          description: "Lifetime No-Ads Access",
+                          amount: { currency_code: "USD", value: LIFETIME_NO_ADS_PRICE.toFixed(2) }
+                        }],
+                        application_context: { shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW' }
+                      });
+                    }}
+                    onApprove={async (data, actions) => {
+                      const details = await actions.order?.capture();
+                      if (details?.status === 'COMPLETED') {
+                        handlePurchaseSuccess('lifetime');
+                      }
+                    }}
+                    onError={(err) => {
+                      console.error("PayPal Error:", err);
+                      notifyError("Upgrade purchase failed.");
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Ad Reward Option: FREE COINS */}
+          <div className="relative overflow-hidden rounded-[2rem] border border-white/5 bg-zinc-950 p-6 group cursor-pointer active:scale-[0.98] transition-all"
                onClick={startAd}>
             <div className="absolute inset-0 bg-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center justify-between relative z-10">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-500 flex items-center justify-center text-black shadow-[0_0_20px_rgba(245,158,11,0.4)] shrink-0">
-                  <Sparkles size={20} sm:size={24} fill="currentColor" />
+              <div className="flex items-center gap-5">
+                <div className="w-14 h-14 rounded-2xl bg-amber-500 flex items-center justify-center text-black shadow-[0_0_20px_rgba(245,158,11,0.2)] group-hover:scale-110 transition-transform shrink-0">
+                  <Play size={28} fill="currentColor" />
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-black uppercase italic tracking-tighter text-white">Daily Reward</h3>
-                  <p className="text-[8px] sm:text-[9px] text-amber-500/80 uppercase font-bold tracking-widest">Watch an ad to claim coins</p>
+                  <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">Ad Reward</h3>
+                  <p className="text-[8px] text-zinc-600 uppercase font-black tracking-widest">Support the development</p>
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <div className="flex items-center gap-1 justify-end">
-                  <span className="text-xl sm:text-2xl font-black italic tracking-tighter text-amber-400">+50,000</span>
-                  <span className="text-xs sm:text-sm">🪙</span>
+                <div className="flex flex-col items-end">
+                  <span className="text-2xl font-black italic tracking-tighter text-amber-500">+50,000</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 leading-none">Coins</span>
                 </div>
-                <span className="text-[7px] sm:text-[8px] text-zinc-500 uppercase font-black tracking-widest">Available Now</span>
               </div>
             </div>
-          </div>
-
-          {/* Coin Packs Section */}
-          <div className="space-y-3 sm:space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-1 h-3 bg-amber-500 rounded-full" />
-              <h3 className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500">Coin Packs</h3>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 sm:gap-4">
-              {COIN_PACKS.map((pack, index) => (
-                <motion.div
-                  key={pack.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4 sm:p-5"
-                >
-                  {/* Background Glow */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${pack.color} opacity-5 group-hover:opacity-10 transition-opacity`} />
-                  
-                  <div className="flex flex-col gap-4 sm:gap-5 relative z-10">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 sm:gap-4">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/5 shrink-0">
-                          {React.cloneElement(pack.icon as React.ReactElement, { size: 20 })}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-1.5 sm:gap-2">
-                            <span className="text-lg sm:text-xl font-black italic tracking-tighter text-white">{pack.coins.toLocaleString()}</span>
-                            <span className="text-[10px] sm:text-xs font-bold text-yellow-500">🪙</span>
-                          </div>
-                          <h4 className="text-[8px] sm:text-[9px] font-black text-zinc-500 uppercase tracking-widest">{pack.name}</h4>
-                          {pack.bonus && (
-                            <span className="text-[8px] sm:text-[9px] font-black text-green-400 uppercase tracking-widest">{pack.bonus}</span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <span className="block text-sm sm:text-base font-black italic tracking-tighter text-white">${pack.price.toFixed(2)}</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-1">
-                    <PayPalButtons
-                      style={{ 
-                        layout: "vertical", 
-                        height: 50, 
-                        color: 'gold', 
-                        shape: 'rect', 
-                        label: 'pay',
-                        tagline: false
-                      }}
-                      fundingSource={undefined} // Allow all eligible funding sources
-                      createOrder={(data, actions) => {
-                        return actions.order.create({
-                          intent: "CAPTURE",
-                          purchase_units: [{
-                            description: pack.name,
-                            amount: {
-                              currency_code: "USD",
-                              value: pack.price.toFixed(2)
-                            }
-                          }],
-                          application_context: {
-                            shipping_preference: 'NO_SHIPPING',
-                            user_action: 'PAY_NOW'
-                          }
-                        });
-                      }}
-                      onApprove={async (data, actions) => {
-                        const details = await actions.order?.capture();
-                        if (details?.status === 'COMPLETED') {
-                          handlePaymentSuccess('coins', pack.coins, details.id);
-                        }
-                      }}
-                      onError={(err) => {
-                        console.error("PayPal Error:", err);
-                        notifyError("Payment failed. Please try again.");
-                      }}
-                    />
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-          {/* Footer Note */}
-          <div className="pt-4 flex flex-col items-center gap-3">
-            <div className="flex items-center gap-2 text-zinc-800">
-              <Sparkles size={12} />
-              <span className="text-[8px] font-black uppercase tracking-[0.3em]">Premium Hoops Economy</span>
-            </div>
-            <p className="text-center text-[7px] text-zinc-800 uppercase tracking-[0.2em] font-bold max-w-[180px]">
-              All transactions are final. We are not affiliated with the NBA; this is a fan game. Coins are non-transferable and have no real-world value.
+          {/* Footer Quality Note */}
+          <div className="pt-10 flex flex-col items-center gap-4 opacity-30 pb-10">
+            <div className="h-px w-24 bg-white/10" />
+            <p className="text-center text-[7px] text-zinc-400 uppercase tracking-[0.5em] font-black leading-loose max-w-xs">
+              MEC HOOPS ULTRA PRO • SECURE CHECKOUT • GLOBAL ACCESS
             </p>
           </div>
         </div>
       </div>
+    </div>
 
       {/* Ad Modal */}
       <AnimatePresence>

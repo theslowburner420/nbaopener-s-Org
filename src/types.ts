@@ -275,6 +275,11 @@ export interface GameState {
   claimedDays: number[]; // Array of day indices (1-7)
   inventoryPacks: InventoryPack[];
   isPremium: boolean;
+  hasLifetimeNoAds: boolean;
+  isBattlePassPremium: boolean;
+  subscriptionExpiry: string | null;
+  battlePassXP: number;
+  battlePassLevel: number;
   franchise?: FranchiseState;
   completedSbcs?: string[];
 }
