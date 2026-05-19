@@ -106,8 +106,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isFirstLoad = useRef(true);
 
   useEffect(() => {
-    stateRef.current = state;
     isInitialSyncDoneRef.current = isInitialSyncDone;
+  }, [isInitialSyncDone]);
+
+  useEffect(() => {
+    stateRef.current = state;
     
     // Save guest progress to localStorage ONLY if not logged in
     if (!state.user) {
@@ -541,6 +544,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }).subscribe();
       }
 
+      isInitialSyncDoneRef.current = true;
       setIsInitialSyncDone(true);
       setIsAuthLoading(false);
       setIsBackgroundSaving(false);
@@ -555,6 +559,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setTimeout(() => {
         if (!isInitialSyncDoneRef.current) {
           console.warn('⚠️ Sync failed but unblocking UI for local play');
+          isInitialSyncDoneRef.current = true;
           setIsInitialSyncDone(true);
         }
       }, 5000);
@@ -567,6 +572,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!supabase) {
       setIsAuthLoading(false);
+      isInitialSyncDoneRef.current = true;
       setIsInitialSyncDone(true);
       return;
     }
@@ -582,6 +588,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         console.log('No session found on mount');
         setIsAuthLoading(false);
+        isInitialSyncDoneRef.current = true;
         setIsInitialSyncDone(true);
       }
     });
@@ -606,6 +613,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!isInitialSyncDoneRef.current) {
         console.warn('⚠️ Safety unblock triggered after 4s');
         setIsAuthLoading(false);
+        isInitialSyncDoneRef.current = true;
         setIsInitialSyncDone(true);
       }
     }, 4000);
