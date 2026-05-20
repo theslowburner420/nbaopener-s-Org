@@ -5,10 +5,12 @@ import { Check, Lock, Gift, Trophy, Star, Zap, Users, Award, Flame, Target, Coin
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useMemo } from 'react';
 import AchievementsModal from '../components/AchievementsModal';
+import { useNotification } from '../context/NotificationContext';
 
 export default function RewardsView() {
   const state = useGame();
   const { 
+    collection,
     coins, 
     claimedDays, 
     lastClaimedDate, 
@@ -22,8 +24,10 @@ export default function RewardsView() {
     inventoryPacks,
     addPackToInventory,
     addCoins,
+    updateGameStateAsync,
     isSaving 
   } = state;
+  const { notifySuccess, notifyError } = useNotification();
   const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'daily' | 'battlepass'>('daily');
 
@@ -31,26 +35,68 @@ export default function RewardsView() {
   const progressPercent = (battlePassXP / XP_PER_LEVEL) * 100;
 
   const BATTLE_PASS_REWARDS = useMemo(() => [
-    { level: 1, free: { type: 'coins', amount: 5000 }, premium: { type: 'pack', id: 'premium', name: 'Premium Pack' }, tier: 'Common' },
-    { level: 2, free: { type: 'coins', amount: 10000 }, premium: { type: 'coins', amount: 25000 }, tier: 'Common' },
-    { level: 3, free: { type: 'pack', id: 'rookie', name: 'Rookie Pack' }, premium: { type: 'pack', id: 'allstar', name: 'All-Star Pack' }, tier: 'Rare' },
-    { level: 4, free: { type: 'coins', amount: 15000 }, premium: { type: 'coins', amount: 50000 }, tier: 'Rare' },
-    { level: 5, free: { type: 'pack', id: 'allstar', name: 'All-Star Pack' }, premium: { type: 'pack', id: 'mvp', name: 'Finals MVP Pack' }, tier: 'Epic' },
-    { level: 6, free: { type: 'coins', amount: 25000 }, premium: { type: 'coins', amount: 100000 }, tier: 'Epic' },
-    { level: 7, free: { type: 'pack', id: 'mvp', name: 'Finals MVP Pack' }, premium: { type: 'pack', id: 'legendary', name: 'Legendary Pack' }, tier: 'Legendary' },
-    { level: 8, free: { type: 'coins', amount: 50000 }, premium: { type: 'coins', amount: 200000 }, tier: 'Legendary' },
-    { level: 9, free: { type: 'pack', id: 'special_item', name: 'Draft Exclusive Selection' }, premium: { type: 'pack', id: 'special_item', name: 'Draft Winner Card' }, tier: 'Ultimate' },
-    { level: 10, free: { type: 'coins', amount: 100000 }, premium: { type: 'coins', amount: 500000 }, tier: 'Ultimate' },
+    { level: 1, free: { type: 'coins' as const, amount: 10000 }, premium: { type: 'pack' as const, id: 'rookie', name: 'Rookie Pack' }, tier: 'Common' },
+    { level: 2, free: { type: 'pack' as const, id: 'rookie', name: 'Rookie Pack' }, premium: { type: 'coins' as const, amount: 25000 }, tier: 'Common' },
+    { level: 3, free: { type: 'coins' as const, amount: 15000 }, premium: { type: 'card' as const, cardId: 'lal-003', playerName: 'Austin Reaves', rarity: 'allstar' }, tier: 'Rare' },
+    { level: 4, free: { type: 'pack' as const, id: 'rookie', name: 'Rookie Pack' }, premium: { type: 'pack' as const, id: 'allstar', name: 'All-Star Pack' }, tier: 'Rare' },
+    { level: 5, free: { type: 'coins' as const, amount: 25000 }, premium: { type: 'pack' as const, id: 'mvp', name: 'Finals MVP Pack' }, tier: 'Epic' },
+    { level: 6, free: { type: 'pack' as const, id: 'allstar', name: 'All-Star Pack' }, premium: { type: 'coins' as const, amount: 75000 }, tier: 'Epic' },
+    { level: 7, free: { type: 'coins' as const, amount: 35000 }, premium: { type: 'pack' as const, id: 'hof', name: 'HOF Pack' }, tier: 'Legendary' },
+    { level: 8, free: { type: 'pack' as const, id: 'rookie', name: 'Rookie Pack' }, premium: { type: 'card' as const, cardId: 'bos-002', playerName: 'Jayson Tatum', rarity: 'franchise' }, tier: 'Legendary' },
+    { level: 9, free: { type: 'coins' as const, amount: 50000 }, premium: { type: 'pack' as const, id: 'mvp', name: 'Finals MVP Pack' }, tier: 'Epic' },
+    { level: 10, free: { type: 'pack' as const, id: 'allstar', name: 'All-Star Pack' }, premium: { type: 'card' as const, cardId: 'lal-002', playerName: 'LeBron James', rarity: 'franchise' }, tier: 'Ultimate' },
+    { level: 11, free: { type: 'coins' as const, amount: 75000 }, premium: { type: 'pack' as const, id: 'hof', name: 'HOF Pack' }, tier: 'Legendary' },
+    { level: 12, free: { type: 'pack' as const, id: 'mvp', name: 'Finals MVP Pack' }, premium: { type: 'card' as const, cardId: 'lal-001', playerName: 'Luka Doncic', rarity: 'franchise' }, tier: 'Ultimate' },
+    { level: 13, free: { type: 'coins' as const, amount: 100000 }, premium: { type: 'pack' as const, id: 'hof', name: 'HOF Pack' }, tier: 'Ultimate' },
+    { level: 14, free: { type: 'pack' as const, id: 'hof', name: 'HOF Pack' }, premium: { type: 'coins' as const, amount: 250000 }, tier: 'Ultimate' },
+    { level: 15, free: { type: 'pack' as const, id: 'hof', name: 'HOF Pack' }, premium: { type: 'card' as const, cardId: 'gsw-001', playerName: 'Stephen Curry', rarity: 'franchise' }, tier: 'Ultimate' }
   ], []);
 
   const handleClaimBPReward = async (level: number, type: 'free' | 'premium') => {
+    if (isSaving) return;
     const reward = (BATTLE_PASS_REWARDS.find(r => r.level === level) as any)[type];
-    if (reward.type === 'coins') {
-      await addCoins(reward.amount);
-    } else {
-      await addPackToInventory({ id: reward.id, type: reward.id, name: reward.name });
+    if (!reward) return;
+
+    try {
+      let newCoins = coins;
+      let newCollection = { ...collection };
+      let newPacks = [...inventoryPacks];
+
+      if (reward.type === 'coins') {
+        newCoins += reward.amount;
+      } else if (reward.type === 'pack') {
+        const existing = newPacks.find(p => p.type === reward.id);
+        if (existing) {
+          newPacks = newPacks.map(p => p.type === reward.id ? { ...p, count: p.count + 1 } : p);
+        } else {
+          newPacks.push({ id: reward.id, type: reward.id, name: reward.name, count: 1 });
+        }
+      } else if (reward.type === 'card') {
+        newCollection[reward.cardId] = (newCollection[reward.cardId] || 0) + 1;
+      }
+
+      const newClaimed = [...claimedAchievements, `bp_${type}_${level}`];
+      await updateGameStateAsync({
+        coins: newCoins,
+        collection: newCollection,
+        inventoryPacks: newPacks,
+        claimedAchievements: newClaimed
+      });
+
+      notifySuccess(`Claimed Level ${level} ${type === 'premium' ? 'Premium' : 'Free'} reward!`);
+    } catch (err) {
+      notifyError('Failed to claim reward. Please try again.');
     }
-    // In a real app we'd track specific claimed BP rewards, but for now we'll just grant them
+  };
+
+  const getTeamStyling = (teamAbbr: string) => {
+    switch (teamAbbr?.toUpperCase()) {
+      case 'LAL': return 'bg-purple-950/90 border-amber-500 text-yellow-500';
+      case 'BOS': return 'bg-emerald-950/90 border-emerald-500 text-emerald-300';
+      case 'GSW': return 'bg-blue-950/90 border-yellow-500 text-yellow-400';
+      case 'DAL': return 'bg-sky-950/90 border-sky-500 text-sky-400';
+      default: return 'bg-zinc-900 border-zinc-700 text-white';
+    }
   };
 
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
@@ -241,26 +287,26 @@ export default function RewardsView() {
         ) : (
           /* Battle Pass Section */
           <section className="space-y-8 max-w-5xl mx-auto">
-            {/* BP Header / Progress */}
-            <div className="relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-zinc-900 shadow-2xl p-8 sm:p-10 group">
+            {/* BP Header / Progress with Cyberpunk Glassmorphism and Amber/Purple glow */}
+            <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950/80 backdrop-blur-xl shadow-[0_0_50px_rgba(168,85,247,0.15)] p-8 sm:p-10 group transition-all duration-500 hover:border-amber-500/20">
               {/* Dynamic Animated Background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-purple-500/10 opacity-30 group-hover:opacity-50 transition-opacity duration-700" />
-              <div className="absolute -top-24 -right-24 w-64 h-64 bg-amber-500/10 blur-[100px] rounded-full pointer-events-none" />
-              <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-500/10 blur-[100px] rounded-full pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/15 via-transparent to-purple-550/15 opacity-40 group-hover:opacity-60 transition-opacity duration-700" />
+              <div className="absolute -top-24 -right-24 w-80 h-80 bg-amber-500/10 blur-[130px] rounded-full pointer-events-none" />
+              <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-purple-600/10 blur-[130px] rounded-full pointer-events-none" />
               
               <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
-                    <div className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[10px] font-black text-amber-500 uppercase tracking-widest">
+                    <div className="px-3 py-1 bg-amber-500/10 border border-amber-500/25 rounded-full text-[10px] font-black text-amber-400 uppercase tracking-widest animate-pulse">
                       Season 1: Rising Legends
                     </div>
                   </div>
-                  <h3 className="text-4xl sm:text-6xl font-black italic uppercase tracking-tighter text-white drop-shadow-2xl">
-                    Elite <span className="text-amber-500">Pass</span>
+                  <h3 className="text-4xl sm:text-6xl font-black italic uppercase tracking-tighter text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)]">
+                    Elite <span className="bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">Pass Pro</span>
                   </h3>
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Level {battlePassLevel} • {XP_PER_LEVEL - battlePassXP} XP TO GO</p>
+                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,1)]" />
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.22em]">Level {battlePassLevel} • {XP_PER_LEVEL - battlePassXP} XP TO GO</p>
                   </div>
                 </div>
 
@@ -268,27 +314,27 @@ export default function RewardsView() {
                   {!isBattlePassPremium ? (
                     <button 
                       onClick={() => state.setCurrentView('shop')}
-                      className="w-full bg-amber-500 hover:bg-amber-400 text-black px-8 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_20px_40px_rgba(245,158,11,0.2)] flex items-center justify-center gap-3"
+                      className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black px-8 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:scale-[1.03] active:scale-[0.97] shadow-[0_20px_45px_rgba(245,158,11,0.25)] flex items-center justify-center gap-3"
                     >
                       <Trophy size={16} fill="currentColor" />
                       Unlock Elite Track
                     </button>
                   ) : (
-                    <div className="w-full bg-white/5 border border-amber-500/20 px-8 py-5 rounded-2xl flex items-center justify-center gap-3 backdrop-blur-xl">
-                      <ShieldCheck size={16} className="text-amber-500" />
-                      <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Elite Membership Active</span>
+                    <div className="w-full bg-zinc-900/80 border border-amber-500/30 px-8 py-5 rounded-2xl flex items-center justify-center gap-3 backdrop-blur-xl shadow-[0_0_20px_rgba(245,158,11,0.15)]">
+                      <ShieldCheck size={16} className="text-amber-400 animate-pulse animate-duration-1000" />
+                      <span className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] italic">Elite Membership Active</span>
                     </div>
                   )}
                   
                   <div className="w-full space-y-2">
-                    <div className="h-4 w-full bg-black/40 rounded-full overflow-hidden border border-white/5 p-1">
+                    <div className="h-4 w-full bg-black/60 rounded-full overflow-hidden border border-white/10 p-1 flex items-center shadow-[0_0_20px_rgba(245,158,11,0.6)]">
                       <motion.div 
                         initial={{ width: 0 }}
                         animate={{ width: `${progressPercent}%` }}
-                        className="h-full bg-gradient-to-r from-amber-600 to-amber-400 rounded-full shadow-[0_0_20px_rgba(245,158,11,0.4)]"
+                        className="h-full bg-gradient-to-r from-amber-600 to-amber-400 rounded-full shadow-[0_0_20px_rgba(245,158,11,0.6)]"
                       />
                     </div>
-                    <div className="flex justify-between text-[8px] font-black uppercase tracking-[0.3em] text-zinc-600">
+                    <div className="flex justify-between text-[8px] font-black uppercase tracking-[0.3em] text-zinc-500">
                       <span>{battlePassXP} Progress</span>
                       <span>1000 Threshold</span>
                     </div>
@@ -298,104 +344,207 @@ export default function RewardsView() {
             </div>
 
             {/* BP Rewards Table */}
-            <div className="space-y-6">
-              <div className="grid grid-cols-[80px,1fr,1fr] gap-6 px-8 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">
-                <span className="text-center">Tier</span>
-                <span className="flex items-center gap-2">Free <span className="opacity-40">Track</span></span>
-                <span className="text-amber-500 flex items-center gap-2">Elite <span className="opacity-40 italic">Premium</span></span>
-              </div>
+            <div className="space-y-8">
+              <div className="space-y-6">
+                {BATTLE_PASS_REWARDS.map((reward) => {
+                  const isFreeClaimed = claimedAchievements.includes(`bp_free_${reward.level}`);
+                  const isFreeUnlocked = battlePassLevel >= reward.level;
 
-              <div className="space-y-4">
-                {BATTLE_PASS_REWARDS.map((reward) => (
-                  <div key={reward.level} className="grid grid-cols-[80px,1fr,1fr] gap-4 sm:gap-6 group">
-                    {/* Level Pill */}
-                    <div className={`relative aspect-square rounded-[2rem] flex flex-col items-center justify-center border-2 transition-all duration-500 ${
-                      battlePassLevel >= reward.level 
-                        ? 'bg-zinc-800 border-white/10 text-white shadow-xl' 
-                        : 'bg-zinc-950 border-white/5 text-zinc-700'
-                    }`}>
-                      <span className="text-[10px] font-black uppercase tracking-widest opacity-20 mb-1">LVL</span>
-                      <span className="text-2xl font-black italic tracking-tighter">{reward.level}</span>
-                      {battlePassLevel >= reward.level && (
-                        <div className="absolute -top-1 -right-1 bg-green-500 w-5 h-5 rounded-full flex items-center justify-center border-2 border-zinc-950">
-                          <Check size={10} className="text-black" strokeWidth={4} />
+                  const isPremiumClaimed = claimedAchievements.includes(`bp_premium_${reward.level}`);
+                  const isPremiumUnlocked = battlePassLevel >= reward.level && isBattlePassPremium;
+
+                  // Find player card details
+                  const freeCardData = reward.free.type === 'card' ? ALL_CARDS.find(c => c.id === reward.free.cardId) : null;
+                  const premiumCardData = reward.premium.type === 'card' ? ALL_CARDS.find(c => c.id === reward.premium.cardId) : null;
+
+                  return (
+                    <div key={reward.level} className="relative border border-zinc-900 bg-zinc-950/60 rounded-3xl p-6 flex flex-col gap-4 transition-all duration-300 hover:border-zinc-800 hover:bg-zinc-950/80">
+                      {/* Level Indicator Header */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`px-4 py-2 bg-zinc-900 border rounded-2xl flex items-center gap-2 transition-all duration-500 ${
+                            battlePassLevel >= reward.level 
+                              ? 'border-amber-500/30 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.15)] font-black'
+                              : 'border-zinc-800 text-zinc-500'
+                          }`}>
+                            <Star size={12} className={battlePassLevel >= reward.level ? "text-amber-400 fill-amber-400 shrink-0 animate-spin" : "text-zinc-500 shrink-0"} />
+                            <span className="text-[11px] font-black uppercase tracking-widest italic">Level {reward.level}</span>
+                          </div>
+                          
+                          <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${
+                            reward.tier === 'Ultimate' ? 'bg-purple-600/90 text-white shadow-[0_0_10px_rgba(147,51,234,0.4)]' : 
+                            reward.tier === 'Legendary' ? 'bg-amber-500 text-black shadow-[0_0_10px_rgba(245,158,11,0.4)]' : 
+                            reward.tier === 'Epic' ? 'bg-blue-600 text-white' : 'bg-zinc-850 text-zinc-450'
+                          }`}>
+                            {reward.tier}
+                          </span>
                         </div>
-                      )}
+                        
+                        {battlePassLevel >= reward.level && isFreeClaimed && (!isBattlePassPremium || isPremiumClaimed) && (
+                          <div className="flex items-center gap-1 text-green-500 text-[10px] font-black uppercase tracking-wider">
+                            <Check size={12} strokeWidth={4} />
+                            <span>100% Cleared</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Tracks Area (separated by center dividing line) */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+                        {/* Center Glowing Divider Line */}
+                        <div className="hidden md:block absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[1px] bg-gradient-to-b from-transparent via-zinc-850 to-transparent" />
+                        <div className="md:hidden h-[1px] bg-gradient-to-r from-transparent via-zinc-850 to-transparent my-1" />
+
+                        {/* 1. FREE TRACK COLUMN */}
+                        <div className="flex flex-col justify-between gap-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Free Track</span>
+                            {isFreeClaimed ? (
+                              <span className="text-[9px] font-black uppercase text-green-500 flex items-center gap-1 bg-green-500/10 px-2 py-0.5 rounded-full">
+                                <Check size={10} strokeWidth={4} className="stroke-[3]" /> Claimed
+                              </span>
+                            ) : !isFreeUnlocked ? (
+                              <span className="text-[9px] font-black uppercase text-zinc-650 flex items-center gap-1">
+                                <Lock size={10} /> Locked
+                              </span>
+                            ) : (
+                              <span className="text-[9px] font-black uppercase text-amber-500 animate-pulse">
+                                Available
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Free Reward Representation */}
+                          <div className="flex-1">
+                            {reward.free.type === 'card' ? (
+                              <div className="relative overflow-hidden rounded-2.5xl p-3 border border-zinc-805 bg-zinc-950/60 flex items-center gap-4 group/hologram">
+                                <div className={`w-14 h-20 rounded-xl overflow-hidden border-2 flex items-center justify-center shrink-0 relative ${getTeamStyling(freeCardData?.teamAbbr || '')} shadow-lg`}>
+                                  {freeCardData?.imageUrl ? (
+                                    <img src={freeCardData.imageUrl} className="h-full object-cover select-none pointer-events-none" referrerPolicy="no-referrer" alt={reward.free.playerName} />
+                                  ) : (
+                                    <span className="text-xl font-bold">{freeCardData?.name?.charAt(0) || '🏀'}</span>
+                                  )}
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
+                                </div>
+                                <div className="flex flex-col leading-tight">
+                                  <span className="text-[8px] font-black text-amber-500 uppercase tracking-widest">Holographic Card</span>
+                                  <h4 className="text-sm font-black italic uppercase text-white tracking-tight">
+                                    {reward.free.playerName}
+                                  </h4>
+                                  <div className="flex items-center gap-1.5 mt-1.5">
+                                    <span className="text-[8px] font-mono uppercase bg-black/60 px-1.5 py-0.5 rounded border border-white/5 text-zinc-400">{freeCardData?.teamAbbr || 'NBA'}</span>
+                                    <span className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-500 text-black">{reward.free.rarity}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="p-4 rounded-2.5xl border border-zinc-90 w-full bg-zinc-950/40 flex items-center gap-4">
+                                <div className="w-11 h-11 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400">
+                                  {reward.free.type === 'coins' ? <Coins size={20} className="text-yellow-500" /> : <Package size={20} className="text-cyan-400" />}
+                                </div>
+                                <div className="flex flex-col leading-tight">
+                                  <span className="text-[8px] font-black text-zinc-550 uppercase tracking-widest">Standard Reward</span>
+                                  <h4 className="text-sm font-black text-white italic uppercase tracking-tight">
+                                    {reward.free.type === 'coins' ? `+${reward.free.amount.toLocaleString()} Coins` : reward.free.name}
+                                  </h4>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Claim Action for Free */}
+                          {isFreeUnlocked && !isFreeClaimed && (
+                            <motion.button
+                              whileHover={{ y: -2, scale: 1.01 }}
+                              whileTap={{ scale: 0.99 }}
+                              onClick={() => handleClaimBPReward(reward.level, 'free')}
+                              disabled={isSaving}
+                              className="w-full py-2.5 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-amber-450 hover:text-black transition-all shadow-lg font-bold"
+                            >
+                              Claim Reward
+                            </motion.button>
+                          )}
+                        </div>
+
+                        {/* 2. ELITE PREMIUM TRACK COLUMN */}
+                        <div className="flex flex-col justify-between gap-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500">Premium Track</span>
+                            {isPremiumClaimed ? (
+                              <span className="text-[9px] font-black uppercase text-amber-500 flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                                <Check size={10} strokeWidth={4} className="stroke-[3]" /> Claimed
+                              </span>
+                            ) : !isPremiumUnlocked ? (
+                              <span className="text-[9px] font-black uppercase text-zinc-650 flex items-center gap-1">
+                                <Lock size={10} /> Locked
+                              </span>
+                            ) : (
+                              <span className="text-[9px] font-black uppercase text-amber-400 animate-pulse">
+                                Available
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Premium Reward Representation (Supports Card) */}
+                          <div className="flex-1">
+                            {reward.premium.type === 'card' ? (
+                              <div className="relative overflow-hidden rounded-2.5xl p-3 border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-zinc-950/90 to-purple-500/5 flex items-center gap-4 group/hologram hover:border-amber-500/60 hover:shadow-[0_0_20px_rgba(245,158,11,0.15)] transition-all duration-500 cursor-pointer">
+                                <div className={`w-14 h-20 rounded-xl overflow-hidden border-2 flex items-center justify-center shrink-0 relative ${getTeamStyling(premiumCardData?.teamAbbr || '')} shadow-lg shadow-amber-500/5 border-amber-500`}>
+                                  {premiumCardData?.imageUrl ? (
+                                    <img src={premiumCardData.imageUrl} className="h-full object-cover select-none pointer-events-none" referrerPolicy="no-referrer" alt={reward.premium.playerName} />
+                                  ) : (
+                                    <span className="text-xl font-bold">{premiumCardData?.name?.charAt(0) || '🏀'}</span>
+                                  )}
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
+                                </div>
+                                <div className="flex flex-col leading-tight">
+                                  <span className="text-[8px] font-black text-amber-400 uppercase tracking-[0.2em] italic animate-pulse">Holographic Card</span>
+                                  <h4 className="text-sm font-black italic uppercase text-white tracking-tight">
+                                    {reward.premium.playerName}
+                                  </h4>
+                                  <div className="flex items-center gap-1.5 mt-1.5">
+                                    <span className="text-[8px] font-mono uppercase bg-black/60 px-1.5 py-0.5 rounded border border-white/5 text-zinc-400">{premiumCardData?.teamAbbr || 'NBA'}</span>
+                                    <span className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-500 text-black">{reward.premium.rarity}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="p-4 rounded-2.5xl border border-zinc-900 bg-zinc-950/40 flex items-center gap-4">
+                                <div className="w-11 h-11 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                                  {reward.premium.type === 'coins' ? <Coins size={20} fill="currentColor" /> : <Package size={20} fill="currentColor" />}
+                                </div>
+                                <div className="flex flex-col leading-tight">
+                                  <span className="text-[8px] font-black text-amber-500/80 uppercase tracking-widest">Elite Reward</span>
+                                  <h4 className="text-sm font-black text-white italic uppercase tracking-tight">
+                                    {reward.premium.type === 'coins' ? `+${reward.premium.amount.toLocaleString()} Coins` : reward.premium.name}
+                                  </h4>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Claim Action for Premium */}
+                          {isPremiumUnlocked && !isPremiumClaimed && (
+                            <motion.button
+                              whileHover={{ y: -2, scale: 1.01 }}
+                              whileTap={{ scale: 0.99 }}
+                              onClick={() => handleClaimBPReward(reward.level, 'premium')}
+                              disabled={isSaving}
+                              className="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all shadow-lg"
+                            >
+                              Claim Premium
+                            </motion.button>
+                          )}
+
+                          {!isBattlePassPremium && isFreeUnlocked && (
+                            <div className="w-full py-1.5 bg-zinc-900/60 border border-dashed border-zinc-800 rounded-xl flex items-center justify-center gap-1.5 text-[8px] font-black uppercase text-zinc-500 tracking-wider">
+                              <Lock size={10} /> Get Elite Pass to Claim
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    
-                    {/* Free Reward Card */}
-                    <motion.div 
-                      whileHover={{ scale: 1.02, y: -4 }}
-                      onClick={() => battlePassLevel >= reward.level && handleClaimBPReward(reward.level, 'free')}
-                      className={`relative p-5 sm:p-6 rounded-[2rem] border transition-all duration-500 overflow-hidden ${
-                        battlePassLevel >= reward.level 
-                          ? 'bg-zinc-900 border-zinc-800 cursor-pointer hover:border-zinc-700 shadow-xl' 
-                          : 'bg-zinc-950/50 border-white/5 opacity-40 grayscale pointer-events-none'
-                      }`}
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-4 relative z-10">
-                        <div className="w-12 h-12 rounded-2xl bg-zinc-800 flex items-center justify-center text-zinc-500 group-hover:bg-zinc-700 transition-colors">
-                          {reward.free.type === 'coins' ? <Coins size={24} /> : <Package size={24} />}
-                        </div>
-                        <div className="flex flex-col leading-tight">
-                          <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Standard Reward</span>
-                          <h4 className="text-base sm:text-lg font-black text-white italic uppercase tracking-tight">
-                            {reward.free.type === 'coins' ? `+${reward.free.amount.toLocaleString()} Coins` : reward.free.name}
-                          </h4>
-                        </div>
-                      </div>
-                      {battlePassLevel < reward.level && (
-                        <div className="absolute inset-0 flex items-center justify-end px-8 bg-gradient-to-l from-black/40 to-transparent">
-                          <Lock size={16} className="text-zinc-800" />
-                        </div>
-                      )}
-                    </motion.div>
-
-                    {/* Elite Reward Card */}
-                    <motion.div 
-                      whileHover={{ scale: 1.02, y: -4 }}
-                      onClick={() => isBattlePassPremium && battlePassLevel >= reward.level && handleClaimBPReward(reward.level, 'premium')}
-                      className={`relative p-5 sm:p-6 rounded-[2rem] border transition-all duration-500 overflow-hidden group/elite ${
-                        isBattlePassPremium && battlePassLevel >= reward.level 
-                          ? 'bg-amber-500/5 border-amber-500/20 cursor-pointer hover:bg-amber-500/10 hover:border-amber-500/40 shadow-2xl shadow-amber-500/5' 
-                          : 'bg-zinc-950/50 border-white/5 opacity-40 grayscale'
-                      }`}
-                    >
-                      {/* Glow effect */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent opacity-0 group-hover/elite:opacity-100 transition-opacity duration-700" />
-                      
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-4 relative z-10">
-                        <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover/elite:scale-110 transition-transform">
-                          {reward.premium.type === 'coins' ? <Coins size={24} fill="currentColor" /> : <Package size={24} fill="currentColor" />}
-                        </div>
-                        <div className="flex flex-col leading-tight">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest italic">Elite Path</span>
-                            <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${
-                              reward.tier === 'Ultimate' ? 'bg-purple-500 text-white' : 
-                              reward.tier === 'Legendary' ? 'bg-amber-500 text-black' : 
-                              reward.tier === 'Epic' ? 'bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-400'
-                            }`}>
-                              {reward.tier}
-                            </span>
-                          </div>
-                          <h4 className="text-base sm:text-lg font-black text-white italic uppercase tracking-tight group-hover/elite:translate-x-1 transition-transform">
-                            {reward.premium.type === 'coins' ? `+${reward.premium.amount.toLocaleString()} Coins` : reward.premium.name}
-                          </h4>
-                        </div>
-                      </div>
-
-                      {!isBattlePassPremium && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/60 backdrop-blur-[2px]">
-                          <div className="flex flex-col items-center gap-1 group-hover/elite:scale-110 transition-transform">
-                            <Lock size={18} className="text-zinc-600 mb-1" />
-                            <span className="text-[7px] font-black text-zinc-500 uppercase tracking-widest">Locked</span>
-                          </div>
-                        </div>
-                      )}
-                    </motion.div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </section>

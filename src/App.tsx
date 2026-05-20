@@ -245,8 +245,8 @@ function AppContent() {
       </AnimatePresence>
 
       {/* Header Area */}
-      {!(currentView === 'draft' || currentView === 'open') && (
-        <div className="z-[5000] flex flex-col bg-black shrink-0">
+      {!(currentView === 'draft') && (
+        <div className="relative z-[9000] flex flex-col bg-black shrink-0">
           {/* Top Ad Area */}
           <StaticAd position="header" />
           

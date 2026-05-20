@@ -27,7 +27,7 @@ export default function CollectionView() {
   const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(24);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
-  const [easterEggType, setEasterEggType] = useState<'unlock' | 'reset'>('unlock');
+  const [easterEggType, setEasterEggType] = useState<'unlock' | 'reset' | 'catalunya'>('unlock');
   const [viewMode, setViewMode] = useState<'roster' | 'duplicates'>('roster');
   const loaderRef = useRef<HTMLDivElement>(null);
 
@@ -77,6 +77,19 @@ export default function CollectionView() {
       // Feedback
       setSearch('');
       setEasterEggType('reset');
+      setShowEasterEgg(true);
+      setTimeout(() => setShowEasterEgg(false), 3000);
+      return;
+    }
+
+    if (search.toLowerCase() === 'catalunya') {
+      // Catalonia Mode: Reset Game & Turn Off Premium
+      resetGame();
+      setPremium(false);
+      
+      // Feedback
+      setSearch('');
+      setEasterEggType('catalunya');
       setShowEasterEgg(true);
       setTimeout(() => setShowEasterEgg(false), 3000);
       return;
@@ -569,10 +582,10 @@ export default function CollectionView() {
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] font-black uppercase tracking-widest leading-none mb-0.5">
-                {easterEggType === 'unlock' ? 'Developer Mode' : 'System Reset'}
+                {easterEggType === 'unlock' ? 'Developer Mode' : easterEggType === 'catalunya' ? 'Catalonia Mode' : 'System Reset'}
               </span>
               <span className="text-xs font-black italic tracking-tighter uppercase">
-                {easterEggType === 'unlock' ? 'Everything Unlocked!' : 'Game Restored to Base!'}
+                {easterEggType === 'unlock' ? 'Everything Unlocked!' : easterEggType === 'catalunya' ? 'JOC REINICIAT & PREMIUM OFF!' : 'Game Restored to Base!'}
               </span>
             </div>
           </motion.div>

@@ -434,7 +434,7 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`fixed inset-0 z-[8000] bg-black flex flex-col items-center justify-center overflow-hidden h-[100dvh] select-none pointer-events-auto isolation-isolate gpu-accelerated ${
+      className={`fixed inset-0 z-[8000] bg-black flex flex-col items-center justify-center overflow-hidden h-[100dvh] select-none pointer-events-auto isolation-isolate gpu-accelerated pt-[165px] sm:pt-[180px] md:pt-[190px] ${
         isRevealing ? 'animate-screen-shake-intense' : ''
       }`}
     >

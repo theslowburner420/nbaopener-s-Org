@@ -71,7 +71,7 @@ const SbcListItem: React.FC<{
         <Trophy size={24} className={`text-zinc-800 ${!completed ? 'animate-pulse' : ''}`} />
         {completed && (
           <div className="absolute inset-0 bg-green-500/20 backdrop-blur-[2px] flex items-center justify-center">
-            <Check Circle2 className="text-green-500" size={24} />
+            <CheckCircle2 className="text-green-500" size={24} />
           </div>
         )}
       </div>
