@@ -190,165 +190,135 @@ export default function CollectionView() {
   return (
     <div className={`flex flex-col min-h-full bg-black text-white transition-all duration-1000 ${isDynastyHunter ? 'animate-golden-aura' : ''}`}>
       {/* Header */}
-      <header className={`collection-header sticky top-0 z-30 backdrop-blur-xl px-4 pt-3 pb-2 border-b border-zinc-800/50 transition-colors duration-1000 ${isDynastyHunter ? 'bg-amber-950/20' : 'bg-black/60'}`}>
-        <div className="flex justify-between items-end mb-3">
-          <div className="flex items-center gap-3">
-            <div>
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <div className={`w-1 h-2 rounded-full transition-colors ${isDynastyHunter ? 'bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.8)]' : 'bg-amber-500'}`} />
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500">Player Registry</span>
-              </div>
-              <h1 className="text-lg font-black uppercase tracking-tighter italic leading-none flex items-center gap-2">
-                {viewMode === 'roster' ? 'My Roster' : 'Duplicates'}
-                {isVintageCollector && (
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-[7px] font-black uppercase tracking-widest text-amber-500 italic">
-                    History
-                  </span>
-                )}
-              </h1>
-            </div>
+      <header className={`collection-header sticky top-0 z-30 backdrop-blur-xl px-3 py-1.5 border-b border-zinc-900/40 transition-colors duration-1000 ${isDynastyHunter ? 'bg-amber-950/20' : 'bg-black/60'}`}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xs font-black uppercase tracking-tighter italic leading-none flex items-center gap-1">
+              <span className={`w-0.5 h-1.5 rounded-full ${isDynastyHunter ? 'bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.8)]' : 'bg-amber-500'}`} />
+              {viewMode === 'roster' ? 'Roster' : 'Duplicates'}
+            </h1>
             
             {/* View Toggle */}
-            <div className="flex bg-zinc-900/80 rounded-full p-1 border border-zinc-800 self-center">
+            <div className="p-0.5 bg-zinc-950 border border-zinc-850 rounded-full flex gap-0.5 shrink-0 scale-90">
               <button
                 onClick={() => setViewMode('roster')}
-                className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-                  viewMode === 'roster' ? 'bg-amber-500 text-black shadow-lg' : 'text-zinc-500 hover:text-white'
+                className={`px-2 py-0.5 rounded-full text-[7.5px] font-black uppercase tracking-wider transition-all ${
+                  viewMode === 'roster' ? 'bg-amber-500 text-black font-extrabold shadow-sm' : 'text-zinc-550 hover:text-zinc-300'
                 }`}
               >
                 Roster
               </button>
               <button
                 onClick={() => setViewMode('duplicates')}
-                className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-                  viewMode === 'duplicates' ? 'bg-amber-500 text-black shadow-lg' : 'text-zinc-500 hover:text-white'
+                className={`px-2 py-0.5 rounded-full text-[7.5px] font-black uppercase tracking-wider transition-all ${
+                  viewMode === 'duplicates' ? 'bg-amber-500 text-black font-extrabold shadow-sm' : 'text-zinc-550 hover:text-zinc-300'
                 }`}
               >
-                Duplicates
+                Dupl
               </button>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-2 justify-between sm:justify-end shrink-0 select-none">
+            {/* HOF Button */}
             <button 
               onClick={() => setIsAchievementsOpen(true)}
-              className="group flex items-center gap-1.5 px-2 py-1 bg-zinc-900 border border-zinc-800 rounded-lg hover:bg-zinc-800 transition-all relative overflow-hidden"
+              className="flex items-center gap-1 px-1 py-0.5 bg-zinc-950 border border-zinc-850 rounded hover:bg-zinc-900 transition-all text-left scale-90"
             >
-              <div className="absolute inset-0 bg-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative flex items-center gap-1.5">
-                <div className="flex items-center justify-center w-4 h-4 rounded-full bg-amber-500/10 text-amber-500">
-                  <Trophy size={8} />
-                </div>
-                <div className="flex flex-col items-start leading-none">
-                  <span className="text-[7px] font-black uppercase tracking-widest text-zinc-500">HOF</span>
-                  <span className="text-[9px] font-black italic text-white">{progressPercent}%</span>
-                </div>
-              </div>
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                <Trophy size={5.5} />
+              </span>
+              <span className="text-[6.5px] font-black tracking-widest text-zinc-400">HOF</span>
             </button>
-
-            <div className="flex flex-col items-end gap-0.5">
-              <div className="flex items-baseline gap-1">
-                <span className={`text-base font-black italic transition-colors ${isDynastyHunter ? 'text-amber-400' : 'text-white'}`}>{collectedCount}</span>
-                <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">/ {totalCards}</span>
-              </div>
-              <div className="w-16 h-1 bg-zinc-900 rounded-full overflow-hidden">
+            {/* Progress metric */}
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-[8.5px] font-mono font-black italic text-zinc-300 leading-none">
+                {collectedCount}/{totalCards} <span className="text-amber-500 text-[7px] font-black">[{progressPercent}%]</span>
+              </span>
+              <div className="w-8 h-[1px] bg-zinc-900 relative overflow-hidden">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${progressPercent}%` }}
-                  className={`h-full shadow-[0_0_8px_rgba(245,158,11,0.4)] transition-all duration-1000 ${isDynastyHunter ? 'bg-gradient-to-r from-amber-600 via-white to-amber-600' : 'bg-gradient-to-r from-amber-500 to-white'}`} 
+                  className="h-full bg-amber-500"
                 />
               </div>
             </div>
           </div>
         </div>
-
         {/* Compact Search & Filter Bar */}
-        <div className="flex gap-2 items-center relative">
+        <div className="flex gap-1.5 items-center mt-1.5 h-7 relative">
           <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className={`relative p-2.5 rounded-xl border transition-all flex items-center justify-center ${
+            className={`p-1 rounded-lg border transition-all flex items-center justify-center shrink-0 w-7 h-7 relative ${
               isFilterOpen || activeFilter !== 'All' || teamFilter !== 'All' || seriesFilter !== 'All'
-                ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.2)]'
-                : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:border-zinc-700'
+                ? 'bg-white text-black border-white shadow-md'
+                : 'bg-zinc-950 text-zinc-400 border-zinc-850 hover:border-zinc-750'
             }`}
           >
-            <Filter size={18} strokeWidth={2.5} />
+            <Filter size={11} strokeWidth={2.5} />
             {(activeFilter !== 'All' || teamFilter !== 'All' || seriesFilter !== 'All') && (
-              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-amber-500 rounded-full border-2 border-black flex items-center justify-center shadow-lg">
-                <span className="text-[10px] font-black text-white leading-none">
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border border-black flex items-center justify-center shadow-lg z-10">
+                <span className="text-[6.5px] font-black text-white leading-none">
                   {(activeFilter !== 'All' ? 1 : 0) + (teamFilter !== 'All' ? 1 : 0) + (seriesFilter !== 'All' ? 1 : 0)}
                 </span>
               </span>
             )}
           </button>
-
-          <div className="relative flex-1 group">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-white transition-colors" size={16} />
+          <div className="relative flex-1 h-7 group">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-650 group-focus-within:text-white transition-colors" size={10} />
             <input
               type="text"
               placeholder="Search roster..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl py-2.5 pl-10 pr-10 text-sm focus:ring-1 focus:ring-white/20 focus:bg-zinc-900 transition-all outline-none placeholder:text-zinc-600"
+              className="w-full h-7 bg-zinc-950 border border-zinc-850 rounded-lg pl-6 pr-6 text-[8px] font-black uppercase tracking-wider focus:border-amber-500 focus:outline-none focus:bg-zinc-900 placeholder:text-zinc-750 text-white"
             />
             {search && (
               <button 
                 onClick={() => setSearch('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white p-1"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-650 hover:text-white p-1"
               >
-                <X size={14} />
+                <X size={8} />
               </button>
             )}
           </div>
-
-          {/* Active Filters Bar */}
-          {hasActiveFilters && (
-            <motion.div 
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              className="flex flex-wrap gap-2 mt-3 overflow-hidden"
+        {/* Active Filters Bar */}
+        {hasActiveFilters && (
+          <div className="flex flex-wrap gap-1 mt-1.5">
+            {activeFilter !== 'All' && (
+              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-zinc-900 rounded border border-zinc-800">
+                <span className="text-[7.5px] font-bold uppercase text-zinc-400">Rarity: {activeFilter}</span>
+                <button onClick={() => setActiveFilter('All')} className="text-zinc-500 hover:text-white"><X size={8} /></button>
+              </div>
+            )}
+            {categoryFilter !== 'All' && (
+              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-zinc-900 rounded border border-zinc-800">
+                <span className="text-[7.5px] font-bold uppercase text-zinc-400">Category: {categoryFilter}</span>
+                <button onClick={() => setCategoryFilter('All')} className="text-zinc-500 hover:text-white"><X size={8} /></button>
+              </div>
+            )}
+            {teamFilter !== 'All' && (
+              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-zinc-900 rounded border border-zinc-800">
+                <span className="text-[7.5px] font-bold uppercase text-zinc-400">{teamFilter}</span>
+                <button onClick={() => setTeamFilter('All')} className="text-zinc-500 hover:text-white"><X size={8} /></button>
+              </div>
+            )}
+            {seriesFilter !== 'All' && (
+              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-zinc-900 rounded border border-zinc-800">
+                <span className="text-[7.5px] font-bold uppercase text-zinc-400">{seriesFilter}</span>
+                <button onClick={() => setSeriesFilter('All')} className="text-zinc-500 hover:text-white"><X size={8} /></button>
+              </div>
+            )}
+            <button 
+              onClick={clearFilters}
+              className="text-[7.5px] font-black uppercase tracking-widest text-amber-500 hover:text-amber-400 self-center ml-1"
             >
-              {activeFilter !== 'All' && (
-                <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-800 rounded-lg border border-zinc-700">
-                  <span className="text-[9px] font-bold uppercase text-zinc-400">Rarity: {activeFilter}</span>
-                  <button onClick={() => setActiveFilter('All')} className="text-zinc-500 hover:text-white"><X size={10} /></button>
-                </div>
-              )}
-              {categoryFilter !== 'All' && (
-                <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-800 rounded-lg border border-zinc-700">
-                  <span className="text-[9px] font-bold uppercase text-zinc-400">Category: {categoryFilter}</span>
-                  <button onClick={() => setCategoryFilter('All')} className="text-zinc-500 hover:text-white"><X size={10} /></button>
-                </div>
-              )}
-              {teamFilter !== 'All' && (
-                <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-800 rounded-lg border border-zinc-700">
-                  <span className="text-[9px] font-bold uppercase text-zinc-400">{teamFilter}</span>
-                  <button onClick={() => setTeamFilter('All')} className="text-zinc-500 hover:text-white"><X size={10} /></button>
-                </div>
-              )}
-              {seriesFilter !== 'All' && (
-                <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-800 rounded-lg border border-zinc-700">
-                  <span className="text-[9px] font-bold uppercase text-zinc-400">{seriesFilter}</span>
-                  <button onClick={() => setSeriesFilter('All')} className="text-zinc-500 hover:text-white"><X size={10} /></button>
-                </div>
-              )}
-              {search !== '' && (
-                <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-800 rounded-lg border border-zinc-700">
-                  <span className="text-[9px] font-bold uppercase text-zinc-400">Search: {search}</span>
-                  <button onClick={() => setSearch('')} className="text-zinc-500 hover:text-white"><X size={10} /></button>
-                </div>
-              )}
-              <button 
-                onClick={clearFilters}
-                className="text-[9px] font-black uppercase tracking-widest text-amber-500 hover:text-amber-400 ml-auto self-center"
-              >
-                Clear All
-              </button>
-            </motion.div>
-          )}
-
-          {/* Filter Dropdown */}
-          <AnimatePresence>
-            {isFilterOpen && (
+              Clear
+            </button>
+          </div>
+        )}
+        {/* Filter Dropdown */}
+        <AnimatePresence>
+          {isFilterOpen && (
               <>
                 <motion.div
                   initial={{ opacity: 0 }}

@@ -240,7 +240,7 @@ export interface FranchiseState {
 }
 
 export interface SbcRequirement {
-  type: 'MIN_RARITY' | 'EXACT_RARITY' | 'POSITION' | 'MIN_OVR' | 'TOTAL_CARDS' | 'UNIQUE_PLAYERS';
+  type: 'MIN_RARITY' | 'EXACT_RARITY' | 'POSITION' | 'MIN_OVR' | 'TOTAL_CARDS' | 'UNIQUE_PLAYERS' | 'TEAM_OVR_MIN' | 'SAME_TEAM_MIN' | 'SAME_CONF_MIN' | 'MAX_TEAMS';
   value: any;
   count?: number;
 }
@@ -261,6 +261,7 @@ export interface SbcChallenge {
   };
   isActive: boolean;
   cardsRequired: number;
+  slotPositions?: string[];
 }
 
 export interface GameState {

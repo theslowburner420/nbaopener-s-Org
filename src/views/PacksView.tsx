@@ -1,7 +1,7 @@
 import React, { ReactNode, useState, useMemo } from 'react';
 import { useGame } from '../context/GameContext';
 import { useEngine, PackType, DROP_RATES } from '../hooks/useEngine';
-import { ShoppingCart, Zap, Trophy, Crown, Star, CheckCircle2, Shield, Package, Gift, Sparkles, RefreshCw } from 'lucide-react';
+import { ShoppingCart, Zap, Trophy, Crown, Star, CheckCircle, Shield, Package, Gift, Sparkles, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import PackOpener from '../components/PackOpener';
 import { Card } from '../types';
@@ -231,7 +231,7 @@ export default function PacksView() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="h-full overflow-y-auto px-4 sm:px-6 pb-20 custom-scrollbar"
+              className="px-4 sm:px-6 pb-24"
             >
               {groupedInventory.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-64 text-zinc-600">

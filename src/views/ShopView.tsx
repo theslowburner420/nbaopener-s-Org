@@ -142,7 +142,7 @@ export default function ShopView() {
                 <span className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Exclusive Services</span>
              </div>
              <h1 className="text-5xl font-black italic uppercase tracking-tighter text-white leading-none">Hoops<span className="text-amber-500">Shop</span></h1>
-             <p className="text-[10px] text-zinc-500 uppercase tracking-[0.4em] font-bold">Ultra Pro Collector Vault</p>
+             <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold max-w-sm mx-auto leading-normal">This is a commercial fan game. Not affiliated with the NBA.</p>
           </div>
 
           {/* Subscription Option: ELITE PASS */}
@@ -291,7 +291,7 @@ export default function ShopView() {
                 </div>
                 <div>
                   <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">Ad Reward</h3>
-                  <p className="text-[8px] text-zinc-600 uppercase font-black tracking-widest">Support the development</p>
+                  <p className="text-[8px] text-zinc-650 uppercase font-black tracking-widest">Support the development</p>
                 </div>
               </div>
               <div className="text-right shrink-0">
@@ -301,16 +301,16 @@ export default function ShopView() {
                 </div>
               </div>
             </div>
+          </div>
           {/* Footer Quality Note */}
           <div className="pt-10 flex flex-col items-center gap-4 opacity-30 pb-10">
             <div className="h-px w-24 bg-white/10" />
-            <p className="text-center text-[7px] text-zinc-400 uppercase tracking-[0.5em] font-black leading-loose max-w-xs">
-              MEC HOOPS ULTRA PRO • SECURE CHECKOUT • GLOBAL ACCESS
+            <p className="text-center text-[7.5px] text-zinc-400 uppercase tracking-[0.3em] font-black leading-loose max-w-sm">
+              NOT AFFILIATED WITH THE NBA • THIS IS AN UNOFFICIAL FAN GAME
             </p>
           </div>
         </div>
       </div>
-    </div>
 
       {/* Ad Modal */}
       <AnimatePresence>

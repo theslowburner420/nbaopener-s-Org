@@ -206,5 +206,71 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     },
     isActive: true,
     cardsRequired: 10
+  },
+  {
+    id: 'mamba-mentality-sbc',
+    name: 'MAMBA MENTALITY',
+    description: 'Rinde homenaje a la leyenda de LA. Requiere jugadores estrella de la conferencia Oeste.',
+    difficulty: 'legendary',
+    type: 'permanent',
+    expiresAt: null,
+    requirements: [
+      { type: 'TOTAL_CARDS', value: 5 },
+      { type: 'TEAM_OVR_MIN', value: 85 },
+      { type: 'SAME_TEAM_MIN', value: 2 },
+      { type: 'SAME_CONF_MIN', value: 5 }
+    ],
+    reward: {
+      playerName: 'Kobe Bryant',
+      rarity: 'invincible',
+      ovr: 96
+    },
+    isActive: true,
+    cardsRequired: 5,
+    slotPositions: ['PG', 'SG', 'SF', 'PF', 'C']
+  },
+  {
+    id: 'splash-brothers-sbc',
+    name: 'SPLASH BROS LEGACY',
+    description: 'Une a los mejores tiradores del perímetro. Requiere una retaguardia potente.',
+    difficulty: 'elite',
+    type: 'permanent',
+    expiresAt: null,
+    requirements: [
+      { type: 'TOTAL_CARDS', value: 3 },
+      { type: 'TEAM_OVR_MIN', value: 83 },
+      { type: 'POSITION', value: 'SG', count: 2 },
+      { type: 'POSITION', value: 'PG', count: 1 }
+    ],
+    reward: {
+      playerName: 'Stephen Curry',
+      rarity: 'galaxy',
+      ovr: 95
+    },
+    isActive: true,
+    cardsRequired: 3,
+    slotPositions: ['PG', 'SG', 'SG']
+  },
+  {
+    id: 'showtime-lakers-sbc',
+    name: 'SHOWTIME ERA',
+    description: 'Construye un quinteto coordinado con jugadores únicos de conferencias distintas.',
+    difficulty: 'legendary',
+    type: 'permanent',
+    expiresAt: null,
+    requirements: [
+      { type: 'TOTAL_CARDS', value: 5 },
+      { type: 'TEAM_OVR_MIN', value: 86 },
+      { type: 'MAX_TEAMS', value: 5 },
+      { type: 'UNIQUE_PLAYERS', value: true }
+    ],
+    reward: {
+      playerName: 'Magic Johnson',
+      rarity: 'legend_sbc',
+      ovr: 94
+    },
+    isActive: true,
+    cardsRequired: 5,
+    slotPositions: ['PG', 'SG', 'SF', 'PF', 'C']
   }
 ];

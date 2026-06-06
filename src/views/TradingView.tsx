@@ -44,7 +44,7 @@ const TradingView: React.FC = () => {
   }
 
   return (
-    <div className="min-h-full w-full bg-black flex flex-col relative">
+    <div className="h-full w-full bg-black flex flex-col relative">
       <AnimatePresence mode="wait">
         {currentState === 'lobby' || currentState === 'matching' ? (
           <motion.div

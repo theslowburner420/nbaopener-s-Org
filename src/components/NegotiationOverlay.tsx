@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Sparkles, AlertCircle, CheckCircle2, TrendingUp, Handshake, AlertTriangle, MessageSquare } from 'lucide-react';
+import { X, Sparkles, AlertCircle, CheckCircle, TrendingUp, Handshake, AlertTriangle, MessageSquare } from 'lucide-react';
 
 interface NegotiationOverlayProps {
   card: any;
@@ -298,7 +298,7 @@ const NegotiationOverlay: React.FC<NegotiationOverlayProps> = ({
            ) : result === 'accepted' ? (
              <div className="flex-1 flex flex-col items-center justify-center space-y-4 py-16 animate-in zoom-in duration-300">
                 <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-black shadow-[0_0_50px_rgba(34,197,94,0.4)]">
-                   <CheckCircle2 size={32} />
+                   <CheckCircle size={32} />
                 </div>
                 <div className="text-center space-y-1">
                    <h4 className="text-2xl font-black text-white italic uppercase italic">Contract Approved!</h4>

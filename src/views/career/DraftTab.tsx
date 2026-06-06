@@ -8,7 +8,7 @@ import {
   ChevronRight,
   GraduationCap,
   Clock,
-  CheckCircle2,
+  CheckCircle,
   Trophy,
   ArrowRight,
   Pause,
@@ -366,7 +366,7 @@ const DraftTab: React.FC<DraftTabProps> = ({ state, setState, onComplete }) => {
                          >
                            {isScouted ? (
                              <>
-                               <CheckCircle2 size={10} />
+                               <CheckCircle size={10} />
                                <span>Detailed Scouted</span>
                              </>
                            ) : (

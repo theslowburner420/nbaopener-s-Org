@@ -307,6 +307,43 @@ const CareerView: React.FC = () => {
     }
   }, [state, setState]);
 
+  const simulateMultiple = React.useCallback(async (count: number, onProgress?: (completedCount: number) => void) => {
+    if (!state) return;
+    let currentState = { ...state };
+    let wins = 0;
+    let losses = 0;
+    
+    for (let i = 0; i < count; i++) {
+      const res = gameService.simulateNextUserGame(currentState);
+      if (!res) break;
+      
+      const userTeamId = currentState.userTeamId;
+      if (res.result.winnerId === userTeamId) {
+        wins++;
+      } else {
+        losses++;
+      }
+      
+      if (onProgress) {
+        onProgress(i + 1);
+      }
+      
+      // Minimal artificial pause for user to witness progress bar filling up dynamically
+      await new Promise(resolve => setTimeout(resolve, 80));
+      
+      if (currentState.phase !== 'regular_season') {
+        break;
+      }
+    }
+    
+    setState({ ...currentState });
+    stateService.save(currentState);
+    
+    if (wins + losses > 0) {
+      notifySuccess(`Batch Simulation Processed! Result: ${wins}W - ${losses}L`);
+    }
+  }, [state, setState, notifySuccess]);
+
   const handleCloseBoxScore = () => {
     setLastGameResult(null);
     // If the game result we just closed was the end of the season, 
@@ -664,129 +701,151 @@ const CareerView: React.FC = () => {
 
       default:
         // Regular Season / Playoffs / Free Agency
+        const teamColors = state ? NBA_TEAMS.find(t => t.id === state.userTeamId) : null;
         return (
-          <div className="flex-1 flex flex-col overflow-hidden">
-             <div className="flex flex-1 overflow-hidden">
-                {/* Sidebar Desktop */}
-                <div className="hidden md:flex flex-col w-20 lg:w-64 bg-zinc-950 border-r border-white/5 z-50">
-                  <div className="p-4 lg:p-8 shrink-0">
-                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-12 shadow-2xl group cursor-pointer overflow-hidden">
-                        <img src={getTeamLogo(state.userTeamId)} className="w-full h-full object-contain p-2" />
+          <div className="flex-1 flex flex-col overflow-hidden relative">
+            <div className="flex flex-1 overflow-hidden">
+                {/* Sidebar Desktop - Clean floating visual glass backdrop */}
+                <div className="hidden md:flex flex-col w-24 lg:w-64 bg-zinc-950/45 backdrop-blur-2xl border-r border-white/5 z-50 transition-all p-4 lg:p-6 justify-between select-none">
+                  <div className="flex flex-col gap-8 w-full">
+                    <div className="flex items-center gap-3 w-full self-start">
+                      <div 
+                        className="w-11 h-11 rounded-xl flex items-center justify-center shadow-2xl overflow-hidden shrink-0 bg-zinc-900 border border-white/5"
+                        style={{ boxShadow: teamColors ? `0 0 15px ${teamColors.primaryColor}22` : undefined }}
+                      >
+                        <img src={getTeamLogo(state.userTeamId)} className="w-8 h-8 object-contain" />
+                      </div>
+                      <div className="hidden lg:block leading-tight shrink-0 min-w-0">
+                        <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block">FRANCHISE MANAGER</span>
+                        <h4 className="font-mono text-xs font-black text-white italic truncate uppercase mt-0.5">
+                          {teamColors?.id || 'TEAM'}
+                        </h4>
+                      </div>
                     </div>
                     
-                    <nav className="space-y-2">
-                      <SidebarItem id="hub" icon={<LayoutDashboard size={20} />} label="Hub" active={activeTab === 'hub'} onClick={() => setActiveTab('hub')} />
-                      <SidebarItem id="lineup" icon={<Users size={20} />} label="Roster" active={activeTab === 'lineup'} onClick={() => setActiveTab('lineup')} />
-                      <SidebarItem id="market" icon={<ShoppingCart size={20} />} label="Market" active={activeTab === 'market'} onClick={() => setActiveTab('market')} />
-                      <SidebarItem id="trades" icon={<TrendingUp size={20} />} label="Trade" active={activeTab === 'trades'} onClick={() => setActiveTab('trades')} />
-                      <SidebarItem id="office" icon={<Building size={20} />} label="Front Office" active={activeTab === 'office'} onClick={() => setActiveTab('office')} />
-                      <SidebarItem id="league" icon={<Trophy size={20} />} label="League" active={activeTab === 'league'} onClick={() => setActiveTab('league')} />
-                      <SidebarItem id="stats" icon={<BarChart3 size={20} />} label="Stats" active={activeTab === 'stats'} onClick={() => setActiveTab('stats')} />
-                      <SidebarItem id="settings" icon={<SettingsIcon size={20} />} label="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
+                    <nav className="space-y-1 w-full">
+                      <SidebarItem id="hub" icon={<LayoutDashboard size={18} />} label="Hub" active={activeTab === 'hub'} onClick={() => setActiveTab('hub')} />
+                      <SidebarItem id="lineup" icon={<Users size={18} />} label="Roster" active={activeTab === 'lineup'} onClick={() => setActiveTab('lineup')} />
+                      <SidebarItem id="market" icon={<ShoppingCart size={18} />} label="Market" active={activeTab === 'market'} onClick={() => setActiveTab('market')} />
+                      <SidebarItem id="trades" icon={<TrendingUp size={18} />} label="Trade" active={activeTab === 'trades'} onClick={() => setActiveTab('trades')} />
+                      <SidebarItem id="office" icon={<Building size={18} />} label="Front Office" active={activeTab === 'office'} onClick={() => setActiveTab('office')} />
+                      <SidebarItem id="league" icon={<Trophy size={18} />} label="League" active={activeTab === 'league'} onClick={() => setActiveTab('league')} />
+                      <SidebarItem id="stats" icon={<BarChart3 size={18} />} label="Stats" active={activeTab === 'stats'} onClick={() => setActiveTab('stats')} />
+                      <SidebarItem id="settings" icon={<SettingsIcon size={18} />} label="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
                     </nav>
                   </div>
-                </div>
+
+                  <div className="hidden lg:flex flex-col gap-1 inline-block border-t border-white/5 pt-4 text-left">
+                    <span className="text-[7px] font-mono text-zinc-500">YEAR</span>
+                    <span className="text-sm font-black italic uppercase leading-none text-white">SEASON {state.season + 1}</span>
+                  </div>
+                </div> 
 
                 <div className="flex-1 flex flex-col overflow-hidden bg-black">
                    <div className="flex-1 overflow-y-auto no-scrollbar">
                     <AnimatePresence mode="wait">
-                      {activeTab === 'hub' && (
-                        <HubTab 
-                          key="hub" 
-                          state={state} 
-                          userTeam={userTeam!} 
-                          nextUserGame={nextUserGame}
-                          simulateGame={simulateGame}
-                          leagueLeaders={leagueLeaders}
-                          setActiveTab={setActiveTab}
-                          setState={setState}
-                          renderPlayoffs={renderPlayoffs}
-                          triggerLottery={handleStartDraftLottery}
-                        />
-                      )}
-                      {activeTab === 'lineup' && (
-                        <LineupTab 
-                          key="lineup" 
-                          state={state} 
-                          userTeam={userTeam!} 
-                          findCard={findCard} 
-                          lineupModalPos={lineupModalPos}
-                          setLineupModalPos={setLineupModalPos}
-                          handleUpdateLineup={(playerId) => {
-                            if (!state || !lineupModalPos) return;
-                            const newState = { ...state };
-                            const team = newState.teams[state.userTeamId];
-                            if (lineupModalPos === 'bench') {
-                               if (!team.lineup.bench.includes(playerId)) {
-                                  team.lineup.bench.push(playerId);
-                               }
-                            } else {
-                               team.lineup[lineupModalPos] = playerId;
-                            }
-                            setState(newState);
-                            stateService.save(newState);
-                          }}
-                          setState={setState}
-                        />
-                      )}
-                      {activeTab === 'market' && (
-                        <MarketTab 
-                          key="market" 
-                          state={state} 
-                          onSignPlayer={handleSignPlayer} 
-                          onFinalizeMarket={handleGoToNewSeason} 
-                          findCard={findCard} 
-                        />
-                      )}
-                      {activeTab === 'league' && (
-                        <LeagueTab 
-                          key="league" 
-                          state={state} 
-                          findCard={findCard} 
-                          renderPlayoffs={renderPlayoffs}
-                        />
-                      )}
-                      {activeTab === 'stats' && (
-                        <StatsTab 
-                          key="stats" 
-                          state={state} 
-                          userTeam={userTeam!}
-                          findCard={findCard} 
-                        />
-                      )}
-                      {activeTab === 'trades' && (
-                        <TradesTab 
-                          key="trades" 
-                          state={state} 
-                          tradeTargetTeamId={tradeTargetTeamId}
-                          setTradeTargetTeamId={setTradeTargetTeamId}
-                          userOfferedIds={userOfferedIds}
-                          setUserOfferedIds={setUserOfferedIds}
-                          userOfferedPickIds={userOfferedPickIds}
-                          setUserOfferedPickIds={setUserOfferedPickIds}
-                          cpuRequestedIds={cpuRequestedIds}
-                          setCpuRequestedIds={setCpuRequestedIds}
-                          cpuRequestedPickIds={cpuRequestedPickIds}
-                          setCpuRequestedPickIds={setCpuRequestedPickIds}
-                          handleExecuteTrade={handleExecuteTrade}
-                          findCard={findCard} 
-                        />
-                      )}
-                      {activeTab === 'office' && (
-                        <OfficeTab 
-                          key="office" 
-                          state={state} 
-                          userTeam={userTeam!}
-                          findCard={findCard} 
-                          handleNegotiationStart={handleNegotiationStart}
-                          setState={setState}
-                        />
-                      )}
-                      {activeTab === 'settings' && <SettingsTab key="settings" state={state} onReset={resetFranchise} />}
+                      <motion.div
+                        key={activeTab}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.25 }}
+                        className="flex-grow min-h-full flex flex-col"
+                      >
+                        {activeTab === 'hub' && (
+                          <HubTab 
+                            state={state} 
+                            userTeam={userTeam!} 
+                            nextUserGame={nextUserGame}
+                            simulateGame={simulateGame}
+                            simulateMultiple={simulateMultiple}
+                            leagueLeaders={leagueLeaders}
+                            setActiveTab={setActiveTab}
+                            setState={setState}
+                            renderPlayoffs={renderPlayoffs}
+                            triggerLottery={handleStartDraftLottery}
+                          />
+                        )}
+                        {activeTab === 'lineup' && (
+                          <LineupTab 
+                            state={state} 
+                            userTeam={userTeam!} 
+                            findCard={findCard} 
+                            lineupModalPos={lineupModalPos}
+                            setLineupModalPos={setLineupModalPos}
+                            handleUpdateLineup={(playerId) => {
+                              if (!state || !lineupModalPos) return;
+                              const newState = { ...state };
+                              const team = newState.teams[state.userTeamId];
+                              if (lineupModalPos === 'bench') {
+                                 if (!team.lineup.bench.includes(playerId)) {
+                                    team.lineup.bench.push(playerId);
+                                 }
+                              } else {
+                                 team.lineup[lineupModalPos] = playerId;
+                              }
+                              setState(newState);
+                              stateService.save(newState);
+                            }}
+                            setState={setState}
+                          />
+                        )}
+                        {activeTab === 'market' && (
+                          <MarketTab 
+                            state={state} 
+                            onSignPlayer={handleSignPlayer} 
+                            onFinalizeMarket={handleGoToNewSeason} 
+                            findCard={findCard} 
+                          />
+                        )}
+                        {activeTab === 'league' && (
+                          <LeagueTab 
+                            state={state} 
+                            findCard={findCard} 
+                            renderPlayoffs={renderPlayoffs}
+                          />
+                        )}
+                        {activeTab === 'stats' && (
+                          <StatsTab 
+                            state={state} 
+                            userTeam={userTeam!}
+                            findCard={findCard} 
+                          />
+                        )}
+                        {activeTab === 'trades' && (
+                          <TradesTab 
+                            state={state} 
+                            tradeTargetTeamId={tradeTargetTeamId}
+                            setTradeTargetTeamId={setTradeTargetTeamId}
+                            userOfferedIds={userOfferedIds}
+                            setUserOfferedIds={setUserOfferedIds}
+                            userOfferedPickIds={userOfferedPickIds}
+                            setUserOfferedPickIds={setUserOfferedPickIds}
+                            cpuRequestedIds={cpuRequestedIds}
+                            setCpuRequestedIds={setCpuRequestedIds}
+                            cpuRequestedPickIds={cpuRequestedPickIds}
+                            setCpuRequestedPickIds={setCpuRequestedPickIds}
+                            handleExecuteTrade={handleExecuteTrade}
+                            findCard={findCard} 
+                          />
+                        )}
+                        {activeTab === 'office' && (
+                          <OfficeTab 
+                            state={state} 
+                            userTeam={userTeam!}
+                            findCard={findCard} 
+                            handleNegotiationStart={handleNegotiationStart}
+                            setState={setState}
+                          />
+                        )}
+                        {activeTab === 'settings' && <SettingsTab state={state} onReset={resetFranchise} />}
+                      </motion.div>
                     </AnimatePresence>
+                    {/* Add spacer under mobile nav to prevent overlapping content bottom */}
+                    <div className="h-20 md:hidden" />
                    </div>
                 </div>
-             </div>
+            </div>
           </div>
         );
     }
@@ -795,29 +854,95 @@ const CareerView: React.FC = () => {
   // Team Selection
   if (!state || !state.userTeamId) {
     return (
-      <div className="flex-1 bg-black text-white p-6 md:p-12 overflow-y-auto">
-        <div className="max-w-7xl mx-auto space-y-12">
-          <div className="space-y-4">
-            <h1 className="text-7xl font-black uppercase italic tracking-tighter">Franchise</h1>
-            <p className="text-zinc-500 max-w-2xl font-medium">Build your legacy. Choose your team.</p>
+      <div className="flex-1 min-h-screen bg-[#000000] text-white p-6 md:p-12 overflow-y-auto relative select-none">
+        {/* Subtle dynamic grid overlay in background */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto space-y-10 relative z-10">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-zinc-900 border border-white/10 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+              <span className="text-[8px] font-black uppercase tracking-[0.25em] text-zinc-400">Career Mode Arena</span>
+            </div>
+            <h1 className="text-5xl md:text-8xl font-black uppercase italic tracking-tighter leading-none bg-gradient-to-r from-white via-zinc-205 to-zinc-500 bg-clip-text text-transparent">
+              FRANCHISE
+            </h1>
+            <p className="text-zinc-500 max-w-xl font-medium text-xs md:text-sm uppercase tracking-wider">
+              Secure your spot in NBA history. Select your franchise and begin your dynasty.
+            </p>
           </div>
-          <div className="flex gap-4 border-b border-white/5 pb-4">
-             {['East', 'West'].map(c => (
-               <button key={c} onClick={() => setSelectedConf(c as any)} className={`px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest ${selectedConf === c ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-500'}`}>{c}</button>
-             ))}
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            {NBA_TEAMS.filter(t => t.conference === selectedConf).map(team => (
-              <motion.div 
-                key={team.id}
-                whileHover={{ scale: 1.05 }}
-                onClick={() => startNewFranchise(team.id)}
-                className="bg-zinc-900 border border-white/5 rounded-[2rem] p-8 flex flex-col items-center gap-4 cursor-pointer"
+
+          {/* Minimalist Neo-Neon Conference Selector */}
+          <div className="flex gap-2 border-b border-white/5 pb-6">
+            {['East', 'West'].map(c => (
+              <button 
+                key={c} 
+                onClick={() => setSelectedConf(c as any)} 
+                className={`relative px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${
+                  selectedConf === c 
+                    ? 'bg-white text-black font-extrabold shadow-[0_0_20px_rgba(255,255,255,0.15)]' 
+                    : 'bg-zinc-950/80 text-zinc-500 border border-white/5 hover:border-white/10 hover:text-zinc-300'
+                }`}
               >
-                <img src={getTeamLogo(team.id)} className="w-20 h-20 object-contain" />
-                <p className="font-black italic uppercase truncate">{team.name}</p>
-              </motion.div>
+                {c} CONFERENCE
+                {selectedConf === c && (
+                  <span className="absolute -bottom-[25px] left-1/2 -translate-x-1/2 w-4 h-[2px] bg-amber-500" />
+                )}
+              </button>
             ))}
+          </div>
+
+          {/* Teams Grid - Spectacular Console Card layout */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 pt-2">
+            {NBA_TEAMS.filter(t => t.conference === selectedConf).map(team => {
+              const bgGradient = `radial-gradient(circle at center, ${team.primaryColor}1a 0%, transparent 75%)`;
+              return (
+                <motion.div 
+                  key={team.id}
+                  whileHover={{ 
+                    scale: 1.04, 
+                    rotateY: 2, 
+                    rotateX: -2,
+                    borderColor: `${team.primaryColor}44`,
+                    boxShadow: `0 10px 30px -5px ${team.primaryColor}1a`
+                  }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => startNewFranchise(team.id)}
+                  style={{ 
+                    background: 'rgba(9,9,11,0.6)',
+                  }}
+                  className="relative group border border-white/5 rounded-[2.25rem] p-6 flex flex-col items-center gap-5 cursor-pointer backdrop-blur-md overflow-hidden transition-all duration-300"
+                >
+                  {/* Pulsing Team Ambient Background Glow */}
+                  <div 
+                    className="absolute inset-0 opacity-40 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" 
+                    style={{ background: bgGradient }}
+                  />
+
+                  {/* Dynamic Corner Accents */}
+                  <div className="absolute top-3 right-3 w-1.5 h-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: team.primaryColor }} />
+                  
+                  <div className="relative z-10 p-3 bg-zinc-950/40 rounded-3xl border border-white/5 group-hover:border-white/10 group-hover:bg-zinc-950/60 transition-all duration-300">
+                    <img 
+                      src={getTeamLogo(team.id)} 
+                      className="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-lg transition-transform duration-300 group-hover:scale-110" 
+                      alt={team.name}
+                    />
+                  </div>
+
+                  <div className="text-center relative z-10 leading-tight">
+                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">{team.city}</p>
+                    <h3 className="font-black italic uppercase truncate group-hover:text-amber-400 transition-colors text-xs md:text-sm mt-0.5">{team.name.split(' ').pop()}</h3>
+                  </div>
+
+                  {/* Minimalist Tier Indicator */}
+                  <div className="absolute bottom-2 px-2.5 py-0.5 bg-zinc-950/80 rounded-full border border-white/5 text-[7px] font-black uppercase tracking-widest text-[#a1a1aa]">
+                    Tier {team.tier?.toUpperCase() || ''}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -834,27 +959,34 @@ const CareerView: React.FC = () => {
   }
 
   return (
-    <div className="flex bg-black h-screen w-screen overflow-hidden text-white font-sans selection:bg-amber-500/30 touch-none">
+    <div className="flex bg-black h-full w-full overflow-hidden text-white font-sans selection:bg-amber-500/30 touch-none">
       <div className="flex-1 flex flex-col md:flex-row h-full w-full overflow-hidden relative">
         {renderPhaseSpecificContent()}
         
-        {/* MOBILE BOTTOM NAVIGATION */}
-        <div className="md:hidden fixed bottom-0 inset-x-0 h-16 bg-zinc-950/80 backdrop-blur-xl border-t border-white/5 flex items-center justify-around z-[4000] pb-safe">
-          <MobileTab id="hub" icon={<LayoutDashboard size={20} />} label="Hub" active={activeTab === 'hub'} onClick={() => setActiveTab('hub')} />
-          <MobileTab id="lineup" icon={<Users size={20} />} label="Roster" active={activeTab === 'lineup'} onClick={() => setActiveTab('lineup')} />
-          <MobileTab id="market" icon={<ShoppingCart size={20} />} label="Market" active={activeTab === 'market'} onClick={() => setActiveTab('market')} />
-          <MobileTab id="league" icon={<Trophy size={20} />} label="League" active={activeTab === 'league'} onClick={() => setActiveTab('league')} />
-          <button 
-            onClick={() => setShowMoreMenu(true)} 
-            className="flex flex-col items-center justify-center gap-1 w-12"
-          >
-            <div className="flex gap-0.5">
-               <div className="w-1 h-1 bg-zinc-500 rounded-full" />
-               <div className="w-1 h-1 bg-zinc-500 rounded-full" />
-               <div className="w-1 h-1 bg-zinc-500 rounded-full" />
-            </div>
-            <span className="text-[8px] font-black uppercase text-zinc-500">More</span>
-          </button>
+        {/* MOBILE BOTTOM NAVIGATION - SMOOTH HORIZONTAL SCROLL PILLS */}
+        <div className="md:hidden fixed bottom-4 inset-x-4 h-14 bg-zinc-950/80 backdrop-blur-2xl border border-white/5 rounded-2xl flex items-center overflow-x-auto no-scrollbar z-[4000] px-3.5 gap-2 shadow-[0_10px_35px_rgba(0,0,0,1)] pb-safe">
+          {[
+            { id: 'hub', label: 'Hub' },
+            { id: 'lineup', label: 'Roster' },
+            { id: 'market', label: 'Market' },
+            { id: 'trades', label: 'Trade' },
+            { id: 'office', label: 'Office' },
+            { id: 'league', label: 'League' },
+            { id: 'stats', label: 'Stats' },
+            { id: 'settings', label: 'Settings' }
+          ].map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id as any)}
+              className={`flex-none px-4 py-2 rounded-xl text-[9px] uppercase font-black tracking-widest transition-all duration-200 cursor-pointer
+                ${activeTab === item.id 
+                  ? 'bg-amber-500 text-black font-extrabold shadow-[0_0_15px_rgba(245,158,11,0.3)]' 
+                  : 'bg-zinc-900/80 text-zinc-400 border border-white/5'}
+              `}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
 
         {/* BOX SCORE MODAL */}
@@ -1149,23 +1281,42 @@ const PreseasonProgressionReport: React.FC<PreseasonReportProps> = ({ players, o
   );
 };
 
-const SidebarItem: React.FC<{ id: string, icon: any, label: string, active: boolean, onClick: () => void }> = ({ icon, label, active, onClick }) => (
-  <button 
-    onClick={onClick}
-    className={`w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all ${active ? 'bg-white text-black' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
-  >
-    {icon}
-    <span className="hidden lg:block text-[10px] font-black uppercase tracking-widest truncate">{label}</span>
-  </button>
-);
+const SidebarItem: React.FC<{ id: string, icon: any, label: string, active: boolean, onClick: () => void }> = ({ icon, label, active, onClick }) => {
+  return (
+    <button 
+      onClick={onClick}
+      className={`w-full flex items-center gap-3.5 px-3.5 py-3 rounded-xl transition-all duration-200 select-none ${
+        active 
+          ? 'bg-white text-black font-extrabold shadow-sm' 
+          : 'text-zinc-500 hover:text-white hover:bg-white/5'
+      }`}
+    >
+      <span className={`shrink-0 transition-transform duration-200 ${active ? 'scale-105' : ''}`}>
+        {icon}
+      </span>
+      <span className="hidden lg:block text-[9.5px] font-black uppercase tracking-wider truncate">
+        {label}
+      </span>
+    </button>
+  );
+};
 
 const MobileTab: React.FC<{ id: string, icon: any, label: string, active: boolean, onClick: () => void }> = ({ icon, label, active, onClick }) => (
   <button 
     onClick={onClick}
-    className={`flex flex-col items-center justify-center gap-1 w-14 h-full border-t-2 transition-all ${active ? 'border-amber-500 text-amber-500' : 'border-transparent text-zinc-500'}`}
+    className={`flex flex-col items-center justify-center gap-1 w-12 h-full transition-all duration-200 relative ${active ? 'text-amber-500 font-extrabold' : 'text-zinc-500'}`}
   >
-    {icon}
-    <span className="text-[8px] font-black uppercase tracking-tighter">{label}</span>
+    {active && (
+      <motion.span 
+        layoutId="activeTabBadge" 
+        className="absolute -top-[5px] w-6 h-[2px] bg-amber-500 rounded-full" 
+        transition={{ type: "spring", stiffness: 350, damping: 35 }}
+      />
+    )}
+    <span className={`transition-transform duration-250 ${active ? 'scale-110' : 'scale-100'}`}>
+      {icon}
+    </span>
+    <span className="text-[7.5px] font-black uppercase tracking-wider">{label}</span>
   </button>
 );
 

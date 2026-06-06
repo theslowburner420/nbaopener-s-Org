@@ -1,4 +1,5 @@
 import { Card, SbcRequirement, Rarity } from '../types';
+import { NBA_TEAMS } from '../data/nbaTeams';
 
 const RARITY_ORDER: Record<string, number> = {
   'bench': 0,
@@ -25,6 +26,12 @@ export const sbcService = {
   },
 
   checkRequirements: (cards: Card[], requirements: SbcRequirement[]) => {
+    // Helper to get conference
+    const getConf = (teamAbbr: string) => {
+      const match = NBA_TEAMS.find(t => t.id === teamAbbr);
+      return match ? match.conference : 'West';
+    };
+
     const results = requirements.map(req => {
       let fulfilled = false;
       switch (req.type) {
@@ -34,21 +41,71 @@ export const sbcService = {
         case 'MIN_RARITY':
           fulfilled = cards.length > 0 && cards.every(c => (RARITY_ORDER[c.rarity] || 0) >= (RARITY_ORDER[req.value as string] || 0));
           break;
-        case 'EXACT_RARITY':
+        case 'EXACT_RARITY': {
           const count = cards.filter(c => c.rarity === req.value).length;
-          fulfilled = count === req.count;
+          const targetCount = req.count !== undefined ? req.count : 1;
+          fulfilled = count >= targetCount;
           break;
-        case 'POSITION':
+        }
+        case 'POSITION': {
           const posCount = cards.filter(c => c.position === req.value).length;
-          fulfilled = posCount === req.count;
+          const targetCount = req.count !== undefined ? req.count : 1;
+          fulfilled = posCount >= targetCount;
           break;
+        }
         case 'MIN_OVR':
           fulfilled = cards.length > 0 && cards.every(c => c.stats.ovr >= req.value);
           break;
-        case 'UNIQUE_PLAYERS':
+        case 'UNIQUE_PLAYERS': {
           const names = new Set(cards.map(c => c.name));
           fulfilled = names.size === cards.length;
           break;
+        }
+        case 'TEAM_OVR_MIN': {
+          const totalReq = requirements.find(r => r.type === 'TOTAL_CARDS');
+          const totalSlots = totalReq ? totalReq.value : 5;
+          const sumOvr = cards.reduce((sum, c) => sum + c.stats.ovr, 0);
+          const avgOvr = cards.length > 0 ? sumOvr / totalSlots : 0;
+          fulfilled = avgOvr >= req.value;
+          break;
+        }
+        case 'SAME_TEAM_MIN': {
+          if (cards.length === 0) {
+            fulfilled = false;
+          } else {
+            const teamCounts: Record<string, number> = {};
+            cards.forEach(c => {
+              teamCounts[c.teamAbbr] = (teamCounts[c.teamAbbr] || 0) + 1;
+            });
+            const maxSameTeam = Math.max(0, ...Object.values(teamCounts));
+            fulfilled = maxSameTeam >= req.value;
+          }
+          break;
+        }
+        case 'SAME_CONF_MIN': {
+          if (cards.length === 0) {
+            fulfilled = false;
+          } else {
+            const confCounts = { 'East': 0, 'West': 0 };
+            cards.forEach(c => {
+              const conf = getConf(c.teamAbbr);
+              if (conf === 'East' || conf === 'West') {
+                confCounts[conf]++;
+              }
+            });
+            fulfilled = confCounts.East >= req.value || confCounts.West >= req.value;
+          }
+          break;
+        }
+        case 'MAX_TEAMS': {
+          if (cards.length === 0) {
+            fulfilled = true; // when empty, it represents 0 teams, which is <= req.value
+          } else {
+            const uniqueTeams = new Set(cards.map(c => c.teamAbbr));
+            fulfilled = uniqueTeams.size <= req.value;
+          }
+          break;
+        }
       }
       return { type: req.type, fulfilled };
     });

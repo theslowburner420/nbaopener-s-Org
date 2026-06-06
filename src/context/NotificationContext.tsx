@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 import { Achievement } from '../types';
 import AchievementToast from '../components/AchievementToast';
 import { AnimatePresence, motion } from 'motion/react';
-import { Info, XCircle, CheckCircle2 } from 'lucide-react';
+import { Info, XCircle, CheckCircle } from 'lucide-react';
 
 type NotificationType = 'achievement' | 'error' | 'success' | 'info';
 
@@ -90,7 +90,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                   }`}
                 >
                   {notif.type === 'error' && <XCircle size={18} />}
-                  {notif.type === 'success' && <CheckCircle2 size={18} />}
+                  {notif.type === 'success' && <CheckCircle size={18} />}
                   {notif.type === 'info' && <Info size={18} />}
                   <span className="text-sm font-bold tracking-tight">{notif.message}</span>
                   

@@ -16,7 +16,7 @@ export default function OpenView() {
   // Preload pack image
   useEffect(() => {
     const img = new Image();
-    img.src = 'https://i.postimg.cc/vHMy0CHK/generated-image.png';
+    img.src = 'https://i.postimg.cc/bY3DRzLz/4a07a4ae-7c5c-4d11-8585-780a8aebebbe.png';
   }, []);
 
   const handleOpenFreePack = async () => {
@@ -52,8 +52,7 @@ export default function OpenView() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(6,182,212,0.1)_0%,_transparent_70%)] pointer-events-none" />
       
       <div 
-        style={{ height: '800px' }}
-        className="flex flex-col items-center justify-center w-full z-10 p-4"
+        className="flex-1 flex flex-col items-center justify-center w-full z-10 p-4 min-h-[480px]"
       >
         {/* Giant Random Pack */}
         <motion.div
@@ -71,7 +70,7 @@ export default function OpenView() {
         >
           {/* Background Image & Overlay */}
           <img 
-            src="https://i.postimg.cc/vHMy0CHK/generated-image.png"
+            src="https://i.postimg.cc/bY3DRzLz/4a07a4ae-7c5c-4d11-8585-780a8aebebbe.png"
             className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none z-0"
             referrerPolicy="no-referrer"
             alt="Free Pack Design"
@@ -147,17 +146,14 @@ export default function OpenView() {
                   ]
                 }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                className="w-64 h-96 bg-zinc-950 rounded-3xl border-4 border-cyan-500 shadow-2xl mb-12 flex items-center justify-center overflow-hidden relative"
+                className="w-64 h-96 bg-zinc-950 rounded-3xl border-4 border-cyan-500 shadow-2xl mb-12 flex items-center justify-center overflow-hidden relative animate-pulse"
               >
-                {/* Image on background of opening pack too! */}
                 <img 
-                  src="https://i.postimg.cc/vHMy0CHK/generated-image.png"
-                  className="absolute inset-0 w-full h-full object-cover opacity-80"
+                  src="https://i.postimg.cc/bY3DRzLz/4a07a4ae-7c5c-4d11-8585-780a8aebebbe.png" 
+                  className="w-full h-full object-cover rounded-3xl" 
                   referrerPolicy="no-referrer"
                   alt="Opening Pack"
                 />
-                <div className="absolute inset-0 bg-black/40" />
-                <Sparkles size={80} className="text-cyan-400 animate-pulse relative z-10" />
               </motion.div>
               <h2 className="text-3xl font-black italic tracking-tighter text-white uppercase animate-pulse">Revealing...</h2>
             </div>

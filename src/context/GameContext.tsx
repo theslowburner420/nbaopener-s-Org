@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { GameState, ViewType, Card, User, FranchiseState, CareerMatch as SeasonMatch } from '../types';
 import { ACHIEVEMENTS } from '../constants/achievements';
 import { supabase } from '../lib/supabase';
+import { Capacitor } from '@capacitor/core';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
 interface GameContextType extends GameState {
   isAuthLoading: boolean;
@@ -736,10 +738,22 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = useCallback(async () => {
     if (!supabase) return;
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin }
-    });
+    try {
+      if (Capacitor.isNativePlatform()) {
+        const googleUser = await GoogleAuth.signIn();
+        await supabase.auth.signInWithIdToken({
+          provider: 'google',
+          token: googleUser.authentication.idToken,
+        });
+      } else {
+        await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: window.location.origin }
+        });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+    }
   }, []);
 
   const logout = useCallback(async () => {

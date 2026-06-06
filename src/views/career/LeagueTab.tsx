@@ -15,7 +15,7 @@ const LeagueTab: React.FC<LeagueTabProps> = React.memo(({ state, renderPlayoffs 
       <motion.div 
         key="league-playoffs"
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-        className="max-w-7xl mx-auto px-3 pb-20"
+        className="max-w-7xl mx-auto px-4 pb-20"
       >
         {renderPlayoffs()}
       </motion.div>
@@ -26,18 +26,20 @@ const LeagueTab: React.FC<LeagueTabProps> = React.memo(({ state, renderPlayoffs 
     <motion.div 
       key="league"
       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-      className="max-w-4xl mx-auto space-y-6 md:space-y-12 px-3 pb-20"
+      className="max-w-4xl mx-auto space-y-4 md:space-y-10 px-4 pb-20"
     >
        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
             {/* CONFERENCE STANDINGS */}
             {['East', 'West'].map(conf => (
-              <div key={conf} className="space-y-4 md:space-y-6">
+              <div key={conf} className="space-y-3 md:space-y-6">
                  <div className="flex items-center justify-between border-b border-white/5 pb-2 px-1">
                     <h3 className="text-xl md:text-3xl font-black uppercase italic text-white tracking-tighter">{conf}</h3>
-                    <span className="text-[9px] md:text-sm font-bold text-zinc-600 uppercase tracking-widest italic">Regular Season</span>
+                    <span className="text-[9px] md:text-sm font-bold text-zinc-650 uppercase tracking-widest italic">Regular Season</span>
                  </div>
+                 
                  <div className="bg-zinc-900 border border-white/5 rounded-2xl md:rounded-[2rem] overflow-hidden shadow-2xl">
-                     <div className="overflow-x-auto custom-scrollbar">
+                     {/* Desktop Standings Table */}
+                     <div className="hidden md:block overflow-x-auto custom-scrollbar">
                         <table className="w-full text-left border-collapse min-w-[320px]">
                            <thead className="bg-white/5 border-b border-white/5">
                               <tr className="text-[8px] md:text-xs font-black text-zinc-600 uppercase tracking-[0.2em]">
@@ -62,7 +64,7 @@ const LeagueTab: React.FC<LeagueTabProps> = React.memo(({ state, renderPlayoffs 
                                               </div>
                                               <div className="flex flex-col min-w-0">
                                                  <span className={`text-[11px] md:text-xl font-black uppercase italic tracking-tighter truncate ${team.isHuman ? 'text-amber-500' : 'text-white'}`}>{team.abbreviation}</span>
-                                                 <span className="text-[8px] md:text-[10px] font-bold text-zinc-600 uppercase tracking-widest hidden md:block truncate">{team.name}</span>
+                                                 <span className="text-[8px] md:text-[10px] font-bold text-zinc-650 uppercase tracking-widest hidden md:block truncate">{team.name}</span>
                                               </div>
                                            </div>
                                         </td>
@@ -76,6 +78,50 @@ const LeagueTab: React.FC<LeagueTabProps> = React.memo(({ state, renderPlayoffs 
                                 })}
                            </tbody>
                         </table>
+                     </div>
+
+                     {/* Mobile Standings: Modern Cards Grid */}
+                     <div className="block md:hidden divide-y divide-white/5 max-h-[70vh] overflow-y-auto no-scrollbar">
+                        {(Object.values(state.teams) as TeamObject[])
+                          .filter(t => t.conference === conf)
+                          .sort((a, b) => b.wins - a.wins || a.losses - b.losses)
+                          .map((team, i) => {
+                             const pct = team.wins + team.losses > 0 
+                               ? ((team.wins / (team.wins + team.losses)) * 1000).toFixed(0).padStart(3, '0')
+                               : '000';
+                             return (
+                               <div 
+                                 key={team.teamId}
+                                 className={`p-3.5 flex items-center justify-between transition-colors ${
+                                   team.isHuman ? 'bg-amber-500/10' : 'bg-transparent'
+                                 }`}
+                               >
+                                 <div className="flex items-center gap-3 min-w-0">
+                                   <span className="text-[10px] font-black text-zinc-500 italic shrink-0 w-4">{i+1}</span>
+                                   <div className="w-9 h-9 bg-black/40 rounded-xl p-1.5 border border-white/5 flex items-center justify-center shrink-0">
+                                     <img src={getTeamLogo(team.teamId)} className="w-full h-full object-contain" />
+                                   </div>
+                                   <div className="flex flex-col min-w-0">
+                                      <span className={`text-[13px] font-black uppercase italic tracking-tighter truncate ${team.isHuman ? 'text-amber-500' : 'text-white'}`}>
+                                        {team.name}
+                                      </span>
+                                      <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">{team.abbreviation}</span>
+                                   </div>
+                                 </div>
+                                 
+                                 <div className="flex items-center gap-4 shrink-0 text-right">
+                                   <div>
+                                     <span className="text-[7px] font-extrabold text-zinc-500 block uppercase tracking-wider">RECORD</span>
+                                     <span className="text-xs font-black italic tracking-tighter text-zinc-100">{team.wins} - {team.losses}</span>
+                                   </div>
+                                   <div>
+                                     <span className="text-[7px] font-extrabold text-zinc-500 block uppercase tracking-wider">PCT</span>
+                                     <span className="text-[10px] font-mono text-zinc-400">.{pct}</span>
+                                   </div>
+                                 </div>
+                               </div>
+                             );
+                          })}
                      </div>
                  </div>
               </div>

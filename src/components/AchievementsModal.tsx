@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useGame } from '../context/GameContext';
 import { ACHIEVEMENTS as ALL_ACHIEVEMENTS } from '../constants/achievements';
 import { ALL_CARDS } from '../data/cards';
-import { Trophy, X, CheckCircle2, Lock, Medal, Star, Package, Gem, Shield, Search, Filter, LayoutGrid, ListFilter, Coins } from 'lucide-react';
+import { Trophy, X, CheckCircle, Lock, Medal, Star, Package, Gem, Shield, Search, Filter, LayoutGrid, ListFilter, Coins } from 'lucide-react';
 
 interface AchievementsModalProps {
   isOpen: boolean;
@@ -233,7 +233,7 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
                               <h3 className={`text-xs sm:text-sm font-black uppercase italic tracking-tight truncate ${isUnlocked ? 'text-white' : 'text-zinc-500'}`}>
                                 {ach.title}
                               </h3>
-                              {isUnlocked && <CheckCircle2 className="text-green-500 shrink-0 w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                              {isUnlocked && <CheckCircle className="text-green-500 shrink-0 w-3.5 h-3.5 sm:w-4 sm:h-4" />}
                             </div>
                             <p className="text-[9px] sm:text-[10px] text-zinc-500 font-medium leading-tight line-clamp-2 mb-3 sm:mb-4">
                               {ach.description}
