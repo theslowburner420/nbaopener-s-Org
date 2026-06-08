@@ -290,34 +290,39 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
 
               return (
                 <div 
-                  className="bg-zinc-950/60 backdrop-blur-md border rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 flex flex-col items-center justify-between gap-8 md:gap-10 relative overflow-hidden group shadow-2xl select-none"
+                  className="bg-gradient-to-b from-zinc-950 to-zinc-900 border-2 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 flex flex-col items-center justify-between gap-8 md:gap-10 relative overflow-hidden group shadow-2xl select-none"
                   style={{
-                    borderColor: `${pColor}20`,
-                    boxShadow: `inset 0 0 40px ${pColor}0a, 0 10px 30px rgba(0,0,0,0.6)`
+                    borderColor: `${pColor}40`,
+                    boxShadow: `0 0 50px ${pColor}0d, inset 0 0 30px rgba(0,0,0,0.8)`
                   }}
                 >
                   {/* Slow low-frequency glowing neon background aura */}
                   <div 
-                    className="absolute -top-40 left-1/2 -translate-x-1/2 w-[450px] h-[450px] rounded-full blur-[140px] pointer-events-none opacity-40 group-hover:opacity-60 transition-opacity duration-1000 animate-pulse"
+                    className="absolute -top-40 left-1/2 -translate-x-1/2 w-[550px] h-[550px] rounded-full blur-[160px] pointer-events-none opacity-40 group-hover:opacity-60 transition-opacity duration-1000 animate-pulse"
                     style={{
-                      background: `radial-gradient(circle, ${pColor}30 0%, ${oColor}18 50%, transparent 100%)`
+                      background: `radial-gradient(circle, ${pColor}40 0%, ${oColor}15 50%, transparent 100%)`
                     }}
                   />
+
+                  {/* High-Tech Grid Overlays */}
+                  <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none opacity-45" />
                   
-                  <div className="space-y-2 relative z-10 text-center w-full">
-                    <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em]" style={{ color: pColor }}>GAMECENTER ARENA</p>
-                    <h3 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter text-white leading-none">
+                  <div className="space-y-3 relative z-10 text-center w-full">
+                    <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] duration-1000 filter drop-shadow-sm animate-pulse" style={{ color: pColor }}>
+                      GAMECENTER ARENA LIVE
+                    </p>
+                    <h3 className="text-5xl md:text-7xl font-sans font-black italic uppercase tracking-tighter text-white leading-none">
                       Matchday {nextUserGame.gameNumber}
                     </h3>
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="px-3 py-1 bg-zinc-900/80 border border-white/5 rounded-full text-[9px] font-black uppercase tracking-widest text-zinc-400">
-                        REGULAR SEASON MATCH
+                    <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                      <div className="px-3 py-1 bg-zinc-950 border border-zinc-800 rounded-full text-[9px] font-black uppercase tracking-widest text-zinc-400">
+                        BROADCAST PREVIEW
                       </div>
                       <div 
-                        className="px-3 py-1 bg-zinc-900/80 rounded-full text-[9px] font-black uppercase tracking-widest"
-                        style={{ color: pColor, border: `1px solid ${pColor}20` }}
+                        className="px-3 py-1 bg-zinc-950 rounded-full text-[9px] font-black uppercase tracking-widest"
+                        style={{ color: pColor, border: `1px solid ${pColor}40` }}
                       >
-                        {nextUserGame.homeTeamId === state.userTeamId ? 'Home Stadium Advantage' : 'On the Road'}
+                        {nextUserGame.homeTeamId === state.userTeamId ? 'Defending Home Court' : 'On the Road Arena'}
                       </div>
                     </div>
                   </div>
@@ -329,30 +334,30 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
                     <div className="flex flex-col items-center lg:items-end gap-3 text-center lg:text-right">
                       <div className="flex items-center gap-4">
                         <div className="hidden lg:block leading-tight">
-                          <p className="text-[9px] font-black text-zinc-550 uppercase">FRANCHISE</p>
-                          <p className="text-lg uppercase italic font-black text-white">{uColors?.name.split(' ').pop()}</p>
+                          <p className="text-[8px] font-semibold text-zinc-500 uppercase tracking-widest">FRANCHISE</p>
+                          <p className="text-xl uppercase italic font-black text-white">{uColors?.name.split(' ').pop()}</p>
                         </div>
                         <motion.div 
                           whileHover={{ scale: 1.05 }}
-                          className="w-20 h-20 bg-zinc-950/90 rounded-2xl border p-3 shadow-2xl flex items-center justify-center transition-all duration-300"
-                          style={{ borderColor: `${pColor}25`, boxShadow: `0 10px 25px -5px ${pColor}1a` }}
+                          className="w-20 h-20 bg-zinc-950 border border-zinc-800 rounded-2xl p-3 shadow-2xl flex items-center justify-center transition-all duration-300 ring-2"
+                          style={{ borderColor: `${pColor}50`, ringColor: `${pColor}20` }}
                         >
                           <img src={getTeamLogo(state.userTeamId)} className="w-[85%] h-[85%] object-contain" />
                         </motion.div>
                       </div>
 
                       {/* Power comparison gauges */}
-                      <div className="w-full max-w-xs space-y-1.5 mt-2 bg-zinc-950/40 p-2.5 border border-white/5 rounded-xl">
+                      <div className="w-full max-w-xs space-y-1.5 mt-2 bg-black/60 p-3 border border-zinc-800/80 rounded-xl shadow-lg">
                         <div className="flex items-center justify-between text-[8px] font-black uppercase tracking-wider text-zinc-400">
                           <span>OFF: <span style={{ color: pColor }} className="font-mono font-black italic">{nextMatchupDetails.userOff}</span></span>
-                          <span className="text-zinc-650 font-bold">STRENGTH BALANCE</span>
+                          <span className="text-zinc-550 font-bold">Roster Core</span>
                           <span>DEF: <span className="font-mono font-black italic text-blue-400">{nextMatchupDetails.userDef}</span></span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <div className="h-1 flex-1 bg-zinc-900/60 rounded-full overflow-hidden flex justify-end">
+                          <div className="h-1.5 flex-1 bg-zinc-950 rounded-full overflow-hidden flex justify-end">
                             <div className="h-full rounded-full transition-all duration-500 shadow-[0_0_8px_#f59e0b]" style={{ width: `${nextMatchupDetails.userOff}%`, backgroundColor: pColor }} />
                           </div>
-                          <div className="h-1 flex-1 bg-zinc-900/60 rounded-full overflow-hidden">
+                          <div className="h-1.5 flex-1 bg-zinc-950 rounded-full overflow-hidden">
                             <div className="h-full rounded-full bg-blue-500 transition-all duration-500 shadow-[0_0_8px_#3b82f6]" style={{ width: `${nextMatchupDetails.userDef}%` }} />
                           </div>
                         </div>
@@ -361,22 +366,22 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
 
                     {/* Sim Action with Sweep Metal effect */}
                     <div className="flex flex-col items-center justify-center gap-2">
-                      <div className="text-4xl md:text-5xl font-black italic uppercase tracking-widest text-zinc-800 relative animate-pulse duration-[2500ms]">
+                      <div className="text-5xl md:text-6xl font-black italic uppercase tracking-[0.2em] text-zinc-800 relative animate-pulse duration-[2500ms]">
                         VS
                         <span className="absolute inset-0 text-white/5 animate-pulse blur-[5px]" />
                       </div>
-                      <div className="h-[1px] w-24 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                      <div className="h-[2px] w-16 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                       
                       {/* Premium simulation controls with batch features */}
                       {isSimulating && simProgress > 0 ? (
                         <div className="w-48 space-y-2 mt-2 select-none text-center">
-                          <div className="flex justify-between text-[8px] font-black uppercase text-zinc-400 tracking-wider">
+                          <div className="flex justify-between text-[8px] font-black uppercase text-zinc-450 tracking-wider">
                             <span>Processing Sim...</span>
                             <span className="font-mono text-amber-500">{simProgress}%</span>
                           </div>
-                          <div className="h-2 w-full bg-zinc-950 border border-white/5 rounded-full overflow-hidden">
+                          <div className="h-2 w-full bg-zinc-950 border border-zinc-850 rounded-full overflow-hidden">
                             <motion.div 
-                              className="h-full bg-gradient-to-r from-amber-600 to-amber-400"
+                              className="h-full bg-gradient-to-r from-amber-600 via-amber-400 to-amber-500"
                               style={{ width: `${simProgress}%` }}
                               animate={{ width: `${simProgress}%` }}
                               transition={{ duration: 0.1 }}
@@ -388,18 +393,19 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
                           <button 
                             onClick={handleSimulateWithSpinner}
                             disabled={isSimulating}
-                            className="relative overflow-hidden group/btn text-center h-11 px-6 bg-zinc-950/90 border border-amber-500/20 hover:border-amber-500/50 hover:bg-zinc-900/80 text-white rounded-xl font-black uppercase italic tracking-tighter text-[11px] flex items-center justify-center gap-2 transition-all outline-none duration-300 active:scale-95 disabled:opacity-75 cursor-pointer shadow-[0_4px_12px_rgba(245,158,11,0.08)]"
+                            className="relative overflow-hidden group/btn text-center h-12 px-6 bg-zinc-950 border-2 text-white rounded-xl font-black uppercase italic tracking-tighter text-[11.5px] flex items-center justify-center gap-2 transition-all outline-none duration-300 active:scale-95 disabled:opacity-75 cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.1)] hover:bg-zinc-900"
+                            style={{ borderColor: `${pColor}50` }}
                           >
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-out" />
                             {isSimulating ? (
                               <>
                                 <Activity size={12} className="text-amber-500 animate-spin" />
-                                <span className="text-zinc-400 font-mono text-[9px]">EXEC_SIM_LOAD...</span>
+                                <span className="text-zinc-400 font-mono text-[9px]">RUNNING_SIM_ENG...</span>
                               </>
                             ) : (
                               <>
-                                <Zap size={11} className="text-amber-500 group-hover/btn:scale-125 transition-transform" />
-                                <span>SIMULATE MATCH [G_{nextUserGame.gameNumber}]</span>
+                                <Zap size={12} className="text-amber-500 group-hover/btn:scale-125 transition-transform" />
+                                <span>SIMULATE G_{nextUserGame.gameNumber}</span>
                               </>
                             )}
                           </button>
@@ -408,20 +414,20 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
                             <button 
                               onClick={() => handleSimulateBatch(4)}
                               disabled={isSimulating}
-                              className="relative overflow-hidden group/btn text-center h-10 px-4 bg-zinc-950/90 border border-white/5 hover:border-emerald-500/30 hover:bg-zinc-900 text-zinc-300 hover:text-white rounded-xl font-black uppercase italic tracking-tighter text-[9px] flex items-center justify-center gap-1.5 transition-all outline-none duration-300 active:scale-95 disabled:opacity-75 cursor-pointer"
+                              className="relative overflow-hidden group/btn text-center h-10 px-4 bg-zinc-950 border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-900 text-zinc-350 hover:text-white rounded-xl font-black uppercase italic tracking-tighter text-[9.5px] flex items-center justify-center gap-1.5 transition-all outline-none duration-350 active:scale-95 disabled:opacity-75 cursor-pointer"
                             >
                               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-out" />
                               <Activity size={10} className="text-emerald-400" />
-                              <span className="font-mono">SIM_4G [WK]</span>
+                              <span className="font-mono">Sim Week</span>
                             </button>
                             <button 
                               onClick={() => handleSimulateBatch(16)}
                               disabled={isSimulating}
-                              className="relative overflow-hidden group/btn text-center h-10 px-4 bg-zinc-950/90 border border-white/5 hover:border-indigo-500/30 hover:bg-zinc-900 text-zinc-300 hover:text-white rounded-xl font-black uppercase italic tracking-tighter text-[9px] flex items-center justify-center gap-1.5 transition-all outline-none duration-300 active:scale-95 disabled:opacity-75 cursor-pointer"
+                              className="relative overflow-hidden group/btn text-center h-10 px-4 bg-zinc-950 border border-zinc-800 hover:border-indigo-500/50 hover:bg-zinc-900 text-zinc-350 hover:text-white rounded-xl font-black uppercase italic tracking-tighter text-[9.5px] flex items-center justify-center gap-1.5 transition-all outline-none duration-355 active:scale-95 disabled:opacity-75 cursor-pointer"
                             >
                               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-out" />
                               <Award size={10} className="text-indigo-400" />
-                              <span className="font-mono">SIM_16G [MTH]</span>
+                              <span className="font-mono">Sim Month</span>
                             </button>
                           </div>
                         </div>
@@ -433,29 +439,29 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
                       <div className="flex items-center gap-4">
                         <motion.div 
                           whileHover={{ scale: 1.05 }}
-                          className="w-20 h-20 bg-zinc-950/90 rounded-2xl border p-3 shadow-2xl flex items-center justify-center transition-all duration-300"
-                          style={{ borderColor: `${oColor}25`, boxShadow: `0 10px 25px -5px ${oColor}1a` }}
+                          className="w-20 h-20 bg-zinc-950 border border-zinc-800 rounded-2xl p-3 shadow-2xl flex items-center justify-center transition-all duration-300 ring-2"
+                          style={{ borderColor: `${oColor}40`, ringColor: `${oColor}10` }}
                         >
                           <img src={getTeamLogo(nextMatchupDetails.opponent.id)} className="w-[85%] h-[85%] object-contain" />
                         </motion.div>
                         <div className="leading-tight">
-                          <p className="text-[9px] font-black text-zinc-550 uppercase">RIVAL</p>
-                          <p className="text-lg uppercase italic font-black text-white">{oColors?.name.split(' ').pop()}</p>
+                          <p className="text-[8px] font-semibold text-zinc-500 uppercase tracking-widest">OPPONENT</p>
+                          <p className="text-xl uppercase italic font-black text-white">{oColors?.name.split(' ').pop()}</p>
                         </div>
                       </div>
 
                       {/* Opponent attributes comparison */}
-                      <div className="w-full max-w-xs space-y-1.5 mt-2 bg-zinc-950/40 p-2.5 border border-white/5 rounded-xl">
+                      <div className="w-full max-w-xs space-y-1.5 mt-2 bg-black/60 p-3 border border-zinc-800/80 rounded-xl shadow-lg">
                         <div className="flex items-center justify-between text-[8px] font-black uppercase tracking-wider text-zinc-400">
                           <span>OFF: <span style={{ color: pColor }} className="font-mono font-black italic">{nextMatchupDetails.oppOff}</span></span>
-                          <span className="text-zinc-650 font-bold">STRENGTH BALANCE</span>
+                          <span className="text-zinc-550 font-bold">Roster Core</span>
                           <span>DEF: <span className="font-mono font-black italic text-blue-400">{nextMatchupDetails.oppDef}</span></span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <div className="h-1 flex-1 bg-zinc-900/60 rounded-full overflow-hidden flex justify-end">
+                          <div className="h-1.5 flex-1 bg-zinc-950 rounded-full overflow-hidden flex justify-end">
                             <div className="h-full rounded-full transition-all duration-500 shadow-[0_0_8px_#f59e0b]" style={{ width: `${nextMatchupDetails.oppOff}%`, backgroundColor: pColor }} />
                           </div>
-                          <div className="h-1 flex-1 bg-zinc-900/60 rounded-full overflow-hidden">
+                          <div className="h-1.5 flex-1 bg-zinc-950 rounded-full overflow-hidden">
                             <div className="h-full rounded-full bg-blue-500 transition-all duration-500 shadow-[0_0_8px_#3b82f6]" style={{ width: `${nextMatchupDetails.oppDef}%` }} />
                           </div>
                         </div>

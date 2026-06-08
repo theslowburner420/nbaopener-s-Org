@@ -125,7 +125,7 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
            </h4>
            
            {/* DESKTOP COURT VIEW (hidden on mobile) */}
-           <div className="hidden md:flex relative w-full aspect-[16/9] bg-[#030712] rounded-[3.5rem] border border-white/10 overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] items-center justify-center p-4 pb-8">
+           <div className="hidden md:flex relative w-full aspect-[16/9] bg-gradient-to-br from-[#02050c] to-[#040916] rounded-[2rem] border border-zinc-850 overflow-hidden shadow-2xl items-center justify-center p-4 pb-8">
               {/* HOLOGRAPHIC DIGITAL MESH GRID & SCANLINES */}
               <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none opacity-50" />
               <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.03)_1.5px,transparent_1.5px)] bg-[size:100%_4px] pointer-events-none opacity-40 animate-pulse" />
@@ -215,10 +215,10 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                              ) : (
                                 <div 
                                   onClick={() => setLineupModalPos(pos)} 
-                                  className="aspect-[1/1.4] bg-zinc-950/40 rounded-2xl border border-dashed border-[#10b981]/35 flex flex-col items-center justify-center gap-2.5 hover:bg-[#10b981]/5 w-full hover:border-[#10b981]/75 transition-all cursor-pointer shadow-inner relative group/wireframe"
+                                  className="aspect-[1/1.4] bg-zinc-950/40 rounded-2xl border-2 border-dashed border-zinc-900 flex flex-col items-center justify-center gap-3 hover:bg-zinc-900/40 w-full hover:border-amber-500/25 transition-all cursor-pointer shadow-inner relative group/wireframe"
                                 >
-                                   <Plus className="text-[#10b981]/70 w-5 h-5 group-hover/wireframe:text-[#10b981] group-hover/wireframe:scale-110 transition-transform duration-300" />
-                                   <span className="text-[9px] font-black text-zinc-500 group-hover/wireframe:text-[#10b981]/80 uppercase tracking-widest italic leading-none">{pos} POSITION</span>
+                                   <Plus className="text-zinc-650 w-5 h-5 group-hover/wireframe:text-amber-500 group-hover/wireframe:scale-110 transition-transform duration-300" />
+                                   <span className="text-[9px] font-black text-zinc-500 group-hover/wireframe:text-amber-500/85 uppercase tracking-widest italic leading-none">{pos} POSITION</span>
                                 </div>
                              )}
                           </div>

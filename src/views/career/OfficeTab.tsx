@@ -258,7 +258,7 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
            const chemCircumference = 2 * Math.PI * chemRadius;
            const chemStrokeDashoffset = chemCircumference - (chemVal / 100) * chemCircumference;
            return (
-             <div className="bg-zinc-950/80 border border-emerald-500/10 p-3 md:p-4 rounded-[1.5rem] md:rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-3 relative overflow-hidden shadow-[0_15px_30px_-10px_rgba(16,185,129,0.04)] group hover:border-emerald-500/30 transition-all duration-300">
+             <div className="bg-gradient-to-br from-zinc-950 to-zinc-900 border border-emerald-500/20 p-3 md:p-5 rounded-xl md:rounded-2xl flex flex-col md:flex-row items-center justify-between gap-3 relative overflow-hidden shadow-2xl group hover:border-emerald-500/40 transition-all duration-300">
                <div className="space-y-1 text-center md:text-left">
                  <p className="text-[7px] font-black text-zinc-550 uppercase tracking-widest leading-none">TEAM COHESION</p>
                  <p className="text-[10px] md:text-sm font-black text-white italic uppercase tracking-wider leading-none mt-1">CHEMISTRY</p>
@@ -291,7 +291,7 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
            const moralCircumference = 2 * Math.PI * moralRadius;
            const moralStrokeDashoffset = moralCircumference - (moralVal / 100) * moralCircumference;
            return (
-             <div className="bg-zinc-950/80 border border-indigo-500/10 p-3 md:p-4 rounded-[1.5rem] md:rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-3 relative overflow-hidden shadow-[0_15px_30px_-10px_rgba(99,102,241,0.04)] group hover:border-indigo-500/30 transition-all duration-300">
+             <div className="bg-gradient-to-br from-zinc-950 to-zinc-900 border border-indigo-500/20 p-3 md:p-3 rounded-xl md:rounded-2xl flex flex-col md:flex-row items-center justify-between gap-3 relative overflow-hidden shadow-2xl group hover:border-indigo-500/40 transition-all duration-300">
                <div className="space-y-1 text-center md:text-left">
                  <p className="text-[7px] font-black text-zinc-550 uppercase tracking-widest leading-none">ROSTER HAPPY</p>
                  <p className="text-[10px] md:text-sm font-black text-white italic uppercase tracking-wider leading-none mt-1">MORAL</p>
@@ -324,7 +324,7 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
            const fansCircumference = 2 * Math.PI * fansRadius;
            const fansStrokeDashoffset = fansCircumference - (fansVal / 100) * fansCircumference;
            return (
-             <div className="bg-zinc-950/80 border border-amber-500/10 p-3 md:p-4 rounded-[1.5rem] md:rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-3 relative overflow-hidden shadow-[0_15px_30px_-10px_rgba(245,158,11,0.04)] group hover:border-amber-500/30 transition-all duration-300">
+             <div className="bg-gradient-to-br from-zinc-950 to-zinc-900 border border-amber-500/20 p-3 md:p-5 rounded-xl md:rounded-2xl flex flex-col md:flex-row items-center justify-between gap-3 relative overflow-hidden shadow-2xl group hover:border-amber-500/40 transition-all duration-300">
                <div className="space-y-1 text-center md:text-left">
                  <p className="text-[7px] font-black text-zinc-550 uppercase tracking-widest leading-none">ATTENDANCE</p>
                  <p className="text-[10px] md:text-sm font-black text-white italic uppercase tracking-wider leading-none mt-1">FAN SUPPORT</p>
@@ -406,62 +406,63 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
                 return (
                   <motion.div 
                     key={d.id}
-                    whileHover={isDone ? {} : { y: -4, scale: 1.01 }}
+                    whileHover={isDone ? {} : { y: -6, scale: 1.02 }}
                     onClick={() => {
                       if (!isDone) setActiveDilemma(d);
                     }}
-                    className={`bg-zinc-950/90 hover:bg-zinc-950 border rounded-[2rem] p-6 flex flex-col justify-between transition-all duration-300 relative h-76 overflow-hidden ${
+                    className={`bg-zinc-950 border-2 rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 relative h-76 overflow-hidden ${
                       isDone 
-                        ? 'opacity-40 border-white/5 cursor-default' 
-                        : 'border-white/10 cursor-pointer hover:border-amber-500/30 hover:shadow-[0_20px_40px_rgba(245,158,11,0.03)]'
+                        ? 'opacity-35 border-zinc-900 cursor-default' 
+                        : 'border-zinc-800 cursor-pointer hover:border-amber-500/40 hover:shadow-[0_20px_40px_rgba(245,158,11,0.06)]'
                     }`}
                   >
-                     {/* Decorative subtle grid line background representing design blueprint */}
-                     <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none opacity-40" />
+                     {/* Decorative high-tech subtle grid blueprint background */}
+                     <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+                     <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.005)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.005)_1px,transparent_1px)] bg-[size:14px_14px] pointer-events-none opacity-40" />
 
-                     {/* Executive tab dossier header specifying the category */}
-                     <div className="absolute top-0 left-6 h-6 px-3 bg-zinc-90 w-fit border-x border-b border-white/10 rounded-b-xl flex items-center justify-center leading-none">
-                       <span className="text-[7px] font-black text-amber-500 tracking-widest uppercase">{d.category}</span>
+                     {/* Executive tab dossier banner specifying the category with vintage folder stamp style */}
+                     <div className="absolute top-0 left-6 h-5 px-2.5 bg-zinc-900 border-x border-b border-zinc-800 rounded-b-lg flex items-center justify-center leading-none">
+                       <span className="text-[6.5px] font-black text-amber-500 tracking-wider uppercase">{d.category}</span>
                      </div>
 
                      {/* Overlay resolved mark */}
                      {isDone ? (
-                       <div className="absolute top-4 right-4 text-[7px] font-black text-zinc-550 border border-zinc-900 bg-zinc-950/80 px-2 py-0.5 rounded uppercase leading-none italic flex items-center gap-1">
-                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                         DECISION DONE
+                       <div className="absolute top-3.5 right-4 text-[7px] font-bold text-zinc-500 border border-zinc-800 bg-zinc-950/90 px-2 py-0.5 rounded uppercase leading-none italic flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          RESOLVED
                        </div>
                      ) : (
-                       <div className="absolute top-4 right-4 text-[7px] font-black text-amber-500/80 bg-amber-500/5 px-2 py-0.5 rounded border border-amber-500/20 leading-none">
-                         EXECUTIVE REQ
+                       <div className="absolute top-3.5 right-4 text-[7px] font-black text-amber-500/95 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 leading-none">
+                          PRESIDENTIAL ACTION
                        </div>
                      )}
 
                      <div className="space-y-4 mt-4 relative z-10">
                         <div className="flex items-center gap-3">
-                           <div className="text-xl bg-zinc-900/80 w-12 h-12 border border-white/5 rounded-2xl flex items-center justify-center p-1 font-mono">
+                           <div className="text-lg bg-zinc-900 border border-zinc-800 w-11 h-11 rounded-xl flex items-center justify-center p-1">
                               {d.icon}
                            </div>
                            <div className="leading-tight">
-                              <span className="text-[7px] font-bold text-zinc-500 tracking-wider uppercase leading-none">PRESIDENTIAL REPORT</span>
-                              <h4 className="text-xs md:text-sm font-black text-white italic uppercase w-44 truncate leading-none mt-1">{d.title}</h4>
+                              <span className="text-[7.5px] font-bold text-zinc-500 tracking-widest uppercase leading-none">ADMINISTRATIVE REPORT</span>
+                              <h4 className="text-xs md:text-sm font-sans font-black text-white italic uppercase w-44 truncate leading-none mt-1">{d.title}</h4>
                            </div>
                         </div>
 
-                        <p className="text-zinc-450 text-[10px] font-medium leading-relaxed tracking-wide uppercase">
+                        <p className="text-zinc-400 text-[10px] font-normal leading-relaxed tracking-wide uppercase">
                           {d.scenario.slice(0, 110)}...
                         </p>
                      </div>
 
-                     <div className="pt-4 border-t border-white/5 flex items-center justify-between text-[8.5px] font-black uppercase tracking-wider text-zinc-500 leading-none relative z-10">
-                       <span className="font-mono text-zinc-650">{d.options.length} DECISION PATHS</span>
-                       <span className="text-zinc-400 hover:text-amber-500 transition-colors flex items-center gap-1">ANALYZE BRIEFING &rarr;</span>
+                     <div className="pt-4 border-t border-zinc-800/80 flex items-center justify-between text-[8.5px] font-black uppercase tracking-wider text-zinc-500 leading-none relative z-10">
+                       <span className="font-mono text-zinc-650">{d.options.length} DECISION BRANCHES</span>
+                       <span className="text-zinc-400 group-hover:text-amber-500 transition-colors flex items-center gap-1">ANALYZE FILES &rarr;</span>
                      </div>
                   </motion.div>
                 );
               })}
             </div>
-         </div>
-       )}
+          </div>
+        )}
 
        {subTab === 'legacy' && (
           <div className="space-y-12">
@@ -510,9 +511,9 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
                              animate={{ opacity: 1, x: 0 }}
                              transition={{ delay: i * 0.05 }}
                              key={`${award.type}-${award.season}-${i}`}
-                             className="flex items-center gap-4 bg-zinc-950 border border-white/5 p-4 rounded-2xl hover:border-white/15 transition-all group"
+                             className="flex items-center gap-4 bg-gradient-to-br from-zinc-950 to-zinc-900 border border-zinc-800 p-4 rounded-xl hover:border-amber-500/30 transition-all duration-300 hover:shadow-[0_8px_16px_rgba(245,158,11,0.03)] group"
                            >
-                               <div className={`w-9 h-9 md:w-11 md:h-11 rounded-lg flex items-center justify-center shrink-0 ${award.type === 'CHAMP' ? 'bg-white text-black' : 'bg-zinc-900 border border-white/10 text-zinc-300'}`}>
+                               <div className={`w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shrink-0 border border-zinc-850 bg-zinc-90 w-fit ${award.type === 'CHAMP' ? 'text-amber-400 bg-zinc-900 border-amber-500/20 shadow-[0_0_12px_rgba(245,158,11,0.15)] animate-pulse' : 'text-zinc-400 bg-zinc-950'}`}>
                                  <Trophy size={14} />
                                </div>
                                <div className="flex-1 min-w-0">
@@ -529,7 +530,7 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
                      })}
                   </div>
                 ) : (
-                  <div className="bg-zinc-950 border border-dashed border-white/5 rounded-[2rem] p-8 md:p-14 text-center space-y-3.5">
+                  <div className="bg-zinc-950/40 border-2 border-dashed border-zinc-900 rounded-2xl p-10 md:p-16 text-center space-y-4">
                      <Trophy className="text-zinc-800 mx-auto md:w-12 md:h-12 shrink-0 animate-pulse" size={32} />
                      <div className="space-y-1">
                          <p className="text-base font-black text-zinc-600 uppercase italic leading-none">Empty Vault Archives</p>

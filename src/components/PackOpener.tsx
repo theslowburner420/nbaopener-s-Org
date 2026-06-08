@@ -369,7 +369,7 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
       // Center active card - optimized for full visibility
       return { 
         x: 0, 
-        y: isMobile ? -20 : 0, 
+        y: 0, 
         scale: isMobile ? 0.75 : 1, 
         rotate: 0, 
         zIndex: 100 
@@ -434,7 +434,7 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`fixed inset-0 z-[8000] bg-black flex flex-col items-center justify-center overflow-hidden h-[100dvh] select-none pointer-events-auto isolation-isolate gpu-accelerated pt-[165px] sm:pt-[180px] md:pt-[190px] ${
+      className={`fixed inset-0 z-[8000] bg-black flex flex-col items-center justify-center overflow-hidden h-[100dvh] select-none pointer-events-auto isolation-isolate gpu-accelerated py-8 pb-[10vh] ${
         isRevealing ? 'animate-screen-shake-intense' : ''
       }`}
     >

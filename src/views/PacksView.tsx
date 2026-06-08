@@ -134,7 +134,7 @@ export default function PacksView() {
   };
 
   return (
-    <div className="min-h-full w-full flex flex-col bg-black">
+    <div className="min-h-[75vh] w-full flex flex-col bg-black">
       {/* Header with Coins */}
       <header className="px-6 pt-4 pb-2 flex flex-col gap-3 shrink-0">
         <div className="flex justify-between items-center">
@@ -173,7 +173,7 @@ export default function PacksView() {
       </header>
 
       {/* Content Area */}
-      <div className="flex-1 pb-safe px-6">
+      <div className="flex-1 pb-safe px-6 flex flex-col justify-center">
         <AnimatePresence mode="wait">
           {activeTab === 'shop' ? (
             <motion.div
@@ -181,7 +181,7 @@ export default function PacksView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 p-4 sm:p-6 pb-24"
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 p-4 sm:p-6 pb-24 my-auto w-full max-w-5xl mx-auto"
             >
               {PACKS.map((pack) => (
                 <motion.div 
@@ -214,13 +214,6 @@ export default function PacksView() {
                         BUX {pack.price.toLocaleString()}
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="mt-4 text-center">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/90 italic">{pack.name}</h3>
-                    <p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mt-1">
-                      {pack.id === 'legendary_mvp' ? '1 CARD' : 'MULTIPLE CARDS'}
-                    </p>
                   </div>
                 </motion.div>
               ))}

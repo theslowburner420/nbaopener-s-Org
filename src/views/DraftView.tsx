@@ -1282,26 +1282,10 @@ const DraftView: React.FC = () => {
     // Balanced OVR: 70% Starters, 30% Bench
     const teamOVR = Math.round((startersAvg * 0.7) + (benchAvg * 0.3));
 
-    // CHEMISTRY CALCULATION (Max 100)
-    let chem = 0;
-    starters.forEach((slot, i) => {
-      if (!slot.card) return;
-      
-      // 1. Natural Position Bonus (+14 per player)
-      const isNatural = slot.card.position.split('/').some(p => p.trim() === slot.position);
-      if (isNatural) chem += 14;
-      else if (slot.position) chem += 4; // Out of position but still base
-      
-      // 2. Team Links (+7.5 per link, checking neighbors: 0-1, 1-2, 2-3, 3-4)
-      if (i < starters.length - 1) {
-        const nextSlot = starters[i+1];
-        if (nextSlot.card && slot.card.team === nextSlot.card.team) {
-          chem += 7.5;
-        }
-      }
-    });
+    // CHEMISTRY CALCULATION - Omitted as per user request
+    const chemistry = 100;
 
-    return { teamOVR, benchOVR: Math.round(benchAvg), chemistry: Math.min(100, Math.round(chem)) };
+    return { teamOVR, benchOVR: Math.round(benchAvg), chemistry };
   }, [starters, bench]);
 
   useEffect(() => {
@@ -1931,14 +1915,6 @@ const DraftView: React.FC = () => {
             <div className="text-center group">
               <p className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-amber-500 transition-colors">Team OVR</p>
               <p className="text-2xl md:text-3xl font-black italic text-amber-500">{teamOVR}</p>
-            </div>
-            <div className="hidden lg:block w-full h-px bg-white/5" />
-            <div className="text-center group">
-              <p className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-blue-500 transition-colors">Chemistry</p>
-              <div className="flex items-center justify-center gap-1">
-                <Shield size={12} className={chemistry > 80 ? "text-green-500" : chemistry > 50 ? "text-amber-500" : "text-zinc-500"} />
-                <p className={`text-xl md:text-2xl font-black italic ${chemistry > 80 ? "text-green-500" : chemistry > 50 ? "text-amber-500" : "text-white"}`}>{chemistry}</p>
-              </div>
             </div>
             <div className="hidden lg:block w-full h-px bg-white/5" />
             <div className="text-right lg:text-center">

@@ -1572,7 +1572,7 @@ body > iframe[id^="at-"] {
 .collection-header {
   background: linear-gradient(to bottom, #111, #000);
   border-bottom: 1px solid #222;
-  padding: 8px 12px;
+  padding: 4px 8px;
 }
 
 .rarity-pill {
