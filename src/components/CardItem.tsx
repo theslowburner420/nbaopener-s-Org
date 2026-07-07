@@ -18,6 +18,7 @@ interface CardItemProps {
     rebounds: number;
     assists: number;
   };
+  width?: number;
 }
 
 const getRarityClass = (rarity: Rarity) => {
@@ -77,8 +78,10 @@ const RARITY_COLORS: Record<Rarity, string> = {
   'future_star': '#10B981',
 };
 
-const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', onClick, showBack = false, isFocused = false, isNew = false, quantity = 0, dynamicOvr, dynamicStats }) => {
+const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', onClick, showBack = false, isFocused = false, isNew = false, quantity = 0, dynamicOvr, dynamicStats, width }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const isMini = mode === 'mini';
   
   const displayOvr = dynamicOvr !== undefined ? dynamicOvr : (card?.stats.ovr || 0);
@@ -360,15 +363,31 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
             )}
           </>
         )}
-        <img
-          src={card.imageUrl}
-          alt={card.name}
-          className={`w-full h-full object-cover object-top transition-transform duration-500 ${isMini ? 'group-hover/mini:scale-110' : ''} ${isVintage ? 'card-vintage' : ''} ${isMoment ? 'brightness-110 contrast-110' : ''}`}
-          referrerPolicy="no-referrer"
-          loading="lazy"
-          decoding="async"
-          {...(isFocused || !isMini ? { fetchPriority: "high" } : { fetchPriority: "low" })}
-        />
+        {!imageLoaded && !imageError && (
+          <div className="absolute inset-0 bg-gradient-to-b from-zinc-850 to-zinc-950 animate-pulse flex items-center justify-center z-10">
+            <div className="w-8 h-8 rounded-full border-2 border-white/5 border-t-amber-500 animate-spin" />
+          </div>
+        )}
+        {imageError ? (
+          <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 to-black flex flex-col items-center justify-center p-2 text-center select-none z-10">
+            <span className={`font-black tracking-tighter uppercase italic leading-none text-zinc-700 ${isMini ? 'text-lg' : 'text-3xl'}`}>
+              {card.name.split(' ').map(n => n[0]).join('')}
+            </span>
+            <span className={`font-black text-zinc-600 uppercase mt-1 tracking-widest leading-none ${isMini ? 'text-[5px]' : 'text-[8px]'}`}>NO PHOTO</span>
+          </div>
+        ) : (
+          <img
+            src={card.imageUrl}
+            alt={card.name}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
+            className={`w-full h-full object-cover object-top transition-all duration-500 ${imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${isMini ? 'group-hover/mini:scale-110' : ''} ${isVintage ? 'card-vintage' : ''} ${isMoment ? 'brightness-110 contrast-110' : ''}`}
+            referrerPolicy="no-referrer"
+            loading="lazy"
+            decoding="async"
+            {...(isFocused || !isMini ? { fetchPriority: "high" } : { fetchPriority: "low" })}
+          />
+        )}
         <div className={`absolute inset-0 ${isMini ? 'bg-gradient-to-t from-black/90 via-transparent to-transparent' : 'opacity-30 z-10'}`} 
              style={!isMini ? { background: `linear-gradient(to bottom, ${card.teamColor}, transparent)` } : {}} />
       </>
@@ -561,9 +580,27 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
         onClick={() => (isOwned || showBack) && onClick?.(card)}
         className={`flex items-center gap-3 bg-zinc-900/80 p-2 rounded-xl border border-white/5 h-20 transition-all active:scale-95 ${isOwned ? 'cursor-pointer hover:bg-white/5' : 'opacity-50'}`}
       >
-         <div className="w-16 h-16 bg-zinc-800 rounded-lg overflow-hidden shrink-0 relative">
-            <img src={card.imageUrl} className="w-full h-full object-cover object-top" referrerPolicy="no-referrer" />
-            <div className="absolute top-0 right-0 bg-white text-black text-[8px] font-black px-1 rounded-bl-md shadow-lg">
+         <div className="w-16 h-16 bg-zinc-850 rounded-lg overflow-hidden shrink-0 relative flex items-center justify-center">
+            {!imageLoaded && !imageError && (
+              <div className="absolute inset-0 bg-gradient-to-b from-zinc-800 to-zinc-900 animate-pulse flex items-center justify-center z-10" />
+            )}
+            {imageError ? (
+              <div className="absolute inset-0 bg-zinc-900 flex flex-col items-center justify-center text-center select-none z-10">
+                <span className="font-black tracking-tighter uppercase italic text-xs leading-none text-zinc-700">
+                  {card.name.split(' ').map(n => n[0]).join('')}
+                </span>
+              </div>
+            ) : (
+              <img
+                src={card.imageUrl}
+                alt={card.name}
+                onLoad={() => setImageLoaded(true)}
+                onError={() => setImageError(true)}
+                className={`w-full h-full object-cover object-top transition-all duration-300 ${imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+                referrerPolicy="no-referrer"
+              />
+            )}
+            <div className="absolute top-0 right-0 bg-white text-black text-[8px] font-black px-1 rounded-bl-md shadow-lg z-20">
                {displayOvr}
             </div>
          </div>
@@ -598,6 +635,48 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
                )}
             </div>
          </div>
+      </div>
+    );
+  }
+
+  if (width) {
+    const DESIGN_WIDTH = 220;
+    const DESIGN_HEIGHT = 308;
+    const scaleFactor = width / DESIGN_WIDTH;
+    
+    return (
+      <div 
+        style={{ 
+          width: width, 
+          height: width * 1.4, 
+          position: 'relative',
+          flexShrink: 0,
+          overflow: 'visible'
+        }}
+        onClick={() => (isOwned || showBack) && onClick?.(card)}
+        className={`shrink-0 select-none ${isOwned ? 'cursor-pointer' : 'cursor-default'}`}
+      >
+        <div 
+          style={{
+            width: DESIGN_WIDTH,
+            height: DESIGN_HEIGHT,
+            transform: `scale(${scaleFactor})`,
+            transformOrigin: 'top left',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            pointerEvents: 'auto'
+          }}
+        >
+          <div 
+            className={`nba-card relative flex flex-col h-full rounded-xl overflow-hidden transition-all ${!showBack ? `${rarityClass} ${categoryClass} ${isDarkCard ? 'dark-card' : ''}` : 'items-center justify-center bg-zinc-900 border-zinc-800'}`}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            style={cardStyle}
+          >
+            {cardContent}
+          </div>
+        </div>
       </div>
     );
   }

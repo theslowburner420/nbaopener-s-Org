@@ -5,7 +5,8 @@ import { tradeEngine } from './tradeEngine';
 import { newsService } from './newsService';
 import { playoffService } from './playoffService';
 import { ALL_CARDS } from '../../data/cards';
-import { getInitialSalary, runCPUMidSeasonLogic, calculateAwards } from './rosterService';
+import { getInitialSalary, runCPUMidSeasonLogic, calculateAwards, generateDraftPool, advanceSeason } from './rosterService';
+import { marketService } from './marketService';
 
 export const gameService = {
   // Simulates the next available game for the user
@@ -148,11 +149,9 @@ export const gameService = {
 
     if (!activeSeries) return null;
 
-    const t1 = state.teams[activeSeries.team1Id];
-    const t2 = state.teams[activeSeries.team2Id];
-    const result = simulationEngine.simulateMatch(t1, t2, state);
+    const result = playoffService.simulatePlayoffGame(state, activeSeries);
 
-    if (result.winnerId === t1.teamId) activeSeries.wins1++;
+    if (result.winnerId === activeSeries.team1Id) activeSeries.wins1++;
     else activeSeries.wins2++;
 
     const targetWins = activeSeries.round === 0 ? 1 : 4;
@@ -170,7 +169,7 @@ export const gameService = {
 
     stateService.save(state);
 
-    return { result, match: { id: 'playoff', homeTeamId: activeSeries.team1Id, awayTeamId: activeSeries.team2Id, played: true, gameNumber: 0 } as FranchiseMatch };
+    return { result, match: { id: 'playoff', homeTeamId: activeSeries.team1Id, awayTeamId: activeSeries.team2Id, played: true, gameNumber: activeSeries.wins1 + activeSeries.wins2 } as FranchiseMatch };
   },
 
   // Simulates remaining CPU games and advances time
@@ -310,5 +309,82 @@ export const gameService = {
       if (entry.steals >= highs.steals.value) highs.steals = { value: entry.steals, rival, date };
       if (entry.blocks >= highs.blocks.value) highs.blocks = { value: entry.blocks, rival, date };
     });
+  },
+
+  // ============================================================================
+  // FINITE STATE MACHINE (FSM) SEASON TRANSITIONS
+  // ============================================================================
+
+  // Phase 1: REGULAR_SEASON_COMPLETE
+  fsmRegularSeasonComplete(state: FranchiseState): FranchiseState {
+    console.log('[FSM PHASE TRANSITION] -> REGULAR_SEASON_COMPLETE');
+    this.endRegularSeason(state);
+    return state;
+  },
+
+  // Phase 2: AWARDS_DISPLAYED
+  fsmAwardsDisplayed(state: FranchiseState): FranchiseState {
+    const previousPhase = state.phase;
+    state.phase = 'playoffs';
+    console.log('[FSM PHASE TRANSITION] season_awards -> playoffs');
+    stateService.save(state);
+    return state;
+  },
+
+  // Phase 3: PLAYOFF_ROUND_SIMULATING
+  fsmPlayoffRoundSimulated(state: FranchiseState): FranchiseState {
+    console.log('[FSM PHASE TRANSITION] Simulation Round in Playoffs');
+    if (state.phase === 'playoffs') {
+      playoffService.simulateNextRoundOnly(state);
+      // Check if candidate for completion
+      if (state.championId || state.playoffSeries.find(s => s.round === 4)?.winnerId) {
+        state.phase = 'offseason_start';
+      }
+    }
+    stateService.save(state);
+    return state;
+  },
+
+  // Phase 4: PLAYOFFS_COMPLETE
+  fsmPlayoffsComplete(state: FranchiseState): FranchiseState {
+    state.phase = 'offseason_start';
+    console.log('[FSM PHASE TRANSITION] playoffs -> offseason_start');
+    stateService.save(state);
+    return state;
+  },
+
+  // Phase 5: DRAFT_LOTTERY_START
+  fsmDraftLotteryStart(state: FranchiseState): FranchiseState {
+    state.phase = 'draft_lottery';
+    const order1 = marketService.getDraftOrder(state, state.season, 1);
+    state.lotteryPicks = order1.slice(0, 14).map(o => o.teamId);
+    console.log('[FSM PHASE TRANSITION] offseason_start -> draft_lottery');
+    stateService.save(state);
+    return state;
+  },
+
+  // Phase 6: DRAFT_START
+  fsmDraftStart(state: FranchiseState): FranchiseState {
+    state.phase = 'draft';
+    state.draftPool = generateDraftPool(state.season);
+    console.log('[FSM PHASE TRANSITION] draft_lottery -> draft (Generated 60 rookies)');
+    stateService.save(state);
+    return state;
+  },
+
+  // Phase 7: DRAFT_COMPLETE
+  fsmDraftComplete(state: FranchiseState): FranchiseState {
+    state.phase = 'free_agency';
+    console.log('[FSM PHASE TRANSITION] draft -> free_agency');
+    stateService.save(state);
+    return state;
+  },
+
+  // Phase 8: SEASON_RESET_AND_CALENDAR
+  fsmSeasonResetAndCalendar(state: FranchiseState): FranchiseState {
+    console.log('[FSM PHASE TRANSITION] new_season -> SEASON_RESET_AND_CALENDAR');
+    const finalizedState = advanceSeason(state);
+    stateService.save(finalizedState);
+    return finalizedState;
   }
 };

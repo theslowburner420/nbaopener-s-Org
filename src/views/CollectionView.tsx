@@ -499,8 +499,9 @@ export default function CollectionView() {
         
         {/* Load More Indicator */}
         {visibleCount < filteredCards.length && (
-          <div ref={loaderRef} className="flex justify-center py-8">
-            <div className="w-8 h-8 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
+          <div ref={loaderRef} className="flex flex-col items-center justify-center py-8 gap-2">
+            <div className="w-6 h-6 border-2 border-amber-500/10 border-t-amber-500 rounded-full animate-spin" />
+            <span className="text-[8px] font-black tracking-[0.2em] text-zinc-600 uppercase animate-pulse">LOAD MORE PLAYERS</span>
           </div>
         )}
         

@@ -11,6 +11,7 @@ interface PackOpenerProps {
   cards: Card[];
   newlyUnlockedAchievements?: any[];
   onClose: () => void;
+  packImage?: string;
 }
 
 const getRarityColor = (rarity: Rarity) => {
@@ -210,7 +211,7 @@ const RarityBackgroundEffect = React.memo(({ rarity, isActive, isRevealing }: { 
   }
 });
 
-export default function PackOpener({ cards, newlyUnlockedAchievements = [], onClose }: PackOpenerProps) {
+export default function PackOpener({ cards, newlyUnlockedAchievements = [], onClose, packImage }: PackOpenerProps) {
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [isRevealing, setIsRevealing] = useState(true);
   const [showPack, setShowPack] = useState(true);
@@ -419,11 +420,22 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 z-[8000] bg-black flex items-center justify-center"
+        className="fixed inset-0 z-[8000] bg-black flex items-center justify-center select-none"
       >
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-amber-500 font-black uppercase tracking-widest text-xs">Preparing Pack...</p>
+        {/* Ambient Golden Glows */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-amber-500/10 blur-[80px] rounded-full pointer-events-none animate-pulse" />
+        
+        <div className="flex flex-col items-center gap-6 relative z-10">
+          <div className="relative">
+            <div className="w-14 h-14 border-2 border-zinc-800 border-t-amber-500 rounded-full animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />
+            </div>
+          </div>
+          <div className="text-center space-y-1">
+            <p className="text-amber-500 font-black uppercase tracking-[0.25em] text-xs animate-pulse">PREPARING GOLDEN PACK...</p>
+            <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Caching High-Definition Assets</p>
+          </div>
         </div>
       </motion.div>
     );
@@ -886,21 +898,22 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
                 {showPack && isActive ? (
                   <motion.div
                     key="pack"
-                    initial={{ scale: 0.8, x: "-50%", y: "-50%", left: "50%", top: "50%" }}
+                    initial={{ scale: 0.8 }}
                     animate={{ 
-                      scale: [0.8, 1.1, 0.9, 1.2],
-                      rotate: [0, -5, 5, -5, 5, 0],
-                      x: "-50%",
-                      y: "-50%"
+                      scale: [0.8, 1.12, 0.95, 1.25],
+                      rotate: [0, -6, 6, -6, 6, 0]
                     }}
-                    exit={{ scale: 2, opacity: 0, filter: 'brightness(2)', x: "-50%", y: "-50%" }}
+                    exit={{ scale: 2, opacity: 0, filter: 'brightness(2)' }}
                     transition={{ duration: 0.8, ease: "easeInOut" }}
-                    className="fixed z-[5000] w-64 h-80 flex items-center justify-center pointer-events-none"
+                    className="fixed inset-0 m-auto z-[5000] w-[220px] xs:w-[260px] md:w-[320px] aspect-[2.5/3.5] flex items-center justify-center pointer-events-none"
                   >
-                    <div className="w-48 h-64 sm:w-56 sm:h-72 bg-gradient-to-br from-amber-500 to-amber-900 rounded-2xl shadow-[0_0_50px_rgba(245,158,11,0.5)] border-2 border-white/20 flex items-center justify-center relative overflow-hidden">
-                      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
-                      <Sparkles size={isMobile ? 48 : 64} className="text-white/80 animate-pulse" />
-                      <div className="absolute bottom-4 text-white font-black italic uppercase tracking-widest text-[10px] sm:text-xs">Opening...</div>
+                    <div className="w-full h-full bg-zinc-950 rounded-3xl overflow-hidden shadow-[0_0_60px_rgba(245,158,11,0.5)] border-4 border-zinc-800 flex items-center justify-center relative">
+                      <img 
+                        src={packImage || 'https://i.postimg.cc/bY3DRzLz/4a07a4ae-7c5c-4d11-8585-780a8aebebbe.png'}
+                        className="absolute inset-0 w-full h-full object-cover select-none"
+                        referrerPolicy="no-referrer"
+                        alt="Opening Pack Image"
+                      />
                     </div>
                   </motion.div>
                 ) : (

@@ -23,11 +23,13 @@ import { stateService } from '../franchise/services/stateService';
 import { gameService } from '../franchise/services/gameService';
 import { FranchiseState, FranchisePhase, TeamObject, FranchiseMatch, PlayoffSeries } from '../franchise/types';
 import { marketService } from '../franchise/services/marketService';
+import { PlayerHeadshot } from '../components/PlayerHeadshot';
 import { tradeEngine } from '../franchise/services/tradeEngine';
 import { playoffService } from '../franchise/services/playoffService';
 import { generateDraftPool, advanceSeason } from '../franchise/services/rosterService';
 import { tradeService } from '../franchise/services/tradeService';
 import CardItem from '../components/CardItem';
+import { BracketCanvas } from '../components/BracketCanvas';
 
 import confetti from 'canvas-confetti';
 
@@ -384,212 +386,24 @@ const CareerView: React.FC = () => {
 
   const renderPlayoffs = () => {
     if (!state) return null;
-    const bracket = state.playoffs?.bracket || {};
-    
-    const renderSeries = (series: PlayoffSeries, label: string) => {
-      const teamA = state.teams[series.team1Id];
-      const teamB = state.teams[series.team2Id];
-      if (!teamA || !teamB) return null;
-
-      const isFinished = series.wins1 >= 4 || series.wins2 >= 4;
-      const winnerId = series.wins1 >= 4 ? series.team1Id : series.wins2 >= 4 ? series.team2Id : null;
-
-      // Calculate exact regular season matchups dynamically
-      const regSeasonGames = (state.schedule || []).filter((m: any) => 
-        !m.isPlayoffs && m.played && 
-        ((m.homeTeamId === series.team1Id && m.awayTeamId === series.team2Id) || 
-         (m.homeTeamId === series.team2Id && m.awayTeamId === series.team1Id))
-      );
-      const team1Wins = regSeasonGames.filter((m: any) => m.winnerId === series.team1Id).length;
-      const team2Wins = regSeasonGames.filter((m: any) => m.winnerId === series.team2Id).length;
-      const h2hText = `Reg Season: ${team1Wins}-${team2Wins} ${teamA.abbreviation}`;
-
-      return (
-        <motion.div 
-          whileHover={{ scale: 1.02, translateY: -2 }}
-          className="bg-zinc-900/60 border border-white/10 rounded-2xl p-4.5 space-y-3.5 min-w-[215px] relative group overflow-hidden shadow-lg transition-all"
-        >
-          {/* Subtle golden background glow if this is user's team matchup */}
-          {(series.team1Id === state.userTeamId || series.team2Id === state.userTeamId) && (
-            <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-amber-600 to-amber-400 opacity-60" />
-          )}
-
-          <div className="flex items-center justify-between border-b border-white/5 pb-2">
-            <span className="text-[10px] font-black text-amber-500 uppercase italic tracking-wider">{label}</span>
-            <span className="text-[9px] font-bold text-zinc-550 uppercase tracking-widest">{isFinished ? 'Finalized' : `Game ${series.wins1 + series.wins2 + 1}`}</span>
-          </div>
-          
-          <div className="space-y-2">
-            {[
-              { id: series.team1Id, abbreviation: teamA.abbreviation, wins: series.wins1, seed: series.seed1 },
-              { id: series.team2Id, abbreviation: teamB.abbreviation, wins: series.wins2, seed: series.seed2 }
-            ].map((t) => (
-              <div key={t.id} className="flex items-center justify-between">
-                 <div className="flex items-center gap-2.5">
-                    <span className="text-[8px] font-black text-zinc-600 w-3">{t.seed}</span>
-                    <div className="w-5.5 h-5.5 bg-black rounded-md p-1 flex items-center justify-center shrink-0 border border-white/5">
-                      <img src={getTeamLogo(t.id)} className="w-full h-full object-contain" />
-                    </div>
-                    <span className={`text-[11px] font-black uppercase italic ${winnerId === t.id ? 'text-amber-500' : 'text-white'}`}>{t.abbreviation}</span>
-                 </div>
-                 <span className={`text-sm md:text-base font-black italic font-mono tabular-nums ${winnerId === t.id ? 'text-amber-500' : 'text-zinc-500'}`}>{t.wins}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="pt-1.5 border-t border-white/5 flex items-center justify-between text-[7px] md:text-[8px] font-bold text-zinc-500 uppercase tracking-wider">
-             <span>Historical H2H:</span>
-             <span className="text-zinc-400 font-extrabold">{h2hText}</span>
-          </div>
-        </motion.div>
-      );
-    };
-
-    const seriesArray = state.playoffSeries || [];
-
     return (
-      <div className="h-full flex flex-col">
-        {/* Cabecera */}
-        <div className="p-4 md:p-8 flex items-center justify-between border-b border-white/5 bg-zinc-950/40 shrink-0">
-          <div className="space-y-1">
-             <h2 className="text-2xl md:text-5xl font-black italic uppercase tracking-tighter text-white leading-none">Playoff Bracket</h2>
-             <p className="text-[10px] md:text-sm font-bold text-zinc-500 uppercase tracking-widest italic mt-1.5 leading-none">Road to the Championship</p>
-          </div>
-          
-          <div className="flex gap-2">
-            {!state.championId && (
-              <button 
-                onClick={() => {
-                  playoffService.simulateNextRoundOnly(state);
-                  setState({...state});
-                  stateService.save(state);
-                }}
-                className="px-6 md:px-10 py-3 md:py-4 bg-white text-black rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-xs hover:bg-amber-500 transition-all shadow-2xl active:scale-95"
-              >
-                Simulate Round
-              </button>
-            )}
-            {state.championId && (
-              <button 
-                onClick={() => {
-                  const newState = { ...state, phase: 'offseason_start' as FranchisePhase };
-                  setState(newState);
-                  stateService.save(newState);
-                }}
-                className="px-6 md:px-10 py-3 md:py-4 bg-amber-500 text-black rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-xs hover:bg-amber-400 transition-all shadow-2xl active:scale-95 animate-bounce"
-              >
-                Proceed to Offseason
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* SELECTOR DE RONDAS EN MÓVIL */}
-        <div className="flex md:hidden bg-zinc-900 border-b border-white/5 p-1 shrink-0">
-          {[
-            { id: 1, label: 'R1' },
-            { id: 2, label: 'Semis' },
-            { id: 3, label: 'Conf. Finals' },
-            { id: 4, label: 'The Finals' }
-          ].map(r => (
-            <button
-              key={r.id}
-              onClick={() => setActivePlayoffRound(r.id)}
-              className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                activePlayoffRound === r.id ? 'bg-white text-black' : 'text-zinc-500'
-              }`}
-            >
-              {r.label}
-            </button>
-          ))}
-        </div>
-
-        {/* BODY DE PLAYOFFS */}
-        <div className="flex-1 overflow-x-auto overflow-y-auto custom-scrollbar py-6 px-4 md:px-8">
-          
-          {/* VISTA MÓVIL (APILADA POR RONDA ACTIVA) */}
-          <div className="md:hidden space-y-6">
-            {activePlayoffRound === 1 && (
-              <div className="space-y-6">
-                <p className="text-[9px] font-black text-blue-500 uppercase tracking-widest text-center">R1 Quarterfinals</p>
-                <div className="grid grid-cols-1 gap-4">
-                  {seriesArray.filter((s: any) => s.round === 1).map((s: any, idx: number) => renderSeries(s, s.conference === 'East' ? `East QF ${idx + 1}` : `West QF ${idx - 3}`))}
-                </div>
-              </div>
-            )}
-            {activePlayoffRound === 2 && (
-              <div className="space-y-6">
-                <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest text-center">Conference Semifinals</p>
-                <div className="grid grid-cols-1 gap-4">
-                  {seriesArray.filter((s: any) => s.round === 2).map((s: any, idx: number) => renderSeries(s, s.conference === 'East' ? `East Semis ${idx + 1}` : `West Semis ${idx - 1}`))}
-                </div>
-              </div>
-            )}
-            {activePlayoffRound === 4 && (
-              <div className="space-y-6 flex flex-col items-center">
-                <Trophy className="text-amber-500 animate-pulse mt-4" size={36} />
-                <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest text-center">The NBA Finals</p>
-                <div className="w-full max-w-sm mt-3">
-                  {seriesArray.filter((s: any) => s.round === 4).map((s: any) => renderSeries(s, 'The Finals'))}
-                </div>
-              </div>
-            )}
-            {activePlayoffRound === 3 && (
-              <div className="space-y-6">
-                <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest text-center">Conference Finals</p>
-                <div className="grid grid-cols-1 gap-4">
-                  {seriesArray.filter((s: any) => s.round === 3).map((s: any) => renderSeries(s, s.conference === 'East' ? 'East Finals' : 'West Finals'))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* VISTA ESCRITORIO (ESTRUCTURA DE ÁRBOL HORIZONTAL COMPLETO) */}
-          <div className="hidden md:flex min-w-[1200px] h-full items-center justify-between gap-8 pb-10">
-            {/* Round 1 (Conf Quarterfinals) */}
-            <div className="flex flex-col justify-around h-full gap-4 w-1/4">
-              <div className="space-y-4">
-                <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest text-center border-b border-blue-500/20 pb-2">East R1 Quarterfinals</p>
-                {seriesArray.filter((s: any) => s.conference === 'East' && s.round === 1).map((s: any, i: number) => renderSeries(s, `Series ${i+1}`))}
-              </div>
-              <div className="space-y-4">
-                <p className="text-[10px] font-black text-red-500 uppercase tracking-widest text-center border-b border-red-500/20 pb-2">West R1 Quarterfinals</p>
-                {seriesArray.filter((s: any) => s.conference === 'West' && s.round === 1).map((s: any, i: number) => renderSeries(s, `Series ${i+1}`))}
-              </div>
-            </div>
-
-            {/* Conf Semis (Round 2) */}
-            <div className="flex flex-col justify-around h-full gap-8 w-1/4">
-              <div className="space-y-4">
-                <p className="text-[10px] font-black text-blue-500/80 uppercase tracking-widest text-center border-b border-blue-500/20 pb-2">East Semifinals</p>
-                {seriesArray.filter((s: any) => s.conference === 'East' && s.round === 2).map((s: any, i: number) => renderSeries(s, `Semis ${i+1}`))}
-              </div>
-              <div className="space-y-4">
-                <p className="text-[10px] font-black text-red-500/80 uppercase tracking-widest text-center border-b border-red-500/20 pb-2">West Semifinals</p>
-                {seriesArray.filter((s: any) => s.conference === 'West' && s.round === 2).map((s: any, i: number) => renderSeries(s, `Semis ${i+1}`))}
-              </div>
-            </div>
-
-            {/* Conference Finals (Round 3) */}
-            <div className="flex flex-col justify-around h-full gap-16 w-1/4">
-              <div className="space-y-6">
-                <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest text-center border-b border-amber-500/20 pb-2">Conference Finals</p>
-                {seriesArray.filter((s: any) => s.round === 3).map((s: any) => renderSeries(s, s.conference === 'East' ? 'East Finals' : 'West Finals'))}
-              </div>
-            </div>
-
-            {/* Gran NBA Finals (Round 4) */}
-            <div className="flex flex-col justify-center h-full w-1/4 items-center">
-               <div className="space-y-4 w-full text-center">
-                  <Trophy className="text-amber-500 mx-auto animate-pulse" size={48} />
-                  <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest text-center border-b border-amber-500/20 pb-2">The NBA Finals</p>
-                  {seriesArray.filter((s: any) => s.round === 4).map((s: any) => renderSeries(s, 'The Finals'))}
-               </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
+      <BracketCanvas
+        state={state}
+        onSimulateRound={() => {
+          playoffService.simulateNextRoundOnly(state);
+          setState({ ...state });
+          stateService.save(state);
+        }}
+        onSimulateUserGame={() => {
+          const res = gameService.simulateUserPlayoffGame(state);
+          if (res) {
+            const winnerName = state.teams[res.result.winnerId]?.name || 'Opponent';
+            notifySuccess(`Playoff Game Simulated! Winner: ${winnerName} (${res.result.score.home} - ${res.result.score.away})`);
+          }
+          setState({ ...state });
+          stateService.save(state);
+        }}
+      />
     );
   };
 
@@ -777,15 +591,80 @@ const CareerView: React.FC = () => {
                               if (!state || !lineupModalPos) return;
                               const newState = { ...state };
                               const team = newState.teams[state.userTeamId];
-                              if (lineupModalPos === 'bench') {
-                                 if (!team.lineup.bench.includes(playerId)) {
-                                    team.lineup.bench.push(playerId);
-                                 }
+                              
+                              const positions = ['PG', 'SG', 'SF', 'PF', 'C'] as const;
+                              
+                              // Find current position of playerId
+                              let currentPos: 'PG' | 'SG' | 'SF' | 'PF' | 'C' | 'bench' | null = null;
+                              if (team.lineup.bench.includes(playerId)) {
+                                currentPos = 'bench';
                               } else {
-                                 team.lineup[lineupModalPos] = playerId;
+                                const foundStarter = positions.find(p => team.lineup[p] === playerId);
+                                if (foundStarter) {
+                                  currentPos = foundStarter;
+                                }
                               }
+
+                              const targetPos = lineupModalPos as 'PG' | 'SG' | 'SF' | 'PF' | 'C' | 'bench';
+                              if (currentPos === targetPos) {
+                                setLineupModalPos(null);
+                                return;
+                              }
+
+                              if (targetPos === 'bench') {
+                                // Moving a starter to bench
+                                if (currentPos && currentPos !== 'bench') {
+                                  team.lineup[currentPos] = null;
+                                }
+                                if (!team.lineup.bench.includes(playerId)) {
+                                  team.lineup.bench.push(playerId);
+                                }
+                              } else {
+                                // Moving to PG, SG, SF, PF, C
+                                const oldPlayerId = team.lineup[targetPos];
+
+                                // Set targets
+                                team.lineup[targetPos] = playerId;
+
+                                if (currentPos === 'bench') {
+                                  // Removed from bench
+                                  team.lineup.bench = team.lineup.bench.filter(id => id !== playerId);
+                                  // If there was an old starter, put them on the bench
+                                  if (oldPlayerId && !team.lineup.bench.includes(oldPlayerId)) {
+                                    team.lineup.bench.push(oldPlayerId);
+                                  }
+                                } else if (currentPos) {
+                                  // Swapped starter with starter
+                                  team.lineup[currentPos] = oldPlayerId;
+                                } else {
+                                  // Player was not in lineup at all but is in team.roster, add oldPlayerId to bench
+                                  if (oldPlayerId && !team.lineup.bench.includes(oldPlayerId)) {
+                                    team.lineup.bench.push(oldPlayerId);
+                                  }
+                                }
+                              }
+
+                              // Ensure no duplicates anywhere
+                              const seen = new Set<string>();
+                              positions.forEach(pos => {
+                                const id = team.lineup[pos];
+                                if (id) {
+                                  if (seen.has(id)) {
+                                    team.lineup[pos] = null;
+                                  } else {
+                                    seen.add(id);
+                                  }
+                                }
+                              });
+                              team.lineup.bench = team.lineup.bench.filter(id => {
+                                if (seen.has(id)) return false;
+                                seen.add(id);
+                                return true;
+                              });
+
                               setState(newState);
                               stateService.save(newState);
+                              setLineupModalPos(null);
                             }}
                             setState={setState}
                           />
@@ -1145,7 +1024,7 @@ const ChampionshipCelebrationOverlay: React.FC<ChampCelebrateProps> = ({ state, 
             <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl animate-pulse" />
             
             <div className="w-16 h-16 bg-black rounded-2xl overflow-hidden shrink-0 border border-white/15">
-              <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${fmvpCard.nbaId}.png`} className="w-full h-full object-contain scale-110" />
+              <PlayerHeadshot nbaId={fmvpCard.nbaId} name={fmvpCard.name} />
             </div>
 
             <div className="leading-tight shrink-0 min-w-0 flex-1">
@@ -1225,7 +1104,7 @@ const PreseasonProgressionReport: React.FC<PreseasonReportProps> = ({ players, o
                  {breakOutPlayer.imageUrl ? (
                    <img src={breakOutPlayer.imageUrl} className="w-full h-full object-contain" />
                  ) : (
-                   <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${breakOutPlayer.nbaId}.png`} className="w-full h-full object-contain scale-110" />
+                   <PlayerHeadshot nbaId={breakOutPlayer.nbaId} name={breakOutPlayer.name} />
                  )}
                </div>
                <div className="absolute -bottom-1 -right-1 bg-indigo-500 text-black text-[7.5px] font-black px-1.5 py-0.5 rounded leading-none">BREAKOUT</div>

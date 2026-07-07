@@ -62,8 +62,8 @@ const StaticAd = React.memo(({ position }: StaticAdProps) => {
   if (isPremium) return null;
 
   const containerClasses = position === 'header'
-    ? "w-full bg-zinc-950 border-b border-zinc-900 flex justify-center items-center h-[100px] shrink-0 z-10 overflow-hidden relative"
-    : "w-full bg-zinc-950 border-t border-zinc-900 flex justify-center items-center h-[100px] shrink-0 z-10 overflow-hidden relative";
+    ? "w-full bg-zinc-950 border-b border-zinc-900 flex justify-center items-center h-[65px] shrink-0 z-10 overflow-hidden relative"
+    : "w-full bg-zinc-950 border-t border-zinc-900 flex justify-center items-center h-[65px] shrink-0 z-10 overflow-hidden relative";
 
   return (
     <div className={containerClasses}>
@@ -80,7 +80,7 @@ const StaticAd = React.memo(({ position }: StaticAdProps) => {
           overflow: 'hidden',
           display: 'flex',
           position: 'relative',
-          scale: '0.8', // Slightly scale down to fit small desktops
+          scale: '0.6', // Slightly scale down to fit small desktops
         }}
       >
         {/* Inner container where the script is injected */}

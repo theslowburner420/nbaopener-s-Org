@@ -29,15 +29,69 @@ const TradingView = lazy(() => import('./views/TradingView'));
 const CareerView = lazy(() => import('./views/CareerView'));
 const SbcView = lazy(() => import('./views/SbcView'));
 
-// Simple View Loader
-const ViewLoader = () => (
-  <div className="h-full w-full flex items-center justify-center bg-black">
-    <div className="flex flex-col items-center gap-4">
-      <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
-      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Loading Module...</span>
+// High-Fidelity Immersive View Loader
+const ViewLoader = () => {
+  const loadingHints = [
+    "DRAFTING FUTURE ALL-STARS...",
+    "POLISHING PREMIUM PLAYER CARDS...",
+    "CONFIGURING GAME LINEUPS...",
+    "SYNCHRONIZING LOCKER ROOMS...",
+    "SIMULATING LEAGUE SEASONS...",
+    "GENERATING EXCLUSIVE PACKS...",
+    "PREPARING LIVE STADIUMS..."
+  ];
+  
+  // Pick a hint based on random/time index for freshness
+  const hintIndex = Math.floor((Date.now() / 1500) % loadingHints.length);
+  const hint = loadingHints[hintIndex];
+
+  return (
+    <div className="h-[70vh] w-full flex flex-col items-center justify-center bg-black relative overflow-hidden select-none">
+      {/* Dynamic Ambient Background Glows */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-amber-500/5 blur-[80px] rounded-full pointer-events-none animate-pulse" />
+      <div className="absolute top-1/3 left-1/3 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-zinc-800/10 blur-[60px] rounded-full pointer-events-none" />
+
+      <div className="relative z-10 flex flex-col items-center gap-6">
+        {/* Animated Badge Holder */}
+        <div className="relative">
+          <div className="w-16 h-16 bg-gradient-to-b from-zinc-850 to-zinc-950 rounded-2xl flex items-center justify-center border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+            <Sparkles className="w-6 h-6 text-amber-500 animate-pulse" />
+          </div>
+          {/* Scanning Line overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-amber-500/20 to-transparent h-1/2 w-full top-0 left-0 animate-bounce" />
+        </div>
+
+        <div className="flex flex-col items-center gap-2">
+          {/* Immersive typography & dynamic hints */}
+          <span className="text-[10px] font-black uppercase tracking-[0.25em] text-white animate-pulse">
+            {hint}
+          </span>
+          <div className="flex items-center gap-1.5 mt-1">
+            <Loader2 className="w-3 h-3 text-amber-500 animate-spin" />
+            <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Initialising Component</span>
+          </div>
+        </div>
+
+        {/* Dynamic scanning bar */}
+        <div className="w-36 h-[2px] bg-zinc-900 rounded-full overflow-hidden relative">
+          <div className="absolute h-full w-12 bg-gradient-to-r from-transparent via-amber-500 to-transparent animate-[shimmer_1.5s_infinite]" 
+               style={{
+                 animation: 'shimmer 1.2s infinite linear'
+               }}
+          />
+        </div>
+      </div>
+      
+      {/* Inline styles for custom shimmer animation since Tailwind configuration is kept standard */}
+      <style>{`
+        @keyframes shimmer {
+          0% { left: -50px; }
+          100% { left: 150px; }
+        }
+      `}</style>
     </div>
-  </div>
-);
+  );
+};
 
 function AppContent() {
   const { currentView, setCurrentView, isPremium, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setShowWelcomeGift, login, user, claimLoginReward } = useGame();

@@ -68,6 +68,7 @@ export default function PacksView() {
   const [openedCards, setOpenedCards] = useState<Card[] | null>(null);
   const [newlyUnlocked, setNewlyUnlocked] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'shop' | 'inventory'>('shop');
+  const [openedPackImage, setOpenedPackImage] = useState<string | undefined>(undefined);
 
   const uniqueOwned = useMemo(() => Object.keys(collection).filter(id => collection[id] > 0).length, [collection]);
   const totalCards = ALL_CARDS.length;
@@ -120,6 +121,7 @@ export default function PacksView() {
     }
     const result = await openPack(pack.id as PackType);
     if (result) {
+      setOpenedPackImage(pack.image);
       setOpenedCards(result.cards);
       setNewlyUnlocked(result.newlyUnlocked);
     }
@@ -128,6 +130,8 @@ export default function PacksView() {
   const handleOpenInventory = async (packId: string, packType: string) => {
     const result = await openInventoryPack(packId, packType as PackType);
     if (result) {
+      const packInfo = PACKS.find(p => p.id === packType);
+      setOpenedPackImage(packInfo?.image || 'https://i.postimg.cc/bY3DRzLz/4a07a4ae-7c5c-4d11-8585-780a8aebebbe.png');
       setOpenedCards(result.cards);
       setNewlyUnlocked(result.newlyUnlocked);
     }
@@ -278,6 +282,7 @@ export default function PacksView() {
           <PackOpener 
             cards={openedCards} 
             newlyUnlockedAchievements={newlyUnlocked}
+            packImage={openedPackImage}
             onClose={() => {
               setOpenedCards(null);
               setNewlyUnlocked([]);

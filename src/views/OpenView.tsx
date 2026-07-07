@@ -140,6 +140,7 @@ export default function OpenView() {
           <PackOpener 
             cards={openedCards} 
             newlyUnlockedAchievements={newlyUnlocked}
+            packImage="https://i.postimg.cc/bY3DRzLz/4a07a4ae-7c5c-4d11-8585-780a8aebebbe.png"
             onClose={() => {
               setOpenedCards(null);
               setNewlyUnlocked([]);

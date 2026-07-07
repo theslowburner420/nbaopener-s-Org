@@ -4,6 +4,7 @@ import { Plus, Users, Sparkles, Award, Zap, Heart, TrendingUp, X, Activity } fro
 import CardItem from '../../components/CardItem';
 import { TeamObject } from '../../franchise/types';
 import { NBA_TEAMS } from '../../data/nbaTeams';
+import { PlayerHeadshot } from '../../components/PlayerHeadshot';
 
 interface LineupTabProps {
   state: any;
@@ -236,14 +237,14 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                  return (
                     <div key={pos} className="bg-zinc-950/70 rounded-xl border border-white/5 p-3 flex items-center justify-between gap-3">
                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="flex-shrink-0 w-10 h-10 bg-zinc-90 w-10 h-10 border border-white/5 rounded-lg flex items-center justify-center text-[10px] font-black text-amber-500 italic">
+                          <div className="flex-shrink-0 w-10 h-10 bg-zinc-900 border border-white/5 rounded-lg flex items-center justify-center text-[10px] font-black text-amber-500 italic">
                              {pos}
                           </div>
                           
                           {card ? (
                              <div className="flex items-center gap-2.5 min-w-0">
                                 <div className="w-8 h-8 rounded bg-zinc-900 border border-white/10 shrink-0 pointer-events-none p-0.5 overflow-hidden">
-                                   <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-full h-full object-contain origin-bottom scale-110" />
+                                   <PlayerHeadshot nbaId={card.nbaId} name={card.name} />
                                 </div>
                                 <div className="truncate min-w-0 leading-tight">
                                    <h5 className="text-[13px] font-black text-white italic truncate">{card.name}</h5>
@@ -327,7 +328,7 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                          <button 
                            onClick={(e) => {
                               e.stopPropagation();
-                              if (confirm(`Remove ${card.name} from bench?`)) {
+                              if (true) {
                                  userTeam.lineup.bench = userTeam.lineup.bench.filter((bid: string) => bid !== id);
                                  setState({ ...state });
                               }
@@ -600,7 +601,7 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                   </div>
                   
                   <div className="flex items-center justify-between md:justify-end gap-3 pt-2 md:pt-0">
-                     <div className="flex bg-zinc-90 w-fit border border-white/5 p-0.5 rounded-lg">
+                     <div className="flex bg-zinc-900 w-fit border border-white/5 p-0.5 rounded-lg">
                         <button 
                           onClick={() => setSortMode('OVR')}
                           className={`px-3 py-1.5 rounded-md text-[8px] md:text-[9.5px] font-black uppercase tracking-wider transition-all cursor-pointer ${sortMode === 'OVR' ? 'bg-white text-black font-extrabold' : 'text-zinc-500 hover:text-white'}`}

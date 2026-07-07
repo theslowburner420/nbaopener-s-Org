@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { TrendingUp, Award, Calendar, BarChart2, Star, Target } from 'lucide-react';
 import { getTeamLogo } from '../../data/nbaTeams';
 import { PlayerStats } from '../../franchise/types';
+import { PlayerHeadshot } from '../../components/PlayerHeadshot';
 
 interface StatsTabProps {
   state: any;
@@ -123,7 +124,7 @@ const StatsTab: React.FC<StatsTabProps> = React.memo(({
                           {/* Athlete */}
                           <td className="py-3 px-6 md:px-8 flex items-center gap-3">
                             <div className="w-8 h-8 rounded bg-zinc-900 border border-white/10 shrink-0 pointer-events-none p-0.5 overflow-hidden">
-                              <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-full h-full object-contain origin-bottom scale-110" />
+                              <PlayerHeadshot nbaId={card.nbaId} name={card.name} />
                             </div>
                             <div className="truncate leading-tight">
                               <p className="text-sm font-bold text-white uppercase italic truncate">{card.name}</p>
@@ -193,7 +194,7 @@ const StatsTab: React.FC<StatsTabProps> = React.memo(({
                        <div className="flex items-center gap-2.5 min-w-0">
                          <span className="text-[10px] font-mono font-black text-zinc-600 italic shrink-0">#{i+1}</span>
                          <div className="w-9 h-9 rounded bg-zinc-900 border border-white/10 shrink-0 pointer-events-none p-0.5 overflow-hidden">
-                           <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-full h-full object-contain origin-bottom scale-110" />
+                           <PlayerHeadshot nbaId={card.nbaId} name={card.name} />
                          </div>
                          <div className="truncate min-w-0 leading-none">
                            <h4 className="text-xs font-black text-white uppercase italic truncate">{card.name}</h4>
@@ -251,7 +252,7 @@ const StatsTab: React.FC<StatsTabProps> = React.memo(({
                   <div key={pid} className="bg-zinc-90 w-full border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4.5 space-y-3.5">
                      <div className="flex items-center gap-2.5 border-b border-white/5 pb-2.5">
                         <div className="w-8 h-8 md:w-9 h-9 bg-zinc-900 border border-white/5 rounded-lg overflow-hidden shrink-0 pointer-events-none p-0.2">
-                           <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-full h-full object-contain origin-bottom scale-110" />
+                           <PlayerHeadshot nbaId={card.nbaId} name={card.name} />
                         </div>
                         <div>
                            <p className="text-xs font-black text-white italic uppercase">{card.name}</p>

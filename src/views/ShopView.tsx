@@ -1,9 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useGame } from '../context/GameContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { Zap, Star, Trophy, ShoppingCart, ShieldCheck, Sparkles, X, Play } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+
+const PayPalScriptProvider = lazy(() =>
+  import("@paypal/react-paypal-js").then((m) => ({ default: m.PayPalScriptProvider }))
+);
+const PayPalButtons = lazy(() =>
+  import("@paypal/react-paypal-js").then((m) => ({ default: m.PayPalButtons }))
+);
 
 // Removed Coin Packs as per user request to only have subscriptions and lifetime upgrades
 const LIFETIME_NO_ADS_PRICE = 5.00;
@@ -193,29 +199,31 @@ export default function ShopView() {
 
               {!isSubActive && (
                 <div className="mt-4">
-                  <PayPalButtons
-                    style={{ layout: "vertical", height: 55, color: 'gold', shape: 'pill', label: 'subscribe', tagline: false }}
-                    createOrder={(data, actions) => {
-                      return actions.order.create({
-                        intent: "CAPTURE",
-                        purchase_units: [{
-                          description: "Elite Pass Monthly Subscription",
-                          amount: { currency_code: "USD", value: SUBSCRIPTION_BATTLE_PASS_PRICE.toFixed(2) }
-                        }],
-                        application_context: { shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW' }
-                      });
-                    }}
-                    onApprove={async (data, actions) => {
-                      const details = await actions.order?.capture();
-                      if (details?.status === 'COMPLETED') {
-                        handlePurchaseSuccess('subscription');
-                      }
-                    }}
-                    onError={(err) => {
-                      console.error("PayPal Error:", err);
-                      notifyError("Elite Pass activation failed.");
-                    }}
-                  />
+                  <Suspense fallback={<div className="h-[55px] w-full bg-zinc-900 animate-pulse rounded-full" />}>
+                    <PayPalButtons
+                      style={{ layout: "vertical", height: 55, color: 'gold', shape: 'pill', label: 'subscribe', tagline: false }}
+                      createOrder={(data, actions) => {
+                        return actions.order.create({
+                          intent: "CAPTURE",
+                          purchase_units: [{
+                            description: "Elite Pass Monthly Subscription",
+                            amount: { currency_code: "USD", value: SUBSCRIPTION_BATTLE_PASS_PRICE.toFixed(2) }
+                          }],
+                          application_context: { shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW' }
+                        });
+                      }}
+                      onApprove={async (data, actions) => {
+                        const details = await actions.order?.capture();
+                        if (details?.status === 'COMPLETED') {
+                          handlePurchaseSuccess('subscription');
+                        }
+                      }}
+                      onError={(err) => {
+                        console.error("PayPal Error:", err);
+                        notifyError("Elite Pass activation failed.");
+                      }}
+                    />
+                  </Suspense>
                 </div>
               )}
             </div>
@@ -252,29 +260,31 @@ export default function ShopView() {
 
               {!hasLifetimeNoAds && (
                 <div className="mt-4">
-                  <PayPalButtons
-                    style={{ layout: "vertical", height: 55, color: 'blue', shape: 'pill', label: 'pay', tagline: false }}
-                    createOrder={(data, actions) => {
-                      return actions.order.create({
-                        intent: "CAPTURE",
-                        purchase_units: [{
-                          description: "Lifetime No-Ads Access",
-                          amount: { currency_code: "USD", value: LIFETIME_NO_ADS_PRICE.toFixed(2) }
-                        }],
-                        application_context: { shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW' }
-                      });
-                    }}
-                    onApprove={async (data, actions) => {
-                      const details = await actions.order?.capture();
-                      if (details?.status === 'COMPLETED') {
-                        handlePurchaseSuccess('lifetime');
-                      }
-                    }}
-                    onError={(err) => {
-                      console.error("PayPal Error:", err);
-                      notifyError("Upgrade purchase failed.");
-                    }}
-                  />
+                  <Suspense fallback={<div className="h-[55px] w-full bg-zinc-900 animate-pulse rounded-full" />}>
+                    <PayPalButtons
+                      style={{ layout: "vertical", height: 55, color: 'blue', shape: 'pill', label: 'pay', tagline: false }}
+                      createOrder={(data, actions) => {
+                        return actions.order.create({
+                          intent: "CAPTURE",
+                          purchase_units: [{
+                            description: "Lifetime No-Ads Access",
+                            amount: { currency_code: "USD", value: LIFETIME_NO_ADS_PRICE.toFixed(2) }
+                          }],
+                          application_context: { shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW' }
+                        });
+                      }}
+                      onApprove={async (data, actions) => {
+                        const details = await actions.order?.capture();
+                        if (details?.status === 'COMPLETED') {
+                          handlePurchaseSuccess('lifetime');
+                        }
+                      }}
+                      onError={(err) => {
+                        console.error("PayPal Error:", err);
+                        notifyError("Upgrade purchase failed.");
+                      }}
+                    />
+                  </Suspense>
                 </div>
               )}
             </div>

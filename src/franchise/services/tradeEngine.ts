@@ -12,61 +12,158 @@ export interface TradeOffer {
 
 export const tradeEngine = {
   SALARY_CAP: 180000000,
-  TRADE_DEADLINE_WEEK: 50, // Matches 82 games schedule better
+  TRADE_DEADLINE_WEEK: 50,
 
-  // 1 — TRADES INTELIGENTES ENTRE EQUIPOS
+  // 1 — TRADES INTELIGENTES: VALOR DE INTERCAMBIO (V_traspaso)
   calculateTradeValue(playerId: string, state: FranchiseState): number {
     const card = ALL_CARDS.find(c => c.id === playerId) || state.customCards?.find(c => c.id === playerId) || state.draftPool?.find(c => c.id === playerId);
     const progress = state.playerProgress[playerId];
     const team = Object.values(state.teams).find(t => t.roster.includes(playerId));
     const contract = team?.contracts[playerId];
 
-    if (!card || !progress) return 0;
+    if (!card) return 0;
 
-    const ovr = progress.ovr || card.stats.ovr;
-    
-    // potential_bonus: bust=0, role_player=5, starter=15, star=30, franchise=50
-    const potential = (card.stats as any).draftPotential || 'starter';
-    const potBonus = potential === 'franchise' ? 50 : potential === 'star' ? 30 : potential === 'starter' ? 15 : potential === 'role_player' ? 5 : 0;
-    
-    // age_penalty: age < 25 → 0 | 25-29 → 5 | 30-33 → 15 | > 33 → 30
-    let agePenalty = 0;
-    if (progress.age >= 34) agePenalty = 30;
-    else if (progress.age >= 30) agePenalty = 15;
-    else if (progress.age >= 25) agePenalty = 5;
+    const ovr = progress?.ovr || card.stats.ovr;
+    const pot = progress?.potential || card.stats.potential || card.stats.ovr;
+    const age = progress?.age || card.age || 25;
+    const salary = contract?.salary || 1200000;
+    const limit = this.SALARY_CAP;
 
-    // salary_penalty: salary > 25M → 10 | salary > 35M → 25
-    let salaryPenalty = 0;
-    if (contract) {
-      if (contract.salary > 35000000) salaryPenalty = 25;
-      else if (contract.salary > 25000000) salaryPenalty = 10;
-    }
+    // E_premium: Exponential premium modifier for star players with OVR >= 84
+    const E_premium = ovr >= 84 ? Math.pow(1.22, ovr - 83) * 3 : 0;
 
-    return (ovr * 2) + potBonus - agePenalty - salaryPenalty;
+    // Exact trade value formula specified
+    const V_traspaso = (ovr * 1.4) + ((pot - ovr) * 1.1) + (25 / age) - ((salary / limit) * 20) + E_premium;
+
+    return Math.max(1, V_traspaso);
   },
 
-  // Evaluates a trade proposal
+  // Determines if a team is currently Contender (Equipos Contendientes) or Rebuilding (Equipos en Reconstrucción)
+  getTeamStatus(teamId: string, state: FranchiseState): { isContender: boolean, isRebuilding: boolean } {
+    const team = state.teams[teamId];
+    if (!team) return { isContender: false, isRebuilding: false };
+    
+    const winPct = (team.wins || 0) / Math.max(1, (team.wins || 0) + (team.losses || 0));
+    
+    let totalOvr = 0;
+    let count = 0;
+    team.roster.forEach(pid => {
+      const card = ALL_CARDS.find(c => c.id === pid) || state.customCards?.find(c => c.id === pid);
+      if (card) {
+        const progress = state.playerProgress[pid];
+        totalOvr += progress?.ovr || card.stats.ovr;
+        count++;
+      }
+    });
+    
+    const avgOvr = count > 0 ? totalOvr / count : 75;
+    const totalGames = (team.wins || 0) + (team.losses || 0);
+
+    const isContender = avgOvr >= 81 || (totalGames >= 10 && winPct >= 0.54);
+    const isRebuilding = avgOvr < 77 || (totalGames >= 10 && winPct < 0.44);
+
+    return { isContender, isRebuilding };
+  },
+
+  // Evaluates a trade proposal with need modifiers and an 8% acceptance error margin
   evaluateUserTrade(state: FranchiseState, offer: TradeOffer): { accepted: boolean; reason: string; fairness: number } {
     const fromTeam = state.teams[offer.fromTeamId];
-    const toTeam = state.teams[offer.toTeamId];
+    const toTeam = state.teams[offer.toTeamId]; // This is the CPU team deciding the deal
 
     if (!fromTeam || !toTeam) return { accepted: false, reason: 'Invalid teams', fairness: 0 };
 
-    // Salary matching (relaxed for game fun but still exists)
+    // Salary matching constraints
     const getSalary = (ids: string[], team: TeamObject) => ids.reduce((sum, id) => sum + (team.contracts[id]?.salary || 0), 0);
     const incomingSalary = getSalary(offer.requestedPlayerIds, toTeam);
     const outgoingSalary = getSalary(offer.offeredPlayerIds, fromTeam);
 
-    if (fromTeam.payroll - outgoingSalary + incomingSalary > this.SALARY_CAP * 1.1) {
-       return { accepted: false, reason: 'This trade would put your team too far over the salary cap.', fairness: 0 };
+    if (fromTeam.payroll - outgoingSalary + incomingSalary > this.SALARY_CAP * 1.12) {
+       return { accepted: false, reason: 'This trade would put your team too far over the luxury tax threshold (12% above Salary Cap).', fairness: 0 };
     }
 
-    const offeredVal = offer.offeredPlayerIds.reduce((sum, id) => sum + this.calculateTradeValue(id, state), 0);
-    const requestedVal = offer.requestedPlayerIds.reduce((sum, id) => sum + this.calculateTradeValue(id, state), 0);
+    const { isContender: isCpuContender, isRebuilding: isCpuRebuilding } = this.getTeamStatus(offer.toTeamId, state);
 
-    const fairness = offeredVal === 0 ? 0 : offeredVal / Math.max(1, requestedVal);
+    // Calculate adjusted values of OFFERED assets from CPU's perspective
+    let offeredVal = 0;
+    offer.offeredPlayerIds.forEach(pid => {
+      const card = ALL_CARDS.find(c => c.id === pid) || state.customCards?.find(c => c.id === pid) || state.draftPool?.find(c => c.id === pid);
+      const progress = state.playerProgress[pid];
+      const age = progress?.age || card?.age || 25;
+      const ovr = progress?.ovr || card?.stats?.ovr || 75;
+      
+      let val = this.calculateTradeValue(pid, state);
 
-    // CPU interest modifier based on team needs
+      if (isCpuContender) {
+        // Contenders value veteran/win-now players (+15%) and discount prospects/young assets (-20%)
+        if (ovr >= 82 || age >= 27) {
+          val *= 1.15;
+        } else {
+          val *= 0.80;
+        }
+      } else if (isCpuRebuilding) {
+        // Rebuilding teams value young players (+25%) and discount veteran age-based
+        if (age < 24) {
+          val *= 1.25;
+        } else {
+          const ageDiscount = Math.max(0.1, 1.0 - (age - 24) * 0.05);
+          val *= ageDiscount;
+        }
+      }
+
+      offeredVal += val;
+    });
+
+    // Pick valuation for offered draft picks
+    if (offer.offeredPickIds) {
+      offer.offeredPickIds.forEach(pickId => {
+        const isFirstRound = pickId.includes('r1') || pickId.includes('round1') || !pickId.includes('round2') && !pickId.includes('r2');
+        let pickVal = isFirstRound ? 22 : 8;
+        if (isCpuRebuilding) pickVal *= 1.25;
+        if (isCpuContender) pickVal *= 0.80;
+        offeredVal += pickVal;
+      });
+    }
+
+    // Calculate adjusted values of REQUESTED assets from CPU's perspective
+    let requestedVal = 0;
+    offer.requestedPlayerIds.forEach(pid => {
+      const card = ALL_CARDS.find(c => c.id === pid) || state.customCards?.find(c => c.id === pid) || state.draftPool?.find(c => c.id === pid);
+      const progress = state.playerProgress[pid];
+      const age = progress?.age || card?.age || 25;
+      const ovr = progress?.ovr || card?.stats?.ovr || 75;
+
+      let val = this.calculateTradeValue(pid, state);
+
+      if (isCpuContender) {
+        if (ovr >= 82 || age >= 27) {
+          val *= 1.15;
+        } else {
+          val *= 0.80;
+        }
+      } else if (isCpuRebuilding) {
+        if (age < 24) {
+          val *= 1.25;
+        } else {
+          const ageDiscount = Math.max(0.1, 1.0 - (age - 24) * 0.05);
+          val *= ageDiscount;
+        }
+      }
+
+      requestedVal += val;
+    });
+
+    // Pick valuation for requested draft picks
+    if (offer.requestedPickIds) {
+      offer.requestedPickIds.forEach(pickId => {
+        const isFirstRound = pickId.includes('r1') || pickId.includes('round1') || !pickId.includes('round2') && !pickId.includes('r2');
+        let pickVal = isFirstRound ? 22 : 8;
+        if (isCpuRebuilding) pickVal *= 1.25;
+        if (isCpuContender) pickVal *= 0.80;
+        requestedVal += pickVal;
+      });
+    }
+
+    // CPU interest / fairness modifier based on positional roster needs
     const getPosImportance = (team: TeamObject, playerIds: string[]) => {
        const rosterPosCount: Record<string, number> = {};
        team.roster.forEach(id => {
@@ -78,24 +175,31 @@ export const tradeEngine = {
           const c = ALL_CARDS.find(c => c.id === id) || state.customCards?.find(c => c.id === id);
           if (!c) return acc;
           const count = rosterPosCount[c.position] || 0;
-          if (count <= 1) return acc * 1.3; // High need
-          if (count >= 4) return acc * 0.7; // Low need
+          if (count <= 1) return acc * 1.30; // High positional demand
+          if (count >= 4) return acc * 0.70; // High saturation
           return acc;
        }, 1.0);
     };
 
-    const weightedFairness = fairness * getPosImportance(toTeam, offer.offeredPlayerIds);
+    const finalOfferedVal = offeredVal * getPosImportance(toTeam, offer.offeredPlayerIds);
+    const finalRequestedVal = requestedVal;
 
-    if (weightedFairness >= 0.9) {
-      return { accepted: true, reason: 'TRADE ACCEPTED: The front office agrees to the deal!', fairness };
-    } else if (weightedFairness >= 0.7) {
-      return { accepted: false, reason: 'OFFER DECLINED: The value is close, but we need more to pull the trigger.', fairness };
+    // CPU accepts the trade if the adjusted incoming value is within 8% error margin of outgoing value
+    const interestRatio = finalOfferedVal / Math.max(1, finalRequestedVal);
+    const fairness = finalOfferedVal / Math.max(1, finalRequestedVal);
+
+    if (interestRatio >= 1.06) {
+      return { accepted: true, reason: 'TRADE ACCEPTED: The front office is absolutely thrilled with this proposal!', fairness };
+    } else if (interestRatio >= 0.92) {
+      return { accepted: true, reason: 'TRADE ACCEPTED: The general manager agrees to the terms and accepts the deal.', fairness };
+    } else if (interestRatio >= 0.76) {
+      return { accepted: false, reason: 'OFFER DECLINED: The value is close, but we need more assets to pull the trigger.', fairness };
     } else {
-      return { accepted: false, reason: 'OFFER REJECTED: This is an unfair proposal and we are not interested.', fairness };
+      return { accepted: false, reason: 'OFFER REJECTED: This is an entirely unbalanced proposal and we are not interested.', fairness };
     }
   },
 
-  // CPU proposes a trade to the user
+  // CPU proposes trades
   generateCPUTradeProposal(state: FranchiseState): TradeOffer | null {
     const userTeam = state.teams[state.userTeamId];
     const cpuTeamIds = Object.keys(state.teams).filter(id => id !== state.userTeamId);
@@ -104,11 +208,11 @@ export const tradeEngine = {
 
     if (cpuTeam.roster.length < 8 || userTeam.roster.length < 6) return null;
 
-    // CPU picks one of its players to offer
+    // CPU picks one of its rosters as offered asset
     const cpuOfferId = cpuTeam.roster[Math.floor(Math.random() * cpuTeam.roster.length)];
     const cpuVal = this.calculateTradeValue(cpuOfferId, state);
 
-    // CPU picks a user player it wants (not the franchise player)
+    // CPU picks a user roster asset (excluding top star)
     const userRosterSorted = [...userTeam.roster].sort((a,b) => this.calculateTradeValue(b, state) - this.calculateTradeValue(a, state));
     const franchisePlayerId = userRosterSorted[0];
     const targetableUsers = userTeam.roster.filter(id => id !== franchisePlayerId);
@@ -117,8 +221,8 @@ export const tradeEngine = {
     const userTargetId = targetableUsers[Math.floor(Math.random() * targetableUsers.length)];
     const userVal = this.calculateTradeValue(userTargetId, state);
 
-    // Only propose if CPU's offer is at least 85% of what it's asking for
-    if (cpuVal >= userVal * 0.85) {
+    // CPU trade proposals are generated if values are reasonably close within 14%
+    if (cpuVal >= userVal * 0.86) {
       return {
         fromTeamId: cpuId,
         toTeamId: state.userTeamId,
@@ -130,12 +234,10 @@ export const tradeEngine = {
     return null;
   },
 
-  // Simulates logical trades between CPU teams
   processWeeklyCPUTrades(state: FranchiseState): string[] {
     const logs: string[] = [];
     const cpuIds = Object.keys(state.teams);
     
-    // Only mid-season (around game 40)
     if (state.currentGameIndex !== 40) return [];
 
     for (let i = 0; i < 3; i++) {
@@ -152,7 +254,7 @@ export const tradeEngine = {
       const valA = this.calculateTradeValue(pAId, state);
       const valB = this.calculateTradeValue(pBId, state);
 
-      if (Math.abs(valA - valB) < 15) {
+      if (Math.abs(valA - valB) < 18) {
         const cardA = ALL_CARDS.find(c => c.id === pAId);
         const cardB = ALL_CARDS.find(c => c.id === pBId);
         if (cardA && cardB) {
@@ -162,7 +264,7 @@ export const tradeEngine = {
             offeredPlayerIds: [pAId],
             requestedPlayerIds: [pBId]
           });
-          logs.push(`TRADE: ${cardA.name} to ${teamB.abbreviation} for ${cardB.name}`);
+          logs.push(`TRADE: ${cardA.name} of ${teamA.abbreviation} was traded to ${teamB.abbreviation} in exchange for ${cardB.name}`);
         }
       }
     }
@@ -204,18 +306,22 @@ export const tradeEngine = {
     // Update Contracts
     offer.offeredPlayerIds.forEach(id => {
       const contract = teamA.contracts[id];
-      teamB.contracts[id] = contract;
-      delete teamA.contracts[id];
-      teamA.payroll -= contract.salary;
-      teamB.payroll += contract.salary;
+      if (contract) {
+        teamB.contracts[id] = contract;
+        delete teamA.contracts[id];
+        teamA.payroll -= contract.salary;
+        teamB.payroll += contract.salary;
+      }
     });
 
     offer.requestedPlayerIds.forEach(id => {
       const contract = teamB.contracts[id];
-      teamA.contracts[id] = contract;
-      delete teamB.contracts[id];
-      teamB.payroll -= contract.salary;
-      teamA.payroll += contract.salary;
+      if (contract) {
+        teamA.contracts[id] = contract;
+        delete teamB.contracts[id];
+        teamB.payroll -= contract.salary;
+        teamA.payroll += contract.salary;
+      }
     });
 
     // Cleanup Lineups (remove moved players)
@@ -227,8 +333,6 @@ export const tradeEngine = {
         }
       });
       team.lineup.bench = team.lineup.bench.filter(id => team.roster.includes(id));
-      
-      // Auto-fix if position empty
       this.rebuildTeamLineup(team, state);
     });
 

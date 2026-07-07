@@ -210,7 +210,7 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
   {
     id: 'mamba-mentality-sbc',
     name: 'MAMBA MENTALITY',
-    description: 'Rinde homenaje a la leyenda de LA. Requiere jugadores estrella de la conferencia Oeste.',
+    description: 'Pay tribute to the LA legend. Requires star players from the Western Conference.',
     difficulty: 'legendary',
     type: 'permanent',
     expiresAt: null,
@@ -232,7 +232,7 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
   {
     id: 'splash-brothers-sbc',
     name: 'SPLASH BROS LEGACY',
-    description: 'Une a los mejores tiradores del perímetro. Requiere una retaguardia potente.',
+    description: 'Unite the finest perimeter shooters. Requires a potent backcourt.',
     difficulty: 'elite',
     type: 'permanent',
     expiresAt: null,
@@ -254,7 +254,7 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
   {
     id: 'showtime-lakers-sbc',
     name: 'SHOWTIME ERA',
-    description: 'Construye un quinteto coordinado con jugadores únicos de conferencias distintas.',
+    description: 'Build a coordinated lineup with unique players from different conferences.',
     difficulty: 'legendary',
     type: 'permanent',
     expiresAt: null,

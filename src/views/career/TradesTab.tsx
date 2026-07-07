@@ -4,6 +4,7 @@ import { X, Sparkles, AlertCircle, ArrowLeftRight, Check, HelpCircle } from 'luc
 import { tradeEngine } from '../../franchise/services/tradeEngine';
 import { ALL_CARDS } from '../../data/cards';
 import { NBA_TEAMS } from '../../data/nbaTeams';
+import { PlayerHeadshot } from '../../components/PlayerHeadshot';
 
 interface TradesTabProps {
   state: any;
@@ -220,7 +221,7 @@ const TradesTab: React.FC<TradesTabProps> = React.memo(({
                                 {isSelected && <Check size={11} strokeWidth={3} />}
                             </div>
                             <div className="w-10 h-10 bg-zinc-900 border border-white/10 rounded-lg overflow-hidden shrink-0 flex items-center justify-center pointer-events-none">
-                              <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card?.nbaId}.png`} className="w-full h-full object-contain scale-110 origin-bottom" />
+                              <PlayerHeadshot nbaId={card?.nbaId || 0} name={card?.name || ''} />
                             </div>
                             <div className="flex flex-col leading-tight truncate shrink-0 min-w-0">
                                 <span className={`text-xs font-black uppercase italic truncate w-32 ${isSelected ? 'text-amber-400' : 'text-zinc-100'}`}>{card?.name}</span>
@@ -300,7 +301,7 @@ const TradesTab: React.FC<TradesTabProps> = React.memo(({
                                 {isSelected && <Check size={11} strokeWidth={3} />}
                             </div>
                             <div className="w-10 h-10 bg-zinc-900 border border-white/10 rounded-lg overflow-hidden shrink-0 flex items-center justify-center pointer-events-none">
-                              <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card?.nbaId}.png`} className="w-full h-full object-contain scale-110 origin-bottom" />
+                              <PlayerHeadshot nbaId={card?.nbaId || 0} name={card?.name || ''} />
                             </div>
                             <div className="flex flex-col leading-tight truncate shrink-0 min-w-0">
                                 <span className={`text-xs font-black uppercase italic truncate w-32 ${isSelected ? 'text-zinc-200' : 'text-zinc-100'}`}>{card?.name}</span>

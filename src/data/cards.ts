@@ -159,22 +159,6 @@ const rawCards = [
     quote: 'Physical and efficient from the wings.'
   },
   {
-    id: 'lal-006',
-    name: 'Marcus Smart',
-    team: 'Los Angeles Lakers',
-    teamAbbr: 'LAL',
-    position: 'G',
-    rarity: 'starter' as const,
-    isHistorical: false,
-    pts: 9.5,
-    reb: 2.6,
-    ast: 2.8,
-    age: 31,
-    nbaId: 203935,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203935.png',
-    quote: 'Defensive heart. Leader on and off the court.'
-  },
-  {
     id: 'lal-007',
     name: 'Jake LaRavia',
     team: 'Los Angeles Lakers',
@@ -691,22 +675,6 @@ const rawCards = [
   },
   
   // BOSTON CELTICS
-  {
-    id: 'bos-001',
-    name: 'Jaylen Brown',
-    team: 'Boston Celtics',
-    teamAbbr: 'BOS',
-    position: 'SF',
-    rarity: 'franchise' as const,
-    isHistorical: false,
-    pts: 28.5,
-    reb: 7.0,
-    ast: 5.1,
-    age: 29,
-    nbaId: 1627759,
-    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627759.png',
-    quote: 'The engine. Relentless, explosive and unstoppable.'
-  },
   {
     id: 'bos-002',
     name: 'Jayson Tatum',
@@ -2125,6 +2093,22 @@ const rawCards = [
   },
   {
     id: 'hou-007',
+    name: 'Marcus Smart',
+    team: 'Houston Rockets',
+    teamAbbr: 'HOU',
+    position: 'G',
+    rarity: 'starter' as const,
+    isHistorical: false,
+    pts: 9.5,
+    reb: 2.6,
+    ast: 2.8,
+    age: 31,
+    nbaId: 203935,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/203935.png',
+    quote: 'Defensive heart. Leader on and off the court.'
+  },
+  {
+    id: 'hou-008',
     name: 'Steven Adams',
     team: 'Houston Rockets',
     teamAbbr: 'HOU',
@@ -2140,7 +2124,7 @@ const rawCards = [
     quote: "The enforcer. No soft plays."
   },
   {
-    id: 'hou-008',
+    id: 'hou-009',
     name: 'Josh Okogie',
     team: 'Houston Rockets',
     teamAbbr: 'HOU',
@@ -2156,7 +2140,7 @@ const rawCards = [
     quote: "Lockdown defender off the bench."
   },
   {
-    id: 'hou-009',
+    id: 'hou-010',
     name: 'Clint Capela',
     team: 'Houston Rockets',
     teamAbbr: 'HOU',
@@ -2172,7 +2156,7 @@ const rawCards = [
     quote: "Still protecting the rim every night."
   },
   {
-    id: 'hou-010',
+    id: 'hou-011',
     name: 'Dorian Finney-Smith',
     team: 'Houston Rockets',
     teamAbbr: 'HOU',
@@ -9962,6 +9946,22 @@ const rawCards = [
   },
 
   // PHILADELPHIA 76ERS
+  {
+    id: 'phi-001',
+    name: 'Jaylen Brown',
+    team: 'Boston Celtics',
+    teamAbbr: 'PHI',
+    position: 'SF',
+    rarity: 'franchise' as const,
+    isHistorical: false,
+    pts: 28.5,
+    reb: 7.0,
+    ast: 5.1,
+    age: 29,
+    nbaId: 1627759,
+    imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1627759.png',
+    quote: 'The engine. Relentless, explosive and unstoppable.'
+  },
   {
     id: 'phi-001',
     name: 'Tyrese Maxey',

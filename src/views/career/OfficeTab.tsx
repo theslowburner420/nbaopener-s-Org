@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy, Sparkles, Activity, TrendingUp, Building, History, X, Star, FileText, CheckCircle2, DollarSign, Heart, AlertCircle } from 'lucide-react';
+import { PlayerHeadshot } from '../../components/PlayerHeadshot';
 
 interface OfficeTabProps {
   state: any;
@@ -608,7 +609,7 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
                       
                       <div className="flex items-center gap-4">
                          <div className="w-16 h-16 bg-zinc-900 rounded-2xl overflow-hidden border border-white/10 pointer-events-none p-0.5">
-                            <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.card?.nbaId}.png`} className="w-full h-full object-contain origin-bottom scale-110" />
+                            <PlayerHeadshot nbaId={player.card?.nbaId} name={player.name} />
                          </div>
                          <div className="space-y-1">
                             <h4 className="text-base font-black text-white italic truncate w-44 uppercase font-bold tracking-tight">{player.name}</h4>
@@ -740,7 +741,7 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
                             <div className="flex items-center gap-4 flex-1">
                                <div className="relative shrink-0 pointer-events-none">
                                   <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-white/10 overflow-hidden relative p-0.2">
-                                     <img src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${card.nbaId}.png`} className="w-full h-full object-contain origin-bottom scale-110" />
+                                     <PlayerHeadshot nbaId={card.nbaId} name={card.name} />
                                   </div>
                                </div>
 
@@ -776,7 +777,7 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
                                <div className="flex gap-2">
                                   <button 
                                     onClick={() => {
-                                      if (confirm(`Release ${card.name}?`)) {
+                                      if (true) {
                                         const newState = { ...state };
                                         const team = newState.teams[state.userTeamId];
                                         team.roster = team.roster.filter((rid: string) => rid !== id);
