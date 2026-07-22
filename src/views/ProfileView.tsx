@@ -5,6 +5,7 @@ import { LogOut, Trash2, User as UserIcon, Check, AlertTriangle, X, CloudUpload,
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useNotification } from '../context/NotificationContext';
+import { ReferralSection } from '../components/ReferralSection';
 
 const ProfileView: React.FC = () => {
   const { 
@@ -198,6 +199,9 @@ const ProfileView: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* Referral System */}
+        <ReferralSection />
 
         {/* Username Form */}
         <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 space-y-4">

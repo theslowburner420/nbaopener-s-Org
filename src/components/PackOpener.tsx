@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Card, Rarity } from '../types';
 import CardItem from './CardItem';
-import { Check, Sparkles } from 'lucide-react';
+import { Check, Sparkles, Trophy, Award } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
 import { useGame } from '../context/GameContext';
 import { MemoryManager } from '../lib/memory';
+import { InviteeClaimModal } from './ReferralModals';
 
 interface PackOpenerProps {
   cards: Card[];
   newlyUnlockedAchievements?: any[];
+  inviteeReward?: any;
   onClose: () => void;
   packImage?: string;
 }
@@ -211,14 +213,29 @@ const RarityBackgroundEffect = React.memo(({ rarity, isActive, isRevealing }: { 
   }
 });
 
-export default function PackOpener({ cards, newlyUnlockedAchievements = [], onClose, packImage }: PackOpenerProps) {
+export default function PackOpener({ cards, newlyUnlockedAchievements = [], inviteeReward, onClose, packImage }: PackOpenerProps) {
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [isRevealing, setIsRevealing] = useState(true);
   const [showPack, setShowPack] = useState(true);
   const [hasOpenedPack, setHasOpenedPack] = useState(false);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [isPreloaded, setIsPreloaded] = useState(false);
-  const [shownAchievementIds, setShownAchievementIds] = useState<Set<string>>(new Set());
+  const [pendingQueue, setPendingQueue] = useState<Array<{ cardIndex: number; achievement: any }>>(() => {
+    return (newlyUnlockedAchievements || []).map(ach => {
+      let idx = typeof ach.cardIndex === 'number' ? ach.cardIndex : -1;
+      if (idx === -1 && ach.triggeredByCardId) {
+        const found = cards.findIndex(c => c.id === ach.triggeredByCardId);
+        if (found !== -1) idx = found;
+      }
+      if (idx === -1) idx = 0;
+      return {
+        cardIndex: Math.min(idx, cards.length - 1),
+        achievement: ach
+      };
+    });
+  });
+
+  const [activeAchievementPopup, setActiveAchievementPopup] = useState<any | null>(null);
 
   const { notify } = useNotification();
 
@@ -304,41 +321,53 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
     }
   }, [activeCardIndex, cards, hasOpenedPack]);
 
-  // Handle achievement notifications during reveal
+  // Pas B & Pas C: Check Pending Achievements Queue when card animation completes
   React.useEffect(() => {
-    // We only trigger notifications when the card is FULLY revealed (!isRevealing)
-    // and correctly preloaded to ensure no spoilers
-    if (!isRevealing && isPreloaded) {
+    if (!isRevealing && isPreloaded && !activeAchievementPopup && pendingQueue.length > 0) {
       const currentCard = cards[activeCardIndex];
-      const allRevealed = activeCardIndex === totalCards - 1;
-      const achievementsToTrigger = newlyUnlockedAchievements.filter(ach => 
-        !shownAchievementIds.has(ach.id) && 
-        (ach.triggeredByCardId === currentCard.id || (allRevealed && ach.triggeredByCardId === null))
+      const isLastCard = activeCardIndex === cards.length - 1;
+
+      // Find first matching achievement for current Card Index or Card ID
+      const matchingIndex = pendingQueue.findIndex(item => 
+        item.cardIndex === activeCardIndex || 
+        (item.achievement.triggeredByCardId && item.achievement.triggeredByCardId === currentCard.id) ||
+        (isLastCard && item.achievement.triggeredByCardId === null)
       );
 
-      if (achievementsToTrigger.length > 0) {
-        achievementsToTrigger.forEach(ach => {
-          // Mark as shown immediately to prevent duplicate triggers
-          setShownAchievementIds(prev => {
-            const next = new Set(prev);
-            next.add(ach.id);
-            return next;
-          });
-          
-          // Small staggered delay for multiple achievements
-          setTimeout(() => {
-            notify({
-              id: ach.id,
-              title: ach.title,
-              description: ach.description,
-              rewardText: ach.rewardText, // Correct mapping
-              icon: ach.icon
-            });
-          }, 300);
-        });
+      if (matchingIndex !== -1) {
+        // Delay of 300ms after reveal animation finishes
+        const timer = setTimeout(() => {
+          const itemToTrigger = pendingQueue[matchingIndex];
+          setActiveAchievementPopup(itemToTrigger.achievement);
+
+          // Pas D: Queue Cleanup
+          setPendingQueue(prev => prev.filter((_, idx) => idx !== matchingIndex));
+        }, 300);
+
+        return () => clearTimeout(timer);
       }
     }
-  }, [activeCardIndex, isRevealing, isPreloaded, newlyUnlockedAchievements, shownAchievementIds, notify, cards]);
+  }, [activeCardIndex, isRevealing, isPreloaded, activeAchievementPopup, pendingQueue, cards]);
+
+  const handleClaimAchievement = React.useCallback(() => {
+    setActiveAchievementPopup(null);
+  }, []);
+
+  const handleClosePackOpener = React.useCallback(() => {
+    // Flush any remaining unshown achievements to notify so user doesn't lose them
+    if (pendingQueue.length > 0) {
+      pendingQueue.forEach(item => {
+        notify({
+          id: item.achievement.id,
+          title: item.achievement.title,
+          description: item.achievement.description,
+          rewardText: item.achievement.rewardText,
+          icon: item.achievement.icon
+        });
+      });
+    }
+    onClose();
+  }, [pendingQueue, notify, onClose]);
 
   const nextCard = React.useCallback(() => {
     if (activeCardIndex < totalCards - 1) {
@@ -817,7 +846,7 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
 
           return (
             <motion.div
-              key={`${card.id}-${index}-${activeCardIndex === index}`}
+              key={`${card.id}-${index}`}
               drag={isActive ? "x" : false}
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.8}
@@ -975,7 +1004,7 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
 
           {allRevealed && (
             <button
-              onClick={(e) => { e.stopPropagation(); onClose(); }}
+              onClick={(e) => { e.stopPropagation(); handleClosePackOpener(); }}
               className="bg-white text-black font-black px-8 sm:px-12 py-3 sm:py-4 rounded-full shadow-[0_0_50px_rgba(255,255,255,0.3)] flex items-center gap-2 sm:gap-3 uppercase tracking-widest text-[10px] sm:text-xs hover:bg-amber-400 transition-all active:scale-95 border-2 border-white/50"
             >
               <Check size={isMobile ? 14 : 18} strokeWidth={3} />
@@ -984,6 +1013,95 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
           )}
         </motion.div>
       </AnimatePresence>
+
+      {/* Achievement Unlocked Modal Popup (Achievement Queue UI) */}
+      <AnimatePresence>
+        {activeAchievementPopup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9500] bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 pointer-events-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <motion.div
+              initial={{ scale: 0.85, y: 25, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.85, y: 20, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 350, damping: 25 }}
+              className="w-full max-w-sm bg-gradient-to-b from-zinc-900 via-zinc-950 to-black border-2 border-amber-500/50 rounded-3xl p-6 shadow-[0_0_60px_rgba(245,158,11,0.35)] flex flex-col items-center text-center relative overflow-hidden"
+            >
+              {/* Top Animated Gold Line */}
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent animate-pulse" />
+              <div className="absolute -top-16 -left-16 w-36 h-36 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-16 -right-16 w-36 h-36 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+              {/* Icon / Trophy Badge */}
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-600 flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.6)] mb-4 animate-bounce-subtle border border-amber-200/40">
+                <Trophy className="text-black w-8 h-8" strokeWidth={2.5} />
+              </div>
+
+              {/* Popup Title */}
+              <h3 className="text-xs font-black uppercase tracking-[0.25em] text-amber-400 italic mb-1">
+                ACHIEVEMENT UNLOCKED!
+              </h3>
+
+              {/* Context / Card Rarity Trigger Text */}
+              {cards[activeCardIndex] && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] font-black uppercase tracking-wider text-amber-300 mb-2">
+                  <Award size={12} className="text-amber-400" />
+                  {cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? (
+                    <span>Hall of Fame Card Unlocked!</span>
+                  ) : cards[activeCardIndex].rarity === 'franchise' || cards[activeCardIndex].category === 'All-Star MVP' ? (
+                    <span>MVP Card Collected!</span>
+                  ) : (
+                    <span>{cards[activeCardIndex].name} Collected</span>
+                  )}
+                </div>
+              )}
+
+              {/* Achievement Title */}
+              <h2 className="text-xl font-black text-white italic tracking-tight uppercase mb-2">
+                {activeAchievementPopup.title}
+              </h2>
+
+              {/* Achievement Description */}
+              <p className="text-xs text-zinc-400 mb-5 px-2 line-clamp-2 leading-relaxed">
+                {activeAchievementPopup.description}
+              </p>
+
+              {/* Reward Subtitle & Box */}
+              <div className="w-full bg-zinc-950/90 border border-amber-500/30 rounded-2xl p-3.5 mb-6 flex flex-col items-center shadow-inner">
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-1">
+                  Reward added to your account
+                </span>
+                <span className="text-base font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 italic tracking-tight uppercase">
+                  {activeAchievementPopup.rewardText}
+                </span>
+              </div>
+
+              {/* Action Button: CLAIM / COLLECT */}
+              <button
+                onClick={handleClaimAchievement}
+                className="w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 text-black font-black uppercase tracking-widest text-xs shadow-[0_0_30px_rgba(245,158,11,0.5)] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-amber-200/60"
+              >
+                CLAIM
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Invitee Referral Reward Popup Modal */}
+      {inviteeReward && (
+        <InviteeClaimModal
+          isOpen={!!inviteeReward}
+          inviterUsername={inviteeReward.inviterUsername || 'Your Friend'}
+          coins={inviteeReward.coins || 25000}
+          pack={inviteeReward.pack || { id: 'hof-pack', type: 'hof', name: 'HOF Pack', count: 1 }}
+          onClaim={() => {}}
+        />
+      )}
     </motion.div>
   );
 }

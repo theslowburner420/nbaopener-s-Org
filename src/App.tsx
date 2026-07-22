@@ -7,7 +7,7 @@ import { useEffect, useState, lazy, Suspense } from 'react';
 import { GameProvider, useGame } from './context/GameContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ALL_CARDS } from './data/cards';
-import { LogIn, LogOut, User as UserIcon, Coins, AlertCircle, ChevronDown, Settings, Cloud, Check, RefreshCw, X, Gift, Star, Home, ShoppingBag, LayoutGrid, Trophy, Zap, AlertTriangle, Loader2, Sparkles } from 'lucide-react';
+import { LogIn, LogOut, User as UserIcon, Coins, AlertCircle, ChevronDown, Settings, Cloud, Check, RefreshCw, X, Gift, Star, Home, ShoppingBag, LayoutGrid, Trophy, Zap, AlertTriangle, Loader2, Sparkles, Award } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MemoryManager } from './lib/memory';
 import { Analytics } from "@vercel/analytics/react";
@@ -15,6 +15,8 @@ import { Analytics } from "@vercel/analytics/react";
 import Header from './components/Header';
 import StaticAd from './components/StaticAd';
 import { Puzzle } from 'lucide-react';
+import { InviterRewardModal } from './components/ReferralModals';
+import { getUnclaimedInviterRewards, removeUnclaimedInviterReward, UnclaimedInviterReward } from './services/referralService';
 
 // Lazy load views for code splitting
 const HomeView = lazy(() => import('./views/HomeView'));
@@ -94,9 +96,34 @@ const ViewLoader = () => {
 };
 
 function AppContent() {
-  const { currentView, setCurrentView, isPremium, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setShowWelcomeGift, login, user, claimLoginReward } = useGame();
+  const { currentView, setCurrentView, isPremium, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setShowWelcomeGift, login, user, claimLoginReward, claimedAchievements, addCoins, addPackToInventory } = useGame();
   const [showLoginIncentive, setShowLoginIncentive] = useState(false);
   const [hasShownLoginIncentive, setHasShownLoginIncentive] = useState(false);
+  const [showLoginBonusModal, setShowLoginBonusModal] = useState(false);
+  const [claimingLoginBonus, setClaimingLoginBonus] = useState(false);
+  const [activeInviterReward, setActiveInviterReward] = useState<UnclaimedInviterReward | null>(null);
+
+  // Check for unclaimed inviter referral rewards
+  useEffect(() => {
+    if (user?.username && isInitialSyncDone) {
+      const unclaimed = getUnclaimedInviterRewards(user.username);
+      if (unclaimed.length > 0) {
+        setActiveInviterReward(unclaimed[0]);
+      }
+    }
+  }, [user?.username, isInitialSyncDone]);
+
+  const handleClaimInviterReward = async () => {
+    if (!activeInviterReward) return;
+    await addCoins(activeInviterReward.coins);
+    await addPackToInventory({
+      id: `hof-ref-${Date.now()}`,
+      type: 'hof',
+      name: 'HOF Pack'
+    });
+    removeUnclaimedInviterReward(activeInviterReward.id);
+    setActiveInviterReward(null);
+  };
 
   // Show login incentive if user is NOT logged in and hasn't seen it this session
   useEffect(() => {
@@ -108,6 +135,18 @@ function AppContent() {
       return () => clearTimeout(timer);
     }
   }, [user, isInitialSyncDone, hasShownLoginIncentive]);
+
+  // Show login bonus claim if logged in, initial sync is done, and not already claimed
+  useEffect(() => {
+    if (user && isInitialSyncDone && !showWelcomeGift && !claimedAchievements?.includes('login_bonus')) {
+      const timer = setTimeout(() => {
+        setShowLoginBonusModal(true);
+      }, 800);
+      return () => clearTimeout(timer);
+    } else {
+      setShowLoginBonusModal(false);
+    }
+  }, [user, isInitialSyncDone, showWelcomeGift, claimedAchievements]);
 
   // Adsterra Script Logic - ONLY load if NOT premium
   useEffect(() => {
@@ -310,7 +349,9 @@ function AppContent() {
       )}
       
       {/* Content Area - Natural Scroll */}
-      <main className="flex-1 relative bg-black overflow-y-auto overflow-x-hidden custom-scrollbar">
+      <main className={`flex-1 relative bg-black overflow-x-hidden custom-scrollbar ${
+        (currentView === 'career' || currentView === 'draft') ? 'overflow-hidden' : 'overflow-y-auto'
+      }`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={currentView}
@@ -318,7 +359,7 @@ function AppContent() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="w-full"
+            className={`w-full ${(currentView === 'career' || currentView === 'draft') ? 'h-full flex flex-col' : ''}`}
           >
             {renderView()}
           </motion.div>
@@ -436,7 +477,7 @@ function AppContent() {
                     </div>
                     <div className="text-left">
                       <p className="text-[10px] font-black uppercase tracking-widest text-white">Login Bonus</p>
-                      <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">+50,000 Coins & Mega Pack</p>
+                      <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">+100,000 Coins & HOF/Legendary Packs</p>
                     </div>
                   </div>
                 </div>
@@ -446,7 +487,7 @@ function AppContent() {
                     login();
                     setShowLoginIncentive(false);
                   }}
-                  className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-amber-400 active:scale-95 transition-all shadow-xl mb-3"
+                  className="w-full bg-white text-black py-2.5 rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-amber-400 active:scale-95 transition-all shadow-lg mb-3"
                 >
                   Login with Google
                 </button>
@@ -486,7 +527,7 @@ function AppContent() {
                   Welcome!
                 </h2>
                 <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-amber-500 mb-4 md:mb-6">
-                  Exclusive Starter Pack
+                  Exclusive Starter Package
                 </p>
                 
                 <div className="space-y-2 md:space-y-3 w-full mb-6 md:mb-8">
@@ -497,7 +538,7 @@ function AppContent() {
                       </div>
                       <span className="text-xs md:text-sm font-black uppercase tracking-widest text-zinc-400">Coins</span>
                     </div>
-                    <span className="text-lg md:text-xl font-black italic text-white">+100,000</span>
+                    <span className="text-lg md:text-xl font-black italic text-white">+150,000</span>
                   </div>
 
                   <div className="bg-black/40 border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center justify-between">
@@ -505,7 +546,7 @@ function AppContent() {
                       <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
                         <ShoppingBag size={14} className="md:w-4 md:h-4" />
                       </div>
-                      <span className="text-xs md:text-sm font-black uppercase tracking-widest text-zinc-400">Welcome Mega</span>
+                      <span className="text-xs md:text-sm font-black uppercase tracking-widest text-zinc-400">Finals MVP Packs</span>
                     </div>
                     <span className="text-lg md:text-xl font-black italic text-white">x5</span>
                   </div>
@@ -515,21 +556,31 @@ function AppContent() {
                       <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500">
                         <Star size={14} className="md:w-4 md:h-4" />
                       </div>
-                      <span className="text-xs md:text-sm font-black uppercase tracking-widest text-zinc-400">MVP Packs</span>
+                      <span className="text-xs md:text-sm font-black uppercase tracking-widest text-zinc-400">HOF Packs</span>
                     </div>
                     <span className="text-lg md:text-xl font-black italic text-white">x3</span>
+                  </div>
+
+                  <div className="bg-black/40 border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
+                        <Award size={14} className="md:w-4 md:h-4" />
+                      </div>
+                      <span className="text-xs md:text-sm font-black uppercase tracking-widest text-zinc-400">Legendary Pack</span>
+                    </div>
+                    <span className="text-lg md:text-xl font-black italic text-white">x1</span>
                   </div>
                 </div>
                 
                 <p className="text-[8px] md:text-[9px] text-zinc-500 uppercase font-bold tracking-widest leading-relaxed mb-6 md:mb-8 max-w-[240px]">
-                  Here is your gift: 100,000 coins, 5 Welcome Mega Packs and 3 MVP Packs to start your collection. <span className="text-amber-500">Sign in now for an extra +50,000 coins and another Mega Pack!</span>
+                  Here is your starter package. <span className="text-amber-500 font-extrabold">Sign in with Google to claim your 100,000 Coins & 2 HOF + 1 Legendary MVP Pack sign-in reward!</span>
                 </p>
                 
                 <button
                   onClick={() => setShowWelcomeGift(false)}
                   className="w-full bg-white text-black py-3 md:py-4 rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs hover:bg-amber-400 active:scale-95 transition-all shadow-xl"
                 >
-                  Claim Rewards
+                  Claim Starter Package
                 </button>
               </div>
               
@@ -543,6 +594,107 @@ function AppContent() {
             </motion.div>
           </motion.div>
         )}
+
+        {showLoginBonusModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[10000] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="w-full max-w-sm bg-zinc-900 border border-amber-500/30 rounded-3xl p-6 md:p-8 relative overflow-y-auto max-h-[90vh] shadow-[0_0_50px_rgba(245,158,11,0.3)]"
+            >
+              {/* Background Glow */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-amber-500/20 blur-[60px] rounded-full animate-pulse" />
+              
+              <div className="relative z-10 flex flex-col items-center text-center">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.5)] mb-4 md:mb-6">
+                  <Sparkles size={32} className="text-black md:w-10 md:h-10 animate-bounce" />
+                </div>
+                
+                <h2 className="text-2xl md:text-3xl font-black italic uppercase tracking-tighter text-white mb-1 md:mb-2 leading-none">
+                  SIGN-IN BONUS!
+                </h2>
+                <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-amber-500 mb-4 md:mb-6">
+                  Google Account Reward
+                </p>
+                
+                <div className="space-y-2 md:space-y-3 w-full mb-6 md:mb-8">
+                  <div className="bg-black/40 border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
+                        <Coins size={14} className="md:w-4 md:h-4" />
+                      </div>
+                      <span className="text-xs md:text-sm font-black uppercase tracking-widest text-zinc-400">Bonus Coins</span>
+                    </div>
+                    <span className="text-lg md:text-xl font-black italic text-amber-400">+100,000</span>
+                  </div>
+
+                  <div className="bg-black/40 border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500">
+                        <Star size={14} className="md:w-4 md:h-4" />
+                      </div>
+                      <span className="text-xs md:text-sm font-black uppercase tracking-widest text-zinc-400">HOF Packs</span>
+                    </div>
+                    <span className="text-lg md:text-xl font-black italic text-white">x2</span>
+                  </div>
+
+                  <div className="bg-black/40 border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                        <Award size={14} className="md:w-4 md:h-4" />
+                      </div>
+                      <span className="text-xs md:text-sm font-black uppercase tracking-widest text-zinc-400">Legendary Pack</span>
+                    </div>
+                    <span className="text-lg md:text-xl font-black italic text-white">x1</span>
+                  </div>
+                </div>
+                
+                <p className="text-[8px] md:text-[9px] text-zinc-500 uppercase font-bold tracking-widest leading-relaxed mb-6 md:mb-8 max-w-[240px]">
+                  Thank you for securing your progress. These elite rewards have been added directly to your account.
+                </p>
+                
+                <button
+                  disabled={claimingLoginBonus}
+                  onClick={async () => {
+                    setClaimingLoginBonus(true);
+                    try {
+                      await claimLoginReward();
+                      setShowLoginBonusModal(false);
+                    } catch (err) {
+                      console.error("Error claiming login bonus", err);
+                    } finally {
+                      setClaimingLoginBonus(false);
+                    }
+                  }}
+                  className="w-full bg-amber-500 text-black py-3 md:py-4 rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs hover:bg-amber-400 active:scale-95 transition-all shadow-xl flex items-center justify-center gap-2"
+                >
+                  {claimingLoginBonus ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Claiming...
+                    </>
+                  ) : (
+                    "Claim Sign-In Bonus"
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+        {/* Inviter Referral Unlocked Modal */}
+        <InviterRewardModal
+          isOpen={!!activeInviterReward}
+          inviteeUsername={activeInviterReward?.inviteeUsername || ''}
+          coins={activeInviterReward?.coins || 25000}
+          packName={activeInviterReward?.pack.name || 'HOF Pack'}
+          totalReferrals={activeInviterReward?.totalReferrals || 1}
+          onClaim={handleClaimInviterReward}
+        />
       </AnimatePresence>
       <Analytics />
     </div>

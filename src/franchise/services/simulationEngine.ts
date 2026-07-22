@@ -63,6 +63,84 @@ function calculateTeamPower(team: TeamObject, state: FranchiseState, isHome: boo
   return power;
 }
 
+function allocateTeamMinutes(team: TeamObject, activeIds: string[], state: FranchiseState): Record<string, number> {
+  const mins: Record<string, number> = {};
+  team.roster.forEach(pid => { mins[pid] = 0; });
+  
+  if (activeIds.length === 0) return mins;
+
+  const starters = new Set([team.lineup.PG, team.lineup.SG, team.lineup.SF, team.lineup.PF, team.lineup.C].filter(Boolean));
+  const bench = new Set((team.lineup.bench || []).filter(Boolean));
+
+  // Define raw weights for play-time
+  const weights: Record<string, number> = {};
+  let totalWeight = 0;
+
+  activeIds.forEach(pid => {
+    const prog = state.playerProgress[pid];
+    const ovr = prog?.ovr || 70;
+    let baseWeight = 4; // deep reserve
+    if (starters.has(pid)) {
+      baseWeight = 32; // starter
+    } else if (bench.has(pid)) {
+      baseWeight = 16; // bench
+    }
+    // Adjust by OVR
+    const adjWeight = baseWeight * (0.7 + (ovr - 40) / 100);
+    weights[pid] = adjWeight;
+    totalWeight += adjWeight;
+  });
+
+  // Distribute 240 minutes proportionally
+  let allocatedSum = 0;
+  activeIds.forEach(pid => {
+    const share = weights[pid] / (totalWeight || 1);
+    let m = Math.round(share * 240);
+    
+    // Constrain minutes
+    if (starters.has(pid)) {
+      m = Math.max(18, Math.min(42, m));
+    } else if (bench.has(pid)) {
+      m = Math.max(6, Math.min(26, m));
+    } else {
+      m = Math.max(0, Math.min(12, m));
+    }
+    mins[pid] = m;
+    allocatedSum += m;
+  });
+
+  // Adjust to make sure the total is EXACTLY 240
+  let attempts = 0;
+  while (allocatedSum !== 240 && attempts < 150) {
+    attempts++;
+    const diff = 240 - allocatedSum;
+    const step = diff > 0 ? 1 : -1;
+    
+    // Find candidates to add/remove a minute
+    const candidates = activeIds.filter(pid => {
+      const m = mins[pid];
+      if (step > 0) {
+        if (starters.has(pid) && m >= 42) return false;
+        if (bench.has(pid) && m >= 26) return false;
+        if (!starters.has(pid) && !bench.has(pid) && m >= 12) return false;
+        return true;
+      } else {
+        if (starters.has(pid) && m <= 18) return false;
+        if (bench.has(pid) && m <= 4) return false;
+        if (!starters.has(pid) && !bench.has(pid) && m <= 0) return false;
+        return true;
+      }
+    });
+
+    if (candidates.length === 0) break;
+    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+    mins[pick] += step;
+    allocatedSum += step;
+  }
+
+  return mins;
+}
+
 function generateBoxScore(
   team: TeamObject,
   totalPoints: number,
@@ -74,13 +152,22 @@ function generateBoxScore(
     const entries: BoxScoreEntry[] = [];
     const seenIds = new Set<string>();
     
-    const players = [
-        ...[team.lineup.PG, team.lineup.SG, team.lineup.SF, team.lineup.PF, team.lineup.C].map(id => ({ id, role: 'starter' })),
-        ...team.lineup.bench.map(id => ({ id, role: 'bench' }))
-    ].filter(p => {
-        if (!p.id || seenIds.has(p.id)) return false;
-        seenIds.add(p.id);
-        return true;
+    const startersSet = new Set([team.lineup.PG, team.lineup.SG, team.lineup.SF, team.lineup.PF, team.lineup.C].filter(Boolean));
+    const benchSet = new Set((team.lineup.bench || []).filter(Boolean));
+
+    // Map over the ENTIRE roster to account for every team player!
+    const players = team.roster.map(id => {
+      let role = 'reserve';
+      if (startersSet.has(id)) {
+        role = 'starter';
+      } else if (benchSet.has(id)) {
+        role = 'bench';
+      }
+      return { id, role };
+    }).filter(p => {
+      if (!p.id || seenIds.has(p.id)) return false;
+      seenIds.add(p.id);
+      return true;
     });
 
     const getDistributionFactor = () => {
@@ -93,49 +180,83 @@ function generateBoxScore(
 
     const playerData = players.map(p => {
       const card = findCard(p.id!, state);
-      // Use simulated minutes from the match core if available
       const mins = minutesPlayed && minutesPlayed[p.id!] !== undefined 
         ? minutesPlayed[p.id!] 
-        : (p.role === 'starter' ? 28 + Math.floor(Math.random() * 11) : 10 + Math.floor(Math.random() * 13));
+        : (p.role === 'starter' ? 28 + Math.floor(Math.random() * 11) : p.role === 'bench' ? 12 + Math.floor(Math.random() * 10) : 0);
       return { id: p.id!, role: p.role, card, mins };
     });
 
+    // 1. Calculate raw offensive scores for each player
     const rawScores = playerData.map(p => {
-       if (p.mins <= 0) return 0;
-       const progress = state.playerProgress[p.id!] || { form: 1.0, ovr: p.card?.stats.ovr || 60 };
-       const currentOvr = progress.ovr || p.card?.stats.ovr || 60;
-       const baseOvr = p.card?.stats.ovr || 60;
-       const ovrMod = currentOvr / baseOvr;
-       
-       const basePPG = p.card?.stats.points || (currentOvr > 85 ? 25 : currentOvr > 75 ? 18 : currentOvr > 65 ? 10 : 5);
-       const raw = (basePPG / 34) * p.mins * getDistributionFactor() * ovrMod * progress.form;
-       return raw;
-     });
+      if (p.mins <= 0) return 0;
+      const progress = (state.playerProgress[p.id!] || { form: 1.0, ovr: p.card?.stats.ovr || 60 }) as any;
+      const currentOvr = progress.ovr || p.card?.stats.ovr || 60;
+      
+      const attrs = progress.attributes;
+      let offenseRating = currentOvr;
+      if (attrs) {
+        offenseRating = (attrs.ins * 0.35 + attrs.mid * 0.35 + attrs.out * 0.3);
+      } else if (p.card?.stats) {
+        offenseRating = p.card.stats.ovr;
+      }
+
+      const basePPG = p.card?.stats.points || (currentOvr > 85 ? 24 : currentOvr > 75 ? 16 : currentOvr > 65 ? 10 : 5);
+      const raw = (basePPG / 34) * p.mins * getDistributionFactor() * (offenseRating / 75) * (progress.form || 1.0);
+      return raw;
+    });
 
     const currentTotalRaw = rawScores.reduce((a, b) => a + b, 0);
     const normalizationFactor = totalPoints / (currentTotalRaw || 1);
 
     playerData.forEach((p, idx) => {
-        const progress = state.playerProgress[p.id] || { form: 1.0, ovr: p.card?.stats.ovr || 60 };
+        const progress = (state.playerProgress[p.id] || { form: 1.0, ovr: p.card?.stats.ovr || 60 }) as any;
         const currentOvr = progress.ovr || p.card?.stats.ovr || 60;
-        const baseOvr = p.card?.stats.ovr || 60;
-        const ovrMod = currentOvr / baseOvr;
+        const attrs = progress.attributes;
         
         let pts = p.mins > 0 ? Math.round(rawScores[idx] * normalizationFactor) : 0;
         
         const rebFactor = getDistributionFactor();
         const astFactor = getDistributionFactor();
 
-        const baseReb = p.card?.stats.rebounds || (currentOvr > 80 ? 8 : 4);
-        const baseAst = p.card?.stats.assists || (currentOvr > 80 ? 7 : 3);
+        // 2. High-fidelity Rebounds based on attributes and position
+        let rebAttr = currentOvr;
+        if (attrs) {
+          rebAttr = attrs.reb * 0.8 + attrs.stre * 0.2;
+        }
+        const isBig = p.card?.position === 'C' || p.card?.position === 'PF' || p.card?.position === 'F' || p.card?.position?.includes('C') || p.card?.position?.includes('PF');
+        const baseReb = p.card?.stats.rebounds || (isBig ? 8 : 3);
+        let reb = p.mins > 0 ? Math.max(0, Math.round((baseReb / 36) * p.mins * rebFactor * (rebAttr / 75))) : 0;
+        if (p.mins > 0 && isBig) {
+          reb = Math.round(reb * 1.25);
+        }
 
-        const reb = p.mins > 0 ? Math.max(0, Math.round((baseReb / 34) * p.mins * rebFactor * ovrMod)) : 0;
-        const ast = p.mins > 0 ? Math.max(0, Math.round((baseAst / 34) * p.mins * astFactor * ovrMod)) : 0;
+        // 3. High-fidelity Assists based on attributes and position
+        let astAttr = currentOvr;
+        if (attrs) {
+          astAttr = attrs.ast * 0.8 + attrs.handle * 0.2;
+        }
+        const isGuard = p.card?.position === 'PG' || p.card?.position === 'SG' || p.card?.position === 'G' || p.card?.position?.includes('G') || p.card?.position?.includes('PG');
+        const baseAst = p.card?.stats.assists || (isGuard ? 6 : 2);
+        let ast = p.mins > 0 ? Math.max(0, Math.round((baseAst / 36) * p.mins * astFactor * (astAttr / 75))) : 0;
+        if (p.mins > 0 && isGuard) {
+          ast = Math.round(ast * 1.2);
+        }
         
-        const stl = p.mins > 0 && Math.random() > (0.6 / progress.form) ? Math.floor(Math.random() * 3) + (p.role === 'starter' ? 1 : 0) : 0;
-        const blk = p.mins > 0 && Math.random() > (0.7 / progress.form) ? Math.floor(Math.random() * 3) + (p.card?.position === 'C' ? 1 : 0) : 0;
+        // 4. Steals and Blocks
+        let stl = 0;
+        let blk = 0;
+        if (p.mins > 0) {
+          const stlAttr = attrs ? attrs.stl : (currentOvr > 75 ? 75 : 55);
+          const blkAttr = attrs ? attrs.blk : (currentOvr > 75 ? 75 : 55);
+
+          const stlProb = (stlAttr / 100) * 0.08 * (p.mins / 48) * (progress.form || 1.0);
+          const blkProb = (blkAttr / 100) * 0.08 * (p.mins / 48) * (progress.form || 1.0) * (isBig ? 2.5 : 0.6);
+
+          stl = Math.random() < stlProb ? 1 + Math.floor(Math.random() * 3) : (Math.random() < 0.25 ? 1 : 0);
+          blk = Math.random() < blkProb ? 1 + Math.floor(Math.random() * 3) : (Math.random() < 0.12 ? 1 : 0);
+        }
         
-        const individualPM = p.mins > 0 ? Math.round((teamPlusMinus * (p.mins / 48)) + (Math.random() * 10 - 5)) : 0;
+        const individualPM = p.mins > 0 ? Math.round((teamPlusMinus * (p.mins / 48)) + (Math.random() * 8 - 4)) : 0;
 
         entries.push({
             playerId: p.id,
@@ -238,7 +359,7 @@ export const simulationEngine = {
             .map(pid => ({ id: pid, prog: state.playerProgress[pid] }))
             .filter(p => p.prog && (p.prog.injuryWeeks || p.prog.injury));
 
-          // Filter on mild injuries (leve / mild / minor)
+          // Filter on mild injuries
           const mildInjured = injuredPlayers.filter(p => {
             const severity = p.prog.injurySeverity || p.prog.injury?.severity || '';
             const type = p.prog.injuryType || p.prog.injury?.type || '';
@@ -279,42 +400,16 @@ export const simulationEngine = {
       const minutesPlayed: Record<string, number> = {};
       const matchIncurredInjuries = new Set<string>();
 
-      hTeam.roster.forEach(pid => minutesPlayed[pid] = 0);
-      aTeam.roster.forEach(pid => minutesPlayed[pid] = 0);
+      // Pre-allocate highly realistic rotational minutes
+      const hMins = allocateTeamMinutes(hTeam, homeRosterInfo.activeIds, state);
+      const aMins = allocateTeamMinutes(aTeam, awayRosterInfo.activeIds, state);
 
-      // Select active / playable cohort for lineups
-      const selectOnCourt = (team: TeamObject, availableIds: string[]) => {
-        const onCourt: string[] = [];
-        const availSet = new Set(availableIds);
-        const slots = ['PG', 'SG', 'SF', 'PF', 'C'] as const;
-
-        slots.forEach(pos => {
-          const baseStarterId = team.lineup[pos];
-          if (baseStarterId && availSet.has(baseStarterId)) {
-            onCourt.push(baseStarterId);
-            availSet.delete(baseStarterId);
-          }
-        });
-
-        // Fill remaining court slots from available bench pool
-        while (onCourt.length < 5 && availSet.size > 0) {
-          const fallbackId = Array.from(availSet)[0];
-          onCourt.push(fallbackId);
-          availSet.delete(fallbackId);
-        }
-
-        // Hard failsafe
-        while (onCourt.length < 5) {
-          const fs = team.roster.find(id => !onCourt.includes(id)) || team.roster[0];
-          onCourt.push(fs);
-        }
-
-        return onCourt.slice(0, 5);
-      };
+      hTeam.roster.forEach(pid => { minutesPlayed[pid] = hMins[pid] || 0; });
+      aTeam.roster.forEach(pid => { minutesPlayed[pid] = aMins[pid] || 0; });
 
       let momentum = 1.0;
       
-      // Simulate quarters and calculate injuries at the end of each quarter incrementally on-court
+      // Simulate quarters and calculate injuries at the end of each quarter incrementally
       for (let q = 1; q <= 4; q++) {
           const qHome = Math.round((homePower / 99) * 28 + (Math.random() * 8 - 4)) * momentum;
           const qAway = Math.round((awayPower / 99) * 28 + (Math.random() * 8 - 4)) * (2 - momentum);
@@ -331,21 +426,13 @@ export const simulationEngine = {
           if (diff > 10) momentum -= 0.05;
           if (diff < -10) momentum += 0.05;
 
-          // Select five active players on court for both teams for this quarter
-          const playableHomeIds = homeRosterInfo.activeIds.filter(id => !matchIncurredInjuries.has(id));
-          const playableAwayIds = awayRosterInfo.activeIds.filter(id => !matchIncurredInjuries.has(id));
-
-          const homeOnCourt = selectOnCourt(hTeam, playableHomeIds);
-          const awayOnCourt = selectOnCourt(aTeam, playableAwayIds);
-
-          // Increment minutes for players on court
-          homeOnCourt.forEach(id => minutesPlayed[id] += 10);
-          awayOnCourt.forEach(id => minutesPlayed[id] += 10);
-
-          // Injury check for playing on-court players
-          const allPlayersOnCourt = [...homeOnCourt.map(id => ({ id, team: hTeam, teamAbbr: hTeam.abbreviation })), ...awayOnCourt.map(id => ({ id, team: aTeam, teamAbbr: aTeam.abbreviation }))];
+          // Injury check for active players in game
+          const allPlayersInGame = [
+            ...homeRosterInfo.activeIds.map(id => ({ id, team: hTeam, teamAbbr: hTeam.abbreviation })),
+            ...awayRosterInfo.activeIds.map(id => ({ id, team: aTeam, teamAbbr: aTeam.abbreviation }))
+          ];
           
-          allPlayersOnCourt.forEach(({ id, team, teamAbbr }) => {
+          allPlayersInGame.forEach(({ id, team, teamAbbr }) => {
             if (matchIncurredInjuries.has(id)) return;
 
             const progress = state.playerProgress[id];
@@ -353,22 +440,21 @@ export const simulationEngine = {
 
             const card = findCard(id, state);
             const age = progress.age || card?.age || 25;
-            const mins = minutesPlayed[id];
+            const mins = minutesPlayed[id] || 0;
+            if (mins <= 0) return; // Didn't play, no injury risk
+
             const durability = progress.attributes?.durability || 75;
 
-            // 1. Calculate Injury Probability using exact specs
+            // 1. Calculate Injury Probability
             const P_base = 0.00015;
-            // F_edad: Linear growth based on age (starts at 1.0 for age 20)
             const F_edad = 1.0 + Math.max(0, age - 20) * 0.05;
-            // F_minutos: Exponential growth if minutes played exceed 38 minutes
             const F_minutos = mins > 38 ? Math.pow(1.18, mins - 38) : 1.0;
-            // F_durabilidad: Mitigador based on durability of 0 to 100
             const F_durabilidad = Math.max(0.1, (110 - durability) / 100);
 
             const P_injury = P_base * F_edad * F_minutos * F_durabilidad;
 
             if (Math.random() < P_injury) {
-              // 2. We have an injury event! Select severity and games duration
+              // 2. Injury event triggers!
               const pRoll = Math.random();
               let severity: 'mild' | 'moderate' | 'severe' = 'mild';
               let gamesRemaining = 2;
@@ -377,7 +463,6 @@ export const simulationEngine = {
               let modifier = 0.85;
 
               if (pRoll < 0.72) {
-                // Mild: 72%
                 severity = 'mild';
                 gamesRemaining = 1 + Math.floor(Math.random() * 3);
                 severityLabel = 'Mild';
@@ -385,7 +470,6 @@ export const simulationEngine = {
                 const types = ['ankle sprain', 'knee soreness', 'finger sprain', 'wrist tightness'];
                 injuryType = types[Math.floor(Math.random() * types.length)];
               } else if (pRoll < 0.95) {
-                // Moderate: 23%
                 severity = 'moderate';
                 gamesRemaining = 4 + Math.floor(Math.random() * 9);
                 severityLabel = 'Moderate';
@@ -393,7 +477,6 @@ export const simulationEngine = {
                 const types = ['hamstring strain', 'calf strain', 'shoulder soreness', 'bruised ribs'];
                 injuryType = types[Math.floor(Math.random() * types.length)];
               } else {
-                // Severe: 5%
                 severity = 'severe';
                 gamesRemaining = 15 + Math.floor(Math.random() * 45);
                 severityLabel = 'Severe';
@@ -404,14 +487,31 @@ export const simulationEngine = {
 
               matchIncurredInjuries.add(id);
 
-              // 3. Superposición de Lesiones: Acumula periodos de inactividad aditivamente y aplica modificadores de atributos multiplicativamente
+              // REDUCE MINUTES AND REDISTRIBUTE TO HEALTHY TEAMMATES
+              const oldMins = minutesPlayed[id] || 0;
+              const newMins = Math.max(2, Math.floor(oldMins * (0.1 + Math.random() * 0.4)));
+              const diffMins = oldMins - newMins;
+              minutesPlayed[id] = newMins;
+
+              const teamActiveHealthy = (team.teamId === hTeam.teamId ? homeRosterInfo.activeIds : awayRosterInfo.activeIds)
+                .filter(pid => pid !== id && !matchIncurredInjuries.has(pid));
+              
+              if (teamActiveHealthy.length > 0 && diffMins > 0) {
+                let left = diffMins;
+                while (left > 0) {
+                  const targetPid = teamActiveHealthy[Math.floor(Math.random() * teamActiveHealthy.length)];
+                  minutesPlayed[targetPid] += 1;
+                  left--;
+                }
+              }
+
+              // Superposition of injuries
               const hasExistingInjury = (progress.injuryWeeks && progress.injuryWeeks > 0) || progress.injury;
               
               if (hasExistingInjury) {
                 const currentRemaining = progress.injuryWeeks || progress.injury?.gamesRemaining || 0;
                 gamesRemaining += currentRemaining;
 
-                // Multiply existing modifiers with lower limit/floor of 15% (0.15)
                 const currentMods = progress.attributeModifiers || { spd: 1.0, jmp: 1.0, endu: 1.0, stre: 1.0, dnk: 1.0 };
                 progress.attributeModifiers = {
                   spd: Math.max(0.15, currentMods.spd * modifier),
@@ -421,7 +521,6 @@ export const simulationEngine = {
                   dnk: Math.max(0.15, (currentMods.dnk ?? 1.0) * modifier)
                 };
               } else {
-                // Brand new modifiers set
                 progress.attributeModifiers = {
                   spd: modifier,
                   jmp: modifier,
@@ -431,7 +530,6 @@ export const simulationEngine = {
                 };
               }
 
-              // Update progress data structures
               progress.injuryWeeks = gamesRemaining;
               progress.injuryType = injuryType;
               progress.injurySeverity = severityLabel;
@@ -441,7 +539,7 @@ export const simulationEngine = {
                 gamesRemaining: gamesRemaining
               };
 
-              // Notify the user of the live simulation injury
+              // Notify injury
               const cardName = card?.name || 'A player';
               state.notifications.unshift({
                 id: `inj-${id}-${Date.now()}`,
@@ -470,7 +568,6 @@ export const simulationEngine = {
           const progress = state.playerProgress[pid];
           if (!progress) return;
 
-          // Only decrement if we didn't just injure them in this exact match
           if (matchIncurredInjuries.has(pid)) return;
 
           const isInjured = (progress.injuryWeeks && progress.injuryWeeks > 0) || progress.injury;
@@ -480,7 +577,6 @@ export const simulationEngine = {
             rem -= 1;
             
             if (rem <= 0) {
-              // Full recovery!
               progress.injuryWeeks = 0;
               delete progress.injuryType;
               delete progress.injurySeverity;

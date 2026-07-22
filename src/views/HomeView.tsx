@@ -124,6 +124,10 @@ const HomeView: React.FC = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             </div>
+
+            <div className="absolute top-2 right-2 md:top-4 md:right-4 z-10">
+              <span className="px-2 py-0.5 md:px-3 md:py-1 bg-amber-500 text-black text-[7px] md:text-[10px] font-black rounded-full uppercase italic">BETA</span>
+            </div>
           </motion.div>
         </div>
       </div>

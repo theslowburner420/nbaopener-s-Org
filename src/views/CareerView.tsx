@@ -838,7 +838,7 @@ const CareerView: React.FC = () => {
   }
 
   return (
-    <div className="flex bg-black h-full w-full overflow-hidden text-white font-sans selection:bg-amber-500/30 touch-none">
+    <div className="flex bg-black h-full w-full overflow-hidden text-white font-sans selection:bg-amber-500/30 touch-pan-y">
       <div className="flex-1 flex flex-col md:flex-row h-full w-full overflow-hidden relative">
         {renderPhaseSpecificContent()}
         
@@ -1125,8 +1125,8 @@ const PreseasonProgressionReport: React.FC<PreseasonReportProps> = ({ players, o
           <h3 className="text-[8.5px] font-extrabold text-zinc-500 uppercase tracking-[0.2em] leading-none text-center">ACTIVE TEAM CAMP PROGRESS</h3>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[220px] overflow-y-auto no-scrollbar pr-1">
-            {players.map(p => (
-              <div key={p.id} className="bg-zinc-950/60 p-3.5 rounded-2xl border border-white/5 flex items-center justify-between">
+            {players.map((p, idx) => (
+              <div key={`${p.id}-${idx}`} className="bg-zinc-950/60 p-3.5 rounded-2xl border border-white/5 flex items-center justify-between">
                 <div className="leading-none shrink-0 min-w-0">
                   <h5 className="font-black text-white text-xs uppercase italic truncate max-w-[125px]">{p.name}</h5>
                   <p className="text-[7.5px] font-black text-zinc-550 uppercase mt-1">{p.position}</p>

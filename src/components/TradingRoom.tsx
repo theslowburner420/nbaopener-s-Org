@@ -345,7 +345,7 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
             <div className="grid grid-cols-3 gap-2.5 max-w-md mx-auto w-full">
               {partnerCards.map((card, i) => (
                 <motion.div 
-                  key={i} 
+                  key={`partner-${card.id}-${i}`} 
                   initial={{ opacity: 0, scale: 0.92 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -454,7 +454,7 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
             <div className="grid grid-cols-3 gap-2.5 max-w-md mx-auto w-full">
               {offerCards.map((card, i) => (
                 <motion.div 
-                  key={i} 
+                  key={`offer-${card.id}-${i}`} 
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="aspect-[2.5/3.2] relative rounded-2xl overflow-hidden border bg-zinc-950 flex flex-col justify-between p-2 group/bento shadow-lg"
@@ -602,14 +602,14 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
             </header>
 
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 sm:gap-4 no-scrollbar">
-              {duplicateCards.map((card) => {
+              {duplicateCards.map((card, index) => {
                 const count = collection[card.id] || 0;
                 const tradableCount = count - 1;
                 const selectedCount = myOffer.cards.filter(id => id === card.id).length;
                 
                 return (
                   <motion.div 
-                    key={card.id}
+                    key={`${card.id}-${index}`}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
                       if (selectedCount >= tradableCount) return;

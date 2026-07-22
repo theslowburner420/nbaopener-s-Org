@@ -25,7 +25,7 @@ const MarketTab: React.FC<MarketTabProps> = React.memo(({
       initial={{ opacity: 0, y: 15 }} 
       animate={{ opacity: 1, y: 0 }} 
       exit={{ opacity: 0, y: -15 }}
-      className="max-w-[1400px] mx-auto space-y-4 md:space-y-10 pb-20 px-4 md:px-8 select-none"
+      className="w-full space-y-4 md:space-y-10 pb-20 px-4 md:px-8 select-none"
     >
       {/* MARKET HEADER */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">

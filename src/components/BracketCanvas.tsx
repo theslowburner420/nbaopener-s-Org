@@ -110,16 +110,28 @@ export const BracketCanvas: React.FC<BracketCanvasProps> = ({ state, onSimulateR
     !s.winnerId && (s.team1Id === state.userTeamId || s.team2Id === state.userTeamId)
   );
 
+  // Auto-detect currently active playoff round or fallback
+  const activeRoundDetected = seriesArray.find(s => !s.winnerId)?.round ?? (state.championId ? 4 : 1);
+  const [selectedRound, setSelectedRound] = React.useState<number>(activeRoundDetected);
+
+  const roundsList = [
+    { id: 0, label: 'Play-In', count: playInSeries.length },
+    { id: 1, label: 'First Round', count: round1Series.length },
+    { id: 2, label: 'Conf Semis', count: round2Series.length },
+    { id: 3, label: 'Conf Finals', count: round3Series.length },
+    { id: 4, label: 'Finals & Champ', count: finalsSeries.length },
+  ].filter(r => r.id === 0 ? playInSeries.length > 0 : true);
+
   return (
     <div className="flex flex-col h-full bg-zinc-950/50 rounded-2xl md:rounded-3xl overflow-hidden border border-white/5">
       {/* Header Area */}
-      <div className="p-4 md:p-6 bg-zinc-950/40 border-b border-white/5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 shrink-0">
-        <div className="space-y-1">
-          <h3 className="text-xl md:text-3xl font-black italic uppercase tracking-tighter text-white leading-none">
+      <div className="p-4 bg-zinc-950/60 border-b border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
+        <div className="space-y-0.5">
+          <h3 className="text-base md:text-lg font-black italic uppercase tracking-tight text-white leading-tight">
             Postseason Bracket
           </h3>
-          <p className="text-[10px] md:text-xs font-bold text-zinc-500 uppercase tracking-widest italic leading-none">
-            Play-In single-match & playoffs best-of-7 series • local victory logistic probability
+          <p className="text-[9px] md:text-[10px] font-bold text-zinc-500 uppercase tracking-wider italic leading-none">
+            Play-In tournament & best-of-7 playoff matchups
           </p>
         </div>
 
@@ -127,7 +139,7 @@ export const BracketCanvas: React.FC<BracketCanvasProps> = ({ state, onSimulateR
           {userInvolvedActiveSeries && (
             <button
               onClick={onSimulateUserGame}
-              className="flex-1 md:flex-none px-6 py-3 bg-amber-500 text-black hover:bg-amber-400 active:scale-95 rounded-xl font-black uppercase tracking-widest text-[9px] md:text-xs transition-all shadow-xl shadow-amber-950/20"
+              className="flex-1 sm:flex-none px-4 py-2 bg-amber-500 text-black hover:bg-amber-400 active:scale-95 rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] transition-all shadow-xl shadow-amber-950/20"
             >
               Simulate Matchup
             </button>
@@ -135,17 +147,215 @@ export const BracketCanvas: React.FC<BracketCanvasProps> = ({ state, onSimulateR
           {!state.championId && (
             <button
               onClick={onSimulateRound}
-              className="flex-1 md:flex-none px-6 py-3 bg-white text-black hover:bg-zinc-200 active:scale-95 rounded-xl font-black uppercase tracking-widest text-[9px] md:text-xs transition-all shadow-xl"
+              className="flex-1 sm:flex-none px-4 py-2 bg-white text-black hover:bg-zinc-200 active:scale-95 rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] transition-all shadow-xl"
             >
-              Simulate Series Game
+              Simulate Game
             </button>
           )}
         </div>
       </div>
 
-      {/* GPU Accelerated Horizontal Scrolling container */}
+      {/* MOBILE ROUND PILL SELECTOR (Shown on mobile/small viewports only) */}
+      <div className="flex md:hidden overflow-x-auto gap-2 px-4 py-3 bg-zinc-950/30 border-b border-white/5 shrink-0 no-scrollbar">
+        {roundsList.map((r) => {
+          const isActive = selectedRound === r.id;
+          return (
+            <button
+              key={r.id}
+              onClick={() => setSelectedRound(r.id)}
+              className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0 transition-all ${
+                isActive 
+                  ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/10' 
+                  : 'bg-white/5 text-zinc-400 hover:bg-white/10'
+              }`}
+            >
+              {r.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* RESPONSIVE LAYOUT CONTAINER */}
+      {/* 1. Mobile Viewport (Only selected round is shown, completely avoiding horizontal scrolls) */}
+      <div className="block md:hidden flex-1 overflow-y-auto px-4 py-6">
+        {selectedRound === 0 && playInSeries.length > 0 && (
+          <div className="space-y-4">
+            <div className="text-center font-black text-xs text-amber-500 uppercase tracking-widest border-b border-white/5 pb-2.5 mb-4 leading-none">
+              Play-In Tournament
+            </div>
+            <div className="space-y-4">
+              {playInSeries.map(s => {
+                let label = `PLAYIN GAME`;
+                if (s.id.includes('7v8')) label = `${s.conference} 7v8 (G_A)`;
+                else if (s.id.includes('9v10')) label = `${s.conference} 9v10 (G_B)`;
+                else if (s.id.includes('final')) label = `${s.conference} Game C`;
+                return (
+                  <MatchupNode 
+                    key={s.id} 
+                    series={s} 
+                    label={label} 
+                    state={state} 
+                    isActive={s.id === userInvolvedActiveSeries?.id}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {selectedRound === 1 && (
+          <div className="space-y-6">
+            <div className="text-center font-black text-xs text-blue-500 uppercase tracking-widest border-b border-white/5 pb-2.5 mb-4 leading-none">
+              Quarterfinals (R1)
+            </div>
+            {round1Series.length === 0 ? (
+              <div className="text-zinc-650 text-xs italic text-center py-20 uppercase font-bold tracking-wider leading-none">
+                Play-In active
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <p className="text-[10px] font-extrabold text-blue-500/70 uppercase tracking-widest text-center border-b border-white/5 pb-1">East Conference</p>
+                  {round1Series.filter(s => s.conference === 'East').map((s, idx) => (
+                    <MatchupNode 
+                      key={s.id} 
+                      series={s} 
+                      label={`East QF Series ${idx+1}`} 
+                      state={state} 
+                      isActive={s.id === userInvolvedActiveSeries?.id}
+                    />
+                  ))}
+                </div>
+                <div className="space-y-3">
+                  <p className="text-[10px] font-extrabold text-red-500/70 uppercase tracking-widest text-center border-b border-white/5 pb-1">West Conference</p>
+                  {round1Series.filter(s => s.conference === 'West').map((s, idx) => (
+                    <MatchupNode 
+                      key={s.id} 
+                      series={s} 
+                      label={`West QF Series ${idx+1}`} 
+                      state={state} 
+                      isActive={s.id === userInvolvedActiveSeries?.id}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {selectedRound === 2 && (
+          <div className="space-y-6">
+            <div className="text-center font-black text-xs text-indigo-400 uppercase tracking-widest border-b border-white/5 pb-2.5 mb-4 leading-none">
+              Conference Semifinals (R2)
+            </div>
+            {round2Series.length === 0 ? (
+              <div className="text-zinc-650 text-xs italic text-center py-20 uppercase font-bold tracking-wider leading-none">
+                R1 series active
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <p className="text-[10px] font-extrabold text-indigo-400/80 uppercase tracking-widest text-center border-b border-white/5 pb-1">East Semis</p>
+                  {round2Series.filter(s => s.conference === 'East').map((s, idx) => (
+                    <MatchupNode 
+                      key={s.id} 
+                      series={s} 
+                      label={`East Semis ${idx+1}`} 
+                      state={state} 
+                      isActive={s.id === userInvolvedActiveSeries?.id}
+                    />
+                  ))}
+                </div>
+                <div className="space-y-3">
+                  <p className="text-[10px] font-extrabold text-red-400/80 uppercase tracking-widest text-center border-b border-white/5 pb-1">West Semis</p>
+                  {round2Series.filter(s => s.conference === 'West').map((s, idx) => (
+                    <MatchupNode 
+                      key={s.id} 
+                      series={s} 
+                      label={`West Semis ${idx+1}`} 
+                      state={state} 
+                      isActive={s.id === userInvolvedActiveSeries?.id}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {selectedRound === 3 && (
+          <div className="space-y-6">
+            <div className="text-center font-black text-xs text-rose-500 uppercase tracking-widest border-b border-white/5 pb-2.5 mb-4 leading-none">
+              Conference Finals (R3)
+            </div>
+            {round3Series.length === 0 ? (
+              <div className="text-zinc-650 text-xs italic text-center py-20 uppercase font-bold tracking-wider leading-none">
+                R2 series active
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {round3Series.map(s => (
+                  <MatchupNode 
+                    key={s.id} 
+                    series={s} 
+                    label={s.conference === 'East' ? 'East Conference Finals' : 'West Conference Finals'} 
+                    state={state} 
+                    isActive={s.id === userInvolvedActiveSeries?.id}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {selectedRound === 4 && (
+          <div className="space-y-6 flex flex-col items-center">
+            <div className="text-center font-black text-xs text-amber-500 uppercase tracking-widest border-b border-white/5 pb-2.5 mb-4 leading-none w-full">
+              NBA Finals (R4)
+            </div>
+            {finalsSeries.length === 0 ? (
+              <div className="text-zinc-650 text-xs italic text-center py-20 uppercase font-bold tracking-wider leading-none flex flex-col items-center">
+                <Trophy className="opacity-10 mb-2" size={32} />
+                Finals pending
+              </div>
+            ) : (
+              <div className="flex flex-col justify-center items-center gap-6 w-full">
+                <Trophy className="text-amber-500 animate-pulse drop-shadow-[0_0_15px_rgba(245,158,11,0.3)]" size={40} />
+                
+                {finalsSeries.map(s => (
+                  <MatchupNode 
+                    key={s.id} 
+                    series={s} 
+                    label="NBA Grand Finals" 
+                    state={state} 
+                    isActive={s.id === userInvolvedActiveSeries?.id}
+                  />
+                ))}
+
+                {state.championId && (
+                  <motion.div 
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 100 }}
+                    className="bg-gradient-to-r from-amber-500 to-yellow-400 text-black px-5 py-3.5 rounded-2xl text-center shadow-xl w-full"
+                  >
+                    <p className="text-[9px] font-extrabold uppercase tracking-widest text-amber-950">
+                      NBA Champion
+                    </p>
+                    <p className="text-sm font-black uppercase italic tracking-wide leading-none mt-1 text-[#221802]">
+                      {state.teams[state.championId]?.name || 'Champion Team'}
+                    </p>
+                  </motion.div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* 2. Desktop Viewport (Classic beautiful side-by-side wide-canvas design) */}
       <div 
-        className="flex-1 overflow-x-auto overflow-y-auto px-4 md:px-8 py-8 flex gap-8 items-stretch select-none scroll-smooth min-h-[500px]"
+        className="hidden md:flex flex-1 overflow-x-auto overflow-y-auto px-6 md:px-8 py-8 gap-8 items-stretch select-none scroll-smooth min-h-[500px]"
         style={{ 
           willChange: 'transform', 
           transform: 'translate3d(0,0,0)',
@@ -157,7 +367,7 @@ export const BracketCanvas: React.FC<BracketCanvasProps> = ({ state, onSimulateR
             Play-In Tournament
           </div>
           {playInSeries.length === 0 ? (
-            <div className="text-zinc-600 text-xs italic text-center py-20 uppercase font-bold tracking-wider leading-none">
+            <div className="text-zinc-660 text-xs italic text-center py-20 uppercase font-bold tracking-wider leading-none">
               Playoffs started
             </div>
           ) : (
@@ -309,10 +519,10 @@ export const BracketCanvas: React.FC<BracketCanvasProps> = ({ state, onSimulateR
 
               {state.championId && (
                 <motion.div 
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: "spring", stiffness: 100 }}
-                  className="bg-gradient-to-r from-amber-500 to-yellow-400 text-black px-5 py-3.5 rounded-2xl text-center shadow-xl w-full"
+                   initial={{ scale: 0.9, opacity: 0 }}
+                   animate={{ scale: 1, opacity: 1 }}
+                   transition={{ type: "spring", stiffness: 100 }}
+                   className="bg-gradient-to-r from-amber-500 to-yellow-400 text-black px-5 py-3.5 rounded-2xl text-center shadow-xl w-full"
                 >
                   <p className="text-[9px] font-extrabold uppercase tracking-widest text-amber-950">
                     NBA Champion

@@ -682,14 +682,14 @@ const SbcView: React.FC = () => {
               <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-black/40">
                 {filteredDuplicates.length > 0 ? (
                   <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
-                    {filteredDuplicates.map(card => {
+                    {filteredDuplicates.map((card, index) => {
                       const impact = getLiveOVRDiff(card);
                       const isWinning = impact ? impact.diff > 0 : false;
                       const isLosing = impact ? impact.diff < 0 : false;
 
                       return (
                         <div 
-                          key={card.id}
+                          key={`${card.id}-${index}`}
                           onClick={() => handleSelectCard(card)}
                           className="relative cursor-pointer group flex flex-col items-center w-full"
                         >

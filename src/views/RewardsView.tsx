@@ -543,7 +543,7 @@ export default function RewardsView() {
               style={{ height: `${progressPercentSegment}%` }}
             />
 
-            {filteredRewards.map((reward) => {
+            {filteredRewards.map((reward, index) => {
               const isFreeClaimed = claimedAchievements.includes(`bp_free_${reward.level}`);
               const isFreeUnlockedAtLevel = battlePassLevel >= reward.level;
               const isFreeUnlocked = !!user && isFreeUnlockedAtLevel;
@@ -573,7 +573,7 @@ export default function RewardsView() {
                 : 'text-zinc-500';
 
               return (
-                <div key={reward.level} className="relative z-10 flex items-center justify-between gap-1.5 sm:gap-2.5 min-h-[60px] sm:min-h-[68px]">
+                <div key={`reward-level-${reward.level}-${index}`} className="relative z-10 flex items-center justify-between gap-1.5 sm:gap-2.5 min-h-[60px] sm:min-h-[68px]">
                   
                   {/* LEFT SIDE: FREE TRACK REWARD */}
                   <div className="flex-1 flex justify-end">
@@ -722,7 +722,7 @@ export default function RewardsView() {
             {claimableAchievements.length > 0 ? (
               claimableAchievements.slice(0, 3).map((ach, idx) => (
                 <motion.div
-                  key={ach.id}
+                  key={`${ach.id}-${idx}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.1 }}

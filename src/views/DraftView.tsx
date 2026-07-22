@@ -1449,6 +1449,7 @@ const DraftView: React.FC = () => {
   const [boxScore, setBoxScore] = useState<PlayerStats[]>([]);
   const [showBoxScore, setShowBoxScore] = useState(false);
   const [activeBoxScoreTeam, setActiveBoxScoreTeam] = useState<'USER' | 'OPP'>('USER');
+  const [boxScoreTab, setBoxScoreTab] = useState<'players' | 'comparison'>('players');
 
   // Rewards State
   const [showTournamentSummary, setShowTournamentSummary] = useState(false);
@@ -1548,8 +1549,8 @@ const DraftView: React.FC = () => {
     } else if (method === 'ad') {
       if (!isPremium) {
         setIsWatchingAd(true);
-        // Simulate ad watch time
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        // Simulate ad watch time - shortened for much better game fluidity
+        await new Promise(resolve => setTimeout(resolve, 1200));
         setIsWatchingAd(false);
       }
     }
@@ -2195,8 +2196,8 @@ const DraftView: React.FC = () => {
             </div>
           </div>
           <div className="text-center">
-            <p className="text-white font-black uppercase tracking-[0.3em] text-sm animate-pulse">SIMULATING SPONSOR COVERAGE...</p>
-            <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-2">Durable synchronization active</p>
+            <p className="text-white font-black uppercase tracking-[0.3em] text-sm animate-pulse">WATCHING SPONSOR VIDEO...</p>
+            <p className="text-[9px] font-bold text-amber-500 uppercase tracking-widest mt-2">REDEEMING FREE DRAFT ENTRY...</p>
           </div>
           <div className="mt-8 scale-75 md:scale-90 px-4">
              <StaticAd position="footer" />
@@ -2550,44 +2551,34 @@ const DraftView: React.FC = () => {
           {/* Unified Bottom Sheet for Bench & Reserves (Does not compress court!) */}
           <AnimatePresence>
             {isBenchOpen ? (
-              <motion.div
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-                className="absolute bottom-0 inset-x-0 bg-zinc-950/98 backdrop-blur-xl border-t border-zinc-900/60 rounded-t-xl shadow-[0_-15px_40px_rgba(0,0,0,0.9)] z-50 flex flex-col px-3 pt-1 pb-2 w-full h-[195px] sm:h-[245px] md:h-[305px] overflow-hidden"
-              >
-                {/* Pull handle indicator */}
-                <div 
-                  className="w-8 h-0.5 bg-zinc-800 hover:bg-zinc-700 rounded-full mx-auto mb-1 cursor-pointer transition-colors shrink-0" 
-                  onClick={() => setIsBenchOpen(false)} 
+              <>
+                {/* Backdrop Click to close bench on outside tap */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setIsBenchOpen(false)}
+                  className="absolute inset-0 bg-black/45 backdrop-blur-sm z-40 cursor-pointer"
                 />
-                
-                {/* Header inside drawer - Extremely Minimalist Row */}
-                <div className="flex items-center justify-between mb-0.5 shrink-0 px-1 h-3.5 sm:h-4">
-                  <div className="flex items-center gap-1.5">
+                <motion.div
+                  initial={{ y: '100%' }}
+                  animate={{ y: 0 }}
+                  exit={{ y: '100%' }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+                  className="absolute bottom-0 inset-x-0 bg-zinc-950/98 backdrop-blur-xl border-t border-zinc-900/60 rounded-t-xl shadow-[0_-15px_40px_rgba(0,0,0,0.9)] z-50 flex flex-col px-3 pt-1 pb-2 w-full h-[195px] sm:h-[245px] md:h-[305px] overflow-hidden"
+                >
+                  {/* Pull handle indicator */}
+                  <div 
+                    className="w-8 h-0.5 bg-zinc-800 hover:bg-zinc-700 rounded-full mx-auto mb-1 cursor-pointer transition-colors shrink-0" 
+                    onClick={() => setIsBenchOpen(false)} 
+                  />
+                  
+                  {/* Header inside drawer - Extremely Minimalist Row Centered */}
+                  <div className="flex items-center justify-center mb-0.5 shrink-0 px-1 h-3.5 sm:h-4">
                     <span className="text-[5px] sm:text-[5.5px] font-black uppercase tracking-widest text-zinc-600">BENCH ({bench.filter(b => b.card).length}/7)</span>
                   </div>
-                  
-                  <div className="flex items-center gap-1">
-                    {phase === 'review' && (
-                      <button
-                        onClick={() => setPhase('summary')}
-                        className="px-1 bg-amber-500 hover:bg-amber-400 text-black rounded-[1.5px] text-[4px] sm:text-[4.5px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-sm leading-none flex items-center justify-center h-2.5 sm:h-3"
-                      >
-                        FINISH
-                      </button>
-                    )}
-                    <button
-                      onClick={() => setIsBenchOpen(false)}
-                      className="px-1 bg-zinc-900 border border-zinc-800/60 hover:bg-zinc-800 text-zinc-500 hover:text-zinc-350 rounded-[1.5px] text-[4px] sm:text-[4.5px] font-black uppercase tracking-widest transition-colors leading-none flex items-center justify-center h-2.5 sm:h-3"
-                    >
-                      CLOSE
-                    </button>
-                  </div>
-                </div>
 
-                {/* Horizontal Carousel Track containing all 7 Bench/Reserve slots */}
+                  {/* Horizontal Carousel Track containing all 7 Bench/Reserve slots */}
                 <div className="flex-1 overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
                   <div className="flex items-center gap-3 sm:gap-4 h-full py-0.5 px-0.5 min-w-max">
                     {bench.map((slot, index) => {
@@ -2618,6 +2609,7 @@ const DraftView: React.FC = () => {
                   </div>
                 </div>
               </motion.div>
+              </>
             ) : (
               <div className="absolute bottom-0 inset-x-0 z-40 flex justify-center">
                 <motion.button
@@ -2678,7 +2670,7 @@ const DraftView: React.FC = () => {
 
               return (
                 <motion.div
-                  key={card.id + idx}
+                  key={`${card.id}-${idx}`}
                   initial={{ opacity: 0, y: 100, rotateY: 90, scale: 0.5 }}
                   animate={{ 
                     opacity: shouldFade ? 0.1 : 1, 
@@ -2757,171 +2749,312 @@ const DraftView: React.FC = () => {
   );
 
   const renderBoxScore = () => {
-    const isUserTeam1 = activeMatchId ? bracket.find(m => m.id === activeMatchId)?.team1 === 'USER' : true;
+    const match = activeMatchId ? bracket.find(m => m.id === activeMatchId) : null;
+    const isUserTeam1 = match ? match.team1 === 'USER' : true;
+    const oppTeam = match ? (isUserTeam1 ? (match.team2 as GhostTeam) : (match.team1 as GhostTeam)) : null;
+    const oppTeamName = oppTeam ? oppTeam.name : 'Opponent';
+
+    const userStats = boxScore.filter(p => p.team === 'USER');
+    const oppStats = boxScore.filter(p => p.team === 'OPP');
+
+    const uPts = userStats.reduce((sum, p) => sum + p.pts, 0);
+    const uReb = userStats.reduce((sum, p) => sum + p.reb, 0);
+    const uAst = userStats.reduce((sum, p) => sum + p.ast, 0);
+    const uStl = userStats.reduce((sum, p) => sum + p.stl, 0);
+    const uBlk = userStats.reduce((sum, p) => sum + p.blk, 0);
+    const uTov = userStats.reduce((sum, p) => sum + p.tov, 0);
+    const uFgm = userStats.reduce((sum, p) => sum + p.fgm, 0);
+    const uFga = userStats.reduce((sum, p) => sum + p.fga, 0);
+    const uFgPct = uFga > 0 ? Math.round((uFgm / uFga) * 100) : 0;
+
+    const oPts = oppStats.reduce((sum, p) => sum + p.pts, 0);
+    const oReb = oppStats.reduce((sum, p) => sum + p.reb, 0);
+    const oAst = oppStats.reduce((sum, p) => sum + p.ast, 0);
+    const oStl = oppStats.reduce((sum, p) => sum + p.stl, 0);
+    const oBlk = oppStats.reduce((sum, p) => sum + p.blk, 0);
+    const oTov = oppStats.reduce((sum, p) => sum + p.tov, 0);
+    const oFgm = oppStats.reduce((sum, p) => sum + p.fgm, 0);
+    const oFga = oppStats.reduce((sum, p) => sum + p.fga, 0);
+    const oFgPct = oFga > 0 ? Math.round((oFgm / oFga) * 100) : 0;
+
     const filteredBoxScore = boxScore.filter(p => p.team === activeBoxScoreTeam);
-    
-    // Calculate Team Totals
-    const totalPts = filteredBoxScore.reduce((sum, p) => sum + p.pts, 0);
-    const totalReb = filteredBoxScore.reduce((sum, p) => sum + p.reb, 0);
-    const totalAst = filteredBoxScore.reduce((sum, p) => sum + p.ast, 0);
-    const totalStl = filteredBoxScore.reduce((sum, p) => sum + p.stl, 0);
-    const totalBlk = filteredBoxScore.reduce((sum, p) => sum + p.blk, 0);
-    const totalTov = filteredBoxScore.reduce((sum, p) => sum + p.tov, 0);
-    const totalFgm = filteredBoxScore.reduce((sum, p) => sum + p.fgm, 0);
-    const totalFga = filteredBoxScore.reduce((sum, p) => sum + p.fga, 0);
-    const teamFgPct = totalFga > 0 ? Math.round((totalFgm / totalFga) * 100) : 0;
+
+    const renderStatRow = (label: string, userVal: number, oppVal: number, isPct: boolean = false) => {
+      const total = userVal + oppVal;
+      const userPercent = total > 0 ? (userVal / total) * 100 : 50;
+      const oppPercent = total > 0 ? (oppVal / total) * 100 : 50;
+      
+      const userBetter = userVal > oppVal;
+      const oppBetter = oppVal > userVal;
+      
+      return (
+        <div className="space-y-1.5 py-3 border-b border-zinc-900/60 last:border-b-0" key={label}>
+          <div className="flex justify-between items-center text-xs sm:text-sm font-bold tracking-tight">
+            <span className={`tabular-nums ${userBetter ? 'text-amber-500 font-black' : 'text-zinc-400'}`}>
+              {userVal}{isPct ? '%' : ''}
+            </span>
+            <span className="text-[10px] sm:text-xs font-semibold text-zinc-500 uppercase tracking-widest">{label}</span>
+            <span className={`tabular-nums ${oppBetter ? 'text-white font-black' : 'text-zinc-400'}`}>
+              {oppVal}{isPct ? '%' : ''}
+            </span>
+          </div>
+          <div className="flex h-1.5 w-full bg-zinc-900/50 rounded-full overflow-hidden">
+            {/* User Bar */}
+            <div className="w-1/2 flex justify-end pr-[1px]">
+              <div 
+                style={{ width: `${userPercent}%` }} 
+                className={`h-full rounded-l-full transition-all duration-700 ${
+                  userBetter ? 'bg-amber-500' : 'bg-zinc-700'
+                }`}
+              />
+            </div>
+            {/* Opponent Bar */}
+            <div className="w-1/2 flex justify-start pl-[1px]">
+              <div 
+                style={{ width: `${oppPercent}%` }} 
+                className={`h-full rounded-r-full transition-all duration-700 ${
+                  oppBetter ? 'bg-white' : 'bg-zinc-700'
+                }`}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    };
 
     return (
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9500] bg-zinc-950 flex flex-col p-4 sm:p-6 md:p-8 overflow-hidden select-none"
+        className="fixed inset-0 z-[9500] bg-zinc-950 flex flex-col overflow-hidden select-none"
       >
-        <div className="max-w-4xl mx-auto w-full flex flex-col h-full space-y-4 sm:space-y-6">
-          {/* Header Block */}
-          <div className="text-center space-y-1">
-            <h2 className="text-2xl sm:text-3xl font-black italic uppercase tracking-tighter text-white">Box Score</h2>
-            <p className="text-[8px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Game Stats & Individual Box Score</p>
+        {/* Navigation / Header bar */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-900 shrink-0 bg-zinc-950">
+          <div className="flex items-center gap-2">
+            <Trophy size={16} className="text-amber-500" />
+            <span className="text-[11px] font-black uppercase tracking-widest text-zinc-400">Match Review</span>
           </div>
-
-          {/* Team Switcher Tabs */}
-          <div className="flex items-center justify-center gap-1.5 max-w-sm mx-auto w-full bg-zinc-900/40 p-1 rounded-2xl border border-zinc-850/60 backdrop-blur-sm shrink-0">
-            <button
-              onClick={() => setActiveBoxScoreTeam('USER')}
-              className={`flex-1 py-2.5 px-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${activeBoxScoreTeam === 'USER' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-zinc-400 hover:text-white hover:bg-zinc-900/30'}`}
-            >
-              <span>Your Team</span>
-              <span className={`text-[8px] font-black px-1.5 py-0.5 rounded ${activeBoxScoreTeam === 'USER' ? 'bg-black/10 text-black' : 'bg-zinc-800 text-zinc-400'}`}>
-                {matchResult ? (isUserTeam1 ? matchResult.score1 : matchResult.score2) : ''}
-              </span>
-            </button>
-            <button
-              onClick={() => setActiveBoxScoreTeam('OPP')}
-              className={`flex-1 py-2.5 px-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${activeBoxScoreTeam === 'OPP' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-zinc-400 hover:text-white hover:bg-zinc-900/30'}`}
-            >
-              <span>Opponent</span>
-              <span className={`text-[8px] font-black px-1.5 py-0.5 rounded ${activeBoxScoreTeam === 'OPP' ? 'bg-black/10 text-black' : 'bg-zinc-800 text-zinc-400'}`}>
-                {matchResult ? (isUserTeam1 ? matchResult.score2 : matchResult.score1) : ''}
-              </span>
-            </button>
-          </div>
-
-          {/* Team Stats Summary Card */}
-          <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 sm:gap-3 p-3 sm:p-4 bg-zinc-900/20 border border-zinc-850/50 rounded-2xl shrink-0">
-            <div className="text-center p-1 sm:p-2 bg-zinc-950/45 rounded-xl border border-zinc-850/20">
-              <p className="text-lg sm:text-2xl font-black italic text-amber-500 leading-none">{totalPts}</p>
-              <p className="text-[6.5px] sm:text-[8px] font-bold text-zinc-500 uppercase tracking-wider mt-1">Points</p>
-            </div>
-            <div className="text-center p-1 sm:p-2 bg-zinc-950/45 rounded-xl border border-zinc-850/20">
-              <p className="text-lg sm:text-2xl font-black italic text-white leading-none">{totalReb}</p>
-              <p className="text-[6.5px] sm:text-[8px] font-bold text-zinc-500 uppercase tracking-wider mt-1">Rebounds</p>
-            </div>
-            <div className="text-center p-1 sm:p-2 bg-zinc-950/45 rounded-xl border border-zinc-850/20">
-              <p className="text-lg sm:text-2xl font-black italic text-white leading-none">{totalAst}</p>
-              <p className="text-[6.5px] sm:text-[8px] font-bold text-zinc-500 uppercase tracking-wider mt-1">Assists</p>
-            </div>
-            <div className="text-center p-1 sm:p-2 bg-zinc-950/45 rounded-xl border border-zinc-850/20">
-              <p className="text-lg sm:text-2xl font-black italic text-zinc-400 leading-none">{teamFgPct}%</p>
-              <p className="text-[6.5px] sm:text-[8px] font-bold text-zinc-500 uppercase tracking-wider mt-1">FG%</p>
-            </div>
-            <div className="text-center p-1 sm:p-2 bg-zinc-950/45 rounded-xl border border-zinc-850/20">
-              <p className="text-lg sm:text-2xl font-black italic text-zinc-400 leading-none">{totalStl}</p>
-              <p className="text-[6.5px] sm:text-[8px] font-bold text-zinc-500 uppercase tracking-wider mt-1">Steals</p>
-            </div>
-            <div className="text-center p-1 sm:p-2 bg-zinc-950/45 rounded-xl border border-zinc-850/20">
-              <p className="text-lg sm:text-2xl font-black italic text-zinc-400 leading-none">{totalBlk}</p>
-              <p className="text-[6.5px] sm:text-[8px] font-bold text-zinc-500 uppercase tracking-wider mt-1">Blocks</p>
-            </div>
-            <div className="text-center p-1 sm:p-2 bg-zinc-950/45 rounded-xl border border-zinc-850/20 col-span-4 sm:col-span-1">
-              <p className="text-lg sm:text-2xl font-black italic text-zinc-500 leading-none">{totalTov}</p>
-              <p className="text-[6.5px] sm:text-[8px] font-bold text-zinc-500 uppercase tracking-wider mt-1">Turnovers</p>
-            </div>
-          </div>
-
-          {/* Main Table Container */}
-          <div className="flex-1 overflow-hidden flex flex-col border border-zinc-850 rounded-2xl bg-zinc-900/10">
-            <div className="flex-1 overflow-auto">
-              <table className="w-full text-left border-collapse min-w-[620px] relative table-auto">
-                <thead className="sticky top-0 z-20 bg-zinc-950 border-b border-zinc-850">
-                  <tr className="text-[8px] sm:text-[9px] font-black text-zinc-500 uppercase tracking-widest">
-                    <th className="p-3 sm:p-4 pl-4 sm:pl-6 sticky left-0 bg-zinc-950 z-10">Player</th>
-                    <th className="p-3 sm:p-4 text-center">POS</th>
-                    <th className="p-3 sm:p-4 text-center">MIN</th>
-                    <th className="p-3 sm:p-4 text-center">FG</th>
-                    <th className="p-3 sm:p-4 text-center">PTS</th>
-                    <th className="p-3 sm:p-4 text-center">REB</th>
-                    <th className="p-3 sm:p-4 text-center">AST</th>
-                    <th className="p-3 sm:p-4 text-center">STL</th>
-                    <th className="p-3 sm:p-4 text-center">BLK</th>
-                    <th className="p-3 sm:p-4 text-center pr-4 sm:pr-6">TO</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-850/40">
-                  {filteredBoxScore.map((player) => (
-                    <tr key={player.cardId} className="hover:bg-zinc-900/30 transition-colors group">
-                      <td className="p-2.5 sm:p-3.5 pl-4 sm:pl-6 sticky left-0 bg-zinc-950/90 backdrop-blur-md z-10 border-r border-zinc-850/10">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-9 rounded bg-zinc-900 border border-zinc-800 shrink-0 overflow-hidden flex items-center justify-center relative">
-                            {player.imageUrl ? (
-                              <img src={player.imageUrl} alt={player.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                            ) : (
-                              <span className="text-[10px] font-black text-zinc-700">{player.name[0]}</span>
-                            )}
-                            {player.isStarter && (
-                              <div className="absolute top-0 right-0 w-2 h-2 bg-amber-500 rounded-bl-sm" title="Starter" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="text-xs font-black uppercase italic text-white group-hover:text-amber-500 transition-colors flex items-center gap-1.5">
-                              <span className="truncate max-w-[120px] sm:max-w-none">{player.name}</span>
-                              {!player.isStarter && <span className="text-[6px] font-black tracking-widest text-zinc-500 bg-zinc-900/80 px-1 py-0.2 rounded border border-white/5 shrink-0">BENCH</span>}
-                            </p>
-                            <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider">{player.position} • {player.ovr} OVR</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-2.5 sm:p-3.5 text-center">
-                        <span className="text-[9px] font-black text-zinc-400">{player.position}</span>
-                      </td>
-                      <td className="p-2.5 sm:p-3.5 text-center">
-                        <span className="text-[11px] font-bold text-zinc-400 tabular-nums">{player.min}</span>
-                      </td>
-                      <td className="p-2.5 sm:p-3.5 text-center">
-                        <span className="text-[11px] font-bold text-zinc-400 tabular-nums">{player.fgm}-{player.fga}</span>
-                      </td>
-                      <td className="p-2.5 sm:p-3.5 text-center">
-                        <span className="text-xs sm:text-sm font-black italic text-amber-500 tabular-nums">{player.pts}</span>
-                      </td>
-                      <td className="p-2.5 sm:p-3.5 text-center">
-                        <span className="text-[11px] font-black italic text-zinc-300 tabular-nums">{player.reb}</span>
-                      </td>
-                      <td className="p-2.5 sm:p-3.5 text-center">
-                        <span className="text-[11px] font-black italic text-zinc-300 tabular-nums">{player.ast}</span>
-                      </td>
-                      <td className="p-2.5 sm:p-3.5 text-center">
-                        <span className="text-[11px] font-bold text-zinc-400 tabular-nums">{player.stl}</span>
-                      </td>
-                      <td className="p-2.5 sm:p-3.5 text-center">
-                        <span className="text-[11px] font-bold text-zinc-400 tabular-nums">{player.blk}</span>
-                      </td>
-                      <td className="p-2.5 sm:p-3.5 text-center pr-4 sm:pr-6">
-                        <span className="text-[11px] font-bold text-zinc-500 tabular-nums">{player.tov}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
           <button
-            onClick={advanceRound}
-            className="w-full bg-amber-500 text-black py-4 sm:py-5 rounded-2xl sm:rounded-3xl font-black uppercase tracking-[0.2em] text-xs sm:text-sm flex items-center justify-center gap-3 hover:bg-amber-400 transition-all shadow-[0_12px_30px_rgba(245,158,11,0.2)] active:scale-95 shrink-0"
+            onClick={() => setShowBoxScore(false)}
+            className="p-1.5 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 active:scale-95 transition-all"
+            title="Back to Bracket"
           >
-            <span>Continue Tournament</span>
-            <ArrowRight size={16} />
+            <X size={16} />
           </button>
+        </div>
+
+        {/* Scrollable Container */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6">
+          <div className="max-w-4xl mx-auto w-full space-y-6">
+            
+            {/* SofaScore-Style Scoreboard Widget */}
+            <div className="bg-gradient-to-b from-zinc-900/40 to-zinc-950/20 border border-zinc-850/60 rounded-3xl p-4 md:p-6 shadow-2xl relative overflow-hidden backdrop-blur-sm">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full filter blur-3xl pointer-events-none" />
+              <div className="grid grid-cols-3 items-center">
+                
+                {/* Left Side: User Team */}
+                <div className="flex flex-col items-center text-center space-y-2">
+                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-amber-500/10 border-2 border-amber-500 flex items-center justify-center text-amber-500 font-black text-xs md:text-sm shadow-[0_0_20px_rgba(245,158,11,0.15)] shrink-0">
+                    YOU
+                  </div>
+                  <span className="text-[10px] md:text-xs font-black uppercase tracking-wider text-white max-w-[90px] md:max-w-[120px] truncate">
+                    Your Team
+                  </span>
+                </div>
+
+                {/* Middle Side: Score & FT Status */}
+                <div className="flex flex-col items-center justify-center text-center space-y-1">
+                  <div className="flex items-center gap-2.5 sm:gap-4">
+                    <span className={`text-3xl md:text-4xl font-black italic tracking-tighter tabular-nums ${uPts >= oPts ? 'text-amber-500' : 'text-zinc-500'}`}>
+                      {matchResult ? (isUserTeam1 ? matchResult.score1 : matchResult.score2) : 0}
+                    </span>
+                    <span className="text-zinc-600 font-black text-sm md:text-lg">-</span>
+                    <span className={`text-3xl md:text-4xl font-black italic tracking-tighter tabular-nums ${oPts >= uPts ? 'text-white' : 'text-zinc-500'}`}>
+                      {matchResult ? (isUserTeam1 ? matchResult.score2 : matchResult.score1) : 0}
+                    </span>
+                  </div>
+                  <span className="bg-zinc-800/80 border border-zinc-700/50 text-zinc-300 text-[7.5px] md:text-[8px] font-black tracking-widest px-2.5 py-0.5 rounded-full uppercase">
+                    Full Time
+                  </span>
+                </div>
+
+                {/* Right Side: Opponent Team */}
+                <div className="flex flex-col items-center text-center space-y-2">
+                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-zinc-900 border-2 border-zinc-800 flex items-center justify-center text-zinc-400 font-black text-xs md:text-sm shrink-0">
+                    {getTeamAbbr(oppTeamName)}
+                  </div>
+                  <span className="text-[10px] md:text-xs font-black uppercase tracking-wider text-zinc-300 max-w-[90px] md:max-w-[120px] truncate">
+                    {oppTeamName}
+                  </span>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Sub-Header Tabs Picker (SofaScore-Style Tabs) */}
+            <div className="flex bg-zinc-900/20 p-1 rounded-2xl border border-zinc-850/40 backdrop-blur-sm">
+              <button
+                onClick={() => setBoxScoreTab('players')}
+                className={`flex-1 py-2.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
+                  boxScoreTab === 'players' 
+                    ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/10 font-extrabold' 
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                <Users size={12} />
+                <span>Player Boxscore</span>
+              </button>
+              <button
+                onClick={() => setBoxScoreTab('comparison')}
+                className={`flex-1 py-2.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
+                  boxScoreTab === 'comparison' 
+                    ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/10 font-extrabold' 
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                <TrendingUp size={12} />
+                <span>Team Stats</span>
+              </button>
+            </div>
+
+            {boxScoreTab === 'players' ? (
+              <div className="space-y-4">
+                {/* Team Switcher Tabs (For player table) */}
+                <div className="flex items-center justify-center gap-1.5 max-w-sm mx-auto w-full bg-zinc-900/40 p-1 rounded-2xl border border-zinc-850/30 backdrop-blur-sm shrink-0">
+                  <button
+                    onClick={() => setActiveBoxScoreTeam('USER')}
+                    className={`flex-1 py-2 px-3 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${activeBoxScoreTeam === 'USER' ? 'bg-zinc-800 text-white border border-zinc-700/50' : 'text-zinc-400 hover:text-white'}`}
+                  >
+                    <span>Your Team</span>
+                    <span className={`text-[8px] font-black px-1.5 py-0.5 rounded ${activeBoxScoreTeam === 'USER' ? 'bg-amber-500 text-black' : 'bg-zinc-900 text-zinc-500'}`}>
+                      {matchResult ? (isUserTeam1 ? matchResult.score1 : matchResult.score2) : 0}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setActiveBoxScoreTeam('OPP')}
+                    className={`flex-1 py-2 px-3 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${activeBoxScoreTeam === 'OPP' ? 'bg-zinc-800 text-white border border-zinc-700/50' : 'text-zinc-400 hover:text-white'}`}
+                  >
+                    <span>{oppTeamName}</span>
+                    <span className={`text-[8px] font-black px-1.5 py-0.5 rounded ${activeBoxScoreTeam === 'OPP' ? 'bg-amber-500 text-black' : 'bg-zinc-900 text-zinc-500'}`}>
+                      {matchResult ? (isUserTeam1 ? matchResult.score2 : matchResult.score1) : 0}
+                    </span>
+                  </button>
+                </div>
+
+                {/* Main Table Container */}
+                <div className="overflow-hidden flex flex-col border border-zinc-900 rounded-3xl bg-zinc-900/10 backdrop-blur-md relative">
+                  
+                  {/* Horiz Swipe Assist Indicator for Mobile */}
+                  <div className="block sm:hidden text-center py-1.5 bg-amber-500/5 border-b border-zinc-900">
+                    <span className="text-[8px] font-bold text-amber-500/70 uppercase tracking-[0.2em] animate-pulse">
+                      ← Scroll left-right to inspect stats →
+                    </span>
+                  </div>
+
+                  <div className="overflow-x-auto scrollbar-none" style={{ WebkitOverflowScrolling: 'touch' }}>
+                    <table className="w-full text-left border-collapse min-w-[460px] relative table-auto">
+                      <thead className="sticky top-0 z-20 bg-zinc-950 border-b border-zinc-900/80">
+                        <tr className="text-[8px] sm:text-[9px] font-black text-zinc-500 uppercase tracking-widest">
+                          <th className="p-3 pl-4 sticky left-0 bg-zinc-950 z-30 min-w-[120px] border-r border-zinc-900/60">Player</th>
+                          <th className="p-3 text-center min-w-[36px] text-amber-500 font-extrabold">PTS</th>
+                          <th className="p-3 text-center min-w-[36px] text-zinc-300">REB</th>
+                          <th className="p-3 text-center min-w-[36px] text-zinc-300">AST</th>
+                          <th className="p-3 text-center min-w-[36px]">STL</th>
+                          <th className="p-3 text-center min-w-[36px]">BLK</th>
+                          <th className="p-3 text-center min-w-[36px]">TO</th>
+                          <th className="p-3 text-center min-w-[42px]">FG</th>
+                          <th className="p-3 text-center min-w-[36px] pr-4">MIN</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-900/40 bg-zinc-950/20">
+                        {filteredBoxScore.map((player, pIdx) => (
+                          <tr key={`${player.cardId || player.name}-${pIdx}`} className="hover:bg-zinc-900/40 transition-colors group">
+                            {/* Sticky Player Column */}
+                            <td className="p-2.5 pl-4 sticky left-0 bg-[#070709] z-10 border-r border-zinc-900 shadow-[4px_0_12px_rgba(0,0,0,0.5)]">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-7 h-9 rounded bg-zinc-900/80 border border-zinc-800 shrink-0 overflow-hidden flex items-center justify-center relative shadow-inner">
+                                  {player.imageUrl ? (
+                                    <img src={player.imageUrl} alt={player.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                  ) : (
+                                    <span className="text-[10px] font-black text-zinc-700">{player.name[0]}</span>
+                                  )}
+                                  {player.isStarter && (
+                                    <div className="absolute top-0 right-0 w-2 h-2 bg-amber-500 rounded-bl-sm" title="Starter" />
+                                  )}
+                                </div>
+                                <div className="min-w-0 text-left">
+                                  <p className="text-[11px] sm:text-xs font-black uppercase italic text-white group-hover:text-amber-500 transition-colors flex items-center gap-1 flex-wrap">
+                                    <span className="truncate max-w-[70px] sm:max-w-none leading-none">{player.name}</span>
+                                    {!player.isStarter && (
+                                      <span className="text-[5.5px] font-black tracking-widest text-zinc-500 bg-zinc-900 border border-white/5 px-1 py-0.2 rounded shrink-0">BENCH</span>
+                                    )}
+                                  </p>
+                                  <p className="text-[7.5px] font-bold text-zinc-500 uppercase tracking-wider mt-0.5 leading-none">
+                                    {player.position} • <span className="text-amber-500/90">{player.ovr} OVR</span>
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+                            {/* Rest of Columns in requested minimalist order */}
+                            <td className="p-2.5 text-center">
+                              <span className="text-xs sm:text-sm font-black italic text-amber-500 tabular-nums">{player.pts}</span>
+                            </td>
+                            <td className="p-2.5 text-center">
+                              <span className="text-[11px] font-black italic text-zinc-300 tabular-nums">{player.reb}</span>
+                            </td>
+                            <td className="p-2.5 text-center">
+                              <span className="text-[11px] font-black italic text-zinc-300 tabular-nums">{player.ast}</span>
+                            </td>
+                            <td className="p-2.5 text-center">
+                              <span className="text-[11px] font-bold text-zinc-400 tabular-nums">{player.stl}</span>
+                            </td>
+                            <td className="p-2.5 text-center">
+                              <span className="text-[11px] font-bold text-zinc-400 tabular-nums">{player.blk}</span>
+                            </td>
+                            <td className="p-2.5 text-center">
+                              <span className="text-[11px] font-bold text-zinc-500 tabular-nums">{player.tov}</span>
+                            </td>
+                            <td className="p-2.5 text-center">
+                              <span className="text-[11px] font-bold text-zinc-400 tabular-nums">{player.fgm}-{player.fga}</span>
+                            </td>
+                            <td className="p-2.5 text-center pr-4">
+                              <span className="text-[11px] font-bold text-zinc-400 tabular-nums">{player.min}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* SofaScore-Style Comparative Progress Bars */
+              <div className="bg-zinc-900/10 border border-zinc-900 rounded-3xl p-5 md:p-8 space-y-4 backdrop-blur-md">
+                <div className="text-center pb-2 border-b border-zinc-900/60">
+                  <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest animate-pulse">
+                    Team Totals comparison
+                  </span>
+                </div>
+                {renderStatRow('Points', uPts, oPts)}
+                {renderStatRow('Field Goal %', uFgPct, oFgPct, true)}
+                {renderStatRow('Rebounds', uReb, oReb)}
+                {renderStatRow('Assists', uAst, oAst)}
+                {renderStatRow('Steals', uStl, oStl)}
+                {renderStatRow('Blocks', uBlk, oBlk)}
+                {renderStatRow('Turnovers', uTov, oTov)}
+              </div>
+            )}
+
+            {/* Bottom Proceed Action Button */}
+            <button
+              onClick={advanceRound}
+              className="w-full bg-amber-500 text-black py-4 sm:py-5 rounded-2xl sm:rounded-3xl font-black uppercase tracking-[0.2em] text-xs sm:text-sm flex items-center justify-center gap-3 hover:bg-amber-400 transition-all shadow-[0_12px_30px_rgba(245,158,11,0.2)] active:scale-95 shrink-0"
+            >
+              <span>Continue Tournament</span>
+              <ArrowRight size={16} />
+            </button>
+          </div>
         </div>
       </motion.div>
     );
@@ -2931,72 +3064,72 @@ const DraftView: React.FC = () => {
     const starterAvg = Math.round(starters.reduce((acc, s) => acc + (s.card?.stats.ovr || 0), 0) / starters.filter(s => s.card).length || 0);
 
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 text-center space-y-6 md:space-y-8 overflow-y-auto max-h-full">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 text-center space-y-4 md:space-y-8 overflow-y-auto max-h-full">
         {/* Header Block with animated crown/sparkle */}
-        <div className="space-y-1.5 md:space-y-2 mt-2 md:mt-0">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full">
-            <Sparkles size={11} className="text-amber-500 animate-pulse" />
-            <span className="text-[8px] font-black uppercase tracking-widest text-amber-500">DRAFT COMPLETE</span>
+        <div className="space-y-1 md:space-y-2 mt-1 md:mt-0">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 md:py-1 bg-amber-500/10 border border-amber-500/20 rounded-full">
+            <Sparkles size={10} className="text-amber-500 animate-pulse" />
+            <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-amber-500">DRAFT COMPLETE</span>
           </div>
-          <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-white leading-none">
+          <h2 className="text-2xl md:text-5xl font-black italic uppercase tracking-tighter text-white leading-none">
             Your Dynasty Is Ready
           </h2>
-          <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-500">
+          <p className="text-[9px] md:text-xs font-bold uppercase tracking-widest text-zinc-500">
             Playoffs await. Prepare to dominate the league
           </p>
         </div>
 
         {/* Tactical Overview Dashboard */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-5 md:gap-10 w-full max-w-2xl px-4 py-2">
+        <div className="flex flex-row md:flex-row items-center justify-center gap-4 md:gap-10 w-full max-w-sm md:max-w-2xl px-1 md:px-4 py-1 md:py-2">
           {/* Circular Glowing OVR Badge */}
           <div className="relative group shrink-0">
             <div className="absolute inset-0 bg-gradient-to-tr from-amber-500 to-amber-300 rounded-full blur-2xl opacity-35 group-hover:opacity-55 transition-opacity duration-700 animate-pulse" />
-            <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full bg-zinc-950 border border-zinc-900 flex flex-col items-center justify-center shadow-2xl">
+            <div className="relative w-20 h-20 md:w-32 md:h-32 rounded-full bg-zinc-950 border border-zinc-900 flex flex-col items-center justify-center shadow-2xl">
               <svg className="absolute inset-0 w-full h-full -rotate-90">
                 <circle
-                  cx="56"
-                  cy="56"
-                  r="50"
+                  cx={isMobile ? "40" : "64"}
+                  cy={isMobile ? "40" : "64"}
+                  r={isMobile ? "34" : "58"}
                   className="stroke-zinc-900 fill-none"
-                  strokeWidth="3.5"
+                  strokeWidth="3"
                   style={!isMobile ? { cx: 64, cy: 64, r: 58 } : undefined}
                 />
                 <circle
-                  cx="56"
-                  cy="56"
-                  r="50"
+                  cx={isMobile ? "40" : "64"}
+                  cy={isMobile ? "40" : "64"}
+                  r={isMobile ? "34" : "58"}
                   className="stroke-amber-500 fill-none"
-                  strokeWidth="3.5"
-                  strokeDasharray={2 * Math.PI * (isMobile ? 50 : 58)}
-                  strokeDashoffset={2 * Math.PI * (isMobile ? 50 : 58) * (1 - teamOVR / 100)}
+                  strokeWidth="3"
+                  strokeDasharray={2 * Math.PI * (isMobile ? 34 : 58)}
+                  strokeDashoffset={2 * Math.PI * (isMobile ? 34 : 58) * (1 - teamOVR / 100)}
                   strokeLinecap="round"
                   style={!isMobile ? { cx: 64, cy: 64, r: 58 } : undefined}
                 />
               </svg>
-              <span className="text-4xl md:text-5xl font-black italic text-white tracking-tighter leading-none">{teamOVR}</span>
-              <span className="text-[7px] md:text-[8px] font-black text-amber-500 uppercase tracking-widest mt-1">TEAM OVR</span>
+              <span className="text-2xl md:text-5xl font-black italic text-white tracking-tighter leading-none">{teamOVR}</span>
+              <span className="text-[6px] md:text-[8px] font-black text-amber-500 uppercase tracking-widest mt-0.5 md:mt-1">TEAM OVR</span>
             </div>
           </div>
 
           {/* Breakdown Stats Cards */}
-          <div className="grid grid-cols-2 gap-3 w-full md:max-w-md">
-            <div className="bg-zinc-950/50 border border-zinc-900/60 rounded-2xl p-3 md:p-4 text-center md:text-left flex flex-col justify-center shadow-lg">
-              <span className="text-[7px] md:text-[8px] font-black text-zinc-500 uppercase tracking-wider">Starters</span>
-              <span className="text-base md:text-lg font-black italic text-white mt-0.5">{starterAvg} OVR</span>
+          <div className="grid grid-cols-2 gap-2.5 flex-1 md:flex-initial md:flex md:flex-col md:gap-3 w-full md:max-w-md">
+            <div className="bg-zinc-950/50 border border-zinc-900/60 rounded-xl md:rounded-2xl p-2.5 md:p-4 text-center md:text-left flex flex-col justify-center shadow-lg">
+              <span className="text-[6px] md:text-[8px] font-black text-zinc-500 uppercase tracking-wider">Starters</span>
+              <span className="text-sm md:text-lg font-black italic text-white mt-0.5">{starterAvg} OVR</span>
             </div>
-            <div className="bg-zinc-950/50 border border-zinc-900/60 rounded-2xl p-3 md:p-4 text-center md:text-left flex flex-col justify-center shadow-lg">
-              <span className="text-[7px] md:text-[8px] font-black text-zinc-500 uppercase tracking-wider">Bench</span>
-              <span className="text-base md:text-lg font-black italic text-white mt-0.5">{benchOVR} OVR</span>
+            <div className="bg-zinc-950/50 border border-zinc-900/60 rounded-xl md:rounded-2xl p-2.5 md:p-4 text-center md:text-left flex flex-col justify-center shadow-lg">
+              <span className="text-[6px] md:text-[8px] font-black text-zinc-500 uppercase tracking-wider">Bench</span>
+              <span className="text-sm md:text-lg font-black italic text-white mt-0.5">{benchOVR} OVR</span>
             </div>
           </div>
         </div>
 
         {/* Showcase Starting Five Cards */}
-        <div className="w-full max-w-4xl px-3 py-4 md:py-6 bg-zinc-950/40 border border-zinc-900/60 rounded-[2.5rem] relative overflow-hidden backdrop-blur-md">
+        <div className="w-full max-w-4xl px-3 py-3 md:py-6 bg-zinc-950/40 border border-zinc-900/60 rounded-2xl md:rounded-[2.5rem] relative overflow-hidden backdrop-blur-md">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
-          <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500 mb-4">Starting Lineup</p>
+          <p className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500 mb-2.5 md:mb-4">Starting Lineup</p>
           
-          <div className="flex items-center justify-start md:justify-center gap-3 md:gap-5 overflow-x-auto pb-2 px-2 scrollbar-none snap-x">
+          <div className="flex items-center justify-start md:justify-center gap-3 md:gap-5 overflow-x-auto pb-1 px-1 scrollbar-none snap-x">
             {starters.map((slot) => {
               if (!slot.card) return null;
               return (
@@ -3009,7 +3142,7 @@ const DraftView: React.FC = () => {
                   className="shrink-0 snap-center flex flex-col items-center"
                 >
                   <CardItem card={slot.card} isOwned={true} width={isMobile ? 74 : 100} />
-                  <span className="mt-1.5 px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-850 text-[6px] md:text-[7px] font-black text-amber-500 uppercase tracking-widest leading-none">
+                  <span className="mt-1 px-1.5 py-0.5 rounded-md bg-zinc-900 border border-zinc-850 text-[5px] md:text-[7px] font-black text-amber-500 uppercase tracking-widest leading-none">
                     {slot.label}
                   </span>
                 </motion.div>
@@ -3019,39 +3152,39 @@ const DraftView: React.FC = () => {
         </div>
 
         {/* Responsive Dual Action Flow */}
-        <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm pt-2 shrink-0">
+        <div className="flex flex-row gap-2.5 w-full max-w-sm pt-1 shrink-0">
           <button 
             onClick={() => setPhase('tournament_selection')}
-            className="group relative flex-1 bg-gradient-to-r from-amber-500 to-amber-400 text-black py-4 px-6 rounded-2xl font-black uppercase tracking-[0.15em] text-xs flex items-center justify-center gap-2.5 hover:from-amber-400 hover:to-amber-300 transition-all shadow-[0_15px_30px_rgba(245,158,11,0.25)] hover:shadow-[0_20px_45px_rgba(245,158,11,0.45)] active:scale-95 border-t border-white/20"
+            className="group relative flex-[1.4] bg-gradient-to-r from-amber-500 to-amber-400 text-black py-3 px-4 rounded-xl md:rounded-2xl font-black uppercase tracking-[0.1em] md:tracking-[0.15em] text-[10px] md:text-xs flex items-center justify-center gap-2 hover:from-amber-400 hover:to-amber-300 transition-all shadow-[0_12px_24px_rgba(245,158,11,0.2)] active:scale-95 border-t border-white/20"
           >
-            <Trophy size={14} className="animate-bounce" />
+            <Trophy size={12} className="animate-bounce" />
             <span>Enter Tournament</span>
-            <ArrowRight size={14} />
+            <ArrowRight size={12} />
           </button>
           
           <button 
             onClick={() => setPhase('review')}
-            className="flex-1 bg-zinc-900 text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-700 py-4 px-6 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 transition-all active:scale-95 hover:bg-zinc-850"
+            className="flex-1 bg-zinc-900 text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-700 py-3 px-4 rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-[10px] flex items-center justify-center gap-1.5 transition-all active:scale-95 hover:bg-zinc-850"
           >
-            <span>Review & Swap</span>
+            <span>Review</span>
           </button>
         </div>
 
         {/* Secondary Back Navigation */}
-        <div className="flex items-center justify-center gap-4 text-center shrink-0 pt-2 pb-4">
+        <div className="flex items-center justify-center gap-4 text-center shrink-0 pt-1 pb-2">
           <button 
             onClick={() => resetDraftState('home')}
-            className="text-zinc-500 hover:text-zinc-300 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-colors"
+            className="text-zinc-500 hover:text-zinc-300 text-[9px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-colors"
           >
-            <Home size={12} />
+            <Home size={10} />
             <span>Exit Draft</span>
           </button>
-          <span className="text-zinc-800">•</span>
+          <span className="text-zinc-850">•</span>
           <button 
             onClick={() => resetDraftState('entry')}
-            className="text-zinc-500 hover:text-red-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-colors"
+            className="text-zinc-500 hover:text-red-400 text-[9px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-colors"
           >
-            <RotateCcw size={12} />
+            <RotateCcw size={10} />
             <span>Reset Draft</span>
           </button>
         </div>
@@ -3061,23 +3194,23 @@ const DraftView: React.FC = () => {
 
   const renderTournamentSelection = () => {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-6 space-y-5 md:space-y-6 overflow-y-auto max-h-full w-full">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-6 space-y-4 md:space-y-6 overflow-y-auto max-h-full w-full">
         {/* Sleek Header & Team Context */}
-        <div className="text-center space-y-1.5 md:space-y-2 mt-2 md:mt-0">
+        <div className="text-center space-y-1 md:space-y-2 mt-1 md:mt-0">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-zinc-900 border border-zinc-850 rounded-full">
-            <span className="text-[8px] font-black uppercase tracking-wider text-zinc-500">YOUR SQUAD</span>
-            <span className="text-[11px] font-black italic text-amber-500">{teamOVR} OVR</span>
+            <span className="text-[7px] md:text-[8px] font-black uppercase tracking-wider text-zinc-500">YOUR SQUAD</span>
+            <span className="text-[10px] md:text-[11px] font-black italic text-amber-500">{teamOVR} OVR</span>
           </div>
           <h2 className="text-2xl md:text-3.5xl font-black italic uppercase tracking-tighter text-white leading-none">
             Select Tournament
           </h2>
-          <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-500">
+          <p className="text-[9px] md:text-xs font-bold uppercase tracking-widest text-zinc-500">
             Choose your battleground and claim premium rewards
           </p>
         </div>
 
-        {/* 4-Column Responsive Grid - Sleek, Thinner & More Compact */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 w-full max-w-5xl px-4 md:px-0">
+        {/* 4-Column Responsive Grid / Horizontal Carousel on Mobile */}
+        <div className="flex overflow-x-auto pb-4 gap-3.5 w-full max-w-5xl px-4 md:px-0 snap-x scrollbar-none sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:overflow-x-visible sm:pb-0 sm:snap-none">
           {TOURNAMENTS.map((t) => {
             // Calculate relative difficulty compared to user's team OVR
             const ovrDiff = teamOVR - t.recommendedOvr;
@@ -3116,7 +3249,7 @@ const DraftView: React.FC = () => {
                 key={t.id}
                 whileHover={{ scale: 1.015, y: -3 }}
                 onClick={() => handleSelectTournament(t)}
-                className="relative group cursor-pointer bg-zinc-950/90 border border-zinc-900 hover:border-zinc-800 rounded-2xl p-4 flex flex-col justify-between text-left space-y-3.5 overflow-hidden shadow-lg transition-all"
+                className="relative group cursor-pointer bg-zinc-950/90 border border-zinc-900 hover:border-zinc-800 rounded-2xl p-4 flex flex-col justify-between text-left space-y-3.5 overflow-hidden shadow-lg transition-all shrink-0 snap-center w-[265px] sm:w-auto"
               >
                 {/* Header Row: Difficulty Badges */}
                 <div className="flex items-center gap-1.5 w-full justify-between">

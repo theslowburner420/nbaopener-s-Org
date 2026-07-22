@@ -15,7 +15,7 @@ const LeagueTab: React.FC<LeagueTabProps> = React.memo(({ state, renderPlayoffs 
       <motion.div 
         key="league-playoffs"
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-        className="max-w-7xl mx-auto px-4 pb-20"
+        className="w-full px-4 pb-20"
       >
         {renderPlayoffs()}
       </motion.div>
@@ -26,7 +26,7 @@ const LeagueTab: React.FC<LeagueTabProps> = React.memo(({ state, renderPlayoffs 
     <motion.div 
       key="league"
       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-      className="max-w-4xl mx-auto space-y-4 md:space-y-10 px-4 pb-20"
+      className="w-full space-y-4 md:space-y-10 px-4 pb-20"
     >
        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
             {/* CONFERENCE STANDINGS */}

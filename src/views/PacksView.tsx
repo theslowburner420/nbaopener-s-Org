@@ -69,6 +69,7 @@ export default function PacksView() {
   const [newlyUnlocked, setNewlyUnlocked] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'shop' | 'inventory'>('shop');
   const [openedPackImage, setOpenedPackImage] = useState<string | undefined>(undefined);
+  const [inviteeReward, setInviteeReward] = useState<any>(null);
 
   const uniqueOwned = useMemo(() => Object.keys(collection).filter(id => collection[id] > 0).length, [collection]);
   const totalCards = ALL_CARDS.length;
@@ -124,6 +125,7 @@ export default function PacksView() {
       setOpenedPackImage(pack.image);
       setOpenedCards(result.cards);
       setNewlyUnlocked(result.newlyUnlocked);
+      if (result.inviteeReward) setInviteeReward(result.inviteeReward);
     }
   };
 
@@ -134,6 +136,7 @@ export default function PacksView() {
       setOpenedPackImage(packInfo?.image || 'https://i.postimg.cc/bY3DRzLz/4a07a4ae-7c5c-4d11-8585-780a8aebebbe.png');
       setOpenedCards(result.cards);
       setNewlyUnlocked(result.newlyUnlocked);
+      if (result.inviteeReward) setInviteeReward(result.inviteeReward);
     }
   };
 
@@ -187,9 +190,9 @@ export default function PacksView() {
               exit={{ opacity: 0, y: -20 }}
               className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 p-4 sm:p-6 pb-24 my-auto w-full max-w-5xl mx-auto"
             >
-              {PACKS.map((pack) => (
+              {PACKS.map((pack, index) => (
                 <motion.div 
-                  key={pack.id} 
+                  key={`${pack.id}-${index}`} 
                   className="flex flex-col items-center"
                   whileHover={{ y: -10, scale: 1.05 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 20 }}
@@ -238,11 +241,11 @@ export default function PacksView() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-3 sm:gap-4 mt-4">
-                  {groupedInventory.map((pack) => {
+                  {groupedInventory.map((pack, idx) => {
                     const packInfo = PACKS.find(p => p.id === pack.type) || { color: 'from-zinc-700 to-zinc-900', image: 'https://i.postimg.cc/TwG0zjyz/generated-image-(1).png' };
                     return (
                       <motion.div
-                        key={`${pack.type}-${pack.id}`}
+                        key={`${pack.type}-${pack.id || idx}-${idx}`}
                         className="bg-zinc-950/50 backdrop-blur-xl border border-white/5 rounded-3xl p-5 flex items-center gap-6 group relative overflow-hidden"
                       >
                         <div className="absolute top-0 right-0 bg-amber-500 px-4 py-1.5 rounded-bl-2xl shadow-lg z-10">
@@ -282,10 +285,12 @@ export default function PacksView() {
           <PackOpener 
             cards={openedCards} 
             newlyUnlockedAchievements={newlyUnlocked}
+            inviteeReward={inviteeReward}
             packImage={openedPackImage}
             onClose={() => {
               setOpenedCards(null);
               setNewlyUnlocked([]);
+              setInviteeReward(null);
             }} 
           />
         )}

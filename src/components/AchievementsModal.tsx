@@ -195,7 +195,7 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
             {/* Content Area */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-8 no-scrollbar scroll-smooth">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                  {filteredAchievements.map((ach) => {
+                  {filteredAchievements.map((ach, index) => {
                     const isUnlocked = unlockedAchievements.includes(ach.id) || ach.requirement(state, ALL_CARDS);
                     const progress = ach.getProgress(state, ALL_CARDS);
                     const progressPercent = Math.round((progress.current / progress.total) * 100);
@@ -205,7 +205,7 @@ export default function AchievementsModal({ isOpen, onClose }: AchievementsModal
                     return (
                       <motion.div
                         layout
-                        key={ach.id}
+                        key={`${ach.id}-${index}`}
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className={`relative p-4 sm:p-5 rounded-2xl border transition-all duration-300 ${

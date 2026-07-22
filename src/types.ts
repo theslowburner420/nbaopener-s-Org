@@ -73,6 +73,8 @@ export interface User {
   email?: string;
   username?: string;
   avatar_url?: string;
+  referralCode?: string;
+  referralsCount?: number;
 }
 
 export interface CareerMatch {
@@ -283,4 +285,10 @@ export interface GameState {
   battlePassLevel: number;
   franchise?: FranchiseState;
   completedSbcs?: string[];
+  pendingReferral?: {
+    inviterUsername: string;
+    status: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
+    createdAt: number;
+  } | null;
+  onFirstPackOpenProcessed?: boolean;
 }

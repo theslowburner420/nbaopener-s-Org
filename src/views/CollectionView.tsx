@@ -106,12 +106,12 @@ export default function CollectionView() {
     setSelectedCard(card);
   }, []);
 
-  const renderGridItem = useCallback((card: Card) => {
+  const renderGridItem = useCallback((card: Card, index: number) => {
     const quantity = collection[card.id] || 0;
     const isOwned = quantity > 0;
     return (
       <CardItem 
-        key={`${card.id}-${card.number}`}
+        key={`${card.id}-${card.number ?? index}-${index}`}
         card={card} 
         isOwned={isOwned} 
         mode="mini"

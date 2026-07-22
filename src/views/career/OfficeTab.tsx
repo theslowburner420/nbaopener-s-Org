@@ -224,7 +224,7 @@ const OfficeTab: React.FC<OfficeTabProps> = React.memo(({
       initial={{ opacity: 0, scale: 0.99 }} 
       animate={{ opacity: 1, scale: 1 }} 
       exit={{ opacity: 0, scale: 0.99 }}
-      className="max-w-[1400px] mx-auto space-y-8 pb-32 px-4 md:px-8 select-none"
+      className="w-full space-y-8 pb-32 px-4 md:px-8 select-none"
     >
        {/* BOARDROOM NAVIGATION */}
        <div className="flex bg-zinc-950 p-1 rounded-xl w-full md:w-fit mx-auto border border-white/5 overflow-x-auto no-scrollbar shrink-0 max-w-full">

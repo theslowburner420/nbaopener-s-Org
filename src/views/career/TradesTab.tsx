@@ -91,7 +91,7 @@ const TradesTab: React.FC<TradesTabProps> = React.memo(({
       initial={{ opacity: 0, y: 15 }} 
       animate={{ opacity: 1, y: 0 }} 
       exit={{ opacity: 0, y: -15 }}
-      className="max-w-[1400px] mx-auto space-y-6 md:space-y-12 pb-32 px-4 md:px-8 select-none"
+      className="w-full space-y-6 md:space-y-12 pb-32 px-4 md:px-8 select-none"
     >
       {/* TRADE CONTROL HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-6">

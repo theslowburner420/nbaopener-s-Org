@@ -202,6 +202,9 @@ const BoxScoreModal: React.FC<BoxScoreModalProps> = ({ result, homeTeam, awayTea
                            <th className="px-4 py-4 text-center">PTS</th>
                            <th className="px-4 py-4 text-center">REB</th>
                            <th className="px-4 py-4 text-center">AST</th>
+                           <th className="px-4 py-4 text-center">STL</th>
+                           <th className="px-4 py-4 text-center">BLK</th>
+                           <th className="px-4 py-4 text-right">+/-</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/5">
@@ -212,8 +215,21 @@ const BoxScoreModal: React.FC<BoxScoreModalProps> = ({ result, homeTeam, awayTea
                              <td className="px-4 py-4 text-center font-black text-sm text-zinc-300 italic">{e.points}</td>
                              <td className="px-4 py-4 text-center font-bold text-xs text-zinc-500">{e.rebounds}</td>
                              <td className="px-4 py-4 text-center font-bold text-xs text-zinc-500">{e.assists}</td>
+                             <td className="px-4 py-4 text-center font-bold text-[10px] text-zinc-600">{e.steals || 0}</td>
+                             <td className="px-4 py-4 text-center font-bold text-[10px] text-zinc-600">{e.blocks || 0}</td>
+                             <td className={`px-4 py-4 text-right font-mono text-xs ${e.plusMinus > 0 ? 'text-emerald-500' : 'text-red-500'}`}>{e.plusMinus > 0 ? `+${e.plusMinus}` : e.plusMinus}</td>
                           </tr>
                         ))}
+                        <tr className="bg-white/5 font-black uppercase text-[10px]">
+                           <td className="px-6 py-4 sticky left-0 bg-zinc-950 z-10">TOTALS</td>
+                           <td className="px-4 py-4 text-center">240</td>
+                           <td className="px-4 py-4 text-center text-amber-500 text-sm">{rivalScore}</td>
+                           <td className="px-4 py-4 text-center text-white">{rivalBox.reduce((s,e) => s + e.rebounds, 0)}</td>
+                           <td className="px-4 py-4 text-center text-white">{rivalBox.reduce((s,e) => s + e.assists, 0)}</td>
+                           <td className="px-4 py-4 text-center text-zinc-500">{rivalBox.reduce((s,e) => s + (e.steals || 0), 0)}</td>
+                           <td className="px-4 py-4 text-center text-zinc-500">{rivalBox.reduce((s,e) => s + (e.blocks || 0), 0)}</td>
+                           <td className="px-4 py-4 text-right text-zinc-500">—</td>
+                        </tr>
                       </tbody>
                    </table>
                  </motion.div>

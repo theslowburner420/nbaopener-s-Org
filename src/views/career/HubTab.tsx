@@ -157,7 +157,7 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
       animate={{ opacity: 1, y: 0 }} 
       exit={{ opacity: 0, y: -20 }}
       transition={{ type: "spring", stiffness: 260, damping: 25 }}
-      className="max-w-7xl mx-auto space-y-6 md:space-y-12 pb-24 px-4 overflow-x-hidden"
+      className="w-full space-y-4 md:space-y-12 pb-24 px-4 md:px-8 overflow-x-hidden"
     >
       {state.phase === 'playoffs' ? (
         renderPlayoffs?.()
@@ -165,7 +165,7 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
         <>
           {/* OFfSEASON LOTTERY ANNOUNCEMENT */}
           {state.phase === 'offseason_start' && (
-            <div className="bg-gradient-to-br from-indigo-500/20 to-zinc-950 border border-indigo-500/30 rounded-3xl p-8 text-center space-y-6 shadow-[0_25px_60px_rgba(99,102,241,0.15)] relative overflow-hidden backdrop-blur-xl">
+            <div className="bg-gradient-to-br from-indigo-500/20 to-zinc-950 border border-indigo-500/30 rounded-3xl p-6 md:p-8 text-center space-y-6 shadow-[0_25px_60px_rgba(99,102,241,0.15)] relative overflow-hidden backdrop-blur-xl">
                <div className="absolute -top-12 -left-12 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl" />
                <div className="w-16 h-16 bg-indigo-500/10 border border-indigo-500/30 rounded-2xl flex items-center justify-center text-indigo-400 mx-auto animate-bounce">
                   <Trophy size={32} />
@@ -184,7 +184,7 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
           )}
 
           {state.phase === 'draft' && (
-            <div className="bg-gradient-to-br from-amber-500/20 to-zinc-950 border border-amber-500/30 rounded-3xl p-8 text-center space-y-6 shadow-[0_25px_60px_rgba(245,158,11,0.15)] backdrop-blur-xl">
+            <div className="bg-gradient-to-br from-amber-500/20 to-zinc-950 border border-amber-500/30 rounded-3xl p-6 md:p-8 text-center space-y-6 shadow-[0_25px_60px_rgba(245,158,11,0.15)] backdrop-blur-xl">
                <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-center text-amber-500 mx-auto animate-pulse">
                   <Sparkles size={32} />
                </div>
@@ -202,68 +202,68 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
           )}
 
           {/* 1. FRANCHISE OVERVIEW CARD - Glassmorphism, resplendent glow and exact ratings */}
-          <div className="bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-12 group">
+          <div className="bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-[2rem] p-4 sm:p-6 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-6 md:gap-12 group">
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-amber-500/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-white/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none" />
             
             <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10 w-full lg:w-auto relative z-10 text-center md:text-left">
               <div className="relative group/logo">
                 <div className="absolute inset-0 bg-amber-500/20 rounded-[2.5rem] blur-2xl group-hover/logo:blur-3xl transition-all duration-300" />
-                <div className="w-24 h-24 md:w-36 md:h-36 bg-zinc-950/80 border border-white/20 rounded-[2.5rem] p-4 flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.6)] animate-pulse transition-transform duration-500 hover:rotate-3">
+                <div className="w-20 h-20 md:w-36 md:h-36 bg-zinc-950/80 border border-white/20 rounded-[2rem] md:rounded-[2.5rem] p-3 md:p-4 flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.6)] animate-pulse transition-transform duration-500 hover:rotate-3">
                   <img src={getTeamLogo(state.userTeamId)} className="w-[85%] h-[85%] object-contain" />
                 </div>
               </div>
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                    <span className="text-[10px] font-black tracking-widest bg-amber-500 text-black px-2.5 py-0.5 rounded-sm uppercase italic">
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3">
+                    <span className="text-[9px] md:text-[10px] font-black tracking-widest bg-amber-500 text-black px-2 py-0.5 rounded-sm uppercase italic">
                       SYSTEM GM HUB
                     </span>
-                    <span className="text-[10px] h-5 font-bold tracking-wider bg-white/10 text-zinc-300 px-2.5 py-0.5 rounded-full uppercase">
+                    <span className="text-[9px] md:text-[10px] h-5 font-bold tracking-wider bg-white/10 text-zinc-300 px-2 py-0.5 rounded-full uppercase">
                       Season {state.season}
                     </span>
                   </div>
-                  <h2 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase text-white leading-tight">
+                  <h2 className="text-2xl md:text-5xl font-black italic tracking-tighter uppercase text-white leading-tight">
                     {userTeam?.name}
                   </h2>
                 </div>
                 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-lg">
-                  <div className="bg-black/40 border border-white/5 p-3 rounded-2xl">
-                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Record</p>
-                    <p className="text-lg font-black italic text-zinc-100">{userTeam?.wins} - {userTeam?.losses}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 max-w-lg">
+                  <div className="bg-black/40 border border-white/5 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl">
+                    <p className="text-[8px] sm:text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Record</p>
+                    <p className="text-base sm:text-lg font-black italic text-zinc-100">{userTeam?.wins} - {userTeam?.losses}</p>
                   </div>
-                  <div className="bg-black/40 border border-white/5 p-3 rounded-2xl">
-                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Conf Rank</p>
-                    <p className="text-lg font-black italic text-amber-500">#{standingsPos} in {userTeam?.conference}</p>
+                  <div className="bg-black/40 border border-white/5 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl">
+                    <p className="text-[8px] sm:text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Conf Rank</p>
+                    <p className="text-base sm:text-lg font-black italic text-amber-500">#{standingsPos} in {userTeam?.conference}</p>
                   </div>
-                  <div className="bg-black/40 border border-white/5 p-3 rounded-2xl">
-                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Starters OVR</p>
-                    <p className="text-lg font-black italic text-white">{startersOvr}</p>
+                  <div className="bg-black/40 border border-white/5 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl">
+                    <p className="text-[8px] sm:text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Starters OVR</p>
+                    <p className="text-base sm:text-lg font-black italic text-white">{startersOvr}</p>
                   </div>
-                  <div className="bg-black/40 border border-white/5 p-3 rounded-2xl">
-                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Rotation OVR</p>
-                    <p className="text-lg font-black italic text-emerald-400">{calculatedTeamOvr}</p>
+                  <div className="bg-black/40 border border-white/5 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl">
+                    <p className="text-[8px] sm:text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Rotation OVR</p>
+                    <p className="text-base sm:text-lg font-black italic text-emerald-400">{calculatedTeamOvr}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Regular Season Progress bar */}
-            <div className="w-full lg:w-80 space-y-3 bg-black/40 border border-white/5 p-5 md:p-6 rounded-[2rem] relative z-10 shrink-0">
+            <div className="w-full lg:w-80 space-y-3 bg-black/40 border border-white/5 p-4 sm:p-5 md:p-6 rounded-[2rem] relative z-10 shrink-0">
               <div className="flex justify-between items-center">
                 <div className="space-y-0.5">
                   <p className="text-[9px] font-black uppercase text-zinc-500 tracking-wider">Season Progression</p>
-                  <p className="text-base font-black italic text-white uppercase tracking-tight">{gamesPlayed} / 82 Games</p>
+                  <p className="text-sm sm:text-base font-black italic text-white uppercase tracking-tight">{gamesPlayed} / 82 Games</p>
                 </div>
                 <div className="text-right">
                   <p className="text-[9px] font-black uppercase text-zinc-500 tracking-wider">Streak</p>
-                  <p className={`text-base font-black italic font-mono uppercase ${userTeam?.streak?.startsWith?.('W') ? 'text-emerald-400' : 'text-rose-500'}`}>
+                  <p className={`text-sm sm:text-base font-black italic font-mono uppercase ${userTeam?.streak?.startsWith?.('W') ? 'text-emerald-400' : 'text-rose-500'}`}>
                     {userTeam?.streak || 'W1'}
                   </p>
                 </div>
               </div>
-              <div className="h-2.5 w-full bg-zinc-900 rounded-full overflow-hidden border border-white/5">
+              <div className="h-2 w-full bg-zinc-900 rounded-full overflow-hidden border border-white/5">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${progressPct}%` }}
@@ -271,7 +271,7 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
                   className="h-full bg-gradient-to-r from-amber-600 to-amber-400 rounded-full shadow-[0_0_12px_rgba(245,158,11,0.5)]"
                 />
               </div>
-              <div className="flex justify-between text-[8px] font-bold tracking-widest text-zinc-600 uppercase">
+              <div className="flex justify-between text-[7px] sm:text-[8px] font-bold tracking-widest text-zinc-600 uppercase">
                 <span>Kick Off</span>
                 <span>Playoffs Bound</span>
               </div>
@@ -290,7 +290,7 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
 
               return (
                 <div 
-                  className="bg-gradient-to-b from-zinc-950 to-zinc-900 border-2 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 flex flex-col items-center justify-between gap-8 md:gap-10 relative overflow-hidden group shadow-2xl select-none"
+                  className="bg-gradient-to-b from-zinc-950 to-zinc-900 border-2 rounded-[2rem] md:rounded-[2.5rem] p-4 sm:p-6 md:p-10 flex flex-col items-center justify-between gap-4 sm:gap-10 relative overflow-hidden group shadow-2xl select-none"
                   style={{
                     borderColor: `${pColor}40`,
                     boxShadow: `0 0 50px ${pColor}0d, inset 0 0 30px rgba(0,0,0,0.8)`
@@ -307,19 +307,19 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
                   {/* High-Tech Grid Overlays */}
                   <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none opacity-45" />
                   
-                  <div className="space-y-3 relative z-10 text-center w-full">
-                    <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] duration-1000 filter drop-shadow-sm animate-pulse" style={{ color: pColor }}>
+                  <div className="space-y-1.5 md:space-y-3 relative z-10 text-center w-full">
+                    <p className="text-[8px] md:text-xs font-black uppercase tracking-[0.4em] duration-1000 filter drop-shadow-sm animate-pulse" style={{ color: pColor }}>
                       GAMECENTER ARENA LIVE
                     </p>
-                    <h3 className="text-5xl md:text-7xl font-sans font-black italic uppercase tracking-tighter text-white leading-none">
+                    <h3 className="text-3xl md:text-7xl font-sans font-black italic uppercase tracking-tighter text-white leading-none">
                       Matchday {nextUserGame.gameNumber}
                     </h3>
                     <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                      <div className="px-3 py-1 bg-zinc-950 border border-zinc-800 rounded-full text-[9px] font-black uppercase tracking-widest text-zinc-400">
+                      <div className="px-2 py-0.5 md:px-3 md:py-1 bg-zinc-950 border border-zinc-800 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest text-zinc-400">
                         BROADCAST PREVIEW
                       </div>
                       <div 
-                        className="px-3 py-1 bg-zinc-950 rounded-full text-[9px] font-black uppercase tracking-widest"
+                        className="px-2 py-0.5 md:px-3 md:py-1 bg-zinc-950 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest"
                         style={{ color: pColor, border: `1px solid ${pColor}40` }}
                       >
                         {nextUserGame.homeTeamId === state.userTeamId ? 'Defending Home Court' : 'On the Road Arena'}
@@ -327,8 +327,78 @@ const HubTab: React.FC<HubTabProps> = React.memo(({
                     </div>
                   </div>
 
-                  {/* VS Display and comparative details with team colors */}
-                  <div className="grid grid-cols-1 lg:grid-cols-3 items-center gap-8 relative z-10 w-full">
+                  {/* COMPACT MOBILE MATCHDAY DISPLAY */}
+                  <div className="flex sm:hidden items-center justify-between w-full relative z-10 py-1 border-t border-b border-white/5 my-1">
+                    {/* User Team */}
+                    <div className="flex flex-col items-center gap-1 w-[30%] text-center">
+                      <div className="w-12 h-12 bg-zinc-950 border border-zinc-800 rounded-xl p-2 flex items-center justify-center shadow-lg">
+                        <img src={getTeamLogo(state.userTeamId)} className="w-full h-full object-contain" />
+                      </div>
+                      <p className="text-[10px] font-black uppercase italic text-white truncate max-w-full leading-none mt-0.5">{uColors?.name.split(' ').pop()}</p>
+                      <span className="text-[8px] font-mono text-zinc-400 font-bold px-1.5 py-0.5 bg-white/5 rounded">OVR {startersOvr}</span>
+                    </div>
+
+                    {/* Simulation Engine and VS */}
+                    <div className="flex-1 flex flex-col items-center justify-center px-1">
+                      <span className="text-base font-black italic tracking-widest text-zinc-600 leading-none mb-1.5">VS</span>
+                      
+                      {isSimulating && simProgress > 0 ? (
+                        <div className="w-full space-y-1 select-none text-center px-2">
+                          <div className="flex justify-between text-[7px] font-black uppercase text-zinc-400">
+                            <span>Simulating...</span>
+                            <span className="font-mono text-amber-500">{simProgress}%</span>
+                          </div>
+                          <div className="h-1 w-full bg-zinc-950 border border-zinc-850 rounded-full overflow-hidden">
+                            <div className="h-full bg-amber-500" style={{ width: `${simProgress}%` }} />
+                          </div>
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={handleSimulateWithSpinner}
+                          disabled={isSimulating}
+                          className="w-full max-w-[110px] h-8 bg-zinc-950 border text-white rounded-lg font-black uppercase italic tracking-tighter text-[9px] flex items-center justify-center gap-1 transition-all active:scale-95 disabled:opacity-75 cursor-pointer shadow-md hover:bg-zinc-900"
+                          style={{ borderColor: `${pColor}60` }}
+                        >
+                          <Zap size={9} className="text-amber-500 shrink-0 animate-pulse" />
+                          <span>SIM G_{nextUserGame.gameNumber}</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Opponent Team */}
+                    <div className="flex flex-col items-center gap-1 w-[30%] text-center">
+                      <div className="w-12 h-12 bg-zinc-950 border border-zinc-850 rounded-xl p-2 flex items-center justify-center shadow-lg">
+                        <img src={getTeamLogo(nextMatchupDetails.opponent.id)} className="w-full h-full object-contain" />
+                      </div>
+                      <p className="text-[10px] font-black uppercase italic text-white truncate max-w-full leading-none mt-0.5">{oColors?.name.split(' ').pop()}</p>
+                      <span className="text-[8px] font-mono text-zinc-400 font-bold px-1.5 py-0.5 bg-white/5 rounded">OVR {nextMatchupDetails.opponentOvr}</span>
+                    </div>
+                  </div>
+
+                  {/* Mobile Batch Sim Controls */}
+                  {!isSimulating && (
+                    <div className="flex sm:hidden items-center justify-center gap-2 w-full shrink-0 relative z-10">
+                      <button 
+                        onClick={() => handleSimulateBatch(4)}
+                        disabled={isSimulating}
+                        className="flex-1 h-8 bg-zinc-950 border border-zinc-800 hover:bg-zinc-900 text-zinc-350 hover:text-white rounded-lg font-black uppercase italic tracking-tighter text-[8px] flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer"
+                      >
+                        <Activity size={8} className="text-emerald-400 shrink-0" />
+                        <span className="font-mono">Sim Week</span>
+                      </button>
+                      <button 
+                        onClick={() => handleSimulateBatch(16)}
+                        disabled={isSimulating}
+                        className="flex-1 h-8 bg-zinc-950 border border-zinc-800 hover:bg-zinc-900 text-zinc-350 hover:text-white rounded-lg font-black uppercase italic tracking-tighter text-[8px] flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer"
+                      >
+                        <Award size={8} className="text-indigo-400 shrink-0" />
+                        <span className="font-mono">Sim Month</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* VS Display and comparative details with team colors - Desktop & Tablet */}
+                  <div className="hidden sm:grid grid-cols-1 lg:grid-cols-3 items-center gap-8 relative z-10 w-full">
                     
                     {/* User Team detail */}
                     <div className="flex flex-col items-center lg:items-end gap-3 text-center lg:text-right">

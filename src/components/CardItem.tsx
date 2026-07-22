@@ -420,8 +420,8 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
     if (isMini) {
       return (
         <div className="grid grid-cols-3 gap-0.5 pt-0.5 shrink-0">
-          {stats.map((s, i) => (
-            <div key={i} className="flex flex-col items-center">
+          {stats.map((s) => (
+            <div key={s.label} className="flex flex-col items-center">
               <span className="text-[6px] font-black text-zinc-400 uppercase tracking-tighter leading-none">{s.label}</span>
               <span className="text-[9px] font-black text-white leading-none mt-0.5 drop-shadow-sm">{s.value}</span>
             </div>
@@ -433,8 +433,8 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
     return (
       <div className="px-3 h-1/4 flex items-center shrink-0">
         <div className={`grid grid-cols-3 w-full py-1 border-b ${isDarkCard ? 'card-border-subtle' : 'border-black/5'}`}>
-          {stats.map((s, i) => (
-            <div key={i} className="flex flex-col items-center justify-center border-r border-black/5 last:border-r-0">
+          {stats.map((s) => (
+            <div key={s.label} className="flex flex-col items-center justify-center border-r border-black/5 last:border-r-0">
               <div className={`w-3 h-3 rounded-full ${s.color} ${s.borderColor} border shadow-inner mb-1`} />
               <div className="flex flex-col items-center">
                 <span className={`text-[10px] font-black leading-none drop-shadow-sm ${isDarkCard ? 'text-white' : 'text-zinc-950'}`}>

@@ -20,7 +20,7 @@ const SettingsTab: React.FC<SettingsTabProps> = React.memo(({
   return (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="max-w-4xl mx-auto space-y-12 pb-32"
+      className="w-full space-y-12 pb-32 px-4 md:px-8"
     >
       <div className="text-center space-y-4">
         <div className="w-20 h-20 bg-zinc-900 rounded-3xl mx-auto flex items-center justify-center text-zinc-500 border border-white/5">

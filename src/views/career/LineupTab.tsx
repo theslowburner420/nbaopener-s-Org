@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Users, Sparkles, Award, Zap, Heart, TrendingUp, X, Activity } from 'lucide-react';
+import { Plus, Users, Sparkles, Award, Zap, Heart, TrendingUp, X, Activity, ChevronUp } from 'lucide-react';
 import CardItem from '../../components/CardItem';
 import { TeamObject } from '../../franchise/types';
 import { NBA_TEAMS } from '../../data/nbaTeams';
@@ -16,6 +16,158 @@ interface LineupTabProps {
   setState: (state: any) => void;
 }
 
+// Visual Slot Component mapped from DraftView style
+interface SlotProps {
+  card: any;
+  label: string;
+  position: string | null;
+  mini?: boolean;
+  onClick: () => void;
+  onInspect: () => void;
+  onSwap: () => void;
+  disabled?: boolean;
+  isSelected?: boolean;
+  teamColor?: string;
+}
+
+const Slot: React.FC<SlotProps> = React.memo(({ 
+  card, 
+  label, 
+  position, 
+  mini, 
+  onClick, 
+  onInspect, 
+  onSwap, 
+  disabled, 
+  isSelected,
+  teamColor
+}) => {
+  const [screenSize, setScreenSize] = React.useState(() => {
+    if (typeof window === 'undefined') return 'desktop';
+    const w = window.innerWidth;
+    if (w < 640) return 'mobile';
+    if (w < 1024) return 'tablet';
+    return 'desktop';
+  });
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      const w = window.innerWidth;
+      if (w < 640) setScreenSize('mobile');
+      else if (w < 1024) setScreenSize('tablet');
+      else setScreenSize('desktop');
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const cardWidth = React.useMemo(() => {
+    if (mini) {
+      if (screenSize === 'mobile') return 68;
+      if (screenSize === 'tablet') return 95;
+      return 105;
+    } else {
+      if (screenSize === 'mobile') return 78;
+      if (screenSize === 'tablet') return 130;
+      return 175;
+    }
+  }, [mini, screenSize]);
+
+  return (
+    <div 
+      className={`relative group transition-all duration-500 w-full h-full aspect-[2.5/3.5] ${disabled ? 'opacity-40 pointer-events-none grayscale-[0.5]' : ''} ${isSelected ? 'scale-110 z-50' : ''}`}
+    >
+      {card ? (
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ 
+            scale: isSelected ? 1.05 : 1, 
+            opacity: 1,
+            boxShadow: isSelected ? [
+              "0 0 20px rgba(245,158,11,0.4)",
+              "0 0 40px rgba(245,158,11,0.8)",
+              "0 0 20px rgba(245,158,11,0.4)"
+            ] : "0 10px 25px rgba(0,0,0,0.5)"
+          }}
+          whileTap={{ scale: 0.95 }}
+          className="h-full w-full cursor-pointer relative"
+          onClick={onClick}
+        >
+          <CardItem 
+            card={card} 
+            isOwned={true} 
+            width={cardWidth} 
+            mode={mini ? 'mini' : 'large'}
+          />
+
+          {/* Desktop Hover Action overlay (hidden on real touch but perfect fallback) */}
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-md opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-2 transition-all duration-300 rounded-[1.25rem] p-2 text-center border border-white/10 z-30">
+             <p className="text-[10px] font-black uppercase text-zinc-400 tracking-wider leading-none">{label}</p>
+             <p className="text-[8px] font-extrabold text-white truncate max-w-full leading-none mb-1.5">{card.name}</p>
+             
+             <button 
+               onClick={(e) => {
+                 e.stopPropagation();
+                 onInspect();
+               }}
+               className="w-full py-1.5 bg-white/5 hover:bg-white/10 text-[8px] font-black uppercase tracking-wider rounded-lg border border-white/5 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+             >
+               Inspect
+             </button>
+             <button 
+               onClick={(e) => {
+                 e.stopPropagation();
+                 onSwap();
+               }}
+               className="w-full py-1.5 text-black text-[8px] font-black uppercase tracking-wider rounded-lg transition-transform hover:scale-105 cursor-pointer"
+               style={{ backgroundColor: teamColor || '#fbbf24' }}
+             >
+               Swap
+             </button>
+          </div>
+
+          {/* Small Position Marker Badge */}
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-zinc-950 border border-white/10 px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1 z-20 group-hover:scale-110 duration-200">
+             <span className="text-[8px] font-black text-white italic">{label}</span>
+          </div>
+        </motion.div>
+      ) : (
+        <button 
+          onClick={onClick}
+          disabled={disabled}
+          className="h-full w-full bg-zinc-900/30 border-2 border-dashed border-zinc-800/50 rounded-xl flex flex-col items-center justify-center gap-1 hover:border-amber-500/50 hover:bg-zinc-900/60 transition-all relative overflow-hidden text-left"
+        >
+          {/* Ghost Card Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-zinc-800/10 to-transparent opacity-50" />
+          
+          <div className={`rounded-full bg-zinc-900/80 flex items-center justify-center text-zinc-650 group-hover:text-amber-500 group-hover:scale-110 transition-all shadow-inner mx-auto ${mini ? 'w-6 h-6' : 'w-10 h-10'}`}>
+            <Zap size={mini ? 12 : 20} className={mini ? '' : 'fill-current opacity-20'} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className={`font-black text-white/10 ${mini ? 'text-xs' : 'text-xl'}`}>+</span>
+            </div>
+          </div>
+          
+          <span className={`font-black uppercase tracking-[0.2em] text-zinc-650 group-hover:text-amber-500/50 transition-colors text-center w-full block ${mini ? 'text-[7px]' : 'text-[10px]'}`}>
+            {position || label}
+          </span>
+
+          {/* Decorative Corner Accents */}
+          <div className="absolute top-1 left-1 w-1 h-1 border-t border-l border-zinc-800" />
+          <div className="absolute top-1 right-1 w-1 h-1 border-t border-r border-zinc-800" />
+          <div className="absolute bottom-1 left-1 w-1 h-1 border-b border-l border-zinc-800" />
+          <div className="absolute bottom-1 right-1 w-1 h-1 border-b border-r border-zinc-800" />
+        </button>
+      )}
+      
+      {!card && !disabled && (
+        <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center shadow-lg animate-bounce z-10 pointer-events-none">
+          <span className="text-black font-black text-[10px]">+</span>
+        </div>
+      )}
+    </div>
+  );
+});
+
 const LineupTab: React.FC<LineupTabProps> = React.memo(({ 
   state, 
   userTeam,
@@ -27,12 +179,11 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
 }) => {
   const positions = ['PG', 'SG', 'SF', 'PF', 'C'] as const;
   
-  // Responsive layout state
+  // States matching DraftView and original LineupTab
   const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [sortMode, setSortMode] = React.useState<'OVR' | 'POS'>('OVR');
-  
-  // Immersive player inspection state
   const [selectedPlayerForProgress, setSelectedPlayerForProgress] = React.useState<{ id: string; card: any } | null>(null);
+  const [isBenchOpen, setIsBenchOpen] = React.useState(false);
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -42,6 +193,7 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Compute roster sorted by OVR or position
   const rosterSorted = React.useMemo(() => {
     return [...((userTeam?.roster || []) as string[])].sort((a, b) => {
       const cardA = findCard(a);
@@ -57,8 +209,9 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
         return (order[posA as keyof typeof order] || 9) - (order[posB as keyof typeof order] || 9);
       }
     });
-  }, [userTeam.roster, sortMode, findCard, state?.playerProgress]);
+  }, [userTeam?.roster, sortMode, findCard, state?.playerProgress]);
 
+  // Compute dynamic Team Rating OVR
   const teamOvr = React.useMemo(() => {
     const starters = positions.map(p => {
       const id = userTeam?.lineup?.[p];
@@ -71,12 +224,30 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
     const all = [...starters, ...bench];
     if (all.length === 0) return 0;
     return Math.round(all.reduce((a, b) => a + b, 0) / all.length);
-  }, [userTeam.lineup, findCard, state?.playerProgress]);
+  }, [userTeam?.lineup, findCard, state?.playerProgress]);
 
-  // Lookup player team colors
+  // Lookup active franchise team branding colors
   const teamColors = React.useMemo(() => {
     return NBA_TEAMS.find(t => t.id === state?.userTeamId) || { primaryColor: '#fbbf24', secondaryColor: '#000000' };
   }, [state?.userTeamId]);
+
+  // Map user's reserves / bench to slots
+  const benchSlots = React.useMemo(() => {
+    const activeBench = (userTeam?.lineup?.bench || []) as string[];
+    // Offer at least 7 slots, expanding dynamically if roster exceeds 7 reserves
+    const count = Math.max(7, activeBench.length);
+    return Array.from({ length: count }).map((_, idx) => {
+      const playerId = activeBench[idx];
+      const card = playerId ? findCard(playerId) : null;
+      return {
+        id: `bench-${idx}`,
+        playerId,
+        card,
+        label: idx < 5 ? 'BN' : 'RES',
+        position: 'bench'
+      };
+    });
+  }, [userTeam?.lineup?.bench, findCard]);
 
   return (
     <motion.div 
@@ -84,15 +255,17 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
       initial={{ opacity: 0, scale: 0.99 }} 
       animate={{ opacity: 1, scale: 1 }} 
       exit={{ opacity: 0, scale: 0.99 }}
-      className="max-w-[1400px] mx-auto space-y-6 md:space-y-12 pb-32 px-4 md:px-8 select-none"
+      className="w-full space-y-4 md:space-y-12 pb-16 md:pb-32 px-4 md:px-8 select-none"
     >
-        {/* TEAM HEADER SUMMARY */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/5 pb-4 md:pb-6">
-           <div className="space-y-1">
-              <div className="flex items-center gap-3">
-                 <h3 className="text-xl md:text-5xl font-black uppercase italic text-white tracking-tighter leading-none">Roster Management</h3>
+        {/* TOP LEVEL TEAM SUMMARY DETAILS */}
+        <div className="flex flex-row md:items-end justify-between gap-2 border-b border-white/5 pb-3 md:pb-6">
+           <div className="space-y-0.5 md:space-y-1 min-w-0">
+              <div className="flex items-center gap-2 md:gap-3">
+                 <h3 className="text-sm sm:text-lg md:text-5xl font-black uppercase italic text-white tracking-tighter leading-none truncate">
+                   {isMobile ? 'Roster' : 'Roster Management'}
+                 </h3>
                  <div 
-                   className="text-black px-2.5 py-1 rounded-lg font-extrabold text-xs md:text-lg italic tracking-tighter shadow-2xl"
+                   className="text-black px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg font-extrabold text-[9px] sm:text-xs md:text-lg italic tracking-tighter shadow-2xl shrink-0"
                    style={{ 
                      backgroundColor: teamColors.primaryColor,
                      boxShadow: `0 0 25px ${teamColors.primaryColor}40`
@@ -101,261 +274,230 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                     {teamOvr} OVR
                  </div>
               </div>
-              <p className="text-[9px] md:text-xs font-bold text-zinc-500 uppercase tracking-widest italic truncate max-w-sm">Optimize rotation settings and individual progress pathways</p>
+              <p className="hidden sm:block text-[9px] md:text-xs font-bold text-zinc-500 uppercase tracking-widest italic truncate max-w-sm">Optimize rotation settings and individual progress pathways</p>
            </div>
            
-           <div className="flex items-center gap-6 justify-between md:justify-end border-t border-white/5 pt-3 md:border-none md:pt-0">
-              <div className="text-left md:text-right">
-                 <p className="text-[8px] font-black text-zinc-550 uppercase tracking-widest leading-none mb-1">Active Roster</p>
-                 <p className="text-base md:text-2xl font-black text-white italic">{userTeam.roster.length} / 15</p>
+           <div className="flex items-center gap-3 sm:gap-6 justify-end shrink-0">
+              <div className="text-right leading-tight">
+                 <p className="text-[6.5px] sm:text-[8px] font-black text-zinc-500 uppercase tracking-widest leading-none mb-0.5 sm:mb-1">Active</p>
+                 <p className="text-xs sm:text-base md:text-2xl font-black text-white italic">{(userTeam?.roster || []).length}/15</p>
               </div>
-              <div className="text-right">
-                 <p className="text-[8px] font-black text-zinc-550 uppercase tracking-widest leading-none mb-1">Salary Cap</p>
-                 <p className={`text-base md:text-2xl font-black italic duration-300 ${userTeam.payroll > 180000000 ? 'text-red-500' : 'text-emerald-400'}`}>
-                    ${(userTeam.payroll / 1000000).toFixed(1)}M
+              <div className="text-right leading-tight">
+                 <p className="text-[6.5px] sm:text-[8px] font-black text-zinc-500 uppercase tracking-widest leading-none mb-0.5 sm:mb-1">Salary Cap</p>
+                 <p className={`text-xs sm:text-base md:text-2xl font-black italic duration-300 ${userTeam?.payroll > 180000000 ? 'text-red-500' : 'text-emerald-400'}`}>
+                    ${((userTeam?.payroll || 0) / 1000000).toFixed(1)}M
                  </p>
               </div>
            </div>
         </div>
 
-        {/* COURT VIEW (STARTING 5) */}
-        <div className="space-y-4 md:space-y-8">
-           <h4 className="text-xs md:text-base font-black text-zinc-400 uppercase tracking-[0.2em] italic flex items-center gap-2">
-              <div className="w-6 h-[1px]" style={{ backgroundColor: teamColors.primaryColor }} />
+        {/* INTERACTIVE BASKETBALL ARENA (STARTING FIVE COURT VIEW) */}
+        <div className="space-y-2 md:space-y-6">
+           <h4 className="text-[10px] md:text-base font-black text-zinc-400 uppercase tracking-[0.2em] italic flex items-center gap-1.5">
+              <div className="w-4 h-[1px]" style={{ backgroundColor: teamColors.primaryColor }} />
               Starting Five Tactician
            </h4>
            
-           {/* DESKTOP COURT VIEW (hidden on mobile) */}
-           <div className="hidden md:flex relative w-full aspect-[16/9] bg-gradient-to-br from-[#02050c] to-[#040916] rounded-[2rem] border border-zinc-850 overflow-hidden shadow-2xl items-center justify-center p-4 pb-8">
-              {/* HOLOGRAPHIC DIGITAL MESH GRID & SCANLINES */}
-              <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none opacity-50" />
-              <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.03)_1.5px,transparent_1.5px)] bg-[size:100%_4px] pointer-events-none opacity-40 animate-pulse" />
+           {/* RESPONSIVE COURT CANVAS CONTAINER */}
+           <div className="relative w-full aspect-[1.22/1] sm:aspect-[1.4/1] md:aspect-[16/9] min-h-[350px] sm:min-h-[440px] md:min-h-[580px] bg-gradient-to-b from-zinc-900 to-zinc-950 rounded-[2rem] border border-zinc-850 overflow-hidden shadow-2xl z-10 flex flex-col justify-between">
               
-              {/* Ambient Hologram Spotlight Glow */}
+              {/* Basketball Half-Court Line Art Overlay (from DraftView) */}
+              <div className="absolute inset-0 opacity-[0.12] pointer-events-none z-0">
+                <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                  {/* Outer boundary */}
+                  <rect x="0" y="0" width="100" height="100" fill="none" stroke="white" strokeWidth="0.5" />
+                  {/* Midcourt line at the top (y=0) */}
+                  <line x1="0" y1="0" x2="100" y2="0" stroke="white" strokeWidth="1" />
+                  {/* Center Circle at the top (y=0) */}
+                  <path d="M 35 0 A 15 15 0 0 0 65 0" fill="none" stroke="white" strokeWidth="0.5" />
+                  {/* The Paint / Key at the bottom (x: 34 to 66, y: 64 to 100) */}
+                  <rect x="34" y="64" width="32" height="36" fill="none" stroke="white" strokeWidth="0.5" />
+                  {/* Free throw circle at top of paint (y=64) */}
+                  <path d="M 34 64 A 16 16 0 0 1 66 64" fill="none" stroke="white" strokeWidth="0.5" />
+                  {/* Three-Point Arc (basket is at x=50, y=92) */}
+                  <line x1="10" y1="100" x2="10" y2="86" stroke="white" strokeWidth="0.5" />
+                  <line x1="90" y1="100" x2="90" y2="86" stroke="white" strokeWidth="0.5" />
+                  <path d="M 10 86 A 42 42 0 0 1 90 86" fill="none" stroke="white" strokeWidth="0.5" />
+                  {/* Backboard: line at y=92, from x=44 to 56 */}
+                  <line x1="44" y1="92" x2="56" y2="92" stroke="white" strokeWidth="0.8" />
+                  {/* Rim: circle centered at x=50, y=92, with radius 2 */}
+                  <circle cx="50" cy="90.5" r="2.5" fill="none" stroke="white" strokeWidth="0.5" />
+                </svg>
+              </div>
+
+              {/* Dynamic Hologram Team Spotlight Glow */}
               <div 
-                className="absolute inset-[10%] rounded-full blur-[180px] opacity-15 pointer-events-none transition-all duration-1000 animate-pulse"
+                className="absolute inset-[15%] rounded-full blur-[160px] opacity-15 pointer-events-none transition-all duration-1000 animate-pulse z-0"
                 style={{
                   background: `radial-gradient(circle, ${teamColors.primaryColor} 0%, transparent 70%)`
                 }}
               />
+
+              {/* Scifi Holographic Digital Mesh & Coordinate Crosshairs */}
+              <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.008)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.008)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none opacity-40 z-0" />
               
-              {/* HIGH-TECH COURT MARKS SCIFI SVGs */}
-              <div className="absolute inset-0 pointer-events-none opacity-20">
-                <svg className="w-full h-full" viewBox="0 0 800 450" fill="none">
-                  {/* Court Rim border */}
-                  <rect x="25" y="25" width="750" height="400" rx="30" stroke={teamColors.primaryColor} strokeWidth="1.5" strokeDasharray="10,5" />
-                  {/* Center Court Ring glow with active spinning radar visual overlay */}
-                  <circle cx="400" cy="225" r="75" stroke="#10b981" strokeWidth="1" strokeDasharray="8,4" />
-                  <circle cx="400" cy="225" r="10" fill="#10b981" opacity="0.1" />
-                  <circle cx="400" cy="225" r="6" fill="#10b981" />
-                  
-                  {/* Tactical Coordinate Crosshairs */}
-                  <path d="M400 20v40M400 390v40M20 225h60M720 225h60" stroke="#10b981" strokeWidth="1" strokeLinecap="round" />
-                  {/* 3-point lines */}
-                  <path d="M 25 80 A 145 145 0 0 1 25 370 M 775 80 A 145 145 0 0 0 775 370" stroke={teamColors.primaryColor} strokeWidth="1.2" strokeDasharray="6,4" />
-                </svg>
-              </div>
-
-              <div className="relative w-full h-full">
-                 {positions.map(pos => {
-                    const id = userTeam.lineup[pos];
+              {/* Tactical Starters Coordinates Overlay */}
+              <div className="relative z-10 w-full h-full overflow-visible">
+                 {[
+                    { pos: 'PG', style: { top: '18%', left: '50%' } },
+                    { pos: 'SG', style: { top: '38%', left: '78%' } },
+                    { pos: 'SF', style: { top: '38%', left: '22%' } },
+                    { pos: 'PF', style: { top: '68%', left: '24%' } },
+                    { pos: 'C', style: { top: '68%', left: '76%' } }
+                 ].map(({ pos, style }) => {
+                    const id = userTeam?.lineup?.[pos];
                     const card = findCard(id);
-                    const coords = {
-                      'PG': { top: '22%', left: '50%' },
-                      'SG': { top: '48%', left: '24%' },
-                      'SF': { top: '48%', left: '76%' },
-                      'PF': { top: '74%', left: '36%' },
-                      'C': { top: '74%', left: '64%' }
-                    }[pos];
-
                     return (
-                       <motion.div 
-                          key={pos}
-                          style={{ top: coords.top, left: coords.left }}
-                          className="absolute -translate-x-1/2 -translate-y-1/2 w-[13%] min-w-[125px] max-w-[200px] z-20 group"
-                          whileHover={{ scale: 1.05, zIndex: 50 }}
+                       <div 
+                          key={pos} 
+                          style={style} 
+                          className="absolute w-[22%] sm:w-[18%] md:w-[15%] lg:w-[13%] aspect-[2.5/3.5] -translate-x-1/2 -translate-y-1/2 z-10 hover:z-30 transition-all duration-300"
                        >
-                          {/* Holographic Glowing Spotlight Base */} <div className="absolute top-[85%] left-1/2 -translate-x-1/2 w-16 h-4 bg-[#10b981]/15 blur-sm rounded-full pointer-events-none group-hover:scale-125 transition-transform duration-300" /> <div className="absolute top-[88%] left-1/2 -translate-x-1/2 w-12 h-1 opacity-40 blur-[2px] rounded-full pointer-events-none" style={{ backgroundColor: teamColors.primaryColor, boxShadow: `0 0 15px 4px ${teamColors.primaryColor}` }} /> <div className="relative">
-                             {card ? (
-                                <div className="relative group/slot">
-                                   <div className="transition-all duration-350 group-hover/slot:drop-shadow-[0_15px_30px_rgba(0,0,0,0.8)]">
-                                     <CardItem card={card} isOwned={true} mode="mini" />
-                                   </div>
-
-                                   <div className="absolute inset-0 bg-black/85 backdrop-blur-md opacity-0 group-hover/slot:opacity-100 flex flex-col items-center justify-center gap-1.5 transition-all duration-300 rounded-[1.25rem] p-2 text-center border border-white/10">
-                                      <p className="text-[9px] font-black uppercase text-zinc-400 tracking-wider leading-none">{pos}</p>
-                                      <p className="text-[8px] font-extrabold text-white truncate max-w-full leading-none mb-1.5">{card.name}</p>
-                                      
-                                      <button 
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setSelectedPlayerForProgress({ id, card });
-                                        }}
-                                        className="w-full py-1.5 bg-white/5 hover:bg-white/10 text-[8px] font-black uppercase tracking-wider rounded-lg border border-white/5 text-zinc-300 hover:text-white transition-colors cursor-pointer"
-                                      >
-                                        Inspect
-                                      </button>
-                                      <button 
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setLineupModalPos(pos);
-                                        }}
-                                        className="w-full py-1.5 text-black text-[8px] font-black uppercase tracking-wider rounded-lg transition-transform hover:scale-103 cursor-pointer"
-                                        style={{ backgroundColor: teamColors.primaryColor }}
-                                      >
-                                        Swap
-                                      </button>
-                                   </div>
-
-                                   <div className="absolute -bottom-3.5 left-1/2 -translate-x-1/2 bg-black border border-white/10 whitespace-nowrap px-3 py-1 rounded-full shadow-2xl transform transition-transform group-hover/slot:scale-110 flex items-center gap-1">
-                                      <span className="text-[9px] font-black text-white italic uppercase">{pos}</span>
-                                      <span className="w-1 h-1 rounded-full bg-zinc-500" />
-                                      <span className="text-[9px] font-extrabold text-amber-500">{(state?.playerProgress?.[id]?.ovr || card.stats?.ovr || 0)}</span>
-                                   </div>
-                                </div>
-                             ) : (
-                                <div 
-                                  onClick={() => setLineupModalPos(pos)} 
-                                  className="aspect-[1/1.4] bg-zinc-950/40 rounded-2xl border-2 border-dashed border-zinc-900 flex flex-col items-center justify-center gap-3 hover:bg-zinc-900/40 w-full hover:border-amber-500/25 transition-all cursor-pointer shadow-inner relative group/wireframe"
-                                >
-                                   <Plus className="text-zinc-650 w-5 h-5 group-hover/wireframe:text-amber-500 group-hover/wireframe:scale-110 transition-transform duration-300" />
-                                   <span className="text-[9px] font-black text-zinc-500 group-hover/wireframe:text-amber-500/85 uppercase tracking-widest italic leading-none">{pos} POSITION</span>
-                                </div>
-                             )}
-                          </div>
-                       </motion.div>
+                          <Slot 
+                             card={card}
+                             label={pos}
+                             position={pos}
+                             onClick={() => {
+                               if (card) {
+                                 // Clicking opens Inspect dialog
+                                 setSelectedPlayerForProgress({ id, card });
+                               } else {
+                                 setLineupModalPos(pos);
+                               }
+                             }}
+                             onInspect={() => setSelectedPlayerForProgress({ id, card })}
+                             onSwap={() => setLineupModalPos(pos)}
+                             isSelected={lineupModalPos === pos}
+                             teamColor={teamColors.primaryColor}
+                          />
+                       </div>
                     );
                  })}
               </div>
-           </div>
 
-           {/* MOBILE STARTING 5: Highly optimized vertical checklist with large touch targets */}
-           <div className="block md:hidden space-y-2">
-              {positions.map(pos => {
-                 const id = userTeam.lineup[pos];
-                 const card = findCard(id);
-                 return (
-                    <div key={pos} className="bg-zinc-950/70 rounded-xl border border-white/5 p-3 flex items-center justify-between gap-3">
-                       <div className="flex items-center gap-3 min-w-0">
-                          <div className="flex-shrink-0 w-10 h-10 bg-zinc-900 border border-white/5 rounded-lg flex items-center justify-center text-[10px] font-black text-amber-500 italic">
-                             {pos}
-                          </div>
-                          
-                          {card ? (
-                             <div className="flex items-center gap-2.5 min-w-0">
-                                <div className="w-8 h-8 rounded bg-zinc-900 border border-white/10 shrink-0 pointer-events-none p-0.5 overflow-hidden">
-                                   <PlayerHeadshot nbaId={card.nbaId} name={card.name} />
-                                </div>
-                                <div className="truncate min-w-0 leading-tight">
-                                   <h5 className="text-[13px] font-black text-white italic truncate">{card.name}</h5>
-                                   <p className="text-[8px] text-zinc-505 uppercase mt-0.5">
-                                      OVR: <span className="text-amber-500 font-mono font-black">{(state?.playerProgress?.[id]?.ovr || card.stats?.ovr || 0)}</span>
-                                   </p>
-                                </div>
-                             </div>
-                          ) : (
-                             <span className="text-xs font-black text-zinc-650 uppercase italic tracking-wider">Position Unassigned</span>
-                          )}
-                       </div>
+              {/* FLOATING TEAM RATING BRAND BADGE ON DESKTOP */}
+              <div className="hidden lg:flex absolute left-6 top-6 w-44 flex-col gap-3 z-20 bg-zinc-950/85 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-4 shadow-2xl">
+                <div className="text-center">
+                  <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">Active Rating</p>
+                  <p className="text-2xl font-black italic mt-1" style={{ color: teamColors.primaryColor }}>
+                    {teamOvr} OVR
+                  </p>
+                </div>
+                <div className="w-full h-px bg-white/5" />
+                <div className="text-center">
+                  <p className="text-[9px] font-black uppercase tracking-tighter text-white italic">TACTICAL BOARD</p>
+                  <p className="text-[7px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
+                    Starting 5 Active
+                  </p>
+                </div>
+                <div className="w-full h-px bg-white/5" />
+                <div className="flex flex-col gap-1 text-center">
+                  <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Reserves Rotation</p>
+                  <p className="text-xs font-bold text-zinc-400">
+                    {(userTeam?.lineup?.bench || []).length} / 7 slots
+                  </p>
+                </div>
+              </div>
 
-                       <div className="flex items-center gap-1.5 shrink-0">
-                          {card && (
-                             <button
-                               onClick={() => setSelectedPlayerForProgress({ id, card })}
-                               className="h-11 px-3 bg-zinc-900 border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-wider text-zinc-400 active:scale-95 transition-all"
-                             >
-                               Inspect
-                             </button>
-                          )}
-                          <button
-                            onClick={() => setLineupModalPos(pos)}
-                            className="h-11 px-4 rounded-lg font-black text-[9px] text-black uppercase tracking-wider active:scale-95 transition-all flex items-center justify-center"
-                            style={{ backgroundColor: teamColors.primaryColor }}
-                          >
-                            Swap
-                          </button>
-                       </div>
+              {/* UNIFIED BOTTOM SHEET FOR BENCH & RESERVES DRAWER (from DraftView) */}
+              <AnimatePresence>
+                {isBenchOpen ? (
+                  <motion.div
+                    initial={{ y: '100%' }}
+                    animate={{ y: 0 }}
+                    exit={{ y: '100%' }}
+                    transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+                    className="absolute bottom-0 inset-x-0 bg-zinc-950/98 backdrop-blur-xl border-t border-zinc-900/60 rounded-t-3xl shadow-[0_-15px_40px_rgba(0,0,0,0.9)] z-40 flex flex-col px-3 pt-1 pb-2 w-full h-[195px] sm:h-[245px] md:h-[305px] overflow-hidden"
+                  >
+                    {/* Drawer drag handle */}
+                    <div 
+                      className="w-10 h-1 bg-zinc-800 hover:bg-zinc-700 rounded-full mx-auto mb-1 cursor-pointer transition-colors shrink-0" 
+                      onClick={() => setIsBenchOpen(false)} 
+                    />
+                    
+                    {/* Header inside drawer */}
+                    <div className="flex items-center justify-between mb-1.5 shrink-0 px-2 h-3.5 sm:h-5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[6px] sm:text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                          BENCH ROTATION ({(userTeam?.lineup?.bench || []).length}/7 ACTIVE)
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => setLineupModalPos('bench')}
+                          className="px-2 py-0.5 bg-zinc-900 hover:bg-zinc-800 border border-white/5 text-amber-500 rounded text-[5px] sm:text-[8px] font-black uppercase tracking-widest transition-all cursor-pointer h-4 sm:h-5"
+                        >
+                          + ADD PLAYER
+                        </button>
+                        <button
+                          onClick={() => setIsBenchOpen(false)}
+                          className="px-2 py-0.5 bg-zinc-900 border border-zinc-800/60 hover:bg-zinc-800 text-zinc-550 hover:text-white rounded text-[5px] sm:text-[8px] font-black uppercase tracking-widest transition-colors h-4 sm:h-5"
+                        >
+                          CLOSE
+                        </button>
+                      </div>
                     </div>
-                 );
-              })}
+
+                    {/* Horizontal scroll track of bench cards */}
+                    <div className="flex-1 overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+                      <div className="flex items-center gap-3 sm:gap-4 h-full py-0.5 px-1 min-w-max">
+                        {benchSlots.map((slot, index) => {
+                          const isReserve = index >= 5;
+                          return (
+                            <div 
+                              key={slot.id} 
+                              className="flex flex-col items-center shrink-0 w-[85px] sm:w-[110px] md:w-[130px]"
+                            >
+                              {/* Overlay tag for card label */}
+                              <div className="flex items-center justify-center -mb-2 relative z-20 select-none pointer-events-none">
+                                <span className={`text-[5px] md:text-[7px] font-black uppercase px-1.5 py-0.5 rounded bg-zinc-950/95 border border-zinc-900/50 tracking-wider leading-none shadow-md ${isReserve ? 'text-zinc-550' : 'text-amber-500/90'}`}>
+                                  {isReserve ? `R${index - 4}` : `B${index + 1}`}
+                                </span>
+                              </div>
+                              
+                              <div className="w-full aspect-[2.5/3.5]">
+                                <Slot 
+                                  card={slot.card}
+                                  label={isReserve ? `R${index - 4}` : `B${index + 1}`}
+                                  position="bench"
+                                  onClick={() => {
+                                    if (slot.card) {
+                                      setSelectedPlayerForProgress({ id: slot.playerId, card: slot.card });
+                                    } else {
+                                      setLineupModalPos('bench');
+                                    }
+                                  }}
+                                  onInspect={() => setSelectedPlayerForProgress({ id: slot.playerId, card: slot.card })}
+                                  onSwap={() => setLineupModalPos('bench')}
+                                  isSelected={lineupModalPos === 'bench'}
+                                  teamColor={teamColors.primaryColor}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <div className="absolute bottom-0 inset-x-0 z-30 flex justify-center">
+                    <motion.button
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      onClick={() => setIsBenchOpen(true)}
+                      className="flex items-center justify-center gap-1.5 bg-zinc-950 border-t border-x border-zinc-900 text-zinc-400 hover:text-white px-6 h-8 rounded-t-xl shadow-[0_-4px_12px_rgba(0,0,0,0.5)] font-bold uppercase tracking-widest text-[8px] transition-colors pointer-events-auto active:bg-zinc-900 cursor-pointer"
+                    >
+                      <ChevronUp size={10} className="animate-bounce text-amber-500" />
+                      <span>▲ BENCH & RESERVES ({(userTeam?.lineup?.bench || []).length}/7)</span>
+                    </motion.button>
+                  </div>
+                )}
+              </AnimatePresence>
            </div>
         </div>
 
-       {/* BENCH SECTION */}
-       <div className="space-y-4">
-          <div className="flex items-center justify-between border-b border-white/5 pb-3">
-             <div className="flex items-center gap-3">
-                <h3 className="text-sm md:text-2xl font-black uppercase italic text-white tracking-tighter">Reserves Rotation</h3>
-                <span className="text-[8px] md:text-[10px] font-black bg-zinc-900 text-zinc-405 px-2.5 py-1 rounded-full uppercase tracking-wider border border-white/5">
-                   {(userTeam?.lineup?.bench || []).length} Active
-                </span>
-             </div>
-             <button 
-                onClick={() => setLineupModalPos('bench')}
-                className="flex items-center gap-1 bg-zinc-900 border border-white/10 text-white h-11 px-4 rounded-xl text-[9px] font-black uppercase tracking-wider hover:scale-102 active:scale-98 transition-all cursor-pointer"
-             >
-                <Plus size={12} className="text-amber-500" /> Add Reserve
-             </button>
-          </div>
-          
-          {/* Fluid Horizontal Scroll Snap list */}
-          <div className="flex gap-3 md:gap-6 overflow-x-auto pb-4 pt-1 snap-x no-scrollbar">
-             {((userTeam?.lineup?.bench || []) as string[]).map((id) => {
-                const card = findCard(id);
-                if (!card) return null;
-                return (
-                   <motion.div 
-                      key={id} 
-                      className="group cursor-pointer relative shrink-0 w-28 md:w-36 snap-start"
-                      whileHover={{ y: -6 }}
-                   >
-                      <CardItem card={card} isOwned={true} mode="mini" />
-                      
-                      {/* Interactive reserve menu */}
-                      <div className="absolute inset-0 bg-black/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-1.5 transition-all duration-250 rounded-[1.2rem] p-3 text-center border border-white/10">
-                         <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">RESERVE</p>
-                         <p className="text-[8.5px] font-black text-white truncate w-full mb-1">{card.name.split(' ').pop()}</p>
-                         
-                         <button 
-                           onClick={(e) => {
-                             e.stopPropagation();
-                             setSelectedPlayerForProgress({ id, card });
-                           }}
-                           className="w-full py-1.5 bg-white/5 hover:bg-white/15 text-[8px] font-black uppercase rounded cursor-pointer text-zinc-300"
-                         >
-                           Inspect
-                         </button>
-                         <button 
-                           onClick={(e) => {
-                              e.stopPropagation();
-                              if (true) {
-                                 userTeam.lineup.bench = userTeam.lineup.bench.filter((bid: string) => bid !== id);
-                                 setState({ ...state });
-                              }
-                           }}
-                           className="w-full py-1.5 bg-rose-950/80 hover:bg-rose-900 border border-rose-500/20 text-rose-400 hover:text-white text-[8px] font-black uppercase rounded cursor-pointer"
-                         >
-                           Remove
-                         </button>
-                      </div>
-                   </motion.div>
-                );
-             })}
-             {((userTeam?.lineup?.bench || []) as string[]).length === 0 && (
-                <div className="w-full py-12 flex flex-col items-center justify-center border border-dashed border-white/5 bg-zinc-950/40 rounded-[1.5rem] md:rounded-[2rem] gap-2">
-                   <div className="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center">
-                      <Users className="text-zinc-650 animate-pulse" size={20} />
-                   </div>
-                   <div className="text-center p-3">
-                      <p className="text-xs font-black text-zinc-500 uppercase italic">Bench Empty</p>
-                      <p className="text-[7.5px] font-extrabold text-[#71717a] uppercase tracking-widest mt-0.5">Appoint secondary reserves to balance fatigue</p>
-                   </div>
-                </div>
-             )}
-          </div>
-       </div>
-
-        {/* PLAYER INSPECT DETAIL MODAL (Adaptive Desk Center OR Bottom Sheet on Mobile) */}
+        {/* DETAILED PLAYER PROGRESS INSPECT MODAL (from DraftView) */}
         <AnimatePresence>
           {selectedPlayerForProgress && (
             <div className="fixed inset-0 z-[11000] flex items-end md:items-center justify-center p-0 md:p-4">
@@ -367,8 +509,9 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                 className="absolute inset-0 bg-black/95 backdrop-blur-2xl" 
               />
 
+              {/* Dynamic light emission behind card pedestal */}
               <div 
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] blur-[120px] opacity-15 pointer-events-none rounded-full"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] blur-[120px] opacity-20 pointer-events-none rounded-full"
                 style={{ backgroundColor: teamColors.primaryColor }}
               />
 
@@ -378,26 +521,25 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                 exit={isMobile ? { y: '100%' } : { scale: 0.94, opacity: 0, y: 30 }}
                 transition={{ type: "spring", stiffness: 350, damping: 28 }}
                 className={isMobile 
-                  ? "fixed bottom-0 left-0 right-0 max-h-[85vh] rounded-t-[2.5rem] bg-zinc-950 border-t border-white/10 p-5 flex flex-col gap-5 overflow-y-auto z-20 shadow-3xl pb-safe"
+                  ? "fixed bottom-0 left-0 right-0 max-h-[90vh] rounded-t-[2.5rem] bg-zinc-950 border-t border-white/10 p-5 flex flex-col gap-5 overflow-y-auto z-20 shadow-3xl pb-safe"
                   : "relative w-full max-w-4xl bg-zinc-950/95 border border-white/10 rounded-[2rem] p-6 md:p-10 flex flex-col md:flex-row gap-8 overflow-hidden z-20 shadow-3xl"
                 }
               >
-                {/* Tactile pull handle for mobile bottom sheets */}
+                {/* Pull handle for mobile */}
                 {isMobile && (
                   <div className="w-12 h-1 bg-zinc-750 rounded-full mx-auto mb-1 shrink-0 opacity-80" />
                 )}
 
-                {/* Close button */}
+                {/* Close Button */}
                 <button 
                   onClick={() => setSelectedPlayerForProgress(null)} 
-                  className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-full text-zinc-405 hover:text-white transition-colors z-50 cursor-pointer"
+                  className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-full text-zinc-400 hover:text-white transition-colors z-50 cursor-pointer"
                 >
                   <X size={16} />
                 </button>
 
-                {/* Left Half: Card display with custom presentation (Holographic Pedestal) */}
+                {/* Left side: Premium Card pedestal */}
                 <div className="flex flex-col items-center justify-center shrink-0 w-full md:w-80 bg-zinc-950/80 border border-white/5 rounded-[2rem] p-6 relative overflow-hidden group shadow-2xl min-h-[380px]">
-                  {/* Glowing Spotlight Pedestal */}
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.02)_0%,transparent_70%)] pointer-events-none" />
                   <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-48 h-6 bg-amber-500/5 blur-xl rounded-full pointer-events-none group-hover:bg-amber-500/10 transition-all duration-1000" />
                   <div 
@@ -408,55 +550,66 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                     }}
                   />
                   <div className="scale-100 md:scale-105 select-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.85)] relative z-10 transition-transform duration-500 hover:scale-110">
-                    <CardItem card={selectedPlayerForProgress.card} isOwned={true} mode="premium" />
+                    <CardItem card={selectedPlayerForProgress.card} isOwned={true} mode="large" />
                   </div>
                 </div>
 
-                {/* Right Half: Dynamic statistics, level tracks, injury flags */}
+                {/* Right side: Dynamic Athlete Profile stats and Progress tracker */}
                 {(() => {
                   const id = selectedPlayerForProgress.id;
                   const card = selectedPlayerForProgress.card;
                   const progressDetails = state?.playerProgress?.[id] || { age: 24, potential: 82, form: 50 };
                   
-                  // Stats computation
+                  // Stats Calculations
                   const sNode = state?.stats?.seasonal?.[id];
                   let gp = sNode?.gamesPlayed || 0;
                   let ppg = gp > 0 ? (sNode.points / gp).toFixed(1) : '0.0';
                   let rpg = gp > 0 ? (sNode.rebounds / gp).toFixed(1) : '0.0';
                   let apg = gp > 0 ? (sNode.assists / gp).toFixed(1) : '0.0';
 
-                  const currOvr = progressDetails.ovr || card.stats.ovr || 72;
-                  const pOvr = progressDetails.potential || card.stats.potential || 85;
+                  const currOvr = progressDetails.ovr || card?.stats?.ovr || 72;
+                  const pOvr = progressDetails.potential || card?.stats?.potential || 85;
                   const progressPercent = Math.min(100, Math.max(0, ((currOvr - 60) / (pOvr - 60)) * 100));
-
                   const isInjured = progressDetails.injuryWeeks && progressDetails.injuryWeeks > 0;
+                  const isBenchPlayer = (userTeam?.lineup?.bench || []).includes(id);
+                  
+                  // Figure out visual label
+                  let slotLabel = 'ROSTER';
+                  if (isBenchPlayer) {
+                    slotLabel = 'BENCH';
+                  } else {
+                    const starterPos = positions.find(p => userTeam?.lineup?.[p] === id);
+                    if (starterPos) slotLabel = starterPos;
+                  }
 
                   return (
                     <div className="flex-1 flex flex-col justify-between space-y-4">
                       <div className="space-y-4">
                         <div className="space-y-1.5 leading-tight">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[9px] font-black uppercase text-amber-500 tracking-wider">ATHLETE FILE</span>
+                            <span className="text-[9px] font-black uppercase tracking-wider text-amber-500">ATHLETE REPORT</span>
                             <span className="w-1 h-1 rounded-full bg-zinc-700" />
                             <span className="text-[9px] text-zinc-400 font-black uppercase tracking-widest"># {card.nbaId || 'ACTIVE'}</span>
                           </div>
                           <h2 className="text-xl md:text-5xl font-black uppercase italic tracking-tighter text-white">
                             {card.name}
                           </h2>
-                          <p className="text-zinc-500 font-extrabold text-[10px] md:text-sm uppercase tracking-widest">{card.position} | Tier {card.tier?.toUpperCase() || 'COMMON'}</p>
+                          <p className="text-zinc-500 font-extrabold text-[10px] md:text-sm uppercase tracking-widest">
+                            {card.position} | Tier {card.tier?.toUpperCase() || card.rarity?.toUpperCase() || 'COMMON'}
+                          </p>
                         </div>
 
-                        {/* Health & Status Badge row */}
+                        {/* Health Status Badges */}
                         <div className="flex flex-wrap gap-1.5">
                           {isInjured ? (
-                            <div className="px-2.5 py-1 bg-red-950/80 border border-red-500/20 text-red-00 font-black text-[8px] uppercase tracking-wider rounded-lg flex items-center gap-1 leading-none">
+                            <div className="px-2.5 py-1 bg-red-950/80 border border-red-500/20 text-red-400 font-black text-[8px] uppercase tracking-wider rounded-lg flex items-center gap-1 leading-none">
                               <Activity size={10} className="animate-pulse" />
                               INJURED: {progressDetails.injuryType || 'Sprained Ankle'} ({progressDetails.injuryWeeks}w left)
                             </div>
                           ) : (
                             <div className="px-2.5 py-1 bg-emerald-950/85 border border-emerald-500/20 text-emerald-400 font-black text-[8px] uppercase tracking-wider rounded-lg flex items-center gap-1 leading-none">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                              FULLY FIT & ACTIVE
+                              FULLY FIT & ELIGIBLE
                             </div>
                           )}
 
@@ -465,7 +618,7 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                           </div>
                         </div>
 
-                        {/* OVERALL AND PROGRESS TRACKER */}
+                        {/* SHIMMER-SWEEPING DEVELOPMENT PATHWAY TRAIL */}
                         <div className="bg-[#090d16] border border-white/10 p-5 rounded-[1.5rem] space-y-4 shadow-inner relative overflow-hidden backdrop-blur-md">
                           <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-500/10 to-transparent blur-xl pointer-events-none" />
                           
@@ -480,16 +633,15 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                             <div className="text-right leading-none">
                               <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">POTENTIAL LIMIT</p>
                               <h4 className="text-xl font-black italic uppercase text-zinc-300 mt-1.5 flex items-center justify-end gap-2">
-                                <span className="text-[10px] font-normal tracking-wide not-italic px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded text-amber-400">CAP LIMIT</span>
+                                <span className="text-[10px] font-normal tracking-wide not-italic px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded text-amber-400">CEILING</span>
                                 {pOvr}
                               </h4>
                             </div>
                           </div>
 
-                          {/* Dual Line progress visualizer track */}
+                          {/* Sweeping bar tracker */}
                           <div className="space-y-2 pt-1">
-                            <div className="relative h-2 w-full bg-zinc-900 rounded-full overflow-hidden border border-white/5 shadow-inner">
-                              {/* Glowing flow background track of potential */}
+                            <div className="relative h-2.5 w-full bg-zinc-900 rounded-full overflow-hidden border border-white/5 shadow-inner">
                               <div className="absolute inset-0 bg-white/[0.02] pointer-events-none" />
                               
                               <motion.div 
@@ -502,8 +654,8 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                                   boxShadow: `0 0 12px ${teamColors.primaryColor}`
                                 }}
                               >
-                                {/* Glowing light sweep on active indicator */}
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent translate-x-[-100%] animate-[shimmer_2s_infinite]" />
+                                {/* Light sweep shimmer animation */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] animate-[shimmer_2s_infinite]" />
                               </motion.div>
                             </div>
                             <div className="flex justify-between text-[8px] font-black tracking-widest text-zinc-500 uppercase">
@@ -514,9 +666,9 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                           </div>
                         </div>
 
-                        {/* CURRENT SEASON AVERAGES FEED */}
+                        {/* STATS AVERAGES FEED */}
                         <div className="space-y-1.5">
-                          <p className="text-[8.5px] font-black text-zinc-550 uppercase tracking-widest">SEASON SIMULATION AVERAGES</p>
+                          <p className="text-[8.5px] font-black text-zinc-500 uppercase tracking-widest">SEASON SIMULATION AVERAGES</p>
                           <div className="grid grid-cols-4 gap-2">
                             <div className="bg-zinc-900/40 border border-white/5 p-2 rounded-xl text-center">
                               <p className="text-[7.5px] font-bold text-zinc-550 uppercase mb-0.5">Games</p>
@@ -538,18 +690,42 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                         </div>
                       </div>
 
-                      {/* Profile Footer */}
-                      <div className="border-t border-white/5 pt-3.5 flex justify-between items-center">
+                      {/* Profile Footer (Close and quick Swap) */}
+                      <div className="border-t border-white/5 pt-3.5 flex justify-between items-center gap-2">
                         <div className="flex items-center gap-1">
                           <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: teamColors.primaryColor }} />
                           <span className="text-[7.5px] font-mono font-bold text-zinc-500 uppercase tracking-widest truncate max-w-[130px]">Dynamic Contract Guard</span>
                         </div>
-                        <button 
-                          onClick={() => setSelectedPlayerForProgress(null)}
-                          className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white border border-white/5 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer"
-                        >
-                          Dismiss
-                        </button>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {isBenchPlayer && (
+                            <button 
+                              onClick={() => {
+                                setSelectedPlayerForProgress(null);
+                                userTeam.lineup.bench = userTeam.lineup.bench.filter((bid: string) => bid !== id);
+                                setState({ ...state });
+                              }}
+                              className="px-4 py-2.5 bg-rose-950/80 hover:bg-rose-900 text-rose-400 border border-rose-500/20 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                            >
+                              Remove
+                            </button>
+                          )}
+                          <button 
+                            onClick={() => {
+                              setSelectedPlayerForProgress(null);
+                              setLineupModalPos(isBenchPlayer ? 'bench' : slotLabel);
+                            }}
+                            className="px-4 py-2.5 text-black text-[9px] font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                            style={{ backgroundColor: teamColors.primaryColor }}
+                          >
+                            Swap Player
+                          </button>
+                          <button 
+                            onClick={() => setSelectedPlayerForProgress(null)}
+                            className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white border border-white/5 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                          >
+                            Dismiss
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -559,8 +735,8 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
           )}
         </AnimatePresence>
 
-         {/* MODAL REDESIGN - Choose best fit roster modal */}
-         <AnimatePresence>
+        {/* GLOWING HIGH-TECH ASSIGNMENT DESKTOP MODAL */}
+        <AnimatePresence>
           {lineupModalPos && (
             <div className="fixed inset-0 z-[10000] flex items-end md:items-center justify-center p-0 md:p-4">
               <motion.div 
@@ -579,7 +755,7 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                   : "relative w-full max-w-7xl bg-zinc-950/80 border border-white/10 rounded-[2.5rem] md:rounded-[4rem] p-6 lg:p-12 space-y-8 max-h-[90vh] overflow-hidden flex flex-col shadow-2xl z-20"
                 }
               >
-                {/* Tactile pull handle for mobile bottom sheets md:hidden */}
+                {/* Mobile drag bar */}
                 {isMobile && (
                   <div className="w-12 h-1 bg-zinc-750 rounded-full mx-auto mb-1 shrink-0 opacity-80" />
                 )}
@@ -595,7 +771,7 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                         Slot {lineupModalPos}
                       </div>
                     </div>
-                    <p className="text-zinc-500 text-[8px] md:text-xs font-bold uppercase tracking-widest italic flex items-center gap-1.5">
+                    <p className="text-zinc-550 text-[8px] md:text-xs font-bold uppercase tracking-widest italic flex items-center gap-1.5">
                        <Sparkles size={11} className="text-amber-500 shrink-0" /> SELECT FROM YOUR ACTIVE ROSTER TO ASSIGN
                     </p>
                   </div>
@@ -615,12 +791,13 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                           By POS
                         </button>
                      </div>
-                     <button onClick={() => setLineupModalPos(null)} className="w-9 h-9 md:w-14 md:h-14 flex items-center justify-center bg-zinc-900 hover:bg-zinc-805 rounded-full transition-colors border border-white/5 cursor-pointer text-zinc-400">
+                     <button onClick={() => setLineupModalPos(null)} className="w-9 h-9 md:w-14 md:h-14 flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 rounded-full transition-colors border border-white/5 cursor-pointer text-zinc-400">
                        <Plus size={20} className="rotate-45" />
                      </button>
                   </div>
                 </div>
 
+                {/* Cards list in Assignment grid */}
                 <div className="flex-1 overflow-y-auto pr-1 no-scrollbar">
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-3 md:gap-6 pb-12">
                      {rosterSorted.map(id => {
@@ -629,8 +806,8 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
                         
                         const isPositionMatch = lineupModalPos !== 'bench' && card.position.includes(lineupModalPos!.charAt(0));
                         const isAssigned = lineupModalPos !== 'bench' 
-                          ? (userTeam.lineup[lineupModalPos as keyof TeamObject['lineup']] === id)
-                          : (userTeam.lineup.bench as string[]).includes(id);
+                          ? (userTeam?.lineup?.[lineupModalPos!] === id)
+                          : (userTeam?.lineup?.bench || []).includes(id);
 
                         const isAssignedElsewhere = lineupModalPos !== 'bench' 
                           ? Object.values(userTeam?.lineup || {}).some((v, idx) => v === id && positions[idx] !== lineupModalPos) || ((userTeam?.lineup?.bench || []) as string[]).includes(id)
@@ -638,15 +815,15 @@ const LineupTab: React.FC<LineupTabProps> = React.memo(({
 
                         return (
                            <motion.div 
-                              key={id}
-                              whileHover={isAssigned ? {} : { y: -8 }}
-                              whileTap={isAssigned ? {} : { scale: 0.97 }}
-                              className={`relative h-full flex flex-col group ${isAssigned ? 'cursor-default' : 'cursor-pointer'}`}
-                              onClick={() => {
-                                 if (isAssigned) return;
-                                 handleUpdateLineup(id);
-                                 setLineupModalPos(null);
-                              }}
+                               key={id}
+                               whileHover={isAssigned ? {} : { y: -8 }}
+                               whileTap={isAssigned ? {} : { scale: 0.97 }}
+                               className={`relative h-full flex flex-col group ${isAssigned ? 'cursor-default' : 'cursor-pointer'}`}
+                               onClick={() => {
+                                  if (isAssigned) return;
+                                  handleUpdateLineup(id);
+                                  setLineupModalPos(null);
+                               }}
                            >
                               <div className={`h-full transition-all duration-400 ${isAssigned ? 'opacity-25 grayscale blur-[0.5px]' : 'group-hover:drop-shadow-[0_0_20px_rgba(245,158,11,0.25)]'}`}>
                                  <CardItem card={card} isOwned={true} mode="mini" />

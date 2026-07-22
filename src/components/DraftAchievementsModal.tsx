@@ -80,13 +80,13 @@ export default function DraftAchievementsModal({ isOpen, onClose }: DraftAchieve
 
             {/* List */}
             <div className="flex-1 overflow-y-auto p-6 space-y-3 no-scrollbar">
-              {draftAchievements.map((ach) => {
+              {draftAchievements.map((ach, index) => {
                 const isUnlocked = unlockedAchievements.includes(ach.id) || ach.requirement(state, ALL_CARDS);
                 const Icon = ach.icon || Zap;
                 
                 return (
                   <div 
-                    key={ach.id}
+                    key={`${ach.id}-${index}`}
                     className={`p-4 md:p-5 rounded-[1.5rem] md:rounded-3xl border transition-all duration-300 flex items-center gap-3 md:gap-5 ${
                       isUnlocked ? 'bg-zinc-900 border-amber-500/30' : 'bg-zinc-950 border-zinc-900 opacity-60'
                     }`}

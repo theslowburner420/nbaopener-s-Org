@@ -42,7 +42,7 @@ const StatsTab: React.FC<StatsTabProps> = React.memo(({
       initial={{ opacity: 0, y: 15 }} 
       animate={{ opacity: 1, y: 0 }} 
       exit={{ opacity: 0, y: -15 }}
-      className="max-w-[1400px] mx-auto space-y-4 md:space-y-8 pb-20 px-4 md:px-8 select-none text-zinc-300"
+      className="w-full space-y-4 md:space-y-8 pb-20 px-4 md:px-8 select-none text-zinc-300"
     >
       {/* EXECUTIVE REPORT TITLE */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/5 pb-4 md:pb-6">

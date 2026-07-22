@@ -85,6 +85,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       battlePassLevel: initialGuestState?.battlePassLevel ?? 0,
       franchise: initialGuestState?.franchise ?? undefined,
       completedSbcs: initialGuestState?.completedSbcs ?? [],
+      pendingReferral: initialGuestState?.pendingReferral ?? null,
+      onFirstPackOpenProcessed: initialGuestState?.onFirstPackOpenProcessed ?? false,
     };
   });
 
@@ -133,6 +135,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         battlePassLevel: state.battlePassLevel,
         franchise: state.franchise,
         completedSbcs: state.completedSbcs,
+        pendingReferral: state.pendingReferral,
+        onFirstPackOpenProcessed: state.onFirstPackOpenProcessed,
       };
       localStorage.setItem('GUEST_PROGRESS', JSON.stringify(guestData));
     } else {
@@ -422,11 +426,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('✨ NEW USER: First sync - Awarding Welcome Pack');
         finalMergedData = {
           ...localProgress,
-          coins: Math.max(localProgress.coins, 100000), // Increased Welcome bonus: 100k
+          coins: Math.max(localProgress.coins, 150000), // Increased Welcome bonus: 150k
           inventoryPacks: [
             ...localProgress.inventoryPacks,
-            { id: `welcome-mega-${Date.now()}`, type: 'premium', name: 'Welcome Mega Pack', count: 5 },
-            { id: `gift-${Date.now()}`, type: 'mvp', name: 'Finals MVP Pack', count: 3 }
+            { id: `welcome-mvp-${Date.now()}`, type: 'mvp', name: 'Finals MVP Pack', count: 5 },
+            { id: `welcome-hof-${Date.now()}`, type: 'hof', name: 'HOF Pack', count: 3 },
+            { id: `welcome-legendary-${Date.now()}`, type: 'legendary_mvp', name: 'Legendary MVP Pack', count: 1 }
           ]
         };
         setShowWelcomeGift(true);
@@ -931,19 +936,31 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const claimLoginReward = useCallback(async () => {
     if (!stateRef.current.user) return;
     
-    // Add specific login rewards: 50,000 extra coins and a Mega Pack
-    const megaPack = { id: 'mega', type: 'mega', name: 'Mega Pack' };
+    // Prevent duplicate claims of login bonus
+    if (stateRef.current.claimedAchievements.includes('login_bonus')) return;
+
     let newPacks = [...stateRef.current.inventoryPacks];
-    const existing = newPacks.find(p => p.type === 'mega');
-    if (existing) {
-      newPacks = newPacks.map(p => p.type === 'mega' ? { ...p, count: p.count + 1 } : p);
+    
+    // Add 2x HOF Pack
+    const existingHof = newPacks.find(p => p.type === 'hof');
+    if (existingHof) {
+      newPacks = newPacks.map(p => p.type === 'hof' ? { ...p, count: p.count + 2 } : p);
     } else {
-      newPacks.push({ ...megaPack, count: 1 });
+      newPacks.push({ id: `login-hof-${Date.now()}`, type: 'hof', name: 'HOF Pack', count: 2 });
+    }
+
+    // Add 1x Legendary MVP Pack
+    const existingLegendary = newPacks.find(p => p.type === 'legendary_mvp');
+    if (existingLegendary) {
+      newPacks = newPacks.map(p => p.type === 'legendary_mvp' ? { ...p, count: p.count + 1 } : p);
+    } else {
+      newPacks.push({ id: `login-legendary-${Date.now()}`, type: 'legendary_mvp', name: 'Legendary MVP Pack', count: 1 });
     }
 
     await updateGameStateAsync({
-      coins: stateRef.current.coins + 50000,
+      coins: stateRef.current.coins + 100000,
       inventoryPacks: newPacks,
+      claimedAchievements: [...stateRef.current.claimedAchievements, 'login_bonus']
     });
   }, [updateGameStateAsync]);
 

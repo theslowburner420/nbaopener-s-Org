@@ -30,7 +30,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, []);
 
   const addNotification = useCallback((notification: Omit<Notification, 'id'>) => {
-    const id = Math.random().toString(36).substring(7);
+    const id = `notif-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     setQueue(prev => [...prev, { ...notification, id }]);
     
     setTimeout(() => {

@@ -11,6 +11,7 @@ export default function OpenView() {
   const [isOpening, setIsOpening] = useState(false);
   const [openedCards, setOpenedCards] = useState<Card[] | null>(null);
   const [newlyUnlocked, setNewlyUnlocked] = useState<any[]>([]);
+  const [inviteeReward, setInviteeReward] = useState<any>(null);
   const { openPack, isSaving } = useEngine();
 
   // Preload pack image
@@ -30,6 +31,7 @@ export default function OpenView() {
           setIsOpening(false);
           setOpenedCards(result.cards);
           setNewlyUnlocked(result.newlyUnlocked);
+          if (result.inviteeReward) setInviteeReward(result.inviteeReward);
         }, 1500);
       }
     } catch (error) {
@@ -140,10 +142,12 @@ export default function OpenView() {
           <PackOpener 
             cards={openedCards} 
             newlyUnlockedAchievements={newlyUnlocked}
+            inviteeReward={inviteeReward}
             packImage="https://i.postimg.cc/bY3DRzLz/4a07a4ae-7c5c-4d11-8585-780a8aebebbe.png"
             onClose={() => {
               setOpenedCards(null);
               setNewlyUnlocked([]);
+              setInviteeReward(null);
             }} 
           />
         )}
