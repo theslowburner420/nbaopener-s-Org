@@ -4,6 +4,7 @@ import { Sparkles, ArrowLeft } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useEngine } from '../hooks/useEngine';
 import PackOpener from '../components/PackOpener';
+import StaticAd from '../components/StaticAd';
 import { Card } from '../types';
 
 export default function OpenView() {
@@ -39,11 +40,16 @@ export default function OpenView() {
   };
 
   return (
-    <div className="h-[100dvh] w-full flex flex-col items-center justify-center bg-black relative overflow-hidden">
+    <div className="h-[100dvh] w-full flex flex-col items-center justify-between bg-black relative overflow-hidden">
+      {/* Top Banner Ad Area */}
+      <div className="w-full z-[5500] relative shrink-0">
+        <StaticAd position="header" />
+      </div>
+
       {/* Back Button */}
       <button 
         onClick={() => setCurrentView('home')}
-        className="absolute top-[calc(1.5rem+env(safe-area-inset-top))] left-[calc(1.5rem+env(safe-area-inset-left))] z-[5500] w-12 h-12 bg-zinc-900/90 backdrop-blur-xl border border-zinc-800/80 rounded-full flex items-center justify-center text-white hover:bg-zinc-800 transition-all active:scale-95 shadow-[0_4px_20px_rgba(0,0,0,0.5)] cursor-pointer"
+        className="absolute top-[calc(5rem+env(safe-area-inset-top))] left-[calc(1.5rem+env(safe-area-inset-left))] z-[5500] w-12 h-12 bg-zinc-900/90 backdrop-blur-xl border border-zinc-800/80 rounded-full flex items-center justify-center text-white hover:bg-zinc-800 transition-all active:scale-95 shadow-[0_4px_20px_rgba(0,0,0,0.5)] cursor-pointer"
       >
         <ArrowLeft size={20} />
       </button>
@@ -106,8 +112,12 @@ export default function OpenView() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[7000] bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center"
+            className="fixed inset-0 z-[7000] bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-between"
           >
+            <div className="w-full z-[7500] relative shrink-0">
+              <StaticAd position="header" />
+            </div>
+
             <div className="flex-1 flex flex-col items-center justify-center">
               <motion.div
                 animate={{ 

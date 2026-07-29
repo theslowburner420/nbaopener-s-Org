@@ -6,6 +6,7 @@ import { Check, Sparkles, Trophy, Award } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
 import { useGame } from '../context/GameContext';
 import { MemoryManager } from '../lib/memory';
+import StaticAd from './StaticAd';
 
 interface PackOpenerProps {
   cards: Card[];
@@ -447,12 +448,16 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 z-[8000] bg-black flex items-center justify-center select-none"
+        className="fixed inset-0 z-[8000] bg-black flex flex-col items-center justify-between select-none"
       >
+        <div className="w-full z-[9900] relative shrink-0">
+          <StaticAd position="header" />
+        </div>
+
         {/* Ambient Golden Glows */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-amber-500/10 blur-[80px] rounded-full pointer-events-none animate-pulse" />
         
-        <div className="flex flex-col items-center gap-6 relative z-10">
+        <div className="flex-1 flex flex-col items-center justify-center gap-6 relative z-10">
           <div className="relative">
             <div className="w-14 h-14 border-2 border-zinc-800 border-t-amber-500 rounded-full animate-spin" />
             <div className="absolute inset-0 flex items-center justify-center">
@@ -464,6 +469,8 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
             <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Caching High-Definition Assets</p>
           </div>
         </div>
+
+        <div className="h-4" />
       </motion.div>
     );
   }
@@ -473,10 +480,15 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`fixed inset-0 z-[8000] bg-black flex flex-col items-center justify-center overflow-hidden h-[100dvh] select-none pointer-events-auto isolation-isolate gpu-accelerated py-8 pb-[10vh] ${
+      className={`fixed inset-0 z-[8000] bg-black flex flex-col items-center justify-between overflow-hidden h-[100dvh] select-none pointer-events-auto isolation-isolate gpu-accelerated pb-[6vh] ${
         isRevealing ? 'animate-screen-shake-intense' : ''
       }`}
     >
+      {/* Top Banner Ad - Always visible in Pack Opener unless user has No-Ads / Premium */}
+      <div className="w-full z-[9900] relative shrink-0">
+        <StaticAd position="header" />
+      </div>
+
       {/* Dark Overlay for focus */}
       <div className="absolute inset-0 bg-black/80 z-0 pointer-events-none" />
 

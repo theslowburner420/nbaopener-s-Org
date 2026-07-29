@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useGame } from '../context/GameContext';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, Sparkles, X, Play, Check } from 'lucide-react';
+import { ShieldCheck, Sparkles, X, Play, Check, Coins, Zap, Star } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
 
 const PayPalScriptProvider = lazy(() =>
@@ -16,6 +16,7 @@ const AD_DURATION_SECONDS = 10;
 
 export default function ShopView() {
   const { 
+    coins,
     addCoins, 
     hasLifetimeNoAds,
     updateGameStateAsync,
@@ -26,7 +27,7 @@ export default function ShopView() {
   const adContainerRef = useRef<HTMLDivElement>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
   
-  const paypalClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+  const paypalClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID || 'test';
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -100,130 +101,178 @@ export default function ShopView() {
   const content = (
     <div className="min-h-full w-full flex flex-col bg-black relative">
       {/* Background Ambience */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(245,158,11,0.05)_0%,transparent_70%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(245,158,11,0.06)_0%,transparent_60%)] pointer-events-none" />
 
-      {/* Content */}
-      <div className="flex-1 px-4 sm:px-8 py-6 sm:py-10 space-y-8 no-scrollbar pb-32 z-10 max-w-lg mx-auto w-full">
+      {/* Main Container */}
+      <div className="flex-1 px-4 sm:px-6 py-5 space-y-5 no-scrollbar pb-28 z-10 max-w-3xl mx-auto w-full">
         
-        <div className="text-center space-y-2 mb-10">
-           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full mb-4">
-              <Sparkles size={12} className="text-amber-500" />
-              <span className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Official Shop</span>
-           </div>
-           <h1 className="text-5xl font-black italic uppercase tracking-tighter text-white leading-none">Hoops<span className="text-amber-500">Shop</span></h1>
-           <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold max-w-sm mx-auto leading-normal">Available Shop Options</p>
-        </div>
-
-        {/* Option 1: REMOVE ADS for $2.99 */}
-        <div className={`relative overflow-hidden rounded-[2.5rem] border-2 transition-all duration-500 p-8 group ${hasLifetimeNoAds ? 'border-purple-500 bg-purple-500/10 shadow-[0_40px_100px_rgba(168,85,247,0.2)]' : 'border-zinc-800 bg-zinc-900/40 hover:border-purple-500/30'}`}>
-          {hasLifetimeNoAds && (
-            <div className="absolute top-6 right-6 px-4 py-1.5 bg-purple-500 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg flex items-center gap-1">
-              <Check size={12} /> PURCHASED
+        {/* Compact Header */}
+        <div className="flex items-center justify-between bg-zinc-950/80 border border-zinc-900 rounded-2xl p-4 shadow-xl">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
+              <Sparkles size={18} />
             </div>
-          )}
-          
-          <div className="flex flex-col gap-6 relative z-10">
-            <div className="flex flex-col gap-4">
-              <div className="w-16 h-16 rounded-3xl bg-purple-600 flex items-center justify-center text-white shadow-[0_20px_40px_rgba(168,85,247,0.3)] shrink-0">
-                <ShieldCheck size={32} fill="currentColor" />
-              </div>
-              <div>
-                <h3 className="text-3xl font-black uppercase italic tracking-tighter text-white">Remove Ads</h3>
-                <p className="text-[9px] text-zinc-500 uppercase font-black tracking-widest mt-1">One-time payment • Lifetime access</p>
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="text-4xl font-black italic tracking-tighter text-white">
-                $2.99<span className="text-xs font-black uppercase tracking-[0.3em] text-zinc-500 ml-3 italic">LIFETIME ACCESS</span>
-              </div>
-              
-              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest leading-relaxed">
-                Permanently remove all pop-up ads and banners from your account.
+            <div>
+              <h1 className="text-lg font-black italic uppercase tracking-tight text-white leading-none">
+                Hoops<span className="text-amber-500">Shop</span>
+              </h1>
+              <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-0.5">
+                Perks & Extra Rewards
               </p>
             </div>
+          </div>
 
-            {!hasLifetimeNoAds && (
-              <div className="mt-4 space-y-3">
-                {paypalClientId ? (
-                  <Suspense fallback={<div className="h-[55px] w-full bg-zinc-900 animate-pulse rounded-full" />}>
-                    <PayPalButtons
-                      style={{ layout: "vertical", height: 55, color: 'blue', shape: 'pill', label: 'pay', tagline: false }}
-                      createOrder={(data, actions) => {
-                        return actions.order.create({
-                          intent: "CAPTURE",
-                          purchase_units: [{
-                            description: "Remove Ads - Lifetime Access",
-                            amount: { currency_code: "USD", value: LIFETIME_NO_ADS_PRICE.toFixed(2) }
-                          }],
-                          application_context: { shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW' }
-                        });
-                      }}
-                      onApprove={async (data, actions) => {
-                        const details = await actions.order?.capture();
-                        if (details?.status === 'COMPLETED') {
-                          handleNoAdsPurchaseSuccess();
-                        }
-                      }}
-                      onError={(err) => {
-                        console.error("PayPal Error:", err);
-                        notifyError("Error processing payment.");
-                      }}
-                    />
-                  </Suspense>
-                ) : (
-                  <button
-                    disabled={isPurchasing}
-                    onClick={handleNoAdsPurchaseSuccess}
-                    className="w-full h-[55px] bg-purple-600 hover:bg-purple-500 text-white font-black uppercase tracking-widest text-xs rounded-full transition-all shadow-[0_10px_30px_rgba(168,85,247,0.4)] active:scale-95 flex items-center justify-center gap-2"
-                  >
-                    {isPurchasing ? "Processing..." : "Remove Ads for $2.99"}
-                  </button>
-                )}
-              </div>
-            )}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-mono font-bold text-amber-500">
+            <Coins size={14} fill="currentColor" />
+            <span>{coins.toLocaleString()}</span>
           </div>
         </div>
 
-        {/* Option 2: WATCH AD (+50,000 COINS, 10 SEC) */}
-        <div 
-          className="relative overflow-hidden rounded-[2.5rem] border border-amber-500/30 bg-zinc-950 p-8 group cursor-pointer active:scale-[0.98] transition-all shadow-[0_20px_50px_rgba(245,158,11,0.1)]"
-          onClick={startAd}
-        >
-          <div className="absolute inset-0 bg-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="flex flex-col gap-6 relative z-10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-3xl bg-amber-500 flex items-center justify-center text-black shadow-[0_0_25px_rgba(245,158,11,0.3)] group-hover:scale-110 transition-transform shrink-0">
-                  <Play size={32} fill="currentColor" />
+        {/* 2-Column Grid (Compact Cards) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          {/* Option 1: REMOVE ADS */}
+          <div className={`relative overflow-hidden rounded-2xl border-2 transition-all duration-300 p-5 flex flex-col justify-between ${
+            hasLifetimeNoAds 
+              ? 'border-purple-500/60 bg-purple-950/20 shadow-[0_10px_30px_rgba(168,85,247,0.15)]' 
+              : 'border-purple-500/30 bg-gradient-to-b from-purple-950/30 via-zinc-950 to-zinc-950 hover:border-purple-500/50'
+          }`}>
+            <div>
+              <div className="flex items-start justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-lg shrink-0">
+                    <ShieldCheck size={20} fill="currentColor" />
+                  </div>
+                  <div>
+                    <span className="text-[9px] font-black text-purple-400 uppercase tracking-widest block">Special Offer</span>
+                    <h3 className="text-xl font-black uppercase italic tracking-tight text-white leading-none">Remove Ads</h3>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-2xl font-black uppercase italic tracking-tighter text-white">Watch Ad</h3>
-                  <p className="text-[9px] text-amber-500 uppercase font-black tracking-widest mt-0.5">Only 10 Seconds</p>
+                {hasLifetimeNoAds && (
+                  <span className="px-2.5 py-1 bg-purple-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-md flex items-center gap-1">
+                    <Check size={10} /> Active
+                  </span>
+                )}
+              </div>
+
+              <div className="space-y-2.5 my-3 pt-2 border-t border-purple-500/10">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black italic tracking-tighter text-white">$2.99</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">One-time • Lifetime</span>
                 </div>
+                
+                <ul className="space-y-1.5 text-[10px] font-medium text-zinc-300">
+                  <li className="flex items-center gap-1.5">
+                    <Star size={12} className="text-purple-400 shrink-0" />
+                    <span>Instant removal of all pop-ups & banner ads</span>
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <Zap size={12} className="text-purple-400 shrink-0" />
+                    <span>Uninterrupted gameplay forever</span>
+                  </li>
+                </ul>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-2 border-t border-white/5">
-              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Reward</span>
-              <div className="flex items-center gap-1.5">
-                <span className="text-3xl font-black italic tracking-tighter text-amber-500">+50,000</span>
-                <span className="text-xs font-black uppercase tracking-widest text-zinc-400">Coins</span>
-              </div>
+            <div className="mt-4">
+              {hasLifetimeNoAds ? (
+                <div className="w-full py-2.5 bg-purple-500/20 border border-purple-500/40 rounded-xl text-center text-[10px] font-black text-purple-300 uppercase tracking-wider flex items-center justify-center gap-1.5">
+                  <Check size={14} /> Ads Permanently Disabled
+                </div>
+              ) : (
+                <Suspense fallback={
+                  <div className="w-full h-[45px] bg-amber-500/20 border border-amber-500/30 rounded-xl animate-pulse flex items-center justify-center text-amber-300 text-[10px] font-black uppercase tracking-wider">
+                    Loading PayPal Checkout...
+                  </div>
+                }>
+                  <PayPalButtons
+                    style={{ layout: "vertical", height: 45, color: 'gold', shape: 'rect', label: 'pay', tagline: false }}
+                    createOrder={(data, actions) => {
+                      return actions.order.create({
+                        intent: "CAPTURE",
+                        purchase_units: [{
+                          description: "Remove Ads - Lifetime Access",
+                          amount: { currency_code: "USD", value: LIFETIME_NO_ADS_PRICE.toFixed(2) }
+                        }],
+                        application_context: { shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW' }
+                      });
+                    }}
+                    onApprove={async (data, actions) => {
+                      const details = await actions.order?.capture();
+                      if (details?.status === 'COMPLETED') {
+                        handleNoAdsPurchaseSuccess();
+                      }
+                    }}
+                    onError={(err) => {
+                      console.error("PayPal Error:", err);
+                      notifyError("Error processing payment.");
+                    }}
+                  />
+                </Suspense>
+              )}
             </div>
-
-            <button className="w-full py-4 bg-amber-500 text-black font-black uppercase tracking-widest text-xs rounded-2xl group-hover:bg-amber-400 transition-colors shadow-lg flex items-center justify-center gap-2">
-              <Play size={16} fill="currentColor" />
-              Watch Ad (10s)
-            </button>
           </div>
+
+          {/* Option 2: WATCH AD (+50,000 COINS) */}
+          <div 
+            className="relative overflow-hidden rounded-2xl border-2 border-amber-500/30 bg-gradient-to-b from-amber-950/20 via-zinc-950 to-zinc-950 p-5 flex flex-col justify-between hover:border-amber-500/50 transition-all duration-300 group cursor-pointer"
+            onClick={startAd}
+          >
+            <div>
+              <div className="flex items-start justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500 text-black flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform shrink-0">
+                    <Play size={20} fill="currentColor" />
+                  </div>
+                  <div>
+                    <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest block">Free Coins</span>
+                    <h3 className="text-xl font-black uppercase italic tracking-tight text-white leading-none">Watch Ad</h3>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[9px] font-black uppercase tracking-wider rounded-full">
+                  10 Sec
+                </span>
+              </div>
+
+              <div className="space-y-2.5 my-3 pt-2 border-t border-amber-500/10">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black italic tracking-tighter text-amber-500">+50,000</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Coins Reward</span>
+                </div>
+                
+                <ul className="space-y-1.5 text-[10px] font-medium text-zinc-300">
+                  <li className="flex items-center gap-1.5">
+                    <Coins size={12} className="text-amber-500 shrink-0" />
+                    <span>Earn instant coins for pack opening</span>
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <Sparkles size={12} className="text-amber-500 shrink-0" />
+                    <span>Watch quick 10-second sponsor video</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  startAd();
+                }}
+                className="w-full py-3 bg-amber-500 text-black font-black uppercase tracking-wider text-xs rounded-xl hover:bg-amber-400 transition-colors shadow-[0_4px_20px_rgba(245,158,11,0.25)] active:scale-95 flex items-center justify-center gap-2"
+              >
+                <Play size={14} fill="currentColor" />
+                Watch Ad (+50k Coins)
+              </button>
+            </div>
+          </div>
+
         </div>
 
         {/* Footer Note */}
-        <div className="pt-10 flex flex-col items-center gap-4 opacity-30 pb-10">
-          <div className="h-px w-24 bg-white/10" />
-          <p className="text-center text-[7.5px] text-zinc-400 uppercase tracking-[0.3em] font-black leading-loose max-w-sm">
-            NOT AFFILIATED WITH THE NBA • THIS IS AN UNOFFICIAL FAN GAME
+        <div className="pt-4 flex flex-col items-center gap-2 opacity-30 pb-4">
+          <p className="text-center text-[7.5px] text-zinc-400 uppercase tracking-[0.2em] font-black">
+            UNOFFICIAL FAN GAME • NOT AFFILIATED WITH THE NBA
           </p>
         </div>
       </div>
@@ -311,21 +360,17 @@ export default function ShopView() {
     </div>
   );
 
-  if (paypalClientId) {
-    return (
-      <PayPalScriptProvider options={{ 
-        "client-id": paypalClientId,
-        currency: "USD",
-        locale: "en_US",
-        "enable-funding": "venmo",
-        "disable-funding": "paylater",
-        "components": "buttons",
-        "intent": "capture"
-      }}>
-        {content}
-      </PayPalScriptProvider>
-    );
-  }
-
-  return content;
+  return (
+    <PayPalScriptProvider options={{ 
+      "client-id": paypalClientId,
+      currency: "USD",
+      locale: "en_US",
+      "enable-funding": "venmo",
+      "disable-funding": "paylater",
+      "components": "buttons",
+      "intent": "capture"
+    }}>
+      {content}
+    </PayPalScriptProvider>
+  );
 }
