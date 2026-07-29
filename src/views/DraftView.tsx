@@ -2670,7 +2670,7 @@ const DraftView: React.FC = () => {
 
               return (
                 <motion.div
-                  key={`${card.id}-${idx}`}
+                  key={card.id + idx}
                   initial={{ opacity: 0, y: 100, rotateY: 90, scale: 0.5 }}
                   animate={{ 
                     opacity: shouldFade ? 0.1 : 1, 
@@ -2968,8 +2968,8 @@ const DraftView: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-900/40 bg-zinc-950/20">
-                        {filteredBoxScore.map((player, pIdx) => (
-                          <tr key={`${player.cardId || player.name}-${pIdx}`} className="hover:bg-zinc-900/40 transition-colors group">
+                        {filteredBoxScore.map((player) => (
+                          <tr key={player.cardId} className="hover:bg-zinc-900/40 transition-colors group">
                             {/* Sticky Player Column */}
                             <td className="p-2.5 pl-4 sticky left-0 bg-[#070709] z-10 border-r border-zinc-900 shadow-[4px_0_12px_rgba(0,0,0,0.5)]">
                               <div className="flex items-center gap-2.5">

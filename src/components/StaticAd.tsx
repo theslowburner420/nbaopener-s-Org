@@ -11,14 +11,12 @@ interface StaticAdProps {
  * Uses fixed dimensions to prevent layout shifts.
  */
 const StaticAd = React.memo(({ position }: StaticAdProps) => {
-  const { isPremium, hasLifetimeNoAds } = useGame();
+  const { isPremium } = useGame();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const adsDisabled = isPremium || hasLifetimeNoAds;
-
   useEffect(() => {
-    // If user is premium or has lifetime no ads, we don't render anything
-    if (adsDisabled || !containerRef.current) return;
+    // If user is premium, we don't render anything
+    if (isPremium || !containerRef.current) return;
 
     // Clear previous content
     containerRef.current.innerHTML = '';
@@ -58,10 +56,10 @@ const StaticAd = React.memo(({ position }: StaticAdProps) => {
         containerRef.current.innerHTML = '';
       }
     };
-  }, [adsDisabled, position]);
+  }, [isPremium, position]);
 
-  // CRITICAL: If premium or lifetime no ads, do not render the component at all
-  if (adsDisabled) return null;
+  // CRITICAL: If premium, do not render the component at all
+  if (isPremium) return null;
 
   const containerClasses = position === 'header'
     ? "w-full bg-zinc-950 border-b border-zinc-900 flex justify-center items-center h-[65px] shrink-0 z-10 overflow-hidden relative"

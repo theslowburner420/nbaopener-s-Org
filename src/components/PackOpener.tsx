@@ -6,12 +6,10 @@ import { Check, Sparkles, Trophy, Award } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
 import { useGame } from '../context/GameContext';
 import { MemoryManager } from '../lib/memory';
-import { InviteeClaimModal } from './ReferralModals';
 
 interface PackOpenerProps {
   cards: Card[];
   newlyUnlockedAchievements?: any[];
-  inviteeReward?: any;
   onClose: () => void;
   packImage?: string;
 }
@@ -213,7 +211,7 @@ const RarityBackgroundEffect = React.memo(({ rarity, isActive, isRevealing }: { 
   }
 });
 
-export default function PackOpener({ cards, newlyUnlockedAchievements = [], inviteeReward, onClose, packImage }: PackOpenerProps) {
+export default function PackOpener({ cards, newlyUnlockedAchievements = [], onClose, packImage }: PackOpenerProps) {
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [isRevealing, setIsRevealing] = useState(true);
   const [showPack, setShowPack] = useState(true);
@@ -846,7 +844,7 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], invi
 
           return (
             <motion.div
-              key={`${card.id}-${index}`}
+              key={`${card.id}-${index}-${activeCardIndex === index}`}
               drag={isActive ? "x" : false}
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.8}
@@ -1091,17 +1089,6 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], invi
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Invitee Referral Reward Popup Modal */}
-      {inviteeReward && (
-        <InviteeClaimModal
-          isOpen={!!inviteeReward}
-          inviterUsername={inviteeReward.inviterUsername || 'Your Friend'}
-          coins={inviteeReward.coins || 25000}
-          pack={inviteeReward.pack || { id: 'hof-pack', type: 'hof', name: 'HOF Pack', count: 1 }}
-          onClaim={() => {}}
-        />
-      )}
     </motion.div>
   );
 }

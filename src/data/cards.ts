@@ -9947,10 +9947,10 @@ const rawCards = [
 
   // PHILADELPHIA 76ERS
   {
-    id: 'bos-001',
+    id: 'phi-001',
     name: 'Jaylen Brown',
     team: 'Boston Celtics',
-    teamAbbr: 'BOS',
+    teamAbbr: 'PHI',
     position: 'SF',
     rarity: 'franchise' as const,
     isHistorical: false,

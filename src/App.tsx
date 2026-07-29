@@ -15,8 +15,6 @@ import { Analytics } from "@vercel/analytics/react";
 import Header from './components/Header';
 import StaticAd from './components/StaticAd';
 import { Puzzle } from 'lucide-react';
-import { InviterRewardModal } from './components/ReferralModals';
-import { getUnclaimedInviterRewards, removeUnclaimedInviterReward, UnclaimedInviterReward } from './services/referralService';
 
 // Lazy load views for code splitting
 const HomeView = lazy(() => import('./views/HomeView'));
@@ -96,34 +94,11 @@ const ViewLoader = () => {
 };
 
 function AppContent() {
-  const { currentView, setCurrentView, isPremium, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setShowWelcomeGift, login, user, claimLoginReward, claimedAchievements, addCoins, addPackToInventory } = useGame();
+  const { currentView, setCurrentView, isPremium, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setShowWelcomeGift, login, user, claimLoginReward, claimedAchievements } = useGame();
   const [showLoginIncentive, setShowLoginIncentive] = useState(false);
   const [hasShownLoginIncentive, setHasShownLoginIncentive] = useState(false);
   const [showLoginBonusModal, setShowLoginBonusModal] = useState(false);
   const [claimingLoginBonus, setClaimingLoginBonus] = useState(false);
-  const [activeInviterReward, setActiveInviterReward] = useState<UnclaimedInviterReward | null>(null);
-
-  // Check for unclaimed inviter referral rewards
-  useEffect(() => {
-    if (user?.username && isInitialSyncDone) {
-      const unclaimed = getUnclaimedInviterRewards(user.username);
-      if (unclaimed.length > 0) {
-        setActiveInviterReward(unclaimed[0]);
-      }
-    }
-  }, [user?.username, isInitialSyncDone]);
-
-  const handleClaimInviterReward = async () => {
-    if (!activeInviterReward) return;
-    await addCoins(activeInviterReward.coins);
-    await addPackToInventory({
-      id: `hof-ref-${Date.now()}`,
-      type: 'hof',
-      name: 'HOF Pack'
-    });
-    removeUnclaimedInviterReward(activeInviterReward.id);
-    setActiveInviterReward(null);
-  };
 
   // Show login incentive if user is NOT logged in and hasn't seen it this session
   useEffect(() => {
@@ -686,15 +661,6 @@ function AppContent() {
             </motion.div>
           </motion.div>
         )}
-        {/* Inviter Referral Unlocked Modal */}
-        <InviterRewardModal
-          isOpen={!!activeInviterReward}
-          inviteeUsername={activeInviterReward?.inviteeUsername || ''}
-          coins={activeInviterReward?.coins || 25000}
-          packName={activeInviterReward?.pack.name || 'HOF Pack'}
-          totalReferrals={activeInviterReward?.totalReferrals || 1}
-          onClaim={handleClaimInviterReward}
-        />
       </AnimatePresence>
       <Analytics />
     </div>

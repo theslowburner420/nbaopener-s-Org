@@ -3,7 +3,6 @@ import { useNotification } from '../context/NotificationContext';
 import { ALL_CARDS, CARDS_BY_RARITY, CARDS_BY_SERIES } from '../data/cards';
 import { Card, Rarity } from '../types';
 import { ACHIEVEMENTS } from '../constants/achievements';
-import { evaluateAntiFraudAndProcessReferral } from '../services/referralService';
 
 export type PackType = 'random' | 'rookie' | 'allstar' | 'mvp' | 'hof' | 'legendary_mvp' | 'rising_star';
 
@@ -94,7 +93,7 @@ const TEAM_CARDS_MAP = ALL_CARDS.reduce((acc, card) => {
 const ALL_TEAMS = Object.keys(TEAM_CARDS_MAP);
 
 export function useEngine() {
-  const { collection, coins, user, pendingReferral, updateGameState, updateGameStateAsync, unlockedAchievements, inventoryPacks, isSaving } = useGame();
+  const { collection, coins, updateGameState, updateGameStateAsync, unlockedAchievements, inventoryPacks, isSaving } = useGame();
   const { notify } = useNotification();
 
   const generateCard = (packType: PackType): Card => {
@@ -287,43 +286,15 @@ export function useEngine() {
       }
     });
 
-    // Evaluate pending referral on ON_FIRST_PACK_OPEN
-    let referralRewardPopupData: any = null;
-    let pendingReferralUpdate = pendingReferral;
-
-    if (pendingReferral && pendingReferral.status === 'PENDING') {
-      const evalRes = await evaluateAntiFraudAndProcessReferral(
-        pendingReferral,
-        user?.username || 'Guest',
-        user?.id || 'guest-id'
-      );
-
-      if (evalRes && evalRes.passed && evalRes.inviteeReward) {
-        currentCoins += evalRes.inviteeReward.coins;
-        const existingHof = updatedInventory.find(p => p.type === 'hof');
-        if (existingHof) {
-          existingHof.count += 1;
-        } else {
-          updatedInventory.push({ id: 'hof-pack', type: 'hof', name: 'HOF Pack', count: 1 });
-        }
-        referralRewardPopupData = evalRes.inviteeReward;
-        pendingReferralUpdate = { ...pendingReferral, status: 'CONFIRMED' as const };
-      } else if (evalRes && !evalRes.passed) {
-        pendingReferralUpdate = { ...pendingReferral, status: 'CANCELLED' as const };
-      }
-    }
-
     // Batch update everything in ONE single call to ensure ONE cloud request (Local-first)
     updateGameState({
       coins: currentCoins + bonusCoins,
       collection: finalCollection,
       unlockedAchievements: [...unlockedAchievements, ...newlyUnlockedIds],
-      inventoryPacks: updatedInventory,
-      pendingReferral: pendingReferralUpdate,
-      onFirstPackOpenProcessed: true
+      inventoryPacks: updatedInventory
     });
 
-    return { cards: cardsWithNewFlag, newlyUnlocked: newlyUnlockedWithIndex, inviteeReward: referralRewardPopupData };
+    return { cards: cardsWithNewFlag, newlyUnlocked: newlyUnlockedWithIndex };
   };
 
   const openInventoryPack = async (packId: string, packType: PackType) => {
@@ -377,44 +348,15 @@ export function useEngine() {
       }
     });
 
-    let currentCoins = coins;
-    // Evaluate pending referral on ON_FIRST_PACK_OPEN
-    let referralRewardPopupData: any = null;
-    let pendingReferralUpdate = pendingReferral;
-
-    if (pendingReferral && pendingReferral.status === 'PENDING') {
-      const evalRes = await evaluateAntiFraudAndProcessReferral(
-        pendingReferral,
-        user?.username || 'Guest',
-        user?.id || 'guest-id'
-      );
-
-      if (evalRes && evalRes.passed && evalRes.inviteeReward) {
-        currentCoins += evalRes.inviteeReward.coins;
-        const existingHof = currentInventory.find(p => p.type === 'hof');
-        if (existingHof) {
-          existingHof.count += 1;
-        } else {
-          currentInventory.push({ id: 'hof-pack', type: 'hof', name: 'HOF Pack', count: 1 });
-        }
-        referralRewardPopupData = evalRes.inviteeReward;
-        pendingReferralUpdate = { ...pendingReferral, status: 'CONFIRMED' as const };
-      } else if (evalRes && !evalRes.passed) {
-        pendingReferralUpdate = { ...pendingReferral, status: 'CANCELLED' as const };
-      }
-    }
-
     // Local-first update
     updateGameState({
-      coins: currentCoins + bonusCoins,
+      coins: coins + bonusCoins,
       collection: finalCollection,
       unlockedAchievements: [...unlockedAchievements, ...newlyUnlockedIds],
-      inventoryPacks: currentInventory,
-      pendingReferral: pendingReferralUpdate,
-      onFirstPackOpenProcessed: true
+      inventoryPacks: currentInventory
     });
 
-    return { cards: cardsWithNewFlag, newlyUnlocked: newlyUnlockedWithIndex, inviteeReward: referralRewardPopupData };
+    return { cards: cardsWithNewFlag, newlyUnlocked: newlyUnlockedWithIndex };
   };
 
   const generateDraftOptions = (count: number, position: string | null, excludedIds: string[], isElite: boolean = false, isCaptain: boolean = false): Card[] => {

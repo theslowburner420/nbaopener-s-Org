@@ -23,7 +23,6 @@ interface GameContextType extends GameState {
   resetGame: (sync?: boolean) => Promise<void>;
   startFranchise: (team: string, initialRoster?: string[]) => Promise<void>;
   updateFranchise: (updates: Partial<FranchiseState>) => Promise<void>;
-  addBattlePassXP: (amount: number) => Promise<void>;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   updateGameState: (updates: Partial<GameState>) => void;
@@ -79,14 +78,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       inventoryPacks: normalizePacks(initialGuestState?.inventoryPacks ?? []),
       isPremium: initialGuestState?.isPremium ?? false,
       hasLifetimeNoAds: initialGuestState?.hasLifetimeNoAds ?? false,
-      isBattlePassPremium: initialGuestState?.isBattlePassPremium ?? false,
       subscriptionExpiry: initialGuestState?.subscriptionExpiry ?? null,
-      battlePassXP: initialGuestState?.battlePassXP ?? 0,
-      battlePassLevel: initialGuestState?.battlePassLevel ?? 0,
       franchise: initialGuestState?.franchise ?? undefined,
       completedSbcs: initialGuestState?.completedSbcs ?? [],
-      pendingReferral: initialGuestState?.pendingReferral ?? null,
-      onFirstPackOpenProcessed: initialGuestState?.onFirstPackOpenProcessed ?? false,
     };
   });
 
@@ -129,14 +123,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         inventoryPacks: state.inventoryPacks,
         isPremium: state.isPremium,
         hasLifetimeNoAds: state.hasLifetimeNoAds,
-        isBattlePassPremium: state.isBattlePassPremium,
         subscriptionExpiry: state.subscriptionExpiry,
-        battlePassXP: state.battlePassXP,
-        battlePassLevel: state.battlePassLevel,
         franchise: state.franchise,
         completedSbcs: state.completedSbcs,
-        pendingReferral: state.pendingReferral,
-        onFirstPackOpenProcessed: state.onFirstPackOpenProcessed,
       };
       localStorage.setItem('GUEST_PROGRESS', JSON.stringify(guestData));
     } else {
@@ -180,9 +169,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         inventory_packs: Array.isArray(newState.inventoryPacks) ? newState.inventoryPacks : [],
         completed_sbcs: Array.isArray(newState.completedSbcs) ? newState.completedSbcs : [],
         ads_disabled: !!(newState.isPremium || newState.hasLifetimeNoAds || (newState.subscriptionExpiry && new Date(newState.subscriptionExpiry) > new Date())),
-        is_battle_pass_premium: !!newState.isBattlePassPremium,
-        battle_pass_xp: newState.battlePassXP || 0,
-        battle_pass_level: newState.battlePassLevel || 0,
         subscription_expiry: newState.subscriptionExpiry,
         franchise_state: newState.franchise ? JSON.stringify(newState.franchise) : null,
         last_claimed_date: newState.lastClaimedDate,
@@ -391,10 +377,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         inventoryPacks: currentLiveState.inventoryPacks.length > 0 ? currentLiveState.inventoryPacks : (guestData?.inventoryPacks || []),
         isPremium: currentLiveState.isPremium || guestData?.isPremium || false,
         hasLifetimeNoAds: currentLiveState.hasLifetimeNoAds || guestData?.hasLifetimeNoAds || false,
-        isBattlePassPremium: currentLiveState.isBattlePassPremium || guestData?.isBattlePassPremium || false,
         subscriptionExpiry: currentLiveState.subscriptionExpiry || guestData?.subscriptionExpiry || null,
-        battlePassXP: Math.max(currentLiveState.battlePassXP, guestData?.battlePassXP || 0),
-        battlePassLevel: Math.max(currentLiveState.battlePassLevel, guestData?.battlePassLevel || 0),
         franchise: currentLiveState.franchise || guestData?.franchise || backupData?.franchise,
         completedSbcs: Array.from(new Set([...(currentLiveState.completedSbcs || []), ...(guestData?.completedSbcs || [])])),
       };
@@ -455,9 +438,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           completed_sbcs: Array.isArray(cloudProfile.completed_sbcs) ? cloudProfile.completed_sbcs : [],
           ads_disabled: !!cloudProfile.ads_disabled,
           has_lifetime_no_ads: !!cloudProfile.has_lifetime_no_ads,
-          is_battle_pass_premium: !!cloudProfile.is_battle_pass_premium,
-          battle_pass_xp: Number(cloudProfile.battle_pass_xp) || 0,
-          battle_pass_level: Number(cloudProfile.battle_pass_level) || 0,
           subscription_expiry: cloudProfile.subscription_expiry,
           franchise: cloudProfile.franchise_state ? (typeof cloudProfile.franchise_state === 'string' ? JSON.parse(cloudProfile.franchise_state) : cloudProfile.franchise_state) : localProgress.franchise,
         };
@@ -491,9 +471,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           completedSbcs: isInitialSyncDoneRef.current ? pc.completed_sbcs : Array.from(new Set([...(pc.completed_sbcs || []), ...(localProgress.completedSbcs || [])])),
           isPremium: pc.ads_disabled || localProgress.isPremium,
           hasLifetimeNoAds: (pc as any).has_lifetime_no_ads || localProgress.hasLifetimeNoAds,
-          isBattlePassPremium: (pc as any).is_battle_pass_premium || localProgress.isBattlePassPremium,
-          battlePassXP: isInitialSyncDoneRef.current ? pc.battle_pass_xp : Math.max(pc.battle_pass_xp || 0, localProgress.battlePassXP),
-          battlePassLevel: isInitialSyncDoneRef.current ? pc.battle_pass_level : Math.max(pc.battle_pass_level || 0, localProgress.battlePassLevel),
           subscriptionExpiry: pc.subscription_expiry || localProgress.subscriptionExpiry,
           franchise: isInitialSyncDoneRef.current ? pc.franchise : (pc.franchise || localProgress.franchise),
         };
@@ -1018,6 +995,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       claimedDays: [],
       inventoryPacks: [],
       isPremium: false,
+      hasLifetimeNoAds: false,
+      subscriptionExpiry: null,
+      completedSbcs: [],
     };
 
     setState(newState);
@@ -1077,22 +1057,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await updateGameStateAsync({ franchise: newFranchise });
   }, [updateGameStateAsync]);
 
-  const addBattlePassXP = useCallback(async (amount: number) => {
-    const XP_PER_LEVEL = 1000;
-    let newXP = stateRef.current.battlePassXP + amount;
-    let newLevel = stateRef.current.battlePassLevel;
-    
-    while (newXP >= XP_PER_LEVEL) {
-      newXP -= XP_PER_LEVEL;
-      newLevel++;
-    }
-    
-    await updateGameStateAsync({ 
-      battlePassXP: newXP,
-      battlePassLevel: newLevel
-    });
-  }, [updateGameStateAsync]);
-
   const forceSync = useCallback(async () => {
     if (stateRef.current.user) {
       lastSyncedStateRef.current = '';
@@ -1140,9 +1104,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     claimLoginReward,
     startFranchise,
-    updateFranchise,
-    addBattlePassXP
-  }), [state, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimAchievementReward, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, forceSync, refreshFromCloud, isSaving, isBackgroundSaving, login, logout, claimLoginReward, startFranchise, updateFranchise, addBattlePassXP]);
+    updateFranchise
+  }), [state, isAuthLoading, isInitialSyncDone, isOffline, syncError, showWelcomeGift, setCoins, addCoins, spendCoins, addToCollection, addCustomCard, setCurrentView, unlockAchievement, claimAchievementReward, claimReward, addPackToInventory, removePackFromInventory, setPremium, resetGame, updateGameState, forceSync, refreshFromCloud, isSaving, isBackgroundSaving, login, logout, claimLoginReward, startFranchise, updateFranchise]);
 
   return (
     <GameContext.Provider value={contextValue}>

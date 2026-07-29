@@ -13,7 +13,7 @@ type FilterType = Rarity | 'All';
 type SortType = 'Number' | 'OVR' | 'Name' | 'Team';
 
 export default function CollectionView() {
-  const { collection, unlockedAchievements, addCoins, addToCollection, setPremium, resetGame } = useGame();
+  const { collection, unlockedAchievements, addCoins, addToCollection, setPremium, resetGame, updateGameStateAsync } = useGame();
   const [activeFilter, setActiveFilter] = useState<FilterType>('All');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [teamFilter, setTeamFilter] = useState<string>('All');
@@ -84,9 +84,10 @@ export default function CollectionView() {
     }
 
     if (search.toLowerCase() === 'catalunya') {
-      // Catalonia Mode: Reset Game & Turn Off Premium
+      // Catalonia Mode: Reset Game & Turn Off Premium + Wipe Shop Purchases
       resetGame();
       setPremium(false);
+      updateGameStateAsync({ hasLifetimeNoAds: false, isPremium: false });
       
       // Feedback
       setSearch('');
@@ -100,18 +101,18 @@ export default function CollectionView() {
       setDebouncedSearch(search);
     }, 300);
     return () => clearTimeout(timer);
-  }, [search, collection, addCoins, setPremium, addToCollection, resetGame]);
+  }, [search, collection, addCoins, setPremium, addToCollection, resetGame, updateGameStateAsync]);
 
   const handleCardClick = useCallback((card: Card) => {
     setSelectedCard(card);
   }, []);
 
-  const renderGridItem = useCallback((card: Card, index: number) => {
+  const renderGridItem = useCallback((card: Card) => {
     const quantity = collection[card.id] || 0;
     const isOwned = quantity > 0;
     return (
       <CardItem 
-        key={`${card.id}-${card.number ?? index}-${index}`}
+        key={`${card.id}-${card.number}`}
         card={card} 
         isOwned={isOwned} 
         mode="mini"
@@ -544,7 +545,7 @@ export default function CollectionView() {
                 {easterEggType === 'unlock' ? 'Developer Mode' : easterEggType === 'catalunya' ? 'Catalonia Mode' : 'System Reset'}
               </span>
               <span className="text-xs font-black italic tracking-tighter uppercase">
-                {easterEggType === 'unlock' ? 'Everything Unlocked!' : easterEggType === 'catalunya' ? 'JOC REINICIAT & PREMIUM OFF!' : 'Game Restored to Base!'}
+                {easterEggType === 'unlock' ? 'Everything Unlocked!' : easterEggType === 'catalunya' ? 'GAME RESET & SHOP PURCHASES WIPED!' : 'Game Restored to Base!'}
               </span>
             </div>
           </motion.div>
