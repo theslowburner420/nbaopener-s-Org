@@ -217,7 +217,7 @@ const TOURNAMENTS: Tournament[] = [
   }
 ];
 
-const DRAFT_COST = 100000;
+const DRAFT_COST = 5000;
 
 const STARTER_SLOTS: DraftSlot[] = [
   { id: 'pg', label: 'PG', position: 'PG', card: null },
@@ -236,28 +236,28 @@ const BENCH_SLOTS: DraftSlot[] = Array.from({ length: 7 }).map((_, i) => ({
 
 const REWARDS = {
   'Summer League': {
-    champion: { coins: 15000, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Rookie Pack' }, { id: 'rookie-2', type: 'rookie', name: 'Rookie Pack' }] },
-    finalist: { coins: 8000, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Rookie Pack' }] },
-    semis: { coins: 4000, packs: [] },
-    quarters: { coins: 1000, packs: [] },
+    champion: { coins: 5000, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Rookie Pack' }, { id: 'rookie-2', type: 'rookie', name: 'Rookie Pack' }] },
+    finalist: { coins: 2500, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Rookie Pack' }] },
+    semis: { coins: 1200, packs: [] },
+    quarters: { coins: 500, packs: [] },
   },
   'NBA Cup': {
-    champion: { coins: 50000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }, { id: 'allstar-2', type: 'allstar', name: 'All-Star Pack' }] },
-    finalist: { coins: 25000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
-    semis: { coins: 12000, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Rookie Pack' }] },
-    quarters: { coins: 5000, packs: [] },
+    champion: { coins: 15000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
+    finalist: { coins: 7500, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Rookie Pack' }] },
+    semis: { coins: 3000, packs: [] },
+    quarters: { coins: 1000, packs: [] },
   },
   'NBA Playoffs': {
-    champion: { coins: 150000, packs: [{ id: 'mvp-1', type: 'mvp', name: 'Finals MVP Pack' }, { id: 'hof-1', type: 'hof', name: 'HOF Pack' }] },
-    finalist: { coins: 75000, packs: [{ id: 'mvp-1', type: 'mvp', name: 'Finals MVP Pack' }] },
-    semis: { coins: 35000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
-    quarters: { coins: 15000, packs: [] },
+    champion: { coins: 40000, packs: [{ id: 'mvp-1', type: 'mvp', name: 'Finals MVP Pack' }, { id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
+    finalist: { coins: 20000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
+    semis: { coins: 8000, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Rookie Pack' }] },
+    quarters: { coins: 2500, packs: [] },
   },
   'Rising Stars': {
-    champion: { coins: 30000, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Premium Rookie Pack' }, { id: 'rookie-2', type: 'rookie', name: 'Premium Rookie Pack' }, { id: 'rookie-3', type: 'rookie', name: 'Premium Rookie Pack' }] },
-    finalist: { coins: 15000, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Premium Rookie Pack' }, { id: 'rookie-2', type: 'rookie', name: 'Premium Rookie Pack' }] },
-    semis: { coins: 7500, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Premium Rookie Pack' }] },
-    quarters: { coins: 2000, packs: [] },
+    champion: { coins: 10000, packs: [{ id: 'rising_star-1', type: 'rising_star', name: 'Rising Star Pack' }] },
+    finalist: { coins: 5000, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Rookie Pack' }] },
+    semis: { coins: 2500, packs: [] },
+    quarters: { coins: 1000, packs: [] },
   }
 };
 

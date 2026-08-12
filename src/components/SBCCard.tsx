@@ -45,7 +45,7 @@ const SBCCard: React.FC<SBCCardProps> = ({ card, size = 'md', isRevealed = true 
       layout
       initial={!isRevealed ? { rotateY: 180 } : {}}
       animate={{ rotateY: 0 }}
-      transition={{ duration: 1.2, ease: "softBezier" }}
+      transition={{ duration: 1.2, ease: "easeInOut" }}
       className={`${sizeClasses[size]} fifa-card-pro rounded-xl relative overflow-hidden shadow-2xl flex flex-col font-condensed group ${config.class}`}
       style={{ transformStyle: 'preserve-3d' }}
     >

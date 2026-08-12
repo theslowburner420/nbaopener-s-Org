@@ -71,12 +71,12 @@ const PACK_SIZES: Record<PackType, number> = {
 };
 
 export const PACK_PRICES: Record<Exclude<PackType, 'random'>, number> = {
-  rookie: 1000,
-  allstar: 5000,
-  mvp: 25000,
-  hof: 100000,
-  legendary_mvp: 250000,
+  rookie: 2500,
+  allstar: 10000,
+  mvp: 35000,
   rising_star: 50000,
+  hof: 120000,
+  legendary_mvp: 300000,
 };
 
 // Pre-calculate pools for series-specific packs

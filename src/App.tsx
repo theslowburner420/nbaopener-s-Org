@@ -344,66 +344,64 @@ function AppContent() {
       {/* Global Navigation Bar */}
       {!(currentView === 'draft' || currentView === 'open' || currentView === 'career') && (
         <div className="z-[4000] flex flex-col bg-black shrink-0">
-          {/* Global Navigation Bar */}
-          <nav className="h-16 bg-zinc-950 border-t border-zinc-900 flex items-center justify-around px-2 pb-safe shrink-0">
+          <nav className="h-11 bg-zinc-950/95 backdrop-blur-md border-t border-white/10 flex items-center justify-around px-3 pb-safe shrink-0">
             {/* Collection */}
             <button 
               onClick={() => handleViewChange('collection')}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'collection' ? 'text-white' : 'text-zinc-600'}`}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 transition-colors ${
+                currentView === 'collection' ? 'text-amber-400 font-bold' : 'text-zinc-500 hover:text-zinc-300'
+              }`}
             >
-              <div className={`p-1.5 rounded-lg transition-all ${currentView === 'collection' ? 'bg-zinc-900' : ''}`}>
-                <LayoutGrid size={20} strokeWidth={currentView === 'collection' ? 2.5 : 2} />
-              </div>
-              <span className="text-[8px] font-black uppercase tracking-wider">Roster</span>
+              <LayoutGrid size={16} strokeWidth={currentView === 'collection' ? 2.2 : 1.8} />
+              <span className="text-[8px] uppercase tracking-wider">Roster</span>
             </button>
 
             {/* Rewards */}
             <button 
               onClick={() => handleViewChange('rewards')}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'rewards' ? 'text-white' : 'text-zinc-600'}`}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 transition-colors ${
+                currentView === 'rewards' ? 'text-amber-400 font-bold' : 'text-zinc-500 hover:text-zinc-300'
+              }`}
             >
-              <div className={`p-1.5 rounded-lg transition-all ${currentView === 'rewards' ? 'bg-zinc-900' : ''}`}>
-                <Trophy size={20} strokeWidth={currentView === 'rewards' ? 2.5 : 2} />
-              </div>
-              <span className="text-[8px] font-black uppercase tracking-wider">Rewards</span>
+              <Trophy size={16} strokeWidth={currentView === 'rewards' ? 2.2 : 1.8} />
+              <span className="text-[8px] uppercase tracking-wider">Rewards</span>
             </button>
   
             {/* HOME (Center) */}
             <button 
               onClick={() => handleViewChange('home')}
               onMouseEnter={() => {
-                // Predictive preloading for home view elements
                 const homeAssets = ALL_CARDS.slice(0, 5).map(c => c.imageUrl);
                 homeAssets.forEach(url => { const img = new Image(); img.src = url; });
               }}
-              className={`flex-1 relative flex flex-col items-center justify-center transition-all duration-500 ${currentView === 'home' || currentView === 'open' || currentView === 'draft' ? 'scale-110 -translate-y-1' : ''}`}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 transition-colors ${
+                currentView === 'home' || currentView === 'open' || currentView === 'draft' ? 'text-amber-400 font-bold' : 'text-zinc-500 hover:text-zinc-300'
+              }`}
             >
-              <div className={`p-2.5 rounded-xl transition-all ${currentView === 'home' || currentView === 'open' || currentView === 'draft' ? 'bg-amber-500 text-black shadow-[0_0_20px_rgba(245,158,11,0.4)]' : 'bg-zinc-900 text-zinc-500'}`}>
-                <Home size={24} strokeWidth={3} fill={currentView === 'home' || currentView === 'open' || currentView === 'draft' ? "currentColor" : "none"} />
-              </div>
-              <span className={`text-[9px] font-black uppercase tracking-[0.1em] mt-1 transition-colors ${currentView === 'home' || currentView === 'open' || currentView === 'draft' ? 'text-amber-500' : 'text-zinc-600'}`}>Home</span>
+              <Home size={16} strokeWidth={currentView === 'home' || currentView === 'open' || currentView === 'draft' ? 2.2 : 1.8} />
+              <span className="text-[8px] uppercase tracking-wider">Home</span>
             </button>
   
             {/* Packs */}
             <button 
               onClick={() => handleViewChange('packs')}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'packs' ? 'text-white' : 'text-zinc-600'}`}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 transition-colors ${
+                currentView === 'packs' ? 'text-amber-400 font-bold' : 'text-zinc-500 hover:text-zinc-300'
+              }`}
             >
-              <div className={`p-1.5 rounded-lg transition-all ${currentView === 'packs' ? 'bg-zinc-900' : ''}`}>
-                <ShoppingBag size={20} strokeWidth={currentView === 'packs' ? 2.5 : 2} />
-              </div>
-              <span className="text-[8px] font-black uppercase tracking-wider">Packs</span>
+              <ShoppingBag size={16} strokeWidth={currentView === 'packs' ? 2.2 : 1.8} />
+              <span className="text-[8px] uppercase tracking-wider">Packs</span>
             </button>
 
             {/* Shop */}
             <button 
               onClick={() => handleViewChange('shop')}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 ${currentView === 'shop' ? 'text-white' : 'text-zinc-600'}`}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1 transition-colors ${
+                currentView === 'shop' ? 'text-amber-400 font-bold' : 'text-zinc-500 hover:text-zinc-300'
+              }`}
             >
-              <div className={`p-1.5 rounded-lg transition-all ${currentView === 'shop' ? 'bg-zinc-900' : ''}`}>
-                <Coins size={20} strokeWidth={currentView === 'shop' ? 2.5 : 2} />
-              </div>
-              <span className="text-[8px] font-black uppercase tracking-wider">Shop</span>
+              <Coins size={16} strokeWidth={currentView === 'shop' ? 2.2 : 1.8} />
+              <span className="text-[8px] uppercase tracking-wider">Shop</span>
             </button>
           </nav>
         </div>

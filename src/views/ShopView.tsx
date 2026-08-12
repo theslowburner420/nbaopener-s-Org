@@ -37,8 +37,8 @@ export default function ShopView() {
       }, 1000);
     } else if (isAdPlaying && adCountdown === 0) {
       setIsAdPlaying(false);
-      addCoins(50000);
-      notifySuccess("Reward Claimed! +50,000 Coins");
+      addCoins(3000);
+      notifySuccess("Reward Claimed! +3,000 Coins");
       setAdCountdown(AD_DURATION_SECONDS);
     }
     return () => clearInterval(timer);
@@ -236,7 +236,7 @@ export default function ShopView() {
 
               <div className="space-y-2.5 my-3 pt-2 border-t border-amber-500/10">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-black italic tracking-tighter text-amber-500">+50,000</span>
+                  <span className="text-3xl font-black italic tracking-tighter text-amber-500">+3,000</span>
                   <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Coins Reward</span>
                 </div>
                 
@@ -262,7 +262,7 @@ export default function ShopView() {
                 className="w-full py-3 bg-amber-500 text-black font-black uppercase tracking-wider text-xs rounded-xl hover:bg-amber-400 transition-colors shadow-[0_4px_20px_rgba(245,158,11,0.25)] active:scale-95 flex items-center justify-center gap-2"
               >
                 <Play size={14} fill="currentColor" />
-                Watch Ad (+50k Coins)
+                Watch Ad (+3k Coins)
               </button>
             </div>
           </div>
@@ -321,7 +321,7 @@ export default function ShopView() {
                   <div className="flex flex-col items-center">
                     <Play size={32} className="text-amber-500 mb-2 animate-bounce" />
                     <h2 className="text-sm font-black italic uppercase tracking-tighter text-white">Hoops Collector Ad</h2>
-                    <p className="text-[8px] text-zinc-500 uppercase tracking-widest font-bold mt-1">Earn +50,000 Coins...</p>
+                    <p className="text-[8px] text-zinc-500 uppercase tracking-widest font-bold mt-1">Earn +3,000 Coins...</p>
                   </div>
                 </div>
               </div>

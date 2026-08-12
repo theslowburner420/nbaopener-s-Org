@@ -409,12 +409,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('✨ NEW USER: First sync - Awarding Welcome Pack');
         finalMergedData = {
           ...localProgress,
-          coins: Math.max(localProgress.coins, 150000), // Increased Welcome bonus: 150k
+          coins: Math.max(localProgress.coins, 2500), // Rebalanced Welcome bonus: 2.5k coins
           inventoryPacks: [
             ...localProgress.inventoryPacks,
-            { id: `welcome-mvp-${Date.now()}`, type: 'mvp', name: 'Finals MVP Pack', count: 5 },
-            { id: `welcome-hof-${Date.now()}`, type: 'hof', name: 'HOF Pack', count: 3 },
-            { id: `welcome-legendary-${Date.now()}`, type: 'legendary_mvp', name: 'Legendary MVP Pack', count: 1 }
+            { id: `welcome-rookie-${Date.now()}`, type: 'rookie', name: 'Rookie Pack', count: 2 },
+            { id: `welcome-allstar-${Date.now()}`, type: 'allstar', name: 'All-Star Pack', count: 1 }
           ]
         };
         setShowWelcomeGift(true);
@@ -918,24 +917,24 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     let newPacks = [...stateRef.current.inventoryPacks];
     
-    // Add 2x HOF Pack
-    const existingHof = newPacks.find(p => p.type === 'hof');
-    if (existingHof) {
-      newPacks = newPacks.map(p => p.type === 'hof' ? { ...p, count: p.count + 2 } : p);
+    // Add 1x All-Star Pack
+    const existingAllStar = newPacks.find(p => p.type === 'allstar');
+    if (existingAllStar) {
+      newPacks = newPacks.map(p => p.type === 'allstar' ? { ...p, count: p.count + 1 } : p);
     } else {
-      newPacks.push({ id: `login-hof-${Date.now()}`, type: 'hof', name: 'HOF Pack', count: 2 });
+      newPacks.push({ id: `login-allstar-${Date.now()}`, type: 'allstar', name: 'All-Star Pack', count: 1 });
     }
 
-    // Add 1x Legendary MVP Pack
-    const existingLegendary = newPacks.find(p => p.type === 'legendary_mvp');
-    if (existingLegendary) {
-      newPacks = newPacks.map(p => p.type === 'legendary_mvp' ? { ...p, count: p.count + 1 } : p);
+    // Add 1x Finals MVP Pack
+    const existingMvp = newPacks.find(p => p.type === 'mvp');
+    if (existingMvp) {
+      newPacks = newPacks.map(p => p.type === 'mvp' ? { ...p, count: p.count + 1 } : p);
     } else {
-      newPacks.push({ id: `login-legendary-${Date.now()}`, type: 'legendary_mvp', name: 'Legendary MVP Pack', count: 1 });
+      newPacks.push({ id: `login-mvp-${Date.now()}`, type: 'mvp', name: 'Finals MVP Pack', count: 1 });
     }
 
     await updateGameStateAsync({
-      coins: stateRef.current.coins + 100000,
+      coins: stateRef.current.coins + 10000,
       inventoryPacks: newPacks,
       claimedAchievements: [...stateRef.current.claimedAchievements, 'login_bonus']
     });

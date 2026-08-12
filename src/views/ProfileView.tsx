@@ -36,32 +36,32 @@ const ProfileView: React.FC = () => {
 
     // Update inventory
     const updatedInventory = [...inventoryPacks];
-    const mvpPackIndex = updatedInventory.findIndex(p => p.id === 'mvp-pack');
+    const rookiePackIndex = updatedInventory.findIndex(p => p.id === 'rookie-pack');
     
-    if (mvpPackIndex !== -1) {
-      updatedInventory[mvpPackIndex] = {
-        ...updatedInventory[mvpPackIndex],
-        count: updatedInventory[mvpPackIndex].count + 1
+    if (rookiePackIndex !== -1) {
+      updatedInventory[rookiePackIndex] = {
+        ...updatedInventory[rookiePackIndex],
+        count: updatedInventory[rookiePackIndex].count + 1
       };
     } else {
       updatedInventory.push({
-        id: 'mvp-pack',
-        type: 'mvp',
-        name: 'MVP Pack',
+        id: 'rookie-pack',
+        type: 'rookie',
+        name: 'Rookie Pack',
         count: 1
       });
     }
 
     // Update state
     updateGameState({
-      coins: coins + 100000,
+      coins: coins + 5000,
       inventoryPacks: updatedInventory,
       unlockedAchievements: [...unlockedAchievements, 'reward_twitter_claimed']
     });
 
     // Show success message
-    notifySuccess('Reward Claimed! 100,000 Coins & 1 MVP Pack added.');
-    setMessage({ type: 'success', text: 'Reward Claimed! 100,000 Coins & 1 MVP Pack added.' });
+    notifySuccess('Reward Claimed! 5,000 Coins & 1 Rookie Pack added.');
+    setMessage({ type: 'success', text: 'Reward Claimed! 5,000 Coins & 1 Rookie Pack added.' });
     
     // Force sync
     setTimeout(() => {

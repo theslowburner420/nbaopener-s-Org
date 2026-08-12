@@ -8,7 +8,7 @@ const HomeView: React.FC = () => {
   return (
     <div className="w-full flex flex-col bg-black">
       {/* Home Container */}
-      <div className="flex-1 flex flex-col gap-1.5 md:gap-4 p-1.5 md:p-6 pb-20 md:pb-10 max-w-7xl mx-auto w-full">
+      <div className="flex-1 flex flex-col gap-1.5 md:gap-4 p-1.5 md:p-6 pb-6 md:pb-6 max-w-7xl mx-auto w-full">
         {/* Top Section: Pack Opener & Hoops Draft side by side */}
         <div className="grid grid-cols-2 gap-1.5 md:gap-4">
           {/* Bloque A: Pack Opener */}
