@@ -489,61 +489,70 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       lastSyncedStateRef.current = ''; 
       await forceSyncToSupabase(mergedState, 3, true, true);
 
-      // Setup/Refresh Real-time
+      // Setup/Refresh Real-time (Non-blocking background sync)
       if (!profileSubscriptionRef.current && supabase) {
-        profileSubscriptionRef.current = supabase
-          .channel(`profile_realtime_${user.id}`)
-          .on('postgres_changes', { 
-            event: 'UPDATE', 
-            schema: 'public', 
-            table: 'profiles', 
-            filter: `id=eq.${user.id}` 
-          }, (payload) => {
-            const updated = payload.new as any;
-            console.log('🔔 Remote update received via Realtime');
-            
-            // CRITICAL: Avoid infinite write loops by checking if the incoming data matches our last synced state
-            const incomingStateString = JSON.stringify({
-              coins: Number(updated.coins) || 0,
-              collection: updated.cards || [],
-              unlockedAchievements: Array.isArray(updated.unlocked_achievements) ? updated.unlocked_achievements : [],
-              claimedAchievements: Array.isArray(updated.claimed_achievements) ? updated.claimed_achievements : [],
-              inventoryPacks: Array.isArray(updated.inventory_packs) ? updated.inventory_packs : [],
-              completedSbcs: Array.isArray(updated.completed_sbcs) ? updated.completed_sbcs : [],
-              isPremium: !!updated.ads_disabled,
-              last_claimed_date: updated.last_claimed_date,
-              claimed_days: updated.claimed_days,
-              userId: user.id
-            });
-
-            if (incomingStateString === lastSyncedStateRef.current) {
-              console.log('🔄 Remote update matches last synced state, ignoring to prevent loop');
-              return;
-            }
-
-            // CRITICAL: Transform remote cards array to local collection map
-            let migratedCollection = stateRef.current.collection;
-            if (updated.cards && Array.isArray(updated.cards)) {
-              const newMap: Record<string, number> = {};
-              updated.cards.forEach((id: string) => {
-                newMap[id] = (newMap[id] || 0) + 1;
+        try {
+          profileSubscriptionRef.current = supabase
+            .channel(`profile_realtime_${user.id}`)
+            .on('postgres_changes', { 
+              event: 'UPDATE', 
+              schema: 'public', 
+              table: 'profiles', 
+              filter: `id=eq.${user.id}` 
+            }, (payload) => {
+              const updated = payload.new as any;
+              console.log('🔔 Remote update received via Realtime');
+              
+              // CRITICAL: Avoid infinite write loops by checking if the incoming data matches our last synced state
+              const incomingStateString = JSON.stringify({
+                coins: Number(updated.coins) || 0,
+                collection: updated.cards || [],
+                unlockedAchievements: Array.isArray(updated.unlocked_achievements) ? updated.unlocked_achievements : [],
+                claimedAchievements: Array.isArray(updated.claimed_achievements) ? updated.claimed_achievements : [],
+                inventoryPacks: Array.isArray(updated.inventory_packs) ? updated.inventory_packs : [],
+                completedSbcs: Array.isArray(updated.completed_sbcs) ? updated.completed_sbcs : [],
+                isPremium: !!updated.ads_disabled,
+                last_claimed_date: updated.last_claimed_date,
+                claimed_days: updated.claimed_days,
+                userId: user.id
               });
-              migratedCollection = newMap;
-            }
 
-            setState(prev => ({
-              ...prev,
-              coins: updated.coins !== undefined ? Number(updated.coins) : prev.coins,
-              collection: migratedCollection,
-              inventoryPacks: updated.inventory_packs || prev.inventoryPacks,
-              completedSbcs: updated.completed_sbcs || prev.completedSbcs,
-              isPremium: updated.ads_disabled !== undefined ? !!updated.ads_disabled : prev.isPremium,
-              franchise: updated.franchise_state ? JSON.parse(updated.franchise_state) : prev.franchise,
-            }));
-            
-            // Sync the ref to prevent a bounce-back save
-            lastSyncedStateRef.current = incomingStateString; 
-          }).subscribe();
+              if (incomingStateString === lastSyncedStateRef.current) {
+                console.log('🔄 Remote update matches last synced state, ignoring to prevent loop');
+                return;
+              }
+
+              // CRITICAL: Transform remote cards array to local collection map
+              let migratedCollection = stateRef.current.collection;
+              if (updated.cards && Array.isArray(updated.cards)) {
+                const newMap: Record<string, number> = {};
+                updated.cards.forEach((id: string) => {
+                  newMap[id] = (newMap[id] || 0) + 1;
+                });
+                migratedCollection = newMap;
+              }
+
+              setState(prev => ({
+                ...prev,
+                coins: updated.coins !== undefined ? Number(updated.coins) : prev.coins,
+                collection: migratedCollection,
+                inventoryPacks: updated.inventory_packs || prev.inventoryPacks,
+                completedSbcs: updated.completed_sbcs || prev.completedSbcs,
+                isPremium: updated.ads_disabled !== undefined ? !!updated.ads_disabled : prev.isPremium,
+                franchise: updated.franchise_state ? JSON.parse(updated.franchise_state) : prev.franchise,
+              }));
+              
+              // Sync the ref to prevent a bounce-back save
+              lastSyncedStateRef.current = incomingStateString; 
+            })
+            .subscribe((status, err) => {
+              if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                console.warn('⚠️ Realtime WebSocket warning (HTTP polling active):', status, err?.message || err);
+              }
+            });
+        } catch (rtErr) {
+          console.warn('⚠️ Realtime subscription setup skipped (HTTP sync active):', rtErr);
+        }
       }
 
       isInitialSyncDoneRef.current = true;
