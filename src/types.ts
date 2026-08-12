@@ -249,6 +249,7 @@ export interface SbcChallenge {
   id: string;
   name: string;
   description: string;
+  category?: 'rookie_series' | 'fan_favourites' | 'hof_legends' | 'franchise_icons' | 'clutch_moments' | string;
   difficulty: 'bronze' | 'silver' | 'gold' | 'elite' | 'legendary';
   type: 'permanent' | 'limited';
   expiresAt: string | null;

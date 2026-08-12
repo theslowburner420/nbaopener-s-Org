@@ -1,18 +1,93 @@
-import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGame } from '../context/GameContext';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, Sparkles, X, Play, Check, Coins, Zap, Star } from 'lucide-react';
+import { ShieldCheck, Sparkles, X, Play, Check, Coins, Zap, Star, AlertCircle, RefreshCw } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
-
-const PayPalScriptProvider = lazy(() =>
-  import("@paypal/react-paypal-js").then((m) => ({ default: m.PayPalScriptProvider }))
-);
-const PayPalButtons = lazy(() =>
-  import("@paypal/react-paypal-js").then((m) => ({ default: m.PayPalButtons }))
-);
+import { PayPalScriptProvider, PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 
 const LIFETIME_NO_ADS_PRICE = 2.99;
 const AD_DURATION_SECONDS = 10;
+
+function PayPalButtonsWrapper({ 
+  onSuccess, 
+  onError,
+  activeClientId,
+  onFallbackToTest
+}: { 
+  onSuccess: () => void; 
+  onError: (msg: string) => void;
+  activeClientId: string;
+  onFallbackToTest: () => void;
+}) {
+  const [{ isPending, isRejected }] = usePayPalScriptReducer();
+
+  useEffect(() => {
+    if (isRejected && activeClientId !== 'test') {
+      console.warn(`PayPal script rejected with clientId '${activeClientId}'. Falling back to 'test'.`);
+      onFallbackToTest();
+    }
+  }, [isRejected, activeClientId, onFallbackToTest]);
+
+  if (isPending) {
+    return (
+      <div className="w-full h-[50px] bg-purple-500/10 border border-purple-500/20 rounded-xl flex items-center justify-center text-purple-300 text-xs font-bold gap-2 animate-pulse">
+        <RefreshCw size={14} className="animate-spin text-purple-400" />
+        <span>Loading PayPal...</span>
+      </div>
+    );
+  }
+
+  if (isRejected && activeClientId === 'test') {
+    return (
+      <div className="w-full p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-center text-red-400 text-xs font-semibold">
+        Unable to load PayPal. Please refresh the page.
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full min-h-[50px] relative z-10">
+      <PayPalButtons
+        style={{ 
+          layout: "vertical", 
+          color: 'gold', 
+          shape: 'rect', 
+          label: 'pay', 
+          tagline: false 
+        }}
+        createOrder={(data, actions) => {
+          return actions.order.create({
+            intent: "CAPTURE",
+            purchase_units: [{
+              description: "Remove Ads - Lifetime Access",
+              amount: { currency_code: "USD", value: LIFETIME_NO_ADS_PRICE.toFixed(2) }
+            }],
+            application_context: { shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW' }
+          });
+        }}
+        onApprove={async (data, actions) => {
+          try {
+            const details = await actions.order?.capture();
+            if (details?.status === 'COMPLETED') {
+              onSuccess();
+            }
+          } catch (e) {
+            console.error("Capture error:", e);
+            onError("Payment failed.");
+          }
+        }}
+        onError={(err) => {
+          console.error("PayPal Error:", err);
+          if (activeClientId !== 'test') {
+            onFallbackToTest();
+          } else {
+            onError("Error with PayPal.");
+          }
+        }}
+      />
+    </div>
+  );
+}
 
 export default function ShopView() {
   const { 
@@ -27,7 +102,26 @@ export default function ShopView() {
   const adContainerRef = useRef<HTMLDivElement>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
   
-  const paypalClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID || 'test';
+  const envClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+  const initialClientId = (!envClientId || envClientId === 'sb' || envClientId.startsWith('AT0')) ? 'test' : envClientId;
+  const [activeClientId, setActiveClientId] = useState<string>(initialClientId);
+
+  const handleFallbackToTest = React.useCallback(() => {
+    setActiveClientId('test');
+  }, []);
+
+  useEffect(() => {
+    const handleScriptError = (event: ErrorEvent | Event) => {
+      const target = event.target as HTMLElement;
+      if (target && target.tagName === 'SCRIPT' && target.getAttribute('src')?.includes('paypal.com/sdk/js')) {
+        console.warn("PayPal SDK script failed to load. Falling back to 'test' client ID.");
+        handleFallbackToTest();
+      }
+    };
+
+    window.addEventListener('error', handleScriptError, true);
+    return () => window.removeEventListener('error', handleScriptError, true);
+  }, [handleFallbackToTest]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -180,35 +274,12 @@ export default function ShopView() {
                   <Check size={14} /> Ads Permanently Disabled
                 </div>
               ) : (
-                <Suspense fallback={
-                  <div className="w-full h-[45px] bg-amber-500/20 border border-amber-500/30 rounded-xl animate-pulse flex items-center justify-center text-amber-300 text-[10px] font-black uppercase tracking-wider">
-                    Loading PayPal Checkout...
-                  </div>
-                }>
-                  <PayPalButtons
-                    style={{ layout: "vertical", height: 45, color: 'gold', shape: 'rect', label: 'pay', tagline: false }}
-                    createOrder={(data, actions) => {
-                      return actions.order.create({
-                        intent: "CAPTURE",
-                        purchase_units: [{
-                          description: "Remove Ads - Lifetime Access",
-                          amount: { currency_code: "USD", value: LIFETIME_NO_ADS_PRICE.toFixed(2) }
-                        }],
-                        application_context: { shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW' }
-                      });
-                    }}
-                    onApprove={async (data, actions) => {
-                      const details = await actions.order?.capture();
-                      if (details?.status === 'COMPLETED') {
-                        handleNoAdsPurchaseSuccess();
-                      }
-                    }}
-                    onError={(err) => {
-                      console.error("PayPal Error:", err);
-                      notifyError("Error processing payment.");
-                    }}
-                  />
-                </Suspense>
+                <PayPalButtonsWrapper 
+                  onSuccess={handleNoAdsPurchaseSuccess} 
+                  onError={(msg) => notifyError(msg)} 
+                  activeClientId={activeClientId}
+                  onFallbackToTest={handleFallbackToTest}
+                />
               )}
             </div>
           </div>
@@ -361,15 +432,14 @@ export default function ShopView() {
   );
 
   return (
-    <PayPalScriptProvider options={{ 
-      "client-id": paypalClientId,
-      currency: "USD",
-      locale: "en_US",
-      "enable-funding": "venmo",
-      "disable-funding": "paylater",
-      "components": "buttons",
-      "intent": "capture"
-    }}>
+    <PayPalScriptProvider 
+      key={activeClientId}
+      options={{ 
+        clientId: activeClientId,
+        currency: "USD",
+        intent: "capture"
+      }}
+    >
       {content}
     </PayPalScriptProvider>
   );

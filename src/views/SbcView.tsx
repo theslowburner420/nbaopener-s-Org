@@ -207,7 +207,7 @@ export default function SbcView() {
   const [rewardReveal, setRewardReveal] = useState<Card | null>(null);
   
   // Filters & Search for Challenges and Duplicate Selector
-  const [filterCategory, setFilterCategory] = useState<'all' | 'permanent' | 'limited' | 'completed'>('all');
+  const [filterCategory, setFilterCategory] = useState<'all' | 'rookie_series' | 'fan_favourites' | 'hof_legends' | 'franchise_icons' | 'clutch_moments' | 'completed'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [posFilter, setPosFilter] = useState('ALL');
   const [rarityFilter, setRarityFilter] = useState('ALL');
@@ -413,9 +413,8 @@ export default function SbcView() {
       const isCompleted = completedSbcs.includes(c.id);
       if (filterCategory === 'completed') return isCompleted;
       if (isCompleted) return false;
-      if (filterCategory === 'limited') return c.type === 'limited';
-      if (filterCategory === 'permanent') return c.type === 'permanent';
-      return true;
+      if (filterCategory === 'all') return true;
+      return c.category === filterCategory;
     });
   }, [completedSbcs, filterCategory]);
 
@@ -450,52 +449,33 @@ export default function SbcView() {
             </div>
           </header>
 
-          {/* Category Filter Pills */}
-          <div className="p-3 border-b border-white/5 bg-black/40 flex items-center justify-between shrink-0">
-            <div className="h-7 px-3 bg-zinc-900 border border-white/5 rounded-full flex items-center gap-3">
-              <button
-                onClick={() => setFilterCategory('all')}
-                className={`text-[9px] uppercase tracking-wider transition-all cursor-pointer ${
-                  filterCategory === 'all'
-                    ? 'text-amber-400 font-black drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]'
-                    : 'text-zinc-500 hover:text-zinc-300 font-bold'
-                }`}
-              >
-                ALL
-              </button>
-              <span className="text-zinc-800 text-[9px] font-bold">|</span>
-              <button
-                onClick={() => setFilterCategory('permanent')}
-                className={`text-[9px] uppercase tracking-wider transition-all cursor-pointer ${
-                  filterCategory === 'permanent'
-                    ? 'text-amber-400 font-black drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]'
-                    : 'text-zinc-500 hover:text-zinc-300 font-bold'
-                }`}
-              >
-                PERMANENT
-              </button>
-              <span className="text-zinc-800 text-[9px] font-bold">|</span>
-              <button
-                onClick={() => setFilterCategory('limited')}
-                className={`text-[9px] uppercase tracking-wider transition-all cursor-pointer ${
-                  filterCategory === 'limited'
-                    ? 'text-amber-400 font-black drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]'
-                    : 'text-zinc-500 hover:text-zinc-300 font-bold'
-                }`}
-              >
-                LIMITED TIME
-              </button>
-              <span className="text-zinc-800 text-[9px] font-bold">|</span>
-              <button
-                onClick={() => setFilterCategory('completed')}
-                className={`text-[9px] uppercase tracking-wider transition-all cursor-pointer ${
-                  filterCategory === 'completed'
-                    ? 'text-amber-400 font-black drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]'
-                    : 'text-zinc-500 hover:text-zinc-300 font-bold'
-                }`}
-              >
-                COMPLETED
-              </button>
+          {/* Minimalist Category Filter Bar */}
+          <div className="px-3 py-2 border-b border-white/5 bg-zinc-950/80 shrink-0 overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-1 min-w-max bg-zinc-900/60 p-1 rounded-xl border border-white/5">
+              {[
+                { id: 'all', label: 'All' },
+                { id: 'rookie_series', label: 'Rookies' },
+                { id: 'fan_favourites', label: 'Favorites' },
+                { id: 'hof_legends', label: 'HOF Legends' },
+                { id: 'franchise_icons', label: 'Icons' },
+                { id: 'clutch_moments', label: 'Clutch' },
+                { id: 'completed', label: 'Completed' },
+              ].map((cat) => {
+                const isActive = filterCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setFilterCategory(cat.id as any)}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer whitespace-nowrap ${
+                      isActive
+                        ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold shadow-sm'
+                        : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5 border border-transparent'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -510,11 +490,19 @@ export default function SbcView() {
                 {filteredChallenges.map((challenge) => {
                   const isCompleted = completedSbcs.includes(challenge.id);
 
+                  const catLabels: Record<string, string> = {
+                    rookie_series: 'ROOKIE SERIES',
+                    fan_favourites: 'FAN FAVOURITE',
+                    hof_legends: 'HOF LEGEND',
+                    franchise_icons: 'FRANCHISE ICON',
+                    clutch_moments: 'CLUTCH MOMENT',
+                  };
+
                   return (
                     <div
                       key={challenge.id}
                       onClick={() => setSelectedChallenge(challenge)}
-                      className={`p-4 rounded-2xl border cursor-pointer transition-all duration-300 flex flex-col justify-between gap-4 group ${
+                      className={`p-4 rounded-2xl border cursor-pointer transition-all duration-300 flex flex-col justify-between gap-4 group relative overflow-hidden ${
                         isCompleted
                           ? 'border-emerald-500/20 bg-zinc-950/60 opacity-80'
                           : 'border-white/10 bg-zinc-900/60 hover:bg-zinc-900 hover:border-amber-500/50 hover:shadow-xl'
@@ -531,6 +519,11 @@ export default function SbcView() {
                           </div>
 
                           <div>
+                            {challenge.category && (
+                              <span className="text-[8px] font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 mb-1 inline-block">
+                                {catLabels[challenge.category] || challenge.category}
+                              </span>
+                            )}
                             <h3 className="text-xs font-black uppercase tracking-tight text-white group-hover:text-amber-400 transition-colors">
                               {challenge.name}
                             </h3>
