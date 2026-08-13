@@ -18,40 +18,61 @@
   aspect-ratio: 63 / 100;
 }
 
-/* RARITY STYLES */
+/* RARITY STYLES FOR SBC SPECIAL CARDS */
+.sbc-card-future-star,
 .card-future-star {
-  background: linear-gradient(135deg, #0a2e1a 0%, #00ff88 100%);
-  border: 1px solid #00ff88;
-  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+  background: radial-gradient(circle at 50% 30%, #064e3b 0%, #022c22 60%, #011812 100%);
+  border: 1.5px solid #34d399;
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.45), inset 0 0 15px rgba(52, 211, 153, 0.2);
 }
+.sbc-card-future-star::after,
 .card-future-star::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+  background: linear-gradient(115deg, transparent 35%, rgba(52, 211, 153, 0.25) 50%, transparent 65%);
   background-size: 200% 100%;
-  animation: sbc-shimmer 3s infinite;
+  animation: sbc-shimmer 2.8s infinite;
 }
 
+.sbc-card-moments,
 .card-moments-sbc {
-  background: linear-gradient(135deg, #c0c0c0 0%, #ffffff 100%);
-  border: 1px solid #ffffff;
-  color: #000;
+  background: radial-gradient(circle at 50% 30%, #3f3f46 0%, #18181b 60%, #09090b 100%);
+  border: 1.5px solid #ffffff;
+  color: #fff;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.15);
 }
+.sbc-card-moments::before,
 .card-moments-sbc::before {
   content: '';
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle, white 1px, transparent 1px);
-  background-size: 10px 10px;
-  animation: sbc-particles 10s linear infinite;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px);
+  background-size: 12px 12px;
+  animation: sbc-particles 12s linear infinite;
 }
 
-.card-icon-sbc {
-  background: linear-gradient(135deg, #0a1628 0%, #1a4fd4 100%);
-  border: 1px solid #ffd700;
-  box-shadow: 0 0 20px rgba(26, 79, 212, 0.5);
+.sbc-card-hof {
+  background: radial-gradient(circle at 50% 35%, #92400e 0%, #451a03 55%, #1c0a00 100%);
+  border: 1.5px solid #fbbf24;
+  box-shadow: 0 0 35px rgba(245, 158, 11, 0.5), inset 0 0 20px rgba(251, 191, 36, 0.25);
 }
+.sbc-card-hof::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, #fef08a 1px, transparent 1px);
+  background-size: 14px 14px;
+  animation: sbc-stars 18s linear infinite;
+}
+
+.sbc-card-icon,
+.card-icon-sbc {
+  background: radial-gradient(circle at 50% 30%, #581c87 0%, #2e1065 60%, #0f0728 100%);
+  border: 1.5px solid #c084fc;
+  box-shadow: 0 0 35px rgba(168, 85, 247, 0.5), inset 0 0 20px rgba(192, 132, 252, 0.2);
+}
+.sbc-card-icon::after,
 .card-icon-sbc::after {
   content: '';
   position: absolute;
@@ -61,8 +82,36 @@
   width: 0%;
   height: 0%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(192, 132, 252, 0.35) 0%, transparent 70%);
   animation: sbc-waves 4s infinite;
+}
+
+.sbc-card-duo {
+  background: radial-gradient(circle at 50% 30%, #0369a1 0%, #0c4a6e 60%, #032b45 100%);
+  border: 1.5px solid #38bdf8;
+  box-shadow: 0 0 30px rgba(56, 189, 248, 0.45), inset 0 0 15px rgba(56, 189, 248, 0.2);
+}
+.sbc-card-duo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(56, 189, 248, 0.3) 50%, transparent 65%);
+  background-size: 200% 100%;
+  animation: sbc-shimmer 2.2s infinite;
+}
+
+.sbc-card-xfactor {
+  background: radial-gradient(circle at 50% 30%, #9a3412 0%, #431407 60%, #1c0500 100%);
+  border: 1.5px solid #f97316;
+  box-shadow: 0 0 35px rgba(249, 115, 22, 0.5), inset 0 0 20px rgba(249, 115, 22, 0.2);
+}
+.sbc-card-xfactor::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, #fdba74 1px, transparent 1px);
+  background-size: 14px 14px;
+  animation: sbc-particles 8s linear infinite;
 }
 
 .card-legend-sbc {
@@ -476,7 +525,6 @@ body {
   --rarity-franchise: #A855F7;
   --rarity-legend: #F59E0B;
   --rarity-roty: #EA580C;
-  --rarity-rookie: #3B82F6;
   --rarity-dynasty: #EF4444;
   --rarity-xfactor: #94A3B8; /* Steel Gray */
   --rarity-xfactor-glow: #60A5FA; /* Soft Blue */
@@ -486,7 +534,6 @@ body {
   --rarity-scoring-champ: #FF4D4D; /* Fire Crimson */
   --rarity-hof: #E2E8F0; /* Platinum/Silver */
   --rarity-coy: #FDE047; /* Coaching Gold */
-  --rarity-rising-star: #06B6D4; /* Rising Star Cyan */
   
   --pokemon-yellow: #FFCB05;
   --pokemon-blue: #2A75BB;
@@ -559,29 +606,6 @@ body {
 }
 .card-legend { 
   background: linear-gradient(135deg, #fde047 0%, #eab308 100%);
-}
-
-.card-rookie {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  border-color: #3b82f6 !important;
-  position: relative;
-}
-
-.card-rookie::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    125deg,
-    transparent 0%,
-    rgba(59, 130, 246, 0.1) 30%,
-    rgba(255, 255, 255, 0.15) 50%,
-    rgba(59, 130, 246, 0.1) 70%,
-    transparent 100%
-  );
-  background-size: 200% 200%;
-  animation: liquidLight 5s linear infinite;
-  pointer-events: none;
 }
 
 .card-record {
@@ -736,31 +760,6 @@ body {
   pointer-events: none;
 }
 
-.card-rising-star {
-  background: linear-gradient(135deg, #083344 0%, #0e7490 100%);
-  border-color: #22d3ee !important;
-  position: relative;
-  box-shadow: 0 0 35px rgba(34, 211, 238, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-}
-
-.card-rising-star::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    115deg,
-    transparent 0%,
-    rgba(34, 211, 238, 0.1) 40%,
-    rgba(255, 255, 255, 0.25) 50%,
-    rgba(34, 211, 238, 0.1) 60%,
-    transparent 100%
-  );
-  background-size: 200% 200%;
-  animation: liquidLight 4s linear infinite;
-  pointer-events: none;
-}
-
 .card-allnba-1st {
   background: linear-gradient(135deg, #09090b 0%, #1a1a1a 100%);
   border-color: #f59e0b !important;
@@ -794,6 +793,31 @@ body {
   position: relative;
   box-shadow: 0 0 40px rgba(239, 68, 68, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.2);
   animation: dynastyGlow 3s ease-in-out infinite;
+}
+
+.card-duo {
+  background: linear-gradient(135deg, #0284c7 0%, #4f46e5 50%, #9333ea 100%);
+  border-color: #38bdf8 !important;
+  position: relative;
+  box-shadow: 0 0 35px rgba(56, 189, 248, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.card-duo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    transparent 0%,
+    rgba(56, 189, 248, 0.1) 30%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(147, 51, 234, 0.1) 70%,
+    transparent 100%
+  );
+  background-size: 200% 200%;
+  animation: liquidLight 6s linear infinite;
+  pointer-events: none;
 }
 
 .card-xfactor {
@@ -1100,34 +1124,76 @@ body {
   opacity: 0.4;
 }
 
-.card-legend_sbc {
-  background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
-  border-color: #f59e0b !important;
-  box-shadow: inset 0 0 30px rgba(245, 158, 11, 0.3);
-}
-
-.card-icon_sbc {
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-  border-color: #fff !important;
-  box-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
-}
-
-.card-moments_sbc {
-  background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
-  border-color: #fff !important;
+.card-legend_sbc,
+.card-legend-sbc {
+  background: radial-gradient(circle at 50% 20%, #2a1f06 0%, #0d0a02 60%, #000000 100%);
+  border: 2px solid #f59e0b !important;
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.4), inset 0 0 20px rgba(245, 158, 11, 0.25);
   position: relative;
   overflow: hidden;
 }
 
-.card-moments_sbc::after {
+.card-legend_sbc::before,
+.card-legend-sbc::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%);
-  animation: sbc-flash 4s ease-in-out infinite;
+  inset: -100%;
+  background: linear-gradient(
+    45deg,
+    transparent 40%,
+    rgba(255, 215, 0, 0.25) 50%,
+    transparent 60%
+  );
+  animation: sbc-holo-slide 3.5s infinite linear;
+  pointer-events: none;
+}
+
+.card-icon_sbc,
+.card-icon-sbc {
+  background: radial-gradient(circle at 50% 20%, #2e1065 0%, #0f172a 60%, #020617 100%);
+  border: 2px solid #a855f7 !important;
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.45), inset 0 0 20px rgba(168, 85, 247, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-icon_sbc::after,
+.card-icon-sbc::after {
+  content: '';
+  position: absolute;
+  inset: -100%;
+  background: linear-gradient(
+    135deg,
+    transparent 35%,
+    rgba(192, 132, 252, 0.3) 50%,
+    transparent 65%
+  );
+  animation: sbc-holo-slide 4s infinite linear;
+  pointer-events: none;
+}
+
+.card-moments_sbc,
+.card-moments-sbc {
+  background: radial-gradient(circle at 50% 20%, #3f3f46 0%, #18181b 60%, #09090b 100%);
+  border: 2px solid #e4e4e7 !important;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.35), inset 0 0 20px rgba(255, 255, 255, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-moments_sbc::after,
+.card-moments-sbc::after {
+  content: '';
+  position: absolute;
+  inset: -100%;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 60%
+  );
+  animation: sbc-holo-slide 3s infinite linear;
+  pointer-events: none;
 }
 
 .card-future_star {
@@ -1719,24 +1785,6 @@ body > iframe[id^="at-"] {
 
 .animate-screen-shake-subtle {
   animation: screen-shake-subtle 0.3s ease-in-out both;
-}
-
-@keyframes intense-glow-rookie {
-  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
-  50% { box-shadow: 0 0 50px rgba(59, 130, 246, 0.7), inset 0 0 15px rgba(255, 255, 255, 0.3); }
-}
-
-.animate-intense-glow-rookie {
-  animation: intense-glow-rookie 2s ease-in-out infinite;
-}
-
-@keyframes rookie-radial-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.3; }
-  50% { transform: scale(1.2); opacity: 0.6; }
-}
-
-.animate-rookie-radial-pulse {
-  animation: rookie-radial-pulse 2s ease-in-out infinite;
 }
 
 @keyframes intense-glow-allstar {

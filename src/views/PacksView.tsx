@@ -18,50 +18,49 @@ interface Pack {
   cardsCount: number;
   price: number;
   image: string;
+  tag: string;
 }
 
 const PACKS: Pack[] = [
   {
-    id: 'rookie',
-    name: 'Rookie Pack',
-    cardsCount: 3,
-    price: 2500,
-    image: 'https://i.postimg.cc/d1xbwS8d/generated-image-(6).png'
+    id: 'duo_xfactor',
+    name: 'Dynamic Duo & X-Factor',
+    cardsCount: 4,
+    price: 15000,
+    image: 'https://i.postimg.cc/TwG0zjyz/generated-image-(1).png',
+    tag: 'Chemistry'
   },
   {
     id: 'allstar',
     name: 'All-Star Pack',
-    cardsCount: 4,
-    price: 10000,
-    image: 'https://i.postimg.cc/RVKZpcmB/generated-image-(7).png'
+    cardsCount: 5,
+    price: 35000,
+    image: 'https://i.postimg.cc/RVKZpcmB/generated-image-(7).png',
+    tag: 'All-Stars'
   },
   {
     id: 'mvp',
-    name: 'Finals MVP Pack',
-    cardsCount: 5,
-    price: 35000,
-    image: 'https://i.postimg.cc/T3kMtwps/generated-image-(8).png'
-  },
-  {
-    id: 'rising_star',
-    name: 'Rising Star',
+    name: 'Finals MVP & Awards',
     cardsCount: 4,
-    price: 50000,
-    image: 'https://i.postimg.cc/TwG0zjyz/generated-image-(1).png'
+    price: 85000,
+    image: 'https://i.postimg.cc/T3kMtwps/generated-image-(8).png',
+    tag: 'Award Winners'
   },
   {
     id: 'hof',
-    name: 'HOF Pack',
+    name: 'Hall of Fame Pack',
     cardsCount: 5,
-    price: 120000,
-    image: 'https://i.postimg.cc/Pfb76x7C/generated-image-(9).png'
+    price: 160000,
+    image: 'https://i.postimg.cc/Pfb76x7C/generated-image-(9).png',
+    tag: 'Legends & HOF'
   },
   {
     id: 'legendary_mvp',
-    name: 'Legendary MVP',
+    name: 'Legendary MVP Single',
     cardsCount: 1,
-    price: 300000,
-    image: 'https://i.postimg.cc/GtzqbBwc/generated-image-(10).png'
+    price: 350000,
+    image: 'https://i.postimg.cc/GtzqbBwc/generated-image-(10).png',
+    tag: 'Ultra Elite'
   }
 ];
 
@@ -202,14 +201,17 @@ export default function PacksView() {
                         className="w-full h-full object-cover"
                         referrerPolicy="no-referrer"
                       />
+                      <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded bg-amber-400 text-black text-[7px] font-black uppercase tracking-wider shadow">
+                        {pack.tag}
+                      </div>
                     </div>
 
-                    {/* Pack Title & Basic Details */}
-                    <div className="space-y-0.5 mb-2 text-center">
+                    {/* Pack Title & Details */}
+                    <div className="space-y-0.5 mb-2.5 text-center">
                       <h3 className="text-[10px] font-black uppercase tracking-tight text-white truncate">
                         {pack.name}
                       </h3>
-                      <p className="text-[7.5px] font-bold text-zinc-500 uppercase tracking-wider">
+                      <p className="text-[8px] font-bold text-amber-400 uppercase tracking-wider">
                         {pack.cardsCount} {pack.cardsCount === 1 ? 'Card' : 'Cards'}
                       </p>
                     </div>

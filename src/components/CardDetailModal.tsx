@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
 import { Card } from '../types';
 import CardItem from './CardItem';
+import SBCCard from './SBCCard';
 
 interface CardDetailModalProps {
   card: Card | null;
@@ -10,6 +11,8 @@ interface CardDetailModalProps {
 }
 
 const CardDetailModal = React.memo(({ card, onClose }: CardDetailModalProps) => {
+  const isSpecialSBC = card ? (card.isSpecialSBC || ['legend_sbc', 'icon_sbc', 'moments_sbc', 'future_star', 'galaxy', 'invincible'].includes(card.rarity)) : false;
+
   return (
     <AnimatePresence>
       {card && (
@@ -37,8 +40,12 @@ const CardDetailModal = React.memo(({ card, onClose }: CardDetailModalProps) => 
 
             {/* Large Card Display */}
             <div className="w-full max-h-[75vh] flex items-center justify-center">
-              <div className="w-full max-w-[320px] sm:max-w-none">
-                <CardItem card={card} isOwned={true} mode="large" isFocused={true} />
+              <div className="w-full flex justify-center items-center">
+                {isSpecialSBC ? (
+                  <SBCCard card={card} size="lg" />
+                ) : (
+                  <CardItem card={card} isOwned={true} mode="large" isFocused={true} />
+                )}
               </div>
             </div>
           </motion.div>

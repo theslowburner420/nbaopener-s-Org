@@ -32,14 +32,12 @@ const getRarityClass = (rarity: Rarity) => {
     case 'dpoy': return 'card-dpoy';
     case 'roty': return 'card-roty';
     case 'record': return 'card-record';
-    case 'rookie': return 'card-rookie';
     case 'logo': return 'card-logo';
     case 'arena': return 'card-arena';
     case 'draft2026': return 'card-draft2026';
     case 'scoring_champ': return 'card-scoring-champ';
     case 'hof': return 'card-hof';
     case 'coy': return 'card-coy';
-    case 'rising_star': return 'card-rising-star';
     case 'allnba_1st': return 'card-allnba-1st';
     case 'invincible': return 'card-invincible';
     case 'galaxy': return 'card-galaxy';
@@ -47,6 +45,10 @@ const getRarityClass = (rarity: Rarity) => {
     case 'icon_sbc': return 'card-icon_sbc';
     case 'moments_sbc': return 'card-moments_sbc';
     case 'future_star': return 'card-future_star';
+    case '6moy': return 'card-6moy';
+    case 'mip': return 'card-award';
+    case 'mvp': return 'card-fmvp';
+    case 'fmvp': return 'card-fmvp';
     default: return '';
   }
 };
@@ -61,14 +63,12 @@ const RARITY_COLORS: Record<Rarity, string> = {
   'dpoy': '#064E3B', // Deep emerald
   'roty': '#EA580C', // Bright orange
   'record': '#F59E0B', // Gold/Amber
-  'rookie': '#3B82F6', // Blue
   'logo': '#F59E0B',   // Gold
   'arena': '#10B981',  // Emerald
   'draft2026': '#6366F1', // Indigo
   'scoring_champ': '#FF4D4D', // Fire Crimson
   'hof': '#F1F5F9', // Platinum/Silver
   'coy': '#FDE047', // Gold
-  'rising_star': '#06B6D4', // Cyan
   'allnba_1st': '#F59E0B',   // Gold/Amber
   'invincible': '#FFD700',
   'galaxy': '#E94560',
@@ -76,6 +76,10 @@ const RARITY_COLORS: Record<Rarity, string> = {
   'icon_sbc': '#8B5CF6',
   'moments_sbc': '#FFFFFF',
   'future_star': '#10B981',
+  '6moy': '#10B981',
+  'mip': '#EC4899',
+  'mvp': '#F59E0B',
+  'fmvp': '#F59E0B',
 };
 
 const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', onClick, showBack = false, isFocused = false, isNew = false, quantity = 0, dynamicOvr, dynamicStats, width }) => {
@@ -98,36 +102,35 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
     
     const isMoment = card.category === 'Moment';
     const isDynasty = card.category === 'Dynasty';
+    const isDuo = card.category === 'Duo';
     const isXFactor = card.category === 'X-Factor';
-    const isRookie = card.category === 'Rookie';
-    const isAward = card.category === 'Award';
+    const isAward = card.category === 'Award' || ['MVP', 'Finals MVP', 'DPOY', 'ROY', '6MOTY', 'MIP', 'All-Star MVP'].includes(card.category);
     const isDraft2026 = card.category === 'Draft 2026';
     const isScoringChamp = card.category === 'Scoring Champion';
     const isHOF = card.category === 'Hall of Fame';
     const isCOY = card.category === 'Coach of the Year';
-    const isRisingStar = card.category === 'Rising Star';
     const isAllNBA = card.category === 'All-NBA 1st Team';
     
     const cClass = isAward 
-      ? (card.rarity === 'dpoy' ? 'card-dpoy' : 
-         card.series === 'ROTY Series' ? 'card-roty' : 
-         card.series === '6MOY Series' ? 'card-6moy' : 
+      ? (card.category === 'DPOY' || card.rarity === 'dpoy' ? 'card-dpoy' : 
+         card.category === 'ROY' || card.rarity === 'roty' || card.series === 'ROTY Series' ? 'card-roty' : 
+         card.category === '6MOTY' || card.rarity === '6moy' || card.series === '6MOY Series' ? 'card-6moy' : 
+         card.category === 'Finals MVP' || card.rarity === 'fmvp' ? 'card-fmvp' :
+         card.category === 'MVP' || card.rarity === 'mvp' ? 'card-fmvp' :
          card.series === 'NBA Record Series' ? 'card-record' : 'card-award') 
       : isDynasty ? 'card-dynasty' : 
+        isDuo ? 'card-duo' :
         isXFactor ? 'card-xfactor' : 
-        isRookie ? 'card-rookie' : 
         isDraft2026 ? 'card-draft2026' :
         isScoringChamp ? 'card-scoring-champ' :
         isHOF ? 'card-hof' :
         isCOY ? 'card-coy' :
-        isRisingStar ? 'card-rising-star' :
         isAllNBA ? 'card-allnba-1st' :
         card.category === 'All-Star MVP' ? 'card-as-mvp' : 
-        card.category === 'Finals MVP' ? 'card-fmvp' : 
         isMoment ? 'card-moment' : '';
         
-    const dark = isAward || card.category === 'Coach' || card.rarity === 'dpoy' || card.rarity === 'roty' || card.rarity === 'record' || card.rarity === 'logo' || card.rarity === 'arena' || card.rarity === 'draft2026' || card.rarity === 'scoring_champ' || card.rarity === 'hof' || card.rarity === 'coy' || card.rarity === 'rising_star' || card.rarity === 'allnba_1st' || isDynasty || isXFactor || card.category === 'NBA Record' || isRookie || isDraft2026 || isScoringChamp || isHOF || isCOY || isRisingStar || isAllNBA || card.category === 'All-Star MVP' || card.category === 'Finals MVP' || isMoment || card.rarity === 'franchise' || ['invincible', 'galaxy', 'legend_sbc', 'icon_sbc', 'moments_sbc', 'future_star'].includes(card.rarity);
-    const holo = ['allstar', 'franchise', 'legend', 'dpoy', 'roty', 'record', 'rookie', 'logo', 'arena', 'draft2026', 'scoring_champ', 'hof', 'coy', 'rising_star', 'allnba_1st', 'invincible', 'galaxy', 'legend_sbc', 'icon_sbc', 'moments_sbc', 'future_star'].includes(card.rarity) || isDynasty || isXFactor || isMoment;
+    const dark = isAward || card.category === 'Coach' || ['dpoy', 'roty', '6moy', 'mip', 'mvp', 'fmvp', 'record', 'logo', 'arena', 'draft2026', 'scoring_champ', 'hof', 'coy', 'allnba_1st'].includes(card.rarity) || isDynasty || isDuo || isXFactor || card.category === 'NBA Record' || isDraft2026 || isScoringChamp || isHOF || isCOY || isAllNBA || isMoment || card.rarity === 'franchise' || ['invincible', 'galaxy', 'legend_sbc', 'icon_sbc', 'moments_sbc', 'future_star'].includes(card.rarity);
+    const holo = isAward || ['allstar', 'franchise', 'legend', 'dpoy', 'roty', '6moy', 'mip', 'mvp', 'fmvp', 'record', 'logo', 'arena', 'draft2026', 'scoring_champ', 'hof', 'coy', 'allnba_1st', 'invincible', 'galaxy', 'legend_sbc', 'icon_sbc', 'moments_sbc', 'future_star'].includes(card.rarity) || isDynasty || isDuo || isXFactor || isMoment;
     const franchise = card.rarity === 'franchise';
     const legend = card.rarity === 'legend' || isDynasty || isMoment;
     const dpoy = card.rarity === 'dpoy';
@@ -298,8 +301,8 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
               <h3 className={`text-[9px] font-black uppercase italic leading-none drop-shadow-md truncate ${isMoment ? 'moment-title-text mini-moment-title-text' : (isDarkCard ? 'text-white' : 'text-zinc-900')}`}>
                 {isMoment && card.momentTitle ? card.momentTitle : card.name}
               </h3>
-              {card.isSpecialSBC && (
-                <span className="bg-amber-500 text-black text-[5px] font-black px-0.5 rounded-[1px] leading-tight">SBC</span>
+              {(card.isSpecialSBC || ['legend_sbc', 'icon_sbc', 'moments_sbc'].includes(card.rarity)) && (
+                <span className="bg-gradient-to-r from-amber-400 to-amber-500 text-black text-[6px] font-black px-1 py-0.2 rounded shadow-md border border-amber-200/50 leading-tight">SBC</span>
               )}
             </div>
             <span className={`text-[6px] font-bold uppercase tracking-tighter truncate ${isDarkCard ? 'text-white/70 shadow-black' : 'text-zinc-700'}`}>
@@ -325,8 +328,8 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
               <h3 className={`text-base md:text-lg font-black uppercase tracking-tighter leading-[0.9] drop-shadow-sm italic ${isDarkCard ? 'card-text-primary' : 'text-zinc-900'} truncate`}>
                 {card.name}
               </h3>
-              {card.isSpecialSBC && (
-                <span className="bg-amber-500 text-black text-[8px] font-black px-1.5 py-0.5 rounded shadow-lg">SBC</span>
+              {(card.isSpecialSBC || ['legend_sbc', 'icon_sbc', 'moments_sbc'].includes(card.rarity)) && (
+                <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 text-black text-[8px] font-black px-2 py-0.5 rounded shadow-[0_0_12px_rgba(245,158,11,0.6)] border border-amber-200 uppercase tracking-wider">SBC REWARD</span>
               )}
             </div>
           )}
@@ -411,10 +414,18 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
   };
 
   const renderStats = () => {
+    const formatVal = (val: any) => {
+      if (typeof val === 'number') {
+        if (val > 45 && val !== 50.4) return Math.round(val);
+        return Number.isInteger(val) ? val : val.toFixed(1);
+      }
+      return val ?? 0;
+    };
+
     const stats = [
-      { label: card.category === 'Coach' || card.category === 'Coach of the Year' || card.category === 'Logo' ? 'WINS' : card.category === 'Arena' ? 'CAP' : 'PTS', value: displayStats?.points || 0, color: 'bg-amber-400', borderColor: 'border-amber-600' },
-      { label: card.category === 'Coach' || card.category === 'Coach of the Year' || card.category === 'Logo' ? 'LOSSES' : card.category === 'Arena' ? 'YEAR' : 'REB', value: displayStats?.rebounds || 0, color: 'bg-zinc-400', borderColor: 'border-zinc-600' },
-      { label: card.category === 'Coach' ? 'RINGS' : card.category === 'Coach of the Year' || card.category === 'Logo' ? 'TITLES' : card.category === 'Arena' ? 'TYPE' : 'AST', value: displayStats?.assists || 0, color: 'bg-blue-400', borderColor: 'border-blue-600' },
+      { label: card.category === 'Coach' || card.category === 'Coach of the Year' || card.category === 'Logo' ? 'WINS' : card.category === 'Arena' ? 'CAP' : 'PTS', value: formatVal(displayStats?.points ?? card.pts), color: 'bg-amber-400', borderColor: 'border-amber-600' },
+      { label: card.category === 'Coach' || card.category === 'Coach of the Year' || card.category === 'Logo' ? 'LOSSES' : card.category === 'Arena' ? 'YEAR' : 'REB', value: formatVal(displayStats?.rebounds ?? card.reb), color: 'bg-zinc-400', borderColor: 'border-zinc-600' },
+      { label: card.category === 'Coach' ? 'RINGS' : card.category === 'Coach of the Year' || card.category === 'Logo' ? 'TITLES' : card.category === 'Arena' ? 'TYPE' : 'AST', value: formatVal(displayStats?.assists ?? card.ast), color: 'bg-blue-400', borderColor: 'border-blue-600' },
     ];
 
     if (isMini) {

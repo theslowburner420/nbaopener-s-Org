@@ -2,7 +2,7 @@ import { SbcChallenge } from '../types';
 
 export const SBC_CHALLENGES: SbcChallenge[] = [
   // ==========================================
-  // 1. ROOKIE SERIES (10 Challenges)
+  // 1. ROOKIE SERIES (Rookie / Future Star SBCs)
   // ==========================================
   {
     id: 'rookie-lebron-2003',
@@ -20,7 +20,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'LeBron James',
       rarity: 'future_star',
-      ovr: 88
+      ovr: 88,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVLB5gUMePndVUTfs1Caetc8Ym79WBe10pKRBngG_j1g&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -41,7 +42,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Stephen Curry',
       rarity: 'future_star',
-      ovr: 86
+      ovr: 86,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR5M2HRbuI-gHSxlY74KqX2Rjn_i4nHiOKLRp4LlaCgOg&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -62,7 +64,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Kobe Bryant',
       rarity: 'future_star',
-      ovr: 87
+      ovr: 87,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrFT8KIxk7FGubiz5l9vkxXv9O5gHfyT9lv06yJZpZhQ&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -83,7 +86,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Kevin Durant',
       rarity: 'future_star',
-      ovr: 87
+      ovr: 87,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUuvEd2g-yYvSTVhy496FT2WQNxMuHXKds3iuq4CP3qw&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -104,7 +108,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Luka Doncic',
       rarity: 'future_star',
-      ovr: 88
+      ovr: 88,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRu0V63XOIgLYmd1I91PLkybw8pN8y3JSb4Vcdl2HNYQ&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -125,7 +130,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Victor Wembanyama',
       rarity: 'future_star',
-      ovr: 89
+      ovr: 89,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuP-kZN3Oc0zVlVokDLGp6G-lDCCIiE-rgEQvXhwkd1g&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -146,7 +152,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Allen Iverson',
       rarity: 'future_star',
-      ovr: 88
+      ovr: 88,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJPXR4fWcOD8ozB82QNzCgRjzG5Vv39XTfwG14dpg-Xw&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -167,7 +174,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Michael Jordan',
       rarity: 'future_star',
-      ovr: 90
+      ovr: 90,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_ZvHGHtxHR_KxoyW5b9l4XHwIgKqZuyi8EjY3AGS98Q&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -188,7 +196,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Magic Johnson',
       rarity: 'future_star',
-      ovr: 89
+      ovr: 89,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHVHqa-1A1_uLKV-4Swd_86qXKc0vN5n0NslzzrJ9IXg&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -209,14 +218,15 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: "Shaquille O'Neal",
       rarity: 'future_star',
-      ovr: 89
+      ovr: 89,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTl5Lo_9Zj2yxH3taBnAUo_0WOmB2rMFXthKJWvVBjmeA&s=10'
     },
     isActive: true,
     cardsRequired: 5
   },
 
   // ==========================================
-  // 2. FAN FAVOURITES (10 Challenges)
+  // 2. FAN FAVOURITES (Moments SBCs)
   // ==========================================
   {
     id: 'fan-isaiah-thomas-celtics',
@@ -234,7 +244,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Isaiah Thomas',
       rarity: 'moments_sbc',
-      ovr: 89
+      ovr: 89,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4Y44vOWfEjM7YO0obA9_zxcAhON0D7TQNkGxq3KZiaA&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -255,28 +266,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Alex Caruso',
       rarity: 'moments_sbc',
-      ovr: 85
-    },
-    isActive: true,
-    cardsRequired: 5
-  },
-  {
-    id: 'fan-derrick-rose-mvp',
-    name: 'D-ROSE 2011 MVP',
-    description: 'Submit 4 Bulls cards + 1 PG card for Youngest MVP Rose.',
-    category: 'fan_favourites',
-    difficulty: 'elite',
-    type: 'permanent',
-    expiresAt: null,
-    requirements: [
-      { type: 'TOTAL_CARDS', value: 5 },
-      { type: 'POSITION', value: 'PG', count: 2 },
-      { type: 'MIN_OVR', value: 80 }
-    ],
-    reward: {
-      playerName: 'Derrick Rose',
-      rarity: 'moments_sbc',
-      ovr: 91
+      ovr: 85,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTylOXr2AqL_yKpPwX7t27FGkEITy8jrwhoNQi5_qGHGA&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -297,7 +288,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Lance Stephenson',
       rarity: 'moments_sbc',
-      ovr: 84
+      ovr: 84,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbrDzm-SDZ02oq3__9idNuezsgLN_dJRMXtepDQ3LHTw&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -318,7 +310,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Boban Marjanovic',
       rarity: 'moments_sbc',
-      ovr: 83
+      ovr: 83,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRx4Dce4DTbZwokbggVVc4kkC25os4366lccoetwHG6eg&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -339,7 +332,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Manu Ginobili',
       rarity: 'moments_sbc',
-      ovr: 89
+      ovr: 89,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzzFHddJ7N-sbb5T3rPHCTWKFszRc6q3-MAvEXbYFFWZjC9dvpHR27Kzk&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -360,7 +354,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Udonis Haslem',
       rarity: 'moments_sbc',
-      ovr: 82
+      ovr: 82,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzy6-sXX3Rlv8BxHkUYb1oXxgyujhaPI7TLwFR2ENhfQ&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -381,7 +376,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Patrick Beverley',
       rarity: 'moments_sbc',
-      ovr: 84
+      ovr: 84,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ65dykMj61SAbVqF3dbKdmJFika9xaj1LVIBBLc-q9wA&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -402,7 +398,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Jamal Crawford',
       rarity: 'moments_sbc',
-      ovr: 87
+      ovr: 87,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTq4-OQZMc8ZTj_MDstkfEs91dQ-nFn_mclE94gLYG1VQ&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -423,19 +420,20 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Jeremy Lin',
       rarity: 'moments_sbc',
-      ovr: 88
+      ovr: 88,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLFK2KLr0TtkFBSCFVt63UN8RNEHLd90nNqRKM5ZFtsA&s=10'
     },
     isActive: true,
     cardsRequired: 5
   },
 
   // ==========================================
-  // 3. HALL OF FAME LEGENDS (10 Challenges)
+  // 3. HALL OF FAME LEGENDS (Legend SBCs)
   // ==========================================
   {
     id: 'hof-michael-jordan-1996',
     name: 'MJ 1996 CHAMPION',
-    description: 'Submit 5 All-Star level guards (82+ OVR) for HOF Jordan.',
+    description: 'Submit 5 East All-Star cards (82+ OVR) for 72-10 Champion Jordan.',
     category: 'hof_legends',
     difficulty: 'legendary',
     type: 'permanent',
@@ -443,12 +441,13 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     requirements: [
       { type: 'TOTAL_CARDS', value: 5 },
       { type: 'MIN_RARITY', value: 'allstar' },
-      { type: 'TEAM_OVR_MIN', value: 82 }
+      { type: 'MIN_OVR', value: 82 }
     ],
     reward: {
       playerName: 'Michael Jordan',
       rarity: 'legend_sbc',
-      ovr: 98
+      ovr: 98,
+      imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/893.png'
     },
     isActive: true,
     cardsRequired: 5
@@ -469,7 +468,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Kobe Bryant',
       rarity: 'legend_sbc',
-      ovr: 97
+      ovr: 97,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2j9T_I8bFC3KvEn7km58G51B0h5dhsroc7vbGgFO8og&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -490,7 +490,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Kareem Abdul-Jabbar',
       rarity: 'legend_sbc',
-      ovr: 97
+      ovr: 97,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRID8uPzWcjh7zfvj9k4qLQdqVuUpgfP4wnYnCtwU5TVQ&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -511,7 +512,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Larry Bird',
       rarity: 'legend_sbc',
-      ovr: 96
+      ovr: 96,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0THNsE9tWM1-Bcm-g8mE1on9kuhUxX6Is-AtDFmSPPA&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -532,7 +534,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Magic Johnson',
       rarity: 'legend_sbc',
-      ovr: 96
+      ovr: 96,
+      imageUrl: 'https://wallpapers.com/images/hd/magic-johnson-golden-art-2gfb0a8ly81nbgp2.jpg'
     },
     isActive: true,
     cardsRequired: 5
@@ -553,7 +556,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: "Shaquille O'Neal",
       rarity: 'legend_sbc',
-      ovr: 97
+      ovr: 97,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgp_YZyi0CaUNKaw2gpDE4DRJJdCHO2g4v6V4hFgaoyOfwjhdgVDUxMtvz&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -574,7 +578,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Hakeem Olajuwon',
       rarity: 'legend_sbc',
-      ovr: 96
+      ovr: 96,
+      imageUrl: 'https://wp.theringer.com/wp-content/uploads/2024/10/DreamShakeExcerpt_Getty_Ringer.jpg'
     },
     isActive: true,
     cardsRequired: 5
@@ -595,7 +600,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Tim Duncan',
       rarity: 'legend_sbc',
-      ovr: 96
+      ovr: 96,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKhOZuO6XB33_azKlUkW7ujNttsi0mTwnPaWqMgOtG4A&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -616,7 +622,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Wilt Chamberlain',
       rarity: 'legend_sbc',
-      ovr: 97
+      ovr: 97,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRt7dAV8LiDmKQYTcxSF3HyWABv39TxUOMMLFCnuBolUw&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -637,14 +644,15 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Bill Russell',
       rarity: 'legend_sbc',
-      ovr: 96
+      ovr: 96,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMOqmF3NP4rkAiGi0UDJ_aZolCevZo3EAD8cs3Mar5bQ&s=10'
     },
     isActive: true,
     cardsRequired: 5
   },
 
   // ==========================================
-  // 4. FRANCHISE ICONS (10 Challenges)
+  // 4. FRANCHISE ICONS (Icon SBCs)
   // ==========================================
   {
     id: 'icon-dirk-nowitzki',
@@ -662,7 +670,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Dirk Nowitzki',
       rarity: 'icon_sbc',
-      ovr: 95
+      ovr: 95,
+      imageUrl: 'https://i.pinimg.com/originals/c3/bf/32/c3bf3247294ab7aa8c3d7bdee0f34c36.jpg'
     },
     isActive: true,
     cardsRequired: 5
@@ -683,7 +692,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Dwyane Wade',
       rarity: 'icon_sbc',
-      ovr: 95
+      ovr: 95,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE84GmqJR-ytQYvuiCGaF2MERo_v4XKdQ4BPpJCYbfWA&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -704,7 +714,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Giannis Antetokounmpo',
       rarity: 'icon_sbc',
-      ovr: 96
+      ovr: 96,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSzzcfb2YbI2I29tO2BCWd99e8nsuw0wl9D28XnxxmZQ&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -725,7 +736,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Stephen Curry',
       rarity: 'icon_sbc',
-      ovr: 96
+      ovr: 96,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTEF65UKaP2n5N4gUA6rCZkFAA19L80Qr3HyUDGEJKMvA&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -746,7 +758,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Nikola Jokic',
       rarity: 'icon_sbc',
-      ovr: 96
+      ovr: 96,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwGrDwE_xz4J7l_fm0ctX2odEqvJylah2ePi-XHcGiQg&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -767,7 +780,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Allen Iverson',
       rarity: 'icon_sbc',
-      ovr: 94
+      ovr: 94,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJPXR4fWcOD8ozB82QNzCgRjzG5Vv39XTfwG14dpg-Xw&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -788,7 +802,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Damian Lillard',
       rarity: 'icon_sbc',
-      ovr: 93
+      ovr: 93,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRlDuweYsMwgbqILOt6cT-cbgLBk5XEB8qmL2kGZfvNLg&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -809,7 +824,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Reggie Miller',
       rarity: 'icon_sbc',
-      ovr: 92
+      ovr: 92,
+      imageUrl: 'https://i.ytimg.com/vi/9cSjsKmiCF8/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCKax0NQmU9cIOPh4AUn0-wyY5bPA'
     },
     isActive: true,
     cardsRequired: 5
@@ -830,7 +846,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Patrick Ewing',
       rarity: 'icon_sbc',
-      ovr: 92
+      ovr: 92,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQb2i0xhFgmAMNpHkXT5mEzdiPGkZwmXLcmhtJnRbbdlg&s=10'
     },
     isActive: true,
     cardsRequired: 5
@@ -851,14 +868,15 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Paul Pierce',
       rarity: 'icon_sbc',
-      ovr: 93
+      ovr: 93,
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4hegMjO3MduppMFt5KdHOvDUmzs1Q6BZWORqT1hzZYg&s=10'
     },
     isActive: true,
     cardsRequired: 5
   },
 
   // ==========================================
-  // 5. CLUTCH MOMENTS (10 Challenges)
+  // 5. CLUTCH MOMENTS (Moments SBCs)
   // ==========================================
   {
     id: 'clutch-ray-allen-game6',
@@ -876,7 +894,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Ray Allen',
       rarity: 'moments_sbc',
-      ovr: 93
+      ovr: 93,
+      imageUrl: 'https://media.tenor.com/RNzYmnPTe1YAAAAM/nba-basketball.gif'
     },
     isActive: true,
     cardsRequired: 5
@@ -897,7 +916,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Kyrie Irving',
       rarity: 'moments_sbc',
-      ovr: 94
+      ovr: 94,
+      imageUrl: 'https://i.makeagif.com/media/7-12-2017/D_v9Rj.gif'
     },
     isActive: true,
     cardsRequired: 5
@@ -918,49 +938,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Kawhi Leonard',
       rarity: 'moments_sbc',
-      ovr: 95
-    },
-    isActive: true,
-    cardsRequired: 5
-  },
-  {
-    id: 'clutch-tracy-mcgrady-13in33',
-    name: 'T-MAC 13 IN 33 SECONDS',
-    description: 'Submit 4 SG cards for Impossible Comeback T-Mac.',
-    category: 'clutch_moments',
-    difficulty: 'gold',
-    type: 'permanent',
-    expiresAt: null,
-    requirements: [
-      { type: 'TOTAL_CARDS', value: 5 },
-      { type: 'POSITION', value: 'SG', count: 2 },
-      { type: 'MIN_OVR', value: 78 }
-    ],
-    reward: {
-      playerName: 'Tracy McGrady',
-      rarity: 'moments_sbc',
-      ovr: 93
-    },
-    isActive: true,
-    cardsRequired: 5
-  },
-  {
-    id: 'clutch-klay-thompson-37pts',
-    name: 'KLAY 37-POINT QUARTER',
-    description: 'Submit 4 Warriors/SG cards for Perfect Quarter Klay.',
-    category: 'clutch_moments',
-    difficulty: 'gold',
-    type: 'permanent',
-    expiresAt: null,
-    requirements: [
-      { type: 'TOTAL_CARDS', value: 5 },
-      { type: 'POSITION', value: 'SG', count: 2 },
-      { type: 'MIN_OVR', value: 78 }
-    ],
-    reward: {
-      playerName: 'Klay Thompson',
-      rarity: 'moments_sbc',
-      ovr: 93
+      ovr: 95,
+      imageUrl: 'https://64.media.tumblr.com/d256967e1db88d8e283e90a860fac2e4/tumblr_prfdwhgPhn1sqpy32o2_400.gifv'
     },
     isActive: true,
     cardsRequired: 5
@@ -981,7 +960,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Vince Carter',
       rarity: 'moments_sbc',
-      ovr: 94
+      ovr: 94,
+      imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/1713.png'
     },
     isActive: true,
     cardsRequired: 5
@@ -1002,38 +982,39 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Robert Horry',
       rarity: 'moments_sbc',
-      ovr: 88
+      ovr: 88,
+      imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/109.png'
     },
     isActive: true,
     cardsRequired: 5
   },
   {
-    id: 'clutch-damian-lillard-wave',
-    name: 'DAME TIME WAVE GOODBYE',
-    description: 'Submit 4 PG cards for Series-Ending Buzzer Beater Dame.',
+    id: 'clutch-tracy-mcgrady-13in33',
+    name: 'T-MAC 13 PTS IN 33 SECS',
+    description: 'Submit 4 SG/SF cards for Miraculous Comeback T-Mac.',
     category: 'clutch_moments',
-    difficulty: 'gold',
+    difficulty: 'elite',
     type: 'permanent',
     expiresAt: null,
     requirements: [
       { type: 'TOTAL_CARDS', value: 5 },
-      { type: 'POSITION', value: 'PG', count: 2 },
-      { type: 'MIN_OVR', value: 78 }
+      { type: 'POSITION', value: 'SG', count: 2 },
+      { type: 'MIN_OVR', value: 80 }
     ],
     reward: {
-      playerName: 'Damian Lillard',
+      playerName: 'Tracy McGrady',
       rarity: 'moments_sbc',
-      ovr: 92
+      ovr: 94
     },
     isActive: true,
     cardsRequired: 5
   },
   {
-    id: 'clutch-reggie-miller-8in9',
-    name: 'REGGIE 8 PTS IN 9 SECS',
-    description: 'Submit 4 Pacers/Guard cards for MSG Stunner Reggie.',
+    id: 'clutch-klay-thompson-37pt',
+    name: 'KLAY 37-PT PERFECT QUARTER',
+    description: 'Submit 4 SG cards (78+ OVR) for Unstoppable Klay Thompson.',
     category: 'clutch_moments',
-    difficulty: 'gold',
+    difficulty: 'elite',
     type: 'permanent',
     expiresAt: null,
     requirements: [
@@ -1042,9 +1023,9 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
       { type: 'MIN_OVR', value: 78 }
     ],
     reward: {
-      playerName: 'Reggie Miller',
+      playerName: 'Klay Thompson',
       rarity: 'moments_sbc',
-      ovr: 91
+      ovr: 93
     },
     isActive: true,
     cardsRequired: 5
@@ -1065,7 +1046,8 @@ export const SBC_CHALLENGES: SbcChallenge[] = [
     reward: {
       playerName: 'Derrick Rose',
       rarity: 'moments_sbc',
-      ovr: 92
+      ovr: 92,
+      imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/201565.png'
     },
     isActive: true,
     cardsRequired: 5

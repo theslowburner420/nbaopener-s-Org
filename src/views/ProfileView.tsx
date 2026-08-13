@@ -36,18 +36,18 @@ const ProfileView: React.FC = () => {
 
     // Update inventory
     const updatedInventory = [...inventoryPacks];
-    const rookiePackIndex = updatedInventory.findIndex(p => p.id === 'rookie-pack');
+    const randomPackIndex = updatedInventory.findIndex(p => p.id === 'random-pack');
     
-    if (rookiePackIndex !== -1) {
-      updatedInventory[rookiePackIndex] = {
-        ...updatedInventory[rookiePackIndex],
-        count: updatedInventory[rookiePackIndex].count + 1
+    if (randomPackIndex !== -1) {
+      updatedInventory[randomPackIndex] = {
+        ...updatedInventory[randomPackIndex],
+        count: updatedInventory[randomPackIndex].count + 1
       };
     } else {
       updatedInventory.push({
-        id: 'rookie-pack',
-        type: 'rookie',
-        name: 'Rookie Pack',
+        id: 'random-pack',
+        type: 'random',
+        name: 'Random Pack',
         count: 1
       });
     }
@@ -60,8 +60,8 @@ const ProfileView: React.FC = () => {
     });
 
     // Show success message
-    notifySuccess('Reward Claimed! 5,000 Coins & 1 Rookie Pack added.');
-    setMessage({ type: 'success', text: 'Reward Claimed! 5,000 Coins & 1 Rookie Pack added.' });
+    notifySuccess('Reward Claimed! 5,000 Coins & 1 Random Pack added.');
+    setMessage({ type: 'success', text: 'Reward Claimed! 5,000 Coins & 1 Random Pack added.' });
     
     // Force sync
     setTimeout(() => {

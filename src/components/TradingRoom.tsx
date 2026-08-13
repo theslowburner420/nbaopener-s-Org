@@ -18,7 +18,6 @@ const RARITY_COLORS: Record<string, string> = {
   'dpoy': '#064E3B',
   'roty': '#EA580C',
   'record': '#F59E0B',
-  'rookie': '#3B82F6',
   'logo': '#F59E0B',
   'arena': '#10B981',
   'draft2026': '#6366F1',

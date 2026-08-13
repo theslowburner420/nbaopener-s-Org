@@ -25,8 +25,6 @@ const getRarityColor = (rarity: Rarity) => {
     case 'dpoy': return '#10B981';
     case 'roty': return '#EA580C';
     case 'record': return '#F59E0B';
-    case 'rookie': return '#3B82F6';
-    case 'rising_star': return '#06B6D4';
     case 'allnba_1st': return '#F59E0B';
     case 'invincible': return '#FFD700';
     case 'galaxy': return '#E94560';
@@ -39,9 +37,9 @@ const getRarityColor = (rarity: Rarity) => {
 };
 
 const ParticleBurst = React.memo(({ color, rarity }: { color: string, rarity: Rarity }) => {
-  const isHighRarity = rarity === 'legend' || rarity === 'franchise' || rarity === 'dpoy' || rarity === 'roty' || rarity === 'record' || rarity === 'rookie';
+  const isHighRarity = rarity === 'legend' || rarity === 'franchise' || rarity === 'dpoy' || rarity === 'roty' || rarity === 'record';
   // Optimized particle counts: enough for impact, low enough for performance
-  const baseCount = rarity === 'legend' || rarity === 'dpoy' || rarity === 'roty' || rarity === 'record' || rarity === 'rookie' ? 24 : rarity === 'franchise' ? 16 : 8;
+  const baseCount = rarity === 'legend' || rarity === 'dpoy' || rarity === 'roty' || rarity === 'record' ? 24 : rarity === 'franchise' ? 16 : 8;
   const particleCount = isHighRarity ? baseCount * 2 : baseCount;
 
   const particles = React.useMemo(() => {
@@ -51,7 +49,7 @@ const ParticleBurst = React.memo(({ color, rarity }: { color: string, rarity: Ra
       const tx = Math.cos(angle * Math.PI / 180) * distance;
       const ty = Math.sin(angle * Math.PI / 180) * distance;
       const scale = Math.random() * (isHighRarity ? 1.2 : 0.8) + 0.4;
-      const dur = (Math.random() * 0.3 + 0.4) + (rarity === 'legend' || rarity === 'dpoy' || rarity === 'roty' || rarity === 'record' || rarity === 'rookie' ? 0.8 : rarity === 'franchise' ? 0.5 : 0);
+      const dur = (Math.random() * 0.3 + 0.4) + (rarity === 'legend' || rarity === 'dpoy' || rarity === 'roty' || rarity === 'record' ? 0.8 : rarity === 'franchise' ? 0.5 : 0);
       const rot = Math.random() * 720 - 360;
       return { tx, ty, scale, dur, rot, id: i };
     });
@@ -105,7 +103,7 @@ const FlareBurst = React.memo(({ color }: { color: string }) => {
 });
 
 const RarityBanner = React.memo(({ rarity, color }: { rarity: Rarity, color: string }) => {
-  if (rarity !== 'legend' && rarity !== 'franchise' && rarity !== 'dpoy' && rarity !== 'roty' && rarity !== 'record' && rarity !== 'rookie') return null;
+  if (rarity !== 'legend' && rarity !== 'franchise' && rarity !== 'dpoy' && rarity !== 'roty' && rarity !== 'record') return null;
 
   return (
     <motion.div
@@ -187,7 +185,6 @@ const RarityBackgroundEffect = React.memo(({ rarity, isActive, isRevealing }: { 
         </div>
       );
     case 'roty':
-    case 'rookie':
       return (
         <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
           <div className="absolute inset-0 bg-orange-500/20 animate-white-flash" />
@@ -291,7 +288,7 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
     
     const card = cards[activeCardIndex];
     const rarity = card.rarity;
-    const isHighRarity = rarity === 'legend' || rarity === 'dpoy' || rarity === 'roty' || rarity === 'record' || rarity === 'rookie' || card.category === 'Dynasty';
+    const isHighRarity = rarity === 'legend' || rarity === 'dpoy' || rarity === 'roty' || rarity === 'record' || card.category === 'Dynasty';
     
     // Initial pack opening logic
     if (activeCardIndex === 0 && !hasOpenedPack) {
@@ -535,14 +532,14 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
               className="shockwave" 
               style={{ 
                 borderColor: getRarityColor(cards[activeCardIndex].rarity),
-                animationDuration: (cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'dpoy' || cards[activeCardIndex].rarity === 'roty' || cards[activeCardIndex].rarity === 'record' || cards[activeCardIndex].rarity === 'rookie') ? '1.5s' : '1s',
+                animationDuration: (cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'dpoy' || cards[activeCardIndex].rarity === 'roty' || cards[activeCardIndex].rarity === 'record') ? '1.5s' : '1s',
                 willChange: 'transform, opacity'
               } as any} 
             />
 
             {/* Radial Lines */}
             <div 
-              className={`radial-lines ${(cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'dpoy' || cards[activeCardIndex].rarity === 'roty' || cards[activeCardIndex].rarity === 'record' || cards[activeCardIndex].rarity === 'rookie') ? 'scale-150 opacity-50' : 'opacity-20'}`} 
+              className={`radial-lines ${(cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'dpoy' || cards[activeCardIndex].rarity === 'roty' || cards[activeCardIndex].rarity === 'record') ? 'scale-150 opacity-50' : 'opacity-20'}`} 
               style={{ willChange: 'transform, opacity' }}
             />
             
@@ -591,10 +588,10 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
                     </motion.div>
                   </>
                 )}
-                {cards[activeCardIndex].category !== 'Dynasty' && (cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'dpoy' || cards[activeCardIndex].rarity === 'roty' || cards[activeCardIndex].rarity === 'record' || cards[activeCardIndex].rarity === 'rookie') && (
+                {cards[activeCardIndex].category !== 'Dynasty' && (cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'dpoy' || cards[activeCardIndex].rarity === 'roty' || cards[activeCardIndex].rarity === 'record') && (
                   <>
-                    <ParticleBurst color={cards[activeCardIndex].rarity === 'legend' ? "#F59E0B" : cards[activeCardIndex].rarity === 'dpoy' ? "#10B981" : cards[activeCardIndex].rarity === 'roty' ? "#EA580C" : cards[activeCardIndex].rarity === 'rookie' ? "#3B82F6" : "#F59E0B"} rarity={cards[activeCardIndex].rarity} />
-                    <FlareBurst color={cards[activeCardIndex].rarity === 'legend' ? "#F59E0B" : cards[activeCardIndex].rarity === 'dpoy' ? "#10B981" : cards[activeCardIndex].rarity === 'roty' ? "#EA580C" : cards[activeCardIndex].rarity === 'rookie' ? "#3B82F6" : "#F59E0B"} />
+                    <ParticleBurst color={cards[activeCardIndex].rarity === 'legend' ? "#F59E0B" : cards[activeCardIndex].rarity === 'dpoy' ? "#10B981" : cards[activeCardIndex].rarity === 'roty' ? "#EA580C" : "#F59E0B"} rarity={cards[activeCardIndex].rarity} />
+                    <FlareBurst color={cards[activeCardIndex].rarity === 'legend' ? "#F59E0B" : cards[activeCardIndex].rarity === 'dpoy' ? "#10B981" : cards[activeCardIndex].rarity === 'roty' ? "#EA580C" : "#F59E0B"} />
                     {/* Extra persistent sparkles for legend/dpoy/roty/record/rookie */}
                     <motion.div 
                       initial={{ opacity: 0 }}
@@ -770,33 +767,33 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
               </motion.div>
             )}
 
-            {(cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'dpoy' || cards[activeCardIndex].rarity === 'roty' || cards[activeCardIndex].rarity === 'record' || cards[activeCardIndex].rarity === 'rookie') && (
+            {(cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'dpoy' || cards[activeCardIndex].rarity === 'roty' || cards[activeCardIndex].rarity === 'record') && (
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="absolute inset-0 flex items-center justify-center"
               >
-                <div className={`w-full h-full bg-[radial-gradient(circle,${cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 'rgba(245,158,11,0.5)' : cards[activeCardIndex].rarity === 'dpoy' ? 'rgba(16,185,129,0.5)' : cards[activeCardIndex].rarity === 'rookie' ? 'rgba(59,130,246,0.5)' : 'rgba(234,88,12,0.5)'}_0%,transparent_70%)] ${cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 'animate-gold-radial-pulse' : cards[activeCardIndex].rarity === 'dpoy' ? 'animate-dpoy-radial-pulse' : cards[activeCardIndex].rarity === 'rookie' ? 'animate-rookie-radial-pulse' : 'animate-roty-radial-pulse'}`} />
+                <div className={`w-full h-full bg-[radial-gradient(circle,${cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 'rgba(245,158,11,0.5)' : cards[activeCardIndex].rarity === 'dpoy' ? 'rgba(16,185,129,0.5)' : 'rgba(234,88,12,0.5)'}_0%,transparent_70%)] ${cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 'animate-gold-radial-pulse' : cards[activeCardIndex].rarity === 'dpoy' ? 'animate-dpoy-radial-pulse' : 'animate-roty-radial-pulse'}`} />
                 <div className="absolute inset-0 bg-white animate-white-flash" />
                 
                 <motion.div
                   initial={{ scale: 0.4, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 2, opacity: 0 }}
-                  className={`absolute top-[15%] ${cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 'text-amber-400' : cards[activeCardIndex].rarity === 'dpoy' ? 'text-emerald-400' : cards[activeCardIndex].rarity === 'rookie' ? 'text-blue-400' : 'text-orange-400'} font-black text-6xl md:text-9xl italic tracking-tighter uppercase drop-shadow-[0_0_50px_${cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 'rgba(245,158,11,0.8)' : cards[activeCardIndex].rarity === 'dpoy' ? 'rgba(16,185,129,0.8)' : cards[activeCardIndex].rarity === 'rookie' ? 'rgba(59,130,246,0.8)' : 'rgba(234,88,12,0.8)'}] animate-text-reveal-glow`}
+                  className={`absolute top-[15%] ${cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 'text-amber-400' : cards[activeCardIndex].rarity === 'dpoy' ? 'text-emerald-400' : 'text-orange-400'} font-black text-6xl md:text-9xl italic tracking-tighter uppercase drop-shadow-[0_0_50px_${cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 'rgba(245,158,11,0.8)' : cards[activeCardIndex].rarity === 'dpoy' ? 'rgba(16,185,129,0.8)' : 'rgba(234,88,12,0.8)'}] animate-text-reveal-glow`}
                 >
-                  {cards[activeCardIndex].rarity === 'legend' ? 'Legendary' : cards[activeCardIndex].rarity === 'dpoy' ? 'DPOY' : cards[activeCardIndex].rarity === 'roty' ? 'ROTY' : cards[activeCardIndex].rarity === 'rookie' ? 'ROOKIE' : 'RECORD'}
+                  {cards[activeCardIndex].rarity === 'legend' ? 'Legendary' : cards[activeCardIndex].rarity === 'dpoy' ? 'DPOY' : cards[activeCardIndex].rarity === 'roty' ? 'ROTY' : 'RECORD'}
                 </motion.div>
 
                 {/* Energy Pulse */}
                 <div 
                   className="energy-pulse" 
-                  style={{ '--rarity-color': cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? '#F59E0B' : cards[activeCardIndex].rarity === 'dpoy' ? '#10B981' : cards[activeCardIndex].rarity === 'rookie' ? '#3B82F6' : '#EA580C', animationDuration: '0.5s' } as any} 
+                  style={{ '--rarity-color': cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? '#F59E0B' : cards[activeCardIndex].rarity === 'dpoy' ? '#10B981' : '#EA580C', animationDuration: '0.5s' } as any} 
                 />
 
                 {/* Particles */}
-                {[...Array(cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' || cards[activeCardIndex].rarity === 'rookie' ? 20 : 15)].map((_, i) => (
+                {[...Array(cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 20 : 15)].map((_, i) => (
                   <div 
                     key={i}
                     className="particle"
@@ -806,15 +803,13 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
                       animationDelay: `${Math.random() * 2}s`,
                       backgroundColor: cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record'
                         ? (i % 3 === 0 ? '#F59E0B' : (i % 3 === 1 ? '#FFF' : '#FCD34D'))
-                        : cards[activeCardIndex].rarity === 'rookie'
-                        ? (i % 2 === 0 ? '#3B82F6' : '#93C5FD')
                         : cards[activeCardIndex].rarity === 'dpoy'
                         ? (i % 2 === 0 ? '#10B981' : '#D1FAE5')
                         : (i % 2 === 0 ? '#EA580C' : '#FFEDD5'),
                       width: `${Math.random() * 8 + 2}px`,
                       height: `${Math.random() * 8 + 2}px`,
                       borderRadius: i % 4 === 0 ? '0%' : '50%',
-                      boxShadow: `0 0 15px ${cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 'rgba(245,158,11,0.6)' : cards[activeCardIndex].rarity === 'rookie' ? 'rgba(59,130,246,0.6)' : cards[activeCardIndex].rarity === 'dpoy' ? 'rgba(16,185,129,0.6)' : 'rgba(234,88,12,0.6)'}`,
+                      boxShadow: `0 0 15px ${cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 'rgba(245,158,11,0.6)' : cards[activeCardIndex].rarity === 'dpoy' ? 'rgba(16,185,129,0.6)' : 'rgba(234,88,12,0.6)'}`,
                       '--tw-translate-x': `${(Math.random() - 0.5) * 600}px`,
                       '--tw-rotate': `${(Math.random() - 0.5) * 1440}deg`,
                     } as any}
@@ -849,7 +844,6 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
           const isFranchise = card.rarity === 'franchise';
           const isLegend = card.rarity === 'legend';
           const isRecord = card.rarity === 'record';
-          const isRookie = card.rarity === 'rookie';
           const isDPOY = card.rarity === 'dpoy';
           const isROTY = card.rarity === 'roty';
           const pos = getGridPosition(index);
@@ -900,7 +894,7 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
               } ${
                 isActive && isRevealing ? 'animate-impact-scale' : ''
               } ${
-                isActive && (isLegend || isRecord || isFranchise || isDPOY || isROTY || isRookie) ? 'animate-aura-pulse' : ''
+                isActive && (isLegend || isRecord || isFranchise || isDPOY || isROTY) ? 'animate-aura-pulse' : ''
               } ${
                 isActive && isFranchise && isRevealing ? 'animate-franchise-reveal animate-intense-glow-franchise' : ''
               } ${
@@ -909,8 +903,6 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
                 isActive && isDPOY && isRevealing ? 'animate-dpoy-reveal animate-intense-glow-dpoy' : ''
               } ${
                 isActive && isROTY && isRevealing ? 'animate-roty-reveal animate-intense-glow-roty' : ''
-              } ${
-                isActive && isRookie && isRevealing ? 'animate-roty-reveal animate-intense-glow-rookie' : ''
               } ${
                 isActive && isAllStar && isRevealing ? 'animate-intense-glow-allstar' : ''
               } ${
@@ -921,15 +913,15 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
                 isActive && isAllStar && !isRevealing ? 'animate-intense-glow-allstar' : ''
               } ${!isActive ? 'rounded-xl overflow-hidden' : ''}`}
               style={{
-                animationDuration: (isLegend || isDPOY || isROTY || isRookie) && isRevealing ? '2.5s' : '1.5s',
+                animationDuration: (isLegend || isDPOY || isROTY) && isRevealing ? '2.5s' : '1.5s',
                 willChange: 'transform, opacity, filter',
                 '--aura-color': getRarityColor(card.rarity)
               } as any}
               onClick={() => handleCardClick(index)}
             >
-              <div className={`w-full h-full ${isActive && (isLegend || isDPOY || isROTY || isFranchise || isRecord || isRookie) ? 'relative' : ''}`}>
+              <div className={`w-full h-full ${isActive && (isLegend || isDPOY || isROTY || isFranchise || isRecord) ? 'relative' : ''}`}>
                 {/* Shimmer effect for high rarity */}
-                {isActive && (isLegend || isRecord || isFranchise || isDPOY || isROTY || isRookie) && <ShimmerOverlay />}
+                {isActive && (isLegend || isRecord || isFranchise || isDPOY || isROTY) && <ShimmerOverlay />}
 
                 {/* God Rays for High Rarity */}
                 <RarityBackgroundEffect rarity={card.rarity} isActive={isActive} isRevealing={isRevealing} />

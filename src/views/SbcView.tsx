@@ -255,7 +255,8 @@ export default function SbcView() {
       selectedChallenge.reward.playerName,
       selectedChallenge.reward.rarity,
       selectedChallenge.reward.ovr,
-      [...ALL_CARDS, ...customCards]
+      [...ALL_CARDS, ...customCards],
+      selectedChallenge.reward.imageUrl
     );
   }, [selectedChallenge, customCards]);
 
@@ -377,7 +378,8 @@ export default function SbcView() {
       selectedChallenge.reward.playerName,
       selectedChallenge.reward.rarity,
       selectedChallenge.reward.ovr,
-      [...ALL_CARDS, ...customCards]
+      [...ALL_CARDS, ...customCards],
+      selectedChallenge.reward.imageUrl
     );
 
     newCollection[rewardCard.id] = (newCollection[rewardCard.id] || 0) + 1;
@@ -990,7 +992,7 @@ export default function SbcView() {
               initial={{ scale: 0.95, opacity: 0, y: 30 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 30 }}
-              className="w-full h-full max-w-4xl flex flex-col bg-zinc-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-10 relative"
+              className="w-full h-full max-w-4xl max-h-[88dvh] my-auto flex flex-col bg-zinc-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-10 relative"
             >
               {/* Header */}
               <header className="p-3.5 flex items-center justify-between gap-3 border-b border-white/5 shrink-0 bg-zinc-900/90">
@@ -1119,36 +1121,64 @@ export default function SbcView() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[10000] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 text-center"
+            className="fixed inset-0 z-[10000] bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center p-3 sm:p-6 text-center overflow-y-auto no-scrollbar"
           >
-            <div className="relative z-10 flex flex-col items-center max-w-sm">
+            <motion.div 
+              initial={{ scale: 0.85, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.85, opacity: 0, y: 20 }}
+              className="relative z-10 flex flex-col items-center w-full max-w-[380px] sm:max-w-md max-h-[92dvh] bg-zinc-950/90 border-2 border-amber-500/60 rounded-3xl p-5 sm:p-7 shadow-[0_25px_80px_rgba(245,158,11,0.4)] my-auto overflow-y-auto no-scrollbar"
+            >
+              <div className="flex items-center gap-1.5 text-amber-400 text-xs sm:text-sm font-black uppercase tracking-widest mb-1">
+                <Sparkles size={18} className="animate-pulse" />
+                <span>CHALLENGE COMPLETED!</span>
+              </div>
+
+              <p className="text-[10px] sm:text-xs font-extrabold text-zinc-400 uppercase tracking-wider mb-2">
+                YOU HAVE UNLOCKED A SPECIAL REWARD
+              </p>
+
               <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
+                initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.4 }}
-                className="mb-6 w-48"
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className="my-3 py-1 flex justify-center scale-95 sm:scale-105 transition-transform"
               >
-                <SBCCard card={rewardReveal} size="lg" />
+                <SBCCard card={rewardReveal} size="md" />
               </motion.div>
 
-              <h2 className="text-lg font-black uppercase tracking-tight text-white mb-1">
-                SBC COMPLETED!
+              <h2 className="text-lg sm:text-xl font-black uppercase tracking-tight text-white mt-1">
+                {rewardReveal.name}
               </h2>
               
-              <p className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider mb-6">
-                {rewardReveal.name} • {rewardReveal.stats.ovr} OVR
+              <p className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider mb-5">
+                {rewardReveal.stats.ovr} OVR • {rewardReveal.position} • {rewardReveal.rarity.replace(/_/g, ' ').toUpperCase()}
               </p>
               
-              <button 
-                onClick={() => {
-                  setRewardReveal(null);
-                  setSelectedChallenge(null);
-                }}
-                className="px-6 py-2.5 bg-amber-400 text-black rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-amber-300 transition-all shadow-lg active:scale-95 cursor-pointer"
-              >
-                CLAIM REWARD
-              </button>
-            </div>
+              <div className="w-full space-y-2 shrink-0">
+                <button 
+                  onClick={() => {
+                    setRewardReveal(null);
+                    setSelectedChallenge(null);
+                    setCurrentView('collection');
+                  }}
+                  className="w-full py-3 bg-amber-400 text-black rounded-xl text-xs font-black uppercase tracking-widest hover:bg-amber-300 transition-all shadow-xl active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Sparkles size={14} />
+                  <span>VIEW IN MY COLLECTION</span>
+                </button>
+
+                <button 
+                  onClick={() => {
+                    setRewardReveal(null);
+                    setSelectedChallenge(null);
+                  }}
+                  className="w-full py-2.5 bg-zinc-900 border border-white/10 text-zinc-300 hover:text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-zinc-800 transition-all active:scale-95 cursor-pointer"
+                >
+                  CONTINUE SBC CHALLENGES
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

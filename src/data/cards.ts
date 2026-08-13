@@ -1,4 +1,6 @@
 import { Card, Rarity } from '../types';
+import { AWARD_CARDS } from './awardCards';
+import { DUO_AND_XFACTOR_CARDS } from './duoAndXFactorCards';
 
 const teamColors: Record<string, string> = {
   'Los Angeles Lakers': '#FDB927',
@@ -183,7 +185,7 @@ const rawCards = [
     ast: 3.8,
     age: 22,
     nbaId: 1630713,
-    imageUrl: "https://www.proballers.com/media/cache/resize_600_png/https---www.proballers.com/ul/player/dyson-daniels-1f0cfbce-56cb-642a-bd65-53947d103a1d.png",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKukEuD-lfVYh42bKX63QvOfdGnP2qnKE289PFEM8khA&s=10",
     quote: "Stat-sheet stuffer with elite defensive versatility."
   },
   {
@@ -291,7 +293,7 @@ const rawCards = [
     ast: 1.2,
     age: 20,
     nbaId: 1642235,
-    imageUrl: "https://www.proballers.com/media/cache/resize_600_png/https---www.proballers.com/ul/player/asa-newell-1f0cfc66-2778-6086-8e54-1b8ae77b76b8.png",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkMwjbT9QLselMQIf4EhFIM93FEMaQ0_dHOdgu2svJKg&s=10",
     quote: "Highly-touted rookie forward ready to make an impact."
   },
   {
@@ -977,24 +979,6 @@ const rawCards = [
     nbaId: 1629651,
     imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1629651.png",
     quote: "Elite defensive anchor and rim runner."
-  },
-  {
-    id: "chi-005",
-    name: "Jaden Ivey",
-    team: "Chicago Bulls",
-    teamAbbr: "CHI",
-    position: "G",
-    rarity: "starter" as const,
-    category: "Base" as const,
-    subtitle: "BENCH EDITION",
-    isHistorical: false,
-    pts: 11.5,
-    reb: 4.8,
-    ast: 4,
-    age: 23,
-    nbaId: 1631093,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1631093.png",
-    quote: "Athletic guard with elite first-step explosion."
   },
   {
     id: "chi-006",
@@ -2025,8 +2009,8 @@ const rawCards = [
   {
     id: "gsw-012",
     name: "Quinten Post",
-    team: "Golden State Warriors",
-    teamAbbr: "GSW",
+    team: "Memphis Grizzlies",
+    teamAbbr: "MEM",
     position: "C",
     rarity: "bench" as const,
     category: "Base" as const,
@@ -2631,7 +2615,7 @@ const rawCards = [
     ast: 4.1,
     age: 27,
     nbaId: 1628384,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1628384.png",
+    imageUrl: "https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/4277811.png&w=350&h=254",
     quote: "Explosive scorer who attacks the paint fearlessly."
   },
   {
@@ -2802,7 +2786,7 @@ const rawCards = [
     team: "Memphis Grizzlies",
     teamAbbr: "MEM",
     position: "F",
-    rarity: "franchise" as const,
+    rarity: "starter" as const,
     category: "Base" as const,
     subtitle: "STARTER EDITION",
     isHistorical: false,
@@ -5583,7 +5567,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 203104,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Head_Coach_Quin_Snyder.jpg/800px-Head_Coach_Quin_Snyder.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYamuJVIBP4VnB-a-zsSgkAhFMt_GXONsthQ2uIQe9Og&s=10",
     quote: "A tactical genius crafting high-powered offenses with relentless attention to detail."
   },
   {
@@ -5601,7 +5585,7 @@ const rawCards = [
     ast: 1,
     age: 25,
     nbaId: 1610612738,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/8e/Joe_Mazzulla.png",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS6wiPEyCb_k4aYHEPUBmeUrGUQY4Lba7FrDr_3dI6O1Q&s=10",
     quote: "Leading the Celtics with relentless focus and tactical precision."
   },
   {
@@ -5619,7 +5603,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 1610612751,
-    imageUrl: "https://pbs.twimg.com/media/GLxT5ZMXoAANVEX.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShOj9XVfVnpY_5hLlIDtHKMofkt9SS4UkRIjZ3SMkx1A&s=10",
     quote: "The first Catalan head coach in NBA history, blending tactical precision with elite player development."
   },
   {
@@ -5637,7 +5621,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 1610612766,
-    imageUrl: "https://pbs.twimg.com/media/GqNZKPgWwAAiDMP.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFhalkh7tUX-DMRQnmohMOMNlUCfThN-RsCPwrlxbDgg&s=10",
     quote: "Bringing a championship-winning culture and elite tactical discipline to Charlotte."
   },
   {
@@ -5655,7 +5639,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 201168,
-    imageUrl: "https://pbs.twimg.com/media/HK8Bb70WkAATZvs.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRh5bHCnIaqQJqZLAnUfbBxu4okcPG9B7aYUHkZvFrh3w&s=10",
     quote: "Bringing championship player experience and tactical precision as head coach to Chicago."
   },
   {
@@ -5673,7 +5657,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 1610612739,
-    imageUrl: "https://pbs.twimg.com/media/GRLTmziXYAALOfI.jpg",
+    imageUrl: "https://ca-times.brightspotcdn.com/dims4/default/a2d8e46/2147483647/strip/true/crop/2621x1763+0+0/resize/1200x807!/quality/75/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2F7c%2Fa1%2F95619af60ccfbc75d41a7cf0c8b4%2Fe21446e8e4dc4a2cb02d9c4859f4aeab",
     quote: "Bringing explosive offense and relentless player development to Cleveland."
   },
   {
@@ -5691,7 +5675,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 1610612742,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Dusty_May_2024.jpg/800px-Dusty_May_2024.jpg",
+    imageUrl: "https://platform.maizenbrew.com/wp-content/uploads/sites/102/2026/08/gettyimages-2283504915.jpg?quality=90&strip=all&crop=0%2C8.3333333333333%2C100%2C83.333333333333&w=2400",
     quote: "Architect of high-tempo basketball taking over the helm in Dallas."
   },
   {
@@ -5709,7 +5693,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 1610612743,
-    imageUrl: "https://pbs.twimg.com/media/HO6Kj0CbMAA97pZ.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShD6JS30mDvOgZN5Gu8KggMHWx-7Y2TxWebjI_F2-PFQ&s=10",
     quote: "A brilliant offensive mind continuing Denver's championship pedigree."
   },
   {
@@ -5727,7 +5711,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 203106,
-    imageUrl: "https://pbs.twimg.com/media/GRLTmziXYAALOfI.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbaQIg4i47HgsoaAPxtMMNktqfS0OBgttxy9oQfYRLUw&s=10",
     quote: "Establishing a hard-nosed defensive culture and championship habits in Detroit."
   },
   {
@@ -5745,7 +5729,7 @@ const rawCards = [
     ast: 4,
     age: 25,
     nbaId: 920,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/4/4e/Golden_State_Warriors_Head_Coach_Steve_Kerr.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTI2-q4HnLlG265KnqBJB1dqecpXgjf6Pp7x6NUVLpudw&s=10",
     quote: "4-time championship head coach orchestrating Golden State's historic Dynasty."
   },
   {
@@ -5763,7 +5747,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 200787,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Ime_Udoka_2022.jpg/800px-Ime_Udoka_2022.jpg",
+    imageUrl: "https://bostonglobe-prod.cdn.arcpublishing.com/resizer/v2/P4Y55QXL2JEVRZSZKGNRZMGBUQ.jpg?auth=a54e650c95c5737e81c50f9d8e5938b886d728b3fa34ec20e3f49637dcf828cb&width=1440",
     quote: "Instilling fierce accountability, physical defense, and competitive fire in Houston."
   },
   {
@@ -5781,7 +5765,7 @@ const rawCards = [
     ast: 1,
     age: 25,
     nbaId: 1628,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Rick_Carlisle_2019.jpg/800px-Rick_Carlisle_2019.jpg",
+    imageUrl: "https://www.unocontraunoweb.com/wp-content/uploads/2026/01/Rick-1000.jpg",
     quote: "Championship architect over 1,000 wins power-charging Indiana's historic offense."
   },
   {
@@ -5799,7 +5783,7 @@ const rawCards = [
     ast: 1,
     age: 25,
     nbaId: 1731,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Tyronn_Lue_2016.jpg/800px-Tyronn_Lue_2016.jpg",
+    imageUrl: "https://objetos-xlk.estaticos-marca.com/uploads/2024/07/05/17170055384495.jpeg",
     quote: "Master playoff tactician renowned for elite in-game adjustments and leadership."
   },
   {
@@ -5817,7 +5801,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 200755,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/JJ_Redick_2024.jpg/800px-JJ_Redick_2024.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFsT7f1YRlDqsdNiWf21n7Ltf6Kza-xZtpjsFfatURPA&s=10",
     quote: "Bringing modern analytical vision, high-IQ spacing, and detail to the Lakers."
   },
   {
@@ -5835,7 +5819,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 1610612763,
-    imageUrl: "https://pbs.twimg.com/media/GqNZKPgWwAAiDMP.jpg",
+    imageUrl: "https://preview.redd.it/tuomas-iisalo-took-over-as-the-head-coach-for-one-game-this-v0-ssiz4x1ekhre1.png?width=640&crop=smart&auto=webp&s=b992656f648e4367675bceca6a0152a9f38fa19f",
     quote: "Bringing European tactical innovation and high-intensity basketball to Memphis."
   },
   {
@@ -5853,7 +5837,7 @@ const rawCards = [
     ast: 2,
     age: 25,
     nbaId: 1610612748,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Erik_Spoelstra_2022_%28cropped%29.jpg",
+    imageUrl: "https://estaticos-cdn.prensaiberica.es/clip/e59a6236-97f4-4f02-8543-eea42cfa74f1_16-9-discover-aspect-ratio_default_0.jpg",
     quote: "2-time champion standard-bearer of Heat Culture and tactical brilliance."
   },
   {
@@ -5871,7 +5855,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 1610612749,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Taylor_Jenkins_2019.jpg/800px-Taylor_Jenkins_2019.jpg",
+    imageUrl: "https://ca-times.brightspotcdn.com/dims4/default/d553116/2147483647/strip/true/crop/4412x2942+0+0/resize/1200x800!/quality/75/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2Ffa%2F91%2Fef79e2eda3ca211128c60f572ebf%2F3be1d0afb03d44e9abc7fb3fb4eb6d86",
     quote: "Bringing modern defensive intensity and tactical execution to Milwaukee."
   },
   {
@@ -5889,7 +5873,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 1610612750,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Chris_Finch_2022.jpg/800px-Chris_Finch_2022.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9xPhFfuWQN8yRC-umEAKqwrhTLjJBIPJVaqlpFm5eZYZJ7Xmdk-4qr7QK&s=10",
     quote: "Architect of Minnesota's elite defense and modern offensive flow."
   },
   {
@@ -5907,7 +5891,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 1610612740,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Jamahl_Mosley_2022.jpg/800px-Jamahl_Mosley_2022.jpg",
+    imageUrl: "https://ca-times.brightspotcdn.com/dims4/default/379c0b7/2147483647/strip/true/crop/2358x1572+0+0/resize/1200x800!/quality/75/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2F79%2F4f%2Fde11f4e34d0f85e662d4b8131b38%2F191b012258244778b570dbe6b8b9619b.jpg",
     quote: "Building a foundation of defensive grit and selfless basketball in New Orleans."
   },
   {
@@ -5925,7 +5909,7 @@ const rawCards = [
     ast: 1,
     age: 25,
     nbaId: 1610612752,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Mike_Brown_2023.jpg/800px-Mike_Brown_2023.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8uzMqhWuMSupyFvRkG7AOi_rc5tRwQA4YDNaFmzW5Fw&s=10",
     quote: "Bringing high-speed execution and championship defensive principles to New York."
   },
   {
@@ -5943,7 +5927,7 @@ const rawCards = [
     ast: 1,
     age: 25,
     nbaId: 1610612760,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Mark_Daigneault_2021.jpg/800px-Mark_Daigneault_2021.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbre6n-x1nzd6DbCVFP6_dFgMJWGavCUb_woZahatAYQ&s=10",
     quote: "Coach of the Year establishing Oklahoma City's position atop the Western Conference."
   },
   {
@@ -5961,7 +5945,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 1610612753,
-    imageUrl: "https://pbs.twimg.com/media/GLxT5ZMXoAANVEX.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR025pmxgGfPDuh57fLa41ZFaBgqXYgRHsPILfsUHu0F-0PwkU3L0jZma69&s=10",
     quote: "Elite defensive mind stepping up to lead Orlando's talented core."
   },
   {
@@ -5979,7 +5963,7 @@ const rawCards = [
     ast: 1,
     age: 25,
     nbaId: 1610612755,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Nick_Nurse_2019.jpg/800px-Nick_Nurse_2019.jpg",
+    imageUrl: "https://cloudfront-us-east-1.images.arcpublishing.com/pmn/ZVLQ33RQUZDJ64KUTUVU36N4KU.jpg",
     quote: "Championship tactician known for creative defensive schemes and relentless mindset."
   },
   {
@@ -5997,7 +5981,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 1610612756,
-    imageUrl: "https://pbs.twimg.com/media/HK8Bb70WkAATZvs.jpg",
+    imageUrl: "https://cdn.allcitynetwork.com/wp-content/uploads/sites/4/2025/11/24111027/USATSI_27520104-1024x683.jpg.webp",
     quote: "Modern analytical mind leading Phoenix's high-powered attack."
   },
   {
@@ -6015,7 +5999,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 1610612757,
-    imageUrl: "https://pbs.twimg.com/media/GqNZKPgWwAAiDMP.jpg",
+    imageUrl: "https://s7d2.scene7.com/is/image/TWCNews/nori-cavs-AP24141030167851-ohio-060324",
     quote: "Master strategist taking the helm in Portland."
   },
   {
@@ -6033,7 +6017,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 947,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Doug_Christie_2024.jpg/800px-Doug_Christie_2024.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQv5eh0IiCVvXtDHULmIj3nk5OqTgXEKp05DqberjAP2Q&s=10",
     quote: "Kings legend bringing heart, defense, and intensity to the Sacramento bench."
   },
   {
@@ -6051,7 +6035,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 1610612759,
-    imageUrl: "https://pbs.twimg.com/media/GRLTmziXYAALOfI.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZ3aI_4ZmVeJsv_oOib0irVPUVWYYP2VGQjiaTQCAT3w&s=10",
     quote: "Guiding San Antonio's elite young core with modern pace and disciplined execution."
   },
   {
@@ -6069,7 +6053,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 1610612761,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Darko_Rajakovic_2023.jpg/800px-Darko_Rajakovic_2023.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6mrDx7cj-ZKRJWrqFrxTlHbDtxDN8H52CK94dVl2AXA&s=10",
     quote: "Implementing a selfless, fast-paced culture in the North."
   },
   {
@@ -6087,7 +6071,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 1610612762,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Will_Hardy_2022.jpg/800px-Will_Hardy_2022.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaQ4AscGe2FE1vxZ_RTTHtgcTGiGH98_AWAHp3cwf6cA&s=10",
     quote: "A brilliant young mind focused on playing the right way with high-octane energy."
   },
   {
@@ -6105,7 +6089,7 @@ const rawCards = [
     ast: 0,
     age: 25,
     nbaId: 1610612764,
-    imageUrl: "https://pbs.twimg.com/media/HK8Bb70WkAATZvs.jpg",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQM_nptrT46VNw812SCGP1JkaFupvJcfL3GqtNFutYPTQ&s=10",
     quote: "A dedicated teacher focused on building winning habits and elite player development."
   },
   {
@@ -10660,384 +10644,6 @@ const rawCards = [
     quote: "Detroit tough."
   },
   {
-    id: "rs-flagg",
-    name: "Cooper Flagg",
-    team: "Dallas Mavericks",
-    teamAbbr: "DAL",
-    position: "SF",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 21,
-    reb: 6.7,
-    ast: 4.5,
-    age: 25,
-    nbaId: 1642843,
-    imageUrl: "https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/5041939.png&w=350&h=254",
-    quote: "The most anticipated prospect since LeBron. The Next Big Thing."
-  },
-  {
-    id: "rs-knueppel",
-    name: "Kon Knueppel",
-    team: "Charlotte Hornets",
-    teamAbbr: "CHA",
-    position: "SG",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 12.6,
-    reb: 4.4,
-    ast: 2.6,
-    age: 25,
-    nbaId: 1642271,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642271.png",
-    quote: "Elite shotmaker with unlimited range."
-  },
-  {
-    id: "rs-harper",
-    name: "Dylan Harper",
-    team: "San Antonio Spurs",
-    teamAbbr: "SAS",
-    position: "PG",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 14,
-    reb: 5.5,
-    ast: 2.6,
-    age: 25,
-    nbaId: 1642844,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642844.png",
-    quote: "High-IQ playmaker with great size for a guard."
-  },
-  {
-    id: "rs-edgecombe",
-    name: "VJ Edgecombe",
-    team: "Philadelphia 76ers",
-    teamAbbr: "PHI",
-    position: "SG",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 14,
-    reb: 6.1,
-    ast: 3.4,
-    age: 25,
-    nbaId: 1642250,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642250.png",
-    quote: "Electrifying athlete and explosive finisher."
-  },
-  {
-    id: "rs-fears",
-    name: "Jeremiah Fears",
-    team: "New Orleans Pelicans",
-    teamAbbr: "NOP",
-    position: "PG",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 13.1,
-    reb: 3.2,
-    ast: 4.4,
-    age: 25,
-    nbaId: 1642847,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642847.png",
-    quote: "Crafty guard with elite scoring instincts."
-  },
-  {
-    id: "rs-johnson",
-    name: "Tre Johnson",
-    team: "Washington Wizards",
-    teamAbbr: "WAS",
-    position: "SG",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 12.1,
-    reb: 3.2,
-    ast: 2.8,
-    age: 25,
-    nbaId: 1642848,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642848.png",
-    quote: "Pure scorer with a deadly mid-range game."
-  },
-  {
-    id: "rs-bailey",
-    name: "Ace Bailey",
-    team: "Utah Jazz",
-    teamAbbr: "UTA",
-    position: "SF",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 13.8,
-    reb: 5.1,
-    ast: 2.4,
-    age: 25,
-    nbaId: 1642846,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642846.png",
-    quote: "Unmatched physical tools and versatile skill set."
-  },
-  {
-    id: "rs-queen",
-    name: "Derik Queen",
-    team: "New Orleans Pelicans",
-    teamAbbr: "NOP",
-    position: "C",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 9.8,
-    reb: 6.2,
-    ast: 1.4,
-    age: 25,
-    nbaId: 1642852,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642852.png",
-    quote: "Elite footwork and soft touch in the post."
-  },
-  {
-    id: "rs-coward",
-    name: "Cedric Coward",
-    team: "Memphis Grizzlies",
-    teamAbbr: "MEM",
-    position: "SF",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 9.2,
-    reb: 3.4,
-    ast: 1.5,
-    age: 25,
-    nbaId: 1642907,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642907.png",
-    quote: "Versatile defender with a developing offensive game."
-  },
-  {
-    id: "rs-gonzalez",
-    name: "Hugo González",
-    team: "Oklahoma City Thunder",
-    teamAbbr: "OKC",
-    position: "PG",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 9.8,
-    reb: 2.8,
-    ast: 3.6,
-    age: 25,
-    nbaId: 1642864,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642864.png",
-    quote: "International prodigy with exceptional court vision."
-  },
-  {
-    id: "rs-castle",
-    name: "Stephon Castle",
-    team: "San Antonio Spurs",
-    teamAbbr: "SAS",
-    position: "PG",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 16,
-    reb: 4.7,
-    ast: 5,
-    age: 20,
-    nbaId: 1642265,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642265.png",
-    quote: "The ultimate winner. Impacting winning at every level."
-  },
-  {
-    id: "rs-george",
-    name: "Kyshawn George",
-    team: "Washington Wizards",
-    teamAbbr: "WAS",
-    position: "SF",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 10.6,
-    reb: 4.3,
-    ast: 2.4,
-    age: 21,
-    nbaId: 1642273,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642273.png",
-    quote: "The Swiss Army Knife of the capital."
-  },
-  {
-    id: "rs-sarr",
-    name: "Alex Sarr",
-    team: "Washington Wizards",
-    teamAbbr: "WAS",
-    position: "C",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 14.6,
-    reb: 8.2,
-    ast: 2.1,
-    age: 20,
-    nbaId: 1642259,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642259.png",
-    quote: "Defensive anchor with modern mobility."
-  },
-  {
-    id: "rs-risacher",
-    name: "Zaccharie Risacher",
-    team: "Atlanta Hawks",
-    teamAbbr: "ATL",
-    position: "SF",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 14.2,
-    reb: 4.8,
-    ast: 2.1,
-    age: 20,
-    nbaId: 1642258,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642258.png",
-    quote: "Smooth operator from France. The #1 overall pick."
-  },
-  {
-    id: "rs-mitchell",
-    name: "Ajay Mitchell",
-    team: "Oklahoma City Thunder",
-    teamAbbr: "OKC",
-    position: "SG",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 9.4,
-    reb: 2.8,
-    ast: 3,
-    age: 29,
-    nbaId: 1642352,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642352.png",
-    quote: "Calculated and cold-blooded scorer."
-  },
-  {
-    id: "rs-mccain",
-    name: "Jared McCain",
-    team: "Oklahoma City Thunder",
-    teamAbbr: "OKC",
-    position: "SG",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 11.9,
-    reb: 3.1,
-    ast: 3.3,
-    age: 21,
-    nbaId: 1642272,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642272.png",
-    quote: "Limitless range and infectious energy."
-  },
-  {
-    id: "rs-edey",
-    name: "Zach Edey",
-    team: "Memphis Grizzlies",
-    teamAbbr: "MEM",
-    position: "C",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 11.4,
-    reb: 9.2,
-    ast: 1.2,
-    age: 23,
-    nbaId: 1641744,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1641744.png",
-    quote: "Big Zach. Dominating the paint with size."
-  },
-  {
-    id: "rs-carrington",
-    name: "Bub Carrington",
-    team: "Washington Wizards",
-    teamAbbr: "WAS",
-    position: "PG",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 11.4,
-    reb: 3.6,
-    ast: 4.2,
-    age: 20,
-    nbaId: 1642267,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642267.png",
-    quote: "The vision of a veteran. Floor general from Pitt."
-  },
-  {
-    id: "rs-ware",
-    name: "Kel'el Ware",
-    team: "Miami Heat",
-    teamAbbr: "MIA",
-    position: "C",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 11.3,
-    reb: 10.1,
-    ast: 0.6,
-    age: 21,
-    nbaId: 1642276,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642276.png",
-    quote: "The prototype modern center for Culture."
-  },
-  {
-    id: "rs-clingan",
-    name: "Donovan Clingan",
-    team: "Portland Trail Blazers",
-    teamAbbr: "POR",
-    position: "C",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 10.6,
-    reb: 9.2,
-    ast: 1.1,
-    age: 21,
-    nbaId: 1642270,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642270.png",
-    quote: "Cling-Kong. Protecting the rim in PDX."
-  },
-  {
-    id: "rs-topic",
-    name: "Nikola Topic",
-    team: "Oklahoma City Thunder",
-    teamAbbr: "OKC",
-    position: "PG",
-    rarity: "rising_star" as const,
-    category: "Rising Star" as const,
-    subtitle: "RISING_STAR EDITION",
-    isHistorical: false,
-    pts: 9.4,
-    reb: 3.1,
-    ast: 5.2,
-    age: 25,
-    nbaId: 1642251,
-    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1642251.png",
-    quote: "The European Maestro. Vision like no other."
-  },
-  {
     id: "allnba-1989-mj",
     name: "Michael Jordan",
     team: "Chicago Bulls",
@@ -14539,7 +14145,8 @@ const rawCards = [
   }
 ];
 
-export const ALL_CARDS: Card[] = rawCards.map((card, index) => {
+export const ALL_CARDS: Card[] = [
+  ...rawCards.map((card, index) => {
   const teamColor = teamColors[card.team] || '#333';
   const teamLogoUrl = teamLogos[card.team];
   const coach = teamCoaches[card.team];
@@ -14623,9 +14230,6 @@ export const ALL_CARDS: Card[] = rawCards.map((card, index) => {
       case 'franchise':
         ovr = Math.max(89, Math.min(baseOvr, 91));
         break;
-      case 'rookie':
-        ovr = Math.max(70, Math.min(baseOvr, 79));
-        break;
       default:
         ovr = Math.min(baseOvr, 99);
     }
@@ -14648,8 +14252,7 @@ export const ALL_CARDS: Card[] = rawCards.map((card, index) => {
          card.id.startsWith('as-mvp') ? 'All-Star MVP Series' :
          card.id.startsWith('fmvp') ? 'Finals MVP Series' :
          '6MOY Series') 
-      : (card as any).category === 'Rookie' ? '2025 Rookie Class' : 
-        (card as any).category === 'Draft 2026' ? '2026 Prospect Class' :
+      : (card as any).category === 'Draft 2026' ? '2026 Prospect Class' :
         (card as any).category === 'Scoring Champion' ? 'NBA Scoring Champions' :
         (card as any).category === 'Hall of Fame' ? 'NBA Hall of Fame' :
         (card as any).category === 'All-NBA 1st Team' ? 'All-NBA First Team Series' :
@@ -14681,9 +14284,7 @@ export const ALL_CARDS: Card[] = rawCards.map((card, index) => {
             card.id.startsWith('fmvp') ? 'FINALS MVP' :
             '6MOY'
           }` 
-        : (card as any).category === 'Rookie'
-          ? 'ROOKIE CLASS'
-          : (card as any).category === 'Duo'
+        : (card as any).category === 'Duo'
           ? 'DYNAMIC DUO'
           : (card as any).category === 'Moment'
             ? `${(card as any).year} ICONIC MOMENT`
@@ -14702,7 +14303,18 @@ export const ALL_CARDS: Card[] = rawCards.map((card, index) => {
     },
     description: card.quote,
   };
-});
+}),
+  ...AWARD_CARDS.map((card, idx) => ({
+    ...card,
+    number: rawCards.length + idx + 1,
+    teamLogoUrl: teamLogos[card.team]
+  })),
+  ...DUO_AND_XFACTOR_CARDS.map((card, idx) => ({
+    ...card,
+    number: rawCards.length + AWARD_CARDS.length + idx + 1,
+    teamLogoUrl: teamLogos[card.team] || teamLogos[card.teamAbbr]
+  }))
+];
 
 // Optimized pools for faster pack opening
 export const CARDS_BY_RARITY = ALL_CARDS.reduce((acc, card) => {

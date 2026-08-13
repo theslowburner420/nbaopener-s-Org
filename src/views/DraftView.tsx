@@ -20,7 +20,14 @@ import {
   Trash2,
   ChevronUp,
   ChevronDown,
-  RefreshCw
+  RefreshCw,
+  Search,
+  Info,
+  Filter,
+  Flame,
+  Star,
+  CheckCircle2,
+  Crown
 } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useNotification } from '../context/NotificationContext';
@@ -166,12 +173,15 @@ interface PlayerStats {
 interface Tournament {
   id: string;
   name: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  difficulty: 'Easy' | 'Medium' | 'Hard' | 'Legend' | 'Special';
   recommendedOvr: number;
   rewards: string;
   minOpponentOvr: number;
   maxOpponentOvr: number;
   opponentPool: string[];
+  category: 'classic' | 'pro' | 'elite' | 'special';
+  description: string;
+  featured?: boolean;
 }
 
 const TOURNAMENTS: Tournament[] = [
@@ -180,40 +190,97 @@ const TOURNAMENTS: Tournament[] = [
     name: 'Summer League',
     difficulty: 'Easy',
     recommendedOvr: 75,
-    rewards: '15,000 Coins + 2 Rookie Packs',
+    category: 'classic',
+    description: 'Perfect for fresh draft rosters. Prove your squad on the Vegas strip.',
+    rewards: '15,000 Coins + 2 Random Packs',
     minOpponentOvr: 70,
-    maxOpponentOvr: 80,
-    opponentPool: ['Lakers Summer Roster', 'Celtics Rookies', 'Heat Prospects', 'Warriors G-League', 'Bucks Summer Squad', 'Suns Young Guns', 'Nets Future', 'Bulls Newcomers']
-  },
-  {
-    id: 'cup',
-    name: 'NBA Cup',
-    difficulty: 'Medium',
-    recommendedOvr: 85,
-    rewards: '50,000 Coins + 2 All-Star Packs',
-    minOpponentOvr: 82,
-    maxOpponentOvr: 90,
-    opponentPool: ['Los Angeles Lakers', 'Boston Celtics', 'Golden State Warriors', 'Milwaukee Bucks', 'Phoenix Suns', 'Miami Heat', 'Denver Nuggets', 'Philadelphia 76ers']
-  },
-  {
-    id: 'playoffs',
-    name: 'NBA Playoffs',
-    difficulty: 'Hard',
-    recommendedOvr: 94,
-    rewards: '150,000 Coins + MVP & HOF Packs',
-    minOpponentOvr: 92,
-    maxOpponentOvr: 98,
-    opponentPool: ['Celtics \'24', 'Warriors \'17', 'Bulls \'96', 'Lakers \'01', 'Spurs \'14', 'Heat \'13', 'Cavaliers \'16', 'Bucks \'71']
+    maxOpponentOvr: 78,
+    opponentPool: ['Lakers Summer Roster', 'Celtics Squad', 'Heat Prospects', 'Warriors G-League', 'Bucks Summer Squad', 'Suns Young Guns', 'Nets Future', 'Bulls Newcomers']
   },
   {
     id: 'rookies',
     name: 'Rising Stars',
     difficulty: 'Medium',
     recommendedOvr: 80,
-    rewards: '30,000 Coins + 3 Premium Rookie Packs',
-    minOpponentOvr: 78,
-    maxOpponentOvr: 85,
+    category: 'classic',
+    description: 'Battle the brightest young talents and sophomore sensations in the league.',
+    rewards: '30,000 Coins + 3 Random Packs',
+    minOpponentOvr: 77,
+    maxOpponentOvr: 84,
     opponentPool: ['Thunder Youths', 'Magic Future', 'Rockets Prospects', 'Pistons Young Core', 'Spurs Rookies', 'Hornets Prospects', 'Jazz Youths', 'Blazers Future']
+  },
+  {
+    id: 'cup',
+    name: 'NBA Cup',
+    difficulty: 'Medium',
+    recommendedOvr: 85,
+    category: 'pro',
+    description: 'High-stakes tournament featuring current NBA contenders fighting for the Emirates Cup.',
+    rewards: '50,000 Coins + 2 All-Star Packs',
+    minOpponentOvr: 82,
+    maxOpponentOvr: 89,
+    opponentPool: ['Los Angeles Lakers', 'Boston Celtics', 'Golden State Warriors', 'Milwaukee Bucks', 'Phoenix Suns', 'Miami Heat', 'Denver Nuggets', 'Philadelphia 76ers']
+  },
+  {
+    id: 'conf_finals',
+    name: 'Conference Finals',
+    difficulty: 'Medium',
+    recommendedOvr: 89,
+    category: 'pro',
+    description: 'One step away from glory. Face fierce playoff rivals in an intense 3-round bracket.',
+    rewards: '85,000 Coins + 2 All-Star Packs + 1 Gold Pack',
+    minOpponentOvr: 86,
+    maxOpponentOvr: 92,
+    opponentPool: ['Timberwolves \'24', 'Mavericks \'24', 'Knicks \'24', 'Pacers \'24', 'Nuggets \'23', 'Cavaliers \'24', 'Grizzlies \'23', 'Kings \'23']
+  },
+  {
+    id: 'playoffs',
+    name: 'NBA Playoffs',
+    difficulty: 'Hard',
+    recommendedOvr: 93,
+    category: 'elite',
+    featured: true,
+    description: 'The ultimate postseason battle. Face legendary historical championship rosters.',
+    rewards: '150,000 Coins + MVP & HOF Packs',
+    minOpponentOvr: 91,
+    maxOpponentOvr: 97,
+    opponentPool: ['Celtics \'24', 'Warriors \'17', 'Bulls \'96', 'Lakers \'01', 'Spurs \'14', 'Heat \'13', 'Cavaliers \'16', 'Bucks \'71']
+  },
+  {
+    id: 'legends',
+    name: 'Legends Dynasty Clash',
+    difficulty: 'Legend',
+    recommendedOvr: 97,
+    category: 'elite',
+    description: 'Extreme difficulty! Clash against supreme Hall of Fame dream teams for massive rewards.',
+    rewards: '300,000 Coins + Galaxy & Invincible Packs',
+    minOpponentOvr: 95,
+    maxOpponentOvr: 99,
+    opponentPool: ['All-Time Bulls', 'All-Time Lakers', 'All-Time Celtics', 'Dream Team \'92', 'All-Time Warriors', 'All-Time Spurs', 'All-Time Heat', 'HOF Superstars']
+  },
+  {
+    id: 'allstar_invitational',
+    name: 'All-Star Invitational',
+    difficulty: 'Special',
+    recommendedOvr: 90,
+    category: 'special',
+    description: 'Exclusive tournament with boosted chemistry bonuses and elite pack payouts.',
+    rewards: '100,000 Coins + 1 Franchise Pack + 1 All-Star Pack',
+    minOpponentOvr: 88,
+    maxOpponentOvr: 94,
+    opponentPool: ['Eastern All-Stars', 'Western All-Stars', 'Global Superstars', 'Clutch Performers', 'Slam Dunk Champs', '3PT Sharpshooters', 'Defensive Titans', 'USA Basketball']
+  },
+  {
+    id: 'draft_2026_showcase',
+    name: 'Draft 2026 Showcase',
+    difficulty: 'Medium',
+    recommendedOvr: 83,
+    category: 'special',
+    description: 'Special future prospects event. Win to earn exclusive Draft 2026 Rookie packs!',
+    rewards: '45,000 Coins + 2 Draft 2026 Packs',
+    minOpponentOvr: 80,
+    maxOpponentOvr: 88,
+    opponentPool: ['Class of 2026 Top Picks', 'International Prospects', 'Overtime Elite', 'G-League Ignite', 'College Phenoms', 'EuroLeague Stars', 'High School Prodigies', 'Next Gen Titans']
   }
 ];
 
@@ -234,30 +301,59 @@ const BENCH_SLOTS: DraftSlot[] = Array.from({ length: 7 }).map((_, i) => ({
   card: null 
 }));
 
-const REWARDS = {
+const REWARDS: Record<string, {
+  champion: { coins: number; packs: any[] };
+  finalist: { coins: number; packs: any[] };
+  semis: { coins: number; packs: any[] };
+  quarters: { coins: number; packs: any[] };
+}> = {
   'Summer League': {
-    champion: { coins: 5000, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Rookie Pack' }, { id: 'rookie-2', type: 'rookie', name: 'Rookie Pack' }] },
-    finalist: { coins: 2500, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Rookie Pack' }] },
-    semis: { coins: 1200, packs: [] },
-    quarters: { coins: 500, packs: [] },
-  },
-  'NBA Cup': {
-    champion: { coins: 15000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
-    finalist: { coins: 7500, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Rookie Pack' }] },
+    champion: { coins: 15000, packs: [{ id: 'random-1', type: 'random', name: 'Random Pack' }, { id: 'random-2', type: 'random', name: 'Random Pack' }] },
+    finalist: { coins: 7500, packs: [{ id: 'random-1', type: 'random', name: 'Random Pack' }] },
     semis: { coins: 3000, packs: [] },
     quarters: { coins: 1000, packs: [] },
   },
-  'NBA Playoffs': {
-    champion: { coins: 40000, packs: [{ id: 'mvp-1', type: 'mvp', name: 'Finals MVP Pack' }, { id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
-    finalist: { coins: 20000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
-    semis: { coins: 8000, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Rookie Pack' }] },
-    quarters: { coins: 2500, packs: [] },
-  },
   'Rising Stars': {
-    champion: { coins: 10000, packs: [{ id: 'rising_star-1', type: 'rising_star', name: 'Rising Star Pack' }] },
-    finalist: { coins: 5000, packs: [{ id: 'rookie-1', type: 'rookie', name: 'Rookie Pack' }] },
-    semis: { coins: 2500, packs: [] },
-    quarters: { coins: 1000, packs: [] },
+    champion: { coins: 30000, packs: [{ id: 'rising_star-1', type: 'rising_star', name: 'Rising Star Pack' }, { id: 'random-1', type: 'random', name: 'Random Pack' }] },
+    finalist: { coins: 15000, packs: [{ id: 'random-1', type: 'random', name: 'Random Pack' }] },
+    semis: { coins: 6000, packs: [] },
+    quarters: { coins: 2000, packs: [] },
+  },
+  'NBA Cup': {
+    champion: { coins: 50000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }, { id: 'allstar-2', type: 'allstar', name: 'All-Star Pack' }] },
+    finalist: { coins: 25000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
+    semis: { coins: 10000, packs: [{ id: 'random-1', type: 'random', name: 'Random Pack' }] },
+    quarters: { coins: 3500, packs: [] },
+  },
+  'Conference Finals': {
+    champion: { coins: 85000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }, { id: 'gold-1', type: 'gold', name: 'Gold Pack' }] },
+    finalist: { coins: 40000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
+    semis: { coins: 15000, packs: [] },
+    quarters: { coins: 5000, packs: [] },
+  },
+  'NBA Playoffs': {
+    champion: { coins: 150000, packs: [{ id: 'mvp-1', type: 'mvp', name: 'Finals MVP Pack' }, { id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
+    finalist: { coins: 75000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
+    semis: { coins: 25000, packs: [{ id: 'random-1', type: 'random', name: 'Random Pack' }] },
+    quarters: { coins: 8000, packs: [] },
+  },
+  'Legends Dynasty Clash': {
+    champion: { coins: 300000, packs: [{ id: 'galaxy-1', type: 'galaxy', name: 'Galaxy Pack' }, { id: 'invincible-1', type: 'invincible', name: 'Invincible Pack' }] },
+    finalist: { coins: 150000, packs: [{ id: 'galaxy-1', type: 'galaxy', name: 'Galaxy Pack' }] },
+    semis: { coins: 50000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
+    quarters: { coins: 15000, packs: [] },
+  },
+  'All-Star Invitational': {
+    champion: { coins: 100000, packs: [{ id: 'franchise-1', type: 'franchise', name: 'Franchise Pack' }, { id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
+    finalist: { coins: 50000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
+    semis: { coins: 20000, packs: [] },
+    quarters: { coins: 7000, packs: [] },
+  },
+  'Draft 2026 Showcase': {
+    champion: { coins: 45000, packs: [{ id: 'draft2026-1', type: 'draft2026', name: 'Draft 2026 Pack' }, { id: 'draft2026-2', type: 'draft2026', name: 'Draft 2026 Pack' }] },
+    finalist: { coins: 20000, packs: [{ id: 'draft2026-1', type: 'draft2026', name: 'Draft 2026 Pack' }] },
+    semis: { coins: 8000, packs: [] },
+    quarters: { coins: 3000, packs: [] },
   }
 };
 
@@ -1410,7 +1506,12 @@ const DraftView: React.FC = () => {
   const [showRules, setShowRules] = useState(false);
   const lastClickRef = useRef<{ id: string; time: number } | null>(null);
 
-  // Tournament State
+  // Tournament UI & Selection State
+  const [tournamentCategory, setTournamentCategory] = useState<'all' | 'classic' | 'pro' | 'elite' | 'special'>('all');
+  const [tournamentSearch, setTournamentSearch] = useState('');
+  const [tournamentSort, setTournamentSort] = useState<'default' | 'diff_asc' | 'diff_desc' | 'reward_desc'>('default');
+  const [previewTournament, setPreviewTournament] = useState<Tournament | null>(null);
+
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(() => {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('hoops_draft_state') : null;
     if (saved) {
@@ -1721,11 +1822,6 @@ const DraftView: React.FC = () => {
         const eliteRarities = ['allstar', 'franchise', 'legend', 'coach', 'dpoy', 'roty', 'record'];
         if (starterCards.every(c => eliteRarities.includes(c.rarity))) {
           unlockAchievement('draft_all_allstar', false).then(u => u && notify(u));
-        }
-
-        // 6. Future is Now (3+ Rookies in draft)
-        if (totalCards.filter(c => c.rarity === 'rookie').length >= 3) {
-          unlockAchievement('draft_rookie_trio', false).then(u => u && notify(u));
         }
 
         // 7. Tactical Balance (5 different positions in PG, SG, SF, PF, C)
@@ -3194,112 +3290,380 @@ const DraftView: React.FC = () => {
   };
 
   const renderTournamentSelection = () => {
+    // 1. Filter tournaments by category
+    const filteredByCategory = TOURNAMENTS.filter(t => {
+      if (tournamentCategory === 'all') return true;
+      return t.category === tournamentCategory;
+    });
+
+    // 2. Filter by search text
+    const searchLower = tournamentSearch.toLowerCase().trim();
+    const filteredBySearch = filteredByCategory.filter(t => {
+      if (!searchLower) return true;
+      return (
+        t.name.toLowerCase().includes(searchLower) ||
+        t.difficulty.toLowerCase().includes(searchLower) ||
+        t.rewards.toLowerCase().includes(searchLower) ||
+        (t.description && t.description.toLowerCase().includes(searchLower))
+      );
+    });
+
+    // 3. Sort tournaments
+    const sortedTournaments = [...filteredBySearch].sort((a, b) => {
+      if (tournamentSort === 'diff_asc') {
+        return a.recommendedOvr - b.recommendedOvr;
+      }
+      if (tournamentSort === 'diff_desc') {
+        return b.recommendedOvr - a.recommendedOvr;
+      }
+      if (tournamentSort === 'reward_desc') {
+        const getCoins = (str: string) => {
+          const m = str.match(/([\d,]+)\s*Coins/i);
+          return m ? parseInt(m[1].replace(/,/g, ''), 10) : 0;
+        };
+        return getCoins(b.rewards) - getCoins(a.rewards);
+      }
+      return 0;
+    });
+
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-6 space-y-5 overflow-y-auto max-h-full w-full">
-        {/* Sleek Minimalist Header */}
-        <div className="text-center space-y-1.5 max-w-lg">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-zinc-900 border border-zinc-800 rounded-full shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">YOUR SQUAD</span>
-            <span className="text-xs font-black italic text-amber-400 font-mono">{teamOVR} OVR</span>
-          </div>
-          <h2 className="text-2xl md:text-4xl font-black italic uppercase tracking-tight text-white">
-            Select Tournament
-          </h2>
-          <p className="text-[10px] md:text-xs font-medium text-zinc-400">
-            Choose your competition level. High OVR tournaments grant elite rewards.
-          </p>
-        </div>
-
-        {/* Clean 4-Card Responsive Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 w-full max-w-5xl px-2 md:px-0">
-          {TOURNAMENTS.map((t) => {
-            const ovrDiff = teamOVR - t.recommendedOvr;
-            let diffBadge = 'EVEN MATCH';
-            let diffClass = 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-
-            if (ovrDiff >= 6) {
-              diffBadge = `+${ovrDiff} OVR ADVANTAGE`;
-              diffClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-            } else if (ovrDiff >= 1) {
-              diffBadge = `+${ovrDiff} OVR FAVORABLE`;
-              diffClass = 'bg-green-500/10 text-green-400 border-green-500/20';
-            } else if (ovrDiff <= -6) {
-              diffBadge = `${ovrDiff} OVR NIGHTMARE`;
-              diffClass = 'bg-red-500/10 text-red-400 border-red-500/20';
-            } else if (ovrDiff < 0) {
-              diffBadge = `${ovrDiff} OVR CHALLENGE`;
-              diffClass = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-            }
-
-            const rewardParts = t.rewards.split('+').map(s => s.trim());
-
-            return (
-              <motion.div
-                key={t.id}
-                whileHover={{ y: -4 }}
-                onClick={() => handleSelectTournament(t)}
-                className="group cursor-pointer bg-zinc-950 border border-zinc-900 hover:border-amber-500/50 rounded-2xl p-4 flex flex-col justify-between text-left space-y-4 shadow-lg hover:shadow-amber-500/5 transition-all duration-200 relative overflow-hidden"
+      <div className="flex-1 min-h-0 h-full w-full flex flex-col overflow-hidden bg-black relative select-none">
+        {/* Sticky Header with Squad Summary Bar */}
+        <div className="shrink-0 bg-zinc-950/95 border-b border-zinc-900 p-3 sm:p-4 backdrop-blur-xl z-30 shadow-2xl">
+          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+            {/* Left: Navigation & Title */}
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <button
+                onClick={() => setPhase('summary')}
+                className="p-2 rounded-xl bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all border border-zinc-800 shrink-0"
+                title="Return to Roster Summary"
               >
-                {/* Header: Difficulty & OVR Match Tag */}
-                <div className="flex items-center justify-between gap-1.5">
-                  <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider ${
-                    t.difficulty === 'Easy' ? 'bg-zinc-900 text-zinc-400 border border-zinc-800' :
-                    t.difficulty === 'Medium' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                    'bg-red-500/10 text-red-400 border border-red-500/20'
-                  }`}>
-                    {t.difficulty}
-                  </span>
-
-                  <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider border ${diffClass}`}>
-                    {diffBadge}
+                <ArrowLeft size={18} />
+              </button>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-500">
+                    Draft Tournament Hub
                   </span>
                 </div>
+                <h1 className="text-xl sm:text-2xl font-black italic uppercase tracking-tight text-white leading-none">
+                  Tournament Selection
+                </h1>
+              </div>
+            </div>
 
-                {/* Main Content: Title & Recommended OVR */}
-                <div className="space-y-1">
-                  <h3 className="text-lg font-black italic uppercase text-white tracking-tight leading-tight group-hover:text-amber-400 transition-colors">
-                    {t.name}
-                  </h3>
-                  <div className="flex items-center gap-1.5 text-[10px] text-zinc-400">
-                    <span>Rec: <strong className="text-zinc-200 font-bold">{t.recommendedOvr} OVR</strong></span>
-                  </div>
+            {/* Right: Squad Summary Bar */}
+            <div className="flex items-center gap-2 sm:gap-3 bg-zinc-900/80 border border-zinc-800 rounded-2xl px-3.5 py-2 w-full md:w-auto justify-between md:justify-end">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 font-black text-xs">
+                  <Trophy size={16} />
                 </div>
-
-                {/* Rewards Clean Pills */}
-                <div className="space-y-1.5">
-                  <span className="text-[8px] font-black text-zinc-500 uppercase tracking-wider">Rewards</span>
-                  <div className="flex flex-wrap gap-1">
-                    {rewardParts.map((part, index) => {
-                      const isCoins = part.toLowerCase().includes('coins');
-                      return (
-                        <span key={index} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-[9px] font-black text-zinc-300">
-                          {isCoins ? <Coins size={10} className="text-amber-500 shrink-0" fill="currentColor" /> : <Package size={10} className="text-blue-400 shrink-0" />}
-                          {part}
-                        </span>
-                      );
-                    })}
-                  </div>
+                <div>
+                  <p className="text-[8px] font-black uppercase tracking-wider text-zinc-500">Draft Roster</p>
+                  <p className="text-xs font-black italic text-white font-mono">
+                    {teamOVR} OVR <span className="text-amber-500 text-[10px] font-sans">({starters.filter(s => s.card).length + bench.filter(b => b.card).length} Players)</span>
+                  </p>
                 </div>
+              </div>
 
-                {/* Primary Action Button */}
-                <button className="w-full bg-amber-500 text-black group-hover:bg-amber-400 py-2.5 rounded-xl font-black uppercase tracking-wider text-[10px] transition-all flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/10 active:scale-95">
-                  <span>Enter Tournament</span>
-                  <ArrowRight size={12} />
-                </button>
-              </motion.div>
-            );
-          })}
+              {/* Starters Mini Badges */}
+              <div className="hidden sm:flex items-center gap-1 pl-3 border-l border-zinc-800">
+                {starters.map((slot) => (
+                  <div key={slot.id} className="w-6.5 h-6.5 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center text-[8px] font-bold text-zinc-400">
+                    {slot.card ? (
+                      <span className="text-amber-400 font-black">{slot.card.overall}</span>
+                    ) : (
+                      <span className="text-zinc-600">{slot.label}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Minimal Back Button */}
-        <button 
-          onClick={() => setPhase('summary')}
-          className="text-zinc-500 hover:text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-colors pt-2"
-        >
-          <RotateCcw size={12} />
-          <span>Back to Roster Summary</span>
-        </button>
+        {/* Search, Filter & Category Navigation Bar */}
+        <div className="shrink-0 bg-zinc-950/80 border-b border-zinc-900/80 px-3 py-2.5 sm:px-6 backdrop-blur-md z-20">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5">
+            {/* Category Tabs */}
+            <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto scrollbar-hide py-0.5">
+              {[
+                { id: 'all', label: 'All', count: TOURNAMENTS.length },
+                { id: 'classic', label: 'Beginner', count: TOURNAMENTS.filter(t => t.category === 'classic').length },
+                { id: 'pro', label: 'Intermediate', count: TOURNAMENTS.filter(t => t.category === 'pro').length },
+                { id: 'elite', label: 'Elite', count: TOURNAMENTS.filter(t => t.category === 'elite').length },
+                { id: 'special', label: 'Special', count: TOURNAMENTS.filter(t => t.category === 'special').length },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setTournamentCategory(tab.id as any)}
+                  className={`px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                    tournamentCategory === tab.id
+                      ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+                      : 'bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 border border-zinc-800/80'
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  <span className={`text-[9px] px-1.5 py-0.2 rounded-full ${tournamentCategory === tab.id ? 'bg-black/20 text-black' : 'bg-zinc-800 text-zinc-400'}`}>
+                    {tab.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Search Input & Sort Dropdown */}
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="relative flex-1 sm:w-48">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                <input
+                  type="text"
+                  value={tournamentSearch}
+                  onChange={(e) => setTournamentSearch(e.target.value)}
+                  placeholder="Search tournament..."
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 transition-colors"
+                />
+                {tournamentSearch && (
+                  <button onClick={() => setTournamentSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white">
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+
+              <select
+                value={tournamentSort}
+                onChange={(e) => setTournamentSort(e.target.value as any)}
+                className="bg-zinc-900 border border-zinc-800 text-zinc-300 rounded-xl px-2.5 py-1.5 text-xs font-bold focus:outline-none focus:border-amber-500/50 transition-colors"
+              >
+                <option value="default">Default Order</option>
+                <option value="diff_asc">Difficulty: Low to High</option>
+                <option value="diff_desc">Difficulty: High to Low</option>
+                <option value="reward_desc">Highest Reward</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Scrollable Container */}
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 scrollbar-thin scrollbar-thumb-amber-500/20 scrollbar-track-transparent">
+          <div className="max-w-6xl mx-auto space-y-6 pb-24">
+            
+            {/* Tournaments Grid Header */}
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
+                <Trophy size={14} className="text-amber-500" />
+                <span>Available Tournaments ({sortedTournaments.length})</span>
+              </h3>
+              <span className="text-[10px] text-zinc-500 font-mono">
+                {tournamentSearch ? `Results for "${tournamentSearch}"` : 'Select a competition to enter the bracket'}
+              </span>
+            </div>
+
+            {/* Empty State if Search yields nothing */}
+            {sortedTournaments.length === 0 && (
+              <div className="bg-zinc-950 border border-zinc-900 rounded-3xl p-10 text-center space-y-4">
+                <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mx-auto text-zinc-600">
+                  <Search size={28} />
+                </div>
+                <h4 className="text-lg font-black italic uppercase text-white">No Tournaments Found</h4>
+                <p className="text-xs text-zinc-400 max-w-sm mx-auto">
+                  Try changing category filters or search query to find other competitions.
+                </p>
+                <button
+                  onClick={() => { setTournamentCategory('all'); setTournamentSearch(''); }}
+                  className="px-4 py-2 bg-zinc-900 text-amber-500 border border-zinc-800 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-zinc-800 transition-all"
+                >
+                  Reset Filters
+                </button>
+              </div>
+            )}
+
+            {/* Responsive Grid of Tournaments */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+              {sortedTournaments.map((t, idx) => {
+                const rewardParts = t.rewards.split('+').map(s => s.trim());
+
+                return (
+                  <motion.div
+                    key={t.id}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.04 }}
+                    whileHover={{ y: -4 }}
+                    className="group bg-zinc-950 border border-zinc-900 hover:border-amber-500/40 rounded-2xl p-5 flex flex-col justify-between text-left space-y-4 shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden"
+                  >
+                    {/* Top Badges */}
+                    <div className="flex items-center justify-between gap-1.5">
+                      <span className={`px-2.5 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-wider ${
+                        t.difficulty === 'Easy' ? 'bg-zinc-900 text-zinc-400 border border-zinc-800' :
+                        t.difficulty === 'Medium' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                        t.difficulty === 'Hard' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                        t.difficulty === 'Legend' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' :
+                        'bg-amber-400/20 text-amber-300 border border-amber-400/30'
+                      }`}>
+                        {t.difficulty}
+                      </span>
+
+                      <span className="px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-wider border bg-zinc-900/80 text-zinc-400 border-zinc-800 font-mono">
+                        Rec: {t.recommendedOvr} OVR
+                      </span>
+                    </div>
+
+                    {/* Title & Description */}
+                    <div className="space-y-1.5">
+                      <h3 className="text-lg font-black italic uppercase text-white tracking-tight leading-tight group-hover:text-amber-400 transition-colors">
+                        {t.name}
+                      </h3>
+                      <p className="text-[10px] text-zinc-400 line-clamp-2 leading-relaxed font-medium">
+                        {t.description}
+                      </p>
+                    </div>
+
+                    {/* Rewards Section */}
+                    <div className="space-y-1.5 bg-zinc-900/50 border border-zinc-850 rounded-xl p-2.5">
+                      <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block">Tournament Rewards</span>
+                      <div className="flex flex-wrap gap-1">
+                        {rewardParts.map((part, index) => {
+                          const isCoins = part.toLowerCase().includes('coins');
+                          return (
+                            <span key={index} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-950 border border-zinc-800 text-[9px] font-bold text-zinc-200">
+                              {isCoins ? <Coins size={10} className="text-amber-500 shrink-0" fill="currentColor" /> : <Package size={10} className="text-blue-400 shrink-0" />}
+                              {part}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        onClick={() => handleSelectTournament(t)}
+                        className="flex-1 bg-amber-500 text-black group-hover:bg-amber-400 py-2.5 rounded-xl font-black uppercase tracking-wider text-[10px] transition-all flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/10 active:scale-95"
+                      >
+                        <span>Enter</span>
+                        <ArrowRight size={12} />
+                      </button>
+
+                      <button
+                        onClick={() => setPreviewTournament(t)}
+                        className="p-2.5 rounded-xl bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800 hover:bg-zinc-800 transition-all shrink-0"
+                        title="View Tournament Details"
+                      >
+                        <Info size={14} />
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Tournament Detail Modal - Fully Adapted & Screen-Safe */}
+        <AnimatePresence>
+          {previewTournament && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+              onClick={() => setPreviewTournament(null)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, y: 15 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.95, y: 15 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-lg bg-zinc-950 border border-zinc-800 rounded-2xl md:rounded-3xl p-5 sm:p-7 shadow-2xl relative max-h-[85vh] sm:max-h-[88vh] flex flex-col my-auto overflow-hidden"
+              >
+                {/* Modal Header */}
+                <div className="flex items-start justify-between gap-3 pb-3 border-b border-zinc-900 shrink-0">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[9px] font-black uppercase tracking-wider">
+                        {previewTournament.difficulty}
+                      </span>
+                      <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">
+                        Rec. OVR: {previewTournament.recommendedOvr}
+                      </span>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-black italic uppercase text-white tracking-tight leading-tight">
+                      {previewTournament.name}
+                    </h3>
+                  </div>
+
+                  <button
+                    onClick={() => setPreviewTournament(null)}
+                    className="p-2 rounded-full bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors shrink-0"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                {/* Modal Scrollable Body */}
+                <div className="flex-1 overflow-y-auto pr-1 space-y-4 my-3 scrollbar-thin scrollbar-thumb-zinc-800">
+                  <p className="text-xs text-zinc-300 leading-relaxed font-medium">
+                    {previewTournament.description}
+                  </p>
+
+                  {/* Bracket Format & Opponents */}
+                  <div className="space-y-3 bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Tournament Structure</p>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="flex flex-col">
+                        <span className="text-[9px] text-zinc-500 font-bold uppercase">Format</span>
+                        <span className="font-black text-white">8 Teams (Quarter-Finals • Semi-Finals • Final)</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[9px] text-zinc-500 font-bold uppercase">Opponent OVR Range</span>
+                        <span className="font-black text-amber-400 font-mono">{previewTournament.minOpponentOvr} - {previewTournament.maxOpponentOvr} OVR</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-zinc-800/80">
+                      <span className="text-[9px] text-zinc-500 font-bold uppercase block mb-1.5">Potential Bracket Rivals</span>
+                      <div className="flex flex-wrap gap-1">
+                        {previewTournament.opponentPool.map((opp, i) => (
+                          <span key={i} className="px-2 py-0.5 rounded-lg bg-zinc-950 border border-zinc-800 text-[9px] font-bold text-zinc-300">
+                            {opp}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Rewards Breakdown */}
+                  <div className="space-y-2">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Tournament Rewards</p>
+                    <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex items-center justify-between">
+                      <div>
+                        <p className="text-[9px] font-bold text-amber-500 uppercase tracking-widest">Tournament Champion</p>
+                        <p className="text-sm font-black text-white">{previewTournament.rewards}</p>
+                      </div>
+                      <Trophy size={24} className="text-amber-500 shrink-0" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="pt-3 border-t border-zinc-900 shrink-0">
+                  <button
+                    onClick={() => {
+                      const t = previewTournament;
+                      setPreviewTournament(null);
+                      handleSelectTournament(t);
+                    }}
+                    className="w-full bg-amber-500 hover:bg-amber-400 text-black py-3.5 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-95 transition-all"
+                  >
+                    <Trophy size={16} />
+                    <span>Enter Tournament</span>
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   };
@@ -3662,7 +4026,7 @@ const DraftView: React.FC = () => {
         {phase === 'entry' && <motion.div key="entry" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col relative z-10">{renderEntry()}</motion.div>}
         {(phase === 'captain' || phase === 'starters' || phase === 'bench' || phase === 'review') && <motion.div key="board" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className="flex-1 flex flex-col relative z-10">{renderDraftBoard()}</motion.div>}
         {phase === 'summary' && <motion.div key="summary" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className="flex-1 flex flex-col relative z-10">{renderSummary()}</motion.div>}
-        {phase === 'tournament_selection' && <motion.div key="tournament" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className="flex-1 flex flex-col relative z-10">{renderTournamentSelection()}</motion.div>}
+        {phase === 'tournament_selection' && <motion.div key="tournament" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className="flex-1 min-h-0 h-full w-full flex flex-col relative z-10 overflow-hidden">{renderTournamentSelection()}</motion.div>}
         {phase === 'bracket' && <motion.div key="bracket" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className="flex-1 flex flex-col relative z-10">{renderBracket()}</motion.div>}
       </AnimatePresence>
 
@@ -3876,7 +4240,7 @@ const BracketMatchCard = memo<{
     return (
       <div className={`w-40 md:w-60 h-24 md:h-28 bg-zinc-900/10 border border-zinc-800/30 border-dashed rounded-xl md:rounded-2xl flex flex-col items-center justify-center gap-1.5 md:gap-2 opacity-20`}>
         <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-800/20 rounded-full" />
-        <span className="text-[6px] md:text-[8px] font-black tracking-widest text-zinc-700 uppercase">Proximo Match</span>
+        <span className="text-[6px] md:text-[8px] font-black tracking-widest text-zinc-700 uppercase">Next Match</span>
       </div>
     );
   }

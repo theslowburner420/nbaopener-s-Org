@@ -13,7 +13,7 @@ type FilterType = Rarity | 'All';
 type SortType = 'Number' | 'OVR' | 'Name' | 'Team';
 
 export default function CollectionView() {
-  const { collection, unlockedAchievements, addCoins, addToCollection, setPremium, resetGame, updateGameStateAsync } = useGame();
+  const { collection, customCards = [], unlockedAchievements, addCoins, addToCollection, setPremium, resetGame, updateGameStateAsync } = useGame();
   const [activeFilter, setActiveFilter] = useState<FilterType>('All');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [teamFilter, setTeamFilter] = useState<string>('All');
@@ -124,7 +124,14 @@ export default function CollectionView() {
     );
   }, [collection, handleCardClick]);
 
-  const totalCards = ALL_CARDS.length;
+  const allAvailableCards = useMemo(() => {
+    const map = new Map<string, Card>();
+    ALL_CARDS.forEach(c => map.set(c.id, c));
+    (customCards || []).forEach(c => map.set(c.id, c));
+    return Array.from(map.values());
+  }, [customCards]);
+
+  const totalCards = allAvailableCards.length;
   const collectedCount = useMemo(() => Object.keys(collection).filter(id => collection[id] > 0).length, [collection]);
   const progressPercent = Math.round((collectedCount / totalCards) * 100);
 
@@ -134,19 +141,28 @@ export default function CollectionView() {
   }, []);
 
   const series = useMemo(() => {
-    const uniqueSeries = Array.from(new Set(ALL_CARDS.filter(c => c.series).map(c => c.series as string))).sort();
+    const uniqueSeries = Array.from(new Set(allAvailableCards.filter(c => c.series).map(c => c.series as string))).sort();
     return ['All', ...uniqueSeries];
-  }, []);
+  }, [allAvailableCards]);
 
   const filteredCards = useMemo(() => {
     const searchLower = debouncedSearch.toLowerCase();
     
-    const filtered = ALL_CARDS.filter(card => {
+    const filtered = allAvailableCards.filter(card => {
       // Duplicates mode filter
       if (viewMode === 'duplicates' && (collection[card.id] || 0) <= 1) return false;
 
       const matchesRarity = activeFilter === 'All' || card.rarity === activeFilter;
-      const matchesCategory = categoryFilter === 'All' || card.category === categoryFilter;
+      
+      let matchesCategory = categoryFilter === 'All';
+      if (!matchesCategory) {
+        if (categoryFilter === 'SBC Reward') {
+          matchesCategory = !!(card.isSpecialSBC || card.category === 'SBC Reward' || card.subtitle?.toLowerCase().includes('sbc') || card.rarity.includes('_sbc'));
+        } else {
+          matchesCategory = card.category === categoryFilter;
+        }
+      }
+
       const matchesTeam = teamFilter === 'All' || card.team === teamFilter;
       const matchesSeries = seriesFilter === 'All' || card.series === seriesFilter;
       const matchesSearch = !debouncedSearch || 
@@ -169,14 +185,14 @@ export default function CollectionView() {
           break;
         case 'Number':
         default:
-          comparison = a.number - b.number;
+          comparison = (a.number || 0) - (b.number || 0);
           break;
       }
       return sortOrder === 'asc' ? comparison : -comparison;
     });
-  }, [activeFilter, categoryFilter, teamFilter, seriesFilter, debouncedSearch, sortBy, sortOrder, viewMode, collection]);
+  }, [allAvailableCards, activeFilter, categoryFilter, teamFilter, seriesFilter, debouncedSearch, sortBy, sortOrder, viewMode, collection]);
 
-  const filters: FilterType[] = ['All', 'bench', 'starter', 'allstar', 'franchise', 'legend', 'roty', 'coach', 'dpoy', 'record', 'rookie', 'rising_star'];
+  const filters: FilterType[] = ['All', 'mvp' as any, 'fmvp' as any, 'dpoy' as any, 'roty' as any, '6moy' as any, 'mip' as any, 'future_star' as any, 'legend_sbc' as any, 'icon_sbc' as any, 'moments_sbc' as any, 'bench', 'starter', 'allstar', 'franchise', 'legend', 'coach', 'record'];
 
   const hasActiveFilters = activeFilter !== 'All' || categoryFilter !== 'All' || teamFilter !== 'All' || seriesFilter !== 'All' || search !== '';
 
@@ -448,7 +464,7 @@ export default function CollectionView() {
                                 : 'bg-zinc-800/60 text-zinc-300 border-zinc-700/50 hover:border-zinc-600'
                             }`}
                           >
-                            {f === 'allstar' ? 'All-Star' : f === 'roty' ? 'ROTY' : f === 'dpoy' ? 'DPOY' : f === 'rising_star' ? 'Rising Star' : f.toUpperCase()}
+                            {f === 'allstar' ? 'All-Star' : f === 'roty' ? 'ROTY' : f === 'dpoy' ? 'DPOY' : f.toUpperCase()}
                           </button>
                         ))}
                       </div>
@@ -460,7 +476,7 @@ export default function CollectionView() {
                     <div>
                       <h4 className="text-[8px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Select Card Category</h4>
                       <div className="grid grid-cols-2 gap-1.5">
-                        {['All', 'Base', 'Award', 'Moment', 'Duo', 'Coach', 'Dynasty', 'X-Factor', 'NBA Record', 'Rookie', 'All-Star MVP', 'Finals MVP'].map((c) => (
+                        {['All', 'MVP', 'Finals MVP', 'DPOY', 'ROY', '6MOTY', 'MIP', 'SBC Reward', 'Base', 'Award', 'Moment', 'Duo', 'Coach', 'Dynasty', 'X-Factor', 'NBA Record', 'All-Star MVP', 'Scoring Champion', 'Hall of Fame'].map((c) => (
                           <button
                             key={c}
                             onClick={() => setCategoryFilter(c)}

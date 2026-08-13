@@ -406,7 +406,7 @@ export function generateDraftPool(year: number): Card[] {
       teamColor: '#6366F1',
       position: pos,
       rarity: rarity,
-      category: 'Rookie',
+      category: 'Base',
       subtitle: `${college}`,
       isHistorical: false,
       pts: 0,

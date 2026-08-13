@@ -59,7 +59,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     id: 'pack-10', title: 'Regular Opener', description: 'Open 10 packs.', icon: Package, category: 'packs', level: 'silver',
     requirement: (state) => (Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0) >= 50, 
     getProgress: (state) => ({ current: Math.min((Object.values(state.collection || {}) as number[]).reduce((a, b) => a + (Number(b) || 0), 0), 50), total: 50 }),
-    rewardCoins: 5000, rewardPacks: [{ id: 'rookie-pack', type: 'rookie', name: 'Rookie Pack' }] 
+    rewardCoins: 5000, rewardPacks: [{ id: 'random-pack', type: 'random', name: 'Random Pack' }] 
   },
   { 
     id: 'pack-25', title: 'Dedicated Opener', description: 'Open 25 packs.', icon: Package, category: 'packs', level: 'silver',
@@ -511,17 +511,6 @@ export const ACHIEVEMENTS: Achievement[] = [
     getProgress: (state) => ({ current: state.unlockedAchievements.includes('draft_all_allstar') ? 1 : 0, total: 1 }),
     rewardCoins: 15000,
     rewardPacks: [{ id: 'allstar-pack', type: 'allstar', name: 'All-Star Pack' }]
-  },
-  {
-    id: 'draft_rookie_trio',
-    category: 'drafting',
-    title: 'Future is Now',
-    description: 'Draft 3 or more Rookie rarity cards in a single session.',
-    icon: Zap,
-    level: 'silver',
-    requirement: (state) => state.unlockedAchievements.includes('draft_rookie_trio'),
-    getProgress: (state) => ({ current: state.unlockedAchievements.includes('draft_rookie_trio') ? 1 : 0, total: 1 }),
-    rewardCoins: 7500
   },
   {
     id: 'draft_position_pure',

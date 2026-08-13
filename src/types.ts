@@ -1,6 +1,6 @@
-export type Rarity = 'bench' | 'starter' | 'allstar' | 'franchise' | 'legend' | 'coach' | 'dpoy' | 'roty' | 'record' | 'rookie' | 'logo' | 'arena' | 'draft2026' | 'scoring_champ' | 'hof' | 'coy' | 'rising_star' | 'allnba_1st' | 'invincible' | 'galaxy' | 'legend_sbc' | 'icon_sbc' | 'moments_sbc' | 'future_star';
+export type Rarity = 'bench' | 'starter' | 'allstar' | 'franchise' | 'legend' | 'coach' | 'dpoy' | 'roty' | 'record' | 'logo' | 'arena' | 'draft2026' | 'scoring_champ' | 'hof' | 'coy' | 'allnba_1st' | 'invincible' | 'galaxy' | 'legend_sbc' | 'icon_sbc' | 'moments_sbc' | 'future_star' | '6moy' | 'mip' | 'mvp' | 'fmvp';
 
-export type CardCategory = 'Base' | 'Award' | 'Moment' | 'Duo' | 'Coach' | 'Dynasty' | 'X-Factor' | 'NBA Record' | 'Rookie' | 'All-Star MVP' | 'Finals MVP' | 'Logo' | 'Arena' | 'Draft 2026' | 'Scoring Champion' | 'Hall of Fame' | 'Coach of the Year' | 'Rising Star' | 'All-NBA 1st Team';
+export type CardCategory = 'Base' | 'Award' | 'Moment' | 'Duo' | 'Coach' | 'Dynasty' | 'X-Factor' | 'NBA Record' | 'All-Star MVP' | 'Finals MVP' | 'Logo' | 'Arena' | 'Draft 2026' | 'Scoring Champion' | 'Hall of Fame' | 'Coach of the Year' | 'All-NBA 1st Team' | 'MVP' | 'DPOY' | 'ROY' | '6MOTY' | 'MIP';
 
 export type RoleTier = 'S' | 'A' | 'B' | 'C' | 'D';
 
@@ -18,6 +18,7 @@ export interface Card {
   category: CardCategory;
   subtitle: string;
   series?: string;
+  season?: string;
   isHistorical: boolean;
   pts: number;
   reb: number;
@@ -42,6 +43,8 @@ export interface Card {
   player2Id?: number;
   teamLogoUrl?: string;
   isSpecialSBC?: boolean;
+  englishContext?: string;
+  achievements?: string[];
 }
 
 export type ViewType = 'collection' | 'open' | 'packs' | 'rewards' | 'shop' | 'profile' | 'home' | 'draft' | 'trading' | 'career' | 'sbc';
@@ -258,6 +261,7 @@ export interface SbcChallenge {
     playerName: string;
     rarity: Rarity;
     ovr: number;
+    imageUrl?: string;
     playerId?: string; // If we want to link to an existing player card
   };
   isActive: boolean;
