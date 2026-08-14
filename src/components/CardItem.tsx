@@ -111,23 +111,25 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
     const isCOY = card.category === 'Coach of the Year';
     const isAllNBA = card.category === 'All-NBA 1st Team';
     
-    const cClass = isAward 
-      ? (card.category === 'DPOY' || card.rarity === 'dpoy' ? 'card-dpoy' : 
-         card.category === 'ROY' || card.rarity === 'roty' || card.series === 'ROTY Series' ? 'card-roty' : 
-         card.category === '6MOTY' || card.rarity === '6moy' || card.series === '6MOY Series' ? 'card-6moy' : 
-         card.category === 'Finals MVP' || card.rarity === 'fmvp' ? 'card-fmvp' :
-         card.category === 'MVP' || card.rarity === 'mvp' ? 'card-fmvp' :
-         card.series === 'NBA Record Series' ? 'card-record' : 'card-award') 
-      : isDynasty ? 'card-dynasty' : 
-        isDuo ? 'card-duo' :
-        isXFactor ? 'card-xfactor' : 
-        isDraft2026 ? 'card-draft2026' :
-        isScoringChamp ? 'card-scoring-champ' :
-        isHOF ? 'card-hof' :
-        isCOY ? 'card-coy' :
-        isAllNBA ? 'card-allnba-1st' :
-        card.category === 'All-Star MVP' ? 'card-as-mvp' : 
-        isMoment ? 'card-moment' : '';
+    const cClass = 
+      card.category === 'All-Star MVP' ? 'card-as-mvp' :
+      isAward 
+        ? (card.category === 'DPOY' || card.rarity === 'dpoy' ? 'card-dpoy' : 
+           card.category === 'ROY' || card.rarity === 'roty' || card.series === 'ROTY Series' ? 'card-roty' : 
+           card.category === '6MOTY' || card.rarity === '6moy' || card.series === '6MOY Series' ? 'card-6moy' : 
+           card.category === 'Finals MVP' || card.rarity === 'fmvp' ? 'card-fmvp' :
+           card.category === 'MVP' || card.rarity === 'mvp' ? 'card-fmvp' :
+           card.category === 'MIP' || card.rarity === 'mip' ? 'card-mip' :
+           card.series === 'NBA Record Series' ? 'card-record' : 'card-award') 
+        : isDynasty ? 'card-dynasty' : 
+          isDuo ? 'card-duo' :
+          isXFactor ? 'card-xfactor' : 
+          isDraft2026 ? 'card-draft2026' :
+          isScoringChamp ? 'card-scoring-champ' :
+          isHOF ? 'card-hof' :
+          isCOY ? 'card-coy' :
+          isAllNBA ? 'card-allnba-1st' :
+          isMoment ? 'card-moment' : '';
         
     const dark = isAward || card.category === 'Coach' || ['dpoy', 'roty', '6moy', 'mip', 'mvp', 'fmvp', 'record', 'logo', 'arena', 'draft2026', 'scoring_champ', 'hof', 'coy', 'allnba_1st'].includes(card.rarity) || isDynasty || isDuo || isXFactor || card.category === 'NBA Record' || isDraft2026 || isScoringChamp || isHOF || isCOY || isAllNBA || isMoment || card.rarity === 'franchise' || ['invincible', 'galaxy', 'legend_sbc', 'icon_sbc', 'moments_sbc', 'future_star'].includes(card.rarity);
     const holo = isAward || ['allstar', 'franchise', 'legend', 'dpoy', 'roty', '6moy', 'mip', 'mvp', 'fmvp', 'record', 'logo', 'arena', 'draft2026', 'scoring_champ', 'hof', 'coy', 'allnba_1st', 'invincible', 'galaxy', 'legend_sbc', 'icon_sbc', 'moments_sbc', 'future_star'].includes(card.rarity) || isDynasty || isDuo || isXFactor || isMoment;
@@ -384,7 +386,8 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
             alt={card.name}
             onLoad={() => setImageLoaded(true)}
             onError={() => setImageError(true)}
-            className={`w-full h-full object-cover object-top transition-all duration-500 ${imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${isMini ? 'group-hover/mini:scale-110' : ''} ${isVintage ? 'card-vintage' : ''} ${isMoment ? 'brightness-110 contrast-110' : ''}`}
+            style={card.imagePosition ? { objectPosition: card.imagePosition } : undefined}
+            className={`w-full h-full object-cover ${card.imagePosition ? '' : 'object-top'} transition-all duration-500 ${imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${isMini ? 'group-hover/mini:scale-110' : ''} ${isVintage ? 'card-vintage' : ''} ${isMoment ? 'brightness-110 contrast-110' : ''}`}
             referrerPolicy="no-referrer"
             loading="lazy"
             decoding="async"
@@ -422,11 +425,20 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
       return val ?? 0;
     };
 
-    const stats = [
-      { label: card.category === 'Coach' || card.category === 'Coach of the Year' || card.category === 'Logo' ? 'WINS' : card.category === 'Arena' ? 'CAP' : 'PTS', value: formatVal(displayStats?.points ?? card.pts), color: 'bg-amber-400', borderColor: 'border-amber-600' },
-      { label: card.category === 'Coach' || card.category === 'Coach of the Year' || card.category === 'Logo' ? 'LOSSES' : card.category === 'Arena' ? 'YEAR' : 'REB', value: formatVal(displayStats?.rebounds ?? card.reb), color: 'bg-zinc-400', borderColor: 'border-zinc-600' },
-      { label: card.category === 'Coach' ? 'RINGS' : card.category === 'Coach of the Year' || card.category === 'Logo' ? 'TITLES' : card.category === 'Arena' ? 'TYPE' : 'AST', value: formatVal(displayStats?.assists ?? card.ast), color: 'bg-blue-400', borderColor: 'border-blue-600' },
-    ];
+    const signatureStats = card.signatureStats;
+
+    const stats = (signatureStats && signatureStats.length === 3) 
+      ? signatureStats.map((st, idx) => ({
+          label: st.label,
+          value: st.value,
+          color: st.color || (idx === 0 ? 'bg-amber-400' : idx === 1 ? 'bg-zinc-400' : 'bg-blue-400'),
+          borderColor: idx === 0 ? 'border-amber-600' : idx === 1 ? 'border-zinc-600' : 'border-blue-600'
+        }))
+      : [
+          { label: card.category === 'Coach' || card.category === 'Coach of the Year' || card.category === 'Logo' ? 'WINS' : card.category === 'Arena' ? 'CAP' : 'PTS', value: formatVal(displayStats?.points ?? card.pts), color: 'bg-amber-400', borderColor: 'border-amber-600' },
+          { label: card.category === 'Coach' || card.category === 'Coach of the Year' || card.category === 'Logo' ? 'LOSSES' : card.category === 'Arena' ? 'YEAR' : 'REB', value: formatVal(displayStats?.rebounds ?? card.reb), color: 'bg-zinc-400', borderColor: 'border-zinc-600' },
+          { label: card.category === 'Coach' ? 'RINGS' : card.category === 'Coach of the Year' || card.category === 'Logo' ? 'TITLES' : card.category === 'Arena' ? 'TYPE' : 'AST', value: formatVal(displayStats?.assists ?? card.ast), color: 'bg-blue-400', borderColor: 'border-blue-600' },
+        ];
 
     if (isMini) {
       return (
@@ -621,20 +633,36 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
                <span className="text-[7px] font-black text-zinc-500 uppercase tracking-widest">{card.position}</span>
             </div>
             <div className="flex items-center gap-3">
-               <div className="flex flex-col">
-                  <span className="text-[6px] font-black text-zinc-600 uppercase">PTS</span>
-                  <span className="text-[10px] font-black text-amber-500 italic leading-none">{displayStats.points}</span>
-               </div>
-               <div className="w-px h-4 bg-white/5" />
-               <div className="flex flex-col">
-                  <span className="text-[6px] font-black text-zinc-600 uppercase">REB</span>
-                  <span className="text-[10px] font-black text-white italic leading-none">{displayStats.rebounds}</span>
-               </div>
-               <div className="w-px h-4 bg-white/5" />
-               <div className="flex flex-col">
-                  <span className="text-[6px] font-black text-zinc-600 uppercase">AST</span>
-                  <span className="text-[10px] font-black text-white italic leading-none">{displayStats.assists}</span>
-               </div>
+              {card.signatureStats && card.signatureStats.length === 3 ? (
+                <>
+                  {card.signatureStats.map((st, i) => (
+                    <React.Fragment key={i}>
+                      {i > 0 && <div className="w-px h-4 bg-white/5" />}
+                      <div className="flex flex-col">
+                        <span className="text-[6px] font-black text-zinc-500 uppercase">{st.label}</span>
+                        <span className="text-[10px] font-black text-amber-400 italic leading-none">{st.value}</span>
+                      </div>
+                    </React.Fragment>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-col">
+                    <span className="text-[6px] font-black text-zinc-600 uppercase">PTS</span>
+                    <span className="text-[10px] font-black text-amber-500 italic leading-none">{displayStats.points}</span>
+                  </div>
+                  <div className="w-px h-4 bg-white/5" />
+                  <div className="flex flex-col">
+                    <span className="text-[6px] font-black text-zinc-600 uppercase">REB</span>
+                    <span className="text-[10px] font-black text-white italic leading-none">{displayStats.rebounds}</span>
+                  </div>
+                  <div className="w-px h-4 bg-white/5" />
+                  <div className="flex flex-col">
+                    <span className="text-[6px] font-black text-zinc-600 uppercase">AST</span>
+                    <span className="text-[10px] font-black text-white italic leading-none">{displayStats.assists}</span>
+                  </div>
+                </>
+              )}
                {card.age && (
                  <>
                    <div className="w-px h-4 bg-white/5" />

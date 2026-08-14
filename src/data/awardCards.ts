@@ -1862,6 +1862,26 @@ export const AWARD_CARDS: Card[] = [
     quote: "2025 Finals MVP winner for Oklahoma City Thunder."
   },
   {
+    id: "award-finalsmvp-2026-jalen-brunson",
+    name: "Jalen Brunson",
+    team: "New York Knicks",
+    teamAbbr: "NYK",
+    position: "G",
+    rarity: "fmvp" as const,
+    category: "Finals MVP" as const,
+    subtitle: "2026 FINALS MVP",
+    series: "Finals MVP Award Series",
+    year: "2026",
+    isHistorical: true,
+    pts: 29.8,
+    reb: 4.2,
+    ast: 7.5,
+    age: 29,
+    nbaId: 1628973,
+    imageUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1628973.png",
+    quote: "2026 Finals MVP winner for New York Knicks."
+  },
+  {
     id: "award-dpoy-198283-sidney-moncrief",
     name: "Sidney Moncrief",
     team: "Milwaukee Bucks",

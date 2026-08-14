@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Card, Rarity } from '../types';
 import CardItem from './CardItem';
-import { Check, Sparkles, Trophy, Award } from 'lucide-react';
+import { Check, Sparkles, Trophy, Award, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
-import { useGame } from '../context/GameContext';
 import { MemoryManager } from '../lib/memory';
 import StaticAd from './StaticAd';
 
@@ -15,7 +14,7 @@ interface PackOpenerProps {
   packImage?: string;
 }
 
-const getRarityColor = (rarity: Rarity) => {
+const getRarityColor = (rarity: Rarity): string => {
   switch (rarity) {
     case 'bench': return '#94A3B8';
     case 'starter': return '#10B981';
@@ -32,28 +31,40 @@ const getRarityColor = (rarity: Rarity) => {
     case 'icon_sbc': return '#8B5CF6';
     case 'moments_sbc': return '#FFFFFF';
     case 'future_star': return '#10B981';
-    default: return '#333';
+    default: return '#94A3B8';
   }
 };
 
-const ParticleBurst = React.memo(({ color, rarity }: { color: string, rarity: Rarity }) => {
-  const isHighRarity = rarity === 'legend' || rarity === 'franchise' || rarity === 'dpoy' || rarity === 'roty' || rarity === 'record';
-  // Optimized particle counts: enough for impact, low enough for performance
-  const baseCount = rarity === 'legend' || rarity === 'dpoy' || rarity === 'roty' || rarity === 'record' ? 24 : rarity === 'franchise' ? 16 : 8;
-  const particleCount = isHighRarity ? baseCount * 2 : baseCount;
+const getCategoryBadge = (card: Card) => {
+  if (card.category === 'All-Star MVP') return { text: 'ALL-STAR MVP', color: '#F59E0B' };
+  if (card.category === 'Dynasty') return { text: 'DYNASTY', color: '#EF4444' };
+  if (card.category === 'X-Factor') return { text: 'X-FACTOR', color: '#60A5FA' };
+  if (card.rarity === 'legend') return { text: 'LEGENDARY', color: '#F59E0B' };
+  if (card.rarity === 'record') return { text: 'RECORD BREAKER', color: '#F59E0B' };
+  if (card.rarity === 'dpoy') return { text: 'DEFENSIVE PLAYER OF THE YEAR', color: '#10B981' };
+  if (card.rarity === 'roty') return { text: 'ROOKIE OF THE YEAR', color: '#EA580C' };
+  if (card.rarity === 'franchise') return { text: 'FRANCHISE PLAYER', color: '#A855F7' };
+  if (card.rarity === 'allstar') return { text: 'ALL-STAR', color: '#3B82F6' };
+  if (card.rarity === 'starter') return { text: 'STARTER', color: '#10B981' };
+  return null;
+};
 
-  const particles = React.useMemo(() => {
+// Memoized high-performance particle burst
+const ParticleBurst = memo(({ color, isHighTier }: { color: string; isHighTier: boolean }) => {
+  const particleCount = isHighTier ? 20 : 10;
+
+  const particles = useMemo(() => {
     return Array.from({ length: particleCount }, (_, i) => {
-      const angle = (i / particleCount) * 360 + (Math.random() * 40 - 20);
-      const distance = (isHighRarity ? 120 : 80) + Math.random() * (isHighRarity ? 250 : 120);
-      const tx = Math.cos(angle * Math.PI / 180) * distance;
-      const ty = Math.sin(angle * Math.PI / 180) * distance;
-      const scale = Math.random() * (isHighRarity ? 1.2 : 0.8) + 0.4;
-      const dur = (Math.random() * 0.3 + 0.4) + (rarity === 'legend' || rarity === 'dpoy' || rarity === 'roty' || rarity === 'record' ? 0.8 : rarity === 'franchise' ? 0.5 : 0);
-      const rot = Math.random() * 720 - 360;
+      const angle = (i / particleCount) * 360 + (i % 2 === 0 ? 10 : -10);
+      const distance = isHighTier ? 120 + (i % 5) * 25 : 70 + (i % 4) * 20;
+      const tx = Math.cos(angle * (Math.PI / 180)) * distance;
+      const ty = Math.sin(angle * (Math.PI / 180)) * distance;
+      const scale = 0.5 + (i % 3) * 0.3;
+      const dur = isHighTier ? 0.7 + (i % 3) * 0.2 : 0.5 + (i % 2) * 0.15;
+      const rot = (i % 2 === 0 ? 1 : -1) * (180 + i * 30);
       return { tx, ty, scale, dur, rot, id: i };
     });
-  }, [particleCount, isHighRarity, rarity]);
+  }, [particleCount, isHighTier]);
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ willChange: 'transform' }}>
@@ -68,9 +79,9 @@ const ParticleBurst = React.memo(({ color, rarity }: { color: string, rarity: Ra
             '--dur': `${p.dur}s`,
             '--rot': `${p.rot}deg`,
             backgroundColor: color,
-            width: isHighRarity ? '5px' : '3px',
-            height: isHighRarity ? '5px' : '3px',
-            boxShadow: `0 0 ${isHighRarity ? '8px' : '4px'} ${color}`,
+            width: isHighTier ? '5px' : '3px',
+            height: isHighTier ? '5px' : '3px',
+            boxShadow: `0 0 ${isHighTier ? '8px' : '4px'} ${color}`,
             borderRadius: p.id % 2 === 0 ? '50%' : '2px',
             willChange: 'transform, opacity'
           } as any}
@@ -80,9 +91,12 @@ const ParticleBurst = React.memo(({ color, rarity }: { color: string, rarity: Ra
   );
 });
 
-const FlareBurst = React.memo(({ color }: { color: string }) => {
+ParticleBurst.displayName = 'ParticleBurst';
+
+// Memoized Flare lines
+const FlareBurst = memo(({ color }: { color: string }) => {
   return (
-    <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
+    <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-20">
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
@@ -92,8 +106,8 @@ const FlareBurst = React.memo(({ color }: { color: string }) => {
             backgroundColor: color,
             boxShadow: `0 0 20px ${color}`,
             width: '3px',
-            height: '200px',
-            opacity: 0.8,
+            height: '180px',
+            opacity: 0.75,
             willChange: 'transform, opacity'
           } as any}
         />
@@ -102,120 +116,24 @@ const FlareBurst = React.memo(({ color }: { color: string }) => {
   );
 });
 
-const RarityBanner = React.memo(({ rarity, color }: { rarity: Rarity, color: string }) => {
-  if (rarity !== 'legend' && rarity !== 'franchise' && rarity !== 'dpoy' && rarity !== 'roty' && rarity !== 'record') return null;
+FlareBurst.displayName = 'FlareBurst';
 
-  return (
-    <motion.div
-      initial={{ width: 0, opacity: 0 }}
-      animate={{ width: '100vw', opacity: 0.15 }}
-      exit={{ width: 0, opacity: 0 }}
-      className="absolute top-1/2 -translate-y-1/2 h-32 pointer-events-none z-0"
-      style={{ backgroundColor: color, filter: 'blur(30px)' }}
-    />
-  );
-});
-
-const ShimmerOverlay = React.memo(() => (
-  <div className="absolute inset-0 pointer-events-none z-[60] overflow-hidden rounded-xl">
+const ShimmerOverlay = memo(() => (
+  <div className="absolute inset-0 pointer-events-none z-[60] overflow-hidden rounded-2xl">
     <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full animate-shimmer-sweep" />
   </div>
 ));
 
-const Shockwave = React.memo(({ color }: { color: string }) => {
-  return (
-    <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-[2000]">
-      <div 
-        className="shockwave" 
-        style={{ borderColor: color, boxShadow: `0 0 50px ${color}` }} 
-      />
-    </div>
-  );
-});
-
-const RarityBackgroundEffect = React.memo(({ rarity, isActive, isRevealing }: { rarity: Rarity, isActive: boolean, isRevealing: boolean }) => {
-  if (!isActive || !isRevealing) return null;
-
-  switch (rarity) {
-    case 'legend':
-    case 'record':
-      return (
-        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-          <div className="absolute inset-0 bg-amber-500/30 animate-legend-lightning" />
-          <FlareBurst color="#F59E0B" />
-          <div className="god-rays opacity-100 scale-[2]" style={{ animationDuration: '8s' }} />
-          {[...Array(40)].map((_, i) => (
-            <div 
-              key={`glitter-${i}`} 
-              className="animate-legend-glitter" 
-              style={{ 
-                left: `${Math.random() * 100}%`, 
-                '--dur': `${1.5 + Math.random() * 2.5}s`,
-                animationDelay: `${Math.random() * 2}s`
-              } as any} 
-            />
-          ))}
-          <div className="absolute inset-0 bg-gradient-to-t from-amber-500/20 to-transparent animate-pulse" />
-        </div>
-      );
-    case 'franchise':
-      return (
-        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-          <div className="absolute inset-0 bg-purple-500/30 animate-legend-lightning" />
-          <div className="radial-lines opacity-60 scale-150" />
-          <div className="animate-franchise-vortex" />
-          <div className="god-rays opacity-80 scale-150" style={{ animationDuration: '12s', background: 'conic-gradient(from 0deg, transparent 0%, rgba(168, 85, 247, 0.3) 10%, transparent 20%)' }} />
-          <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(168,85,247,0.2)_0%,transparent_70%)] animate-pulse" />
-        </div>
-      );
-    case 'dpoy':
-      return (
-        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden flex items-center justify-center">
-          <div className="absolute inset-0 bg-emerald-500/20 animate-white-flash" />
-          <div className="w-[400px] h-[400px] border-[30px] border-emerald-500/40 rounded-full animate-dpoy-reveal-shield-bg" />
-          <div className="w-[200px] h-[200px] border-[10px] border-emerald-500/20 rounded-full animate-dpoy-reveal-shield-bg" style={{ animationDelay: '0.2s' }} />
-          {[...Array(8)].map((_, i) => (
-            <div 
-              key={`scan-${i}`} 
-              className="animate-dpoy-grid-scan" 
-              style={{ animationDelay: `${i * 0.3}s` }} 
-            />
-          ))}
-          <div className="god-rays opacity-50 scale-150" style={{ animationDuration: '18s', background: 'conic-gradient(from 0deg, transparent 0%, rgba(16, 185, 129, 0.3) 10%, transparent 20%)' }} />
-        </div>
-      );
-    case 'roty':
-      return (
-        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-          <div className="absolute inset-0 bg-orange-500/20 animate-white-flash" />
-          <div className="absolute bottom-0 left-0 right-0 h-full bg-gradient-to-t from-orange-500/60 via-orange-500/20 to-transparent animate-roty-reveal-rise-bg" />
-          {[...Array(30)].map((_, i) => (
-            <div 
-              key={`flame-${i}`} 
-              className="animate-roty-flame" 
-              style={{ 
-                left: `${Math.random() * 100}%`, 
-                bottom: '0',
-                '--dur': `${0.8 + Math.random() * 1.5}s`,
-                animationDelay: `${Math.random() * 1}s`
-              } as any} 
-            />
-          ))}
-          <div className="absolute inset-0 bg-orange-500/5 animate-pulse" />
-        </div>
-      );
-    default:
-      return null;
-  }
-});
+ShimmerOverlay.displayName = 'ShimmerOverlay';
 
 export default function PackOpener({ cards, newlyUnlockedAchievements = [], onClose, packImage }: PackOpenerProps) {
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [isRevealing, setIsRevealing] = useState(true);
   const [showPack, setShowPack] = useState(true);
-  const [hasOpenedPack, setHasOpenedPack] = useState(false);
-  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  const [packBurst, setPackBurst] = useState(false);
   const [isPreloaded, setIsPreloaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
   const [pendingQueue, setPendingQueue] = useState<Array<{ cardIndex: number; achievement: any }>>(() => {
     return (newlyUnlockedAchievements || []).map(ach => {
       let idx = typeof ach.cardIndex === 'number' ? ach.cardIndex : -1;
@@ -232,125 +150,159 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
   });
 
   const [activeAchievementPopup, setActiveAchievementPopup] = useState<any | null>(null);
-
   const { notify } = useNotification();
 
-  React.useEffect(() => {
+  const totalCards = cards.length;
+  const currentCard = cards[activeCardIndex] || cards[0];
+
+  const isHighTier = useMemo(() => {
+    if (!currentCard) return false;
+    const r = currentCard.rarity;
+    return r === 'legend' || r === 'dpoy' || r === 'roty' || r === 'record' || r === 'invincible' || r === 'galaxy' ||
+           currentCard.category === 'Dynasty' || currentCard.category === 'All-Star MVP';
+  }, [currentCard]);
+
+  const activeColor = useMemo(() => {
+    if (!currentCard) return '#94A3B8';
+    if (currentCard.category === 'Dynasty') return '#EF4444';
+    if (currentCard.category === 'X-Factor') return '#60A5FA';
+    return getRarityColor(currentCard.rarity);
+  }, [currentCard]);
+
+  const badge = useMemo(() => {
+    return currentCard ? getCategoryBadge(currentCard) : null;
+  }, [currentCard]);
+
+  // Handle Resize
+  useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  React.useEffect(() => {
+  // Quick Preloader with fallback timeout for silky smooth startup
+  useEffect(() => {
     document.body.style.overflow = 'hidden';
-    
-    // Preload images for all cards in the pack
-    const preloadImages = async () => {
-      const promises = cards.flatMap(card => {
-        const cardImg = document.createElement('img');
-        cardImg.src = card.imageUrl;
-        
-        const logoImg = document.createElement('img');
-        if (card.teamLogoUrl) {
-          logoImg.src = card.teamLogoUrl;
-        }
-        
-        return [
-          new Promise(resolve => { 
-            cardImg.onload = () => { cardImg.decode().finally(() => resolve(undefined)); }; 
-            cardImg.onerror = resolve; 
-          }),
-          card.teamLogoUrl ? new Promise(resolve => { 
-            logoImg.onload = () => { logoImg.decode().finally(() => resolve(undefined)); }; 
-            logoImg.onerror = resolve; 
-          }) : Promise.resolve()
-        ];
-      });
-      
-      await Promise.all(promises);
-      setIsPreloaded(true);
-    };
 
-    preloadImages();
+    let isCancelled = false;
+    const imgUrls = cards.map(c => c.imageUrl).filter(Boolean);
+
+    const promises = imgUrls.map(url => {
+      return new Promise<void>((resolve) => {
+        const img = new Image();
+        img.src = url;
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+      });
+    });
+
+    // Max 500ms wait to avoid hanging on slow network
+    const timeout = new Promise<void>(resolve => setTimeout(resolve, 500));
+
+    Promise.race([Promise.all(promises), timeout]).then(() => {
+      if (!isCancelled) {
+        setIsPreloaded(true);
+      }
+    });
 
     return () => {
+      isCancelled = true;
       document.body.style.overflow = 'unset';
-      // Cleanup assets when the pack opener is closed to free up memory
       MemoryManager.cleanupAssets();
     };
   }, [cards]);
 
-  const totalCards = cards.length;
+  // Initial Pack Opening Burst & Timing
+  useEffect(() => {
+    if (!isPreloaded) return;
 
-  React.useEffect(() => {
-    // Trigger a quick reveal effect for every card change
-    setIsRevealing(true);
-    
-    const card = cards[activeCardIndex];
-    const rarity = card.rarity;
-    const isHighRarity = rarity === 'legend' || rarity === 'dpoy' || rarity === 'roty' || rarity === 'record' || card.category === 'Dynasty';
-    
-    // Initial pack opening logic
-    if (activeCardIndex === 0 && !hasOpenedPack) {
-      setShowPack(true);
-      const packTimer = setTimeout(() => setShowPack(false), 800);
-      
-      const duration = isHighRarity ? 2200 : 1200;
-      const revealTimer = setTimeout(() => {
-        setIsRevealing(false);
-        setHasOpenedPack(true);
-      }, duration);
-      
+    if (showPack) {
+      // Pack shake then burst
+      const burstTimer = setTimeout(() => {
+        setPackBurst(true);
+      }, 500);
+
+      const hidePackTimer = setTimeout(() => {
+        setShowPack(false);
+        setIsRevealing(true);
+      }, 750);
+
       return () => {
-        clearTimeout(packTimer);
-        clearTimeout(revealTimer);
+        clearTimeout(burstTimer);
+        clearTimeout(hidePackTimer);
       };
-    } else {
-      // Quick flash/reveal for subsequent cards
-      setShowPack(false);
-      const duration = isHighRarity ? 1200 : 600;
-      const revealTimer = setTimeout(() => {
-        setIsRevealing(false);
-      }, duration);
-      
-      return () => clearTimeout(revealTimer);
     }
-  }, [activeCardIndex, cards, hasOpenedPack]);
+  }, [isPreloaded, showPack]);
 
-  // Pas B & Pas C: Check Pending Achievements Queue when card animation completes
-  React.useEffect(() => {
-    if (!isRevealing && isPreloaded && !activeAchievementPopup && pendingQueue.length > 0) {
-      const currentCard = cards[activeCardIndex];
+  // Card Reveal timer when switching cards
+  useEffect(() => {
+    if (showPack) return;
+
+    setIsRevealing(true);
+    const duration = isHighTier ? 900 : 500;
+    const timer = setTimeout(() => {
+      setIsRevealing(false);
+    }, duration);
+
+    return () => clearTimeout(timer);
+  }, [activeCardIndex, isHighTier, showPack]);
+
+  // Achievement queue processing
+  useEffect(() => {
+    if (!isRevealing && !showPack && isPreloaded && !activeAchievementPopup && pendingQueue.length > 0) {
       const isLastCard = activeCardIndex === cards.length - 1;
 
-      // Find first matching achievement for current Card Index or Card ID
       const matchingIndex = pendingQueue.findIndex(item => 
         item.cardIndex === activeCardIndex || 
-        (item.achievement.triggeredByCardId && item.achievement.triggeredByCardId === currentCard.id) ||
+        (item.achievement.triggeredByCardId && item.achievement.triggeredByCardId === currentCard?.id) ||
         (isLastCard && item.achievement.triggeredByCardId === null)
       );
 
       if (matchingIndex !== -1) {
-        // Delay of 300ms after reveal animation finishes
         const timer = setTimeout(() => {
           const itemToTrigger = pendingQueue[matchingIndex];
           setActiveAchievementPopup(itemToTrigger.achievement);
-
-          // Pas D: Queue Cleanup
           setPendingQueue(prev => prev.filter((_, idx) => idx !== matchingIndex));
-        }, 300);
+        }, 250);
 
         return () => clearTimeout(timer);
       }
     }
-  }, [activeCardIndex, isRevealing, isPreloaded, activeAchievementPopup, pendingQueue, cards]);
+  }, [activeCardIndex, isRevealing, showPack, isPreloaded, activeAchievementPopup, pendingQueue, cards, currentCard]);
 
-  const handleClaimAchievement = React.useCallback(() => {
+  const handleBurstPackNow = useCallback(() => {
+    if (showPack) {
+      setPackBurst(true);
+      setTimeout(() => {
+        setShowPack(false);
+        setIsRevealing(true);
+      }, 200);
+    }
+  }, [showPack]);
+
+  const nextCard = useCallback(() => {
+    if (activeCardIndex < totalCards - 1) {
+      setActiveCardIndex(prev => prev + 1);
+    }
+  }, [activeCardIndex, totalCards]);
+
+  const prevCard = useCallback(() => {
+    if (activeCardIndex > 0) {
+      setActiveCardIndex(prev => prev - 1);
+    }
+  }, [activeCardIndex]);
+
+  const handleCardClick = useCallback((index: number) => {
+    if (index !== activeCardIndex) {
+      setActiveCardIndex(index);
+    }
+  }, [activeCardIndex]);
+
+  const handleClaimAchievement = useCallback(() => {
     setActiveAchievementPopup(null);
   }, []);
 
-  const handleClosePackOpener = React.useCallback(() => {
-    // Flush any remaining unshown achievements to notify so user doesn't lose them
+  const handleClosePackOpener = useCallback(() => {
     if (pendingQueue.length > 0) {
       pendingQueue.forEach(item => {
         notify({
@@ -365,110 +317,126 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
     onClose();
   }, [pendingQueue, notify, onClose]);
 
-  const nextCard = React.useCallback(() => {
-    if (activeCardIndex < totalCards - 1) {
-      setActiveCardIndex(prev => prev + 1);
-    }
-  }, [activeCardIndex, totalCards]);
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (activeAchievementPopup) {
+        if (e.key === 'Enter' || e.key === 'Escape' || e.key === ' ') {
+          e.preventDefault();
+          handleClaimAchievement();
+        }
+        return;
+      }
 
-  const prevCard = React.useCallback(() => {
-    if (activeCardIndex > 0) {
-      setActiveCardIndex(prev => prev - 1);
-    }
-  }, [activeCardIndex]);
+      if (showPack) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleBurstPackNow();
+        }
+        return;
+      }
 
-  const handleCardClick = React.useCallback((index: number) => {
-    if (index !== activeCardIndex) {
-      setActiveCardIndex(index);
-    }
-  }, [activeCardIndex]);
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        if (activeCardIndex < totalCards - 1) {
+          nextCard();
+        } else {
+          handleClosePackOpener();
+        }
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevCard();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        handleClosePackOpener();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeAchievementPopup, showPack, activeCardIndex, totalCards, nextCard, prevCard, handleClosePackOpener, handleBurstPackNow, handleClaimAchievement]);
 
   const allRevealed = activeCardIndex === totalCards - 1;
 
-  // Grid positions based on total cards
-  const getGridPosition = React.useCallback((index: number) => {
+  // Ultra-fluid position calculation for the fanned deck
+  const getCardTransform = useCallback((index: number) => {
     const isActive = index === activeCardIndex;
     const isSeen = index < activeCardIndex;
-    const isUnseen = index > activeCardIndex;
 
     if (isActive) {
-      // Center active card - optimized for full visibility
-      return { 
-        x: 0, 
-        y: 0, 
-        scale: isMobile ? 0.75 : 1, 
-        rotate: 0, 
-        zIndex: 100 
+      return {
+        x: 0,
+        y: 0,
+        scale: isMobile ? 0.88 : 1,
+        rotate: 0,
+        zIndex: 100,
+        opacity: 1,
+        filter: 'brightness(1) contrast(1)',
+        pointerEvents: 'auto' as const
       };
     }
 
     if (isSeen) {
-      // Compact fan stack on the left - much closer to the center
-      const distanceFromActive = activeCardIndex - index;
-      // Only show the top 3-4 cards in the stack for performance and clarity
-      if (distanceFromActive > 5) return { x: -100, y: 100, scale: 0, rotate: -45, zIndex: 0, opacity: 0 };
-      
-      const angle = -8 - (distanceFromActive * 2);
-      const xOffset = isMobile ? -10 - (distanceFromActive * 8) : -15 - (distanceFromActive * 12);
-      const yOffset = 5 + (distanceFromActive * 4);
-      
-      return { 
-        x: xOffset, 
-        y: yOffset, 
-        scale: isMobile ? 0.6 : 0.8, 
-        rotate: angle, 
-        zIndex: 50 - distanceFromActive,
-        opacity: 1
+      const distance = activeCardIndex - index;
+      if (distance > 4) {
+        return { x: -200, y: 50, scale: 0, rotate: -30, zIndex: 0, opacity: 0, filter: 'brightness(0.2)', pointerEvents: 'none' as const };
+      }
+      const angle = -6 - distance * 3;
+      const xOffset = isMobile ? -14 - distance * 12 : -22 - distance * 18;
+      const yOffset = distance * 6;
+
+      return {
+        x: xOffset,
+        y: yOffset,
+        scale: isMobile ? 0.72 - distance * 0.04 : 0.82 - distance * 0.04,
+        rotate: angle,
+        zIndex: 50 - distance,
+        opacity: 1 - distance * 0.15,
+        filter: 'brightness(0.35) contrast(0.8)',
+        pointerEvents: 'auto' as const
       };
     }
 
-    // Compact fan stack on the right (unseen cards)
-    const distanceFromActive = index - activeCardIndex;
-    if (distanceFromActive > 5) return { x: 100, y: 100, scale: 0, rotate: 45, zIndex: 0, opacity: 0 };
+    // Unseen cards on right
+    const distance = index - activeCardIndex;
+    if (distance > 4) {
+      return { x: 200, y: 50, scale: 0, rotate: 30, zIndex: 0, opacity: 0, filter: 'brightness(0.2)', pointerEvents: 'none' as const };
+    }
+    const angle = 6 + distance * 3;
+    const xOffset = isMobile ? 14 + distance * 12 : 22 + distance * 18;
+    const yOffset = distance * 6;
 
-    const angle = 8 + (distanceFromActive * 2);
-    const xOffset = isMobile ? 10 + (distanceFromActive * 8) : 15 + (distanceFromActive * 12);
-    const yOffset = 5 + (distanceFromActive * 4);
-
-    return { 
-      x: xOffset, 
-      y: yOffset, 
-      scale: isMobile ? 0.6 : 0.8, 
-      rotate: angle, 
-      zIndex: 50 - distanceFromActive,
-      opacity: 1
+    return {
+      x: xOffset,
+      y: yOffset,
+      scale: isMobile ? 0.72 - distance * 0.04 : 0.82 - distance * 0.04,
+      rotate: angle,
+      zIndex: 50 - distance,
+      opacity: 1 - distance * 0.15,
+      filter: 'brightness(0.35) contrast(0.8)',
+      pointerEvents: 'auto' as const
     };
   }, [activeCardIndex, isMobile]);
 
   if (!isPreloaded) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="fixed inset-0 z-[8000] bg-black flex flex-col items-center justify-between select-none"
-      >
+      <div className="fixed inset-0 z-[8000] bg-black flex flex-col items-center justify-between select-none">
         <div className="w-full z-[9900] relative shrink-0">
           <StaticAd position="header" />
         </div>
-
-        {/* Ambient Golden Glows */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-amber-500/10 blur-[80px] rounded-full pointer-events-none animate-pulse" />
-        
-        <div className="flex-1 flex flex-col items-center justify-center gap-6 relative z-10">
+        <div className="flex-1 flex flex-col items-center justify-center gap-4">
           <div className="relative">
-            <div className="w-14 h-14 border-2 border-zinc-800 border-t-amber-500 rounded-full animate-spin" />
+            <div className="w-12 h-12 border-2 border-zinc-800 border-t-amber-500 rounded-full animate-spin" />
             <div className="absolute inset-0 flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />
             </div>
           </div>
-          <div className="text-center space-y-1">
-            <p className="text-amber-500 font-black uppercase tracking-[0.25em] text-xs animate-pulse">PREPARING GOLDEN PACK...</p>
-            <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Caching High-Definition Assets</p>
-          </div>
+          <p className="text-amber-400 font-black uppercase tracking-widest text-[11px]">
+            OPENING PACK...
+          </p>
         </div>
-
-        <div className="h-4" />
-      </motion.div>
+        <div className="h-6" />
+      </div>
     );
   }
 
@@ -477,615 +445,279 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`fixed inset-0 z-[8000] bg-black flex flex-col items-center justify-between overflow-hidden h-[100dvh] select-none pointer-events-auto isolation-isolate gpu-accelerated pb-[6vh] ${
-        isRevealing ? 'animate-screen-shake-intense' : ''
-      }`}
+      className="fixed inset-0 z-[8000] bg-black flex flex-col items-center justify-between overflow-hidden h-[100dvh] select-none pointer-events-auto"
+      style={{ willChange: 'transform, opacity' }}
     >
-      {/* Top Banner Ad - Always visible in Pack Opener unless user has No-Ads / Premium */}
+      {/* Top Banner Ad Area */}
       <div className="w-full z-[9900] relative shrink-0">
         <StaticAd position="header" />
       </div>
 
-      {/* Dark Overlay for focus */}
-      <div className="absolute inset-0 bg-black/80 z-0 pointer-events-none" />
+      {/* Atmospheric Background Glow */}
+      <div 
+        className="absolute inset-0 pointer-events-none transition-colors duration-700 ease-out"
+        style={{
+          background: `radial-gradient(circle at 50% 45%, ${activeColor}28 0%, transparent 70%)`
+        }}
+      />
 
-      {/* Background Glow & Special Effects */}
-      <AnimatePresence mode="wait">
-        <motion.div 
-            key={activeCardIndex}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.5 }}
-            exit={{ opacity: 0 }}
-            className={`absolute inset-0 blur-[150px] pointer-events-none transition-all duration-700 will-change-opacity ${
-              isRevealing && (cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].category === 'Dynasty' || cards[activeCardIndex].category === 'X-Factor') ? 'animate-screen-darken' : ''
-            }`}
-            style={{ 
-              backgroundColor: cards[activeCardIndex].category === 'Dynasty' ? '#EF4444' : 
-                               cards[activeCardIndex].category === 'X-Factor' ? '#60A5FA' : 
-                               getRarityColor(cards[activeCardIndex].rarity)
-            }}
-          />
-        {/* Screen-wide Vignette */}
-        <div 
-          className={`absolute inset-0 pointer-events-none z-[10] will-change-transform ${isRevealing ? 'animate-shimmer-bg' : ''}`}
-          style={{ 
-            background: `radial-gradient(circle, transparent 20%, ${getRarityColor(cards[activeCardIndex].rarity)}22 100%)`
-          }}
-        />
-      </AnimatePresence>
-
-      {/* Screen-wide visual cues */}
+      {/* Rarity Reveal Effects on Center Screen */}
       <AnimatePresence>
-        {isRevealing && (
-          <div className={`absolute inset-0 z-[2500] pointer-events-none flex items-center justify-center overflow-hidden`}>
-            {/* Rarity Banner */}
-            <RarityBanner 
-              rarity={cards[activeCardIndex].rarity} 
-              color={getRarityColor(cards[activeCardIndex].rarity)} 
-            />
+        {isRevealing && !showPack && (
+          <div className="absolute inset-0 pointer-events-none z-[15] flex flex-col items-center justify-center overflow-hidden">
+            {/* White flash */}
+            <div className="absolute inset-0 bg-white/25 animate-white-flash pointer-events-none" />
 
-            {/* Intense White Flash */}
-            <div className="absolute inset-0 bg-white z-[3000] animate-white-flash-intense pointer-events-none" />
+            {/* Particle Burst */}
+            <ParticleBurst color={activeColor} isHighTier={isHighTier} />
 
-            {/* Shockwave for all reveals */}
-            <div 
-              className="shockwave" 
-              style={{ 
-                borderColor: getRarityColor(cards[activeCardIndex].rarity),
-                animationDuration: (cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'dpoy' || cards[activeCardIndex].rarity === 'roty' || cards[activeCardIndex].rarity === 'record') ? '1.5s' : '1s',
-                willChange: 'transform, opacity'
-              } as any} 
-            />
+            {/* Flare rays for high-tier */}
+            {isHighTier && <FlareBurst color={activeColor} />}
 
-            {/* Radial Lines */}
-            <div 
-              className={`radial-lines ${(cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'dpoy' || cards[activeCardIndex].rarity === 'roty' || cards[activeCardIndex].rarity === 'record') ? 'scale-150 opacity-50' : 'opacity-20'}`} 
-              style={{ willChange: 'transform, opacity' }}
-            />
-            
-            {/* Rarity Specific Text & Particles */}
-            {isRevealing && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                {cards[activeCardIndex].category === 'All-Star MVP' && (
-                  <>
-                    <ParticleBurst color="#F59E0B" rarity="allstar" />
-                    <FlareBurst color="#F59E0B" />
-                    <motion.div
-                      initial={{ scale: 0.4, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 2, opacity: 0 }}
-                      className="absolute top-[15%] text-amber-500 font-black text-6xl md:text-9xl italic tracking-tighter uppercase drop-shadow-[0_0_50px_rgba(245,158,11,0.8)] animate-text-reveal-glow"
-                    >
-                      All-Star MVP
-                    </motion.div>
-                  </>
-                )}
-                {cards[activeCardIndex].category === 'Dynasty' && (
-                  <>
-                    <ParticleBurst color="#EF4444" rarity="legend" />
-                    <FlareBurst color="#EF4444" />
-                    <motion.div
-                      initial={{ scale: 0.4, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 2, opacity: 0 }}
-                      className="absolute top-[15%] text-red-500 font-black text-6xl md:text-9xl italic tracking-tighter uppercase drop-shadow-[0_0_50px_rgba(239,68,68,0.8)] animate-text-reveal-glow"
-                    >
-                      Dynasty
-                    </motion.div>
-                  </>
-                )}
-                {cards[activeCardIndex].category === 'X-Factor' && (
-                  <>
-                    <ParticleBurst color="#60A5FA" rarity="allstar" />
-                    <FlareBurst color="#60A5FA" />
-                    <motion.div
-                      initial={{ scale: 0.4, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 2, opacity: 0 }}
-                      className="absolute top-[15%] text-blue-400 font-black text-6xl md:text-9xl italic tracking-tighter uppercase drop-shadow-[0_0_50px_rgba(96,165,250,0.8)] animate-text-reveal-glow"
-                    >
-                      X-Factor
-                    </motion.div>
-                  </>
-                )}
-                {cards[activeCardIndex].category !== 'Dynasty' && (cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'dpoy' || cards[activeCardIndex].rarity === 'roty' || cards[activeCardIndex].rarity === 'record') && (
-                  <>
-                    <ParticleBurst color={cards[activeCardIndex].rarity === 'legend' ? "#F59E0B" : cards[activeCardIndex].rarity === 'dpoy' ? "#10B981" : cards[activeCardIndex].rarity === 'roty' ? "#EA580C" : "#F59E0B"} rarity={cards[activeCardIndex].rarity} />
-                    <FlareBurst color={cards[activeCardIndex].rarity === 'legend' ? "#F59E0B" : cards[activeCardIndex].rarity === 'dpoy' ? "#10B981" : cards[activeCardIndex].rarity === 'roty' ? "#EA580C" : "#F59E0B"} />
-                    {/* Extra persistent sparkles for legend/dpoy/roty/record/rookie */}
-                    <motion.div 
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="absolute inset-0 flex items-center justify-center"
-                    >
-                      {Array.from({ length: 6 }).map((_, i) => (
-                        <motion.div
-                          key={i}
-                          animate={{ 
-                            scale: [0, 1, 0],
-                            opacity: [0, 0.8, 0],
-                            rotate: [0, 180, 360]
-                          }}
-                          transition={{ 
-                            duration: 2, 
-                            repeat: Infinity, 
-                            delay: Math.random() * 2,
-                            ease: "easeInOut"
-                          }}
-                          className="absolute w-1.5 h-1.5 bg-white rounded-full blur-[1px]"
-                          style={{
-                            left: `${Math.random() * 100}%`,
-                            top: `${Math.random() * 100}%`,
-                          }}
-                        />
-                      ))}
-                    </motion.div>
-                  </>
-                )}
-                {cards[activeCardIndex].rarity === 'franchise' && (
-                  <>
-                    <ParticleBurst color="#A855F7" rarity="franchise" />
-                    <FlareBurst color="#A855F7" />
-                  </>
-                )}
-                {cards[activeCardIndex].rarity === 'allstar' && <ParticleBurst color="#3B82F6" rarity="allstar" />}
-              </div>
-            )}
-
-            {cards[activeCardIndex].rarity === 'starter' && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 flex items-center justify-center"
+            {/* Category/Rarity Text Splash */}
+            {badge && (
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0, y: -20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 1.3, opacity: 0, y: -10 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="absolute top-[18%] md:top-[16%] text-center px-4"
               >
-                <div className="w-full h-full bg-[radial-gradient(circle,rgba(16,185,129,0.2)_0%,transparent_70%)]" />
-                <motion.div
-                  initial={{ scale: 0.8, opacity: 0, y: 20 }}
-                  animate={{ scale: 1, opacity: 1, y: 0 }}
-                  exit={{ scale: 1.2, opacity: 0 }}
-                  className="absolute top-1/4 text-emerald-400 font-black text-3xl md:text-4xl italic tracking-tighter uppercase drop-shadow-[0_0_15px_rgba(16,185,129,0.6)] animate-text-reveal-glow"
+                <span
+                  className="font-black italic tracking-tighter uppercase text-3xl md:text-6xl drop-shadow-[0_0_30px_currentColor]"
+                  style={{ color: badge.color }}
                 >
-                  Starter
-                </motion.div>
-                {/* Subtle Green Particles */}
-                {[...Array(8)].map((_, i) => (
-                  <div 
-                    key={i}
-                    className="particle"
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
-                      animationDelay: `${Math.random() * 0.5}s`,
-                      backgroundColor: '#10B981',
-                      width: '3px',
-                      height: '3px',
-                      '--tw-translate-x': `${(Math.random() - 0.5) * 100}px`,
-                      '--tw-rotate': `${(Math.random() - 0.5) * 360}deg`,
-                    } as any}
-                  />
-                ))}
-              </motion.div>
-            )}
-
-            {cards[activeCardIndex].rarity === 'allstar' && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 flex items-center justify-center"
-              >
-                <div className="w-full h-full bg-[radial-gradient(circle,rgba(59,130,246,0.3)_0%,transparent_70%)] animate-pulse" />
-                <motion.div
-                  initial={{ scale: 0.7, opacity: 0, y: 30 }}
-                  animate={{ scale: 1, opacity: 1, y: 0 }}
-                  exit={{ scale: 1.3, opacity: 0 }}
-                  className="absolute top-1/4 text-blue-400 font-black text-4xl md:text-5xl italic tracking-tighter uppercase drop-shadow-[0_0_20px_rgba(59,130,246,0.7)] animate-text-reveal-glow"
-                >
-                  All-Star
-                </motion.div>
-                {/* Blue Particles */}
-                {[...Array(15)].map((_, i) => (
-                  <div 
-                    key={i}
-                    className="particle"
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
-                      animationDelay: `${Math.random() * 0.7}s`,
-                      backgroundColor: i % 2 === 0 ? '#3B82F6' : '#60A5FA',
-                      width: `${Math.random() * 4 + 2}px`,
-                      height: `${Math.random() * 4 + 2}px`,
-                      '--tw-translate-x': `${(Math.random() - 0.5) * 200}px`,
-                      '--tw-rotate': `${(Math.random() - 0.5) * 720}deg`,
-                    } as any}
-                  />
-                ))}
-              </motion.div>
-            )}
-
-            {cards[activeCardIndex].rarity === 'franchise' && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 flex items-center justify-center"
-              >
-                <div className="w-full h-full bg-[radial-gradient(circle,rgba(168,85,247,0.4)_0%,transparent_70%)] animate-purple-flash" />
-                <motion.div
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 1.5, opacity: 0 }}
-                  className="absolute top-1/4 text-purple-400 font-black text-5xl md:text-7xl italic tracking-tighter uppercase drop-shadow-[0_0_30px_rgba(168,85,247,0.8)] animate-text-reveal-glow"
-                >
-                  Franchise
-                </motion.div>
-
-                {/* Franchise Energy Pulse */}
-                <div 
-                  className="energy-pulse" 
-                  style={{ '--rarity-color': '#A855F7' } as any} 
-                />
-
-                {/* Particles for Franchise */}
-                {[...Array(15)].map((_, i) => (
-                  <div 
-                    key={i}
-                    className="particle"
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
-                      animationDelay: `${Math.random() * 1.2}s`,
-                      backgroundColor: i % 2 === 0 ? '#A855F7' : '#D8B4FE',
-                      width: `${Math.random() * 6 + 2}px`,
-                      height: `${Math.random() * 6 + 2}px`,
-                      boxShadow: '0 0 10px rgba(168, 85, 247, 0.5)',
-                      '--tw-translate-x': `${(Math.random() - 0.5) * 400}px`,
-                      '--tw-rotate': `${(Math.random() - 0.5) * 1080}deg`,
-                    } as any}
-                  />
-                ))}
-
-                {/* Embers for Franchise */}
-                {[...Array(4)].map((_, i) => (
-                  <div 
-                    key={`ember-${i}`}
-                    className="ember"
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      bottom: '-20px',
-                      animationDelay: `${Math.random() * 2}s`,
-                      backgroundColor: '#A855F7',
-                      width: '4px',
-                      height: '4px',
-                      boxShadow: '0 0 8px #A855F7',
-                      '--tw-translate-x': `${(Math.random() - 0.5) * 150}px`,
-                      '--tw-rotate': `${Math.random() * 360}deg`,
-                    } as any}
-                  />
-                ))}
-              </motion.div>
-            )}
-
-            {(cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'dpoy' || cards[activeCardIndex].rarity === 'roty' || cards[activeCardIndex].rarity === 'record') && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 flex items-center justify-center"
-              >
-                <div className={`w-full h-full bg-[radial-gradient(circle,${cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 'rgba(245,158,11,0.5)' : cards[activeCardIndex].rarity === 'dpoy' ? 'rgba(16,185,129,0.5)' : 'rgba(234,88,12,0.5)'}_0%,transparent_70%)] ${cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 'animate-gold-radial-pulse' : cards[activeCardIndex].rarity === 'dpoy' ? 'animate-dpoy-radial-pulse' : 'animate-roty-radial-pulse'}`} />
-                <div className="absolute inset-0 bg-white animate-white-flash" />
-                
-                <motion.div
-                  initial={{ scale: 0.4, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 2, opacity: 0 }}
-                  className={`absolute top-[15%] ${cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 'text-amber-400' : cards[activeCardIndex].rarity === 'dpoy' ? 'text-emerald-400' : 'text-orange-400'} font-black text-6xl md:text-9xl italic tracking-tighter uppercase drop-shadow-[0_0_50px_${cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 'rgba(245,158,11,0.8)' : cards[activeCardIndex].rarity === 'dpoy' ? 'rgba(16,185,129,0.8)' : 'rgba(234,88,12,0.8)'}] animate-text-reveal-glow`}
-                >
-                  {cards[activeCardIndex].rarity === 'legend' ? 'Legendary' : cards[activeCardIndex].rarity === 'dpoy' ? 'DPOY' : cards[activeCardIndex].rarity === 'roty' ? 'ROTY' : 'RECORD'}
-                </motion.div>
-
-                {/* Energy Pulse */}
-                <div 
-                  className="energy-pulse" 
-                  style={{ '--rarity-color': cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? '#F59E0B' : cards[activeCardIndex].rarity === 'dpoy' ? '#10B981' : '#EA580C', animationDuration: '0.5s' } as any} 
-                />
-
-                {/* Particles */}
-                {[...Array(cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 20 : 15)].map((_, i) => (
-                  <div 
-                    key={i}
-                    className="particle"
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
-                      animationDelay: `${Math.random() * 2}s`,
-                      backgroundColor: cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record'
-                        ? (i % 3 === 0 ? '#F59E0B' : (i % 3 === 1 ? '#FFF' : '#FCD34D'))
-                        : cards[activeCardIndex].rarity === 'dpoy'
-                        ? (i % 2 === 0 ? '#10B981' : '#D1FAE5')
-                        : (i % 2 === 0 ? '#EA580C' : '#FFEDD5'),
-                      width: `${Math.random() * 8 + 2}px`,
-                      height: `${Math.random() * 8 + 2}px`,
-                      borderRadius: i % 4 === 0 ? '0%' : '50%',
-                      boxShadow: `0 0 15px ${cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? 'rgba(245,158,11,0.6)' : cards[activeCardIndex].rarity === 'dpoy' ? 'rgba(16,185,129,0.6)' : 'rgba(234,88,12,0.6)'}`,
-                      '--tw-translate-x': `${(Math.random() - 0.5) * 600}px`,
-                      '--tw-rotate': `${(Math.random() - 0.5) * 1440}deg`,
-                    } as any}
-                  />
-                ))}
-
-                {/* Gold Dust for Legend/Record */}
-                {(cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record') && [...Array(10)].map((_, i) => (
-                  <div 
-                    key={`dust-${i}`}
-                    className="gold-dust"
-                    style={{
-                      left: '50%',
-                      top: '50%',
-                      animationDelay: `${Math.random() * 1.5}s`,
-                      '--tw-translate-x': `${(Math.random() - 0.5) * 800}px`,
-                      '--tw-translate-y': `${(Math.random() - 0.5) * 800}px`,
-                    } as any}
-                  />
-                ))}
+                  {badge.text}
+                </span>
               </motion.div>
             )}
           </div>
         )}
       </AnimatePresence>
 
-      {/* Main Card Area - Centered and responsive */}
-      <div className="flex-1 w-full flex items-center justify-center relative z-10">
-        {cards.map((card, index) => {
-          const isActive = index === activeCardIndex;
-          const isAllStar = card.rarity === 'allstar';
-          const isFranchise = card.rarity === 'franchise';
-          const isLegend = card.rarity === 'legend';
-          const isRecord = card.rarity === 'record';
-          const isDPOY = card.rarity === 'dpoy';
-          const isROTY = card.rarity === 'roty';
-          const pos = getGridPosition(index);
+      {/* Main Stage: Pack Burst OR Cards Stack */}
+      <div className="flex-1 w-full flex items-center justify-center relative z-20">
+        {showPack ? (
+          /* 3D Opening Pack Foil Animation */
+          <motion.div
+            initial={{ scale: 0.85, opacity: 0 }}
+            animate={packBurst ? {
+              scale: [1, 1.4],
+              opacity: [1, 0],
+              filter: 'brightness(3) blur(8px)'
+            } : {
+              scale: [0.95, 1.05, 0.98, 1.03, 1],
+              rotate: [0, -3, 3, -2, 0],
+              opacity: 1
+            }}
+            transition={packBurst ? { duration: 0.25, ease: "easeOut" } : { duration: 0.6, ease: "easeInOut" }}
+            onClick={handleBurstPackNow}
+            className="w-[220px] xs:w-[260px] md:w-[300px] aspect-[2.5/3.5] bg-zinc-950 rounded-3xl border-4 border-amber-500/80 shadow-[0_0_50px_rgba(245,158,11,0.5)] flex items-center justify-center overflow-hidden relative cursor-pointer active:scale-95 transition-transform"
+          >
+            <img
+              src={packImage || 'https://i.postimg.cc/bY3DRzLz/4a07a4ae-7c5c-4d11-8585-780a8aebebbe.png'}
+              className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
+              referrerPolicy="no-referrer"
+              alt="Pack Foil"
+            />
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent animate-shimmer-sweep pointer-events-none" />
+            <div className="absolute bottom-4 px-4 py-1.5 rounded-full bg-black/80 backdrop-blur-md border border-white/20 text-[10px] font-black text-amber-400 uppercase tracking-widest animate-pulse">
+              Tap to Reveal
+            </div>
+          </motion.div>
+        ) : (
+          /* Cards Carousel */
+          <div className="relative w-full h-full flex items-center justify-center">
+            {cards.map((card, index) => {
+              const isActive = index === activeCardIndex;
+              const transform = getCardTransform(index);
 
-          return (
-            <motion.div
-              key={`${card.id}-${index}-${activeCardIndex === index}`}
-              drag={isActive ? "x" : false}
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.8}
-              onDragEnd={(_, info) => {
-                const swipeThreshold = 50;
-                const velocityThreshold = 500;
-                
-                if (isActive) {
-                  // Swipe left to go next
-                  if (info.offset.x < -swipeThreshold || info.velocity.x < -velocityThreshold) {
-                    nextCard();
-                  }
-                  // Swipe right to go back
-                  if (info.offset.x > swipeThreshold || info.velocity.x > velocityThreshold) {
-                    prevCard();
-                  }
-                }
-              }}
-              initial={{ y: 1000, opacity: 0, scale: 0.5 }}
-              animate={{
-                x: pos.x,
-                y: pos.y,
-                scale: pos.scale,
-                rotate: pos.rotate,
-                opacity: pos.opacity ?? 1,
-                zIndex: pos.zIndex,
-                filter: isActive ? 'brightness(1) contrast(1)' : 'brightness(0.2) contrast(0.7)',
-              }}
-              whileHover={isActive ? { 
-                scale: 1.02,
-                transition: { duration: 0.2 }
-              } : {}}
-              transition={{ 
-                type: "spring",
-                stiffness: 250,
-                damping: 30,
-                mass: 0.8
-              }}
-              className={`absolute w-[220px] xs:w-[260px] md:w-[320px] max-h-[65vh] md:max-h-[75vh] aspect-[2.5/3.5] touch-none gpu-accelerated ${
-                !isActive ? 'pointer-events-none' : 'cursor-pointer'
-              } ${
-                isActive && isRevealing ? 'animate-impact-scale' : ''
-              } ${
-                isActive && (isLegend || isRecord || isFranchise || isDPOY || isROTY) ? 'animate-aura-pulse' : ''
-              } ${
-                isActive && isFranchise && isRevealing ? 'animate-franchise-reveal animate-intense-glow-franchise' : ''
-              } ${
-                isActive && (isLegend || isRecord) && isRevealing ? 'animate-legend-reveal animate-intense-glow-legend' : ''
-              } ${
-                isActive && isDPOY && isRevealing ? 'animate-dpoy-reveal animate-intense-glow-dpoy' : ''
-              } ${
-                isActive && isROTY && isRevealing ? 'animate-roty-reveal animate-intense-glow-roty' : ''
-              } ${
-                isActive && isAllStar && isRevealing ? 'animate-intense-glow-allstar' : ''
-              } ${
-                isActive && isFranchise && !isRevealing ? 'animate-intense-glow-franchise' : ''
-              } ${
-                isActive && (isLegend || isRecord) && !isRevealing ? (isLegend || isRecord ? 'animate-intense-glow-legend' : 'animate-intense-glow-record') : ''
-              } ${
-                isActive && isAllStar && !isRevealing ? 'animate-intense-glow-allstar' : ''
-              } ${!isActive ? 'rounded-xl overflow-hidden' : ''}`}
-              style={{
-                animationDuration: (isLegend || isDPOY || isROTY) && isRevealing ? '2.5s' : '1.5s',
-                willChange: 'transform, opacity, filter',
-                '--aura-color': getRarityColor(card.rarity)
-              } as any}
-              onClick={() => handleCardClick(index)}
-            >
-              <div className={`w-full h-full ${isActive && (isLegend || isDPOY || isROTY || isFranchise || isRecord) ? 'relative' : ''}`}>
-                {/* Shimmer effect for high rarity */}
-                {isActive && (isLegend || isRecord || isFranchise || isDPOY || isROTY) && <ShimmerOverlay />}
+              return (
+                <motion.div
+                  key={`${card.id || 'card'}-${index}`}
+                  drag={isActive ? "x" : false}
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.4}
+                  onDragEnd={(_, info) => {
+                    if (!isActive) return;
+                    if (info.offset.x < -40 || info.velocity.x < -300) {
+                      nextCard();
+                    } else if (info.offset.x > 40 || info.velocity.x > 300) {
+                      prevCard();
+                    }
+                  }}
+                  animate={{
+                    x: transform.x,
+                    y: transform.y,
+                    scale: transform.scale,
+                    rotate: transform.rotate,
+                    opacity: transform.opacity,
+                    zIndex: transform.zIndex,
+                    filter: transform.filter
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 28,
+                    mass: 0.7
+                  }}
+                  onClick={() => handleCardClick(index)}
+                  className={`absolute w-[220px] xs:w-[260px] md:w-[310px] max-h-[64vh] md:max-h-[72vh] aspect-[2.5/3.5] touch-none ${
+                    isActive ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
+                  }`}
+                  style={{
+                    willChange: 'transform, opacity, filter'
+                  }}
+                >
+                  <div className="w-full h-full relative">
+                    {/* Shimmer for high tier cards */}
+                    {isActive && isHighTier && <ShimmerOverlay />}
 
-                {/* God Rays for High Rarity */}
-                <RarityBackgroundEffect rarity={card.rarity} isActive={isActive} isRevealing={isRevealing} />
-
-                {showPack && isActive ? (
-                  <motion.div
-                    key="pack"
-                    initial={{ scale: 0.8 }}
-                    animate={{ 
-                      scale: [0.8, 1.12, 0.95, 1.25],
-                      rotate: [0, -6, 6, -6, 6, 0]
-                    }}
-                    exit={{ scale: 2, opacity: 0, filter: 'brightness(2)' }}
-                    transition={{ duration: 0.8, ease: "easeInOut" }}
-                    className="fixed inset-0 m-auto z-[5000] w-[220px] xs:w-[260px] md:w-[320px] aspect-[2.5/3.5] flex items-center justify-center pointer-events-none"
-                  >
-                    <div className="w-full h-full bg-zinc-950 rounded-3xl overflow-hidden shadow-[0_0_60px_rgba(245,158,11,0.5)] border-4 border-zinc-800 flex items-center justify-center relative">
-                      <img 
-                        src={packImage || 'https://i.postimg.cc/bY3DRzLz/4a07a4ae-7c5c-4d11-8585-780a8aebebbe.png'}
-                        className="absolute inset-0 w-full h-full object-cover select-none"
-                        referrerPolicy="no-referrer"
-                        alt="Opening Pack Image"
-                      />
-                    </div>
-                  </motion.div>
-                ) : (
-                  <div className="w-full h-full">
-                    {/* Golden Glow for Rare Cards (>85) */}
-                    {cards[index].stats.ovr > 85 && isActive && !isRevealing && (
-                      <div className="absolute inset-[-20px] bg-amber-500/20 blur-3xl rounded-full animate-pulse z-[-1]" />
-                    )}
-                    
-                    <CardItem 
-                      card={card} 
-                      isOwned={true} 
+                    <CardItem
+                      card={card}
+                      isOwned={true}
                       mode="large"
                       showBack={false}
                       isFocused={isActive}
                       isNew={card.isNew}
                     />
                   </div>
-                )}
-              </div>
-            </motion.div>
-          );
-        })}
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* Action Button - Moved outside content div for better stacking */}
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute bottom-6 sm:bottom-12 flex flex-col items-center gap-3 sm:gap-4 z-[4000] pointer-events-auto pb-safe"
-        >
-          <div className="flex items-center gap-4 sm:gap-8 mb-2 sm:mb-4">
-            <button 
-              onClick={(e) => { e.stopPropagation(); prevCard(); }}
+      {/* Bottom Controls Bar */}
+      {!showPack && (
+        <div className="w-full flex flex-col items-center gap-3 z-40 pb-6 pt-2 shrink-0 bg-gradient-to-t from-black via-black/80 to-transparent">
+          {/* Card Dots & Navigation Buttons */}
+          <div className="flex items-center justify-center gap-4">
+            <button
+              onClick={prevCard}
               disabled={activeCardIndex === 0}
-              className={`text-[8px] sm:text-[10px] font-black uppercase tracking-widest px-4 sm:px-6 py-2 sm:py-3 rounded-full border border-white/10 transition-all shadow-xl ${activeCardIndex === 0 ? 'opacity-20 cursor-not-allowed' : 'bg-zinc-800 text-white hover:bg-zinc-700 active:scale-95'}`}
+              aria-label="Previous card"
+              className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all ${
+                activeCardIndex === 0
+                  ? 'opacity-20 border-white/10 text-zinc-600 cursor-not-allowed'
+                  : 'border-white/20 bg-zinc-900/90 text-white hover:bg-zinc-800 active:scale-95'
+              }`}
             >
-              Prev
+              <ChevronLeft size={18} />
             </button>
-            <div className="flex gap-1.5 sm:gap-2">
+
+            {/* Dots */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-950/80 border border-white/10">
               {cards.map((_, i) => (
-                <div 
+                <button
                   key={i}
-                  className={`h-1 sm:h-1.5 rounded-full transition-all duration-300 ${
-                    i === activeCardIndex ? 'w-4 sm:w-6 bg-white' : (i < activeCardIndex ? 'w-1.5 sm:w-2 bg-white/60' : 'w-1.5 sm:w-2 bg-white/20')
+                  onClick={() => handleCardClick(i)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    i === activeCardIndex
+                      ? 'w-6 bg-amber-400'
+                      : i < activeCardIndex
+                      ? 'w-2 bg-white/60 hover:bg-white'
+                      : 'w-2 bg-white/20 hover:bg-white/40'
                   }`}
                 />
               ))}
             </div>
-            <button 
-              onClick={(e) => { e.stopPropagation(); nextCard(); }}
+
+            <button
+              onClick={nextCard}
               disabled={activeCardIndex === totalCards - 1}
-              className={`text-[8px] sm:text-[10px] font-black uppercase tracking-widest px-4 sm:px-6 py-2 sm:py-3 rounded-full border border-white/10 transition-all shadow-xl ${activeCardIndex === totalCards - 1 ? 'opacity-20 cursor-not-allowed' : 'bg-zinc-800 text-white hover:bg-zinc-700 active:scale-95'}`}
+              aria-label="Next card"
+              className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all ${
+                activeCardIndex === totalCards - 1
+                  ? 'opacity-20 border-white/10 text-zinc-600 cursor-not-allowed'
+                  : 'border-white/20 bg-zinc-900/90 text-white hover:bg-zinc-800 active:scale-95'
+              }`}
             >
-              Next
+              <ChevronRight size={18} />
             </button>
           </div>
 
-          {allRevealed && (
-            <button
-              onClick={(e) => { e.stopPropagation(); handleClosePackOpener(); }}
-              className="bg-white text-black font-black px-8 sm:px-12 py-3 sm:py-4 rounded-full shadow-[0_0_50px_rgba(255,255,255,0.3)] flex items-center gap-2 sm:gap-3 uppercase tracking-widest text-[10px] sm:text-xs hover:bg-amber-400 transition-all active:scale-95 border-2 border-white/50"
-            >
-              <Check size={isMobile ? 14 : 18} strokeWidth={3} />
-              Collect Cards
-            </button>
-          )}
-        </motion.div>
-      </AnimatePresence>
+          {/* Action / Collect Button */}
+          <div className="h-12 flex items-center justify-center">
+            {allRevealed ? (
+              <motion.button
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={handleClosePackOpener}
+                className="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-black font-black px-8 py-3 rounded-full shadow-[0_0_30px_rgba(245,158,11,0.4)] flex items-center gap-2 uppercase tracking-widest text-xs border border-amber-200 cursor-pointer"
+              >
+                <Check size={16} strokeWidth={3} />
+                <span>Collect Cards</span>
+              </motion.button>
+            ) : (
+              <button
+                onClick={nextCard}
+                className="text-zinc-400 hover:text-white text-[11px] font-bold uppercase tracking-widest px-4 py-2 transition-colors"
+              >
+                Card {activeCardIndex + 1} of {totalCards} · Tap Next →
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
-      {/* Achievement Unlocked Modal Popup (Achievement Queue UI) */}
+      {/* Achievement Unlocked Modal Popup */}
       <AnimatePresence>
         {activeAchievementPopup && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9500] bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 pointer-events-auto"
+            className="fixed inset-0 z-[9500] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 pointer-events-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <motion.div
-              initial={{ scale: 0.85, y: 25, opacity: 0 }}
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.85, y: 20, opacity: 0 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
               transition={{ type: "spring", stiffness: 350, damping: 25 }}
-              className="w-full max-w-sm bg-gradient-to-b from-zinc-900 via-zinc-950 to-black border-2 border-amber-500/50 rounded-3xl p-6 shadow-[0_0_60px_rgba(245,158,11,0.35)] flex flex-col items-center text-center relative overflow-hidden"
+              className="w-full max-w-sm bg-gradient-to-b from-zinc-900 via-zinc-950 to-black border-2 border-amber-500/60 rounded-3xl p-6 shadow-[0_0_60px_rgba(245,158,11,0.4)] flex flex-col items-center text-center relative overflow-hidden"
             >
-              {/* Top Animated Gold Line */}
-              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent animate-pulse" />
-              <div className="absolute -top-16 -left-16 w-36 h-36 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-16 -right-16 w-36 h-36 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent animate-pulse" />
 
-              {/* Icon / Trophy Badge */}
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-600 flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.6)] mb-4 animate-bounce-subtle border border-amber-200/40">
-                <Trophy className="text-black w-8 h-8" strokeWidth={2.5} />
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-600 flex items-center justify-center shadow-[0_0_25px_rgba(245,158,11,0.5)] mb-3 border border-amber-200/50">
+                <Trophy className="text-black w-7 h-7" strokeWidth={2.5} />
               </div>
 
-              {/* Popup Title */}
-              <h3 className="text-xs font-black uppercase tracking-[0.25em] text-amber-400 italic mb-1">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-400 italic mb-1">
                 ACHIEVEMENT UNLOCKED!
               </h3>
 
-              {/* Context / Card Rarity Trigger Text */}
-              {cards[activeCardIndex] && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] font-black uppercase tracking-wider text-amber-300 mb-2">
+              {currentCard && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] font-black uppercase tracking-wider text-amber-300 mb-2">
                   <Award size={12} className="text-amber-400" />
-                  {cards[activeCardIndex].rarity === 'legend' || cards[activeCardIndex].rarity === 'record' ? (
-                    <span>Hall of Fame Card Unlocked!</span>
-                  ) : cards[activeCardIndex].rarity === 'franchise' || cards[activeCardIndex].category === 'All-Star MVP' ? (
-                    <span>MVP Card Collected!</span>
-                  ) : (
-                    <span>{cards[activeCardIndex].name} Collected</span>
-                  )}
+                  <span>{currentCard.name}</span>
                 </div>
               )}
 
-              {/* Achievement Title */}
-              <h2 className="text-xl font-black text-white italic tracking-tight uppercase mb-2">
+              <h2 className="text-lg font-black text-white italic tracking-tight uppercase mb-1.5">
                 {activeAchievementPopup.title}
               </h2>
 
-              {/* Achievement Description */}
-              <p className="text-xs text-zinc-400 mb-5 px-2 line-clamp-2 leading-relaxed">
+              <p className="text-xs text-zinc-400 mb-4 px-2 line-clamp-2 leading-relaxed">
                 {activeAchievementPopup.description}
               </p>
 
-              {/* Reward Subtitle & Box */}
-              <div className="w-full bg-zinc-950/90 border border-amber-500/30 rounded-2xl p-3.5 mb-6 flex flex-col items-center shadow-inner">
-                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-1">
-                  Reward added to your account
+              <div className="w-full bg-zinc-950/90 border border-amber-500/30 rounded-2xl p-3 mb-5 flex flex-col items-center">
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-0.5">
+                  Reward
                 </span>
-                <span className="text-base font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 italic tracking-tight uppercase">
+                <span className="text-sm font-black text-amber-400 uppercase tracking-wide">
                   {activeAchievementPopup.rewardText}
                 </span>
               </div>
 
-              {/* Action Button: CLAIM / COLLECT */}
               <button
                 onClick={handleClaimAchievement}
-                className="w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 text-black font-black uppercase tracking-widest text-xs shadow-[0_0_30px_rgba(245,158,11,0.5)] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-amber-200/60"
+                className="w-full py-3 px-6 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 text-black font-black uppercase tracking-widest text-xs shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-amber-200"
               >
                 CLAIM
               </button>

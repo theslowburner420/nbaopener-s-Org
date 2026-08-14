@@ -19,6 +19,7 @@ export interface Card {
   subtitle: string;
   series?: string;
   season?: string;
+  year?: string;
   isHistorical: boolean;
   pts: number;
   reb: number;
@@ -33,11 +34,12 @@ export interface Card {
     draftPotential?: string;
   };
   age?: number;
-  description: string;
+  description?: string;
   momentTitle?: string;
   momentDate?: string;
   quote: string;
   imageUrl: string;
+  imagePosition?: string;
   isNew?: boolean;
   coach?: string;
   player2Id?: number;
@@ -45,6 +47,7 @@ export interface Card {
   isSpecialSBC?: boolean;
   englishContext?: string;
   achievements?: string[];
+  signatureStats?: Array<{ label: string; value: string | number; color?: string }>;
 }
 
 export type ViewType = 'collection' | 'open' | 'packs' | 'rewards' | 'shop' | 'profile' | 'home' | 'draft' | 'trading' | 'career' | 'sbc';
@@ -243,16 +246,77 @@ export interface FranchiseState {
 }
 
 export interface SbcRequirement {
-  type: 'MIN_RARITY' | 'EXACT_RARITY' | 'POSITION' | 'MIN_OVR' | 'TOTAL_CARDS' | 'UNIQUE_PLAYERS' | 'TEAM_OVR_MIN' | 'SAME_TEAM_MIN' | 'SAME_CONF_MIN' | 'MAX_TEAMS';
+  type: 
+    | 'MIN_RARITY' 
+    | 'EXACT_RARITY' 
+    | 'POSITION' 
+    | 'MIN_OVR' 
+    | 'MAX_OVR'
+    | 'TOTAL_CARDS' 
+    | 'UNIQUE_PLAYERS' 
+    | 'TEAM_OVR_MIN' 
+    | 'SAME_TEAM_MIN' 
+    | 'SAME_CONF_MIN' 
+    | 'MAX_TEAMS'
+    | 'SPECIFIC_PLAYER_NAME'
+    | 'SPECIFIC_TEAM'
+    | 'SPECIAL_CARDS_MIN'
+    | 'CATEGORY';
   value: any;
   count?: number;
+  playerName?: string;
+  minOvr?: number;
+  maxOvr?: number;
+  edition?: string;
+  era?: string;
+  teamsList?: string[];
+  playersList?: string[];
+  description?: string;
+}
+
+export interface SbcSegmentReward {
+  type: 'coins' | 'pack' | 'both';
+  coins?: number;
+  packType?: string;
+  packName?: string;
+  packImage?: string;
+  description: string;
+}
+
+export interface SbcSegment {
+  id: string;
+  name: string;
+  description: string;
+  requirements: SbcRequirement[];
+  cardsRequired: number;
+  slotPositions?: string[];
+  segmentReward: SbcSegmentReward;
+}
+
+export interface SbcGroup {
+  id: string;
+  name: string;
+  description: string;
+  category: 'dynasty' | 'hof_legends' | 'franchise_icons' | 'fan_favourites' | 'rookie_series' | 'clutch_moments' | string;
+  difficulty: 'bronze' | 'silver' | 'gold' | 'elite' | 'legendary';
+  type: 'permanent' | 'limited';
+  expiresAt: string | null;
+  reward: {
+    playerName: string;
+    rarity: Rarity;
+    ovr: number;
+    imageUrl?: string;
+    playerId?: string;
+  };
+  segments: SbcSegment[];
+  isActive: boolean;
 }
 
 export interface SbcChallenge {
   id: string;
   name: string;
   description: string;
-  category?: 'rookie_series' | 'fan_favourites' | 'hof_legends' | 'franchise_icons' | 'clutch_moments' | string;
+  category?: 'dynasty' | 'rookie_series' | 'fan_favourites' | 'hof_legends' | 'franchise_icons' | 'clutch_moments' | string;
   difficulty: 'bronze' | 'silver' | 'gold' | 'elite' | 'legendary';
   type: 'permanent' | 'limited';
   expiresAt: string | null;
@@ -262,7 +326,7 @@ export interface SbcChallenge {
     rarity: Rarity;
     ovr: number;
     imageUrl?: string;
-    playerId?: string; // If we want to link to an existing player card
+    playerId?: string;
   };
   isActive: boolean;
   cardsRequired: number;

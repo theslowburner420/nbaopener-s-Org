@@ -9,7 +9,6 @@ import { Card } from '../types';
 
 export default function OpenView() {
   const { setCurrentView } = useGame();
-  const [isOpening, setIsOpening] = useState(false);
   const [openedCards, setOpenedCards] = useState<Card[] | null>(null);
   const [newlyUnlocked, setNewlyUnlocked] = useState<any[]>([]);
   const { openPack, isSaving } = useEngine();
@@ -26,16 +25,11 @@ export default function OpenView() {
     try {
       const result = await openPack('random');
       if (result) {
-        setIsOpening(true);
-        setTimeout(() => {
-          setIsOpening(false);
-          setOpenedCards(result.cards);
-          setNewlyUnlocked(result.newlyUnlocked);
-        }, 1500);
+        setOpenedCards(result.cards);
+        setNewlyUnlocked(result.newlyUnlocked);
       }
     } catch (error) {
       console.error('Failed to open pack:', error);
-      // Error is handled by GameContext and displayed via ErrorBoundary or Toast if implemented
     }
   };
 
@@ -104,46 +98,6 @@ export default function OpenView() {
           </p>
         </div>
       </div>
-
-      {/* Opening Overlay */}
-      <AnimatePresence>
-        {isOpening && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[7000] bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-between"
-          >
-            <div className="w-full z-[7500] relative shrink-0">
-              <StaticAd position="header" />
-            </div>
-
-            <div className="flex-1 flex flex-col items-center justify-center">
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.15, 1],
-                  rotate: [0, 8, -8, 0],
-                  boxShadow: [
-                    "0 0 0px rgba(6,182,212,0)",
-                    "0 0 70px rgba(6,182,212,0.6)",
-                    "0 0 0px rgba(6,182,212,0)"
-                  ]
-                }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                className="w-64 h-96 bg-zinc-950 rounded-3xl border-4 border-cyan-500 shadow-2xl mb-12 flex items-center justify-center overflow-hidden relative animate-pulse"
-              >
-                <img 
-                  src="https://i.postimg.cc/bY3DRzLz/4a07a4ae-7c5c-4d11-8585-780a8aebebbe.png" 
-                  className="w-full h-full object-cover rounded-3xl" 
-                  referrerPolicy="no-referrer"
-                  alt="Opening Pack"
-                />
-              </motion.div>
-              <h2 className="text-3xl font-black italic tracking-tighter text-white uppercase animate-pulse">Revealing...</h2>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <AnimatePresence>
         {openedCards && (

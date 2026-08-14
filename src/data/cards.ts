@@ -1,6 +1,8 @@
 import { Card, Rarity } from '../types';
 import { AWARD_CARDS } from './awardCards';
 import { DUO_AND_XFACTOR_CARDS } from './duoAndXFactorCards';
+import { DYNASTY_CARDS } from './dynastyCards';
+import { ALL_STAR_MVP_CARDS } from './allStarMvpCards';
 
 const teamColors: Record<string, string> = {
   'Los Angeles Lakers': '#FDB927',
@@ -14312,6 +14314,16 @@ export const ALL_CARDS: Card[] = [
   ...DUO_AND_XFACTOR_CARDS.map((card, idx) => ({
     ...card,
     number: rawCards.length + AWARD_CARDS.length + idx + 1,
+    teamLogoUrl: teamLogos[card.team] || teamLogos[card.teamAbbr]
+  })),
+  ...DYNASTY_CARDS.map((card, idx) => ({
+    ...card,
+    number: rawCards.length + AWARD_CARDS.length + DUO_AND_XFACTOR_CARDS.length + idx + 1,
+    teamLogoUrl: teamLogos[card.team] || teamLogos[card.teamAbbr]
+  })),
+  ...ALL_STAR_MVP_CARDS.map((card, idx) => ({
+    ...card,
+    number: rawCards.length + AWARD_CARDS.length + DUO_AND_XFACTOR_CARDS.length + DYNASTY_CARDS.length + idx + 1,
     teamLogoUrl: teamLogos[card.team] || teamLogos[card.teamAbbr]
   }))
 ];
