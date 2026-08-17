@@ -7,6 +7,7 @@ import { useEffect, useState, lazy, Suspense } from 'react';
 import { GameProvider, useGame } from './context/GameContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ALL_CARDS } from './data/cards';
+import { isScreamEditionActive } from './constants/screamEdition';
 import { LogIn, LogOut, User as UserIcon, Coins, AlertCircle, ChevronDown, Settings, Cloud, Check, RefreshCw, X, Gift, Star, Home, ShoppingBag, LayoutGrid, Trophy, Zap, AlertTriangle, Loader2, Sparkles, Award } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MemoryManager } from './lib/memory';
@@ -14,6 +15,7 @@ import { Analytics } from "@vercel/analytics/react";
 
 import Header from './components/Header';
 import StaticAd from './components/StaticAd';
+import HalloweenEventModal from './components/HalloweenEventModal';
 import { Puzzle } from 'lucide-react';
 
 // Lazy load views for code splitting
@@ -99,6 +101,38 @@ function AppContent() {
   const [hasShownLoginIncentive, setHasShownLoginIncentive] = useState(false);
   const [showLoginBonusModal, setShowLoginBonusModal] = useState(false);
   const [claimingLoginBonus, setClaimingLoginBonus] = useState(false);
+  const isScreamActive = isScreamEditionActive(isPremium);
+  const [isHalloweenModalOpen, setIsHalloweenModalOpen] = useState(false);
+  const [sbcInitialCategory, setSbcInitialCategory] = useState<any>('all');
+  const [spookyFogEnabled, setSpookyFogEnabled] = useState<boolean>(() => {
+    return localStorage.getItem('hoops_spooky_fog') !== 'false';
+  });
+
+  useEffect(() => {
+    const handleFogToggle = () => {
+      setSpookyFogEnabled(localStorage.getItem('hoops_spooky_fog') !== 'false');
+    };
+    window.addEventListener('hoops-fog-toggle', handleFogToggle);
+    return () => window.removeEventListener('hoops-fog-toggle', handleFogToggle);
+  }, []);
+
+  // Auto-open Halloween showcase modal on first visit of session if event is active
+  useEffect(() => {
+    if (isScreamActive) {
+      const hasSeen = sessionStorage.getItem('hoops_halloween_modal_seen');
+      if (!hasSeen) {
+        setIsHalloweenModalOpen(true);
+        sessionStorage.setItem('hoops_halloween_modal_seen', 'true');
+      }
+    }
+  }, [isScreamActive]);
+
+  // Listen for open-halloween-modal event from anywhere in the app
+  useEffect(() => {
+    const handleOpenModal = () => setIsHalloweenModalOpen(true);
+    window.addEventListener('open-halloween-modal', handleOpenModal);
+    return () => window.removeEventListener('open-halloween-modal', handleOpenModal);
+  }, []);
 
   // Show login incentive if user is NOT logged in and hasn't seen it this session
   useEffect(() => {
@@ -212,7 +246,7 @@ function AppContent() {
             case 'profile': return <ProfileView />;
             case 'trading': return <TradingView />;
             case 'career': return <CareerView />;
-            case 'sbc': return <SbcView />;
+            case 'sbc': return <SbcView initialCategory={sbcInitialCategory} />;
             default: return <HomeView />;
           }
         })()}
@@ -291,8 +325,20 @@ function AppContent() {
     );
   }
 
+  const isSpookyAtmosphereActive = isScreamActive && spookyFogEnabled;
+
   return (
-    <div className="h-[100dvh] w-full bg-black text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black relative overflow-hidden">
+    <div className={`h-[100dvh] w-full bg-black text-white flex flex-col font-sans selection:bg-amber-500 selection:text-black relative overflow-hidden ${
+      isSpookyAtmosphereActive ? 'spooky-theme' : ''
+    }`}>
+      {/* Spooky Atmospheric Fog & Vignette Overlay */}
+      {isSpookyAtmosphereActive && (
+        <>
+          <div className="spooky-fog-layer" aria-hidden="true" />
+          <div className="spooky-vignette fixed inset-0 pointer-events-none z-[2]" aria-hidden="true" />
+        </>
+      )}
+
       {/* Premium Texture Overlay */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.02] z-[10000] mix-blend-overlay bg-repeat" 
            style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }} />
@@ -301,6 +347,7 @@ function AppContent() {
       <AnimatePresence>
         {isOffline && (
           <motion.div
+            key="offline-warning"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -407,16 +454,18 @@ function AppContent() {
         </div>
       )}
 
-      {/* Welcome Gift Modal */}
+      {/* Welcome Gift & Auth Modals */}
       <AnimatePresence>
         {showLoginIncentive && !user && (
           <motion.div
+            key="login-incentive-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-md flex items-center justify-center p-6"
           >
             <motion.div
+              key="login-incentive-content"
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               className="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-3xl p-6 md:p-8 relative overflow-hidden shadow-2xl"
@@ -478,12 +527,14 @@ function AppContent() {
 
         {showWelcomeGift && (
           <motion.div
+            key="welcome-gift-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[10000] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6"
           >
             <motion.div
+              key="welcome-gift-content"
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               className="w-full max-w-sm bg-zinc-900 border border-amber-500/30 rounded-3xl p-6 md:p-8 relative overflow-y-auto max-h-[90vh] shadow-[0_0_50px_rgba(245,158,11,0.2)]"
@@ -570,12 +621,14 @@ function AppContent() {
 
         {showLoginBonusModal && (
           <motion.div
+            key="login-bonus-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[10000] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6"
           >
             <motion.div
+              key="login-bonus-content"
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               className="w-full max-w-sm bg-zinc-900 border border-amber-500/30 rounded-3xl p-6 md:p-8 relative overflow-y-auto max-h-[90vh] shadow-[0_0_50px_rgba(245,158,11,0.3)]"
@@ -658,6 +711,21 @@ function AppContent() {
               </div>
             </motion.div>
           </motion.div>
+        )}
+
+        {/* Halloween Scream Event Showcase Modal */}
+        {isHalloweenModalOpen && (
+          <HalloweenEventModal
+            key="halloween-event-modal"
+            isOpen={isHalloweenModalOpen}
+            onClose={() => setIsHalloweenModalOpen(false)}
+            onNavigateToPacks={() => setCurrentView('packs')}
+            onNavigateToSBC={() => {
+              setSbcInitialCategory('scream');
+              setCurrentView('sbc');
+            }}
+            onNavigateToDraft={() => setCurrentView('draft')}
+          />
         )}
       </AnimatePresence>
       <Analytics />

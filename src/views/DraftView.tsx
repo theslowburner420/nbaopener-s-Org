@@ -27,7 +27,8 @@ import {
   Flame,
   Star,
   CheckCircle2,
-  Crown
+  Crown,
+  Ghost
 } from 'lucide-react';
 import { useGame } from '../context/GameContext';
 import { useNotification } from '../context/NotificationContext';
@@ -281,6 +282,19 @@ const TOURNAMENTS: Tournament[] = [
     minOpponentOvr: 80,
     maxOpponentOvr: 88,
     opponentPool: ['Class of 2026 Top Picks', 'International Prospects', 'Overtime Elite', 'G-League Ignite', 'College Phenoms', 'EuroLeague Stars', 'High School Prodigies', 'Next Gen Titans']
+  },
+  {
+    id: 'halloween_scream',
+    name: 'Spooky Scream Classic',
+    difficulty: 'Special',
+    recommendedOvr: 88,
+    category: 'special',
+    featured: true,
+    description: 'Limited-time Halloween showdown! Defeat spooky squads and haunted franchise legends to win Scream Edition Packs & massive Coin rewards.',
+    rewards: '120,000 Coins + 2 Scream Edition Packs + 1 All-Star Pack',
+    minOpponentOvr: 85,
+    maxOpponentOvr: 93,
+    opponentPool: ['Haunted Celtics', 'Phantom Warriors', 'Graveyard Lakers', 'Spooky Timberwolves', 'Ghost Bulls', 'Nightmare Heat', 'Shadow Spurs', 'Cursed Nuggets']
   }
 ];
 
@@ -354,6 +368,12 @@ const REWARDS: Record<string, {
     finalist: { coins: 20000, packs: [{ id: 'draft2026-1', type: 'draft2026', name: 'Draft 2026 Pack' }] },
     semis: { coins: 8000, packs: [] },
     quarters: { coins: 3000, packs: [] },
+  },
+  'Spooky Scream Classic': {
+    champion: { coins: 120000, packs: [{ id: 'scream-1', type: 'scream_edition', name: 'Scream Edition Pack' }, { id: 'scream-2', type: 'scream_edition', name: 'Scream Edition Pack' }, { id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
+    finalist: { coins: 60000, packs: [{ id: 'scream-1', type: 'scream_edition', name: 'Scream Edition Pack' }] },
+    semis: { coins: 25000, packs: [{ id: 'allstar-1', type: 'allstar', name: 'All-Star Pack' }] },
+    quarters: { coins: 10000, packs: [] },
   }
 };
 
@@ -2093,6 +2113,9 @@ const DraftView: React.FC = () => {
       } else if (selectedTournament.name === 'NBA Playoffs') {
         const unlocked = await unlockAchievement('ring_chaser', false);
         if (unlocked) notify(unlocked);
+      } else if (selectedTournament.name === 'Spooky Scream Classic' || selectedTournament.id === 'halloween_scream') {
+        const unlocked = await unlockAchievement('scream_tournament_champ', false);
+        if (unlocked) notify(unlocked);
       }
     }
   };
@@ -3482,6 +3505,7 @@ const DraftView: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
               {sortedTournaments.map((t, idx) => {
                 const rewardParts = t.rewards.split('+').map(s => s.trim());
+                const isHalloween = t.id === 'halloween_scream';
 
                 return (
                   <motion.div
@@ -3490,29 +3514,43 @@ const DraftView: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.04 }}
                     whileHover={{ y: -4 }}
-                    className="group bg-zinc-950 border border-zinc-900 hover:border-amber-500/40 rounded-2xl p-5 flex flex-col justify-between text-left space-y-4 shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden"
+                    className={`group rounded-2xl p-5 flex flex-col justify-between text-left space-y-4 shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden ${
+                      isHalloween
+                        ? 'bg-gradient-to-b from-orange-950/40 via-purple-950/30 to-zinc-950 border-2 border-orange-500/80 hover:border-orange-400 shadow-[0_0_25px_rgba(249,115,22,0.35)]'
+                        : 'bg-zinc-950 border border-zinc-900 hover:border-amber-500/40'
+                    }`}
                   >
+                    {isHalloween && (
+                      <div className="absolute -top-16 -right-16 w-32 h-32 bg-orange-500/20 rounded-full blur-2xl pointer-events-none" />
+                    )}
+
                     {/* Top Badges */}
-                    <div className="flex items-center justify-between gap-1.5">
+                    <div className="flex items-center justify-between gap-1.5 relative z-10">
                       <span className={`px-2.5 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-wider ${
+                        isHalloween ? 'bg-gradient-to-r from-orange-500 to-purple-600 text-white shadow' :
                         t.difficulty === 'Easy' ? 'bg-zinc-900 text-zinc-400 border border-zinc-800' :
                         t.difficulty === 'Medium' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
                         t.difficulty === 'Hard' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
                         t.difficulty === 'Legend' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' :
                         'bg-amber-400/20 text-amber-300 border border-amber-400/30'
                       }`}>
-                        {t.difficulty}
+                        {isHalloween ? '🎃 HALLOWEEN SPECIAL' : t.difficulty}
                       </span>
 
-                      <span className="px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-wider border bg-zinc-900/80 text-zinc-400 border-zinc-800 font-mono">
+                      <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-wider border font-mono ${
+                        isHalloween ? 'bg-black/60 text-orange-300 border-orange-500/40' : 'bg-zinc-900/80 text-zinc-400 border-zinc-800'
+                      }`}>
                         Rec: {t.recommendedOvr} OVR
                       </span>
                     </div>
 
                     {/* Title & Description */}
-                    <div className="space-y-1.5">
-                      <h3 className="text-lg font-black italic uppercase text-white tracking-tight leading-tight group-hover:text-amber-400 transition-colors">
-                        {t.name}
+                    <div className="space-y-1.5 relative z-10">
+                      <h3 className={`text-lg font-black italic uppercase tracking-tight leading-tight transition-colors ${
+                        isHalloween ? 'text-orange-400 group-hover:text-orange-300 flex items-center gap-1.5' : 'text-white group-hover:text-amber-400'
+                      }`}>
+                        {isHalloween && <Ghost size={18} className="text-orange-400 animate-pulse shrink-0" />}
+                        <span>{t.name}</span>
                       </h3>
                       <p className="text-[10px] text-zinc-400 line-clamp-2 leading-relaxed font-medium">
                         {t.description}
@@ -3520,14 +3558,26 @@ const DraftView: React.FC = () => {
                     </div>
 
                     {/* Rewards Section */}
-                    <div className="space-y-1.5 bg-zinc-900/50 border border-zinc-850 rounded-xl p-2.5">
-                      <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block">Tournament Rewards</span>
+                    <div className={`space-y-1.5 rounded-xl p-2.5 relative z-10 ${
+                      isHalloween ? 'bg-black/60 border border-orange-500/40' : 'bg-zinc-900/50 border border-zinc-850'
+                    }`}>
+                      <span className={`text-[8px] font-black uppercase tracking-widest block ${
+                        isHalloween ? 'text-orange-400' : 'text-zinc-500'
+                      }`}>
+                        {isHalloween ? '🎃 SPOOKY REWARDS' : 'Tournament Rewards'}
+                      </span>
                       <div className="flex flex-wrap gap-1">
                         {rewardParts.map((part, index) => {
                           const isCoins = part.toLowerCase().includes('coins');
+                          const isScreamPack = part.toLowerCase().includes('scream');
                           return (
-                            <span key={index} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-950 border border-zinc-800 text-[9px] font-bold text-zinc-200">
-                              {isCoins ? <Coins size={10} className="text-amber-500 shrink-0" fill="currentColor" /> : <Package size={10} className="text-blue-400 shrink-0" />}
+                            <span key={index} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold ${
+                              isScreamPack ? 'bg-orange-500/20 border border-orange-500/60 text-orange-300 font-black' :
+                              'bg-zinc-950 border border-zinc-800 text-zinc-200'
+                            }`}>
+                              {isCoins ? <Coins size={10} className="text-amber-500 shrink-0" fill="currentColor" /> : 
+                               isScreamPack ? <Ghost size={10} className="text-orange-400 shrink-0" /> :
+                               <Package size={10} className="text-blue-400 shrink-0" />}
                               {part}
                             </span>
                           );
@@ -3536,12 +3586,16 @@ const DraftView: React.FC = () => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex items-center gap-2 pt-1">
+                    <div className="flex items-center gap-2 pt-1 relative z-10">
                       <button
                         onClick={() => handleSelectTournament(t)}
-                        className="flex-1 bg-amber-500 text-black group-hover:bg-amber-400 py-2.5 rounded-xl font-black uppercase tracking-wider text-[10px] transition-all flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/10 active:scale-95"
+                        className={`flex-1 py-2.5 rounded-xl font-black uppercase tracking-wider text-[10px] transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-95 ${
+                          isHalloween
+                            ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-black shadow-orange-500/20'
+                            : 'bg-amber-500 text-black group-hover:bg-amber-400 shadow-amber-500/10'
+                        }`}
                       >
-                        <span>Enter</span>
+                        <span>Enter Tournament</span>
                         <ArrowRight size={12} />
                       </button>
 

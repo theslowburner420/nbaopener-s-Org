@@ -129,14 +129,24 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
       localStorage.setItem('GUEST_PROGRESS', JSON.stringify(guestData));
     } else {
-      // Emergency Mirror for logged in users (prevents loss if cloud fetch fails)
+      // Complete backup for logged in users (prevents loss if cloud fetch fails or drops fields)
       const mirrorData = {
         coins: state.coins,
         collection: state.collection,
+        customCards: state.customCards,
+        unlockedAchievements: state.unlockedAchievements,
+        claimedAchievements: state.claimedAchievements,
+        lastClaimedDate: state.lastClaimedDate,
+        claimedDays: state.claimedDays,
         inventoryPacks: state.inventoryPacks,
-        isPremium: state.isPremium
+        completedSbcs: state.completedSbcs,
+        isPremium: state.isPremium,
+        hasLifetimeNoAds: state.hasLifetimeNoAds,
+        subscriptionExpiry: state.subscriptionExpiry,
+        franchise: state.franchise,
       };
       localStorage.setItem(`BACKUP_${state.user.id}`, JSON.stringify(mirrorData));
+      localStorage.setItem(`USER_PROGRESS_${state.user.id}`, JSON.stringify(mirrorData));
     }
   }, [state]);
 
@@ -158,14 +168,26 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ? newState.collection 
         : Object.entries(newState.collection).flatMap(([id, count]) => Array(Number(count) || 0).fill(id));
 
+      const claimedArray = Array.isArray(newState.claimedAchievements) ? newState.claimedAchievements : [];
+      const unlockedArray = Array.isArray(newState.unlockedAchievements) ? newState.unlockedAchievements : [];
+      
+      // Encode claimed tags inside unlocked_achievements text[] array
+      // This ensures 100% cloud persistence even if PostgreSQL profiles table lacks the claimed_achievements column
+      const claimedTags = claimedArray.map(id => `CLAIMED_${id}`);
+      const cleanUnlockedOnly = unlockedArray.filter(id => typeof id === 'string' && !id.startsWith('CLAIMED_'));
+      const combinedUnlockedForSupabase = Array.from(new Set([
+        ...cleanUnlockedOnly,
+        ...claimedTags
+      ]));
+
       const payload = {
         id: newState.user.id,
         username: newState.user.username,
         avatar_url: newState.user.avatar_url,
         coins: Number(newState.coins) || 0,
         cards: flattenedCards,
-        unlocked_achievements: Array.isArray(newState.unlockedAchievements) ? newState.unlockedAchievements : [],
-        claimed_achievements: Array.isArray(newState.claimedAchievements) ? newState.claimedAchievements : [],
+        unlocked_achievements: combinedUnlockedForSupabase,
+        claimed_achievements: claimedArray,
         inventory_packs: Array.isArray(newState.inventoryPacks) ? newState.inventoryPacks : [],
         completed_sbcs: Array.isArray(newState.completedSbcs) ? newState.completedSbcs : [],
         ads_disabled: !!(newState.isPremium || newState.hasLifetimeNoAds || (newState.subscriptionExpiry && new Date(newState.subscriptionExpiry) > new Date())),
@@ -324,26 +346,30 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const currentLiveState = stateRef.current;
       const savedGuest = localStorage.getItem('GUEST_PROGRESS');
+      const savedUserProgress = localStorage.getItem(`USER_PROGRESS_${user.id}`);
       const savedBackup = localStorage.getItem(`BACKUP_${user.id}`);
       
       let guestData = null;
+      let userDataLocal = null;
       let backupData = null;
       
       try {
         guestData = savedGuest ? JSON.parse(savedGuest) : null;
+        userDataLocal = savedUserProgress ? JSON.parse(savedUserProgress) : null;
         backupData = savedBackup ? JSON.parse(savedBackup) : null;
       } catch (e) {
         console.error('Local data corrupt', e);
       }
       
       const localProgress = {
-        coins: Math.max(currentLiveState.coins, guestData?.coins ?? 0, backupData?.coins ?? 0),
+        coins: Math.max(currentLiveState.coins, guestData?.coins ?? 0, userDataLocal?.coins ?? 0, backupData?.coins ?? 0),
         collection: (() => {
           let merged: Record<string, number> = {};
           
-          // Merge Backup (Most reliable local source for this user)
-          if (backupData?.collection) {
-            Object.entries(backupData.collection).forEach(([id, count]) => {
+          // Merge Backup / UserDataLocal (Most reliable local source for this user)
+          const primaryLocal = userDataLocal || backupData;
+          if (primaryLocal?.collection) {
+            Object.entries(primaryLocal.collection).forEach(([id, count]) => {
               merged[id] = Math.max(merged[id] || 0, count as number);
             });
           }
@@ -372,14 +398,29 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
           return merged;
         })(),
-        unlockedAchievements: Array.from(new Set([...currentLiveState.unlockedAchievements, ...(guestData?.unlockedAchievements || [])])),
-        claimedAchievements: Array.from(new Set([...currentLiveState.claimedAchievements, ...(guestData?.claimedAchievements || [])])),
-        inventoryPacks: currentLiveState.inventoryPacks.length > 0 ? currentLiveState.inventoryPacks : (guestData?.inventoryPacks || []),
-        isPremium: currentLiveState.isPremium || guestData?.isPremium || false,
-        hasLifetimeNoAds: currentLiveState.hasLifetimeNoAds || guestData?.hasLifetimeNoAds || false,
-        subscriptionExpiry: currentLiveState.subscriptionExpiry || guestData?.subscriptionExpiry || null,
-        franchise: currentLiveState.franchise || guestData?.franchise || backupData?.franchise,
-        completedSbcs: Array.from(new Set([...(currentLiveState.completedSbcs || []), ...(guestData?.completedSbcs || [])])),
+        unlockedAchievements: Array.from(new Set([
+          ...currentLiveState.unlockedAchievements,
+          ...(userDataLocal?.unlockedAchievements || []),
+          ...(backupData?.unlockedAchievements || []),
+          ...(guestData?.unlockedAchievements || [])
+        ])),
+        claimedAchievements: Array.from(new Set([
+          ...currentLiveState.claimedAchievements,
+          ...(userDataLocal?.claimedAchievements || []),
+          ...(backupData?.claimedAchievements || []),
+          ...(guestData?.claimedAchievements || [])
+        ])),
+        inventoryPacks: currentLiveState.inventoryPacks.length > 0 ? currentLiveState.inventoryPacks : (userDataLocal?.inventoryPacks || backupData?.inventoryPacks || guestData?.inventoryPacks || []),
+        isPremium: currentLiveState.isPremium || userDataLocal?.isPremium || backupData?.isPremium || guestData?.isPremium || false,
+        hasLifetimeNoAds: currentLiveState.hasLifetimeNoAds || userDataLocal?.hasLifetimeNoAds || backupData?.hasLifetimeNoAds || guestData?.hasLifetimeNoAds || false,
+        subscriptionExpiry: currentLiveState.subscriptionExpiry || userDataLocal?.subscriptionExpiry || backupData?.subscriptionExpiry || guestData?.subscriptionExpiry || null,
+        franchise: currentLiveState.franchise || userDataLocal?.franchise || backupData?.franchise || guestData?.franchise,
+        completedSbcs: Array.from(new Set([
+          ...(currentLiveState.completedSbcs || []),
+          ...(userDataLocal?.completedSbcs || []),
+          ...(backupData?.completedSbcs || []),
+          ...(guestData?.completedSbcs || [])
+        ])),
       };
 
       // 1. Fetch Cloud Data with Timeout
@@ -420,6 +461,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         console.log('🧬 MERGING CLOUD DATA');
         
+        const rawUnlocked = Array.isArray(cloudProfile.unlocked_achievements) ? cloudProfile.unlocked_achievements : [];
+        const claimedFromUnlocked = rawUnlocked
+          .filter((s: any) => typeof s === 'string' && s.startsWith('CLAIMED_'))
+          .map((s: string) => s.replace('CLAIMED_', ''));
+        const cleanUnlockedOnly = rawUnlocked.filter((s: any) => typeof s === 'string' && !s.startsWith('CLAIMED_'));
+        const rawClaimed = Array.isArray(cloudProfile.claimed_achievements) ? cloudProfile.claimed_achievements : [];
+
+        const cloudClaimed = Array.from(new Set([...rawClaimed, ...claimedFromUnlocked]));
+        const cloudUnlocked = Array.from(new Set([...cleanUnlockedOnly, ...cloudClaimed]));
+
         const pc = {
           coins: Number(cloudProfile.coins) || 0,
           cards: (() => {
@@ -431,8 +482,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
             return (raw && typeof raw === 'object') ? raw : {};
           })(),
-          unlocked_achievements: Array.isArray(cloudProfile.unlocked_achievements) ? cloudProfile.unlocked_achievements : [],
-          claimed_achievements: Array.isArray(cloudProfile.claimed_achievements) ? cloudProfile.claimed_achievements : [],
+          unlocked_achievements: cloudUnlocked,
+          claimed_achievements: cloudClaimed,
           inventory_packs: Array.isArray(cloudProfile.inventory_packs) ? cloudProfile.inventory_packs : [],
           completed_sbcs: Array.isArray(cloudProfile.completed_sbcs) ? cloudProfile.completed_sbcs : [],
           ads_disabled: !!cloudProfile.ads_disabled,
@@ -926,26 +977,30 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     let newPacks = [...stateRef.current.inventoryPacks];
     
-    // Add 1x All-Star Pack
-    const existingAllStar = newPacks.find(p => p.type === 'allstar');
-    if (existingAllStar) {
-      newPacks = newPacks.map(p => p.type === 'allstar' ? { ...p, count: p.count + 1 } : p);
+    // Add 2x HOF Packs (matching modal text: 2 HOF + 1 Legendary MVP)
+    const existingHof = newPacks.find(p => p.type === 'hof');
+    if (existingHof) {
+      newPacks = newPacks.map(p => p.type === 'hof' ? { ...p, count: (p.count || 1) + 2 } : p);
     } else {
-      newPacks.push({ id: `login-allstar-${Date.now()}`, type: 'allstar', name: 'All-Star Pack', count: 1 });
+      newPacks.push({ id: `login-hof-${Date.now()}`, type: 'hof', name: 'Hall of Fame Pack', count: 2 });
     }
 
-    // Add 1x Finals MVP Pack
-    const existingMvp = newPacks.find(p => p.type === 'mvp');
+    // Add 1x Legendary MVP Pack
+    const existingMvp = newPacks.find(p => p.type === 'legendary_mvp');
     if (existingMvp) {
-      newPacks = newPacks.map(p => p.type === 'mvp' ? { ...p, count: p.count + 1 } : p);
+      newPacks = newPacks.map(p => p.type === 'legendary_mvp' ? { ...p, count: (p.count || 1) + 1 } : p);
     } else {
-      newPacks.push({ id: `login-mvp-${Date.now()}`, type: 'mvp', name: 'Finals MVP Pack', count: 1 });
+      newPacks.push({ id: `login-legendary-mvp-${Date.now()}`, type: 'legendary_mvp', name: 'Legendary MVP Pack', count: 1 });
     }
+
+    const newClaimed = Array.from(new Set([...stateRef.current.claimedAchievements, 'login_bonus']));
+    const newUnlocked = Array.from(new Set([...stateRef.current.unlockedAchievements, 'login_bonus']));
 
     await updateGameStateAsync({
-      coins: stateRef.current.coins + 10000,
+      coins: stateRef.current.coins + 100000,
       inventoryPacks: newPacks,
-      claimedAchievements: [...stateRef.current.claimedAchievements, 'login_bonus']
+      claimedAchievements: newClaimed,
+      unlockedAchievements: newUnlocked,
     });
   }, [updateGameStateAsync]);
 

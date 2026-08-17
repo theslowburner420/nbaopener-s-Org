@@ -601,14 +601,14 @@ const TradingRoom: React.FC<TradingRoomProps> = ({ roomId, onLeave }) => {
             </header>
 
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 sm:gap-4 no-scrollbar">
-              {duplicateCards.map((card) => {
+              {duplicateCards.map((card, cardIdx) => {
                 const count = collection[card.id] || 0;
                 const tradableCount = count - 1;
                 const selectedCount = myOffer.cards.filter(id => id === card.id).length;
                 
                 return (
                   <motion.div 
-                    key={card.id}
+                    key={`duplicate-picker-${card.id}-${cardIdx}`}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
                       if (selectedCount >= tradableCount) return;

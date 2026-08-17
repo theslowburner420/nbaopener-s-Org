@@ -11,19 +11,27 @@ interface CardDetailModalProps {
 }
 
 const CardDetailModal = React.memo(({ card, onClose }: CardDetailModalProps) => {
-  const isSpecialSBC = card ? (card.isSpecialSBC || ['legend_sbc', 'icon_sbc', 'moments_sbc', 'future_star', 'galaxy', 'invincible'].includes(card.rarity)) : false;
+  const isSpecialSBC = card ? (
+    card.isSpecialSBC || 
+    ['legend_sbc', 'icon_sbc', 'moments_sbc', 'future_star', 'galaxy', 'invincible'].includes(card.rarity) ||
+    card.category === 'Scream Edition' ||
+    card.series === 'Scream Edition' ||
+    card.id.startsWith('scream-')
+  ) : false;
 
   return (
     <AnimatePresence>
       {card && (
         <motion.div 
+          key={`card-detail-backdrop-${card.id}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[6000] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
+          className="fixed inset-0 z-[15000] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
           onClick={onClose}
         >
           <motion.div 
+            key={`card-detail-box-${card.id}`}
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}

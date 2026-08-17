@@ -3653,6 +3653,209 @@ export const SBC_GROUPS: SbcGroup[] = [
             }
       }
     ]
+  },
+  // ==========================================
+  // SCREAM EDITION HALLOWEEN SPECIAL SBCS
+  // ==========================================
+  {
+    id: 'sbc-group-scream-kobe',
+    name: 'Scream Master: Kobe Bryant',
+    description: 'Complete all 3 Halloween squad challenges to unlock the 98 OVR Scream Edition Black Mamba.',
+    category: 'scream',
+    difficulty: 'legendary',
+    type: 'limited',
+    expiresAt: null,
+    isActive: true,
+    reward: {
+      playerName: 'Kobe Bryant',
+      playerId: 'scream-kobe-bryant-sbc',
+      rarity: 'legend_sbc',
+      ovr: 98,
+      imageUrl: 'https://i.postimg.cc/zV9bVh5w/chat5.png'
+    },
+    segments: [
+      {
+        id: 'scream-kobe-seg-1',
+        name: 'Nightmare on Figueroa',
+        description: 'Submit 5 cards: Team OVR >= 85, min 2 Los Angeles Lakers cards.',
+        cardsRequired: 5,
+        slotPositions: ['PG', 'SG', 'SF', 'PF', 'C'],
+        requirements: [
+          {
+            type: 'TOTAL_CARDS',
+            value: 5
+          },
+          {
+            type: 'TEAM_OVR_MIN',
+            value: 85
+          },
+          {
+            type: 'SPECIFIC_TEAM',
+            value: 'LAL',
+            count: 2
+          }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 6000,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '6,000 Coins + 1x All-Star Pack'
+        }
+      },
+      {
+        id: 'scream-kobe-seg-2',
+        name: 'Midnight Mamba Venom',
+        description: 'Submit 3 cards: Min 1 SG, Team OVR >= 87.',
+        cardsRequired: 3,
+        slotPositions: ['PG', 'SG', 'SF'],
+        requirements: [
+          {
+            type: 'TOTAL_CARDS',
+            value: 3
+          },
+          {
+            type: 'TEAM_OVR_MIN',
+            value: 87
+          }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 10000,
+          packType: 'mvp',
+          packName: 'Finals MVP Pack',
+          description: '10,000 Coins + 1x Finals MVP Pack'
+        }
+      },
+      {
+        id: 'scream-kobe-seg-3',
+        name: '81-Point Terror',
+        description: 'Submit 5 cards: Team OVR >= 88, min 2 Special/All-Star cards.',
+        cardsRequired: 5,
+        slotPositions: ['PG', 'SG', 'SF', 'PF', 'C'],
+        requirements: [
+          {
+            type: 'TOTAL_CARDS',
+            value: 5
+          },
+          {
+            type: 'TEAM_OVR_MIN',
+            value: 88
+          },
+          {
+            type: 'SPECIAL_CARDS_MIN',
+            value: 2
+          }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 15000,
+          packType: 'scream_edition',
+          packName: 'Scream Edition Pack',
+          description: '15,000 Coins + 1x Scream Edition Pack'
+        }
+      }
+    ]
+  },
+  {
+    id: 'sbc-group-scream-garnett',
+    name: 'Scream Master: Kevin Garnett',
+    description: 'Complete all 3 Halloween squad challenges to unlock the 97 OVR Scream Edition Big Ticket.',
+    category: 'scream',
+    difficulty: 'legendary',
+    type: 'limited',
+    expiresAt: null,
+    isActive: true,
+    reward: {
+      playerName: 'Kevin Garnett',
+      playerId: 'scream-kevin-garnett-sbc',
+      rarity: 'legend_sbc',
+      ovr: 97,
+      imageUrl: 'https://i.postimg.cc/YhJGhFkX/chat4.png'
+    },
+    segments: [
+      {
+        id: 'scream-garnett-seg-1',
+        name: 'Howl of the Timberwolf',
+        description: 'Submit 5 cards: Team OVR >= 84, min 2 Minnesota Timberwolves / Boston Celtics cards.',
+        cardsRequired: 5,
+        slotPositions: ['PG', 'SG', 'SF', 'PF', 'C'],
+        requirements: [
+          {
+            type: 'TOTAL_CARDS',
+            value: 5
+          },
+          {
+            type: 'TEAM_OVR_MIN',
+            value: 84
+          },
+          {
+            type: 'SPECIFIC_TEAM',
+            value: 'MIN',
+            count: 1
+          }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 5000,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '5,000 Coins + 1x All-Star Pack'
+        }
+      },
+      {
+        id: 'scream-garnett-seg-2',
+        name: 'Paint of Terror',
+        description: 'Submit 3 cards: Min 2 Big Men (PF or C), Team OVR >= 86.',
+        cardsRequired: 3,
+        slotPositions: ['SF', 'PF', 'C'],
+        requirements: [
+          {
+            type: 'TOTAL_CARDS',
+            value: 3
+          },
+          {
+            type: 'TEAM_OVR_MIN',
+            value: 86
+          }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 9000,
+          packType: 'duo_xfactor',
+          packName: 'Dynamic Duo & X-Factor Pack',
+          description: '9,000 Coins + 1x Dynamic Duo Pack'
+        }
+      },
+      {
+        id: 'scream-garnett-seg-3',
+        name: 'Haunted Intensity',
+        description: 'Submit 5 cards: Team OVR >= 88, min 2 Special/All-Star cards.',
+        cardsRequired: 5,
+        slotPositions: ['PG', 'SG', 'SF', 'PF', 'C'],
+        requirements: [
+          {
+            type: 'TOTAL_CARDS',
+            value: 5
+          },
+          {
+            type: 'TEAM_OVR_MIN',
+            value: 88
+          },
+          {
+            type: 'SPECIAL_CARDS_MIN',
+            value: 2
+          }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 14000,
+          packType: 'scream_edition',
+          packName: 'Scream Edition Pack',
+          description: '14,000 Coins + 1x Scream Edition Pack'
+        }
+      }
+    ]
   }
 ];
 

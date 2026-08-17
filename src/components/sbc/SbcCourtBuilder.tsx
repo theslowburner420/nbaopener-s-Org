@@ -787,11 +787,11 @@ export const SbcCourtBuilder: React.FC<SbcCourtBuilderProps> = ({
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 justify-items-center">
-                    {filteredDuplicates.map(card => {
+                    {filteredDuplicates.map((card, cardIdx) => {
                       const remaining = card.quantity - (slottedCardCounts[card.id] || 0);
                       return (
                         <motion.div
-                          key={card.id}
+                          key={`dup-card-${card.id}-${cardIdx}`}
                           whileHover={{ scale: 1.04, y: -4 }}
                           whileTap={{ scale: 0.96 }}
                           className="relative cursor-pointer group flex flex-col items-center w-full max-w-[155px]"

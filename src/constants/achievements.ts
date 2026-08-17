@@ -1,4 +1,4 @@
-import { Trophy, Star, Zap, Shield, Crown, Gem, Flame, Target, Users, Coins, Calendar, History, Package, Award, Globe, TrendingUp, Wallet, Gift, Crosshair, Activity, Layers, Eye } from 'lucide-react';
+import { Trophy, Star, Zap, Shield, Crown, Gem, Flame, Target, Users, Coins, Calendar, History, Package, Award, Globe, TrendingUp, Wallet, Gift, Crosshair, Activity, Layers, Eye, Ghost } from 'lucide-react';
 
 export interface Achievement {
   id: string;
@@ -546,5 +546,100 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: (state: any) => state.unlockedAchievements.includes(`draft_team_${team.toLowerCase().replace(/ /g, '_')}_5`),
     getProgress: (state: any) => ({ current: state.unlockedAchievements.includes(`draft_team_${team.toLowerCase().replace(/ /g, '_')}_5`) ? 1 : 0, total: 1 }),
     rewardCoins: 15000
-  }))
+  })),
+
+  // --- HALLOWEEN & SCREAM EDITION REWARDS ---
+  {
+    id: 'scream_first_pull',
+    category: 'specials',
+    title: 'Spooky Discovery',
+    description: 'Obtain your first Scream Edition Halloween card.',
+    icon: Ghost,
+    level: 'silver',
+    requirement: (state, allCards) => allCards.some(c => (c.category === 'Scream Edition' || c.series === 'Scream Edition') && (state.collection?.[c.id] || 0) > 0),
+    getProgress: (state, allCards) => ({
+      current: allCards.some(c => (c.category === 'Scream Edition' || c.series === 'Scream Edition') && (state.collection?.[c.id] || 0) > 0) ? 1 : 0,
+      total: 1
+    }),
+    rewardCoins: 15000,
+    rewardPacks: [{ id: 'scream-rew-1', type: 'scream_edition', name: 'Scream Edition Pack' }]
+  },
+  {
+    id: 'scream_trio',
+    category: 'specials',
+    title: 'Haunted Trio',
+    description: 'Collect 3 unique Scream Edition cards.',
+    icon: Flame,
+    level: 'gold',
+    requirement: (state, allCards) => allCards.filter(c => (c.category === 'Scream Edition' || c.series === 'Scream Edition') && (state.collection?.[c.id] || 0) > 0).length >= 3,
+    getProgress: (state, allCards) => ({
+      current: Math.min(allCards.filter(c => (c.category === 'Scream Edition' || c.series === 'Scream Edition') && (state.collection?.[c.id] || 0) > 0).length, 3),
+      total: 3
+    }),
+    rewardCoins: 40000,
+    rewardPacks: [{ id: 'scream-rew-2', type: 'scream_edition', name: 'Scream Edition Pack' }]
+  },
+  {
+    id: 'scream_squad',
+    category: 'specials',
+    title: 'Scream Squad',
+    description: 'Collect 6 unique Scream Edition cards.',
+    icon: Shield,
+    level: 'gold',
+    requirement: (state, allCards) => allCards.filter(c => (c.category === 'Scream Edition' || c.series === 'Scream Edition') && (state.collection?.[c.id] || 0) > 0).length >= 6,
+    getProgress: (state, allCards) => ({
+      current: Math.min(allCards.filter(c => (c.category === 'Scream Edition' || c.series === 'Scream Edition') && (state.collection?.[c.id] || 0) > 0).length, 6),
+      total: 6
+    }),
+    rewardCoins: 80000,
+    rewardPacks: [{ id: 'scream-rew-3', type: 'scream_edition', name: 'Scream Edition Pack' }]
+  },
+  {
+    id: 'scream_master_collector',
+    category: 'specials',
+    title: 'Nightmare Supreme',
+    description: 'Collect all 9 Scream Edition cards (Pack & SBC Masters).',
+    icon: Crown,
+    level: 'diamond',
+    requirement: (state, allCards) => allCards.filter(c => (c.category === 'Scream Edition' || c.series === 'Scream Edition') && (state.collection?.[c.id] || 0) > 0).length >= 9,
+    getProgress: (state, allCards) => ({
+      current: Math.min(allCards.filter(c => (c.category === 'Scream Edition' || c.series === 'Scream Edition') && (state.collection?.[c.id] || 0) > 0).length, 9),
+      total: 9
+    }),
+    rewardCoins: 200000,
+    rewardPacks: [
+      { id: 'scream-rew-4a', type: 'scream_edition', name: 'Scream Edition Pack', count: 2 },
+      { id: 'hof-rew-4b', type: 'hof', name: 'HOF Pack' }
+    ]
+  },
+  {
+    id: 'scream_sbc_conqueror',
+    category: 'specials',
+    title: 'Phantom Architect',
+    description: 'Complete a Scream Edition SBC Master (Kobe Bryant or Kevin Garnett).',
+    icon: Zap,
+    level: 'gold',
+    requirement: (state, allCards) => allCards.some(c => (c.id === 'scream-kobe-bryant-sbc' || c.id === 'scream-kevin-garnett-sbc') && (state.collection?.[c.id] || 0) > 0),
+    getProgress: (state, allCards) => ({
+      current: allCards.some(c => (c.id === 'scream-kobe-bryant-sbc' || c.id === 'scream-kevin-garnett-sbc') && (state.collection?.[c.id] || 0) > 0) ? 1 : 0,
+      total: 1
+    }),
+    rewardCoins: 50000,
+    rewardPacks: [{ id: 'scream-rew-5', type: 'scream_edition', name: 'Scream Edition Pack' }]
+  },
+  {
+    id: 'scream_tournament_champ',
+    category: 'tournaments',
+    title: 'Ghost Hunter Champion',
+    description: 'Win the Spooky Scream Classic tournament in Hoops Draft.',
+    icon: Trophy,
+    level: 'diamond',
+    requirement: (state) => (state.unlockedAchievements || []).includes('scream_tournament_champ'),
+    getProgress: (state) => ({
+      current: (state.unlockedAchievements || []).includes('scream_tournament_champ') ? 1 : 0,
+      total: 1
+    }),
+    rewardCoins: 60000,
+    rewardPacks: [{ id: 'scream-rew-6', type: 'scream_edition', name: 'Scream Edition Pack' }]
+  }
 ];

@@ -8,12 +8,13 @@ import { Search, LayoutGrid, Filter, X, ChevronDown, Trophy } from 'lucide-react
 import CardDetailModal from '../components/CardDetailModal';
 import CardItem from '../components/CardItem';
 import AchievementsModal from '../components/AchievementsModal';
+import { isScreamEditionActive, isScreamFilterPermanentlyAvailable } from '../constants/screamEdition';
 
 type FilterType = Rarity | 'All';
 type SortType = 'Number' | 'OVR' | 'Name' | 'Team';
 
 export default function CollectionView() {
-  const { collection, customCards = [], unlockedAchievements, addCoins, addToCollection, setPremium, resetGame, updateGameStateAsync } = useGame();
+  const { collection, customCards = [], unlockedAchievements, addCoins, addToCollection, setPremium, resetGame, updateGameStateAsync, isPremium } = useGame();
   const [activeFilter, setActiveFilter] = useState<FilterType>('All');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [teamFilter, setTeamFilter] = useState<string>('All');
@@ -124,12 +125,23 @@ export default function CollectionView() {
     );
   }, [collection, handleCardClick]);
 
+  const isScreamActive = isScreamEditionActive(isPremium);
+  const isScreamFilterAvailable = isScreamFilterPermanentlyAvailable(isPremium);
+
   const allAvailableCards = useMemo(() => {
     const map = new Map<string, Card>();
-    ALL_CARDS.forEach(c => map.set(c.id, c));
-    (customCards || []).forEach(c => map.set(c.id, c));
+    ALL_CARDS.forEach(c => {
+      const isScream = c.series === 'Scream Edition' || c.category === 'Scream Edition' || c.id.startsWith('scream-');
+      if (isScream && !isScreamActive) return;
+      map.set(c.id, c);
+    });
+    (customCards || []).forEach(c => {
+      const isScream = c.series === 'Scream Edition' || c.category === 'Scream Edition' || c.id.startsWith('scream-');
+      if (isScream && !isScreamActive) return;
+      map.set(c.id, c);
+    });
     return Array.from(map.values());
-  }, [customCards]);
+  }, [customCards, isScreamActive]);
 
   const totalCards = allAvailableCards.length;
   const collectedCount = useMemo(() => Object.keys(collection).filter(id => collection[id] > 0).length, [collection]);
@@ -145,6 +157,14 @@ export default function CollectionView() {
     return ['All', ...uniqueSeries];
   }, [allAvailableCards]);
 
+  const categoryOptions = useMemo(() => {
+    const base = ['All', 'MVP', 'Finals MVP', 'DPOY', 'ROY', '6MOTY', 'MIP', 'SBC Reward', 'Base', 'Award', 'Moment', 'Duo', 'Coach', 'Dynasty', 'X-Factor', 'NBA Record', 'All-Star MVP', 'Scoring Champion', 'Hall of Fame'];
+    if (isScreamFilterAvailable) {
+      base.splice(1, 0, 'Scream Edition');
+    }
+    return base;
+  }, [isScreamFilterAvailable]);
+
   const filteredCards = useMemo(() => {
     const searchLower = debouncedSearch.toLowerCase();
     
@@ -158,6 +178,8 @@ export default function CollectionView() {
       if (!matchesCategory) {
         if (categoryFilter === 'SBC Reward') {
           matchesCategory = !!(card.isSpecialSBC || card.category === 'SBC Reward' || card.subtitle?.toLowerCase().includes('sbc') || card.rarity.includes('_sbc'));
+        } else if (categoryFilter === 'Scream Edition') {
+          matchesCategory = card.category === 'Scream Edition' || card.series === 'Scream Edition' || card.id.startsWith('scream-');
         } else {
           matchesCategory = card.category === categoryFilter;
         }
@@ -476,17 +498,17 @@ export default function CollectionView() {
                     <div>
                       <h4 className="text-[8px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Select Card Category</h4>
                       <div className="grid grid-cols-2 gap-1.5">
-                        {['All', 'MVP', 'Finals MVP', 'DPOY', 'ROY', '6MOTY', 'MIP', 'SBC Reward', 'Base', 'Award', 'Moment', 'Duo', 'Coach', 'Dynasty', 'X-Factor', 'NBA Record', 'All-Star MVP', 'Scoring Champion', 'Hall of Fame'].map((c) => (
+                        {categoryOptions.map((c) => (
                           <button
                             key={c}
                             onClick={() => setCategoryFilter(c)}
                             className={`py-2 px-2.5 rounded-lg text-[8.5px] font-bold uppercase tracking-wider transition-all border text-center truncate ${
                               categoryFilter === c 
-                                ? 'bg-amber-400 text-black border-amber-400 font-extrabold shadow' 
-                                : 'bg-zinc-800/60 text-zinc-300 border-zinc-700/50 hover:border-zinc-600'
+                                ? (c === 'Scream Edition' ? 'bg-gradient-to-r from-orange-500 to-purple-600 text-white border-orange-400 font-extrabold shadow-[0_0_12px_rgba(249,115,22,0.7)]' : 'bg-amber-400 text-black border-amber-400 font-extrabold shadow')
+                                : (c === 'Scream Edition' ? 'bg-orange-950/40 text-orange-300 border-orange-500/40 hover:border-orange-400' : 'bg-zinc-800/60 text-zinc-300 border-zinc-700/50 hover:border-zinc-600')
                             }`}
                           >
-                            {c === 'Duo' ? 'Dynamic Duo' : c}
+                            {c === 'Scream Edition' ? '🎃 Scream Edition' : c === 'Duo' ? 'Dynamic Duo' : c}
                           </button>
                         ))}
                       </div>

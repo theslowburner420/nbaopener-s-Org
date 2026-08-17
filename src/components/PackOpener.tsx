@@ -36,6 +36,7 @@ const getRarityColor = (rarity: Rarity): string => {
 };
 
 const getCategoryBadge = (card: Card) => {
+  if (card.series === 'Scream Edition' || card.category === 'Scream Edition') return { text: 'SCREAM EDITION 🎃', color: '#F97316' };
   if (card.category === 'All-Star MVP') return { text: 'ALL-STAR MVP', color: '#F59E0B' };
   if (card.category === 'Dynasty') return { text: 'DYNASTY', color: '#EF4444' };
   if (card.category === 'X-Factor') return { text: 'X-FACTOR', color: '#60A5FA' };
@@ -51,23 +52,23 @@ const getCategoryBadge = (card: Card) => {
 
 // Memoized high-performance particle burst
 const ParticleBurst = memo(({ color, isHighTier }: { color: string; isHighTier: boolean }) => {
-  const particleCount = isHighTier ? 20 : 10;
+  const particleCount = isHighTier ? 14 : 8;
 
   const particles = useMemo(() => {
     return Array.from({ length: particleCount }, (_, i) => {
       const angle = (i / particleCount) * 360 + (i % 2 === 0 ? 10 : -10);
-      const distance = isHighTier ? 120 + (i % 5) * 25 : 70 + (i % 4) * 20;
+      const distance = isHighTier ? 110 + (i % 4) * 20 : 65 + (i % 3) * 15;
       const tx = Math.cos(angle * (Math.PI / 180)) * distance;
       const ty = Math.sin(angle * (Math.PI / 180)) * distance;
-      const scale = 0.5 + (i % 3) * 0.3;
-      const dur = isHighTier ? 0.7 + (i % 3) * 0.2 : 0.5 + (i % 2) * 0.15;
+      const scale = 0.6 + (i % 3) * 0.25;
+      const dur = isHighTier ? 0.6 + (i % 3) * 0.15 : 0.45 + (i % 2) * 0.1;
       const rot = (i % 2 === 0 ? 1 : -1) * (180 + i * 30);
       return { tx, ty, scale, dur, rot, id: i };
     });
   }, [particleCount, isHighTier]);
 
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ willChange: 'transform' }}>
+    <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ willChange: 'transform, opacity', transform: 'translateZ(0)' }}>
       {particles.map((p) => (
         <div
           key={p.id}
@@ -79,11 +80,12 @@ const ParticleBurst = memo(({ color, isHighTier }: { color: string; isHighTier: 
             '--dur': `${p.dur}s`,
             '--rot': `${p.rot}deg`,
             backgroundColor: color,
-            width: isHighTier ? '5px' : '3px',
-            height: isHighTier ? '5px' : '3px',
-            boxShadow: `0 0 ${isHighTier ? '8px' : '4px'} ${color}`,
+            width: isHighTier ? '4px' : '3px',
+            height: isHighTier ? '4px' : '3px',
+            boxShadow: `0 0 ${isHighTier ? '6px' : '3px'} ${color}`,
             borderRadius: p.id % 2 === 0 ? '50%' : '2px',
-            willChange: 'transform, opacity'
+            willChange: 'transform, opacity',
+            transform: 'translateZ(0)'
           } as any}
         />
       ))}
@@ -96,18 +98,18 @@ ParticleBurst.displayName = 'ParticleBurst';
 // Memoized Flare lines
 const FlareBurst = memo(({ color }: { color: string }) => {
   return (
-    <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-20">
-      {Array.from({ length: 6 }).map((_, i) => (
+    <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-20" style={{ transform: 'translateZ(0)' }}>
+      {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}
           className="flare-burst"
           style={{
-            transform: `rotate(${i * 60}deg)`,
+            transform: `rotate(${i * 90}deg) translateZ(0)`,
             backgroundColor: color,
-            boxShadow: `0 0 20px ${color}`,
-            width: '3px',
-            height: '180px',
-            opacity: 0.75,
+            boxShadow: `0 0 15px ${color}`,
+            width: '2.5px',
+            height: '160px',
+            opacity: 0.65,
             willChange: 'transform, opacity'
           } as any}
         />
@@ -367,7 +369,7 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
       return {
         x: 0,
         y: 0,
-        scale: isMobile ? 0.88 : 1,
+        scale: 1,
         rotate: 0,
         zIndex: 100,
         opacity: 1,
@@ -378,42 +380,42 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
 
     if (isSeen) {
       const distance = activeCardIndex - index;
-      if (distance > 4) {
-        return { x: -200, y: 50, scale: 0, rotate: -30, zIndex: 0, opacity: 0, filter: 'brightness(0.2)', pointerEvents: 'none' as const };
+      if (distance > 3) {
+        return { x: -280, y: 80, scale: 0, rotate: -35, zIndex: 0, opacity: 0, filter: 'brightness(0.1)', pointerEvents: 'none' as const };
       }
-      const angle = -6 - distance * 3;
-      const xOffset = isMobile ? -14 - distance * 12 : -22 - distance * 18;
-      const yOffset = distance * 6;
+      const angle = -7 - distance * 3.5;
+      const xOffset = isMobile ? -26 - distance * 16 : -48 - distance * 26;
+      const yOffset = distance * 7;
 
       return {
         x: xOffset,
         y: yOffset,
-        scale: isMobile ? 0.72 - distance * 0.04 : 0.82 - distance * 0.04,
+        scale: Math.max(0.7, 0.88 - distance * 0.05),
         rotate: angle,
         zIndex: 50 - distance,
-        opacity: 1 - distance * 0.15,
-        filter: 'brightness(0.35) contrast(0.8)',
+        opacity: Math.max(0, 0.95 - distance * 0.18),
+        filter: 'brightness(0.4) contrast(0.85)',
         pointerEvents: 'auto' as const
       };
     }
 
     // Unseen cards on right
     const distance = index - activeCardIndex;
-    if (distance > 4) {
-      return { x: 200, y: 50, scale: 0, rotate: 30, zIndex: 0, opacity: 0, filter: 'brightness(0.2)', pointerEvents: 'none' as const };
+    if (distance > 3) {
+      return { x: 280, y: 80, scale: 0, rotate: 35, zIndex: 0, opacity: 0, filter: 'brightness(0.1)', pointerEvents: 'none' as const };
     }
-    const angle = 6 + distance * 3;
-    const xOffset = isMobile ? 14 + distance * 12 : 22 + distance * 18;
-    const yOffset = distance * 6;
+    const angle = 7 + distance * 3.5;
+    const xOffset = isMobile ? 26 + distance * 16 : 48 + distance * 26;
+    const yOffset = distance * 7;
 
     return {
       x: xOffset,
       y: yOffset,
-      scale: isMobile ? 0.72 - distance * 0.04 : 0.82 - distance * 0.04,
+      scale: Math.max(0.7, 0.88 - distance * 0.05),
       rotate: angle,
       zIndex: 50 - distance,
-      opacity: 1 - distance * 0.15,
-      filter: 'brightness(0.35) contrast(0.8)',
+      opacity: Math.max(0, 0.95 - distance * 0.18),
+      filter: 'brightness(0.4) contrast(0.85)',
       pointerEvents: 'auto' as const
     };
   }, [activeCardIndex, isMobile]);
@@ -506,13 +508,13 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
               opacity: [1, 0],
               filter: 'brightness(3) blur(8px)'
             } : {
-              scale: [0.95, 1.05, 0.98, 1.03, 1],
-              rotate: [0, -3, 3, -2, 0],
+              scale: [0.96, 1.04, 0.98, 1.02, 1],
+              rotate: [0, -2, 2, -1, 0],
               opacity: 1
             }}
-            transition={packBurst ? { duration: 0.25, ease: "easeOut" } : { duration: 0.6, ease: "easeInOut" }}
+            transition={packBurst ? { duration: 0.22, ease: "easeOut" } : { duration: 0.6, ease: "easeInOut" }}
             onClick={handleBurstPackNow}
-            className="w-[220px] xs:w-[260px] md:w-[300px] aspect-[2.5/3.5] bg-zinc-950 rounded-3xl border-4 border-amber-500/80 shadow-[0_0_50px_rgba(245,158,11,0.5)] flex items-center justify-center overflow-hidden relative cursor-pointer active:scale-95 transition-transform"
+            className="w-[260px] xs:w-[290px] sm:w-[320px] md:w-[360px] max-h-[66vh] aspect-[2.5/3.5] bg-zinc-950 rounded-3xl border-4 border-amber-500/80 shadow-[0_0_50px_rgba(245,158,11,0.5)] flex items-center justify-center overflow-hidden relative cursor-pointer active:scale-95 transition-transform"
           >
             <img
               src={packImage || 'https://i.postimg.cc/bY3DRzLz/4a07a4ae-7c5c-4d11-8585-780a8aebebbe.png'}
@@ -521,7 +523,7 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
               alt="Pack Foil"
             />
             <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent animate-shimmer-sweep pointer-events-none" />
-            <div className="absolute bottom-4 px-4 py-1.5 rounded-full bg-black/80 backdrop-blur-md border border-white/20 text-[10px] font-black text-amber-400 uppercase tracking-widest animate-pulse">
+            <div className="absolute bottom-4 px-5 py-2 rounded-full bg-black/85 backdrop-blur-md border border-amber-400/40 text-[11px] font-black text-amber-400 uppercase tracking-widest animate-pulse shadow-lg">
               Tap to Reveal
             </div>
           </motion.div>
@@ -530,6 +532,11 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
           <div className="relative w-full h-full flex items-center justify-center">
             {cards.map((card, index) => {
               const isActive = index === activeCardIndex;
+              const distance = Math.abs(index - activeCardIndex);
+              
+              // Skip rendering cards far away to maintain peak 60/120fps fluidity
+              if (distance > 3) return null;
+
               const transform = getCardTransform(index);
 
               return (
@@ -537,12 +544,12 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
                   key={`${card.id || 'card'}-${index}`}
                   drag={isActive ? "x" : false}
                   dragConstraints={{ left: 0, right: 0 }}
-                  dragElastic={0.4}
+                  dragElastic={0.25}
                   onDragEnd={(_, info) => {
                     if (!isActive) return;
-                    if (info.offset.x < -40 || info.velocity.x < -300) {
+                    if (info.offset.x < -35 || info.velocity.x < -250) {
                       nextCard();
-                    } else if (info.offset.x > 40 || info.velocity.x > 300) {
+                    } else if (info.offset.x > 35 || info.velocity.x > 250) {
                       prevCard();
                     }
                   }}
@@ -557,16 +564,17 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
                   }}
                   transition={{
                     type: "spring",
-                    stiffness: 300,
+                    stiffness: 340,
                     damping: 28,
-                    mass: 0.7
+                    mass: 0.6
                   }}
                   onClick={() => handleCardClick(index)}
-                  className={`absolute w-[220px] xs:w-[260px] md:w-[310px] max-h-[64vh] md:max-h-[72vh] aspect-[2.5/3.5] touch-none ${
+                  className={`absolute w-[280px] xs:w-[315px] sm:w-[345px] md:w-[380px] lg:w-[410px] max-h-[68vh] md:max-h-[74vh] aspect-[2.5/3.5] touch-none ${
                     isActive ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
                   }`}
                   style={{
-                    willChange: 'transform, opacity, filter'
+                    willChange: 'transform, opacity, filter',
+                    transform: 'translateZ(0)'
                   }}
                 >
                   <div className="w-full h-full relative">

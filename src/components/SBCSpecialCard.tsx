@@ -4,7 +4,7 @@ import { Card } from '../types';
 import { getLoreForPlayer } from '../data/sbcCardLore';
 import { getTeamLogo } from '../data/nbaTeams';
 
-export type SBCRarityTheme = 'future-star' | 'moments' | 'hof' | 'icon' | 'duo' | 'xfactor';
+export type SBCRarityTheme = 'future-star' | 'moments' | 'hof' | 'icon' | 'duo' | 'xfactor' | 'scream';
 
 export interface SBCSpecialCardProps {
   card?: Card;
@@ -123,11 +123,23 @@ export const SBC_RARITY_CONFIGS: Record<SBCRarityTheme, {
     icon: <Target className="w-3.5 h-3.5 text-orange-300" />,
     gradientOverlay: 'from-orange-500/20 via-transparent to-black/80',
   },
+  'scream': {
+    className: 'sbc-card-scream',
+    badgeText: 'SCREAM EDITION 🎃',
+    badgeBg: 'bg-orange-950/90 border-orange-500/80',
+    badgeTextColor: 'text-orange-300',
+    ovrColor: 'text-orange-400 drop-shadow-[0_0_16px_rgba(249,115,22,0.95)]',
+    glowColor: 'rgba(249, 115, 22, 0.7)',
+    accentBorder: 'border-orange-500',
+    icon: <Flame className="w-3.5 h-3.5 text-orange-400" />,
+    gradientOverlay: 'from-orange-600/30 via-purple-950/40 to-black/90',
+  },
 };
 
 export function resolveSBCTheme(rarityTheme?: string, card?: Card): SBCRarityTheme {
   if (rarityTheme) {
     const normalized = rarityTheme.toLowerCase().replace(/_/g, '-');
+    if (normalized.includes('scream') || normalized.includes('halloween')) return 'scream';
     if (normalized.includes('future') || normalized.includes('rising')) return 'future-star';
     if (normalized.includes('moment')) return 'moments';
     if (normalized.includes('hof') || normalized.includes('hall')) return 'hof';
@@ -140,7 +152,9 @@ export function resolveSBCTheme(rarityTheme?: string, card?: Card): SBCRarityThe
     const r = card.rarity?.toLowerCase() || '';
     const c = card.category?.toLowerCase() || '';
     const s = card.series?.toLowerCase() || '';
+    const id = card.id?.toLowerCase() || '';
 
+    if (c === 'scream edition' || s === 'scream edition' || id.startsWith('scream-') || c.includes('scream')) return 'scream';
     if (r === 'future_star' || c.includes('rising star') || c.includes('rookie')) return 'future-star';
     if (r === 'moments_sbc' || c.includes('moment') || c.includes('record')) return 'moments';
     if (r === 'hof' || c.includes('hall of fame') || s.includes('hall of fame')) return 'hof';
@@ -340,17 +354,23 @@ export const SBCSpecialCard: React.FC<SBCSpecialCardProps> = ({
                 <h3 className={`${textSizes.name} font-black uppercase tracking-tighter leading-none italic text-white truncate drop-shadow-md`}>
                   {card.name}
                 </h3>
-                <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 text-black text-[8px] font-black px-1.5 py-0.5 rounded shadow-md border border-amber-200/60 uppercase tracking-wider shrink-0">
-                  SBC
-                </span>
+                {resolvedThemeKey === 'scream' ? (
+                  <span className="bg-gradient-to-r from-orange-500 via-amber-500 to-purple-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(249,115,22,0.8)] border border-orange-300 uppercase tracking-wider shrink-0">
+                    🎃 SCREAM
+                  </span>
+                ) : (
+                  <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 text-black text-[8px] font-black px-1.5 py-0.5 rounded shadow-md border border-amber-200/60 uppercase tracking-wider shrink-0">
+                    SBC
+                  </span>
+                )}
               </div>
               <span className="text-[9px] font-extrabold uppercase tracking-widest text-amber-300/90 mt-0.5 truncate">
                 {card.team} {card.subtitle ? `• ${card.subtitle}` : ''}
               </span>
             </div>
-            <div className="flex items-center gap-1 shrink-0 bg-black/80 px-2 py-1 rounded-md border border-amber-400/50 shadow-lg">
-              <span className="text-[9px] font-black text-amber-400 uppercase tracking-wider">OVR</span>
-              <span className={`${textSizes.ovr} font-black italic text-white leading-none drop-shadow-md`}>
+            <div className={`flex items-center gap-1 shrink-0 bg-black/80 px-2 py-1 rounded-md border ${resolvedThemeKey === 'scream' ? 'border-orange-500/80 shadow-[0_0_12px_rgba(249,115,22,0.5)]' : 'border-amber-400/50 shadow-lg'}`}>
+              <span className={`text-[9px] font-black uppercase tracking-wider ${resolvedThemeKey === 'scream' ? 'text-orange-400' : 'text-amber-400'}`}>OVR</span>
+              <span className={`${textSizes.ovr} font-black italic ${resolvedThemeKey === 'scream' ? 'text-orange-400 drop-shadow-[0_0_10px_rgba(249,115,22,0.9)]' : 'text-white'} leading-none drop-shadow-md`}>
                 {card.stats?.ovr || card.pts || 95}
               </span>
             </div>
@@ -362,7 +382,9 @@ export const SBCSpecialCard: React.FC<SBCSpecialCardProps> = ({
             <div
               className="absolute inset-0 opacity-80"
               style={{
-                background: `linear-gradient(135deg, ${card.teamColor || '#1e3a8a'} 0%, #09090b 100%)`,
+                background: resolvedThemeKey === 'scream'
+                  ? `radial-gradient(circle at 50% 30%, ${card.teamColor || '#552583'} 0%, #18062b 60%, #08020e 100%)`
+                  : `linear-gradient(135deg, ${card.teamColor || '#1e3a8a'} 0%, #09090b 100%)`,
               }}
             />
 
@@ -378,7 +400,7 @@ export const SBCSpecialCard: React.FC<SBCSpecialCardProps> = ({
             {/* Player Photo Cutout */}
             {imgError ? (
               <div className="relative z-10 text-center p-2">
-                <span className="text-3xl font-black text-amber-400 italic">
+                <span className={`text-3xl font-black italic ${resolvedThemeKey === 'scream' ? 'text-orange-400' : 'text-amber-400'}`}>
                   {card.name.split(' ').map(n => n[0]).join('')}
                 </span>
                 <span className="block text-[9px] font-bold text-zinc-400 uppercase mt-1">{card.teamAbbr}</span>
@@ -405,43 +427,60 @@ export const SBCSpecialCard: React.FC<SBCSpecialCardProps> = ({
 
             {/* Position Pill on Bottom Left of Photo */}
             <div className="absolute bottom-2 left-2 z-20">
-              <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-amber-300 bg-black/85 rounded-md border border-amber-400/50 shadow-md">
+              <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-widest ${resolvedThemeKey === 'scream' ? 'text-orange-300 border-orange-500/60 bg-black/90' : 'text-amber-300 border-amber-400/50 bg-black/85'} rounded-md border shadow-md`}>
                 {card.position || 'SF'}
               </span>
             </div>
           </div>
 
-          {/* Circular Dot Stats Panel matching Collection Cards */}
-          <div className="px-3 py-1.5 z-20 shrink-0 bg-black/75 border-t border-b border-white/10 backdrop-blur-sm">
-            <div className="grid grid-cols-3 w-full">
-              <div className="flex flex-col items-center border-r border-white/10">
-                <div className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-amber-600 shadow-inner mb-0.5" />
-                <span className={`${textSizes.statVal} font-black text-white leading-none`}>
-                  {card.pts || card.stats?.points || 28}
+          {/* Stats or Halloween Banner */}
+          {resolvedThemeKey === 'scream' ? (
+            <div className="px-3 py-1.5 z-20 shrink-0 bg-gradient-to-r from-orange-950/80 via-purple-950/80 to-black border-t border-b border-orange-500/40 backdrop-blur-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm">🎃</span>
+                  <div className="flex flex-col">
+                    <span className="text-[8.5px] font-black uppercase tracking-widest text-orange-300">SCREAM EDITION</span>
+                    <span className="text-[6.5px] font-bold text-purple-300 uppercase tracking-wider">HALLOWEEN EXCLUSIVE</span>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-orange-500/20 border border-orange-500/50 text-orange-400 text-[7.5px] font-black uppercase tracking-widest shadow-sm">
+                  COLLECTIBLE
                 </span>
-                <span className="text-[7px] font-extrabold uppercase text-zinc-400 tracking-widest mt-0.5">PTS</span>
-              </div>
-              <div className="flex flex-col items-center border-r border-white/10">
-                <div className="w-2.5 h-2.5 rounded-full bg-zinc-400 border border-zinc-600 shadow-inner mb-0.5" />
-                <span className={`${textSizes.statVal} font-black text-white leading-none`}>
-                  {card.reb || card.stats?.rebounds || 8}
-                </span>
-                <span className="text-[7px] font-extrabold uppercase text-zinc-400 tracking-widest mt-0.5">REB</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-2.5 h-2.5 rounded-full bg-blue-400 border border-blue-600 shadow-inner mb-0.5" />
-                <span className={`${textSizes.statVal} font-black text-white leading-none`}>
-                  {card.ast || card.stats?.assists || 7}
-                </span>
-                <span className="text-[7px] font-extrabold uppercase text-zinc-400 tracking-widest mt-0.5">AST</span>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="px-3 py-1.5 z-20 shrink-0 bg-black/75 border-t border-b border-white/10 backdrop-blur-sm">
+              <div className="grid grid-cols-3 w-full">
+                <div className="flex flex-col items-center border-r border-white/10">
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-amber-600 shadow-inner mb-0.5" />
+                  <span className={`${textSizes.statVal} font-black text-white leading-none`}>
+                    {card.pts || card.stats?.points || 28}
+                  </span>
+                  <span className="text-[7px] font-extrabold uppercase text-zinc-400 tracking-widest mt-0.5">PTS</span>
+                </div>
+                <div className="flex flex-col items-center border-r border-white/10">
+                  <div className="w-2.5 h-2.5 rounded-full bg-zinc-400 border border-zinc-600 shadow-inner mb-0.5" />
+                  <span className={`${textSizes.statVal} font-black text-white leading-none`}>
+                    {card.reb || card.stats?.rebounds || 8}
+                  </span>
+                  <span className="text-[7px] font-extrabold uppercase text-zinc-400 tracking-widest mt-0.5">REB</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="w-2.5 h-2.5 rounded-full bg-blue-400 border border-blue-600 shadow-inner mb-0.5" />
+                  <span className={`${textSizes.statVal} font-black text-white leading-none`}>
+                    {card.ast || card.stats?.assists || 7}
+                  </span>
+                  <span className="text-[7px] font-extrabold uppercase text-zinc-400 tracking-widest mt-0.5">AST</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Description / Lore Quote */}
           <div className="px-3 py-1 text-center z-20 min-h-0 flex items-center justify-center">
-            <p className="text-[9px] text-zinc-300 italic line-clamp-1 font-medium">
-              "{card.description || 'Special SBC reward card.'}"
+            <p className={`text-[9px] ${resolvedThemeKey === 'scream' ? 'text-orange-200/90' : 'text-zinc-300'} italic line-clamp-1 font-medium`}>
+              "{card.quote || card.description || 'Special collectible card.'}"
             </p>
           </div>
 
@@ -451,7 +490,7 @@ export const SBCSpecialCard: React.FC<SBCSpecialCardProps> = ({
               {teamLogo && (
                 <img src={teamLogo} alt="" className="w-4 h-4 object-contain shrink-0 filter drop-shadow" />
               )}
-              <span className="text-[8px] font-black text-amber-300 uppercase tracking-wider truncate">
+              <span className={`text-[8px] font-black ${resolvedThemeKey === 'scream' ? 'text-orange-300' : 'text-amber-300'} uppercase tracking-wider truncate`}>
                 {card.teamAbbr || card.team}
               </span>
             </div>

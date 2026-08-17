@@ -114,6 +114,51 @@
   animation: sbc-particles 8s linear infinite;
 }
 
+/* SCREAM EDITION (HALLOWEEN) CARD THEME */
+.sbc-card-scream,
+.card-scream {
+  background: radial-gradient(circle at 50% 25%, #2a0b4d 0%, #150529 45%, #080210 100%) !important;
+  border: 2px solid #f97316 !important;
+  box-shadow: 0 0 35px rgba(249, 115, 22, 0.6), inset 0 0 25px rgba(168, 85, 247, 0.45) !important;
+  position: relative;
+  overflow: hidden;
+}
+.sbc-card-scream::before,
+.card-scream::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(249, 115, 22, 0.25) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.3) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+}
+.sbc-card-scream::after,
+.card-scream::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 20%,
+    rgba(249, 115, 22, 0.2) 35%,
+    rgba(255, 255, 255, 0.35) 50%,
+    rgba(168, 85, 247, 0.25) 65%,
+    transparent 80%
+  );
+  background-size: 200% 200%;
+  animation: sbc-scream-sweep 3.5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes sbc-scream-sweep {
+  0% { background-position: -200% -200%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 300% 300%; }
+}
+
 .card-legend-sbc {
   background: linear-gradient(135deg, #080808 0%, #111 100%);
   border: 2px solid #ffd700;
@@ -1200,6 +1245,43 @@ body {
   background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
   border-color: #10b981 !important;
   box-shadow: 0 0 25px rgba(16, 185, 129, 0.3);
+}
+
+/* SCREAM EDITION (HALLOWEEN SPECIAL) */
+.card-scream,
+.sbc-card-scream {
+  background: radial-gradient(circle at 50% 15%, #2e0854 0%, #170428 45%, #08020e 100%) !important;
+  border: 2px solid #f97316 !important;
+  box-shadow: 0 0 30px rgba(249, 115, 22, 0.5), inset 0 0 25px rgba(168, 85, 247, 0.3), 0 10px 40px rgba(0, 0, 0, 0.9) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-scream::before,
+.sbc-card-scream::before {
+  content: '';
+  position: absolute;
+  inset: -100%;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(249, 115, 22, 0.35) 48%,
+    rgba(168, 85, 247, 0.45) 52%,
+    transparent 65%
+  );
+  animation: sbc-holo-slide 3.2s infinite linear;
+  pointer-events: none;
+  z-index: 12;
+}
+
+.card-scream::after,
+.sbc-card-scream::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(249, 115, 22, 0.15), transparent 70%);
+  pointer-events: none;
+  z-index: 10;
 }
 
 @keyframes sbc-holo-slide {
@@ -2389,3 +2471,93 @@ body > iframe[id^="at-"] {
   pointer-events: none;
   animation: particle-float 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
+
+/* ==========================================================================
+   HALLOWEEN SPOOKY THEME & ATMOSPHERIC FOG OVERLAY
+   ========================================================================== */
+
+@keyframes spooky-fog-drift-1 {
+  0% {
+    transform: translate3d(-5%, 0, 0) scale(1);
+    opacity: 0.12;
+  }
+  50% {
+    transform: translate3d(5%, -2%, 0) scale(1.08);
+    opacity: 0.22;
+  }
+  100% {
+    transform: translate3d(-5%, 0, 0) scale(1);
+    opacity: 0.12;
+  }
+}
+
+@keyframes spooky-fog-drift-2 {
+  0% {
+    transform: translate3d(4%, 3%, 0) scale(1.05);
+    opacity: 0.15;
+  }
+  50% {
+    transform: translate3d(-4%, -2%, 0) scale(0.96);
+    opacity: 0.08;
+  }
+  100% {
+    transform: translate3d(4%, 3%, 0) scale(1.05);
+    opacity: 0.15;
+  }
+}
+
+@keyframes spooky-glow-pulse {
+  0%, 100% {
+    opacity: 0.25;
+    filter: drop-shadow(0 0 15px rgba(249, 115, 22, 0.3));
+  }
+  50% {
+    opacity: 0.45;
+    filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.4));
+  }
+}
+
+.spooky-theme {
+  --spooky-ambient-orange: rgba(249, 115, 22, 0.15);
+  --spooky-ambient-purple: rgba(147, 51, 234, 0.12);
+  background-color: #050407 !important;
+}
+
+.spooky-fog-layer {
+  position: fixed;
+  inset: -20px;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+.spooky-fog-layer::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: radial-gradient(ellipse at 20% 80%, rgba(249, 115, 22, 0.12) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, rgba(147, 51, 234, 0.12) 0%, transparent 65%),
+              radial-gradient(ellipse at 50% 50%, rgba(192, 132, 252, 0.06) 0%, transparent 70%);
+  filter: blur(40px);
+  animation: spooky-fog-drift-1 22s ease-in-out infinite;
+  transform: translateZ(0);
+}
+
+.spooky-fog-layer::after {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(ellipse at 75% 75%, rgba(234, 88, 12, 0.1) 0%, transparent 55%),
+              radial-gradient(ellipse at 25% 25%, rgba(126, 34, 206, 0.1) 0%, transparent 55%);
+  filter: blur(50px);
+  animation: spooky-fog-drift-2 28s ease-in-out infinite alternate;
+  transform: translateZ(0);
+}
+
+/* Subtle Spooky Vignette */
+.spooky-vignette {
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8), inset 0 0 40px rgba(249, 115, 22, 0.06);
+}
+

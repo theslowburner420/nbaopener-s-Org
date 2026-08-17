@@ -3,6 +3,7 @@ import { AWARD_CARDS } from './awardCards';
 import { DUO_AND_XFACTOR_CARDS } from './duoAndXFactorCards';
 import { DYNASTY_CARDS } from './dynastyCards';
 import { ALL_STAR_MVP_CARDS } from './allStarMvpCards';
+import { SCREAM_CARDS } from './screamCards';
 
 const teamColors: Record<string, string> = {
   'Los Angeles Lakers': '#FDB927',
@@ -14324,6 +14325,11 @@ export const ALL_CARDS: Card[] = [
   ...ALL_STAR_MVP_CARDS.map((card, idx) => ({
     ...card,
     number: rawCards.length + AWARD_CARDS.length + DUO_AND_XFACTOR_CARDS.length + DYNASTY_CARDS.length + idx + 1,
+    teamLogoUrl: teamLogos[card.team] || teamLogos[card.teamAbbr]
+  })),
+  ...SCREAM_CARDS.map((card, idx) => ({
+    ...card,
+    number: rawCards.length + AWARD_CARDS.length + DUO_AND_XFACTOR_CARDS.length + DYNASTY_CARDS.length + ALL_STAR_MVP_CARDS.length + idx + 1,
     teamLogoUrl: teamLogos[card.team] || teamLogos[card.teamAbbr]
   }))
 ];

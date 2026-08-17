@@ -6,27 +6,17 @@ import {
   RefreshCw, 
   Coins, 
   Layers,
-  Info,
-  X,
   Sparkles,
-  Trophy,
-  Flame
+  ChevronRight,
+  Flame,
+  Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import PackOpener from '../components/PackOpener';
 import { Card } from '../types';
 import { useNotification } from '../context/NotificationContext';
-
-interface PackOdds {
-  guaranteed: string;
-  benchRate: string;
-  starterRate: string;
-  allStarRate: string;
-  franchiseAwardRate: string;
-  dynastyLegendRate: string;
-  godTierRate?: string;
-  highlights: string[];
-}
+import { isScreamEditionActive, SCREAM_EDITION_CONFIG } from '../constants/screamEdition';
+import { getPrimaryActiveEvent, getActiveEvents } from '../constants/events';
 
 interface Pack {
   id: PackType;
@@ -34,124 +24,64 @@ interface Pack {
   cardsCount: number;
   price: number;
   image: string;
-  tag: string;
-  tagColor?: string;
-  odds: PackOdds;
+  isEventPack?: boolean;
+  eventBadge?: string;
 }
 
-const PACKS: Pack[] = [
+const BASE_PACKS: Pack[] = [
   {
-    id: 'duo_xfactor',
-    name: 'Dynamic Chemistry',
+    id: 'rookie',
+    name: 'Rookie Pack',
+    cardsCount: 4,
+    price: 5000,
+    image: 'https://i.postimg.cc/bY3DRzLz/4a07a4ae-7c5c-4d11-8585-780a8aebebbe.png'
+  },
+  {
+    id: 'starter',
+    name: 'Starter Pack',
     cardsCount: 4,
     price: 15000,
-    image: 'https://i.postimg.cc/TwG0zjyz/generated-image-(1).png',
-    tag: 'Chemistry Booster',
-    odds: {
-      guaranteed: 'Min. 1x Starter (80+) focus • 8% Walkout Chemistry Chance',
-      benchRate: '68.0%',
-      starterRate: '28.0%',
-      allStarRate: '1.0%',
-      franchiseAwardRate: '3.0% (Duo & X-Factor)',
-      dynastyLegendRate: '<0.1%',
-      highlights: ['Dynamic Duos & Special Boosts', 'X-Factor Impact Cards', 'Team Chemistry Fillers']
-    }
+    image: 'https://i.postimg.cc/TwG0zjyz/generated-image-(1).png'
   },
   {
     id: 'allstar',
-    name: 'All-Star Players',
+    name: 'All-Star Pack',
     cardsCount: 5,
     price: 35000,
-    image: 'https://i.postimg.cc/RVKZpcmB/generated-image-(7).png',
-    tag: 'Rare Players',
-    odds: {
-      guaranteed: 'Min. 1x Starter (80+) • 26% All-Star (85+) Walkout Chance',
-      benchRate: '55.0%',
-      starterRate: '38.0%',
-      allStarRate: '7.0% (Base) / 26.0% (Walkout)',
-      franchiseAwardRate: '4.0% (Walkout)',
-      dynastyLegendRate: '0.5% (Walkout)',
-      highlights: ['NBA All-Star Pool (85–89 OVR)', 'Starters & Role Players', 'Low Chance at Top Walkouts']
-    }
+    image: 'https://i.postimg.cc/RVKZpcmB/generated-image-(7).png'
+  },
+  {
+    id: 'allnba',
+    name: 'All-NBA Pack',
+    cardsCount: 5,
+    price: 75000,
+    image: 'https://i.postimg.cc/PJ7m51xb/generated-image-(2).png'
   },
   {
     id: 'mvp',
-    name: 'Finals & Award Winners',
-    cardsCount: 5,
-    price: 85000,
-    image: 'https://i.postimg.cc/T3kMtwps/generated-image-(8).png',
-    tag: 'Prime Players',
-    odds: {
-      guaranteed: 'High-Rated Pool • 45% All-Star 85+ • 13% Awards 90+',
-      benchRate: '30.0%',
-      starterRate: '52.0%',
-      allStarRate: '15.0% (Base) / 45.0% (Walkout)',
-      franchiseAwardRate: '13.0% (Awards & Franchise)',
-      dynastyLegendRate: '2.0% (Dynasty & HOF Walkout)',
-      highlights: ['Finals MVPs, DPOY, ROY & 6MOTY', 'All-Star Regulars (85–89)', 'Rare Dynasty & Legend Walkouts']
-    }
-  },
-  {
-    id: 'dynasty',
-    name: 'Dynasty Champions',
+    name: 'Finals MVP Pack',
     cardsCount: 5,
     price: 130000,
-    image: 'https://i.postimg.cc/PJ7m51xb/generated-image-(2).png',
-    tag: 'Dynasty Heritage',
-    odds: {
-      guaranteed: 'Elite 80–89 Base • 20% Franchise 90+ • 4.5% Dynasty Jackpot',
-      benchRate: '15.0%',
-      starterRate: '48.0%',
-      allStarRate: '32.0% (Base) / 50.0% (Walkout)',
-      franchiseAwardRate: '20.0% (Franchise Champions 90+)',
-      dynastyLegendRate: '4.5% Dynasty Squads • 1.5% HOF',
-      highlights: [
-        'Showtime Lakers (98 OVR)',
-        'Lakers Three-Peat (98 OVR)',
-        'Spurs Dynasty (97 OVR)',
-        'Heat Big Three (97 OVR)',
-        'Bad Boys Pistons (96 OVR)'
-      ]
-    }
+    image: 'https://i.postimg.cc/T3kMtwps/generated-image-(8).png'
   },
   {
     id: 'hof',
-    name: 'Hall of Fame Heritage',
+    name: 'Hall of Fame Pack',
     cardsCount: 5,
-    price: 185000,
-    image: 'https://i.postimg.cc/Pfb76x7C/generated-image-(9).png',
-    tag: 'Ultimate Pack',
-    odds: {
-      guaranteed: '55% All-Star 85+ • 20% 90+ Stars • ~6.5% HOF/Dynasty Jackpot',
-      benchRate: '10.0%',
-      starterRate: '45.0%',
-      allStarRate: '38.0% (Base) / 55.0% (Walkout)',
-      franchiseAwardRate: '20.0% (Franchise & Awards)',
-      dynastyLegendRate: '5.0% HOF Legends (90–99) • 1.5% Dynasty',
-      highlights: ['Springfield Hall of Famers', 'High 85–93 OVR Density', 'Jordan, Bird, Magic & Wilt Eras']
-    }
+    price: 195000,
+    image: 'https://i.postimg.cc/Pfb76x7C/generated-image-(9).png'
   },
   {
     id: 'legendary_mvp',
-    name: 'Guaranteed MVP Pack',
+    name: 'Legendary MVP Pack',
     cardsCount: 1,
     price: 280000,
-    image: 'https://i.postimg.cc/GtzqbBwc/generated-image-(10).png',
-    tag: '100% Guaranteed MVP',
-    odds: {
-      guaranteed: '100% Guaranteed MVP Card (Finals MVP, Regular Season MVP or All-Star MVP)',
-      benchRate: '0.0%',
-      starterRate: '0.0%',
-      allStarRate: '0.0%',
-      franchiseAwardRate: '100% MVP Award Winners (93–99 OVR)',
-      dynastyLegendRate: '143 Total MVP Cards Pool',
-      highlights: ['Finals MVPs (Jordan, LeBron, Kobe, Shaq)', 'Regular Season MVPs (Curry, Jokic, Giannis, Bird)', 'All-Star Game MVP Legends']
-    }
+    image: 'https://i.postimg.cc/GtzqbBwc/generated-image-(10).png'
   }
 ];
 
 export default function PacksView() {
-  const { coins, inventoryPacks, isSaving } = useGame();
+  const { coins, inventoryPacks, isSaving, isPremium } = useGame();
   const { openPack, openInventoryPack } = useEngine();
   const { notifyError } = useNotification();
   
@@ -160,7 +90,26 @@ export default function PacksView() {
   const [activeTab, setActiveTab] = useState<'shop' | 'inventory'>('shop');
   const [openedPackImage, setOpenedPackImage] = useState<string | undefined>(undefined);
   const [buyingPackId, setBuyingPackId] = useState<string | null>(null);
-  const [selectedPackForOdds, setSelectedPackForOdds] = useState<Pack | null>(null);
+
+  // Active events resolution
+  const activeEvents = useMemo(() => getActiveEvents(isPremium), [isPremium]);
+  const primaryEvent = useMemo(() => getPrimaryActiveEvent(isPremium), [isPremium]);
+
+  // Pack list with event packs highlighted at the very top
+  const availablePacks = useMemo<Pack[]>(() => {
+    const eventPacks: Pack[] = activeEvents.map(event => ({
+      id: event.packId,
+      name: event.packName,
+      cardsCount: event.packCardsCount,
+      price: event.packPrice,
+      image: event.packImage,
+      isEventPack: true,
+      eventBadge: event.icon
+    }));
+
+    // Event packs featured FIRST, followed by standard base packs
+    return [...eventPacks, ...BASE_PACKS];
+  }, [activeEvents]);
 
   const totalInventoryCount = useMemo(() => {
     return inventoryPacks.reduce((acc, p) => acc + (p.count || 1), 0);
@@ -203,11 +152,15 @@ export default function PacksView() {
     if (isSaving) return;
     const result = await openInventoryPack(packId, packType as PackType);
     if (result) {
-      const packInfo = PACKS.find(p => p.id === packType);
-      setOpenedPackImage(packInfo?.image || 'https://i.postimg.cc/bY3DRzLz/4a07a4ae-7c5c-4d11-8585-780a8aebebbe.png');
+      const packInfo = availablePacks.find(p => p.id === packType);
+      setOpenedPackImage(packInfo?.image || (packType.includes('scream') ? SCREAM_EDITION_CONFIG.PACK_IMAGE : 'https://i.postimg.cc/TwG0zjyz/generated-image-(1).png'));
       setOpenedCards(result.cards);
       setNewlyUnlocked(result.newlyUnlocked);
     }
+  };
+
+  const handleOpenEventModal = () => {
+    window.dispatchEvent(new CustomEvent('open-halloween-modal'));
   };
 
   return (
@@ -261,7 +214,7 @@ export default function PacksView() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 px-3 py-2 no-scrollbar pb-24 max-w-2xl mx-auto w-full z-10 overflow-y-auto">
+      <div className="flex-1 px-3 py-2 no-scrollbar pb-24 max-w-2xl mx-auto w-full z-10 overflow-y-auto space-y-3">
         <AnimatePresence mode="wait">
           {activeTab === 'shop' ? (
             <motion.div
@@ -269,74 +222,174 @@ export default function PacksView() {
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
-              className="grid grid-cols-2 sm:grid-cols-3 gap-3"
+              className="space-y-3"
             >
-              {PACKS.map((pack) => {
-                const canAfford = coins >= pack.price;
-                const isBuyingThis = buyingPackId === pack.id;
+              {/* Featured Event Hero Showcase Banner */}
+              {primaryEvent && (
+                <div 
+                  className={`rounded-2xl border ${primaryEvent.theme.borderGlow} bg-gradient-to-r ${primaryEvent.theme.bgGradient} p-3 sm:p-4 relative overflow-hidden transition-all shadow-xl`}
+                >
+                  {/* Subtle Background Glow */}
+                  <div className="absolute top-0 right-0 w-36 h-36 bg-orange-500/10 blur-2xl rounded-full pointer-events-none" />
 
-                return (
-                  <div
-                    key={pack.id}
-                    className="group bg-zinc-950/70 rounded-xl border border-white/5 p-2.5 flex flex-col justify-between transition-all duration-300 hover:border-amber-400/30 relative"
-                  >
-                    {/* Pack Art Image */}
-                    <div className="w-full aspect-[3/4] rounded-lg overflow-hidden border border-white/5 bg-zinc-900 mb-2 relative group-hover:scale-[1.02] transition-transform duration-300">
-                      <img 
-                        src={pack.image} 
-                        alt={pack.name} 
-                        className="w-full h-full object-cover"
-                        referrerPolicy="no-referrer"
-                      />
-                      <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded bg-amber-400 text-black text-[7px] font-black uppercase tracking-wider shadow">
-                        {pack.tag}
+                  <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+                    {/* Left: Pack Art & Info */}
+                    <div className="flex items-center gap-3 w-full sm:w-auto min-w-0">
+                      <div className="w-14 h-20 sm:w-16 sm:h-22 rounded-xl overflow-hidden border-2 border-orange-500/80 shrink-0 bg-black shadow-[0_0_15px_rgba(249,115,22,0.5)]">
+                        <img 
+                          src={primaryEvent.packImage} 
+                          alt={primaryEvent.packName} 
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
                       </div>
 
-                      {/* Info / Odds Button */}
+                      <div className="space-y-1 min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={`px-1.5 py-0.5 rounded ${primaryEvent.theme.badgeBg} ${primaryEvent.theme.badgeText} text-[7.5px] sm:text-[8px] font-black uppercase tracking-wider shadow`}>
+                            {primaryEvent.tag}
+                          </span>
+                          <span className="text-[9px] font-bold text-orange-300 uppercase tracking-widest hidden xs:inline">
+                            FEATURED DROP
+                          </span>
+                        </div>
+
+                        <h2 className="text-xs sm:text-base font-black uppercase tracking-tight text-white truncate drop-shadow">
+                          {primaryEvent.packName}
+                        </h2>
+
+                        <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-mono font-bold text-amber-400">
+                          <Coins size={11} fill="currentColor" className="shrink-0" />
+                          <span>{primaryEvent.packPrice.toLocaleString()} COINS</span>
+                          <span className="text-zinc-600">•</span>
+                          <span>{primaryEvent.packCardsCount} CARDS</span>
+                        </div>
+
+                        {/* Odds pill */}
+                        <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/60 border border-orange-500/40 text-[8px] sm:text-[8.5px] text-orange-200 font-bold">
+                          <span>{primaryEvent.oddsDescription}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right: Actions */}
+                    <div className="flex sm:flex-col items-center gap-2 w-full sm:w-36 shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-orange-500/20">
+                      {/* Buy Button */}
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedPackForOdds(pack);
+                        onClick={() => {
+                          const pack = availablePacks.find(p => p.id === primaryEvent.packId);
+                          if (pack) handleBuy(pack);
                         }}
-                        className="absolute bottom-1.5 right-1.5 w-5 h-5 rounded-full bg-black/80 backdrop-blur-sm border border-white/20 flex items-center justify-center text-zinc-300 hover:text-amber-400 hover:border-amber-400/50 transition-colors shadow"
-                        title="View Probabilities & Odds"
+                        disabled={isSaving || !!buyingPackId || coins < primaryEvent.packPrice}
+                        className={`w-full py-2 px-3 rounded-xl text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 ${
+                          coins >= primaryEvent.packPrice
+                            ? `bg-gradient-to-r ${primaryEvent.theme.buttonGradient}`
+                            : 'bg-zinc-900 text-zinc-600 border border-white/5 cursor-not-allowed'
+                        }`}
                       >
-                        <Info size={11} />
+                        {buyingPackId === primaryEvent.packId ? (
+                          <RefreshCw size={12} className="animate-spin" />
+                        ) : (
+                          <>
+                            <Flame size={12} className="text-black shrink-0" />
+                            <span>Quick Buy</span>
+                          </>
+                        )}
+                      </button>
+
+                      {/* View Showcase Modal */}
+                      <button
+                        onClick={handleOpenEventModal}
+                        className="w-full py-1.5 px-3 rounded-xl bg-zinc-950/80 hover:bg-zinc-900 border border-orange-500/50 hover:border-orange-400 text-orange-300 font-black text-[9px] uppercase tracking-wider flex items-center justify-center gap-1 transition-all active:scale-95"
+                      >
+                        <Sparkles size={11} className="text-orange-400" />
+                        <span>View Cards</span>
                       </button>
                     </div>
-
-                    {/* Pack Title & Details */}
-                    <div className="space-y-0.5 mb-2.5 text-center">
-                      <h3 className="text-[10px] font-black uppercase tracking-tight text-white truncate">
-                        {pack.name}
-                      </h3>
-                      <p className="text-[8px] font-bold text-amber-400 uppercase tracking-wider">
-                        {pack.cardsCount} {pack.cardsCount === 1 ? 'Card' : 'Cards'}
-                      </p>
-                    </div>
-
-                    {/* Price & Action Button */}
-                    <button
-                      onClick={() => handleBuy(pack)}
-                      disabled={isSaving || !!buyingPackId || !canAfford}
-                      className={`w-full py-1.5 px-2 rounded-lg text-[8.5px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 ${
-                        canAfford
-                          ? 'bg-amber-400 text-black hover:bg-amber-300 active:scale-95'
-                          : 'bg-zinc-900 text-zinc-600 border border-white/5 cursor-not-allowed'
-                      }`}
-                    >
-                      {isBuyingThis ? (
-                        <RefreshCw size={11} className="animate-spin" />
-                      ) : (
-                        <>
-                          <Coins size={10} fill="currentColor" className="shrink-0" />
-                          <span>{pack.price.toLocaleString()}</span>
-                        </>
-                      )}
-                    </button>
                   </div>
-                );
-              })}
+                </div>
+              )}
+
+              {/* All Packs Grid */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-[10px] font-black uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                    <span>ALL AVAILABLE PACKS</span>
+                    <span className="text-zinc-600 font-mono">({availablePacks.length})</span>
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {availablePacks.map((pack) => {
+                    const canAfford = coins >= pack.price;
+                    const isBuyingThis = buyingPackId === pack.id;
+                    const isEvent = pack.isEventPack || pack.id === 'scream_edition' || pack.id === 'scream';
+
+                    return (
+                      <div
+                        key={pack.id}
+                        className={`group rounded-xl p-2.5 flex flex-col justify-between transition-all duration-300 relative ${
+                          isEvent
+                            ? 'bg-gradient-to-b from-orange-950/40 via-zinc-950/80 to-zinc-950 border border-orange-500/60 hover:border-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.2)]'
+                            : 'bg-zinc-950/70 border border-white/5 hover:border-amber-400/30'
+                        }`}
+                      >
+                        {isEvent && (
+                          <div className="absolute top-1.5 right-1.5 z-10 px-1.5 py-0.2 rounded bg-orange-500 text-black text-[7px] font-black uppercase tracking-wider shadow">
+                            🎃 EVENT
+                          </div>
+                        )}
+
+                        {/* Pack Art Image */}
+                        <div className={`w-full aspect-[3/4] rounded-lg overflow-hidden border mb-2 relative group-hover:scale-[1.02] transition-transform duration-300 ${
+                          isEvent ? 'border-orange-500/50 bg-black' : 'border-white/5 bg-zinc-900'
+                        }`}>
+                          <img 
+                            src={pack.image} 
+                            alt={pack.name} 
+                            className="w-full h-full object-cover" 
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+
+                        {/* Pack Title & Details */}
+                        <div className="space-y-0.5 mb-2.5 text-center">
+                          <h3 className={`text-[10px] font-black uppercase tracking-tight truncate ${
+                            isEvent ? 'text-orange-300' : 'text-white'
+                          }`}>
+                            {pack.name}
+                          </h3>
+                          <p className="text-[8px] font-bold text-amber-400 uppercase tracking-wider">
+                            {pack.cardsCount} {pack.cardsCount === 1 ? 'Card' : 'Cards'}
+                          </p>
+                        </div>
+
+                        {/* Price & Action Button */}
+                        <button
+                          onClick={() => handleBuy(pack)}
+                          disabled={isSaving || !!buyingPackId || !canAfford}
+                          className={`w-full py-1.5 px-2 rounded-lg text-[8.5px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 ${
+                            canAfford
+                              ? isEvent
+                                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-black hover:from-orange-400 hover:to-amber-400 active:scale-95 shadow-[0_0_10px_rgba(249,115,22,0.3)]'
+                                : 'bg-amber-400 text-black hover:bg-amber-300 active:scale-95'
+                              : 'bg-zinc-900 text-zinc-600 border border-white/5 cursor-not-allowed'
+                          }`}
+                        >
+                          {isBuyingThis ? (
+                            <RefreshCw size={11} className="animate-spin" />
+                          ) : (
+                            <>
+                              <Coins size={10} fill="currentColor" className="shrink-0" />
+                              <span>{pack.price.toLocaleString()}</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </motion.div>
           ) : (
             <motion.div
@@ -356,7 +409,7 @@ export default function PacksView() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {groupedInventory.map((pack) => {
-                    const packInfo = PACKS.find(p => p.id === pack.type) || { 
+                    const packInfo = availablePacks.find(p => p.id === pack.type) || BASE_PACKS.find(p => p.id === pack.type) || { 
                       name: pack.name || 'Reward Pack',
                       image: 'https://i.postimg.cc/TwG0zjyz/generated-image-(1).png' 
                     };
@@ -406,123 +459,6 @@ export default function PacksView() {
           )}
         </AnimatePresence>
       </div>
-
-      {/* Probabilities & Odds Modal */}
-      <AnimatePresence>
-        {selectedPackForOdds && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-zinc-950 border border-white/10 rounded-2xl max-w-sm w-full p-4 space-y-3 shadow-2xl relative"
-            >
-              {/* Close Button */}
-              <button
-                onClick={() => setSelectedPackForOdds(null)}
-                className="absolute top-3 right-3 text-zinc-400 hover:text-white p-1 rounded-full bg-zinc-900 border border-white/5"
-              >
-                <X size={14} />
-              </button>
-
-              {/* Title & Tag */}
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-14 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-zinc-900">
-                  <img
-                    src={selectedPackForOdds.image}
-                    alt={selectedPackForOdds.name}
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                <div className="space-y-0.5">
-                  <div className="inline-block px-1.5 py-0.5 rounded bg-amber-400 text-black text-[7px] font-black uppercase tracking-wider">
-                    {selectedPackForOdds.tag}
-                  </div>
-                  <h3 className="text-xs font-black uppercase tracking-wider text-white">
-                    {selectedPackForOdds.name}
-                  </h3>
-                  <p className="text-[9px] font-mono font-bold text-amber-400">
-                    {selectedPackForOdds.price.toLocaleString()} Coins • {selectedPackForOdds.cardsCount} Cards
-                  </p>
-                </div>
-              </div>
-
-              {/* Guaranteed Box */}
-              <div className="p-2.5 rounded-xl bg-amber-400/10 border border-amber-400/20 space-y-1">
-                <div className="flex items-center gap-1.5 text-amber-400 text-[9px] font-black uppercase tracking-wider">
-                  <Sparkles size={11} />
-                  <span>Guaranteed Drop</span>
-                </div>
-                <p className="text-[10px] text-zinc-200 font-semibold leading-tight">
-                  {selectedPackForOdds.odds.guaranteed}
-                </p>
-              </div>
-
-              {/* Probabilities Breakdown */}
-              <div className="space-y-1.5 text-[9px]">
-                <div className="flex items-center justify-between font-bold text-zinc-400 uppercase tracking-wider text-[8px] border-b border-white/5 pb-1">
-                  <span>Tier / Category</span>
-                  <span>Base Rate</span>
-                </div>
-
-                <div className="flex justify-between items-center text-zinc-300">
-                  <span>Bench Tier (&lt;80 OVR)</span>
-                  <span className="font-mono font-bold text-zinc-400">{selectedPackForOdds.odds.benchRate}</span>
-                </div>
-
-                <div className="flex justify-between items-center text-zinc-300">
-                  <span>Starter Tier (80–84 OVR)</span>
-                  <span className="font-mono font-bold text-zinc-300">{selectedPackForOdds.odds.starterRate}</span>
-                </div>
-
-                <div className="flex justify-between items-center text-zinc-300">
-                  <span>All-Star Tier (85–89 OVR)</span>
-                  <span className="font-mono font-bold text-amber-300">{selectedPackForOdds.odds.allStarRate}</span>
-                </div>
-
-                <div className="flex justify-between items-center text-zinc-300">
-                  <span>Franchise & Awards (90–93 OVR)</span>
-                  <span className="font-mono font-bold text-amber-400">{selectedPackForOdds.odds.franchiseAwardRate}</span>
-                </div>
-
-                <div className="flex justify-between items-center text-zinc-200 font-bold">
-                  <span className="flex items-center gap-1 text-amber-400">
-                    <Flame size={10} />
-                    Dynasty & Legend Tier (94–98 OVR)
-                  </span>
-                  <span className="font-mono text-amber-400">{selectedPackForOdds.odds.dynastyLegendRate}</span>
-                </div>
-              </div>
-
-              {/* Featured Highlights */}
-              <div className="space-y-1 pt-1 border-t border-white/5">
-                <p className="text-[8px] font-black uppercase tracking-wider text-zinc-400">
-                  Featured In This Pack
-                </p>
-                <div className="flex flex-wrap gap-1">
-                  {selectedPackForOdds.odds.highlights.map((h, i) => (
-                    <span
-                      key={i}
-                      className="px-1.5 py-0.5 rounded bg-zinc-900 border border-white/5 text-zinc-300 text-[8px] font-semibold"
-                    >
-                      {h}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Dismiss button */}
-              <button
-                onClick={() => setSelectedPackForOdds(null)}
-                className="w-full py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-[9px] font-black uppercase tracking-wider text-white transition-colors"
-              >
-                Close Info
-              </button>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
       {/* Pack Opener Modal */}
       <AnimatePresence>

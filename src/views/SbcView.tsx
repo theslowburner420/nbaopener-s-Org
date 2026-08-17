@@ -15,10 +15,15 @@ import { SbcCourtBuilder } from '../components/sbc/SbcCourtBuilder';
 import { SegmentClaimModal, GrandRewardModal } from '../components/sbc/SbcCelebrationModals';
 import CardItem from '../components/CardItem';
 import CardDetailModal from '../components/CardDetailModal';
+import { isScreamEditionActive } from '../constants/screamEdition';
 
-type CategoryFilter = 'all' | 'dynasty' | 'hof_legends' | 'franchise_icons' | 'fan_favourites' | 'rookie_series' | 'clutch_moments' | 'completed';
+type CategoryFilter = 'all' | 'dynasty' | 'hof_legends' | 'franchise_icons' | 'fan_favourites' | 'rookie_series' | 'clutch_moments' | 'scream' | 'completed';
 
-export const SbcView: React.FC = () => {
+interface SbcViewProps {
+  initialCategory?: CategoryFilter;
+}
+
+export const SbcView: React.FC<SbcViewProps> = ({ initialCategory = 'all' }) => {
   const { 
     collection, 
     customCards, 
@@ -26,16 +31,38 @@ export const SbcView: React.FC = () => {
     addCoins, 
     addPackToInventory, 
     addCustomCard, 
-    updateGameStateAsync 
+    updateGameStateAsync,
+    isPremium
   } = useGame();
+
+  // Scream Edition active status (via Halloween date window or admin override)
+  const isScreamActive = isScreamEditionActive(isPremium);
+
+  // Visible SBC Groups filtered by Scream event availability
+  const visibleSbcGroups = useMemo(() => {
+    return SBC_GROUPS.filter(g => {
+      const isScream = g.category === 'scream' || g.id.includes('scream');
+      if (isScream && !isScreamActive) {
+        return false;
+      }
+      return true;
+    });
+  }, [isScreamActive]);
 
   // Navigation State
   const [selectedGroup, setSelectedGroup] = useState<SbcGroup | null>(null);
   const [activeSegment, setActiveSegment] = useState<SbcSegment | null>(null);
 
   // Filters State
-  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>(initialCategory);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Update category when initialCategory prop changes
+  React.useEffect(() => {
+    if (initialCategory) {
+      setCategoryFilter(initialCategory);
+    }
+  }, [initialCategory]);
 
   // Card Inspection Modal State
   const [inspectCard, setInspectCard] = useState<Card | null>(null);
@@ -63,7 +90,7 @@ export const SbcView: React.FC = () => {
     let completedSegments = 0;
     let totalSegments = 0;
 
-    SBC_GROUPS.forEach(g => {
+    visibleSbcGroups.forEach(g => {
       totalSegments += g.segments.length;
       if (sbcService.isGroupCompleted(g, completedSbcs)) {
         completedGroups++;
@@ -77,15 +104,15 @@ export const SbcView: React.FC = () => {
 
     return {
       completedGroups,
-      totalGroups: SBC_GROUPS.length,
+      totalGroups: visibleSbcGroups.length,
       completedSegments,
       totalSegments
     };
-  }, [completedSbcs]);
+  }, [completedSbcs, visibleSbcGroups]);
 
   // Filtered SBC Groups for the Hub
   const filteredGroups = useMemo(() => {
-    return SBC_GROUPS.filter(group => {
+    return visibleSbcGroups.filter(group => {
       const isFinished = sbcService.isGroupCompleted(group, completedSbcs);
       if (categoryFilter === 'completed') {
         if (!isFinished) return false;
@@ -103,7 +130,7 @@ export const SbcView: React.FC = () => {
       }
       return true;
     });
-  }, [categoryFilter, searchQuery, completedSbcs]);
+  }, [categoryFilter, searchQuery, completedSbcs, visibleSbcGroups]);
 
   // Handle submitting a squad segment
   const handleSubmitSquad = async (submittedCards: Card[]) => {
@@ -427,6 +454,7 @@ export const SbcView: React.FC = () => {
           <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
             {[
               { id: 'all', label: 'All SBCs', icon: '🎯' },
+              ...(isScreamActive ? [{ id: 'scream', label: 'Scream Edition', icon: '🎃' }] : []),
               { id: 'dynasty', label: 'Dynasty Special', icon: '👑' },
               { id: 'hof_legends', label: 'HOF Legends', icon: '⭐' },
               { id: 'franchise_icons', label: 'Franchise Icons', icon: '🏆' },
