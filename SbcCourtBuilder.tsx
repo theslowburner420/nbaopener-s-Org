@@ -222,7 +222,7 @@ const CourtSlot = memo<{
   );
 });
 
-export const SbcCourtBuilder: React.FC<SbcCourtBuilderProps> = ({
+export const SbcCourtBuilder: React.FC<SbcCourtBuilderProps> = memo(({
   segment,
   group,
   availableDuplicates,
@@ -833,4 +833,4 @@ export const SbcCourtBuilder: React.FC<SbcCourtBuilderProps> = ({
       </AnimatePresence>
     </div>
   );
-};
+});

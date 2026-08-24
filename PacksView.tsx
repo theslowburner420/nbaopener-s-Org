@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useGame } from '../context/GameContext';
 import { useEngine, PackType } from '../hooks/useEngine';
 import { 
@@ -128,7 +128,7 @@ export default function PacksView() {
     return Object.values(groups);
   }, [inventoryPacks]);
 
-  const handleBuy = async (pack: Pack) => {
+  const handleBuy = useCallback(async (pack: Pack) => {
     if (isSaving || buyingPackId) return;
     if (coins < pack.price) {
       notifyError(`Need ${(pack.price - coins).toLocaleString()} more coins!`);
@@ -146,9 +146,9 @@ export default function PacksView() {
     } finally {
       setBuyingPackId(null);
     }
-  };
+  }, [isSaving, buyingPackId, coins, notifyError, openPack]);
 
-  const handleOpenInventory = async (packId: string, packType: string) => {
+  const handleOpenInventory = useCallback(async (packId: string, packType: string) => {
     if (isSaving) return;
     const result = await openInventoryPack(packId, packType as PackType);
     if (result) {
@@ -157,11 +157,11 @@ export default function PacksView() {
       setOpenedCards(result.cards);
       setNewlyUnlocked(result.newlyUnlocked);
     }
-  };
+  }, [isSaving, openInventoryPack, availablePacks]);
 
-  const handleOpenEventModal = () => {
+  const handleOpenEventModal = useCallback(() => {
     window.dispatchEvent(new CustomEvent('open-halloween-modal'));
-  };
+  }, []);
 
   return (
     <div className="min-h-full w-full flex flex-col bg-black text-white relative">
@@ -241,6 +241,8 @@ export default function PacksView() {
                           alt={primaryEvent.packName} 
                           className="w-full h-full object-cover"
                           referrerPolicy="no-referrer"
+                          loading="lazy"
+                          decoding="async"
                         />
                       </div>
 
@@ -344,6 +346,8 @@ export default function PacksView() {
                             alt={pack.name} 
                             className="w-full h-full object-cover" 
                             referrerPolicy="no-referrer"
+                            loading="lazy"
+                            decoding="async"
                           />
                         </div>
 
@@ -421,6 +425,8 @@ export default function PacksView() {
                               alt={pack.name} 
                               className="w-full h-full object-cover" 
                               referrerPolicy="no-referrer" 
+                              loading="lazy"
+                              decoding="async"
                             />
                           </div>
 

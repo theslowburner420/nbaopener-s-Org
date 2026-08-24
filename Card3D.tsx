@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, memo } from 'react';
 import { RotateCw, Sparkles, Trophy, Flame, Shield, Info, Quote, Award, Star } from 'lucide-react';
 import { Card } from '../types';
 import { getLoreForPlayer } from '../data/sbcCardLore';
@@ -13,7 +13,7 @@ export interface Card3DProps {
   onFlipChange?: (isFlipped: boolean) => void;
 }
 
-export const Card3D: React.FC<Card3DProps> = ({
+export const Card3D: React.FC<Card3DProps> = memo(({
   card,
   frontContent,
   backContent,
@@ -307,7 +307,7 @@ export const Card3D: React.FC<Card3DProps> = ({
       </div>
     </div>
   );
-};
+});
 
 // Default Back Face component with rich English context narrative & Player Achievements
 const DefaultBackFace: React.FC<{ card?: Card; size?: 'sm' | 'md' | 'lg'; onFlip: () => void }> = ({ card, size = 'md', onFlip }) => {

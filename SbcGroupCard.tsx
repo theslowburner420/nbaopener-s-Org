@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { motion } from 'motion/react';
 import { Trophy, CheckCircle2, ChevronRight, Sparkles, Layers, Gift, Eye } from 'lucide-react';
 import { SbcGroup, Card } from '../../types';
@@ -30,7 +30,7 @@ const CATEGORY_TAGS: Record<string, { label: string; icon: string }> = {
   clutch_moments: { label: 'Clutch Moments', icon: '⚡' }
 };
 
-export const SbcGroupCard: React.FC<SbcGroupCardProps> = ({ 
+export const SbcGroupCard: React.FC<SbcGroupCardProps> = memo(({ 
   group, 
   completedSbcs, 
   allCardsPool,
@@ -186,5 +186,5 @@ export const SbcGroupCard: React.FC<SbcGroupCardProps> = ({
       </div>
     </motion.div>
   );
-};
+});
 

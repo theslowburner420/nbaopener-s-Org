@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Card } from '../types';
 import SBCSpecialCard from './SBCSpecialCard';
 
@@ -8,13 +8,13 @@ interface SBCCardProps {
   isRevealed?: boolean;
 }
 
-const SBCCard: React.FC<SBCCardProps> = ({ card, size = 'md' }) => {
+const SBCCard: React.FC<SBCCardProps> = memo(({ card, size = 'md' }) => {
   return (
     <SBCSpecialCard 
       card={card}
       size={size}
     />
   );
-};
+});
 
 export default SBCCard;

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, memo } from 'react';
 import { RotateCw, Sparkles, Trophy, Flame, Shield, Users, Target, Quote, Award, Star } from 'lucide-react';
 import { Card } from '../types';
 import { getLoreForPlayer } from '../data/sbcCardLore';
@@ -166,7 +166,7 @@ export function resolveSBCTheme(rarityTheme?: string, card?: Card): SBCRarityThe
   return 'hof';
 }
 
-export const SBCSpecialCard: React.FC<SBCSpecialCardProps> = ({
+export const SBCSpecialCard: React.FC<SBCSpecialCardProps> = memo(({
   card = DEFAULT_SAMPLE_CARD,
   rarityTheme,
   size = 'md',
@@ -412,6 +412,9 @@ export const SBCSpecialCard: React.FC<SBCSpecialCardProps> = ({
                 src={teamLogo}
                 alt=""
                 className="absolute w-36 h-36 object-contain opacity-15 filter blur-[1px] pointer-events-none"
+                loading="lazy"
+                decoding="async"
+                referrerPolicy="no-referrer"
               />
             )}
 
@@ -430,6 +433,8 @@ export const SBCSpecialCard: React.FC<SBCSpecialCardProps> = ({
                 onError={() => setImgError(true)}
                 className="w-full h-full object-cover object-top filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.85)] z-10 transition-transform duration-500 transform group-hover:scale-105"
                 referrerPolicy="no-referrer"
+                loading="lazy"
+                decoding="async"
               />
             )}
 
@@ -506,7 +511,7 @@ export const SBCSpecialCard: React.FC<SBCSpecialCardProps> = ({
           <div className="px-3 py-1.5 flex items-center justify-between z-20 shrink-0 border-t border-white/10 bg-black/85 backdrop-blur-md">
             <div className="flex items-center gap-1.5 min-w-0">
               {teamLogo && (
-                <img src={teamLogo} alt="" className="w-4 h-4 object-contain shrink-0 filter drop-shadow" />
+                <img src={teamLogo} alt="" className="w-4 h-4 object-contain shrink-0 filter drop-shadow" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
               )}
               <span className={`text-[8px] font-black ${resolvedThemeKey === 'scream' ? 'text-orange-300' : 'text-amber-300'} uppercase tracking-wider truncate`}>
                 {card.teamAbbr || card.team}
@@ -537,7 +542,7 @@ export const SBCSpecialCard: React.FC<SBCSpecialCardProps> = ({
           {/* Header */}
           <div className="flex justify-between items-center pb-2.5 border-b border-white/15">
             <div className="flex items-center gap-2">
-              {teamLogo && <img src={teamLogo} alt={card.team} className="w-6 h-6 object-contain" />}
+              {teamLogo && <img src={teamLogo} alt={card.team} className="w-6 h-6 object-contain" loading="lazy" decoding="async" referrerPolicy="no-referrer" />}
               <div>
                 <h4 className="text-xs font-black uppercase text-white truncate max-w-[130px]">{card.name}</h4>
                 <p className="text-[8px] font-bold text-amber-400">{card.position} • #{card.number || 23}</p>
@@ -628,6 +633,6 @@ export const SBCSpecialCard: React.FC<SBCSpecialCardProps> = ({
       </div>
     </div>
   );
-};
+});
 
 export default SBCSpecialCard;

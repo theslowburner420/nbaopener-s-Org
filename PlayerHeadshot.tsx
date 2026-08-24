@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 
 interface PlayerHeadshotProps {
   nbaId: number;
@@ -7,7 +7,7 @@ interface PlayerHeadshotProps {
   isVintage?: boolean;
 }
 
-export const PlayerHeadshot: React.FC<PlayerHeadshotProps> = ({ nbaId, name, className = "w-full h-full object-contain origin-bottom scale-110", isVintage = false }) => {
+export const PlayerHeadshot: React.FC<PlayerHeadshotProps> = memo(({ nbaId, name, className = "w-full h-full object-contain origin-bottom scale-110", isVintage = false }) => {
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -49,7 +49,8 @@ export const PlayerHeadshot: React.FC<PlayerHeadshotProps> = ({ nbaId, name, cla
         className={`${className} transition-all duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0 scale-95'} ${isVintage ? 'brightness-95 contrast-[1.05] grayscale-[15%]' : ''}`}
         referrerPolicy="no-referrer"
         loading="lazy"
+        decoding="async"
       />
     </div>
   );
-};
+});

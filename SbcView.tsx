@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Puzzle, Trophy, Sparkles, Search, ArrowLeft, Layers, Filter, CheckCircle2, 
@@ -65,6 +65,26 @@ export const SbcView: React.FC<SbcViewProps> = ({ initialCategory = 'all' }) => 
 
   // Card Inspection Modal State
   const [inspectCard, setInspectCard] = useState<Card | null>(null);
+
+  const handleInspectCard = useCallback((card: Card) => {
+    setInspectCard(card);
+  }, []);
+
+  const handleCloseInspect = useCallback(() => {
+    setInspectCard(null);
+  }, []);
+
+  const handleSelectGroup = useCallback((group: SbcGroup) => {
+    setSelectedGroup(group);
+  }, []);
+
+  const handleBuildSquad = useCallback((segment: SbcSegment) => {
+    setActiveSegment(segment);
+  }, []);
+
+  const handleCloseActiveSegment = useCallback(() => {
+    setActiveSegment(null);
+  }, []);
 
   // Modals & Submission State
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -236,15 +256,15 @@ export const SbcView: React.FC<SbcViewProps> = ({ initialCategory = 'all' }) => 
           group={selectedGroup}
           availableDuplicates={availableDuplicates}
           isSubmitting={isSubmitting}
-          onBack={() => setActiveSegment(null)}
+          onBack={handleCloseActiveSegment}
           onSubmitSquad={handleSubmitSquad}
-          onInspectCard={(c) => setInspectCard(c)}
+          onInspectCard={handleInspectCard}
         />
 
         {/* Card Detail Modal */}
         <CardDetailModal
           card={inspectCard}
-          onClose={() => setInspectCard(null)}
+          onClose={handleCloseInspect}
         />
 
         {/* Celebration Modals */}
@@ -416,7 +436,7 @@ export const SbcView: React.FC<SbcViewProps> = ({ initialCategory = 'all' }) => 
                     segment={segment}
                     index={idx}
                     isCompleted={isSegDone}
-                    onBuildSquad={(seg) => setActiveSegment(seg)}
+                    onBuildSquad={handleBuildSquad}
                   />
                 );
               })}
@@ -507,8 +527,8 @@ export const SbcView: React.FC<SbcViewProps> = ({ initialCategory = 'all' }) => 
                 group={group}
                 completedSbcs={completedSbcs || []}
                 allCardsPool={allAvailableCards}
-                onSelect={(g) => setSelectedGroup(g)}
-                onInspectCard={(c) => setInspectCard(c)}
+                onSelect={handleSelectGroup}
+                onInspectCard={handleInspectCard}
               />
             ))}
           </div>
@@ -518,7 +538,7 @@ export const SbcView: React.FC<SbcViewProps> = ({ initialCategory = 'all' }) => 
       {/* Card Detail Modal */}
       <CardDetailModal
         card={inspectCard}
-        onClose={() => setInspectCard(null)}
+        onClose={handleCloseInspect}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle2, ChevronRight, Coins, Package, Award, ArrowRight, ShieldCheck } from 'lucide-react';
 import { SbcSegment, SbcRequirement } from '../../types';
@@ -33,7 +33,7 @@ const getReqSummary = (req: SbcRequirement) => {
   }
 };
 
-export const SbcSegmentCard: React.FC<SbcSegmentCardProps> = ({
+export const SbcSegmentCard: React.FC<SbcSegmentCardProps> = memo(({
   segment,
   index,
   isCompleted,
@@ -142,4 +142,4 @@ export const SbcSegmentCard: React.FC<SbcSegmentCardProps> = ({
       </div>
     </motion.div>
   );
-};
+});
