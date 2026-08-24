@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { NativePurchases, PURCHASE_TYPE } from '@capgo/native-purchases';
 
 export const BILLING_PRODUCTS = {
   LIFETIME_NO_ADS: 'lifetime_no_ads',
@@ -12,32 +13,32 @@ export interface PurchaseResult {
 }
 
 /**
- * Service to handle Google Play Billing (and web test fallback)
- * for lifetime non-consumable in-app purchases.
+ * Service to handle real Google Play Billing for Android via @capgo/native-purchases.
+ * Securely enforces real payments on Google Play and never gives free unlocks.
  */
 class GooglePlayBillingService {
   private isInitialized: boolean = false;
 
   public async initialize(): Promise<void> {
     if (this.isInitialized) return;
-
-    if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
-      try {
-        console.log('[BillingService] Initializing Google Play Billing for Android...');
-        // Check if any native billing plugin is registered on window/Capacitor
-        const customPlugins = (Capacitor as any).Plugins || (window as any).Capacitor?.Plugins;
-        if (customPlugins?.GooglePlayBilling || customPlugins?.InAppPurchase2) {
-          console.log('[BillingService] Native Google Play Billing plugin detected.');
-        }
-      } catch (err) {
-        console.warn('[BillingService] Google Play Billing init notice:', err);
-      }
-    }
     this.isInitialized = true;
   }
 
   /**
-   * Purchase the non-consumable "lifetime_no_ads" product
+   * Check if Google Play Billing is supported on the current device
+   */
+  public async isAvailable(): Promise<boolean> {
+    if (!Capacitor.isNativePlatform()) return false;
+    try {
+      const { isBillingSupported } = await NativePurchases.isBillingSupported();
+      return !!isBillingSupported;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Purchase the non-consumable "lifetime_no_ads" product via Google Play Store
    */
   public async purchaseLifetimeNoAds(
     onSuccess: () => Promise<void> | void,
@@ -45,40 +46,40 @@ class GooglePlayBillingService {
   ): Promise<boolean> {
     await this.initialize();
 
-    const isNativeAndroid = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
-
-    if (isNativeAndroid) {
-      try {
-        const customPlugins = (Capacitor as any).Plugins || (window as any).Capacitor?.Plugins;
-        const nativeBilling = customPlugins?.GooglePlayBilling || customPlugins?.InAppPurchase || customPlugins?.Purchases;
-
-        if (nativeBilling && typeof nativeBilling.purchase === 'function') {
-          const result = await nativeBilling.purchase({
-            productId: BILLING_PRODUCTS.LIFETIME_NO_ADS,
-            type: 'inapp',
-          });
-
-          if (result && (result.success || result.isSuccess || result.purchaseState === 1)) {
-            await onSuccess();
-            return true;
-          } else {
-            onError(result?.error || 'Purchase cancelled or could not be verified.');
-            return false;
-          }
-        }
-      } catch (err: any) {
-        console.error('[BillingService] Native purchase error:', err);
-        // If native billing plugin is not yet compiled into apk, fallback to web handler or show friendly error
-      }
+    // Check if running inside native Android / iOS
+    if (!Capacitor.isNativePlatform()) {
+      onError('Las compras directas de Google Play solo están disponibles desde la app móvil en Android. Para la web, utiliza la pasarela de PayPal.');
+      return false;
     }
 
-    // Web / Fallback simulation for dev & testing environment
-    console.log('[BillingService] Simulating Google Play purchase for product:', BILLING_PRODUCTS.LIFETIME_NO_ADS);
     try {
-      await onSuccess();
-      return true;
+      const supported = await this.isAvailable();
+      if (!supported) {
+        onError('Google Play Billing no está disponible o no hay servicios de Google Play activos en este dispositivo.');
+        return false;
+      }
+
+      console.log('[BillingService] Launching Google Play purchase flow for:', BILLING_PRODUCTS.LIFETIME_NO_ADS);
+
+      const transaction = await NativePurchases.purchaseProduct({
+        productIdentifier: BILLING_PRODUCTS.LIFETIME_NO_ADS,
+        productType: PURCHASE_TYPE.INAPP,
+        autoAcknowledgePurchases: true,
+      });
+
+      console.log('[BillingService] Purchase transaction completed:', transaction);
+
+      if (transaction && transaction.transactionId) {
+        await onSuccess();
+        return true;
+      } else {
+        onError('La compra no se pudo completar o fue cancelada en Google Play.');
+        return false;
+      }
     } catch (err: any) {
-      onError(err?.message || 'Error processing purchase');
+      console.error('[BillingService] Google Play purchase error:', err);
+      const message = err?.message || (typeof err === 'string' ? err : 'Error en la pasarela de Google Play.');
+      onError(message);
       return false;
     }
   }
@@ -92,21 +93,25 @@ class GooglePlayBillingService {
   ): Promise<void> {
     await this.initialize();
 
-    if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
-      try {
-        const customPlugins = (Capacitor as any).Plugins || (window as any).Capacitor?.Plugins;
-        const nativeBilling = customPlugins?.GooglePlayBilling || customPlugins?.Purchases;
-        if (nativeBilling && typeof nativeBilling.queryPurchases === 'function') {
-          const res = await nativeBilling.queryPurchases();
-          const hasNoAds = res?.purchases?.some((p: any) => p.productId === BILLING_PRODUCTS.LIFETIME_NO_ADS);
-          if (hasNoAds) {
-            await onRestored();
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn('[BillingService] Query purchases error:', err);
+    if (!Capacitor.isNativePlatform()) {
+      onNoneFound();
+      return;
+    }
+
+    try {
+      await NativePurchases.restorePurchases();
+      const res = await NativePurchases.getPurchases({ productType: PURCHASE_TYPE.INAPP });
+      
+      const hasPurchased = res?.purchases?.some(
+        (p: any) => p.productIdentifier === BILLING_PRODUCTS.LIFETIME_NO_ADS || p.productId === BILLING_PRODUCTS.LIFETIME_NO_ADS
+      );
+
+      if (hasPurchased) {
+        await onRestored();
+        return;
       }
+    } catch (err) {
+      console.warn('[BillingService] Restore purchases error:', err);
     }
 
     onNoneFound();
@@ -114,3 +119,4 @@ class GooglePlayBillingService {
 }
 
 export const billingService = new GooglePlayBillingService();
+
