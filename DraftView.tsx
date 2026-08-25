@@ -39,6 +39,7 @@ import CardDetailModal from '../components/CardDetailModal';
 import CardItem from '../components/CardItem';
 import StaticAd from '../components/StaticAd';
 import { PlayerHeadshot } from '../components/PlayerHeadshot';
+import { isScreamEditionActive } from '../constants/screamEdition';
 
 import DraftAchievementsModal from '../components/DraftAchievementsModal';
 
@@ -548,29 +549,11 @@ const TournamentSummaryModal = memo<{
 const Slot = memo<{ 
   slot: DraftSlot; 
   mini?: boolean; 
-  onClick: () => void; 
+  onClick: (slot: DraftSlot) => void; 
   disabled?: boolean; 
   isSelected?: boolean;
-}>(({ slot, mini, onClick, disabled, isSelected }) => {
-  const [screenSize, setScreenSize] = useState(() => {
-    if (typeof window === 'undefined') return 'desktop';
-    const w = window.innerWidth;
-    if (w < 640) return 'mobile';
-    if (w < 1024) return 'tablet';
-    return 'desktop';
-  });
-
-  useEffect(() => {
-    const handleResize = () => {
-      const w = window.innerWidth;
-      if (w < 640) setScreenSize('mobile');
-      else if (w < 1024) setScreenSize('tablet');
-      else setScreenSize('desktop');
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
+  screenSize?: 'mobile' | 'tablet' | 'desktop';
+}>(({ slot, mini, onClick, disabled, isSelected, screenSize = 'desktop' }) => {
   const cardWidth = useMemo(() => {
     if (mini) {
       if (screenSize === 'mobile') return 80;
@@ -583,26 +566,25 @@ const Slot = memo<{
     }
   }, [mini, screenSize]);
 
+  const handleClick = useCallback(() => {
+    onClick(slot);
+  }, [onClick, slot]);
+
   return (
     <div 
-      className={`relative group transition-all duration-500 w-full h-full aspect-[2.5/3.5] ${disabled ? 'opacity-40 pointer-events-none grayscale-[0.5]' : ''} ${isSelected ? 'scale-110 z-50' : ''}`}
+      className={`relative group transition-all duration-300 w-full h-full aspect-[2.5/3.5] ${disabled ? 'opacity-40 pointer-events-none grayscale-[0.5]' : ''} ${isSelected ? 'scale-110 z-50 ring-2 ring-amber-500 rounded-2xl shadow-[0_0_30px_rgba(245,158,11,0.6)]' : ''}`}
     >
       {slot.card ? (
         <motion.div 
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ 
             scale: isSelected ? 1.05 : 1, 
-            opacity: 1,
-            boxShadow: isSelected ? [
-              "0 0 20px rgba(245,158,11,0.4)",
-              "0 0 40px rgba(245,158,11,0.8)",
-              "0 0 20px rgba(245,158,11,0.4)"
-            ] : "0 10px 25px rgba(0,0,0,0.5)"
+            opacity: 1
           }}
           whileTap={{ scale: 0.95 }}
-          transition={isSelected ? { repeat: Infinity, duration: 1.5 } : { duration: 0.3 }}
+          transition={{ duration: 0.2 }}
           className="h-full w-full cursor-pointer"
-          onClick={onClick}
+          onClick={handleClick}
         >
           <CardItem 
             card={slot.card} 
@@ -613,7 +595,7 @@ const Slot = memo<{
         </motion.div>
       ) : (
         <button 
-          onClick={onClick}
+          onClick={handleClick}
           disabled={disabled}
           className="h-full w-full bg-zinc-900/30 border-2 border-dashed border-zinc-800/50 rounded-xl flex flex-col items-center justify-center gap-1 hover:border-amber-500/50 hover:bg-zinc-900/60 transition-all relative overflow-hidden text-left"
         >
@@ -1576,12 +1558,24 @@ const generateRosterBoxScore = (
 };
 
 const DraftView: React.FC = () => {
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>(() => {
+    if (typeof window === 'undefined') return 'desktop';
+    const w = window.innerWidth;
+    if (w < 640) return 'mobile';
+    if (w < 1024) return 'tablet';
+    return 'desktop';
+  });
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      const w = window.innerWidth;
+      setIsMobile(w < 768);
+      if (w < 640) setScreenSize('mobile');
+      else if (w < 1024) setScreenSize('tablet');
+      else setScreenSize('desktop');
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   const { 
@@ -1975,7 +1969,7 @@ const DraftView: React.FC = () => {
   };
 
   // Manual slot selection logic (FUT Draft Style)
-  const handleSlotClick = (slot: DraftSlot) => {
+  const handleSlotClick = useCallback((slot: DraftSlot) => {
     if (slot.id.startsWith('bench')) {
       setIsBenchOpen(true);
     }
@@ -2086,7 +2080,7 @@ const DraftView: React.FC = () => {
       setCurrentOptions(options);
       setIsFlipping(true);
     }
-  };
+  }, [swapSource, starters, bench, phase, seenCardIds, generateDraftOptions]);
 
   const generateGhostTeam = (tournament: Tournament): GhostTeam => {
     const name = tournament.opponentPool[Math.floor(Math.random() * tournament.opponentPool.length)];
@@ -2759,8 +2753,9 @@ const DraftView: React.FC = () => {
                >
                   <Slot 
                      slot={slot} 
-                     onClick={() => handleSlotClick(slot)} 
+                     onClick={handleSlotClick} 
                      isSelected={swapSource === slot.id || activeSlotId === slot.id}
+                     screenSize={screenSize}
                   />
                </div>
             ))}
@@ -2832,8 +2827,9 @@ const DraftView: React.FC = () => {
                             <Slot 
                               slot={slot} 
                               mini={false} 
-                              onClick={() => handleSlotClick(slot)} 
+                              onClick={handleSlotClick} 
                               isSelected={swapSource === slot.id || activeSlotId === slot.id}
+                              screenSize={screenSize}
                             />
                           </div>
                         </div>
@@ -2904,18 +2900,17 @@ const DraftView: React.FC = () => {
               return (
                 <motion.div
                   key={card.id + idx}
-                  initial={{ opacity: 0, y: 100, rotateY: 90, scale: 0.5 }}
+                  initial={{ opacity: 0, y: 60, scale: 0.85 }}
                   animate={{ 
-                    opacity: shouldFade ? 0.1 : 1, 
-                    scale: isSelected ? (isMobile ? 1.05 : 1.12) : shouldFade ? 0.85 : 1,
+                    opacity: shouldFade ? 0.15 : 1, 
+                    scale: isSelected ? (isMobile ? 1.05 : 1.12) : shouldFade ? 0.9 : 1,
                     y: isSelected ? (isMobile ? -8 : -20) : 0,
-                    rotateY: 0,
-                    filter: shouldFade ? "blur(3px) grayscale(50%)" : "blur(0px)",
                     transition: isSelected 
                       ? { type: "spring", stiffness: 300, damping: 20 }
-                      : { type: "spring", stiffness: 100, damping: 15, delay: idx * 0.15 }
+                      : { type: "spring", stiffness: 140, damping: 18, delay: idx * 0.06 }
                   }}
-                  whileHover={!isMobile && !isAnySelected ? { scale: 1.05, y: -10, transition: { duration: 0.2 } } : undefined}
+                  style={{ willChange: 'transform, opacity' }}
+                  whileHover={!isMobile && !isAnySelected ? { scale: 1.05, y: -10, transition: { duration: 0.15 } } : undefined}
                   whileTap={!isAnySelected ? { scale: 0.95 } : undefined}
                   className={`relative group ${isSelected ? 'z-50' : 'z-10'} ${
                     isMobile 
@@ -3426,8 +3421,19 @@ const DraftView: React.FC = () => {
   };
 
   const renderTournamentSelection = () => {
+    const isScreamActive = isScreamEditionActive();
+
+    // 0. Base available tournaments filtered by active events
+    const availableTournaments = TOURNAMENTS.filter(t => {
+      const isScream = t.id === 'halloween_scream' || t.category === 'special' || t.name.toLowerCase().includes('scream');
+      if (isScream && !isScreamActive) {
+        return false;
+      }
+      return true;
+    });
+
     // 1. Filter tournaments by category
-    const filteredByCategory = TOURNAMENTS.filter(t => {
+    const filteredByCategory = availableTournaments.filter(t => {
       if (tournamentCategory === 'all') return true;
       return t.category === tournamentCategory;
     });
@@ -3461,6 +3467,8 @@ const DraftView: React.FC = () => {
       }
       return 0;
     });
+
+    const specialTournamentsCount = availableTournaments.filter(t => t.category === 'special').length;
 
     return (
       <div className="flex-1 min-h-0 h-full w-full flex flex-col overflow-hidden bg-black relative select-none">
@@ -3525,11 +3533,11 @@ const DraftView: React.FC = () => {
             {/* Category Tabs */}
             <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto scrollbar-hide py-0.5">
               {[
-                { id: 'all', label: 'All', count: TOURNAMENTS.length },
-                { id: 'classic', label: 'Beginner', count: TOURNAMENTS.filter(t => t.category === 'classic').length },
-                { id: 'pro', label: 'Intermediate', count: TOURNAMENTS.filter(t => t.category === 'pro').length },
-                { id: 'elite', label: 'Elite', count: TOURNAMENTS.filter(t => t.category === 'elite').length },
-                { id: 'special', label: 'Special Events 🎃', count: TOURNAMENTS.filter(t => t.category === 'special').length, isSpecial: true },
+                { id: 'all', label: 'All', count: availableTournaments.length },
+                { id: 'classic', label: 'Beginner', count: availableTournaments.filter(t => t.category === 'classic').length },
+                { id: 'pro', label: 'Intermediate', count: availableTournaments.filter(t => t.category === 'pro').length },
+                { id: 'elite', label: 'Elite', count: availableTournaments.filter(t => t.category === 'elite').length },
+                ...(specialTournamentsCount > 0 ? [{ id: 'special', label: 'Special Events 🎃', count: specialTournamentsCount, isSpecial: true }] : []),
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -3590,10 +3598,10 @@ const DraftView: React.FC = () => {
         <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 scrollbar-thin scrollbar-thumb-amber-500/20 scrollbar-track-transparent">
           <div className="max-w-6xl mx-auto space-y-6 pb-24">
             
-            {/* Special Event Spotlight Banner (Prominently displays when special event active) */}
-            {(!tournamentSearch || tournamentSearch.toLowerCase().includes('halloween') || tournamentSearch.toLowerCase().includes('special') || tournamentSearch.toLowerCase().includes('scream')) && (
+            {/* Special Event Spotlight Banner (Prominently displays only when special event active) */}
+            {isScreamActive && (!tournamentSearch || tournamentSearch.toLowerCase().includes('halloween') || tournamentSearch.toLowerCase().includes('special') || tournamentSearch.toLowerCase().includes('scream')) && (
               (() => {
-                const specialTournament = TOURNAMENTS.find(t => t.id === 'halloween_scream' || t.category === 'special');
+                const specialTournament = availableTournaments.find(t => t.id === 'halloween_scream' || t.category === 'special');
                 if (!specialTournament) return null;
                 const isHalloween = specialTournament.id === 'halloween_scream';
 

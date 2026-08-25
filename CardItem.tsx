@@ -80,6 +80,7 @@ const RARITY_COLORS: Record<Rarity, string> = {
   'mip': '#EC4899',
   'mvp': '#F59E0B',
   'fmvp': '#F59E0B',
+  'hidden_gems': '#10B981',
 };
 
 const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', onClick, showBack = false, isFocused = false, isNew = false, quantity = 0, dynamicOvr, dynamicStats, width }) => {
@@ -93,13 +94,14 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
   
   if (!card && !showBack) return null;
 
-  const { rarityClass, categoryClass, isDarkCard, isHolo, isFranchise, isLegend, isDPOY, isROTY, isXFactor, isVintage, isMoment, isScream, RarityColor } = useMemo(() => {
+  const { rarityClass, categoryClass, isDarkCard, isHolo, isFranchise, isLegend, isDPOY, isROTY, isXFactor, isVintage, isMoment, isScream, isHiddenGems, RarityColor } = useMemo(() => {
     if (!card) {
-       return { rarityClass: '', categoryClass: '', isDarkCard: true, isHolo: false, isFranchise: false, isLegend: false, isDPOY: false, isROTY: false, isXFactor: false, isVintage: false, isMoment: false, isScream: false, RarityColor: '#94A3B8' };
+       return { rarityClass: '', categoryClass: '', isDarkCard: true, isHolo: false, isFranchise: false, isLegend: false, isDPOY: false, isROTY: false, isXFactor: false, isVintage: false, isMoment: false, isScream: false, isHiddenGems: false, RarityColor: '#94A3B8' };
     }
     const isScreamCard = card.category === 'Scream Edition' || card.series === 'Scream Edition' || card.id.startsWith('scream-');
-    const rClass = isScreamCard ? 'card-scream' : getRarityClass(card.rarity);
-    const rColor = isScreamCard ? '#f97316' : (RARITY_COLORS[card.rarity] || '#94A3B8');
+    const isHiddenGemCard = card.category === 'Hidden Gems' || card.series === 'Hidden Gems' || card.id.startsWith('gem-') || card.rarity === 'hidden_gems';
+    const rClass = isScreamCard ? 'card-scream' : isHiddenGemCard ? 'card-hidden-gems' : getRarityClass(card.rarity);
+    const rColor = isScreamCard ? '#f97316' : isHiddenGemCard ? '#10b981' : (RARITY_COLORS[card.rarity] || '#94A3B8');
     
     const isMoment = card.category === 'Moment';
     const isDynasty = card.category === 'Dynasty';
@@ -114,6 +116,7 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
     
     const cClass = 
       isScreamCard ? 'card-scream' :
+      isHiddenGemCard ? 'card-hidden-gems' :
       card.category === 'All-Star MVP' ? 'card-as-mvp' :
       isAward 
         ? (card.category === 'DPOY' || card.rarity === 'dpoy' ? 'card-dpoy' : 
@@ -133,16 +136,16 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
           isAllNBA ? 'card-allnba-1st' :
           isMoment ? 'card-moment' : '';
         
-    const dark = isScreamCard || isAward || card.category === 'Coach' || ['dpoy', 'roty', '6moy', 'mip', 'mvp', 'fmvp', 'record', 'logo', 'arena', 'draft2026', 'scoring_champ', 'hof', 'coy', 'allnba_1st'].includes(card.rarity) || isDynasty || isDuo || isXFactor || card.category === 'NBA Record' || isDraft2026 || isScoringChamp || isHOF || isCOY || isAllNBA || isMoment || card.rarity === 'franchise' || ['invincible', 'galaxy', 'legend_sbc', 'icon_sbc', 'moments_sbc', 'future_star'].includes(card.rarity);
-    const holo = isScreamCard || isAward || ['allstar', 'franchise', 'legend', 'dpoy', 'roty', '6moy', 'mip', 'mvp', 'fmvp', 'record', 'logo', 'arena', 'draft2026', 'scoring_champ', 'hof', 'coy', 'allnba_1st', 'invincible', 'galaxy', 'legend_sbc', 'icon_sbc', 'moments_sbc', 'future_star'].includes(card.rarity) || isDynasty || isDuo || isXFactor || isMoment;
+    const dark = isScreamCard || isHiddenGemCard || isAward || card.category === 'Coach' || ['dpoy', 'roty', '6moy', 'mip', 'mvp', 'fmvp', 'record', 'logo', 'arena', 'draft2026', 'scoring_champ', 'hof', 'coy', 'allnba_1st', 'hidden_gems'].includes(card.rarity) || isDynasty || isDuo || isXFactor || card.category === 'NBA Record' || isDraft2026 || isScoringChamp || isHOF || isCOY || isAllNBA || isMoment || card.rarity === 'franchise' || ['invincible', 'galaxy', 'legend_sbc', 'icon_sbc', 'moments_sbc', 'future_star'].includes(card.rarity);
+    const holo = isScreamCard || isHiddenGemCard || isAward || ['allstar', 'franchise', 'legend', 'dpoy', 'roty', '6moy', 'mip', 'mvp', 'fmvp', 'record', 'logo', 'arena', 'draft2026', 'scoring_champ', 'hof', 'coy', 'allnba_1st', 'invincible', 'galaxy', 'legend_sbc', 'icon_sbc', 'moments_sbc', 'future_star', 'hidden_gems'].includes(card.rarity) || isDynasty || isDuo || isXFactor || isMoment;
     const franchise = card.rarity === 'franchise';
-    const legend = isScreamCard || card.rarity === 'legend' || isDynasty || isMoment;
+    const legend = isScreamCard || isHiddenGemCard || card.rarity === 'legend' || isDynasty || isMoment;
     const dpoy = card.rarity === 'dpoy';
     const roty = card.rarity === 'roty';
     const xfactor = isXFactor;
     const vintage = card.nbaId < 1000;
     
-    return { rarityClass: rClass, categoryClass: cClass, isDarkCard: dark, isHolo: holo, isFranchise: franchise, isLegend: legend, isDPOY: dpoy, isROTY: roty, isXFactor: xfactor, isVintage: vintage, isMoment, isScream: isScreamCard, RarityColor: rColor };
+    return { rarityClass: rClass, categoryClass: cClass, isDarkCard: dark, isHolo: holo, isFranchise: franchise, isLegend: legend, isDPOY: dpoy, isROTY: roty, isXFactor: xfactor, isVintage: vintage, isMoment, isScream: isScreamCard, isHiddenGems: isHiddenGemCard, RarityColor: rColor };
   }, [card.rarity, card.category, card.series, card.nbaId, card.id]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -201,11 +204,10 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
   // Extreme Performance Optimization: Hardware Acceleration & Memory Management
   const gpuStyles = useMemo(() => ({
     transform: 'translateZ(0)',
-    willChange: 'transform, opacity, filter',
+    willChange: 'transform',
     backfaceVisibility: 'hidden' as const,
     perspective: '1000px',
     WebkitFontSmoothing: 'antialiased' as const,
-    contentVisibility: 'auto' as any,
   } as React.CSSProperties), []);
 
   const cardStyle = useMemo(() => {
@@ -251,7 +253,7 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
     return (
       <>
         <div className={`subtle-shimmer ${!isHovered && !isFocused ? 'opacity-10' : 'opacity-30'}`} />
-        <div className={`micro-sparkles ${!isHovered && !isFocused ? 'opacity-5' : 'opacity-15'}`} />
+        {!isMini && <div className={`micro-sparkles ${!isHovered && !isFocused ? 'opacity-5' : 'opacity-15'}`} />}
         <div className={`rainbow-foil ${!isHovered && !isFocused ? 'opacity-20' : 'opacity-60'}`} />
         {(isHovered || isFocused) && (
           <>
@@ -321,6 +323,29 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
         );
       }
 
+      if (isHiddenGems) {
+        return (
+          <div className="absolute top-0 left-0 right-0 p-1.5 z-50 flex justify-between items-start bg-gradient-to-b from-black/85 via-black/50 to-transparent">
+            <div className="flex flex-col min-w-0 flex-1 pr-1">
+              <div className="flex items-center gap-1 min-w-0">
+                <h3 className="text-[9px] font-black uppercase italic leading-none drop-shadow-md truncate text-white">
+                  {card.name}
+                </h3>
+                <span className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-[6px] font-black px-1 py-0.2 rounded shadow-md border border-emerald-300/60 leading-tight shrink-0">
+                  💎
+                </span>
+              </div>
+              <span className="text-[6px] font-bold uppercase tracking-tighter truncate text-emerald-300/90 shadow-black mt-0.5">
+                {card.teamAbbr || card.team} • HIDDEN GEM
+              </span>
+            </div>
+            <div className="bg-black/90 backdrop-blur-sm rounded px-1 py-0.5 border border-emerald-500/80 shadow-[0_0_8px_rgba(16,185,129,0.6)] shrink-0">
+              <span className="text-[9px] font-black text-emerald-400 italic leading-none">{displayOvr}</span>
+            </div>
+          </div>
+        );
+      }
+
       return (
         <div className="absolute top-0 left-0 right-0 p-1.5 z-50 flex justify-between items-start bg-gradient-to-b from-black/60 to-transparent">
           <div className="flex flex-col min-w-0">
@@ -371,6 +396,34 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
       );
     }
 
+    if (isHiddenGems) {
+      return (
+        <div className="px-2.5 py-1 flex justify-between items-center z-20 shrink-0">
+          <div className="flex flex-col flex-1 min-w-0 pr-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <h3 className="text-[14px] sm:text-[15px] md:text-base font-black uppercase tracking-tight leading-none drop-shadow-md italic text-white truncate">
+                {card.name}
+              </h3>
+              <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white text-[7px] md:text-[8px] font-black px-1.5 py-0.5 rounded shadow-[0_0_12px_rgba(16,185,129,0.8)] border border-emerald-300 uppercase tracking-wider shrink-0 whitespace-nowrap">
+                💎 HIDDEN GEM
+              </span>
+            </div>
+            <span className="text-[7px] md:text-[8px] font-bold uppercase tracking-wider mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis text-emerald-300/90">
+              {card.team} {card.subtitle ? `• ${card.subtitle}` : '• HIDDEN GEMS SERIES'}
+            </span>
+          </div>
+          <div className="flex items-center gap-1 shrink-0 bg-black/90 px-1.5 py-0.5 rounded-md border border-emerald-500/80 shadow-[0_0_12px_rgba(16,185,129,0.6)]">
+            <span className="text-[7.5px] md:text-[8.5px] font-black uppercase tracking-wider text-emerald-400">
+              OVR
+            </span>
+            <span className="text-lg md:text-xl font-black leading-none drop-shadow-sm italic text-emerald-400">
+              {displayOvr}
+            </span>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="px-3 py-1 flex justify-between items-center z-20 h-[18%] shrink-0">
         <div className="flex flex-col flex-1 min-w-0 pr-2">
@@ -411,6 +464,13 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
           <div className={`absolute ${isMini ? 'top-6 right-1' : 'top-2 right-2'} z-[50]`}>
             <div className="text-[6px] md:text-[8px] font-black bg-orange-950/90 text-orange-300 border border-orange-500/80 px-1.5 py-0.5 rounded-full shadow-[0_0_8px_rgba(249,115,22,0.6)]">
               🎃 HALLOWEEN
+            </div>
+          </div>
+        )}
+        {isHiddenGems && !isScream && (
+          <div className={`absolute ${isMini ? 'top-6 right-1' : 'top-2 right-2'} z-[50]`}>
+            <div className="text-[6px] md:text-[8px] font-black bg-emerald-950/90 text-emerald-300 border border-emerald-500/80 px-1.5 py-0.5 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.6)]">
+              💎 HIDDEN GEM
             </div>
           </div>
         )}
@@ -657,6 +717,36 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
             <div className="flex flex-col items-end justify-center">
               <span className="text-[6.5px] font-black uppercase leading-none mb-0.5 text-orange-400">CARD NO.</span>
               <span className="text-[7px] md:text-[8px] font-bold text-orange-300">
+                #{card.number}
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (isHiddenGems) {
+      return (
+        <div className="px-2.5 h-1/3 border-t border-emerald-500/20 bg-black/60 shrink-0 flex items-center mt-auto">
+          <div className="grid grid-cols-3 w-full items-center">
+            <div className="flex items-center gap-1 min-w-0">
+              {card.teamLogoUrl && (
+                <img src={card.teamLogoUrl} alt="" className="w-3.5 h-3.5 object-contain drop-shadow-sm shrink-0" referrerPolicy="no-referrer" loading="lazy" decoding="async" />
+              )}
+              <div className="flex flex-col min-w-0">
+                <span className="text-[6.5px] font-black uppercase leading-none mb-0.5 text-emerald-400">TEAM</span>
+                <span className="text-[7.5px] md:text-[8px] font-black uppercase tracking-tighter leading-none truncate text-emerald-200">
+                  {card.team}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col items-center justify-center">
+              <span className="text-[6.5px] font-black uppercase leading-none mb-0.5 text-emerald-400">SERIES</span>
+              <span className="text-[7px] font-black text-emerald-300 uppercase tracking-wider">HIDDEN GEM</span>
+            </div>
+            <div className="flex flex-col items-end justify-center">
+              <span className="text-[6.5px] font-black uppercase leading-none mb-0.5 text-emerald-400">CARD NO.</span>
+              <span className="text-[7px] md:text-[8px] font-bold text-emerald-300">
                 #{card.number}
               </span>
             </div>

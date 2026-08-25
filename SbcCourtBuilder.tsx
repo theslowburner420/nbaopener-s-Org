@@ -43,6 +43,8 @@ const getReqShortLabel = (req: SbcRequirement) => {
       return `${req.value} Cards`;
     case 'MIN_OVR':
       return `Min ${req.value} OVR`;
+    case 'MAX_OVR':
+      return `Max ${req.value} OVR`;
     case 'TEAM_OVR_MIN':
       return `Squad ${req.value}+ OVR`;
     case 'MIN_RARITY':
@@ -60,24 +62,29 @@ const getReqShortLabel = (req: SbcRequirement) => {
     case 'MAX_TEAMS':
       return `Max ${req.value} Teams`;
     case 'SPECIFIC_PLAYER_NAME':
-      return `Card of ${req.value}`;
+      return `${req.count && req.count > 1 ? `${req.count}x ` : ''}${req.edition ? `${req.value} (${req.edition})` : `${req.value}`}`;
     case 'SPECIFIC_TEAM':
-      return `${req.count ?? 'All'}x ${req.value}`;
+      if (req.teamsList && req.teamsList.length > 0) {
+        return `${req.count ?? 1}x ${req.teamsList.join(' / ')}`;
+      }
+      return `${req.count ? `${req.count}x ` : ''}${req.value}${req.era ? ` (${req.era})` : ''}`;
     case 'SPECIAL_CARDS_MIN':
-      return `${req.count ?? req.value ?? 1}x Special`;
+      return `Min ${req.count ?? req.value ?? 1} Special`;
     case 'CATEGORY':
       return `${req.count ?? 1}x ${req.value}`;
     default:
-      return `${req.type}: ${req.value}`;
+      return `${req.value || 'Requirement'}`;
   }
 };
 
 const getReqDescription = (req: SbcRequirement) => {
   switch (req.type) {
     case 'TOTAL_CARDS':
-      return `Submit exactly ${req.value} duplicate cards.`;
+      return `Submit exactly ${req.value} duplicate card(s).`;
     case 'MIN_OVR':
       return `Every slotted card must be at least ${req.value} OVR.`;
+    case 'MAX_OVR':
+      return `At least ${req.count ?? 1} card(s) must have ${req.value} OVR or lower.`;
     case 'TEAM_OVR_MIN':
       return `Squad average rating must be ${req.value}+ OVR.`;
     case 'MIN_RARITY':
@@ -95,15 +102,18 @@ const getReqDescription = (req: SbcRequirement) => {
     case 'MAX_TEAMS':
       return `Maximum ${req.value} different NBA teams represented.`;
     case 'SPECIFIC_PLAYER_NAME':
-      return `Must include a card of ${req.value}.`;
+      return req.edition ? `Submit ${req.count ?? 1} card: ${req.value} (${req.edition}).` : `Submit ${req.count ?? 1} card: ${req.value}.`;
     case 'SPECIFIC_TEAM':
-      return `Must include ${req.count ?? 'all'} player(s) from ${req.value}.`;
+      if (req.teamsList && req.teamsList.length > 0) {
+        return `Must include at least ${req.count ?? 1} player(s) from ${req.teamsList.join(' or ')}.`;
+      }
+      return `Must include ${req.count ?? 'all'} player(s) from ${req.value}${req.era ? ` (${req.era})` : ''}.`;
     case 'SPECIAL_CARDS_MIN':
       return `Include at least ${req.count ?? req.value ?? 1}x Special Card(s) (All-Star / Award / Legend).`;
     case 'CATEGORY':
       return `Include ${req.count ?? 1}x card(s) from ${req.value} series.`;
     default:
-      return `${req.type}: ${req.value}`;
+      return `${req.value || 'Requirement'}`;
   }
 };
 

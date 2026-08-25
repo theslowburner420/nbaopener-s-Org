@@ -114,6 +114,51 @@
   animation: sbc-particles 8s linear infinite;
 }
 
+/* HIDDEN GEMS (JOYAS OCULTAS) CARD THEME */
+.sbc-card-hidden-gems,
+.card-hidden-gems {
+  background: radial-gradient(circle at 50% 25%, #064e3b 0%, #042f24 45%, #021510 100%) !important;
+  border: 2px solid #10b981 !important;
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.45), inset 0 0 20px rgba(6, 182, 212, 0.35) !important;
+  position: relative;
+  overflow: hidden;
+  contain: paint;
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.sbc-card-hidden-gems::before,
+.card-hidden-gems::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.25) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.3) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.sbc-card-hidden-gems::after,
+.card-hidden-gems:hover::after,
+.card-hidden-gems.gem-active::after {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(16, 185, 129, 0.3) 48%,
+    rgba(6, 182, 212, 0.35) 52%,
+    transparent 65%
+  );
+  animation: sbc-holo-slide 3.2s infinite linear;
+  pointer-events: none;
+  z-index: 2;
+  will-change: transform;
+}
+
 /* SCREAM EDITION (HALLOWEEN) CARD THEME */
 .sbc-card-scream,
 .card-scream {
@@ -1323,7 +1368,22 @@ img.card-img-hd {
   100% { box-shadow: 0 0 5px var(--rarity-franchise); }
 }
 
-/* Subtle Base Holographic Shimmer - More noticeable */
+/* Selected Slot Glow GPU Optimized Pulse */
+@keyframes slotSelectedPulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4), 0 5px 15px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.8), 0 8px 25px rgba(0, 0, 0, 0.7);
+  }
+}
+
+.selected-slot-pulse {
+  animation: slotSelectedPulse 1.6s ease-in-out infinite;
+  will-change: box-shadow;
+}
+
+/* Subtle Base Holographic Shimmer - GPU accelerated */
 .subtle-shimmer {
   position: absolute;
   inset: 0;
@@ -1345,6 +1405,10 @@ img.card-img-hd {
   background-size: 400% 400%;
   animation: shimmerMove 15s linear infinite;
   mix-blend-mode: overlay;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  contain: strict;
+  will-change: background-position;
 }
 
 .micro-sparkles {
@@ -1357,6 +1421,10 @@ img.card-img-hd {
   background-size: 30px 30px;
   animation: sparkleFloat 20s linear infinite;
   mix-blend-mode: screen;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  contain: strict;
+  will-change: background-position;
 }
 
 @keyframes shimmerMove {
@@ -1369,7 +1437,7 @@ img.card-img-hd {
   100% { background-position: 100px 100px; }
 }
 
-/* Moving Rainbow Foil Hologram (Visible at first glance) */
+/* Moving Rainbow Foil Hologram (Visible at first glance) - GPU optimized */
 .rainbow-foil {
   position: absolute;
   inset: 0;
@@ -1389,7 +1457,11 @@ img.card-img-hd {
   animation: rainbowMove 6s linear infinite;
   mix-blend-mode: color-dodge;
   opacity: 0.6;
-  filter: blur(15px) brightness(1.2);
+  filter: blur(8px) brightness(1.15);
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  contain: strict;
+  will-change: background-position;
 }
 
 .rainbow-foil::after {
@@ -1407,6 +1479,9 @@ img.card-img-hd {
   background-size: 200% 100%;
   animation: glintSwipe 3s ease-in-out infinite;
   mix-blend-mode: overlay;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  will-change: background-position;
 }
 
 @keyframes rainbowMove {

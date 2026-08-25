@@ -3,7 +3,7 @@ import { GameState, ViewType, Card, User, FranchiseState, CareerMatch as SeasonM
 import { ACHIEVEMENTS } from '../constants/achievements';
 import { supabase } from '../lib/supabase';
 import { Capacitor } from '@capacitor/core';
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { SocialLogin } from '@capgo/capacitor-social-login';
 import { unityAdsService } from '../services/unityAdsService';
 
 interface GameContextType extends GameState {
@@ -795,13 +795,21 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     try {
       if (Capacitor.isNativePlatform()) {
-        const googleUser = await GoogleAuth.signIn();
-        if (!googleUser?.authentication?.idToken) {
+        await SocialLogin.initialize({
+          google: {
+            webClientId: '103038526514-h2r91joiaeptjf39nc7lu475t3dqon70.apps.googleusercontent.com',
+          }
+        });
+        const res = await SocialLogin.login({
+          provider: 'google',
+          options: { scopes: ['email', 'profile'] }
+        });
+        if (res.provider !== 'google' || res.result.responseType !== 'online' || !res.result.idToken) {
           throw new Error('Google Sign-In did not return a valid ID token.');
         }
         const { error: authError } = await supabase.auth.signInWithIdToken({
           provider: 'google',
-          token: googleUser.authentication.idToken,
+          token: res.result.idToken,
         });
         if (authError) {
           throw authError;

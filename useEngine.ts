@@ -3,6 +3,7 @@ import { useNotification } from '../context/NotificationContext';
 import { ALL_CARDS, CARDS_BY_RARITY, CARDS_BY_SERIES } from '../data/cards';
 import { Card, Rarity } from '../types';
 import { ACHIEVEMENTS } from '../constants/achievements';
+import { isScreamEditionActive } from '../constants/screamEdition';
 
 export type PackType = 
   | 'rookie'
@@ -439,6 +440,12 @@ export function useEngine() {
   };
 
   const openPack = async (packType: PackType) => {
+    if (packType === 'scream_edition' || packType === 'scream') {
+      if (!isScreamEditionActive()) {
+        return null;
+      }
+    }
+
     let currentCoins = coins;
     if (packType !== 'random') {
       const price = PACK_PRICES[packType as keyof typeof PACK_PRICES] || 5000;
@@ -546,6 +553,7 @@ export function useEngine() {
   const generateDraftOptions = (count: number, position: string | null, excludedIds: string[], isElite: boolean = false, isCaptain: boolean = false): Card[] => {
     const options: Card[] = [];
     const seenIds = new Set(excludedIds);
+    const isScreamActive = isScreamEditionActive();
     
     // Get names of already drafted players to prevent different versions of same player
     const draftedNames = new Set(
@@ -560,6 +568,10 @@ export function useEngine() {
         if (seenIds.has(c.id)) return false;
         if (draftedNames.has(c.name)) return false; // Prevent duplicate players by name
         
+        // Exclude scheduled event cards (Scream Edition) unless event is active
+        const isScreamCard = c.series === 'Scream Edition' || c.category === 'Scream Edition' || c.id.startsWith('scream-');
+        if (isScreamCard && !isScreamActive) return false;
+
         // STRICT PLAYER-ONLY FILTER
         if (c.rarity === 'coach' || c.rarity === 'logo' || c.rarity === 'arena') return false;
         if (['Coach', 'Logo', 'Arena', 'Coach of the Year'].includes(c.category)) return false;
@@ -593,6 +605,8 @@ export function useEngine() {
         pool = ALL_CARDS.filter(c => {
           if (seenIds.has(c.id)) return false;
           if (draftedNames.has(c.name)) return false; // Still exclude by name in fallback
+          const isScreamCard = c.series === 'Scream Edition' || c.category === 'Scream Edition' || c.id.startsWith('scream-');
+          if (isScreamCard && !isScreamActive) return false;
           if (c.rarity === 'coach' || c.rarity === 'logo' || c.rarity === 'arena') return false;
           if (['Coach', 'Logo', 'Arena', 'Coach of the Year'].includes(c.category)) return false;
           if (['Duo', 'Dynasty', 'Big Three'].includes(c.category)) return false;
@@ -604,7 +618,14 @@ export function useEngine() {
 
       // Final fallback: allow duplicates if absolutely necessary (shouldn't happen with large pool)
       if (pool.length === 0) {
-        pool = ALL_CARDS.filter(c => !seenIds.has(c.id) && c.rarity !== 'coach' && c.rarity !== 'logo' && c.rarity !== 'arena' && !['Coach', 'Logo', 'Arena'].includes(c.category));
+        pool = ALL_CARDS.filter(c => {
+          if (seenIds.has(c.id)) return false;
+          const isScreamCard = c.series === 'Scream Edition' || c.category === 'Scream Edition' || c.id.startsWith('scream-');
+          if (isScreamCard && !isScreamActive) return false;
+          if (c.rarity === 'coach' || c.rarity === 'logo' || c.rarity === 'arena') return false;
+          if (['Coach', 'Logo', 'Arena'].includes(c.category)) return false;
+          return true;
+        });
       }
 
       const selectedCard = pool[Math.floor(Math.random() * pool.length)];

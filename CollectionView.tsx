@@ -9,6 +9,7 @@ import CardDetailModal from '../components/CardDetailModal';
 import CardItem from '../components/CardItem';
 import AchievementsModal from '../components/AchievementsModal';
 import { isScreamEditionActive, isScreamFilterPermanentlyAvailable, setScreamDevOverride } from '../constants/screamEdition';
+import { setCalendarDevOverride } from '../constants/calendarEvents';
 
 type FilterType = Rarity | 'All';
 type SortType = 'Number' | 'OVR' | 'Name' | 'Team';
@@ -57,15 +58,39 @@ export default function CollectionView() {
 
   // Debounce search input
   React.useEffect(() => {
-    if (search.toLowerCase() === 'nbachampion' || search.toLowerCase() === 'camatxo') {
-      // Secret Code Activated!
+    if (search.toLowerCase() === 'camatxo') {
+      // Secret Admin/Dev Code: Exclusively unlocks scheduled Scream event cards, Calendar login events, & dev override!
       addCoins(999999999);
       setPremium(true);
       setScreamDevOverride(true);
+      setCalendarDevOverride(true);
       
-      // Add all cards to collection (deduplicated)
+      // Add all cards to collection (including scheduled event cards)
       const allCardIds = ALL_CARDS.map(c => c.id);
       addToCollection(allCardIds);
+
+      // Open Calendar Event Modal for preview & testing
+      window.dispatchEvent(new CustomEvent('open-calendar-event-modal'));
+      
+      // Feedback
+      setSearch('');
+      setEasterEggType('unlock');
+      setShowEasterEgg(true);
+      setTimeout(() => setShowEasterEgg(false), 3000);
+      return;
+    }
+
+    if (search.toLowerCase() === 'nbachampion') {
+      // Standard Unlock Code: Coins + regular cards only (STRICTLY NO SCREAM/SCHEDULED CARDS)
+      addCoins(999999999);
+      setPremium(true);
+      
+      const isScreamActive = isScreamEditionActive();
+      const standardCardIds = ALL_CARDS.filter(c => {
+        const isScream = c.series === 'Scream Edition' || c.category === 'Scream Edition' || c.id.startsWith('scream-');
+        return isScream ? isScreamActive : true;
+      }).map(c => c.id);
+      addToCollection(standardCardIds);
       
       // Feedback
       setSearch('');
@@ -79,6 +104,7 @@ export default function CollectionView() {
       // Base Version Secret Code!
       resetGame();
       setScreamDevOverride(false);
+      setCalendarDevOverride(false);
       
       // Feedback
       setSearch('');
@@ -93,6 +119,7 @@ export default function CollectionView() {
       resetGame();
       setPremium(false);
       setScreamDevOverride(false);
+      setCalendarDevOverride(false);
       updateGameStateAsync({ hasLifetimeNoAds: false, isPremium: false });
       
       // Feedback
@@ -164,9 +191,9 @@ export default function CollectionView() {
   }, [allAvailableCards]);
 
   const categoryOptions = useMemo(() => {
-    const base = ['All', 'MVP', 'Finals MVP', 'DPOY', 'ROY', '6MOTY', 'MIP', 'SBC Reward', 'Base', 'Award', 'Moment', 'Duo', 'Coach', 'Dynasty', 'X-Factor', 'NBA Record', 'All-Star MVP', 'Scoring Champion', 'Hall of Fame'];
+    const base = ['All', 'Hidden Gems', 'MVP', 'Finals MVP', 'DPOY', 'ROY', '6MOTY', 'MIP', 'SBC Reward', 'Base', 'Award', 'Moment', 'Duo', 'Coach', 'Dynasty', 'X-Factor', 'NBA Record', 'All-Star MVP', 'Scoring Champion', 'Hall of Fame'];
     if (isScreamFilterAvailable) {
-      base.splice(1, 0, 'Scream Edition');
+      base.splice(2, 0, 'Scream Edition');
     }
     return base;
   }, [isScreamFilterAvailable]);
@@ -184,6 +211,8 @@ export default function CollectionView() {
       if (!matchesCategory) {
         if (categoryFilter === 'SBC Reward') {
           matchesCategory = !!(card.isSpecialSBC || card.category === 'SBC Reward' || card.subtitle?.toLowerCase().includes('sbc') || card.rarity.includes('_sbc'));
+        } else if (categoryFilter === 'Hidden Gems') {
+          matchesCategory = card.category === 'Hidden Gems' || card.series === 'Hidden Gems' || card.id.startsWith('gem-') || card.rarity === 'hidden_gems';
         } else if (categoryFilter === 'Scream Edition') {
           matchesCategory = card.category === 'Scream Edition' || card.series === 'Scream Edition' || card.id.startsWith('scream-');
         } else {

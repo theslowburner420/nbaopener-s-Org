@@ -16,8 +16,10 @@ import { Analytics } from "@vercel/analytics/react";
 import Header from './components/Header';
 import StaticAd from './components/StaticAd';
 import HalloweenEventModal from './components/HalloweenEventModal';
+import CalendarEventModal from './components/CalendarEventModal';
 import RewardedVideoModal from './components/RewardedVideoModal';
 import { unityAdsService } from './services/unityAdsService';
+import { getActiveCalendarEvents, calculateEventClaimStatus } from './constants/calendarEvents';
 import { Puzzle } from 'lucide-react';
 
 // Lazy load views for code splitting
@@ -105,6 +107,8 @@ function AppContent() {
   const [claimingLoginBonus, setClaimingLoginBonus] = useState(false);
   const isScreamActive = isScreamEditionActive();
   const [isHalloweenModalOpen, setIsHalloweenModalOpen] = useState(false);
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [selectedCalendarEventId, setSelectedCalendarEventId] = useState<'opening_tipoff' | 'black_friday'>('opening_tipoff');
   const [sbcInitialCategory, setSbcInitialCategory] = useState<any>('all');
   const [spookyFogEnabled, setSpookyFogEnabled] = useState<boolean>(() => {
     return localStorage.getItem('hoops_spooky_fog') !== 'false';
@@ -158,11 +162,46 @@ function AppContent() {
     }
   }, [isScreamActive]);
 
+  // Auto-open Calendar Event modal on session start if any calendar event is active and has unclaimed reward or not seen
+  useEffect(() => {
+    const activeCalendarEvents = getActiveCalendarEvents();
+    if (activeCalendarEvents.length > 0 && isInitialSyncDone) {
+      const primary = activeCalendarEvents[0];
+      setSelectedCalendarEventId(primary.id);
+
+      const sessionKey = `hoops_calendar_modal_seen_${primary.id}`;
+      const hasSeen = sessionStorage.getItem(sessionKey);
+      const claimStatus = calculateEventClaimStatus(primary);
+
+      // Show if unclaimed today or hasn't seen this session
+      if (claimStatus.canClaimToday || !hasSeen) {
+        const timer = setTimeout(() => {
+          setIsCalendarModalOpen(true);
+          sessionStorage.setItem(sessionKey, 'true');
+        }, 1200);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isInitialSyncDone]);
+
   // Listen for open-halloween-modal event from anywhere in the app
   useEffect(() => {
     const handleOpenModal = () => setIsHalloweenModalOpen(true);
     window.addEventListener('open-halloween-modal', handleOpenModal);
     return () => window.removeEventListener('open-halloween-modal', handleOpenModal);
+  }, []);
+
+  // Listen for open-calendar-event-modal event from anywhere in the app
+  useEffect(() => {
+    const handleOpenCalendar = (e: any) => {
+      const eventId = e.detail?.eventId;
+      if (eventId) {
+        setSelectedCalendarEventId(eventId);
+      }
+      setIsCalendarModalOpen(true);
+    };
+    window.addEventListener('open-calendar-event-modal', handleOpenCalendar);
+    return () => window.removeEventListener('open-calendar-event-modal', handleOpenCalendar);
   }, []);
 
   // Show login incentive if user is NOT logged in and hasn't seen it this session
@@ -756,6 +795,17 @@ function AppContent() {
               setCurrentView('sbc');
             }}
             onNavigateToDraft={() => setCurrentView('draft')}
+          />
+        )}
+
+        {/* Calendar Event Login Popup & Reward Showcase Modal */}
+        {isCalendarModalOpen && (
+          <CalendarEventModal
+            key="calendar-event-modal"
+            isOpen={isCalendarModalOpen}
+            initialEventId={selectedCalendarEventId}
+            onClose={() => setIsCalendarModalOpen(false)}
+            onNavigateToStore={() => setCurrentView('shop')}
           />
         )}
 

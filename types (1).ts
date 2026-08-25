@@ -1,6 +1,6 @@
-export type Rarity = 'bench' | 'starter' | 'allstar' | 'franchise' | 'legend' | 'coach' | 'dpoy' | 'roty' | 'record' | 'logo' | 'arena' | 'draft2026' | 'scoring_champ' | 'hof' | 'coy' | 'allnba_1st' | 'invincible' | 'galaxy' | 'legend_sbc' | 'icon_sbc' | 'moments_sbc' | 'future_star' | '6moy' | 'mip' | 'mvp' | 'fmvp';
+export type Rarity = 'bench' | 'starter' | 'allstar' | 'franchise' | 'legend' | 'coach' | 'dpoy' | 'roty' | 'record' | 'logo' | 'arena' | 'draft2026' | 'scoring_champ' | 'hof' | 'coy' | 'allnba_1st' | 'invincible' | 'galaxy' | 'legend_sbc' | 'icon_sbc' | 'moments_sbc' | 'future_star' | '6moy' | 'mip' | 'mvp' | 'fmvp' | 'hidden_gems';
 
-export type CardCategory = 'Base' | 'Award' | 'Moment' | 'Duo' | 'Coach' | 'Dynasty' | 'X-Factor' | 'NBA Record' | 'All-Star MVP' | 'Finals MVP' | 'Logo' | 'Arena' | 'Draft 2026' | 'Scoring Champion' | 'Hall of Fame' | 'Coach of the Year' | 'All-NBA 1st Team' | 'MVP' | 'DPOY' | 'ROY' | '6MOTY' | 'MIP' | 'Scream Edition';
+export type CardCategory = 'Base' | 'Award' | 'Moment' | 'Duo' | 'Coach' | 'Dynasty' | 'X-Factor' | 'NBA Record' | 'All-Star MVP' | 'Finals MVP' | 'Logo' | 'Arena' | 'Draft 2026' | 'Scoring Champion' | 'Hall of Fame' | 'Coach of the Year' | 'All-NBA 1st Team' | 'MVP' | 'DPOY' | 'ROY' | '6MOTY' | 'MIP' | 'Scream Edition' | 'Hidden Gems';
 
 export type RoleTier = 'S' | 'A' | 'B' | 'C' | 'D';
 

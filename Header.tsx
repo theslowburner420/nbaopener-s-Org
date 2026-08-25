@@ -1,13 +1,22 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
-import { LogIn, LogOut, User as UserIcon, Coins, AlertCircle, ChevronDown, Settings, Cloud, Check, RefreshCw } from 'lucide-react';
+import { LogIn, LogOut, User as UserIcon, Coins, AlertCircle, ChevronDown, Settings, Cloud, Check, RefreshCw, Calendar, Gift } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'motion/react';
+import { getActiveCalendarEvents, calculateEventClaimStatus } from '../constants/calendarEvents';
 
 const Header: React.FC = React.memo(() => {
   const { user, coins, login, logout, setCurrentView, isAuthLoading, isSaving, isBackgroundSaving } = useGame();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const activeCalendarEvents = getActiveCalendarEvents();
+  const primaryCalendarEvent = activeCalendarEvents.length > 0 ? activeCalendarEvents[0] : null;
+  const calendarClaimStatus = primaryCalendarEvent ? calculateEventClaimStatus(primaryCalendarEvent) : null;
+
+  const openCalendarModal = () => {
+    window.dispatchEvent(new CustomEvent('open-calendar-event-modal'));
+  };
 
   const isSyncing = isSaving || isBackgroundSaving;
 
@@ -52,7 +61,28 @@ const Header: React.FC = React.memo(() => {
       </div>
 
       {/* Right side: Coins & Profile */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-4">
+        {/* Calendar Event Quick Access Button (if active) */}
+        {primaryCalendarEvent && (
+          <button
+            onClick={openCalendarModal}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 md:px-3.5 md:py-2 rounded-full border transition-all relative ${
+              primaryCalendarEvent.id === 'opening_tipoff'
+                ? 'bg-amber-500/10 border-amber-500/40 text-amber-400 hover:bg-amber-500/20'
+                : 'bg-rose-500/10 border-rose-500/40 text-rose-400 hover:bg-rose-500/20'
+            }`}
+            title={`${primaryCalendarEvent.name} Calendar Rewards`}
+          >
+            <span className="text-sm">{primaryCalendarEvent.icon}</span>
+            <span className="text-[10px] md:text-xs font-black uppercase tracking-wider hidden sm:inline">
+              Day {calendarClaimStatus?.currentDayIndex || 1}
+            </span>
+            {calendarClaimStatus?.canClaimToday && (
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping absolute -top-0.5 -right-0.5" />
+            )}
+          </button>
+        )}
+
         {/* Coins Display */}
         <div className="flex items-center gap-2 bg-white/5 backdrop-blur-xl px-3 py-1.5 md:px-4 md:py-2 rounded-full border border-white/5 shadow-2xl group hover:border-amber-500/30 transition-colors cursor-pointer"
              onClick={() => setCurrentView('shop')}>

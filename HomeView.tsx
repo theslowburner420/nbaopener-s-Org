@@ -2,11 +2,17 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useGame } from '../context/GameContext';
 import { isScreamEditionActive, SCREAM_EDITION_CONFIG } from '../constants/screamEdition';
-import { Eye, EyeOff } from 'lucide-react';
+import { getActiveCalendarEvents, calculateEventClaimStatus } from '../constants/calendarEvents';
+import { Eye, EyeOff, Calendar, Gift, Flame, Sparkles, Coins, Layers } from 'lucide-react';
 
 const HomeView: React.FC = () => {
   const { setCurrentView } = useGame();
   const isScreamActive = isScreamEditionActive();
+  const activeCalendarEvents = getActiveCalendarEvents();
+  const primaryCalendarEvent = activeCalendarEvents.length > 0 ? activeCalendarEvents[0] : null;
+
+  const calendarClaimStatus = primaryCalendarEvent ? calculateEventClaimStatus(primaryCalendarEvent) : null;
+
   const [isBannerHidden, setIsBannerHidden] = useState<boolean>(() => {
     return localStorage.getItem('hoops_halloween_banner_hidden') === 'true';
   });
@@ -20,10 +26,86 @@ const HomeView: React.FC = () => {
     window.dispatchEvent(new CustomEvent('open-halloween-modal'));
   };
 
+  const openCalendarModal = (eventId?: string) => {
+    window.dispatchEvent(new CustomEvent('open-calendar-event-modal', { detail: { eventId } }));
+  };
+
   return (
     <div className="w-full flex flex-col bg-black">
       {/* Home Container */}
       <div className="flex-1 flex flex-col gap-1.5 md:gap-4 p-1.5 md:p-6 pb-6 md:pb-6 max-w-7xl mx-auto w-full">
+        {/* Calendar Login Events Banner (Opening Tip-Off / Black Friday) */}
+        {primaryCalendarEvent && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`relative group overflow-hidden rounded-2xl md:rounded-[2rem] border p-3 md:p-4 flex items-center justify-between shadow-lg transition-all cursor-pointer ${
+              primaryCalendarEvent.id === 'opening_tipoff'
+                ? 'border-amber-500/50 bg-gradient-to-r from-amber-950/90 via-zinc-950 to-zinc-950 shadow-amber-950/50 hover:border-amber-400'
+                : 'border-rose-500/50 bg-gradient-to-r from-rose-950/90 via-purple-950/60 to-zinc-950 shadow-rose-950/50 hover:border-rose-400'
+            }`}
+            onClick={() => openCalendarModal(primaryCalendarEvent.id)}
+          >
+            <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
+              <div className={`w-12 h-14 md:w-14 md:h-16 rounded-xl border flex flex-col items-center justify-center text-center shrink-0 shadow-md ${
+                primaryCalendarEvent.id === 'opening_tipoff'
+                  ? 'bg-amber-500/20 border-amber-500/60 text-amber-400'
+                  : 'bg-rose-500/20 border-rose-500/60 text-rose-400'
+              }`}>
+                <span className="text-lg md:text-2xl leading-none">{primaryCalendarEvent.icon}</span>
+                <span className="text-[8px] font-black uppercase mt-0.5 tracking-tighter">
+                  DAY {calendarClaimStatus?.currentDayIndex || 1}
+                </span>
+              </div>
+
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className={`px-2 py-0.5 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-wider shadow ${
+                    primaryCalendarEvent.id === 'opening_tipoff' ? 'bg-amber-500 text-black' : 'bg-rose-500 text-white'
+                  }`}>
+                    {primaryCalendarEvent.tag}
+                  </span>
+                  <span className="text-[9px] md:text-[10px] text-zinc-400 font-bold uppercase tracking-widest hidden sm:inline">
+                    {primaryCalendarEvent.totalDays} DAYS OF REWARDS
+                  </span>
+                </div>
+
+                <h3 className="text-sm md:text-lg font-black text-white uppercase tracking-tight mt-0.5 flex items-center gap-1.5 truncate">
+                  {primaryCalendarEvent.name}
+                  <span className="text-[10px] text-amber-400 font-bold tracking-widest hidden sm:inline">
+                    • +{calendarClaimStatus?.rewardToday?.coins?.toLocaleString()} COINS & +{calendarClaimStatus?.rewardToday?.packsCount} PACKS
+                  </span>
+                </h3>
+
+                <p className="text-[10px] md:text-xs text-zinc-300 truncate flex items-center gap-2">
+                  <span>{calendarClaimStatus?.canClaimToday ? "⚡ Today's reward is ready to claim!" : "✓ Today's reward claimed"}</span>
+                  <span className="text-zinc-500">•</span>
+                  <span className="text-amber-400 font-mono font-bold">Streak: Day {calendarClaimStatus?.currentDayIndex}/{primaryCalendarEvent.totalDays}</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openCalendarModal(primaryCalendarEvent.id);
+                }}
+                className={`px-3 py-1.5 md:px-4 md:py-2 rounded-xl font-black text-xs uppercase tracking-wider shrink-0 transition-transform active:scale-95 shadow-md flex items-center gap-1.5 ${
+                  calendarClaimStatus?.canClaimToday
+                    ? primaryCalendarEvent.id === 'opening_tipoff'
+                      ? 'bg-amber-400 hover:bg-amber-300 text-black shadow-[0_0_15px_rgba(245,158,11,0.5)] animate-pulse'
+                      : 'bg-rose-500 hover:bg-rose-400 text-white shadow-[0_0_15px_rgba(244,63,94,0.5)] animate-pulse'
+                    : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                }`}
+              >
+                <Gift size={14} />
+                <span>{calendarClaimStatus?.canClaimToday ? 'Claim' : 'View Calendar'}</span>
+              </button>
+            </div>
+          </motion.div>
+        )}
+
         {/* Halloween Scream Edition Special Event Banner / Minimized Strip */}
         {isScreamActive && (
           <AnimatePresence mode="wait">
@@ -203,34 +285,11 @@ const HomeView: React.FC = () => {
             </div>
           </motion.div>
     
-          {/* Bloque D: Franchise Mode */}
+          {/* Bloque D: SBC Mode (Placed above Franchise Mode, BETA removed) */}
           <motion.div 
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="relative group cursor-pointer overflow-hidden rounded-2xl md:rounded-[2.5rem] border border-white/5 bg-zinc-950 aspect-[3/1] md:aspect-auto md:h-[180px] lg:h-[240px]"
-            onClick={() => setCurrentView('career')}
-          >
-            <div className="absolute inset-0 z-0">
-              <img 
-                src="https://i.postimg.cc/CxGfW3j7/generated-image-(3).png" 
-                alt="Franchise Mode" 
-                className="w-full h-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-110"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            </div>
-
-            <div className="absolute top-2 right-2 md:top-4 md:right-4 z-10">
-              <span className="px-2 py-0.5 md:px-3 md:py-1 bg-amber-500 text-black text-[7px] md:text-[10px] font-black rounded-full uppercase italic">BETA</span>
-            </div>
-          </motion.div>
-
-          {/* Bloque E: SBC Mode */}
-          <motion.div 
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
             className="relative group cursor-pointer overflow-hidden rounded-2xl md:rounded-[2.5rem] border border-white/5 bg-zinc-950 aspect-[3/1] md:aspect-auto md:h-[180px] lg:h-[240px]"
             onClick={() => setCurrentView('sbc')}
           >
@@ -238,6 +297,25 @@ const HomeView: React.FC = () => {
               <img 
                 src="https://i.postimg.cc/2SkZNHTG/generated-image-(4).png" 
                 alt="SBC" 
+                className="w-full h-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-110"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            </div>
+          </motion.div>
+
+          {/* Bloque E: Franchise Mode */}
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="relative group cursor-pointer overflow-hidden rounded-2xl md:rounded-[2.5rem] border border-white/5 bg-zinc-950 aspect-[3/1] md:aspect-auto md:h-[180px] lg:h-[240px]"
+            onClick={() => setCurrentView('career')}
+          >
+            <div className="absolute inset-0 z-0">
+              <img 
+                src="https://i.postimg.cc/CxGfW3j7/generated-image-(3).png" 
+                alt="Franchise Mode" 
                 className="w-full h-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-110"
                 referrerPolicy="no-referrer"
               />

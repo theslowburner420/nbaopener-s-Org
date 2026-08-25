@@ -18,140 +18,67 @@ export const SBC_GROUPS: SbcGroup[] = [
       imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbwj-hgQKWkuaeUfver4JjXddqzh0xuiwDY8EHeOi8gJR3q0as9ce16iBj&s=10'
     },
     segments: [
-{
-            id: 'dynasty-bulls-seg-1',
-            name: '90s Bulls Foundation',
-            description: 'Submit 5 cards: Team OVR >= 85, min 3 Chicago Bulls 90s era cards.',
-            cardsRequired: 5,
-            slotPositions: [
-                  'PG',
-                  'SG',
-                  'SF',
-                  'PF',
-                  'C'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 5
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 85
-                  },
-                  {
-                        type: 'SPECIFIC_TEAM',
-                        value: 'CHI',
-                        count: 3,
-                        era: '90s'
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 3500,
-                  packType: 'duo_xfactor',
-                  packName: 'Dynamic Duo & X-Factor',
-                  description: '3,500 Coins + 1x Dynamic Duo Pack'
-            }
+      {
+        id: 'dynasty-bulls-seg-1',
+        name: '90s Bulls Foundation',
+        description: 'Submit 5 cards (PG, SG, SF, PF, C): Team OVR >= 85, min 5 Chicago Bulls 90s era cards.',
+        cardsRequired: 5,
+        slotPositions: ['PG', 'SG', 'SF', 'PF', 'C'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 5 },
+          { type: 'TEAM_OVR_MIN', value: 85 },
+          { type: 'SPECIFIC_TEAM', value: 'CHI', count: 5, era: '90s' }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 3500,
+          packType: 'duo_xfactor',
+          packName: 'Dynamic Duo Pack',
+          description: '3,500 Monedes + 1x Duo Pack'
+        }
       },
       {
-            id: 'dynasty-bulls-seg-2',
-            name: 'Michael Jordan 1998 Finals MVP',
-            description: 'Submit 1 card: Michael Jordan — Finals MVP 1998 (any copy).',
-            cardsRequired: 1,
-            slotPositions: [
-                  'SG'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Michael Jordan',
-                        edition: 'Finals MVP 1998',
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 7500,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '7,500 Coins + 1x All-Star Pack'
-            }
+        id: 'dynasty-bulls-seg-2',
+        name: 'Michael Jordan 1998 Finals MVP',
+        description: 'Submit 1 card: Michael Jordan (Finals MVP 1998).',
+        cardsRequired: 1,
+        slotPositions: ['SG'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 1 },
+          { type: 'SPECIFIC_PLAYER_NAME', value: 'Michael Jordan', edition: 'Finals MVP 1998', count: 1 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 7500,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '7,500 Monedes + 1x All-Star Pack'
+        }
       },
       {
-            id: 'dynasty-bulls-seg-3',
-            name: 'Championship Supporting Cast',
-            description: 'Submit 3 cards: Min 2 of Pippen, Rodman, Kerr (Chicago Bulls), Team OVR >= 88.',
-            cardsRequired: 3,
-            slotPositions: [
-                  'SF',
-                  'PF',
-                  'PG'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 3
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Scottie Pippen, Dennis Rodman or Steve Kerr',
-                        count: 2,
-                        playersList: [
-                              'Scottie Pippen',
-                              'Dennis Rodman',
-                              'Steve Kerr'
-                        ]
-                  },
-                  {
-                        type: 'SPECIFIC_TEAM',
-                        value: 'CHI',
-                        count: 3
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 88
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 10000,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '10,000 Coins + 1x All-Star Pack'
-            }
-      },
-      {
-            id: 'dynasty-bulls-seg-4',
-            name: 'The Last Shot 1998 Moment',
-            description: 'Submit 1 card: Michael Jordan — Moment \'The Last Shot\' (1998).',
-            cardsRequired: 1,
-            slotPositions: [
-                  'SG'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Michael Jordan',
-                        edition: 'Moment \'The Last Shot\' (1998)',
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 15000,
-                  packType: 'mvp',
-                  packName: 'Finals MVP & Awards Pack',
-                  description: '15,000 Coins + 1x Finals MVP Pack'
-            }
+        id: 'dynasty-bulls-seg-3',
+        name: 'Championship Supporting Cast',
+        description: 'Submit 3 cards (SF, PF, PG): Team OVR >= 88, min 2 of Pippen or Rodman (CHI).',
+        cardsRequired: 3,
+        slotPositions: ['SF', 'PF', 'PG'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 3 },
+          { type: 'TEAM_OVR_MIN', value: 88 },
+          { 
+            type: 'SPECIFIC_PLAYER_NAME', 
+            value: 'Scottie Pippen or Dennis Rodman', 
+            count: 2, 
+            playersList: ['Scottie Pippen', 'Dennis Rodman'] 
+          },
+          { type: 'SPECIFIC_TEAM', value: 'CHI', count: 2 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 12000,
+          packType: 'mvp',
+          packName: 'Finals MVP Pack',
+          description: '12,000 Monedes + 1x Finals MVP Pack'
+        }
       }
     ]
   },
@@ -172,154 +99,67 @@ export const SBC_GROUPS: SbcGroup[] = [
       imageUrl: 'https://a.espncdn.com/photo/2018/0608/r382973_608x342_16-9.jpg'
     },
     segments: [
-{
-            id: 'dynasty-warriors-seg-1',
-            name: 'Dub Nation Foundation',
-            description: 'Submit 5 cards: Team OVR >= 84, min 3 Golden State Warriors cards.',
-            cardsRequired: 5,
-            slotPositions: [
-                  'PG',
-                  'SG',
-                  'SF',
-                  'PF',
-                  'C'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 5
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 84
-                  },
-                  {
-                        type: 'SPECIFIC_TEAM',
-                        value: 'GSW',
-                        count: 3
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 3500,
-                  packType: 'duo_xfactor',
-                  packName: 'Dynamic Duo & X-Factor',
-                  description: '3,500 Coins + 1x Dynamic Duo Pack'
-            }
+      {
+        id: 'dynasty-warriors-seg-1',
+        name: 'Splash Era',
+        description: 'Submit 5 cards (PG, SG, SF, PF, C): Team OVR >= 85, min 5 Golden State Warriors 2010s/2020s cards.',
+        cardsRequired: 5,
+        slotPositions: ['PG', 'SG', 'SF', 'PF', 'C'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 5 },
+          { type: 'TEAM_OVR_MIN', value: 85 },
+          { type: 'SPECIFIC_TEAM', value: 'GSW', count: 5, era: '2010s/2020s' }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 3500,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '3,500 Monedes + 1x All-Star Pack'
+        }
       },
       {
-            id: 'dynasty-warriors-seg-2',
-            name: 'Original Big Three',
-            description: 'Submit 3 cards: Stephen Curry + Klay Thompson + Draymond Green (all GSW), Team OVR >= 87.',
-            cardsRequired: 3,
-            slotPositions: [
-                  'PG',
-                  'SG',
-                  'PF'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 3
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Stephen Curry',
-                        count: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Klay Thompson',
-                        count: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Draymond Green',
-                        count: 1
-                  },
-                  {
-                        type: 'SPECIFIC_TEAM',
-                        value: 'GSW',
-                        count: 3
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 87
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 7000,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '7,000 Coins + 1x All-Star Pack'
-            }
+        id: 'dynasty-warriors-seg-2',
+        name: 'Stephen Curry Finals MVP 2022',
+        description: 'Submit 1 card (PG): Stephen Curry (Finals MVP 2022).',
+        cardsRequired: 1,
+        slotPositions: ['PG'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 1 },
+          { type: 'SPECIFIC_PLAYER_NAME', value: 'Stephen Curry', edition: 'Finals MVP 2022', count: 1 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 7500,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '7,500 Monedes + 1x All-Star Pack'
+        }
       },
       {
-            id: 'dynasty-warriors-seg-3',
-            name: 'Bang Bang 2015 Moment',
-            description: 'Submit 1 card: Stephen Curry — Moment \'Bang Bang\' (2015).',
-            cardsRequired: 1,
-            slotPositions: [
-                  'PG'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Stephen Curry',
-                        edition: 'Moment \'Bang Bang\' (2015)',
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 9000,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '9,000 Coins + 1x All-Star Pack'
-            }
-      },
-      {
-            id: 'dynasty-warriors-seg-4',
-            name: 'Hampton 5 & KD Era',
-            description: 'Submit 3 cards: Min 1 Kevin Durant (GSW) + 2 GSW cards, Team OVR >= 90.',
-            cardsRequired: 3,
-            slotPositions: [
-                  'SF',
-                  'PG',
-                  'SG'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 3
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Kevin Durant',
-                        count: 1
-                  },
-                  {
-                        type: 'SPECIFIC_TEAM',
-                        value: 'GSW',
-                        count: 3
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 90
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 12500,
-                  packType: 'mvp',
-                  packName: 'Finals MVP & Awards Pack',
-                  description: '12,500 Coins + 1x Finals MVP Pack'
-            }
+        id: 'dynasty-warriors-seg-3',
+        name: 'Golden State Core',
+        description: 'Submit 4 cards (SG, PF, SF, PG): Team OVR >= 87, min 4 GSW cards with Klay Thompson, Draymond Green or Andre Iguodala.',
+        cardsRequired: 4,
+        slotPositions: ['SG', 'PF', 'SF', 'PG'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 4 },
+          { type: 'TEAM_OVR_MIN', value: 87 },
+          { 
+            type: 'SPECIFIC_PLAYER_NAME', 
+            value: 'Klay Thompson, Draymond Green or Andre Iguodala', 
+            count: 3, 
+            playersList: ['Klay Thompson', 'Draymond Green', 'Andre Iguodala'] 
+          },
+          { type: 'SPECIFIC_TEAM', value: 'GSW', count: 4 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 10000,
+          packType: 'mvp',
+          packName: 'Finals MVP Pack',
+          description: '10,000 Monedes + 1x Finals MVP Pack'
+        }
       }
     ]
   },
@@ -339,129 +179,60 @@ export const SBC_GROUPS: SbcGroup[] = [
       imageUrl: 'https://cdn.nba.com/headshots/nba/latest/1040x760/893.png'
     },
     segments: [
-{
-            id: 'hof-jordan-seg-1',
-            name: 'Michael Jordan 90+ OVR',
-            description: 'Submit 1 card: Michael Jordan (any edition, OVR >= 90).',
-            cardsRequired: 1,
-            slotPositions: [
-                  'SG'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Michael Jordan',
-                        minOvr: 90,
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 4000,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '4,000 Coins + 1x All-Star Pack'
-            }
+      {
+        id: 'hof-jordan-seg-1',
+        name: 'Michael Jordan',
+        description: 'Submit 1 card: Michael Jordan.',
+        cardsRequired: 1,
+        slotPositions: ['SG'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 1 },
+          { type: 'SPECIFIC_PLAYER_NAME', value: 'Michael Jordan', count: 1 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 4000,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '4,000 Monedes + 1x All-Star Pack'
+        }
       },
       {
-            id: 'hof-jordan-seg-2',
-            name: 'Chicago Bulls Elite Unit',
-            description: 'Submit 3 cards: Min 2 Chicago Bulls cards, Team OVR >= 89.',
-            cardsRequired: 3,
-            slotPositions: [
-                  'SG',
-                  'SF',
-                  'PF'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 3
-                  },
-                  {
-                        type: 'SPECIFIC_TEAM',
-                        value: 'CHI',
-                        count: 2
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 89
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 8000,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '8,000 Coins + 1x All-Star Pack'
-            }
+        id: 'hof-jordan-seg-2',
+        name: 'Michael Jordan Finals MVP 1996',
+        description: 'Submit 1 card: Michael Jordan (Finals MVP 1996).',
+        cardsRequired: 1,
+        slotPositions: ['SG'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 1 },
+          { type: 'SPECIFIC_PLAYER_NAME', value: 'Michael Jordan', edition: 'Finals MVP 1996', count: 1 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 8000,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '8,000 Monedes + 1x All-Star Pack'
+        }
       },
       {
-            id: 'hof-jordan-seg-3',
-            name: 'Michael Jordan All-Star MVP',
-            description: 'Submit 1 card: Michael Jordan — All-Star MVP 1996 or 1998.',
-            cardsRequired: 1,
-            slotPositions: [
-                  'SG'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Michael Jordan',
-                        edition: 'All-Star MVP 1996 or 1998',
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 12000,
-                  packType: 'mvp',
-                  packName: 'Finals MVP & Awards Pack',
-                  description: '12,000 Coins + 1x Finals MVP Pack'
-            }
-      },
-      {
-            id: 'hof-jordan-seg-4',
-            name: 'Apex Hall of Fame Squad',
-            description: 'Submit 5 cards: Team OVR >= 92, min 1 card with 96+ OVR.',
-            cardsRequired: 5,
-            slotPositions: [
-                  'PG',
-                  'SG',
-                  'SF',
-                  'PF',
-                  'C'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 5
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 92
-                  },
-                  {
-                        type: 'SPECIAL_CARDS_MIN',
-                        value: 1,
-                        minOvr: 96
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 20000,
-                  packType: 'mvp',
-                  packName: 'Finals MVP & Awards Pack',
-                  description: '20,000 Coins + 1x Finals MVP Pack'
-            }
+        id: 'hof-jordan-seg-3',
+        name: 'Plantilla Chicago Bulls',
+        description: 'Submit 3 cards (SG, SF, PF): Team OVR >= 86, min 3 Chicago Bulls cards.',
+        cardsRequired: 3,
+        slotPositions: ['SG', 'SF', 'PF'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 3 },
+          { type: 'TEAM_OVR_MIN', value: 86 },
+          { type: 'SPECIFIC_TEAM', value: 'CHI', count: 3 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 15000,
+          packType: 'mvp',
+          packName: 'Finals MVP & Awards Pack',
+          description: '15,000 Monedes + 1x Finals MVP Pack'
+        }
       }
     ]
   },
@@ -481,94 +252,60 @@ export const SBC_GROUPS: SbcGroup[] = [
       imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2j9T_I8bFC3KvEn7km58G51B0h5dhsroc7vbGgFO8og&s=10'
     },
     segments: [
-{
-            id: 'hof-kobe-seg-1',
-            name: 'Kobe Bryant 88+ OVR',
-            description: 'Submit 1 card: Kobe Bryant (any edition, OVR >= 88).',
-            cardsRequired: 1,
-            slotPositions: [
-                  'SG'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Kobe Bryant',
-                        minOvr: 88,
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 4000,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '4,000 Coins + 1x All-Star Pack'
-            }
+      {
+        id: 'hof-kobe-seg-1',
+        name: 'Kobe Bryant',
+        description: 'Submit 1 card: Kobe Bryant.',
+        cardsRequired: 1,
+        slotPositions: ['SG'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 1 },
+          { type: 'SPECIFIC_PLAYER_NAME', value: 'Kobe Bryant', count: 1 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 4000,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '4,000 Monedes + 1x All-Star Pack'
+        }
       },
       {
-            id: 'hof-kobe-seg-2',
-            name: 'Kobe Bryant All-Star MVP',
-            description: 'Submit 1 card: Kobe Bryant — All-Star MVP (2002, 2007, 2009 or 2011).',
-            cardsRequired: 1,
-            slotPositions: [
-                  'SG'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Kobe Bryant',
-                        edition: 'All-Star MVP (2002, 2007, 2009, 2011)',
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 8000,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '8,000 Coins + 1x All-Star Pack'
-            }
+        id: 'hof-kobe-seg-2',
+        name: 'Kobe Bryant MVP',
+        description: 'Submit 1 card: Kobe Bryant MVP.',
+        cardsRequired: 1,
+        slotPositions: ['SG'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 1 },
+          { type: 'SPECIFIC_PLAYER_NAME', value: 'Kobe Bryant', edition: 'MVP', count: 1 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 8000,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '8,000 Monedes + 1x All-Star Pack'
+        }
       },
       {
-            id: 'hof-kobe-seg-3',
-            name: 'Lakers Showtime Spirit',
-            description: 'Submit 3 cards: Min 2 Los Angeles Lakers cards, Team OVR >= 90.',
-            cardsRequired: 3,
-            slotPositions: [
-                  'SG',
-                  'SF',
-                  'C'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 3
-                  },
-                  {
-                        type: 'SPECIFIC_TEAM',
-                        value: 'LAL',
-                        count: 2
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 90
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 15000,
-                  packType: 'mvp',
-                  packName: 'Finals MVP & Awards Pack',
-                  description: '15,000 Coins + 1x Finals MVP Pack'
-            }
+        id: 'hof-kobe-seg-3',
+        name: 'Plantilla Los Angeles Lakers',
+        description: 'Submit 3 cards (SG, SF, C): Team OVR >= 85, min 3 Los Angeles Lakers cards.',
+        cardsRequired: 3,
+        slotPositions: ['SG', 'SF', 'C'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 3 },
+          { type: 'TEAM_OVR_MIN', value: 85 },
+          { type: 'SPECIFIC_TEAM', value: 'LAL', count: 3 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 15000,
+          packType: 'mvp',
+          packName: 'Finals MVP & Awards Pack',
+          description: '15,000 Monedes + 1x Finals MVP Pack'
+        }
       }
     ]
   },
@@ -588,70 +325,65 @@ export const SBC_GROUPS: SbcGroup[] = [
       imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRID8uPzWcjh7zfvj9k4qLQdqVuUpgfP4wnYnCtwU5TVQ&s=10'
     },
     segments: [
-{
-            id: 'hof-kareem-seg-1',
-            name: 'Kareem Abdul-Jabbar 87+ OVR',
-            description: 'Submit 1 card: Kareem Abdul-Jabbar (OVR >= 87).',
-            cardsRequired: 1,
-            slotPositions: [
-                  'C'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Kareem Abdul-Jabbar',
-                        minOvr: 87,
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 4000,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '4,000 Coins + 1x All-Star Pack'
-            }
+      {
+        id: 'hof-kareem-seg-1',
+        name: 'Kareem Abdul-Jabbar',
+        description: 'Submit 1 card: Kareem Abdul-Jabbar.',
+        cardsRequired: 1,
+        slotPositions: ['C'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 1 },
+          { type: 'SPECIFIC_PLAYER_NAME', value: 'Kareem Abdul-Jabbar', count: 1 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 4000,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '4,000 Monedes + 1x All-Star Pack'
+        }
       },
       {
-            id: 'hof-kareem-seg-2',
-            name: 'Lakers / Bucks Dominance',
-            description: 'Submit 3 cards: Min 2 Los Angeles Lakers or Milwaukee Bucks cards, Team OVR >= 90.',
-            cardsRequired: 3,
-            slotPositions: [
-                  'C',
-                  'PF',
-                  'PG'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 3
-                  },
-                  {
-                        type: 'SPECIFIC_TEAM',
-                        value: 'LAL or MIL',
-                        count: 2,
-                        teamsList: [
-                              'LAL',
-                              'MIL'
-                        ]
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 90
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 12000,
-                  packType: 'mvp',
-                  packName: 'Finals MVP & Awards Pack',
-                  description: '12,000 Coins + 1x Finals MVP Pack'
-            }
+        id: 'hof-kareem-seg-2',
+        name: 'Kareem Finals MVP',
+        description: 'Submit 1 card: Kareem Abdul-Jabbar (Finals MVP).',
+        cardsRequired: 1,
+        slotPositions: ['C'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 1 },
+          { type: 'SPECIFIC_PLAYER_NAME', value: 'Kareem Abdul-Jabbar', edition: 'Finals MVP', count: 1 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 8000,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '8,000 Monedes + 1x All-Star Pack'
+        }
+      },
+      {
+        id: 'hof-kareem-seg-3',
+        name: 'Plantilla Lakers / Bucks',
+        description: 'Submit 3 cards (C, PG, PF): Team OVR >= 86, min 3 Los Angeles Lakers or Milwaukee Bucks cards.',
+        cardsRequired: 3,
+        slotPositions: ['C', 'PG', 'PF'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 3 },
+          { type: 'TEAM_OVR_MIN', value: 86 },
+          { 
+            type: 'SPECIFIC_TEAM', 
+            value: 'LAL or MIL', 
+            count: 3, 
+            teamsList: ['LAL', 'MIL'] 
+          }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 15000,
+          packType: 'mvp',
+          packName: 'Finals MVP & Awards Pack',
+          description: '15,000 Monedes + 1x Finals MVP Pack'
+        }
       }
     ]
   },
@@ -671,94 +403,42 @@ export const SBC_GROUPS: SbcGroup[] = [
       imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0THNsE9tWM1-Bcm-g8mE1on9kuhUxX6Is-AtDFmSPPA&s=10'
     },
     segments: [
-{
-            id: 'hof-bird-seg-1',
-            name: 'Larry Bird 86+ OVR',
-            description: 'Submit 1 card: Larry Bird (OVR >= 86).',
-            cardsRequired: 1,
-            slotPositions: [
-                  'SF'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Larry Bird',
-                        minOvr: 86,
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 3500,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '3,500 Coins + 1x All-Star Pack'
-            }
+      {
+        id: 'hof-bird-seg-1',
+        name: 'Larry Bird',
+        description: 'Submit 1 card: Larry Bird.',
+        cardsRequired: 1,
+        slotPositions: ['SF'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 1 },
+          { type: 'SPECIFIC_PLAYER_NAME', value: 'Larry Bird', count: 1 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 4000,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '4,000 Monedes + 1x All-Star Pack'
+        }
       },
       {
-            id: 'hof-bird-seg-2',
-            name: 'Larry Bird All-Star MVP 1982',
-            description: 'Submit 1 card: Larry Bird — All-Star MVP 1982.',
-            cardsRequired: 1,
-            slotPositions: [
-                  'SF'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Larry Bird',
-                        edition: 'All-Star MVP 1982',
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 7000,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '7,000 Coins + 1x All-Star Pack'
-            }
-      },
-      {
-            id: 'hof-bird-seg-3',
-            name: 'Boston Celtics Pride',
-            description: 'Submit 3 cards: Min 2 Boston Celtics cards, Team OVR >= 89.',
-            cardsRequired: 3,
-            slotPositions: [
-                  'SF',
-                  'PF',
-                  'PG'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 3
-                  },
-                  {
-                        type: 'SPECIFIC_TEAM',
-                        value: 'BOS',
-                        count: 2
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 89
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 12000,
-                  packType: 'mvp',
-                  packName: 'Finals MVP & Awards Pack',
-                  description: '12,000 Coins + 1x Finals MVP Pack'
-            }
+        id: 'hof-bird-seg-2',
+        name: 'Plantilla Boston Celtics',
+        description: 'Submit 3 cards (SF, PF, PG): Team OVR >= 85, min 3 Boston Celtics cards.',
+        cardsRequired: 3,
+        slotPositions: ['SF', 'PF', 'PG'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 3 },
+          { type: 'TEAM_OVR_MIN', value: 85 },
+          { type: 'SPECIFIC_TEAM', value: 'BOS', count: 3 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 12000,
+          packType: 'mvp',
+          packName: 'Finals MVP & Awards Pack',
+          description: '12,000 Monedes + 1x Finals MVP Pack'
+        }
       }
     ]
   },
@@ -778,177 +458,42 @@ export const SBC_GROUPS: SbcGroup[] = [
       imageUrl: 'https://wallpapers.com/images/hd/magic-johnson-golden-art-2gfb0a8ly81nbgp2.jpg'
     },
     segments: [
-{
-            id: 'hof-magic-seg-1',
-            name: 'Magic Johnson 86+ OVR',
-            description: 'Submit 1 card: Magic Johnson (OVR >= 86).',
-            cardsRequired: 1,
-            slotPositions: [
-                  'PG'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Magic Johnson',
-                        minOvr: 86,
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 3500,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '3,500 Coins + 1x All-Star Pack'
-            }
+      {
+        id: 'hof-magic-seg-1',
+        name: 'Magic Johnson',
+        description: 'Submit 1 card: Magic Johnson.',
+        cardsRequired: 1,
+        slotPositions: ['PG'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 1 },
+          { type: 'SPECIFIC_PLAYER_NAME', value: 'Magic Johnson', count: 1 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 4000,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '4,000 Monedes + 1x All-Star Pack'
+        }
       },
       {
-            id: 'hof-magic-seg-2',
-            name: 'Magic Johnson Finals MVP',
-            description: 'Submit 1 card: Magic Johnson — Finals MVP (1980, 1982 or 1987).',
-            cardsRequired: 1,
-            slotPositions: [
-                  'PG'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Magic Johnson',
-                        edition: 'Finals MVP (1980, 1982, 1987)',
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 7000,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '7,000 Coins + 1x All-Star Pack'
-            }
-      },
-      {
-            id: 'hof-magic-seg-3',
-            name: 'Showtime Lakers Unit',
-            description: 'Submit 3 cards: Min 2 Los Angeles Lakers cards, Team OVR >= 89.',
-            cardsRequired: 3,
-            slotPositions: [
-                  'PG',
-                  'SG',
-                  'C'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 3
-                  },
-                  {
-                        type: 'SPECIFIC_TEAM',
-                        value: 'LAL',
-                        count: 2
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 89
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 12000,
-                  packType: 'mvp',
-                  packName: 'Finals MVP & Awards Pack',
-                  description: '12,000 Coins + 1x Finals MVP Pack'
-            }
-      }
-    ]
-  },
-  {
-    id: 'sbc-group-hof-shaquille-oneal',
-    name: "Shaquille O\'Neal Most Dominant",
-    description: "Complete all 3 squad challenges to unlock 97 OVR Legend SBC Shaquille O\'Neal.",
-    category: 'hof_legends',
-    difficulty: 'legendary',
-    type: 'permanent',
-    expiresAt: null,
-    isActive: true,
-    reward: {
-      playerName: "Shaquille O\'Neal",
-      rarity: 'legend_sbc',
-      ovr: 97,
-      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgp_YZyi0CaUNKaw2gpDE4DRJJdCHO2g4v6V4hFgaoyOfwjhdgVDUxMtvz&s=10'
-    },
-    segments: [
-{
-            id: 'hof-shaq-seg-1',
-            name: 'Shaquille O\'Neal 87+ OVR',
-            description: 'Submit 1 card: Shaquille O\'Neal (OVR >= 87).',
-            cardsRequired: 1,
-            slotPositions: [
-                  'C'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Shaquille O\'Neal',
-                        minOvr: 87,
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 4000,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '4,000 Coins + 1x All-Star Pack'
-            }
-      },
-      {
-            id: 'hof-shaq-seg-2',
-            name: 'Lakers / Magic Dominance',
-            description: 'Submit 3 cards: Min 2 Los Angeles Lakers or Orlando Magic cards, Team OVR >= 89.',
-            cardsRequired: 3,
-            slotPositions: [
-                  'C',
-                  'SG',
-                  'PF'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 3
-                  },
-                  {
-                        type: 'SPECIFIC_TEAM',
-                        value: 'LAL or ORL',
-                        count: 2,
-                        teamsList: [
-                              'LAL',
-                              'ORL'
-                        ]
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 89
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 12000,
-                  packType: 'mvp',
-                  packName: 'Finals MVP & Awards Pack',
-                  description: '12,000 Coins + 1x Finals MVP Pack'
-            }
+        id: 'hof-magic-seg-2',
+        name: 'Showtime Lakers',
+        description: 'Submit 3 cards (PG, SG, C): Team OVR >= 85, min 3 Los Angeles Lakers cards.',
+        cardsRequired: 3,
+        slotPositions: ['PG', 'SG', 'C'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 3 },
+          { type: 'TEAM_OVR_MIN', value: 85 },
+          { type: 'SPECIFIC_TEAM', value: 'LAL', count: 3 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 12000,
+          packType: 'mvp',
+          packName: 'Finals MVP & Awards Pack',
+          description: '12,000 Monedes + 1x Finals MVP Pack'
+        }
       }
     ]
   },
@@ -968,66 +513,42 @@ export const SBC_GROUPS: SbcGroup[] = [
       imageUrl: 'https://wp.theringer.com/wp-content/uploads/2024/10/DreamShakeExcerpt_Getty_Ringer.jpg'
     },
     segments: [
-{
-            id: 'hof-hakeem-seg-1',
-            name: 'Hakeem Olajuwon 86+ OVR',
-            description: 'Submit 1 card: Hakeem Olajuwon (OVR >= 86).',
-            cardsRequired: 1,
-            slotPositions: [
-                  'C'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Hakeem Olajuwon',
-                        minOvr: 86,
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 3500,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '3,500 Coins + 1x All-Star Pack'
-            }
+      {
+        id: 'hof-hakeem-seg-1',
+        name: 'Hakeem Olajuwon',
+        description: 'Submit 1 card: Hakeem Olajuwon.',
+        cardsRequired: 1,
+        slotPositions: ['C'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 1 },
+          { type: 'SPECIFIC_PLAYER_NAME', value: 'Hakeem Olajuwon', count: 1 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 4000,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '4,000 Monedes + 1x All-Star Pack'
+        }
       },
       {
-            id: 'hof-hakeem-seg-2',
-            name: 'Houston Rockets Dominance',
-            description: 'Submit 3 cards: Min 2 Houston Rockets cards, Team OVR >= 89.',
-            cardsRequired: 3,
-            slotPositions: [
-                  'C',
-                  'SG',
-                  'PF'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 3
-                  },
-                  {
-                        type: 'SPECIFIC_TEAM',
-                        value: 'HOU',
-                        count: 2
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 89
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 12000,
-                  packType: 'mvp',
-                  packName: 'Finals MVP & Awards Pack',
-                  description: '12,000 Coins + 1x Finals MVP Pack'
-            }
+        id: 'hof-hakeem-seg-2',
+        name: 'Houston Rockets Championship Squad',
+        description: 'Submit 3 cards (C, SG, SF): Team OVR >= 85, min 3 Houston Rockets cards.',
+        cardsRequired: 3,
+        slotPositions: ['C', 'SG', 'SF'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 3 },
+          { type: 'TEAM_OVR_MIN', value: 85 },
+          { type: 'SPECIFIC_TEAM', value: 'HOU', count: 3 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 12000,
+          packType: 'mvp',
+          packName: 'Finals MVP & Awards Pack',
+          description: '12,000 Monedes + 1x Finals MVP Pack'
+        }
       }
     ]
   },
@@ -1047,94 +568,42 @@ export const SBC_GROUPS: SbcGroup[] = [
       imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKhOZuO6XB33_azKlUkW7ujNttsi0mTwnPaWqMgOtG4A&s=10'
     },
     segments: [
-{
-            id: 'hof-duncan-seg-1',
-            name: 'Tim Duncan 86+ OVR',
-            description: 'Submit 1 card: Tim Duncan (OVR >= 86).',
-            cardsRequired: 1,
-            slotPositions: [
-                  'PF'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Tim Duncan',
-                        minOvr: 86,
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 3500,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '3,500 Coins + 1x All-Star Pack'
-            }
+      {
+        id: 'hof-duncan-seg-1',
+        name: 'Tim Duncan',
+        description: 'Submit 1 card: Tim Duncan.',
+        cardsRequired: 1,
+        slotPositions: ['PF'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 1 },
+          { type: 'SPECIFIC_PLAYER_NAME', value: 'Tim Duncan', count: 1 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 4000,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '4,000 Monedes + 1x All-Star Pack'
+        }
       },
       {
-            id: 'hof-duncan-seg-2',
-            name: 'Tim Duncan Finals MVP',
-            description: 'Submit 1 card: Tim Duncan — Finals MVP.',
-            cardsRequired: 1,
-            slotPositions: [
-                  'PF'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Tim Duncan',
-                        edition: 'Finals MVP',
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 7000,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '7,000 Coins + 1x All-Star Pack'
-            }
-      },
-      {
-            id: 'hof-duncan-seg-3',
-            name: 'San Antonio Spurs Pride',
-            description: 'Submit 3 cards: Min 2 San Antonio Spurs cards, Team OVR >= 89.',
-            cardsRequired: 3,
-            slotPositions: [
-                  'PF',
-                  'SG',
-                  'PG'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 3
-                  },
-                  {
-                        type: 'SPECIFIC_TEAM',
-                        value: 'SAS',
-                        count: 2
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 89
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 12000,
-                  packType: 'mvp',
-                  packName: 'Finals MVP & Awards Pack',
-                  description: '12,000 Coins + 1x Finals MVP Pack'
-            }
+        id: 'hof-duncan-seg-2',
+        name: 'San Antonio Spurs Dynasty',
+        description: 'Submit 3 cards (PF, PG, SG): Team OVR >= 85, min 3 San Antonio Spurs cards.',
+        cardsRequired: 3,
+        slotPositions: ['PF', 'PG', 'SG'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 3 },
+          { type: 'TEAM_OVR_MIN', value: 85 },
+          { type: 'SPECIFIC_TEAM', value: 'SAS', count: 3 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 12000,
+          packType: 'mvp',
+          packName: 'Finals MVP & Awards Pack',
+          description: '12,000 Monedes + 1x Finals MVP Pack'
+        }
       }
     ]
   },
@@ -1154,102 +623,59 @@ export const SBC_GROUPS: SbcGroup[] = [
       imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRt7dAV8LiDmKQYTcxSF3HyWABv39TxUOMMLFCnuBolUw&s=10'
     },
     segments: [
-{
-            id: 'hof-wilt-seg-1',
-            name: 'Wilt Chamberlain 87+ OVR',
-            description: 'Submit 1 card: Wilt Chamberlain (OVR >= 87).',
-            cardsRequired: 1,
-            slotPositions: [
-                  'C'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Wilt Chamberlain',
-                        minOvr: 87,
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 4000,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '4,000 Coins + 1x All-Star Pack'
-            }
+      {
+        id: 'hof-wilt-seg-1',
+        name: 'Wilt Chamberlain',
+        description: 'Submit 1 card: Wilt Chamberlain.',
+        cardsRequired: 1,
+        slotPositions: ['C'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 1 },
+          { type: 'SPECIFIC_PLAYER_NAME', value: 'Wilt Chamberlain', count: 1 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 4000,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '4,000 Monedes + 1x All-Star Pack'
+        }
       },
       {
-            id: 'hof-wilt-seg-2',
-            name: 'Dominant Centers Squad',
-            description: 'Submit 5 cards: Team OVR >= 88, min 1 Center with 92+ OVR.',
-            cardsRequired: 5,
-            slotPositions: [
-                  'PG',
-                  'SG',
-                  'SF',
-                  'PF',
-                  'C'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 5
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 88
-                  },
-                  {
-                        type: 'POSITION',
-                        value: 'C',
-                        minOvr: 92,
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 8000,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '8,000 Coins + 1x All-Star Pack'
-            }
+        id: 'hof-wilt-seg-2',
+        name: 'Wilt Chamberlain MVP',
+        description: 'Submit 1 card: Wilt Chamberlain MVP.',
+        cardsRequired: 1,
+        slotPositions: ['C'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 1 },
+          { type: 'SPECIFIC_PLAYER_NAME', value: 'Wilt Chamberlain', edition: 'MVP', count: 1 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 8000,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '8,000 Monedes + 1x All-Star Pack'
+        }
       },
       {
-            id: 'hof-wilt-seg-3',
-            name: '100-Point Legend Unit',
-            description: 'Submit 3 cards: Team OVR >= 92, min 1 card with 95+ OVR.',
-            cardsRequired: 3,
-            slotPositions: [
-                  'C',
-                  'PF',
-                  'SF'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 3
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 92
-                  },
-                  {
-                        type: 'SPECIAL_CARDS_MIN',
-                        value: 1,
-                        minOvr: 95
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 15000,
-                  packType: 'mvp',
-                  packName: 'Finals MVP & Awards Pack',
-                  description: '15,000 Coins + 1x Finals MVP Pack'
-            }
+        id: 'hof-wilt-seg-3',
+        name: 'Historic Dominance',
+        description: 'Submit 3 cards (C, PG, SF): Team OVR >= 91.',
+        cardsRequired: 3,
+        slotPositions: ['C', 'PG', 'SF'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 3 },
+          { type: 'TEAM_OVR_MIN', value: 91 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 15000,
+          packType: 'mvp',
+          packName: 'Finals MVP & Awards Pack',
+          description: '15,000 Monedes + 1x Finals MVP Pack'
+        }
       }
     ]
   },
@@ -1269,94 +695,42 @@ export const SBC_GROUPS: SbcGroup[] = [
       imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMOqmF3NP4rkAiGi0UDJ_aZolCevZo3EAD8cs3Mar5bQ&s=10'
     },
     segments: [
-{
-            id: 'hof-russell-seg-1',
-            name: 'Bill Russell 86+ OVR',
-            description: 'Submit 1 card: Bill Russell (OVR >= 86).',
-            cardsRequired: 1,
-            slotPositions: [
-                  'C'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Bill Russell',
-                        minOvr: 86,
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 3500,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '3,500 Coins + 1x All-Star Pack'
-            }
+      {
+        id: 'hof-russell-seg-1',
+        name: 'Bill Russell',
+        description: 'Submit 1 card: Bill Russell.',
+        cardsRequired: 1,
+        slotPositions: ['C'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 1 },
+          { type: 'SPECIFIC_PLAYER_NAME', value: 'Bill Russell', count: 1 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 4000,
+          packType: 'allstar',
+          packName: 'All-Star Pack',
+          description: '4,000 Monedes + 1x All-Star Pack'
+        }
       },
       {
-            id: 'hof-russell-seg-2',
-            name: 'Bill Russell Finals MVP',
-            description: 'Submit 1 card: Bill Russell — Finals MVP.',
-            cardsRequired: 1,
-            slotPositions: [
-                  'C'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 1
-                  },
-                  {
-                        type: 'SPECIFIC_PLAYER_NAME',
-                        value: 'Bill Russell',
-                        edition: 'Finals MVP',
-                        count: 1
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 7000,
-                  packType: 'allstar',
-                  packName: 'All-Star Pack',
-                  description: '7,000 Coins + 1x All-Star Pack'
-            }
-      },
-      {
-            id: 'hof-russell-seg-3',
-            name: 'Boston Celtics Dynasty',
-            description: 'Submit 3 cards: Min 2 Boston Celtics cards, Team OVR >= 89.',
-            cardsRequired: 3,
-            slotPositions: [
-                  'C',
-                  'SF',
-                  'PG'
-            ],
-            requirements: [
-                  {
-                        type: 'TOTAL_CARDS',
-                        value: 3
-                  },
-                  {
-                        type: 'SPECIFIC_TEAM',
-                        value: 'BOS',
-                        count: 2
-                  },
-                  {
-                        type: 'TEAM_OVR_MIN',
-                        value: 89
-                  }
-            ],
-            segmentReward: {
-                  type: 'both',
-                  coins: 12000,
-                  packType: 'mvp',
-                  packName: 'Finals MVP & Awards Pack',
-                  description: '12,000 Coins + 1x Finals MVP Pack'
-            }
+        id: 'hof-russell-seg-2',
+        name: '60s Celtics Dynasty',
+        description: 'Submit 3 cards (C, PG, SG): Team OVR >= 85, min 3 Boston Celtics cards.',
+        cardsRequired: 3,
+        slotPositions: ['C', 'PG', 'SG'],
+        requirements: [
+          { type: 'TOTAL_CARDS', value: 3 },
+          { type: 'TEAM_OVR_MIN', value: 85 },
+          { type: 'SPECIFIC_TEAM', value: 'BOS', count: 3 }
+        ],
+        segmentReward: {
+          type: 'both',
+          coins: 12000,
+          packType: 'mvp',
+          packName: 'Finals MVP & Awards Pack',
+          description: '12,000 Monedes + 1x Finals MVP Pack'
+        }
       }
     ]
   },
@@ -1378,8 +752,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'icon-dirk-seg-1',
-            name: 'Dirk Nowitzki 84+ OVR',
-            description: 'Submit 1 card: Dirk Nowitzki (OVR >= 84).',
+            name: 'Dirk Nowitzki',
+            description: 'Submit 1 card: Dirk Nowitzki.',
             cardsRequired: 1,
             slotPositions: [
                   'PF'
@@ -1392,7 +766,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Dirk Nowitzki',
-                        minOvr: 84,
                         count: 1
                   }
             ],
@@ -1485,8 +858,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'icon-wade-seg-1',
-            name: 'Dwyane Wade 84+ OVR',
-            description: 'Submit 1 card: Dwyane Wade (OVR >= 84).',
+            name: 'Dwyane Wade',
+            description: 'Submit 1 card: Dwyane Wade.',
             cardsRequired: 1,
             slotPositions: [
                   'SG'
@@ -1499,7 +872,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Dwyane Wade',
-                        minOvr: 84,
                         count: 1
                   }
             ],
@@ -1592,8 +964,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'icon-giannis-seg-1',
-            name: 'Giannis Antetokounmpo 85+ OVR',
-            description: 'Submit 1 card: Giannis Antetokounmpo (OVR >= 85).',
+            name: 'Giannis Antetokounmpo',
+            description: 'Submit 1 card: Giannis Antetokounmpo.',
             cardsRequired: 1,
             slotPositions: [
                   'PF'
@@ -1606,7 +978,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Giannis Antetokounmpo',
-                        minOvr: 85,
                         count: 1
                   }
             ],
@@ -1699,8 +1070,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'icon-curry-seg-1',
-            name: 'Stephen Curry 85+ OVR',
-            description: 'Submit 1 card: Stephen Curry (OVR >= 85).',
+            name: 'Stephen Curry',
+            description: 'Submit 1 card: Stephen Curry.',
             cardsRequired: 1,
             slotPositions: [
                   'PG'
@@ -1713,7 +1084,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Stephen Curry',
-                        minOvr: 85,
                         count: 1
                   }
             ],
@@ -1834,8 +1204,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'icon-jokic-seg-1',
-            name: 'Nikola Jokic 85+ OVR',
-            description: 'Submit 1 card: Nikola Jokic (OVR >= 85).',
+            name: 'Nikola Jokic',
+            description: 'Submit 1 card: Nikola Jokic.',
             cardsRequired: 1,
             slotPositions: [
                   'C'
@@ -1848,7 +1218,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Nikola Jokic',
-                        minOvr: 85,
                         count: 1
                   }
             ],
@@ -1941,8 +1310,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'icon-ai-seg-1',
-            name: 'Allen Iverson 83+ OVR',
-            description: 'Submit 1 card: Allen Iverson (OVR >= 83).',
+            name: 'Allen Iverson',
+            description: 'Submit 1 card: Allen Iverson.',
             cardsRequired: 1,
             slotPositions: [
                   'PG'
@@ -1955,7 +1324,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Allen Iverson',
-                        minOvr: 83,
                         count: 1
                   }
             ],
@@ -2048,8 +1416,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'icon-dame-seg-1',
-            name: 'Damian Lillard 82+ OVR',
-            description: 'Submit 1 card: Damian Lillard (OVR >= 82).',
+            name: 'Damian Lillard',
+            description: 'Submit 1 card: Damian Lillard.',
             cardsRequired: 1,
             slotPositions: [
                   'PG'
@@ -2062,7 +1430,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Damian Lillard',
-                        minOvr: 82,
                         count: 1
                   }
             ],
@@ -2159,8 +1526,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'icon-reggie-seg-1',
-            name: 'Reggie Miller 81+ OVR',
-            description: 'Submit 1 card: Reggie Miller (OVR >= 81).',
+            name: 'Reggie Miller',
+            description: 'Submit 1 card: Reggie Miller.',
             cardsRequired: 1,
             slotPositions: [
                   'SG'
@@ -2173,7 +1540,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Reggie Miller',
-                        minOvr: 81,
                         count: 1
                   }
             ],
@@ -2238,8 +1604,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'icon-ewing-seg-1',
-            name: 'Patrick Ewing 81+ OVR',
-            description: 'Submit 1 card: Patrick Ewing (OVR >= 81).',
+            name: 'Patrick Ewing',
+            description: 'Submit 1 card: Patrick Ewing.',
             cardsRequired: 1,
             slotPositions: [
                   'C'
@@ -2252,7 +1618,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Patrick Ewing',
-                        minOvr: 81,
                         count: 1
                   }
             ],
@@ -2317,8 +1682,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'icon-pierce-seg-1',
-            name: 'Paul Pierce 82+ OVR',
-            description: 'Submit 1 card: Paul Pierce (OVR >= 82).',
+            name: 'Paul Pierce',
+            description: 'Submit 1 card: Paul Pierce.',
             cardsRequired: 1,
             slotPositions: [
                   'SF'
@@ -2331,7 +1696,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Paul Pierce',
-                        minOvr: 82,
                         count: 1
                   }
             ],
@@ -2409,7 +1773,7 @@ export const SBC_GROUPS: SbcGroup[] = [
   {
     id: 'sbc-group-fan-isaiah-thomas',
     name: 'Isaiah Thomas Boston King',
-    description: 'Complete both squad challenges to unlock 89 OVR Moments SBC Isaiah Thomas.',
+    description: 'Complete both squad challenges to unlock 89 OVR Fan Favourite Isaiah Thomas.',
     category: 'fan_favourites',
     difficulty: 'gold',
     type: 'permanent',
@@ -2417,15 +1781,15 @@ export const SBC_GROUPS: SbcGroup[] = [
     isActive: true,
     reward: {
       playerName: 'Isaiah Thomas',
-      rarity: 'moments_sbc',
+      rarity: 'icon_sbc',
       ovr: 89,
       imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4Y44vOWfEjM7YO0obA9_zxcAhON0D7TQNkGxq3KZiaA&s=10'
     },
     segments: [
 {
             id: 'fan-it-seg-1',
-            name: 'Isaiah Thomas 73+ OVR',
-            description: 'Submit 1 card: Isaiah Thomas (OVR >= 73).',
+            name: 'Isaiah Thomas',
+            description: 'Submit 1 card: Isaiah Thomas.',
             cardsRequired: 1,
             slotPositions: [
                   'PG'
@@ -2438,7 +1802,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Isaiah Thomas',
-                        minOvr: 73,
                         count: 1
                   }
             ],
@@ -2488,7 +1851,7 @@ export const SBC_GROUPS: SbcGroup[] = [
   {
     id: 'sbc-group-fan-manu-ginobili',
     name: 'Manu Ginobili 6th Man Legend',
-    description: 'Complete both squad challenges to unlock 89 OVR Moments SBC Manu Ginobili.',
+    description: 'Complete both squad challenges to unlock 89 OVR Fan Favourite Manu Ginobili.',
     category: 'fan_favourites',
     difficulty: 'gold',
     type: 'permanent',
@@ -2496,15 +1859,15 @@ export const SBC_GROUPS: SbcGroup[] = [
     isActive: true,
     reward: {
       playerName: 'Manu Ginobili',
-      rarity: 'moments_sbc',
+      rarity: 'icon_sbc',
       ovr: 89,
       imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzzFHddJ7N-sbb5T3rPHCTWKFszRc6q3-MAvEXbYFFWZjC9dvpHR27Kzk&s=10'
     },
     segments: [
 {
             id: 'fan-manu-seg-1',
-            name: 'Manu Ginobili 73+ OVR',
-            description: 'Submit 1 card: Manu Ginobili (OVR >= 73).',
+            name: 'Manu Ginobili',
+            description: 'Submit 1 card: Manu Ginobili.',
             cardsRequired: 1,
             slotPositions: [
                   'SG'
@@ -2517,7 +1880,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Manu Ginobili',
-                        minOvr: 73,
                         count: 1
                   }
             ],
@@ -2567,7 +1929,7 @@ export const SBC_GROUPS: SbcGroup[] = [
   {
     id: 'sbc-group-fan-jeremy-lin',
     name: 'Jeremy Lin Linsanity 2012',
-    description: 'Complete both squad challenges to unlock 88 OVR Moments SBC Jeremy Lin.',
+    description: 'Complete both squad challenges to unlock 88 OVR Fan Favourite Jeremy Lin.',
     category: 'fan_favourites',
     difficulty: 'gold',
     type: 'permanent',
@@ -2575,15 +1937,15 @@ export const SBC_GROUPS: SbcGroup[] = [
     isActive: true,
     reward: {
       playerName: 'Jeremy Lin',
-      rarity: 'moments_sbc',
+      rarity: 'icon_sbc',
       ovr: 88,
       imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLFK2KLr0TtkFBSCFVt63UN8RNEHLd90nNqRKM5ZFtsA&s=10'
     },
     segments: [
 {
             id: 'fan-lin-seg-1',
-            name: 'Jeremy Lin 72+ OVR',
-            description: 'Submit 1 card: Jeremy Lin (OVR >= 72).',
+            name: 'Jeremy Lin',
+            description: 'Submit 1 card: Jeremy Lin.',
             cardsRequired: 1,
             slotPositions: [
                   'PG'
@@ -2596,7 +1958,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Jeremy Lin',
-                        minOvr: 72,
                         count: 1
                   }
             ],
@@ -2646,7 +2007,7 @@ export const SBC_GROUPS: SbcGroup[] = [
   {
     id: 'sbc-group-fan-jamal-crawford',
     name: 'Jamal Crawford Shake N Bake',
-    description: 'Complete both squad challenges to unlock 87 OVR Moments SBC Jamal Crawford.',
+    description: 'Complete both squad challenges to unlock 87 OVR Fan Favourite Jamal Crawford.',
     category: 'fan_favourites',
     difficulty: 'silver',
     type: 'permanent',
@@ -2654,15 +2015,15 @@ export const SBC_GROUPS: SbcGroup[] = [
     isActive: true,
     reward: {
       playerName: 'Jamal Crawford',
-      rarity: 'moments_sbc',
+      rarity: 'icon_sbc',
       ovr: 87,
       imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTq4-OQZMc8ZTj_MDstkfEs91dQ-nFn_mclE94gLYG1VQ&s=10'
     },
     segments: [
 {
             id: 'fan-crawford-seg-1',
-            name: 'Jamal Crawford 71+ OVR',
-            description: 'Submit 1 card: Jamal Crawford (OVR >= 71).',
+            name: 'Jamal Crawford',
+            description: 'Submit 1 card: Jamal Crawford.',
             cardsRequired: 1,
             slotPositions: [
                   'SG'
@@ -2675,7 +2036,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Jamal Crawford',
-                        minOvr: 71,
                         count: 1
                   }
             ],
@@ -2725,7 +2085,7 @@ export const SBC_GROUPS: SbcGroup[] = [
   {
     id: 'sbc-group-fan-alex-caruso',
     name: 'Alex Caruso Lakeshow Hero',
-    description: 'Complete both squad challenges to unlock 85 OVR Moments SBC Alex Caruso.',
+    description: 'Complete both squad challenges to unlock 85 OVR Fan Favourite Alex Caruso.',
     category: 'fan_favourites',
     difficulty: 'bronze',
     type: 'permanent',
@@ -2733,15 +2093,15 @@ export const SBC_GROUPS: SbcGroup[] = [
     isActive: true,
     reward: {
       playerName: 'Alex Caruso',
-      rarity: 'moments_sbc',
+      rarity: 'icon_sbc',
       ovr: 85,
       imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTylOXr2AqL_yKpPwX7t27FGkEITy8jrwhoNQi5_qGHGA&s=10'
     },
     segments: [
 {
             id: 'fan-caruso-seg-1',
-            name: 'Alex Caruso 70+ OVR',
-            description: 'Submit 1 card: Alex Caruso (OVR >= 70).',
+            name: 'Alex Caruso',
+            description: 'Submit 1 card: Alex Caruso.',
             cardsRequired: 1,
             slotPositions: [
                   'PG'
@@ -2754,7 +2114,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Alex Caruso',
-                        minOvr: 70,
                         count: 1
                   }
             ],
@@ -2823,8 +2182,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'rookie-lebron-seg-1',
-            name: 'LeBron James (Any edition 70+ OVR)',
-            description: 'Submit 1 card: LeBron James (any edition, OVR >= 70).',
+            name: 'LeBron James',
+            description: 'Submit 1 card: LeBron James.',
             cardsRequired: 1,
             slotPositions: [
                   'SF'
@@ -2837,7 +2196,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'LeBron James',
-                        minOvr: 70,
                         count: 1
                   }
             ],
@@ -2902,8 +2260,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'rookie-curry-seg-1',
-            name: 'Stephen Curry (Any edition 68+ OVR)',
-            description: 'Submit 1 card: Stephen Curry (any edition, OVR >= 68).',
+            name: 'Stephen Curry',
+            description: 'Submit 1 card: Stephen Curry.',
             cardsRequired: 1,
             slotPositions: [
                   'PG'
@@ -2916,7 +2274,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Stephen Curry',
-                        minOvr: 68,
                         count: 1
                   }
             ],
@@ -2981,8 +2338,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'rookie-kobe-seg-1',
-            name: 'Kobe Bryant (Any edition 69+ OVR)',
-            description: 'Submit 1 card: Kobe Bryant (any edition, OVR >= 69).',
+            name: 'Kobe Bryant',
+            description: 'Submit 1 card: Kobe Bryant.',
             cardsRequired: 1,
             slotPositions: [
                   'SG'
@@ -2995,7 +2352,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Kobe Bryant',
-                        minOvr: 69,
                         count: 1
                   }
             ],
@@ -3060,8 +2416,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'rookie-wemby-seg-1',
-            name: 'Victor Wembanyama (Any edition 71+ OVR)',
-            description: 'Submit 1 card: Victor Wembanyama (any edition, OVR >= 71).',
+            name: 'Victor Wembanyama',
+            description: 'Submit 1 card: Victor Wembanyama.',
             cardsRequired: 1,
             slotPositions: [
                   'C'
@@ -3074,7 +2430,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Victor Wembanyama',
-                        minOvr: 71,
                         count: 1
                   }
             ],
@@ -3139,8 +2494,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'rookie-jordan-seg-1',
-            name: 'Michael Jordan (Any edition 72+ OVR)',
-            description: 'Submit 1 card: Michael Jordan (any edition, OVR >= 72).',
+            name: 'Michael Jordan',
+            description: 'Submit 1 card: Michael Jordan.',
             cardsRequired: 1,
             slotPositions: [
                   'SG'
@@ -3153,7 +2508,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Michael Jordan',
-                        minOvr: 72,
                         count: 1
                   }
             ],
@@ -3218,8 +2572,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'clutch-ray-allen-seg-1',
-            name: 'Ray Allen 82+ OVR',
-            description: 'Submit 1 card: Ray Allen (OVR >= 82).',
+            name: 'Ray Allen',
+            description: 'Submit 1 card: Ray Allen.',
             cardsRequired: 1,
             slotPositions: [
                   'SG'
@@ -3232,7 +2586,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Ray Allen',
-                        minOvr: 82,
                         count: 1
                   }
             ],
@@ -3329,8 +2682,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'clutch-kyrie-seg-1',
-            name: 'Kyrie Irving 83+ OVR',
-            description: 'Submit 1 card: Kyrie Irving (OVR >= 83).',
+            name: 'Kyrie Irving',
+            description: 'Submit 1 card: Kyrie Irving.',
             cardsRequired: 1,
             slotPositions: [
                   'PG'
@@ -3343,7 +2696,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Kyrie Irving',
-                        minOvr: 83,
                         count: 1
                   }
             ],
@@ -3436,8 +2788,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'clutch-kawhi-seg-1',
-            name: 'Kawhi Leonard 84+ OVR',
-            description: 'Submit 1 card: Kawhi Leonard (OVR >= 84).',
+            name: 'Kawhi Leonard',
+            description: 'Submit 1 card: Kawhi Leonard.',
             cardsRequired: 1,
             slotPositions: [
                   'SF'
@@ -3450,7 +2802,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Kawhi Leonard',
-                        minOvr: 84,
                         count: 1
                   }
             ],
@@ -3547,8 +2898,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'clutch-vince-seg-1',
-            name: 'Vince Carter 83+ OVR',
-            description: 'Submit 1 card: Vince Carter (OVR >= 83).',
+            name: 'Vince Carter',
+            description: 'Submit 1 card: Vince Carter.',
             cardsRequired: 1,
             slotPositions: [
                   'SF'
@@ -3561,7 +2912,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Vince Carter',
-                        minOvr: 83,
                         count: 1
                   }
             ],
@@ -3593,8 +2943,8 @@ export const SBC_GROUPS: SbcGroup[] = [
     segments: [
 {
             id: 'clutch-drose-seg-1',
-            name: 'Derrick Rose 81+ OVR',
-            description: 'Submit 1 card: Derrick Rose (OVR >= 81).',
+            name: 'Derrick Rose',
+            description: 'Submit 1 card: Derrick Rose.',
             cardsRequired: 1,
             slotPositions: [
                   'PG'
@@ -3607,7 +2957,6 @@ export const SBC_GROUPS: SbcGroup[] = [
                   {
                         type: 'SPECIFIC_PLAYER_NAME',
                         value: 'Derrick Rose',
-                        minOvr: 81,
                         count: 1
                   }
             ],

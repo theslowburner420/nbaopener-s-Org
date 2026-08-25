@@ -18,73 +18,26 @@ const StaticAd = React.memo(({ position }: StaticAdProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // If user is premium, we don't render anything
     if (isPremium || !containerRef.current) return;
-
     const currentContainer = containerRef.current;
-
-    // Clear previous content
     currentContainer.innerHTML = '';
 
-    // Create unique ID for this instance
-    const adId = position === 'header' 
-      ? 'adsterra-banner-header-ca59b0dcdd453b6300a8f085b2df6f47'
-      : 'adsterra-banner-footer-ca59b0dcdd453b6300a8f085b2df6f47';
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('sandbox', 'allow-scripts allow-popups'); // sin allow-same-origin: el anuncio es cross-origin, no lo necesita
+    iframe.style.border = 'none';
+    iframe.style.width = '728px';
+    iframe.style.height = '90px';
+    iframe.setAttribute('scrolling', 'no');
+    iframe.srcdoc = `
+      <html><body style="margin:0;overflow:hidden">
+        <script>
+          atOptions = { key:'ca59b0dcdd453b6300a8f085b2df6f47', format:'iframe', height:90, width:728, params:{} };
+        </script>
+        <script src="https://www.highperformanceformat.com/ca59b0dcdd453b6300a8f085b2df6f47/invoke.js"></script>
+      </body></html>`;
 
-    const adWrapper = document.createElement('div');
-    adWrapper.id = adId;
-    currentContainer.appendChild(adWrapper);
-
-    // MutationObserver to automatically apply strict sandbox attributes to dynamically generated iframes
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node.nodeName === 'IFRAME') {
-            const iframe = node as HTMLIFrameElement;
-            // Explicitly excluding allow-popups, allow-top-navigation, allow-top-navigation-by-user-activation
-            iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-            iframe.setAttribute('loading', 'lazy');
-          } else if (node.hasChildNodes && 'querySelectorAll' in node) {
-            const element = node as HTMLElement;
-            element.querySelectorAll('iframe').forEach((iframe) => {
-              iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-              iframe.setAttribute('loading', 'lazy');
-            });
-          }
-        });
-      });
-    });
-
-    observer.observe(currentContainer, { childList: true, subtree: true });
-
-    // Options Script (Clean Native Iframe Format)
-    const optionsScript = document.createElement('script');
-    optionsScript.type = 'text/javascript';
-    optionsScript.text = `
-      atOptions = {
-        'key' : 'ca59b0dcdd453b6300a8f085b2df6f47',
-        'format' : 'iframe',
-        'height' : 90,
-        'width' : 728,
-        'params' : {}
-      };
-    `;
-    
-    // Asynchronous Ad Script
-    const invokeScript = document.createElement('script');
-    invokeScript.type = 'text/javascript';
-    invokeScript.src = 'https://www.highperformanceformat.com/ca59b0dcdd453b6300a8f085b2df6f47/invoke.js';
-    invokeScript.async = true;
-
-    currentContainer.appendChild(optionsScript);
-    currentContainer.appendChild(invokeScript);
-
-    return () => {
-      observer.disconnect();
-      if (currentContainer) {
-        currentContainer.innerHTML = '';
-      }
-    };
+    currentContainer.appendChild(iframe);
+    return () => { currentContainer.innerHTML = ''; };
   }, [isPremium, position]);
 
   // CRITICAL: If premium, do not render the component at all

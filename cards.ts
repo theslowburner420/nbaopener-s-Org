@@ -4,6 +4,7 @@ import { DUO_AND_XFACTOR_CARDS } from './duoAndXFactorCards';
 import { DYNASTY_CARDS } from './dynastyCards';
 import { ALL_STAR_MVP_CARDS } from './allStarMvpCards';
 import { SCREAM_CARDS } from './screamCards';
+import { HIDDEN_GEMS_CARDS } from './hiddenGemsCards';
 
 const teamColors: Record<string, string> = {
   'Los Angeles Lakers': '#FDB927',
@@ -14330,6 +14331,11 @@ export const ALL_CARDS: Card[] = [
   ...SCREAM_CARDS.map((card, idx) => ({
     ...card,
     number: rawCards.length + AWARD_CARDS.length + DUO_AND_XFACTOR_CARDS.length + DYNASTY_CARDS.length + ALL_STAR_MVP_CARDS.length + idx + 1,
+    teamLogoUrl: teamLogos[card.team] || teamLogos[card.teamAbbr]
+  })),
+  ...HIDDEN_GEMS_CARDS.map((card, idx) => ({
+    ...card,
+    number: rawCards.length + AWARD_CARDS.length + DUO_AND_XFACTOR_CARDS.length + DYNASTY_CARDS.length + ALL_STAR_MVP_CARDS.length + SCREAM_CARDS.length + idx + 1,
     teamLogoUrl: teamLogos[card.team] || teamLogos[card.teamAbbr]
   }))
 ];

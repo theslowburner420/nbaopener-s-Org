@@ -148,6 +148,32 @@ export const SBC_CARD_LORE: Record<string, SBCCardLore> = {
     achievements: ['2008 NBA Champion & Finals MVP', '10x NBA All-Star Selection', '24,000+ Career Points'],
   },
 
+  // HIDDEN GEMS
+  'Ben Wallace': {
+    englishContext: 'Undrafted in 1996 out of Virginia Union, Big Ben anchored Detroit’s 2004 championship defense and became a 4-time NBA Defensive Player of the Year.',
+    achievements: ['4x NBA Defensive Player of Year', '2004 NBA Champion', 'Hall of Fame Class of 2021'],
+  },
+  'Fred VanVleet': {
+    englishContext: 'Betting on himself after going undrafted in 2016, FVV climbed to NBA Champion with Toronto, an All-Star nod, and an undrafted record 54 points.',
+    achievements: ['2019 NBA Champion', '2022 NBA All-Star Selection', '54-Point Undrafted Record'],
+  },
+  'Austin Reaves': {
+    englishContext: 'Going undrafted by design in 2021 to join the Lakers, Reaves quickly established himself as a high-IQ playmaker and fearless 4th-quarter clutch performer.',
+    achievements: ['2023 In-Season Tournament Champion', '2023 Team USA World Cup', 'Breakout Playoff Playmaker'],
+  },
+  'Draymond Green': {
+    englishContext: 'Selected 35th overall in the 2nd round, Draymond became the vocal leader, defensive maestro, and 4-time champion anchor of the Golden State dynasty.',
+    achievements: ['4x NBA Champion', '2017 Defensive Player of Year', '8x NBA All-Defensive Selection'],
+  },
+  'Marc Gasol': {
+    englishContext: 'Drafted 48th overall, Marc transformed into the Grit & Grind defensive anchor, 2013 DPOY, 3-time All-Star, and 2019 NBA Champion with Toronto.',
+    achievements: ['2013 Defensive Player of Year', '2019 NBA Champion', '3x NBA All-Star Selection'],
+  },
+  'Dennis Rodman': {
+    englishContext: 'Overlooked in high school and drafted in the 2nd round, The Worm became the fiercest rebounder and lockdown defensive forward in NBA history.',
+    achievements: ['5x NBA Champion', '2x Defensive Player of Year', '7x NBA Rebound Champion'],
+  },
+
   // CLUTCH MOMENTS
   'Ray Allen': {
     englishContext: 'Down 3 with 5.2 seconds left in Game 6 of the 2013 Finals, Ray Allen hit the most clutch corner 3-pointer in NBA history to save Miami.',

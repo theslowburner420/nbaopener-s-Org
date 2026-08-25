@@ -1,11 +1,12 @@
 import { useGame } from '../context/GameContext';
 import { ALL_CARDS } from '../data/cards';
 import { ACHIEVEMENTS } from '../constants/achievements';
-import { Check, Trophy, Coins, Sparkles, Filter, CheckCircle2 } from 'lucide-react';
+import { Check, Trophy, Coins, Sparkles, Filter, CheckCircle2, Calendar, Gift, Flame, Layers } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState, useMemo } from 'react';
 import AchievementsModal from '../components/AchievementsModal';
 import { useNotification } from '../context/NotificationContext';
+import { getActiveCalendarEvents, calculateEventClaimStatus } from '../constants/calendarEvents';
 
 export default function RewardsView() {
   const state = useGame();
@@ -19,6 +20,14 @@ export default function RewardsView() {
   const { notifySuccess, notifyError } = useNotification();
   const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  const activeCalendarEvents = getActiveCalendarEvents();
+  const primaryCalendarEvent = activeCalendarEvents.length > 0 ? activeCalendarEvents[0] : null;
+  const calendarStatus = primaryCalendarEvent ? calculateEventClaimStatus(primaryCalendarEvent) : null;
+
+  const openCalendarModal = () => {
+    window.dispatchEvent(new CustomEvent('open-calendar-event-modal'));
+  };
 
   const achievementsPercent = useMemo(() => {
     const unlockedCount = ACHIEVEMENTS.filter(ach => 
@@ -96,6 +105,65 @@ export default function RewardsView() {
       {/* Main Content Area */}
       <div className="flex-1 px-4 py-4 space-y-6 no-scrollbar pb-28 overflow-y-auto max-w-4xl mx-auto w-full">
         
+        {/* Active Calendar Login Event Banner */}
+        {primaryCalendarEvent && (
+          <div 
+            onClick={openCalendarModal}
+            className={`cursor-pointer relative overflow-hidden rounded-3xl border-2 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl transition-all hover:scale-[1.01] ${
+              primaryCalendarEvent.id === 'opening_tipoff'
+                ? 'border-amber-500/80 bg-gradient-to-r from-amber-950/80 via-zinc-950 to-black shadow-[0_0_25px_rgba(245,158,11,0.3)]'
+                : 'border-rose-500/80 bg-gradient-to-r from-rose-950/80 via-purple-950/50 to-black shadow-[0_0_25px_rgba(244,63,94,0.3)]'
+            }`}
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border flex items-center justify-center text-2xl shadow-lg shrink-0 ${
+                primaryCalendarEvent.id === 'opening_tipoff'
+                  ? 'bg-amber-500/20 border-amber-500/60 text-amber-400'
+                  : 'bg-rose-500/20 border-rose-500/60 text-rose-400'
+              }`}>
+                {primaryCalendarEvent.icon}
+              </div>
+              <div className="space-y-0.5 min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className={`px-2 py-0.5 rounded text-[8.5px] font-black uppercase tracking-wider ${
+                    primaryCalendarEvent.id === 'opening_tipoff' ? 'bg-amber-500 text-black' : 'bg-rose-500 text-white'
+                  }`}>
+                    {primaryCalendarEvent.tag}
+                  </span>
+                  <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
+                    Day {calendarStatus?.currentDayIndex || 1} / {primaryCalendarEvent.totalDays}
+                  </span>
+                </div>
+                <h3 className="text-base sm:text-lg font-black uppercase text-white tracking-tight truncate">
+                  {primaryCalendarEvent.name} Daily Rewards
+                </h3>
+                <p className="text-[10px] sm:text-xs text-zinc-300">
+                  {calendarStatus?.canClaimToday ? "⚡ Today's reward ready: +" + calendarStatus?.rewardToday?.coins?.toLocaleString() + ' Coins & +' + calendarStatus?.rewardToday?.packsCount + ' Packs' : "✓ Today's reward already claimed"}
+                </p>
+              </div>
+            </div>
+
+            <div className="shrink-0 w-full sm:w-auto">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openCalendarModal();
+                }}
+                className={`w-full sm:w-auto px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-md ${
+                  calendarStatus?.canClaimToday
+                    ? primaryCalendarEvent.id === 'opening_tipoff'
+                      ? 'bg-amber-400 hover:bg-amber-300 text-black shadow-[0_0_15px_rgba(245,158,11,0.5)] animate-pulse'
+                      : 'bg-rose-500 hover:bg-rose-400 text-white shadow-[0_0_15px_rgba(244,63,94,0.5)] animate-pulse'
+                    : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                }`}
+              >
+                <Gift size={14} />
+                <span>{calendarStatus?.canClaimToday ? 'Claim Day ' + calendarStatus?.currentDayIndex : 'View Calendar'}</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Banner Summary */}
         <div className="relative overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-br from-zinc-950 via-zinc-900 to-black p-6 shadow-2xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 blur-[80px] rounded-full pointer-events-none" />

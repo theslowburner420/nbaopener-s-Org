@@ -266,6 +266,18 @@ export const sbcService = {
             }
             if (!nameMatch) return false;
             if (req.minOvr && c.stats.ovr < req.minOvr) return false;
+            
+            if (req.edition) {
+              const ed = req.edition.toLowerCase();
+              const fullCardText = `${c.category || ''} ${c.subtitle || ''} ${c.description || ''} ${c.rarity || ''} ${c.name || ''} ${c.quote || ''}`.toLowerCase();
+              if (ed.includes('finals mvp') || ed.includes('fmvp')) {
+                const hasFmvp = c.category === 'Finals MVP' || fullCardText.includes('finals mvp') || fullCardText.includes('fmvp') || fullCardText.includes('finals');
+                if (!hasFmvp) return false;
+              } else if (ed.includes('mvp')) {
+                const hasMvp = c.category === 'MVP' || c.category === 'All-Star MVP' || c.category === 'Finals MVP' || fullCardText.includes('mvp');
+                if (!hasMvp) return false;
+              }
+            }
             return true;
           }).length;
           const targetCount = req.count !== undefined ? req.count : 1;
@@ -274,11 +286,31 @@ export const sbcService = {
         }
         case 'SPECIFIC_TEAM': {
           const count = cards.filter(c => {
+            let teamMatch = false;
             if (req.teamsList && req.teamsList.length > 0) {
-              return req.teamsList.some(t => c.teamAbbr?.toUpperCase() === t.toUpperCase() || c.team?.toLowerCase().includes(t.toLowerCase()));
+              teamMatch = req.teamsList.some(t => c.teamAbbr?.toUpperCase() === t.toUpperCase() || c.team?.toLowerCase().includes(t.toLowerCase()));
+            } else {
+              const targetTeam = String(req.value).toUpperCase();
+              teamMatch = c.teamAbbr?.toUpperCase() === targetTeam || c.team?.toLowerCase().includes(String(req.value).toLowerCase());
             }
-            const targetTeam = String(req.value).toUpperCase();
-            return c.teamAbbr?.toUpperCase() === targetTeam || c.team?.toLowerCase().includes(String(req.value).toLowerCase());
+            if (!teamMatch) return false;
+            
+            if (req.era) {
+              const era = req.era.toLowerCase();
+              const fullCardText = `${c.category || ''} ${c.subtitle || ''} ${c.description || ''} ${c.name || ''}`.toLowerCase();
+              const parsedYear = c.year ? parseInt(String(c.year), 10) : NaN;
+              if (era.includes('90')) {
+                const is90s = (!isNaN(parsedYear) && parsedYear >= 1990 && parsedYear <= 1999) || c.isHistorical || fullCardText.includes('90') || fullCardText.includes('199');
+                if (!is90s) return false;
+              } else if (era.includes('2010') || era.includes('2020')) {
+                const isModern = (!isNaN(parsedYear) && parsedYear >= 2010) || !c.isHistorical || fullCardText.includes('201') || fullCardText.includes('202') || fullCardText.includes('splash');
+                if (!isModern) return false;
+              } else if (era.includes('60')) {
+                const is60s = (!isNaN(parsedYear) && parsedYear >= 1955 && parsedYear <= 1970) || c.isHistorical || fullCardText.includes('60') || fullCardText.includes('196');
+                if (!is60s) return false;
+              }
+            }
+            return true;
           }).length;
           const targetCount = req.count !== undefined ? req.count : (cards.length > 0 ? cards.length : 1);
           fulfilled = count >= targetCount;
@@ -349,7 +381,26 @@ export const sbcService = {
       { label: 'AST', value: typeof finalAst === 'number' ? finalAst.toFixed(1) : finalAst, color: 'bg-yellow-400' }
     ];
 
-    return {
+    let finalCategory = baseCard?.category || 'Base';
+    const fanFavPlayers = ['Isaiah Thomas', 'Manu Ginobili', 'Jeremy Lin', 'Jamal Crawford', 'Alex Caruso', 'Lance Stephenson', 'Boban Marjanovic', 'Udonis Haslem', 'Patrick Beverley'];
+    const clutchPlayers = ['Ray Allen', 'Kyrie Irving', 'Kawhi Leonard', 'Vince Carter', 'Derrick Rose', 'Robert Horry', 'Reggie Miller', 'Tracy McGrady', 'Klay Thompson'];
+    const rookiePlayers = ['Victor Wembanyama', 'Luka Doncic', 'Kevin Durant'];
+
+    if (playerName.toLowerCase().includes('dynasty') || (rarity === 'legend_sbc' && (playerName.includes('Bulls') || playerName.includes('Warriors') || playerName.includes('Lakers') || playerName.includes('Celtics') || playerName.includes('Spurs') || playerName.includes('Heat')))) {
+      finalCategory = 'Dynasty';
+    } else if (clutchPlayers.some(cp => playerName.toLowerCase().includes(cp.toLowerCase())) || rarity === 'moments_sbc') {
+      finalCategory = 'Moment';
+    } else if (fanFavPlayers.some(fp => playerName.toLowerCase().includes(fp.toLowerCase()))) {
+      finalCategory = 'X-Factor';
+    } else if (rarity === 'future_star' || rookiePlayers.some(rp => playerName.toLowerCase().includes(rp.toLowerCase()))) {
+      finalCategory = 'ROY';
+    } else if (rarity === 'legend_sbc' || ['Bill Russell', 'Wilt Chamberlain', 'Kareem Abdul-Jabbar', "Shaquille O'Neal", 'Hakeem Olajuwon', 'Larry Bird', 'Magic Johnson'].some(h => playerName.toLowerCase().includes(h.toLowerCase()))) {
+      finalCategory = 'Hall of Fame';
+    } else if (rarity === 'icon_sbc') {
+      finalCategory = 'Base';
+    }
+
+    const rewardCard: Card = {
       ...(baseCard || {}),
       id: playerId || baseCard?.id || `sbc-${rarity}-${playerName.toLowerCase().replace(/\s+/g, '-')}-${finalOvr}`,
       number: baseCard?.number || 23,
@@ -359,7 +410,7 @@ export const sbcService = {
       teamColor: baseCard?.teamColor || '#F59E0B',
       position: finalPosition,
       rarity: rarity,
-      category: baseCard?.category || 'Moment',
+      category: finalCategory,
       subtitle: subtitleText,
       isHistorical: true,
       pts: finalPts,
@@ -380,5 +431,12 @@ export const sbcService = {
         assists: finalAst,
       }
     };
+
+    if (finalCategory !== 'Moment') {
+      delete rewardCard.momentTitle;
+      delete rewardCard.momentDate;
+    }
+
+    return rewardCard;
   }
 };

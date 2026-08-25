@@ -16,6 +16,8 @@ const getReqSummary = (req: SbcRequirement) => {
       return `${req.value} Cards`;
     case 'MIN_OVR':
       return `Min ${req.value} OVR`;
+    case 'MAX_OVR':
+      return `Max ${req.value} OVR`;
     case 'TEAM_OVR_MIN':
       return `Team ${req.value}+ OVR`;
     case 'POSITION':
@@ -28,8 +30,23 @@ const getReqSummary = (req: SbcRequirement) => {
       return 'Unique Players';
     case 'MIN_RARITY':
       return `Min ${String(req.value).toUpperCase()}`;
+    case 'EXACT_RARITY':
+      return `${req.count || 1}x ${String(req.value).toUpperCase()}`;
+    case 'MAX_TEAMS':
+      return `Max ${req.value} Teams`;
+    case 'SPECIFIC_PLAYER_NAME':
+      return `${req.count && req.count > 1 ? `${req.count}x ` : ''}${req.edition ? `${req.value} (${req.edition})` : `${req.value}`}`;
+    case 'SPECIFIC_TEAM':
+      if (req.teamsList && req.teamsList.length > 0) {
+        return `${req.count || 1}x ${req.teamsList.join('/')}`;
+      }
+      return `${req.count ? `${req.count}x ` : ''}${req.value}${req.era ? ` (${req.era})` : ''}`;
+    case 'SPECIAL_CARDS_MIN':
+      return `Min ${req.count || req.value || 1} Special`;
+    case 'CATEGORY':
+      return `${req.count || 1}x ${req.value}`;
     default:
-      return `${req.type}`;
+      return `${req.value || 'Requirement'}`;
   }
 };
 

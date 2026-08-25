@@ -4,7 +4,7 @@ import { Card } from '../types';
 import { getLoreForPlayer } from '../data/sbcCardLore';
 import { getTeamLogo } from '../data/nbaTeams';
 
-export type SBCRarityTheme = 'future-star' | 'moments' | 'hof' | 'icon' | 'duo' | 'xfactor' | 'scream';
+export type SBCRarityTheme = 'future-star' | 'moments' | 'hof' | 'icon' | 'duo' | 'xfactor' | 'scream' | 'hidden-gems';
 
 export interface SBCSpecialCardProps {
   card?: Card;
@@ -134,12 +134,24 @@ export const SBC_RARITY_CONFIGS: Record<SBCRarityTheme, {
     icon: <Flame className="w-3.5 h-3.5 text-orange-400" />,
     gradientOverlay: 'from-orange-600/30 via-purple-950/40 to-black/90',
   },
+  'hidden-gems': {
+    className: 'sbc-card-hidden-gems',
+    badgeText: 'HIDDEN GEM 💎',
+    badgeBg: 'bg-emerald-950/90 border-emerald-500/80',
+    badgeTextColor: 'text-emerald-300',
+    ovrColor: 'text-emerald-400 drop-shadow-[0_0_16px_rgba(16,185,129,0.95)]',
+    glowColor: 'rgba(16, 185, 129, 0.7)',
+    accentBorder: 'border-emerald-500',
+    icon: <Sparkles className="w-3.5 h-3.5 text-emerald-400" />,
+    gradientOverlay: 'from-emerald-600/30 via-teal-950/40 to-black/90',
+  },
 };
 
 export function resolveSBCTheme(rarityTheme?: string, card?: Card): SBCRarityTheme {
   if (rarityTheme) {
     const normalized = rarityTheme.toLowerCase().replace(/_/g, '-');
     if (normalized.includes('scream') || normalized.includes('halloween')) return 'scream';
+    if (normalized.includes('gem') || normalized.includes('hidden')) return 'hidden-gems';
     if (normalized.includes('future') || normalized.includes('rising')) return 'future-star';
     if (normalized.includes('moment')) return 'moments';
     if (normalized.includes('hof') || normalized.includes('hall')) return 'hof';
@@ -155,6 +167,7 @@ export function resolveSBCTheme(rarityTheme?: string, card?: Card): SBCRarityThe
     const id = card.id?.toLowerCase() || '';
 
     if (c === 'scream edition' || s === 'scream edition' || id.startsWith('scream-') || c.includes('scream')) return 'scream';
+    if (c === 'hidden gems' || s === 'hidden gems' || id.startsWith('gem-') || c.includes('gem')) return 'hidden-gems';
     if (r === 'future_star' || c.includes('rising star') || c.includes('rookie')) return 'future-star';
     if (r === 'moments_sbc' || c.includes('moment') || c.includes('record')) return 'moments';
     if (r === 'hof' || c.includes('hall of fame') || s.includes('hall of fame')) return 'hof';
