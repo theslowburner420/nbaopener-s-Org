@@ -18,7 +18,6 @@ import {
   XCircle, 
   RotateCcw, 
   Layers, 
-  Plus,
   Search
 } from 'lucide-react';
 
@@ -36,6 +35,7 @@ export const Coinflip: React.FC<CoinflipProps> = ({ onBackToHub }) => {
   // Mode: Wager a Card (Default) or Coins
   const [betMode, setBetMode] = useState<BetMode>('card');
   const [coinAmount, setCoinAmount] = useState<number>(25000);
+  const [coinInputStr, setCoinInputStr] = useState<string>('25000');
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [chosenSide, setChosenSide] = useState<BetSide>('heads');
   const [fastMode, setFastMode] = useState<boolean>(false);
@@ -72,6 +72,16 @@ export const Coinflip: React.FC<CoinflipProps> = ({ onBackToHub }) => {
     });
   }, [collection]);
 
+  // Total copies owned of selected card
+  const selectedQty = useMemo(() => {
+    return selectedCard ? (collection[selectedCard.id] || 0) : 0;
+  }, [selectedCard, collection]);
+
+  // Single card value
+  const cardValue = useMemo(() => {
+    return selectedCard ? getCardMarketValue(selectedCard) : 0;
+  }, [selectedCard]);
+
   // Filtered Cards in Picker
   const filteredPickerCards = useMemo(() => {
     return ownedCards.filter(({ card, quantity }) => {
@@ -87,14 +97,28 @@ export const Coinflip: React.FC<CoinflipProps> = ({ onBackToHub }) => {
     });
   }, [ownedCards, pickerFilter, pickerSearch]);
 
-  // Card Value
-  const cardValue = useMemo(() => {
-    return selectedCard ? getCardMarketValue(selectedCard) : 0;
-  }, [selectedCard]);
+  // Current Potential Coin Payout (1 card value profit or 2x coins)
+  const potentialCoinPayout = useMemo(() => {
+    if (betMode === 'coins') return coinAmount * 2;
+    return cardValue;
+  }, [betMode, coinAmount, cardValue]);
 
-  // Current Wager Total & Potential Payout
-  const currentWagerValue = betMode === 'coins' ? coinAmount : cardValue;
-  const potentialPayout = currentWagerValue * 2;
+  // Handle custom coin text change
+  const handleCoinInputChange = (valStr: string) => {
+    setCoinInputStr(valStr);
+    const parsed = parseInt(valStr.replace(/[^0-9]/g, ''), 10);
+    if (!isNaN(parsed)) {
+      setCoinAmount(parsed);
+    } else {
+      setCoinAmount(0);
+    }
+  };
+
+  const setFixedCoinAmount = (val: number) => {
+    const clamped = Math.max(500, Math.min(coins, val));
+    setCoinAmount(clamped);
+    setCoinInputStr(clamped.toString());
+  };
 
   // Sound handler
   const playSound = useCallback((type: 'tick' | 'spin' | 'win' | 'loss') => {
@@ -110,9 +134,14 @@ export const Coinflip: React.FC<CoinflipProps> = ({ onBackToHub }) => {
     if (gameState === 'flipping') return;
 
     let stakedCard: Card | null = null;
+    let stakedQty = 0;
 
     if (betMode === 'coins') {
-      if (coinAmount > coins || coinAmount <= 0) {
+      if (coinAmount < 500) {
+        notifyError('Minimum bet is 500 coins.');
+        return;
+      }
+      if (coinAmount > coins) {
         notifyError('Insufficient coins.');
         return;
       }
@@ -122,15 +151,18 @@ export const Coinflip: React.FC<CoinflipProps> = ({ onBackToHub }) => {
         notifyError('Select a card to wager.');
         return;
       }
-      const qty = collection[selectedCard.id] || 0;
-      if (qty <= 0) {
+      stakedQty = collection[selectedCard.id] || 0;
+      if (stakedQty <= 0) {
         notifyError('Card no longer in inventory.');
         setSelectedCard(null);
         return;
       }
+
       stakedCard = selectedCard;
-      // Remove card immediately from collection
-      await removeFromCollection([selectedCard.id]);
+      
+      // All-in: Deduct ALL copies of this card (No coin fee needed for card stake in flip)
+      const allCopiesArray = Array(stakedQty).fill(stakedCard.id);
+      await removeFromCollection(allCopiesArray);
     }
 
     setGameState('flipping');
@@ -138,7 +170,7 @@ export const Coinflip: React.FC<CoinflipProps> = ({ onBackToHub }) => {
     setWinningSide(null);
     playSound('spin');
 
-    // 50/50 Provably Fair RNG
+    // 50/50 Fair RNG
     const outcome: BetSide = Math.random() < 0.5 ? 'heads' : 'tails';
     const won = outcome === chosenSide;
 
@@ -176,28 +208,25 @@ export const Coinflip: React.FC<CoinflipProps> = ({ onBackToHub }) => {
           setStreak(s => s + 1);
 
           if (betMode === 'coins') {
-            addCoins(potentialPayout);
-            notifySuccess(`+🪙 ${formatCoinCompact(potentialPayout)} (2.0X)`);
+            addCoins(coinAmount * 2);
+            notifySuccess(`+🪙 ${formatCoinCompact(coinAmount * 2)} (2.0X)`);
           } else if (stakedCard) {
-            // Player keeps original card + wins 100% of card value in coins
-            addToCollection([stakedCard.id]);
+            // Restore all copies + win 1x card market value in coins
+            const allCopiesArray = Array(stakedQty).fill(stakedCard.id);
+            addToCollection(allCopiesArray);
             addCoins(cardValue);
-            notifySuccess(`Kept ${stakedCard.name} + won 🪙 ${formatCoinCompact(cardValue)}`);
+            notifySuccess(`Kept ${stakedQty}x ${stakedCard.name} + won 🪙 ${formatCoinCompact(cardValue)}!`);
           }
         } else {
           playSound('loss');
           setStreak(0);
 
           if (stakedCard) {
-            // Card is permanently lost!
-            notifyError(`Lost ${stakedCard.name} (Landed ${outcome.toUpperCase()})`);
-            // Check if player has more copies of this card
-            const remainingCopies = (collection[stakedCard.id] || 0) - 1;
-            if (remainingCopies <= 0) {
-              setSelectedCard(null);
-            }
+            // Permanently lost ALL copies
+            notifyError(`Lost ${stakedQty}x ${stakedCard.name}`);
+            setSelectedCard(null);
           } else {
-            notifyError(`-🪙 ${formatCoinCompact(coinAmount)} (Landed ${outcome.toUpperCase()})`);
+            notifyError(`-🪙 ${formatCoinCompact(coinAmount)} (${outcome.toUpperCase()})`);
           }
         }
       }
@@ -209,7 +238,7 @@ export const Coinflip: React.FC<CoinflipProps> = ({ onBackToHub }) => {
   return (
     <div className="h-full w-full max-w-4xl mx-auto flex flex-col justify-between bg-black text-zinc-100 font-sans select-none overflow-hidden p-2 sm:p-4">
       
-      {/* 1. MINIMAL HEADER */}
+      {/* 1. COMPACT HEADER */}
       <div className="shrink-0 bg-zinc-950 border border-zinc-800/80 rounded-xl px-3 py-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 font-bold text-xs">
@@ -354,67 +383,96 @@ export const Coinflip: React.FC<CoinflipProps> = ({ onBackToHub }) => {
                 betMode === 'coins' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
-              🪙 Coins
+              🪙 Coins Only
             </button>
           </div>
 
           <div className="text-[11px] font-mono text-zinc-400">
-            Payout: <b className="text-emerald-400">2.0X (🪙 {formatCoinCompact(potentialPayout)})</b>
+            {betMode === 'card' ? (
+              <span>Profit: <b className="text-emerald-400">+🪙 {formatCoinCompact(potentialCoinPayout)}</b></span>
+            ) : (
+              <span>Payout: <b className="text-emerald-400">2.0X (🪙 {formatCoinCompact(potentialCoinPayout)})</b></span>
+            )}
           </div>
         </div>
 
         {/* Stake Slot / Input */}
         {betMode === 'card' ? (
-          <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-zinc-900/70 border border-zinc-800">
-            {selectedCard ? (
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-11 rounded-lg bg-zinc-800 border border-zinc-700 flex flex-col items-center justify-center text-center">
-                  <span className="text-[10px] font-bold text-amber-400 leading-none">{selectedCard.stats.ovr}</span>
-                  <span className="text-[7px] text-zinc-400 font-mono">OVR</span>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-zinc-900/70 border border-zinc-800">
+              {selectedCard ? (
+                <div className="flex items-center gap-3">
+                  <div className="relative w-9 h-11 rounded-lg bg-zinc-800 border border-zinc-700 flex flex-col items-center justify-center text-center">
+                    <span className="text-[10px] font-bold text-amber-400 leading-none">{selectedCard.stats.ovr}</span>
+                    <span className="text-[7px] text-zinc-400 font-mono">OVR</span>
+                    {selectedQty > 1 && (
+                      <span className="absolute -top-1.5 -right-1.5 px-1 bg-red-500 text-white text-[8px] font-black rounded-full shadow">
+                        x{selectedQty}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-left">
+                    <div className="text-xs font-bold text-white truncate max-w-[170px]">{selectedCard.name}</div>
+                    <div className="text-[10px] font-mono text-zinc-400 flex items-center gap-1.5">
+                      <span className="text-amber-400 font-bold">Val: 🪙 {formatCoinCompact(cardValue)}</span>
+                      <span>•</span>
+                      <span className="text-rose-400 font-bold">ALL-IN ({selectedQty}x)</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <div className="text-xs font-bold text-white truncate max-w-[170px]">{selectedCard.name}</div>
-                  <div className="text-[10px] font-mono text-emerald-400 font-bold">🪙 {formatCoinCompact(cardValue)}</div>
-                </div>
-              </div>
-            ) : (
-              <span className="text-xs text-zinc-500 font-mono ml-2">No card selected</span>
-            )}
+              ) : (
+                <span className="text-xs text-zinc-500 font-mono ml-2">No card selected</span>
+              )}
 
-            <button
-              onClick={() => gameState !== 'flipping' && setIsPickerOpen(true)}
-              className="px-3.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-mono font-bold text-white transition-colors cursor-pointer"
-            >
-              {selectedCard ? 'Change Card' : 'Pick Card +'}
-            </button>
+              <button
+                onClick={() => gameState !== 'flipping' && setIsPickerOpen(true)}
+                className="px-3.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-mono font-bold text-white transition-colors cursor-pointer"
+              >
+                {selectedCard ? 'Change Card' : 'Pick Card +'}
+              </button>
+            </div>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
-            {[10000, 25000, 50000, 100000].map((amt) => (
+          <div className="space-y-2">
+            {/* Custom Input + Quick buttons */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 font-mono text-xs">🪙</span>
+                <input
+                  type="text"
+                  value={coinInputStr}
+                  onChange={(e) => handleCoinInputChange(e.target.value)}
+                  placeholder="Min 500"
+                  disabled={gameState === 'flipping'}
+                  className="w-full pl-7 pr-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-xs font-mono text-white focus:outline-none focus:border-purple-400"
+                />
+              </div>
+
               <button
-                key={amt}
-                onClick={() => gameState !== 'flipping' && setCoinAmount(amt)}
-                className={`flex-1 py-1.5 px-1 rounded-lg border text-[11px] font-mono transition-all cursor-pointer ${
-                  coinAmount === amt
-                    ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
-                    : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200'
-                }`}
+                onClick={() => setFixedCoinAmount(500)}
+                className="px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-300 hover:text-white"
               >
-                {formatCoinCompact(amt)}
+                500
               </button>
-            ))}
-            <button
-              onClick={() => gameState !== 'flipping' && setCoinAmount(Math.max(1000, Math.floor(coins / 2)))}
-              className="px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-400 hover:text-white cursor-pointer"
-            >
-              ½
-            </button>
-            <button
-              onClick={() => gameState !== 'flipping' && setCoinAmount(coins)}
-              className="px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-amber-400 hover:text-amber-300 cursor-pointer"
-            >
-              MAX
-            </button>
+              <button
+                onClick={() => setFixedCoinAmount(25000)}
+                className="px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-300 hover:text-white"
+              >
+                25K
+              </button>
+              <button
+                onClick={() => setFixedCoinAmount(Math.max(500, Math.floor(coins / 2)))}
+                className="px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-400 hover:text-white"
+              >
+                ½
+              </button>
+              <button
+                onClick={() => setFixedCoinAmount(coins)}
+                className="px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-amber-400 hover:text-amber-300 font-bold"
+              >
+                MAX
+              </button>
+            </div>
           </div>
         )}
 
@@ -422,11 +480,17 @@ export const Coinflip: React.FC<CoinflipProps> = ({ onBackToHub }) => {
         <div className="flex items-center gap-2 pt-0.5">
           <button
             onClick={executeFlip}
-            disabled={gameState === 'flipping' || (betMode === 'card' && !selectedCard) || (betMode === 'coins' && coinAmount > coins)}
+            disabled={
+              gameState === 'flipping' || 
+              (betMode === 'card' && !selectedCard) || 
+              (betMode === 'coins' && (coinAmount < 500 || coinAmount > coins))
+            }
             className={`flex-1 py-3 rounded-xl text-xs font-black font-mono uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
               gameState === 'flipping'
                 ? 'bg-zinc-900 text-zinc-500 border border-zinc-800 cursor-not-allowed'
                 : (betMode === 'card' && !selectedCard)
+                ? 'bg-zinc-900 text-zinc-500 border border-zinc-800 cursor-not-allowed'
+                : (betMode === 'coins' && (coinAmount < 500 || coinAmount > coins))
                 ? 'bg-zinc-900 text-zinc-500 border border-zinc-800 cursor-not-allowed'
                 : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:opacity-95 active:scale-[0.99] shadow-[0_0_20px_rgba(168,85,247,0.3)] cursor-pointer'
             }`}
@@ -452,7 +516,10 @@ export const Coinflip: React.FC<CoinflipProps> = ({ onBackToHub }) => {
           {gameState === 'result' && (
             <button
               onClick={executeFlip}
-              disabled={(betMode === 'card' && !selectedCard) || (betMode === 'coins' && coinAmount > coins)}
+              disabled={
+                (betMode === 'card' && (!selectedCard || (collection[selectedCard.id] || 0) <= 0)) || 
+                (betMode === 'coins' && (coinAmount < 500 || coinAmount > coins))
+              }
               className="px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Flip again"
             >
@@ -464,7 +531,7 @@ export const Coinflip: React.FC<CoinflipProps> = ({ onBackToHub }) => {
 
       </div>
 
-      {/* 4. CARD PICKER MODAL (Spacious grid, no overlap) */}
+      {/* 4. CARD PICKER MODAL */}
       <AnimatePresence>
         {isPickerOpen && (
           <motion.div
@@ -484,10 +551,10 @@ export const Coinflip: React.FC<CoinflipProps> = ({ onBackToHub }) => {
                 <div>
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
                     <Layers size={16} className="text-purple-400" />
-                    <span>Select Card to Stake</span>
+                    <span>Select Card to Stake (ALL-IN)</span>
                   </h3>
                   <p className="text-[11px] text-zinc-500 font-mono">
-                    50% chance to win double or lose the card
+                    Risks all copies • Win 100% card value in coins
                   </p>
                 </div>
                 <button
@@ -565,9 +632,13 @@ export const Coinflip: React.FC<CoinflipProps> = ({ onBackToHub }) => {
                               : 'border-zinc-800 hover:border-zinc-600'
                           }`}
                         >
-                          {quantity > 1 && (
-                            <div className="absolute top-2 right-2 z-10 px-1.5 py-0.5 rounded-full bg-amber-500 text-black text-[9px] font-black font-mono shadow-md">
-                              x{quantity}
+                          {quantity > 1 ? (
+                            <div className="absolute top-2 right-2 z-10 px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-black font-mono shadow-md">
+                              ALL-IN x{quantity}
+                            </div>
+                          ) : (
+                            <div className="absolute top-2 right-2 z-10 px-1.5 py-0.5 rounded-full bg-zinc-800 text-zinc-300 text-[9px] font-mono border border-zinc-700">
+                              x1
                             </div>
                           )}
 
@@ -576,8 +647,10 @@ export const Coinflip: React.FC<CoinflipProps> = ({ onBackToHub }) => {
                           </div>
 
                           <div className="w-full mt-2 pt-1.5 border-t border-zinc-800/80 flex items-center justify-between text-[10px] font-mono">
-                            <span className="text-zinc-300 truncate max-w-[60%] font-sans font-medium">{card.name}</span>
-                            <span className="text-purple-400 font-bold">🪙{formatCoinCompact(val)}</span>
+                            <span className="text-zinc-300 truncate max-w-[55%] font-sans font-medium">{card.name}</span>
+                            <span className="font-bold text-purple-400">
+                              🪙{formatCoinCompact(val)}
+                            </span>
                           </div>
                         </div>
                       );

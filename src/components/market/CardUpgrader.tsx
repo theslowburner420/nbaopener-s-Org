@@ -20,7 +20,8 @@ import {
   Sparkles, 
   Layers, 
   Plus,
-  Award
+  Award,
+  AlertTriangle
 } from 'lucide-react';
 
 interface CardUpgraderProps {
@@ -43,10 +44,10 @@ const PROBABILITY_PRESETS: ProbabilityPreset[] = [
 ];
 
 export const CardUpgrader: React.FC<CardUpgraderProps> = ({ onBackToHub }) => {
-  const { collection, addCoins, addToCollection, removeFromCollection } = useGame();
+  const { coins, collection, addCoins, addToCollection, removeFromCollection } = useGame();
   const { notifySuccess, notifyError } = useNotification();
 
-  // Core State - No card selected by default (must be picked by player)
+  // Core State - No card selected by default
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [winProbability, setWinProbability] = useState<number>(50); // Default 50%
   const [fastMode, setFastMode] = useState<boolean>(false);
@@ -78,7 +79,6 @@ export const CardUpgrader: React.FC<CardUpgraderProps> = ({ onBackToHub }) => {
         list.push({ card, quantity: qty });
       }
     });
-    // Sort by duplicates first, then OVR descending
     return list.sort((a, b) => {
       if (b.quantity > 1 && a.quantity <= 1) return 1;
       if (a.quantity > 1 && b.quantity <= 1) return -1;
@@ -86,19 +86,28 @@ export const CardUpgrader: React.FC<CardUpgraderProps> = ({ onBackToHub }) => {
     });
   }, [collection]);
 
+  // Total copies owned of selected card
+  const selectedQty = useMemo(() => {
+    return selectedCard ? (collection[selectedCard.id] || 0) : 0;
+  }, [selectedCard, collection]);
+
   // Multiplier from probability
   const currentMultiplier = useMemo(() => {
     return Math.max(1.05, parseFloat((100 / Math.max(1, winProbability)).toFixed(2)));
   }, [winProbability]);
 
-  // Card values
-  const inputCardValue = useMemo(() => {
+  // Single card value & required coin entry fee
+  const singleCardValue = useMemo(() => {
     return selectedCard ? getCardMarketValue(selectedCard) : 0;
   }, [selectedCard]);
 
+  // Can player afford the coin fee for the upgrade?
+  const hasEnoughCoins = coins >= singleCardValue;
+
+  // Reward coins calculated as if 1 card was staked (preventing exploit)
   const targetRewardCoins = useMemo(() => {
-    return Math.round(inputCardValue * currentMultiplier);
-  }, [inputCardValue, currentMultiplier]);
+    return Math.round(singleCardValue * currentMultiplier);
+  }, [singleCardValue, currentMultiplier]);
 
   // Dynamic Target Card calculation based on selected card + chosen probability %
   const targetCardCandidate = useMemo<Card | null>(() => {
@@ -163,7 +172,7 @@ export const CardUpgrader: React.FC<CardUpgraderProps> = ({ onBackToHub }) => {
   const executeUpgrade = async () => {
     if (gameState === 'spinning' || !selectedCard) return;
 
-    // Verify card is still in inventory
+    // Verify card quantity in inventory
     const currentQty = collection[selectedCard.id] || 0;
     if (currentQty <= 0) {
       notifyError('Card no longer in inventory.');
@@ -171,10 +180,20 @@ export const CardUpgrader: React.FC<CardUpgraderProps> = ({ onBackToHub }) => {
       return;
     }
 
-    const sacrificedCard = selectedCard;
+    // Verify player has enough coins to match the card value
+    if (coins < singleCardValue) {
+      notifyError(`You need 🪙 ${formatCoinCompact(singleCardValue)} to match the upgrade fee!`);
+      return;
+    }
 
-    // Deduct card immediately from collection
-    await removeFromCollection([sacrificedCard.id]);
+    const sacrificedCard = selectedCard;
+    const sacrificedQty = currentQty;
+    const requiredCoinsFee = singleCardValue;
+
+    // All-In: Remove ALL copies of this card and the coin fee
+    const allCopiesArray = Array(sacrificedQty).fill(sacrificedCard.id);
+    await removeFromCollection(allCopiesArray);
+    addCoins(-requiredCoinsFee);
 
     setGameState('spinning');
     setIsWinner(null);
@@ -233,23 +252,19 @@ export const CardUpgrader: React.FC<CardUpgraderProps> = ({ onBackToHub }) => {
           const rewardCoins = targetRewardCoins;
           setWonCardReward(rewardCard);
 
-          // Add upgraded card to collection & reward bonus coins
+          // Add 1 upgraded card to collection & reward multiplier coins
           addToCollection([rewardCard.id]);
           addCoins(rewardCoins);
           setStreak(prev => prev + 1);
 
           notifySuccess(`+ ${rewardCard.name} (${rewardCard.stats.ovr} OVR) + 🪙 ${formatCoinCompact(rewardCoins)}`);
+          setSelectedCard(null);
         } else {
           playSound('loss');
           setWonCardReward(null);
           setStreak(0);
-          notifyError(`Upgrade failed. ${sacrificedCard.name} destroyed.`);
-
-          // If no more copies of this card remain, reset selection
-          const remainingCopies = (collection[sacrificedCard.id] || 0) - 1;
-          if (remainingCopies <= 0) {
-            setSelectedCard(null);
-          }
+          notifyError(`Upgrade failed! Lost ${sacrificedQty}x ${sacrificedCard.name} and 🪙 ${formatCoinCompact(requiredCoinsFee)}`);
+          setSelectedCard(null);
         }
       }
     };
@@ -283,7 +298,7 @@ export const CardUpgrader: React.FC<CardUpgraderProps> = ({ onBackToHub }) => {
           </div>
           <div>
             <span className="text-xs font-bold text-white tracking-wide block leading-none">CARD UPGRADER</span>
-            <span className="text-[9px] text-zinc-500 font-mono">Risk tier upgrade</span>
+            <span className="text-[9px] text-zinc-500 font-mono">High Stakes • All-In Sacrifice</span>
           </div>
         </div>
 
@@ -325,7 +340,7 @@ export const CardUpgrader: React.FC<CardUpgraderProps> = ({ onBackToHub }) => {
           {/* LEFT: YOUR STAKED CARD */}
           <div className="col-span-4 flex flex-col items-center justify-center">
             <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-bold mb-1.5 flex items-center gap-1">
-              <span>Your Card</span>
+              <span>Sacrifice</span>
             </div>
 
             {selectedCard ? (
@@ -333,14 +348,20 @@ export const CardUpgrader: React.FC<CardUpgraderProps> = ({ onBackToHub }) => {
                 onClick={() => gameState !== 'spinning' && setIsPickerOpen(true)}
                 className="relative group cursor-pointer w-32 sm:w-44 rounded-2xl overflow-hidden border border-zinc-700/80 hover:border-amber-400 transition-all bg-zinc-950 p-2 shadow-xl flex flex-col items-center"
               >
+                {selectedQty > 1 && (
+                  <div className="absolute top-2 right-2 z-10 px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-black font-mono shadow-md">
+                    ALL-IN x{selectedQty}
+                  </div>
+                )}
+
                 <div className="w-full pointer-events-none flex justify-center py-1">
-                  <CardItem card={selectedCard} isOwned={true} mode="mini" quantity={collection[selectedCard.id] || 1} />
+                  <CardItem card={selectedCard} isOwned={true} mode="mini" quantity={selectedQty} />
                 </div>
 
                 <div className="w-full mt-1 pt-1.5 border-t border-zinc-800 text-center">
                   <div className="text-xs font-bold text-white truncate font-sans">{selectedCard.name}</div>
-                  <div className="text-[10px] font-mono text-amber-400 font-bold flex items-center justify-center gap-1">
-                    <span>🪙 {formatCoinCompact(inputCardValue)}</span>
+                  <div className="text-[10px] font-mono text-zinc-400 flex items-center justify-center gap-1">
+                    <span className="text-amber-400 font-bold">🪙 {formatCoinCompact(singleCardValue)}</span>
                     <span className="text-zinc-500">•</span>
                     <span className="text-zinc-300">{selectedCard.stats.ovr} OVR</span>
                   </div>
@@ -521,16 +542,35 @@ export const CardUpgrader: React.FC<CardUpgraderProps> = ({ onBackToHub }) => {
           })}
         </div>
 
+        {/* Warning Badge for All-In Card + Coin Requirement */}
+        {selectedCard && (
+          <div className={`px-3 py-1.5 rounded-xl text-[10px] font-mono flex items-center justify-between gap-2 border ${
+            hasEnoughCoins 
+              ? 'bg-amber-500/10 border-amber-500/20 text-amber-300' 
+              : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+          }`}>
+            <div className="flex items-center gap-1.5">
+              <AlertTriangle size={12} className={hasEnoughCoins ? 'text-amber-400' : 'text-rose-400'} />
+              <span>Sacrifice: <b>{selectedQty}x {selectedCard.name}</b> + <b>🪙 {formatCoinCompact(singleCardValue)}</b></span>
+            </div>
+            {!hasEnoughCoins && (
+              <span className="font-bold text-rose-400">Need 🪙 {formatCoinCompact(singleCardValue - coins)} more</span>
+            )}
+          </div>
+        )}
+
         {/* Action Trigger Button */}
         <div className="flex items-center gap-2 pt-0.5">
           <button
             onClick={executeUpgrade}
-            disabled={gameState === 'spinning' || !selectedCard}
+            disabled={gameState === 'spinning' || !selectedCard || !hasEnoughCoins}
             className={`flex-1 py-3 rounded-xl text-xs font-black font-mono uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
               gameState === 'spinning'
                 ? 'bg-zinc-900 text-zinc-500 border border-zinc-800 cursor-not-allowed'
                 : !selectedCard
                 ? 'bg-zinc-900 text-zinc-500 border border-zinc-800 cursor-not-allowed'
+                : !hasEnoughCoins
+                ? 'bg-rose-950/40 text-rose-400 border border-rose-800 cursor-not-allowed'
                 : 'bg-gradient-to-r from-emerald-500 to-teal-400 text-black hover:opacity-95 active:scale-[0.99] shadow-[0_0_20px_rgba(16,185,129,0.3)] cursor-pointer'
             }`}
           >
@@ -544,6 +584,11 @@ export const CardUpgrader: React.FC<CardUpgraderProps> = ({ onBackToHub }) => {
                 <Layers size={14} />
                 <span>SELECT A CARD TO UPGRADE</span>
               </>
+            ) : !hasEnoughCoins ? (
+              <>
+                <AlertTriangle size={14} />
+                <span>INSUFFICIENT COINS FOR UPGRADE MATCH</span>
+              </>
             ) : (
               <>
                 <Zap size={14} className="fill-black" />
@@ -553,23 +598,11 @@ export const CardUpgrader: React.FC<CardUpgraderProps> = ({ onBackToHub }) => {
               </>
             )}
           </button>
-
-          {gameState === 'result' && (
-            <button
-              onClick={executeUpgrade}
-              disabled={!selectedCard || (collection[selectedCard.id] || 0) <= 0}
-              className="px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Upgrade again"
-            >
-              <RotateCcw size={13} />
-              <span className="hidden sm:inline">Again</span>
-            </button>
-          )}
         </div>
 
       </div>
 
-      {/* 4. CLEAN CARD SELECTION MODAL (Spacious grid, no overlap) */}
+      {/* 4. CLEAN CARD SELECTION MODAL */}
       <AnimatePresence>
         {isPickerOpen && (
           <motion.div
@@ -589,10 +622,10 @@ export const CardUpgrader: React.FC<CardUpgraderProps> = ({ onBackToHub }) => {
                 <div>
                   <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
                     <Layers size={16} className="text-emerald-400" />
-                    <span>Select Card to Upgrade</span>
+                    <span>Select Card to Upgrade (ALL-IN)</span>
                   </h3>
                   <p className="text-[11px] text-zinc-500 font-mono">
-                    Pick a card from your inventory to risk
+                    Risks all copies + requires 🪙 matching entry fee
                   </p>
                 </div>
                 <button
@@ -656,6 +689,7 @@ export const CardUpgrader: React.FC<CardUpgraderProps> = ({ onBackToHub }) => {
                     {filteredPickerCards.map(({ card, quantity }) => {
                       const isCurrent = selectedCard?.id === card.id;
                       const val = getCardMarketValue(card);
+                      const canAfford = coins >= val;
 
                       return (
                         <div
@@ -670,9 +704,13 @@ export const CardUpgrader: React.FC<CardUpgraderProps> = ({ onBackToHub }) => {
                               : 'border-zinc-800 hover:border-zinc-600'
                           }`}
                         >
-                          {quantity > 1 && (
-                            <div className="absolute top-2 right-2 z-10 px-1.5 py-0.5 rounded-full bg-amber-500 text-black text-[9px] font-black font-mono shadow-md">
-                              x{quantity}
+                          {quantity > 1 ? (
+                            <div className="absolute top-2 right-2 z-10 px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-black font-mono shadow-md">
+                              ALL-IN x{quantity}
+                            </div>
+                          ) : (
+                            <div className="absolute top-2 right-2 z-10 px-1.5 py-0.5 rounded-full bg-zinc-800 text-zinc-300 text-[9px] font-mono border border-zinc-700">
+                              x1
                             </div>
                           )}
 
@@ -681,8 +719,10 @@ export const CardUpgrader: React.FC<CardUpgraderProps> = ({ onBackToHub }) => {
                           </div>
 
                           <div className="w-full mt-2 pt-1.5 border-t border-zinc-800/80 flex items-center justify-between text-[10px] font-mono">
-                            <span className="text-zinc-300 truncate max-w-[60%] font-sans font-medium">{card.name}</span>
-                            <span className="text-emerald-400 font-bold">🪙{formatCoinCompact(val)}</span>
+                            <span className="text-zinc-300 truncate max-w-[55%] font-sans font-medium">{card.name}</span>
+                            <span className={`font-bold ${canAfford ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              🪙{formatCoinCompact(val)}
+                            </span>
                           </div>
                         </div>
                       );
