@@ -1,0 +1,6 @@
+{
+  "name": "MECHoops Collector",
+  "description": "ULTRA PRO: The ultimate basketball card experience. Featuring Draft Champions mode with Chemistry system, live match simulation, and exclusive rewards. Collect legends, manage your dynasty, and conquer the Rising Stars tournament.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
