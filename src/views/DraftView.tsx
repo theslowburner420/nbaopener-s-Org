@@ -2577,7 +2577,7 @@ const DraftView: React.FC = () => {
 
   const renderDraftBoard = () => {
     return (
-      <div className="h-[100dvh] w-full flex flex-col bg-zinc-950 overflow-hidden relative">
+      <div className="h-full w-full flex flex-col bg-zinc-950 overflow-hidden relative">
         {/* Background Ambience for Desktop */}
         <div className="hidden lg:block absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-black" />
@@ -3963,7 +3963,7 @@ const DraftView: React.FC = () => {
     };
 
     return (
-      <div className="h-[100dvh] w-full flex flex-col bg-zinc-950 overflow-hidden relative text-white">
+      <div className="h-full w-full flex flex-col bg-zinc-950 overflow-hidden relative text-white">
         {/* Clean Header */}
         <header className="px-4 py-3 bg-black/90 border-b border-zinc-900 flex items-center justify-between gap-2 z-30 shrink-0">
           <div className="flex items-center gap-2.5">

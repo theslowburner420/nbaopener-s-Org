@@ -86,22 +86,24 @@ export const AdBannerRoot: React.FC<AdBannerRootProps> = ({
     <div
       // Clau: MAI desmuntar amb {condició && <AdBannerRoot/>}.
       // Amagar sempre amb CSS, per mantenir l'script viu al DOM.
-      className="w-full bg-zinc-950 border-b border-zinc-900 flex justify-center items-center shrink-0 z-50 overflow-hidden relative select-none h-[48px] sm:h-[60px] md:h-[72px]"
+      className="w-full bg-zinc-950 border-b border-zinc-900 flex justify-center items-center shrink-0 z-50 overflow-hidden relative select-none h-[48px] sm:h-[60px] md:h-[90px]"
       style={{
         display: isPremium ? 'none' : 'flex',
       }}
     >
-      <div
-        id="ad-banner-hoopscollector-root"
-        ref={containerRef}
-        style={{
-          width: `${width}px`,
-          height: `${height}px`,
-          minWidth: `${width}px`,
-          minHeight: `${height}px`,
-        }}
-        className="ad-banner-hoopscollector-root pointer-events-auto"
-      />
+      <div className="scale-[0.5] sm:scale-[0.62] md:scale-100 origin-center transition-transform flex items-center justify-center">
+        <div
+          id="ad-banner-hoopscollector-root"
+          ref={containerRef}
+          style={{
+            width: `${width}px`,
+            height: `${height}px`,
+            minWidth: `${width}px`,
+            minHeight: `${height}px`,
+          }}
+          className="ad-banner-hoopscollector-root pointer-events-auto"
+        />
+      </div>
     </div>
   );
 };

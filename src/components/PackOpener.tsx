@@ -5,6 +5,7 @@ import CardItem from './CardItem';
 import { Check, Sparkles, Trophy, Award, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
 import { MemoryManager } from '../lib/memory';
+import { isAndroidDevice } from '../lib/device';
 
 interface PackOpenerProps {
   cards: Card[];
@@ -50,8 +51,19 @@ const getCategoryBadge = (card: Card) => {
 };
 
 // Memoized high-performance particle burst
-const ParticleBurst = memo(({ color, isHighTier }: { color: string; isHighTier: boolean }) => {
-  const particleCount = isHighTier ? 14 : 8;
+const ParticleBurst = memo(({ color, isHighTier, isMobile, isAndroid }: { color: string; isHighTier: boolean; isMobile?: boolean; isAndroid?: boolean }) => {
+  const [isBursting, setIsBursting] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsBursting(false);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const particleCount = isAndroid 
+    ? (isHighTier ? 6 : 4) 
+    : (isMobile ? (isHighTier ? 8 : 6) : (isHighTier ? 14 : 8));
 
   const particles = useMemo(() => {
     return Array.from({ length: particleCount }, (_, i) => {
@@ -67,7 +79,10 @@ const ParticleBurst = memo(({ color, isHighTier }: { color: string; isHighTier: 
   }, [particleCount, isHighTier]);
 
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ willChange: 'transform, opacity', transform: 'translateZ(0)' }}>
+    <div
+      className="absolute inset-0 pointer-events-none overflow-hidden"
+      style={isBursting && !isAndroid ? { willChange: 'transform, opacity', transform: 'translateZ(0)' } : undefined}
+    >
       {particles.map((p) => (
         <div
           key={p.id}
@@ -83,8 +98,7 @@ const ParticleBurst = memo(({ color, isHighTier }: { color: string; isHighTier: 
             height: isHighTier ? '4px' : '3px',
             boxShadow: `0 0 ${isHighTier ? '6px' : '3px'} ${color}`,
             borderRadius: p.id % 2 === 0 ? '50%' : '2px',
-            willChange: 'transform, opacity',
-            transform: 'translateZ(0)'
+            ...(isBursting && !isAndroid ? { willChange: 'transform, opacity', transform: 'translateZ(0)' } : {})
           } as any}
         />
       ))}
@@ -95,21 +109,35 @@ const ParticleBurst = memo(({ color, isHighTier }: { color: string; isHighTier: 
 ParticleBurst.displayName = 'ParticleBurst';
 
 // Memoized Flare lines
-const FlareBurst = memo(({ color }: { color: string }) => {
+const FlareBurst = memo(({ color, isMobile, isAndroid }: { color: string; isMobile?: boolean; isAndroid?: boolean }) => {
+  const [isBursting, setIsBursting] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsBursting(false);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const flareCount = isAndroid ? 2 : (isMobile ? 2 : 4);
+
   return (
-    <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-20" style={{ transform: 'translateZ(0)' }}>
-      {Array.from({ length: 4 }).map((_, i) => (
+    <div
+      className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-20"
+      style={isBursting && !isAndroid ? { transform: 'translateZ(0)' } : undefined}
+    >
+      {Array.from({ length: flareCount }).map((_, i) => (
         <div
           key={i}
           className="flare-burst"
           style={{
-            transform: `rotate(${i * 90}deg) translateZ(0)`,
+            transform: `rotate(${i * (isMobile || isAndroid ? 180 : 90)}deg)${isBursting && !isAndroid ? ' translateZ(0)' : ''}`,
             backgroundColor: color,
             boxShadow: `0 0 15px ${color}`,
             width: '2.5px',
             height: '160px',
             opacity: 0.65,
-            willChange: 'transform, opacity'
+            ...(isBursting && !isAndroid ? { willChange: 'transform, opacity' } : {})
           } as any}
         />
       ))}
@@ -119,9 +147,9 @@ const FlareBurst = memo(({ color }: { color: string }) => {
 
 FlareBurst.displayName = 'FlareBurst';
 
-const ShimmerOverlay = memo(() => (
+const ShimmerOverlay = memo(({ isMobile }: { isMobile?: boolean }) => (
   <div className="absolute inset-0 pointer-events-none z-[60] overflow-hidden rounded-2xl">
-    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full animate-shimmer-sweep" />
+    <div className={`absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full ${isMobile ? 'animate-shimmer-sweep-mobile' : 'animate-shimmer-sweep'}`} />
   </div>
 ));
 
@@ -134,6 +162,7 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
   const [packBurst, setPackBurst] = useState(false);
   const [isPreloaded, setIsPreloaded] = useState(false);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  const isAndroid = useMemo(() => isAndroidDevice(), []);
 
   const [pendingQueue, setPendingQueue] = useState<Array<{ cardIndex: number; achievement: any }>>(() => {
     return (newlyUnlockedAchievements || []).map(ach => {
@@ -235,10 +264,14 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
     }
   }, [isPreloaded, showPack]);
 
-  // Card Reveal trigger when switching cards (isRevealing is reset onAnimationComplete of the active card)
+  // Card Reveal trigger when switching cards (with safety auto-dismiss timeout)
   useEffect(() => {
     if (showPack) return;
     setIsRevealing(true);
+    const timer = setTimeout(() => {
+      setIsRevealing(false);
+    }, 750);
+    return () => clearTimeout(timer);
   }, [activeCardIndex, showPack]);
 
   // Achievement queue processing
@@ -438,7 +471,7 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[8000] bg-black flex flex-col items-center justify-between overflow-hidden h-[100dvh] select-none pointer-events-auto"
-      style={{ willChange: 'transform, opacity' }}
+      style={!isAndroid ? { willChange: 'transform, opacity' } : undefined}
     >
       {/* Atmospheric Background Glow */}
       <div 
@@ -456,10 +489,10 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
             <div className="absolute inset-0 bg-white/25 animate-white-flash pointer-events-none" />
 
             {/* Particle Burst */}
-            <ParticleBurst color={activeColor} isHighTier={isHighTier} />
+            <ParticleBurst color={activeColor} isHighTier={isHighTier} isMobile={isMobile} isAndroid={isAndroid} />
 
             {/* Flare rays for high-tier */}
-            {isHighTier && <FlareBurst color={activeColor} />}
+            {isHighTier && <FlareBurst color={activeColor} isMobile={isMobile} isAndroid={isAndroid} />}
 
             {/* Category/Rarity Text Splash */}
             {badge && (
@@ -489,9 +522,8 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
           <motion.div
             initial={{ scale: 0.85, opacity: 0 }}
             animate={packBurst ? {
-              scale: [1, 1.4],
-              opacity: [1, 0],
-              filter: 'brightness(3) blur(8px)'
+              scale: [1, 1.6],
+              opacity: [1, 0]
             } : {
               scale: [0.96, 1.04, 0.98, 1.02, 1],
               rotate: [0, -2, 2, -1, 0],
@@ -519,18 +551,19 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
               const isActive = index === activeCardIndex;
               const distance = Math.abs(index - activeCardIndex);
               
-              // Skip rendering cards far away to maintain peak 60/120fps fluidity (distance > 2 on mobile, > 3 on desktop)
-              if (isMobile ? distance > 2 : distance > 3) return null;
+              // Only render adjacent cards: max 1 on Android/mobile, max 3 on desktop for optimal rendering performance
+              if (isAndroid ? distance > 1 : (isMobile ? distance > 2 : distance > 3)) return null;
 
               const transform = getCardTransform(index);
-              const shouldPromote = isActive || distance <= 1;
+              const shouldPromote = !isAndroid && (isActive || distance <= 1);
 
               return (
                 <motion.div
                   key={`${card.id || 'card'}-${index}`}
+                  initial={{ scale: 0.85, opacity: 0 }}
                   drag={isActive ? "x" : false}
                   dragConstraints={{ left: 0, right: 0 }}
-                  dragElastic={0.25}
+                  dragElastic={0.2}
                   onDragEnd={(_, info) => {
                     if (!isActive) return;
                     if (info.offset.x < -35 || info.velocity.x < -250) {
@@ -548,12 +581,19 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
                     opacity: transform.opacity,
                     zIndex: transform.zIndex
                   }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 340,
-                    damping: 28,
-                    mass: 0.6
-                  }}
+                  transition={
+                    isAndroid
+                      ? {
+                          duration: 0.24,
+                          ease: [0.25, 1, 0.5, 1]
+                        }
+                      : {
+                          type: "spring",
+                          stiffness: 340,
+                          damping: 28,
+                          mass: 0.6
+                        }
+                  }
                   onAnimationComplete={() => {
                     if (isActive) {
                       setIsRevealing(false);
@@ -564,12 +604,13 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
                     isActive ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
                   }`}
                   style={{
-                    willChange: shouldPromote ? 'transform, opacity' : 'auto'
+                    willChange: shouldPromote ? 'transform, opacity' : 'auto',
+                    contain: isAndroid ? 'layout paint' : 'none'
                   }}
                 >
                   <div className="w-full h-full relative">
                     {/* Shimmer for high tier cards */}
-                    {isActive && isHighTier && <ShimmerOverlay />}
+                    {isActive && isHighTier && !isAndroid && <ShimmerOverlay isMobile={isMobile} />}
 
                     <CardItem
                       card={card}
@@ -578,12 +619,15 @@ export default function PackOpener({ cards, newlyUnlockedAchievements = [], onCl
                       showBack={false}
                       isFocused={isActive}
                       isNew={card.isNew}
-                      isAnimating={isActive && isRevealing}
+                      isAnimating={(isActive || distance <= 1) && isRevealing}
+                      disableLayoutId={true}
+                      isMobile={isMobile}
+                      isAndroid={isAndroid}
                     />
 
                     {/* Darkening overlay for non-active/distant cards (replaces costly filter brightness/contrast animation) */}
                     <div 
-                      className="absolute inset-0 bg-black rounded-xl pointer-events-none transition-opacity duration-300 ease-out z-40"
+                      className={`absolute inset-0 bg-black rounded-xl pointer-events-none z-40 ${isAndroid ? '' : 'transition-opacity duration-300 ease-out'}`}
                       style={{ opacity: transform.overlayOpacity }}
                     />
                   </div>

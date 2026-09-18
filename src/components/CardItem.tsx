@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo, memo, useRef, useEffect } from '
 import { motion } from 'motion/react';
 import { Card, Rarity } from '../types';
 import { Lock, Zap } from 'lucide-react';
+import { isAndroidDevice } from '../lib/device';
 
 interface CardItemProps {
   card: Card;
@@ -12,6 +13,9 @@ interface CardItemProps {
   isFocused?: boolean;
   isNew?: boolean;
   isAnimating?: boolean;
+  disableLayoutId?: boolean;
+  isMobile?: boolean;
+  isAndroid?: boolean;
   quantity?: number;
   dynamicOvr?: number;
   dynamicStats?: {
@@ -84,7 +88,12 @@ const RARITY_COLORS: Record<Rarity, string> = {
   'hidden_gems': '#10B981',
 };
 
-const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', onClick, showBack = false, isFocused = false, isNew = false, isAnimating = false, quantity = 0, dynamicOvr, dynamicStats, width }) => {
+const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', onClick, showBack = false, isFocused = false, isNew = false, isAnimating = false, disableLayoutId = false, isMobile = false, isAndroid: isAndroidProp, quantity = 0, dynamicOvr, dynamicStats, width }) => {
+  const isAndroid = useMemo(() => {
+    if (typeof isAndroidProp === 'boolean') return isAndroidProp;
+    return isAndroidDevice();
+  }, [isAndroidProp]);
+
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -182,6 +191,7 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
   }, [card.rarity, card.category, card.series, card.nbaId, card.id]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (isAndroid) return;
     if (!isHovered) setIsHovered(true);
     if (!isOwned || !isHolo) return;
     
@@ -214,9 +224,10 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
       target.style.setProperty('--holo-opacity', holoOpacity.toString());
       mouseRafRef.current = null;
     });
-  }, [isHovered, isOwned, isHolo, isLegend, isFranchise]);
+  }, [isAndroid, isHovered, isOwned, isHolo, isLegend, isFranchise]);
 
   const handleMouseLeave = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (isAndroid) return;
     setIsHovered(false);
     const target = e.currentTarget;
     
@@ -242,18 +253,19 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
       target.style.setProperty('--opacity', isHolo ? baseOpacity.toString() : '0');
       target.style.setProperty('--holo-opacity', isHolo ? baseHoloOpacity.toString() : '0');
     });
-  }, [isHolo, isLegend, isFranchise]);
+  }, [isAndroid, isHolo, isLegend, isFranchise]);
 
   // Extreme Performance Optimization: Hardware Acceleration & Memory Management
   const gpuStyles = useMemo(() => {
-    const shouldPromote = isFocused || isAnimating;
+    // On Android/Blink, will-change causes excessive compositor layers and texture cache churn
+    const shouldPromote = !isAndroid && (isFocused || isAnimating);
     return {
       willChange: shouldPromote ? 'transform, opacity' : 'auto',
       backfaceVisibility: 'hidden' as const,
       perspective: '1000px',
       WebkitFontSmoothing: 'antialiased' as const,
     } as React.CSSProperties;
-  }, [isFocused, isAnimating]);
+  }, [isFocused, isAnimating, isAndroid]);
 
   const cardStyle = useMemo(() => {
     if (showBack) {
@@ -269,8 +281,8 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
     const shadowOpacity = isMini ? '33' : '44';
     const shadowSize = isMini ? '20px' : '50px';
 
-    // When animating actively, use a simplified single-layer shadow to avoid GPU fillrate saturation
-    const baseShadow = isAnimating
+    // When animating actively or on mobile/Android, use a simplified single-layer shadow to avoid GPU fillrate saturation
+    const baseShadow = (isAnimating || isMobile || isAndroid)
       ? `0 4px ${isMini ? '12px' : '20px'} ${shadowColor}44`
       : isMini
         ? `0 4px ${shadowSize} ${shadowColor}${shadowOpacity}`
@@ -278,13 +290,13 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
     
     return {
       ...gpuStyles,
-      '--opacity': isLegend || isDPOY || isROTY || isXFactor ? '0.45' : isFranchise ? '0.35' : isHolo ? '0.3' : '0',
-      '--holo-opacity': isLegend || isDPOY || isROTY || isXFactor ? '0.5' : isFranchise ? '0.35' : isHolo ? '0.25' : '0',
+      '--opacity': isLegend || isDPOY || isROTY || isXFactor ? (isAndroid ? '0.35' : '0.45') : isFranchise ? (isAndroid ? '0.25' : '0.35') : isHolo ? '0.3' : '0',
+      '--holo-opacity': isLegend || isDPOY || isROTY || isXFactor ? (isAndroid ? '0.35' : '0.5') : isFranchise ? (isAndroid ? '0.25' : '0.35') : isHolo ? '0.25' : '0',
       borderColor: isMoment ? '#d4af37' : RarityColor,
       boxShadow: isOwned ? baseShadow : 'none',
       borderWidth: isMini ? '3px' : '6px',
     } as React.CSSProperties;
-  }, [isLegend, isDPOY, isROTY, isXFactor, isFranchise, isHolo, RarityColor, isOwned, gpuStyles, isMoment, isMini, showBack, isAnimating]);
+  }, [isLegend, isDPOY, isROTY, isXFactor, isFranchise, isHolo, RarityColor, isOwned, gpuStyles, isMoment, isMini, showBack, isAnimating, isMobile, isAndroid]);
 
   // Sub-renderers for cleaner JSX
   const renderMomentEffects = () => {
@@ -304,11 +316,11 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
     return (
       <>
         <div className={`subtle-shimmer ${!isHovered && !isFocused ? 'opacity-10' : 'opacity-30'}`} />
-        {!isMini && <div className={`micro-sparkles ${!isHovered && !isFocused ? 'opacity-5' : 'opacity-15'}`} />}
-        <div className={`rainbow-foil ${!isHovered && !isFocused ? 'opacity-20' : 'opacity-60'}`} />
+        {!isMini && !isMobile && !isAndroid && <div className={`micro-sparkles ${!isHovered && !isFocused ? 'opacity-5' : 'opacity-15'}`} />}
+        <div className={`rainbow-foil ${!isHovered && !isFocused ? 'opacity-20' : (isAndroid ? 'opacity-35' : 'opacity-60')}`} />
         {(isHovered || isFocused) && (
           <>
-            <div className="holo-texture-pattern opacity-10" />
+            {!isAndroid && <div className="holo-texture-pattern opacity-10" />}
             <div className="modern-holo" />
           </>
         )}
@@ -988,7 +1000,7 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
           }}
         >
           <div 
-            className={`nba-card relative flex flex-col h-full rounded-xl overflow-hidden transition-all ${!showBack ? `${rarityClass} ${categoryClass} ${isDarkCard ? 'dark-card' : ''}` : 'items-center justify-center bg-zinc-900 border-zinc-800'}`}
+            className={`nba-card ${isAndroid ? 'is-android' : ''} relative flex flex-col h-full rounded-xl overflow-hidden transition-all ${!showBack ? `${rarityClass} ${categoryClass} ${isDarkCard ? 'dark-card' : ''}` : 'items-center justify-center bg-zinc-900 border-zinc-800'}`}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={cardStyle}
@@ -1004,7 +1016,7 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
     return (
       <div 
         ref={elementRef}
-        className={`nba-card relative aspect-[2.5/3.5] rounded-xl overflow-hidden transition-all ${isOwned ? 'cursor-pointer hover:scale-105' : 'cursor-default'} ${!showBack ? `${rarityClass} ${categoryClass} group/mini content-auto` : 'items-center justify-center bg-zinc-900 border-zinc-800'} ${!isVisible ? 'anim-paused' : ''}`}
+        className={`nba-card ${isAndroid ? 'is-android' : ''} relative aspect-[2.5/3.5] rounded-xl overflow-hidden transition-all ${isOwned ? 'cursor-pointer hover:scale-105' : 'cursor-default'} ${!showBack ? `${rarityClass} ${categoryClass} group/mini content-auto` : 'items-center justify-center bg-zinc-900 border-zinc-800'} ${!isVisible ? 'anim-paused' : ''}`}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         style={cardStyle}
@@ -1018,7 +1030,7 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
   return (
     <motion.div
       ref={elementRef}
-      layoutId={card.id}
+      layoutId={disableLayoutId ? undefined : card.id}
       onClick={() => (isOwned || showBack) && onClick?.(card)}
       className={`w-full max-w-[340px] aspect-[2.5/3.5] cursor-pointer ${!isVisible ? 'anim-paused' : ''}`}
       whileHover={isOwned && !showBack ? { 
@@ -1030,7 +1042,7 @@ const CardItem: React.FC<CardItemProps> = memo(({ card, isOwned, mode = 'mini', 
       initial={false}
     >
       <div 
-        className={`nba-card relative flex flex-col h-full rounded-xl overflow-hidden transition-all ${!showBack ? `${rarityClass} ${categoryClass} ${isDarkCard ? 'dark-card' : ''}` : 'items-center justify-center bg-zinc-900 border-zinc-800'}`}
+        className={`nba-card ${isAndroid ? 'is-android' : ''} relative flex flex-col h-full rounded-xl overflow-hidden transition-all ${!showBack ? `${rarityClass} ${categoryClass} ${isDarkCard ? 'dark-card' : ''}` : 'items-center justify-center bg-zinc-900 border-zinc-800'}`}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         style={cardStyle}
